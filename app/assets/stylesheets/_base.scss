@@ -1,0 +1,24 @@
+$red:   #E0645C;
+$orange:#DD8047;
+$dark:  #3B444B;
+$light: #DCDCCC;
+$blue:  #005CA3;
+$green: #2E8B57;
+
+@mixin font {
+    font-family: 'Droid Sans', Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 25px;
+}
+
+@mixin containment($width) {
+    padding: 20px;
+    margin: 20px auto;
+    width: $width;
+    min-width: 600px;
+}
+
+@mixin background_opacity($color, $opacity: 0.5) {
+    background: $color; /* fallback */
+    background: rgba($color, $opacity);
+}

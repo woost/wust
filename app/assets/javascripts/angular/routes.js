@@ -3,6 +3,9 @@ app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
         url: '/',
         templateUrl: 'home.html',
         controller: 'HomeCtrl'
+    }).state('help', {
+        url: '/help',
+        templateUrl: 'help.html',
     }).state('graph', {
         url: '/graphs/:id',
         templateUrl: 'graphs/show.html',
