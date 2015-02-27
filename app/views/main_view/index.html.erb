@@ -1,1 +1,2 @@
-<div id="main_view" ui-view></div>
+<div route-loading-indicator></div>
+<div id="main_view" ng-if='!isRouteLoading' ui-view></div>

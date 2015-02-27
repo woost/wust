@@ -14,3 +14,4 @@ Gemfile.lock
 
 # bower
 vendor/assets/bower_components
+vendor/assets/bower.json

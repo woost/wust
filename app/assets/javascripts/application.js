@@ -15,6 +15,7 @@
 //= require angular-ui-router/release/angular-ui-router
 //= require angular-ui-bootstrap-bower/ui-bootstrap
 //= require angular-rails-templates
+//= require spin.js/spin
 //= require_tree ../templates
 //= require ./angular/module.js
 //= require_tree .
