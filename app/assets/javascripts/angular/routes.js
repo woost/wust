@@ -2,15 +2,6 @@ app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
     $stateProvider.state('help', {
         url: '/help',
         templateUrl: 'help.html',
-    }).state('graph', {
-        url: '/graphs/:id',
-        templateUrl: 'graph_detail.html',
-        controller: 'GraphDetailsCtrl',
-        resolve: {
-            initialData: function(Graph, $stateParams) {
-                return Graph.get($stateParams.id).$promise;
-            }
-        }
     }).state('graphs', {
         url: '/graphs',
         templateUrl: 'graph_list.html',
@@ -20,6 +11,11 @@ app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
                 return Graph.get().$promise;
             }
         }
+    }).state('graphs.detail', {
+        parent: 'graphs',
+        url: '/:id',
+        templateUrl: 'graph_detail.html',
+        controller: 'GraphDetailsCtrl',
     });
 
     $urlRouterProvider.when('/', '/graphs');

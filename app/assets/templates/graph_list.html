@@ -2,7 +2,8 @@
     <h1>Graphs</h1>
     <ul>
         <li ng-repeat="graph in graphs">
-            <a ui-sref="graph({ id: graph.id })" ui-sref-active="active">{{graph.title}}</a>
+            <a ui-sref="graphs.detail({ id: graph.id })" ui-sref-active="active">{{graph.title}}</a>
         </li>
     </ul>
+    <div ui-view></div>
 </div>
