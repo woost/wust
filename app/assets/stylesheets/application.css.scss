@@ -1,6 +1,5 @@
 //= require font-awesome
 //= require bootstrap-sass
-//= require animate.css/animate.css
 //= require_tree .
 
 @import "base";
@@ -31,13 +30,6 @@ body {
 
 #main_view {
     padding: 20px 20px;
-    &.ng-enter {
-        -webkit-animation: fadeIn 0.5s;
-        -moz-animation: fadeIn 0.5s;
-        -ms-animation: fadeIn 0.5s;
-        -o-animation: fadeIn 0.5s;
-        animation: fadeIn 0.5s;
-    }
 }
 
 #noscriptmsg {

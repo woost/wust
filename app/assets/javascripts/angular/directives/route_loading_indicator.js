@@ -13,7 +13,6 @@
                     lines: 8,
                     radius: 12,
                     width: 8,
-                    color: 'white'
                 };
 
                 var spinner = new Spinner(opts);

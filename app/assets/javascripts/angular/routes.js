@@ -1,22 +1,28 @@
 app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
-    $stateProvider.state('home', {
-        url: '/',
-        templateUrl: 'home.html',
-        controller: 'HomeCtrl'
-    }).state('help', {
+    $stateProvider.state('help', {
         url: '/help',
         templateUrl: 'help.html',
     }).state('graph', {
         url: '/graphs/:id',
-        templateUrl: 'graphs/show.html',
-        controller: 'GraphsCtrl',
+        templateUrl: 'graph_detail.html',
+        controller: 'GraphDetailsCtrl',
         resolve: {
-            initialData: function(GraphResolver, $stateParams) {
-                return GraphResolver($stateParams.id);
+            initialData: function(Graph, $stateParams) {
+                return Graph.get($stateParams.id).$promise;
+            }
+        }
+    }).state('graphs', {
+        url: '/graphs',
+        templateUrl: 'graph_list.html',
+        controller: 'GraphListsCtrl',
+        resolve: {
+            initialData: function(Graph, $stateParams) {
+                return Graph.get().$promise;
             }
         }
     });
 
+    $urlRouterProvider.when('/', '/graphs');
     $urlRouterProvider.otherwise('/');
 
     $locationProvider.html5Mode(true);

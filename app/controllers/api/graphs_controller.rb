@@ -3,17 +3,16 @@ module Api
     respond_to :json
 
     def show
-      graph = {
-        nodes: [
-          1, 2, 3
-        ],
-        edges: [
-          [1, 2],
-          [2, 3]
-        ]
-      }
+      graph = Graph.all.find { |g| g[:id] == params[:id].to_i }
+      if graph
+        render json: { graph:  graph }, status: :ok
+      else
+        render json: {}, status: :unprocessable_entity
+      end
+    end
 
-      render json: { graph: graph }, status: :ok
+    def index
+      render json: { graphs: Graph.all }, status: :ok
     end
   end
 end
