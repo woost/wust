@@ -1,0 +1,4 @@
+asset 'angular'
+asset 'angular-resource'
+asset 'angular-ui-bootstrap-bower'
+asset 'angular-ui-router'

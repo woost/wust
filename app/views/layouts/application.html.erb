@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html ng-app='wust'>
+    <head>
+        <base href="/">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title><%= content_for?(:title) ? yield(:title) : "Wust" %></title>
+        <meta name="description" content="<%= content_for?(:description) ? yield(:description) : "Wust" %>">
+        <%= stylesheet_link_tag 'application', media: 'all' %>
+        <%= javascript_include_tag 'application', media: 'all' %>
+        <%= csrf_meta_tags %>
+
+        <noscript>
+            <style type="text/css">
+                #pagecontent {visibility:hidden;}
+            </style>
+            <div id="noscriptmsg">
+                <p>Welcome to Wust!</p>
+                <p>You don't have javascript enabled.  Good luck with that.</p>
+            </div>
+        </noscript>
+    </head>
+    <body>
+        <div id="pagecontent">
+            <main role="main">
+                <%= yield %>
+            </main>
+        </div>
+    </body>
+</html>
