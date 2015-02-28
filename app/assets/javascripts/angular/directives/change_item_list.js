@@ -2,7 +2,7 @@ app.directive("changeItemList", function($compile) {
     return {
         restrict: 'A',
         template: "<ul class='list-group'>" +
-            "<li class='list-group-item' ng-repeat='item in items'>" +
+            "<li class='list-group-item' ng-repeat='item in items | objectToArray | orderBy:\"label\"'>" +
             "<button class='btn btn-danger' ng-click='removeItem()(items, item)'><i class='fa fa-minus'></i></button>" +
             "<span ng-bind='item.label'></span>" +
             "</li>" +
