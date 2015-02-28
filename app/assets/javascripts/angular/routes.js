@@ -13,7 +13,7 @@ app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
         }
     }).state('graphs.detail', {
         parent: 'graphs',
-        url: '/:id/details',
+        url: '/:id',
         templateUrl: 'graph_detail.html',
         controller: 'GraphDetailsCtrl',
         resolve: {
@@ -40,15 +40,13 @@ app.factory('httpErrorResponseInterceptor', function($q, $injector) {
         responseError: function error(response) {
             var state = $injector.get('$state');
             state.go('graphs');
-            toastr.error("Request failed")
+            toastr.error("Request failed");
 
             return $q.reject(response);
         }
     };
 });
 
-app.config(['$httpProvider',
-    function($httpProvider) {
-        $httpProvider.interceptors.push('httpErrorResponseInterceptor');
-    }
-]);
+app.config(function($httpProvider) {
+    $httpProvider.interceptors.push('httpErrorResponseInterceptor');
+});
