@@ -1,11 +1,7 @@
 <div id="graph_detail">
     <h2>Problem View</h2>
     <b>Ideas:</b>
-    <ul>
-        <li ng-repeat="idea in ideas">{{idea.label}}</li>
-    </ul>
+    <div change-item-list items="ideas" new-item="newIdea" add-item="addNode" remove-item="removeNode"></div>
     <b>Questions:</b>
-    <ul>
-        <li ng-repeat="question in questions">{{question.label}}</li>
-    </ul>
+    <div change-item-list items="questions" new-item="newQuestion" add-item="addNode" remove-item="removeNode"></div>
 </div>
