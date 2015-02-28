@@ -12,6 +12,5 @@
 # Gemfile
 Gemfile.lock
 
-# bower
+# bower assets
 vendor/assets/bower_components
-vendor/assets/bower.json
