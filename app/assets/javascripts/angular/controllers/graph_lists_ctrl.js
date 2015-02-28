@@ -1,5 +1,5 @@
 app.controller('GraphListsCtrl', function($scope, $state, initialData) {
-    $scope.graph = initialData.graph;
+    $scope.graph = initialData;
     $scope.onSelect = onSelect;
 
     function onSelect(properties) {

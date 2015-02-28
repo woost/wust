@@ -29,6 +29,21 @@ class Graph
       id: 5,
       type: :idea,
       label: "All software must die",
+    },
+    {
+      id: 6,
+      type: :question,
+      label: "Which OS are you using?",
+    },
+    {
+      id: 7,
+      type: :question,
+      label: "Where is the problem?",
+    },
+    {
+      id: 8,
+      type: :idea,
+      label: "Deal with it!",
     }
   ]
 
@@ -37,6 +52,21 @@ class Graph
       from: 0,
       to: 0,
       label: :causes,
+    },
+    {
+      from: 6,
+      to: 0,
+      label: :asks,
+    },
+    {
+      from: 7,
+      to: 4,
+      label: :asks,
+    },
+    {
+      from: 8,
+      to: 4,
+      label: :solves,
     },
     {
       from: 1,
@@ -55,32 +85,39 @@ class Graph
     }
   ]
 
-  def self.problem_graphs
-    nodes = problems
+  def self.problem_graph
+    nodes = @nodes.select { |n| n[:type] == :problem }
     edges = intra_connections(nodes)
     {
-      title: 'problems',
       nodes: nodes,
       edges: edges
     }
   end
 
-  def self.problem_graph(id)
-    problem = problems.find { |n| n[:id] == id }
-    puts problems.inspect
-    puts problem.inspect
-    if problem
-      connected_graph(problem)
+  def self.problem_nodes(id)
+    nodes = self.graph(id)[:nodes]
+    if nodes
+      ideas = nodes.select { |n| n[:type] == :idea }
+      questions = nodes.select { |n| n[:type] == :question }
+      {
+        ideas: ideas,
+        questions: questions
+      }
+    else
+      nil
+    end
+  end
+
+  def self.graph(id)
+    node = @nodes.find { |n| n[:id] == id }
+    if node
+      connected_graph(node)
     else
       nil
     end
   end
 
   private
-
-  def self.problems
-    @nodes.select { |n| n[:type] == :problem }
-  end
 
   def self.connected_graph(node)
     nodes = [node]
@@ -94,7 +131,6 @@ class Graph
     end
 
     {
-      title: "node #{node[:id]}",
       nodes: nodes,
       edges: edges
     }

@@ -1,3 +1,4 @@
 app.controller('GraphDetailsCtrl', function($scope, $stateParams, initialData) {
-    $scope.graph = initialData.graph;
+    $scope.ideas = initialData.ideas;
+    $scope.questions = initialData.questions;
 });

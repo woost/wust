@@ -1,6 +1,9 @@
 @import "base";
 
 #graph_view {
+    #graph_detail {
+        @include containment(50%)
+    }
     .graph_box {
         @include containment(80%);
         height: 250px;

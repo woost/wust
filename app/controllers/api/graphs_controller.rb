@@ -3,16 +3,16 @@ module Api
     respond_to :json
 
     def show
-      graph = Graph.problem_graph(params[:id].to_i)
-      if graph
-        render json: { graph:  graph }, status: :ok
+      nodes = Graph.problem_nodes(params[:id].to_i)
+      if nodes
+        render json: nodes, status: :ok
       else
         render json: {}, status: :unprocessable_entity
       end
     end
 
     def index
-      render json: { graph: Graph.problem_graphs }, status: :ok
+      render json: Graph.problem_graph, status: :ok
     end
   end
 end
