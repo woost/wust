@@ -6,8 +6,9 @@
     }
     .graph_box {
         @include containment(80%);
-        height: 250px;
         border: 2px solid $green;
-        text-align: center;
+        .graph_network {
+            height: 250px;
+        }
     }
 }

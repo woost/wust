@@ -1,6 +1,10 @@
 <div class="container" id="graph_view">
     <h1>Problem Browser</h1>
-    <div vis-network ng-model="graph" on-select="onSelect" class="graph_box"></div>
+
+    <div class="graph_box">
+        <input type="text" ng-model="search.label">
+        <div vis-network ng-model="graph" on-select="onSelect" class="graph_network"></div>
+    </div>
 
     <div route-loading-indicator></div>
     <div ng-if='!isRouteLoading' ui-view></div>
