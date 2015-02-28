@@ -3,7 +3,7 @@ module Api
     respond_to :json
 
     def show
-      graph = Graph.all.find { |g| g[:id] == params[:id].to_i }
+      graph = Graph.problem_graph(params[:id].to_i)
       if graph
         render json: { graph:  graph }, status: :ok
       else
@@ -12,7 +12,7 @@ module Api
     end
 
     def index
-      render json: { graphs: Graph.all }, status: :ok
+      render json: { graph: Graph.problem_graphs }, status: :ok
     end
   end
 end

@@ -16,6 +16,8 @@
 //= require angular-resource
 //= require angular-ui-router
 //= require angular-bootstrap
+//= require vis
+//= require toastr
 //= require spin.js/spin
 //= require bootstrap-sass
 //= require angular-rails-templates

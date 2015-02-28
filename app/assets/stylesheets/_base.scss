@@ -12,7 +12,7 @@ $green: #2E8B57;
 }
 
 @mixin containment($width) {
-    padding: 20px;
+    padding: 0px;
     margin: 20px auto;
     width: $width;
     min-width: 600px;

@@ -1,9 +1,7 @@
-<div class="container">
-    <h1>Graphs</h1>
-    <ul>
-        <li ng-repeat="graph in graphs">
-            <a ui-sref="graphs.detail({ id: graph.id })" ui-sref-active="active">{{graph.title}}</a>
-        </li>
-    </ul>
-    <div ui-view></div>
+<div class="container" id="graph_view">
+    <h1>Problem Browser</h1>
+    <div vis-network ng-model="graph" on-select="onSelect" class="graph_box"></div>
+
+    <div route-loading-indicator></div>
+    <div ng-if='!isRouteLoading' ui-view></div>
 </div>

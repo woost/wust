@@ -8,5 +8,7 @@
     "font-awesome": "latest",
     "bootstrap-sass": "latest",
     "angular-resource": "<1.3",
+    "vis": "latest",
+    "toastr": "latest"
   }
 }
