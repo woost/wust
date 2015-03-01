@@ -1,16 +1,20 @@
-# Ignore bundler config.
-/.bundle
+logs
+project/project
+project/target
+target
+tmp
+.history
+dist
+/.idea
+/*.iml
+/out
+/.idea_modules
+/.classpath
+/.project
+/RUNNING_PID
+/.settings
 
-# Ignore the default SQLite database.
-/db/*.sqlite3
-/db/*.sqlite3-journal
-
-# Ignore all logfiles and tempfiles.
-/log/*.log
-/tmp
-
-# Gemfile
+/public/*
+/node_modules
+.sass-cache
 Gemfile.lock
-
-# bower assets
-vendor/assets/bower_components
