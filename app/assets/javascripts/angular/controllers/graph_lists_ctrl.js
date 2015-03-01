@@ -1,27 +1,28 @@
 app.controller('GraphListsCtrl', function($scope, $state, $filter, initialData) {
+    $scope.$watch('search.label', filter);
+
     var nodes = new vis.DataSet();
     var edges = new vis.DataSet();
     nodes.add(initialData.nodes);
     edges.add(initialData.edges);
-    $scope.graph = {
-        nodes: nodes,
-        edges: edges
-    };
-
-    $scope.options = {
-        navigation: true,
-        dataManipulation: true,
-        nodes: {
-            shape: 'box',
-            mass: 1.2
+    $scope.data = {
+        graph: {
+            nodes: nodes,
+            edges: edges
         },
-        edges: {
-            style: 'arrow'
+        options: {
+            navigation: true,
+            dataManipulation: true,
+            nodes: {
+                shape: 'box',
+                mass: 1.2
+            },
+            edges: {
+                style: 'arrow'
+            },
         },
+        onSelect: onSelect
     };
-
-    $scope.onSelect = onSelect;
-    $scope.$watch('search.label', filter);
 
     function onSelect(properties) {
         var id = properties.nodes[0];

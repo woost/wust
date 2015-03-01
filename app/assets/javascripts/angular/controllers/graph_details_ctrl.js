@@ -1,16 +1,22 @@
 app.controller('GraphDetailsCtrl', function($scope, $stateParams, initialData) {
-    $scope.ideas = initialData.ideas;
-    $scope.questions = initialData.questions;
-    $scope.addNode = addNode;
-    $scope.removeNode = removeNode;
+    $scope.selected = {
+        title: initialData.type + ': ' + initialData.title,
+        ideas: initialData.ideas,
+        questions: initialData.questions
+    };
+
     $scope.newIdea = {
         type: 'idea',
         label: ''
     };
+
     $scope.newQuestion = {
         type: 'question',
         label: ''
     };
+
+    $scope.addNode = addNode;
+    $scope.removeNode = removeNode;
 
     function addNode(list, elem) {
         list.push(angular.copy(elem));

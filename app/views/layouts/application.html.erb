@@ -11,8 +11,7 @@
 
         <noscript>
             <style type="text/css">
-                #pagecontent {visibility:hidden;}
-                #pagecontent a {visibility:hidden;}
+                #pagecontent { display:none; }
             </style>
             <div id="noscriptmsg">
                 <p>Welcome to Wust!</p>
@@ -22,7 +21,7 @@
     </head>
     <body>
         <div id="pagecontent">
-k           <%= render 'layouts/navigation' %>
+            <%= render 'layouts/navigation' %>
             <main role="main">
                 <%= yield %>
             </main>

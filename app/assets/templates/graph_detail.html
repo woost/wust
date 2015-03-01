@@ -1,7 +1,13 @@
 <div id="graph_detail">
-    <h2>Problem View</h2>
-    <b>Ideas:</b>
-    <div change-item-list items="ideas" new-item="newIdea" add-item="addNode" remove-item="removeNode"></div>
-    <b>Questions:</b>
-    <div change-item-list items="questions" new-item="newQuestion" add-item="addNode" remove-item="removeNode"></div>
+    <h2 ng-bind="selected.title"></h2>
+    <div class="filled_items">
+        <div id="idea_list">
+            <b>Ideas:</b>
+            <div change-item-list items="selected.ideas" new-item="newIdea" add-item="addNode" remove-item="removeNode"></div>
+        </div>
+        <div id="question_list">
+            <b>Questions:</b>
+            <div change-item-list items="selected.questions" new-item="newQuestion" add-item="addNode" remove-item="removeNode"></div>
+        </div>
+    </div>
 </div>

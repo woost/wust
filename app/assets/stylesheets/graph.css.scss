@@ -2,7 +2,11 @@
 
 #graph_view {
     #graph_detail {
-        @include containment(50%)
+        #idea_list {
+            width: 70%;
+        }
+        #question_list {
+        }
     }
     .graph_box {
         @include containment(80%);

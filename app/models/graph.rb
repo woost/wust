@@ -94,41 +94,28 @@ class Graph
     }
   end
 
-  def self.problem_nodes(id)
-    nodes = self.graph(id)[:nodes]
-    if nodes
-      ideas = nodes.select { |n| n[:type] == :idea }
-      questions = nodes.select { |n| n[:type] == :question }
-      {
-        ideas: ideas,
-        questions: questions
-      }
-    else
-      nil
-    end
-  end
-
   def self.graph(id)
     node = @nodes.find { |n| n[:id] == id }
-    if node
-      connected_graph(node)
-    else
-      nil
-    end
+    return nil unless node
+
+    nodes = connected_graph(node)[:nodes]
+    nodes.delete(node)
+    ideas = nodes.select { |n| n[:type] == :idea }
+    questions = nodes.select { |n| n[:type] == :question }
+
+    {
+      title: node[:label],
+      type: node[:type],
+      ideas: ideas,
+      questions: questions
+    }
   end
 
   private
 
   def self.connected_graph(node)
-    nodes = [node]
-    edges = []
-    loop do
-      edges = inter_connections(nodes)
-      tmp = nodes + connected_nodes(edges)
-      tmp.uniq!
-      break if tmp.size == nodes.size
-      nodes = tmp
-    end
+    edges = inter_connections([node])
+    nodes = connected_nodes(edges)
 
     {
       nodes: nodes,
