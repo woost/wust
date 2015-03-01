@@ -6,11 +6,13 @@ app.controller('GraphDetailsCtrl', function($scope, $stateParams, initialData) {
     };
 
     $scope.newIdea = {
+        id: 666,
         type: 'idea',
         label: ''
     };
 
     $scope.newQuestion = {
+        id: 666,
         type: 'question',
         label: ''
     };
