@@ -8,6 +8,18 @@ app.controller('GraphListsCtrl', function($scope, $state, $filter, initialData) 
         edges: edges
     };
 
+    $scope.options = {
+        navigation: true,
+        dataManipulation: true,
+        nodes: {
+            shape: 'box',
+            mass: 1.2
+        },
+        edges: {
+            style: 'arrow'
+        },
+    };
+
     $scope.onSelect = onSelect;
     $scope.$watch('search.label', filter);
 
