@@ -37,7 +37,11 @@ app.controller('GraphListsCtrl', function($scope, $state, $filter, initialData) 
 
     function filter() {
         var filtered = $filter('filter')(initialData.nodes, $scope.search);
-        nodes.clear();
-        nodes.add(filtered);
+        nodes.update(filtered);
+        nodes.forEach(function(node) {
+            if (!filtered.find(function(n) { return n.id === node.id; })) {
+                nodes.remove(node.id);
+            }
+        });
     }
 });
