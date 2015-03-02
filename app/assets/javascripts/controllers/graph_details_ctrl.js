@@ -1,28 +1,45 @@
-app.controller('GraphDetailsCtrl', function($scope, $stateParams, initialData) {
+app.controller('GraphDetailsCtrl', function($scope, $stateParams, Graph, initialData) {
     $scope.selected = {
-        title: initialData.node.type + ': ' + initialData.node.label,
+        title: initialData.node.label + ': ' + initialData.node.text,
         ideas: initialData.ideas,
         questions: initialData.questions
     };
 
     $scope.newIdea = {
-        id: 666,
-        type: 'idea',
-        label: ''
+        relationLabel: 'SOLVES',
+        label: 'IDEA',
+        text: ''
     };
 
     $scope.newQuestion = {
-        id: 666,
-        type: 'question',
-        label: ''
+        relationLabel: 'ASKS',
+        label: 'QUESTION',
+        text: ''
     };
 
     $scope.addNode = addNode;
     $scope.removeNode = removeNode;
 
     function addNode(list, elem) {
-        list.push(angular.copy(elem));
-        elem.label = '';
+        var obj = {
+            "reference": $stateParams.id,
+            "label": elem.relationLabel,
+            "node": {
+                "label": elem.label,
+                "text": elem.text
+            }
+        };
+
+        Graph.create(obj).$promise.then(function (data) {
+            list.push(data.node);
+            $scope.data.graph.nodes.add(data.node);
+            $scope.data.graph.edges.add(data.relation);
+            toastr.success("Created new Node");
+        }, function(response) {
+            toastr.error("Failed to create Node");
+        });
+
+        elem.text = '';
     }
 
     function removeNode(list, elem) {

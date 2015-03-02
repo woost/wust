@@ -8,17 +8,25 @@ import renesca.parameter.PropertyKey._
 import renesca.parameter.StringPropertyValue
 
 object GraphFormat {
-  private implicit def LabelToString(label: Label):String = label.name
-  private implicit def RelationTypeToString(relationType: RelationType):String = relationType.name
-  private implicit def IdToLong(id: Id):BigDecimal = id.value
+  implicit def LabelToString(label: Label):String = label.name
+  implicit def RelationTypeToString(relationType: RelationType):String = relationType.name
+  implicit def IdToLong(id: Id):BigDecimal = id.value
 
   implicit object NodeFormat extends Format[Node] {
-    def reads(json: JsValue) = ???
+    def reads(json: JsValue) = json match {
+      case JsObject(_) => {
+        val node = Node.local
+        node.labels += (json \ "label").as[String]
+        node.properties += ("text" -> (json \ "text").as[String])
+        JsSuccess(node)
+      }
+      case _ => JsError()
+    }
 
     def writes(node: Node) = JsObject(Seq(
       ("id", JsNumber(node.id)),
-      ("type", JsString(node.labels.head)),
-      ("label", JsString(node.properties("text").asInstanceOf[StringPropertyValue]))
+      ("label", JsString(node.labels.headOption.getOrElse("").toString)),
+      ("text", JsString(node.properties.getOrElse("text", StringPropertyValue("")).asInstanceOf[StringPropertyValue]))
     ));
   }
 
