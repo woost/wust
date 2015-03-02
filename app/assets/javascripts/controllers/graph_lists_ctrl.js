@@ -12,7 +12,7 @@ app.controller('GraphListsCtrl', function($scope, $state, $filter, Graph, initia
         },
         options: {
             navigation: true,
-            dataManipulation: true,
+            dataManipulation: false,
             nodes: {
                 shape: 'box',
                 mass: 1.2

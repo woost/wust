@@ -1,16 +1,17 @@
 <div class="container" id="graph_view">
     <h1>Problem Browser</h1>
 
-    <div class="graph_box">
-        <input type="text" ng-model="search.label">
-        <div vis-network ng-model="data.graph" options="data.options" on-select="data.onSelect" class="graph_network"></div>
-    </div>
-
-    <div class="problem_box">
-        <h2>Create a new Problem</h2>
-        <div class="filled_items">
-            <input type="text" ng-model="newProblem.text">
-            <button class='btn btn-success' ng-click='addProblem()'><i class='fa fa-plus'></i></button>
+    <div class="filled_items">
+        <div class="graph_box">
+            <input type="text" ng-model="search.label">
+            <div vis-network ng-model="data.graph" options="data.options" on-select="data.onSelect" class="graph_network"></div>
+        </div>
+        <div class="problem_box">
+            <h2>Add Problem</h2>
+            <div class="filled_items">
+                <input type="text" ng-model="newProblem.text">
+                <button class='btn btn-success' ng-click='addProblem()'><i class='fa fa-plus'></i></button>
+            </div>
         </div>
     </div>
 

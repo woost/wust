@@ -109,14 +109,13 @@ nav .nav a:hover, a:visited {
         }
     }
     .graph_box {
-        @include containment(80%);
+        @include containment(85%);
         border: 2px solid $green;
         .graph_network {
-            height: 250px;
+            height: 300px;
         }
     }
     .problem_box {
-        @include containment(50%);
-        border: 2px solid $green;
+        padding: 20px;
     }
 }
