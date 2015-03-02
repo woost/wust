@@ -6,6 +6,8 @@ app.controller('GraphListsCtrl', function($scope, $state, $filter, Graph, initia
     nodes.add(initialData.nodes);
     edges.add(initialData.edges);
     $scope.data = {
+        addNode: addNode,
+        addEdge: addEdge,
         graph: {
             nodes: nodes,
             edges: edges
@@ -36,7 +38,7 @@ app.controller('GraphListsCtrl', function($scope, $state, $filter, Graph, initia
         };
 
         Graph.create(obj).$promise.then(function(data) {
-            nodes.add(data.node);
+            addNode(data.node);
             toastr.success("Created new Problem");
         }, function(response) {
             toastr.error("Failed to create Problem");
@@ -64,5 +66,18 @@ app.controller('GraphListsCtrl', function($scope, $state, $filter, Graph, initia
                 nodes.remove(node.id);
             }
         });
+    }
+
+    function addNode(node) {
+        initialData.nodes.push(node);
+        nodes.add(node);
+        filter();
+    }
+
+    function addEdge(edge) {
+        initialData.edges.push(edge);
+        console.log(edge);
+        edges.add(edge);
+        filter();
     }
 });

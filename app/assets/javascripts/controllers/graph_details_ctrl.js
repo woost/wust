@@ -32,8 +32,8 @@ app.controller('GraphDetailsCtrl', function($scope, $stateParams, Graph, initial
 
         Graph.create(obj).$promise.then(function (data) {
             list.push(data.node);
-            $scope.data.graph.nodes.add(data.node);
-            $scope.data.graph.edges.add(data.relation);
+            $scope.data.addNode(data.node);
+            $scope.data.addEdge(data.relation);
             toastr.success("Created new Node");
         }, function(response) {
             toastr.error("Failed to create Node");
