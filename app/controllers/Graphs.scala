@@ -19,8 +19,9 @@ object Graphs extends Controller {
   }
 
   def remove(id: String) = Action{
-    val graph = db.queryGraph("match (n) optional match (n)-[r]-() return n,r")
+    val graph = db.queryGraph(Query("match (n) where id(n) = {id} return n", Map("id" -> id.toInt)))
     graph.nodes.clear
+    db.persistChanges(graph)
     Ok(JsObject(Seq()))
   }
 
