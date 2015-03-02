@@ -24,7 +24,7 @@ app.controller('GraphListsCtrl', function($scope, $state, $filter, Graph, initia
         onSelect: onSelect
     };
 
-    var newProblem = {
+    $scope.newProblem = {
         label: "PROBLEM",
         text: ""
     };
@@ -32,7 +32,7 @@ app.controller('GraphListsCtrl', function($scope, $state, $filter, Graph, initia
 
     function addProblem() {
         var obj = {
-            "node": angular.copy(newProblem)
+            "node": angular.copy($scope.newProblem)
         };
 
         Graph.create(obj).$promise.then(function(data) {
@@ -42,7 +42,7 @@ app.controller('GraphListsCtrl', function($scope, $state, $filter, Graph, initia
             toastr.error("Failed to create Problem");
         });
 
-        newProblem.text = "";
+        $scope.newProblem.text = "";
     }
 
     function onSelect(properties) {
