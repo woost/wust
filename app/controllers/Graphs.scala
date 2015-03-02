@@ -63,7 +63,7 @@ object Graphs extends Controller {
     } else {
       val node = nodes.head
       val ideas = db.queryGraph(Query("match (n:IDEA)-[r:SOLVES]->(m) where id(m) = {id} return n", Map("id" -> id.toInt))).nodes
-      val questions = db.queryGraph(Query("match (n:QUESTION)-[r:asks]->(m) where id(m) = {id} return n", Map("id" -> id.toInt))).nodes
+      val questions = db.queryGraph(Query("match (n:QUESTION)-[r:ASKS]->(m) where id(m) = {id} return n", Map("id" -> id.toInt))).nodes
       Ok(Json.toJson(JsObject(
         Seq(
           ("node", Json.toJson(node)),
