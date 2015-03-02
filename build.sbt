@@ -15,12 +15,13 @@ libraryDependencies ++= Seq(
   "org.webjars" % "bootstrap" % "3.3.2-1",
   "org.webjars" % "spin-js" % "2.0.0-1",
   "org.webjars" % "visjs" % "3.10.0",
-  "org.webjars" % "toastr" % "2.1.0"
+  "org.webjars" % "toastr" % "2.1.0",
+  "com.github.renesca" %% "renesca" % "0.1"
 )
 
+// javascript file groups
 pipelineStages in Assets := Seq(concat)
 
-// javascript file groups
 Concat.groups := Seq(
   "controllers.js" -> group((baseDirectory.value / "app" / "assets"/ "javascripts" / "controllers") * "*.js"),
   "services.js" -> group((baseDirectory.value / "app" / "assets"/ "javascripts" / "services") * "*.js"),
@@ -29,6 +30,3 @@ Concat.groups := Seq(
 )
 
 Concat.parentDir := "public/main/javascripts"
-
-// settings for sbt-bower
-JsEngineKeys.engineType := JsEngineKeys.EngineType.Node
