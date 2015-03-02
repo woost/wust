@@ -1,15 +1,41 @@
 package controllers
 
 import play.api.libs.json.Json
+import play.api.libs.json.JsObject
 import play.api.mvc.Action
 import play.api.mvc.Controller
 
+import renesca.DbService
+import renesca.RestService
+import renesca.Query
+import renesca.graph.Graph
+import renesca.parameter.implicits._
+import modules.json.GraphFormat._
+
 object Graphs extends Controller {
+  val db = new DbService
+  db.restService = new RestService("http://localhost:7474")
+
   def index() = Action {
-    Ok(Json.parse("""{"nodes":[{"id":0,"type":"problem","label":"Houston, we have a problem"},{"id":1,"type":"problem","label":"something relevant"},{"id":2,"type":"problem","label":"Something does not work"},{"id":4,"type":"problem","label":"Something works but is weird"}],"edges":[{"from":0,"to":0,"label":"causes"},{"from":1,"to":2,"label":"causes"}]}"""))
+    val graph = db.queryGraph("match (n) optional match (n)-[r]-() return n,r")
+    Ok(Json.toJson(graph))
   }
 
   def show(id: String) = Action {
-    Ok(Json.parse("""{"title":"Something works but is weird","type":"problem","ideas":[{"id":8,"type":"idea","label":"Deal with it!"},{"id":5,"type":"idea","label":"All software must die"}],"questions":[{"id":7,"type":"question","label":"Where is the problem?"}]}"""))
+    val nodes = db.queryGraph(Query("match (n) where id(n) = {id} return n", Map("id" -> id.toInt))).nodes
+    if (nodes.isEmpty) {
+      BadRequest
+    } else {
+      val node = nodes.head
+      val ideas = db.queryGraph(Query("match (n:IDEA)-[r:SOLVES]->(m) where id(m) = {id} return n", Map("id" -> id.toInt))).nodes
+      val questions = db.queryGraph(Query("match (n:QUESTION)-[r:asks]->(m) where id(m) = {id} return n", Map("id" -> id.toInt))).nodes
+      Ok(Json.toJson(JsObject(
+        Seq(
+          ("node", Json.toJson(node)),
+          ("ideas", Json.toJson(ideas)),
+          ("questions", Json.toJson(questions))
+        )
+      )))
+    }
   }
 }

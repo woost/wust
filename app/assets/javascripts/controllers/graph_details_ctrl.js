@@ -1,6 +1,6 @@
 app.controller('GraphDetailsCtrl', function($scope, $stateParams, initialData) {
     $scope.selected = {
-        title: initialData.type + ': ' + initialData.title,
+        title: initialData.node.type + ': ' + initialData.node.label,
         ideas: initialData.ideas,
         questions: initialData.questions
     };
