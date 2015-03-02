@@ -48,6 +48,12 @@ app.controller('GraphDetailsCtrl', function($scope, $stateParams, Graph, initial
             return;
         }
 
-        list.splice(index, 1);
+        Graph.remove(elem.id).$promise.then(function (data) {
+            list.splice(index, 1);
+            $scope.data.graph.nodes.remove(elem.id);
+            toastr.success("Removed Node");
+        }, function(response) {
+            toastr.error("Failed to remove Node");
+        });
     }
 });

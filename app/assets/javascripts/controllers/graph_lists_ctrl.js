@@ -1,4 +1,4 @@
-app.controller('GraphListsCtrl', function($scope, $state, $filter, initialData) {
+app.controller('GraphListsCtrl', function($scope, $state, $filter, Graph, initialData) {
     $scope.$watch('search.label', filter);
 
     var nodes = new vis.DataSet();
@@ -23,6 +23,27 @@ app.controller('GraphListsCtrl', function($scope, $state, $filter, initialData) 
         },
         onSelect: onSelect
     };
+
+    var newProblem = {
+        label: "PROBLEM",
+        text: ""
+    };
+    $scope.addProblem = addProblem;
+
+    function addProblem() {
+        var obj = {
+            "node": angular.copy(newProblem)
+        };
+
+        Graph.create(obj).$promise.then(function(data) {
+            nodes.add(data.node);
+            toastr.success("Created new Problem");
+        }, function(response) {
+            toastr.error("Failed to create Problem");
+        });
+
+        newProblem.text = "";
+    }
 
     function onSelect(properties) {
         var id = properties.nodes[0];

@@ -115,4 +115,8 @@ nav .nav a:hover, a:visited {
             height: 250px;
         }
     }
+    .problem_box {
+        @include containment(50%);
+        border: 2px solid $green;
+    }
 }
