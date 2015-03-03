@@ -1,10 +1,10 @@
 app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
     $stateProvider.state('help', {
         url: '/help',
-        templateUrl: 'views/help.html',
+        templateUrl: 'assets/views/help.html',
     }).state('graphs', {
         url: '/graphs',
-        templateUrl: 'views/graph.html',
+        templateUrl: 'assets/views/graph.html',
         controller: 'GraphsCtrl',
         resolve: {
             initialData: function(Graph) {
@@ -14,7 +14,7 @@ app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
     }).state('graphs.detail', {
         parent: 'graphs',
         url: '/:id',
-        templateUrl: 'views/graph_detail.html',
+        templateUrl: 'assets/views/graph_detail.html',
         controller: 'GraphDetailsCtrl',
         resolve: {
             initialData: function(Graph, $stateParams) {

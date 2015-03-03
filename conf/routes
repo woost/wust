@@ -5,9 +5,6 @@
 # Home page
 GET / controllers.Application.index(any = "none")
 
-# Play routes serving HTML to AngularJS start with /views
-GET /views/*any controllers.Application.loadPublicHTML(any)
-
 # Play routes serving JSON to AngularJS start with /api
 GET /api/graphs controllers.Graphs.index
 GET /api/graphs/:id controllers.Graphs.show(id: String)
