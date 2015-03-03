@@ -4,8 +4,8 @@ app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
         templateUrl: 'views/help.html',
     }).state('graphs', {
         url: '/graphs',
-        templateUrl: 'views/graph_list.html',
-        controller: 'GraphListsCtrl',
+        templateUrl: 'views/graph.html',
+        controller: 'GraphsCtrl',
         resolve: {
             initialData: function(Graph) {
                 return Graph.get().$promise;

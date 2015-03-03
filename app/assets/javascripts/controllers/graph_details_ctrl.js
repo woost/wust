@@ -1,4 +1,4 @@
-app.controller('GraphDetailsCtrl', function($scope, $stateParams, Graph, Utils, initialData) {
+app.controller('GraphDetailsCtrl', function($scope, $stateParams, Graph, initialData) {
     $scope.selected = {
         title: initialData.node.type + ': ' + initialData.node.label,
         text: initialData.node.text,

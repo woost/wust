@@ -1,4 +1,4 @@
-app.controller('GraphListsCtrl', function($scope, $state, $filter, Graph, Utils, initialData) {
+app.controller('GraphsCtrl', function($scope, $state, $filter, Graph, Utils, initialData) {
     $scope.$watch('search.label', filter);
 
     $scope.addProblem = addProblem;
