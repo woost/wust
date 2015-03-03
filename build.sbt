@@ -23,10 +23,8 @@ libraryDependencies ++= Seq(
 pipelineStages in Assets := Seq(concat)
 
 Concat.groups := Seq(
-  "controllers.js" -> group((baseDirectory.value / "app" / "assets"/ "javascripts" / "controllers") * "*.js"),
-  "services.js" -> group((baseDirectory.value / "app" / "assets"/ "javascripts" / "services") * "*.js"),
-  "directives.js" -> group((baseDirectory.value / "app" / "assets"/ "javascripts" / "directives") * "*.js"),
-  "filters.js" -> group((baseDirectory.value / "app" / "assets"/ "javascripts" / "filters") * "*.js")
+  // http://www.scala-sbt.org/0.12.1/docs/Detailed-Topics/Paths.html
+  "wust.js" -> group((baseDirectory.value / "app" / "assets"/ "javascripts") ** "*.js")
 )
 
 Concat.parentDir := "public/main/javascripts"
