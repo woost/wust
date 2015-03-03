@@ -29,17 +29,17 @@ app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
     $locationProvider.html5Mode(true);
 });
 
-// we need to use the injector to get a reference to the $state service in an
-// http-interceptor, otherwise we would have circular dependency.
-// http://stackoverflow.com/questions/20230691/injecting-state-ui-router-into-http-interceptor-causes-circular-dependency
 app.factory('httpErrorResponseInterceptor', function($q, $injector) {
     return {
         response: function(responseData) {
             return responseData;
         },
         responseError: function error(response) {
-            var state = $injector.get('$state');
-            state.go('help');
+            // we need to use the injector to get a reference to the $state service in an
+            // http-interceptor, otherwise we would have circular dependency.
+            // http://stackoverflow.com/questions/20230691/injecting-state-ui-router-into-http-interceptor-causes-circular-dependency
+            //var state = $injector.get('$state');
+            //state.go('/');
             toastr.error("Request failed");
 
             return $q.reject(response);
