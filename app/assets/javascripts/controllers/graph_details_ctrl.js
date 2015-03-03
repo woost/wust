@@ -1,59 +1,63 @@
-app.controller('GraphDetailsCtrl', function($scope, $stateParams, Graph, initialData) {
+app.controller('GraphDetailsCtrl', function($scope, $stateParams, Graph, Utils, initialData) {
     $scope.selected = {
-        title: initialData.node.label + ': ' + initialData.node.text,
+        title: initialData.node.type + ': ' + initialData.node.label,
+        text: initialData.node.text,
         ideas: initialData.ideas,
         questions: initialData.questions
     };
 
     $scope.newIdea = {
         relationLabel: 'SOLVES',
-        label: 'IDEA',
-        text: ''
+        type: 'IDEA',
+        label: ''
     };
 
     $scope.newQuestion = {
         relationLabel: 'ASKS',
-        label: 'QUESTION',
-        text: ''
+        type: 'QUESTION',
+        label: ''
     };
 
-    $scope.addNode = addNode;
-    $scope.removeNode = removeNode;
+    $scope.addIdea = addItem($scope.selected.ideas);
+    $scope.addQuestion = addItem($scope.selected.questions);
+    $scope.removeIdea = removeItem($scope.selected.ideas);
+    $scope.removeQuestion = removeItem($scope.selected.questions);
 
-    function addNode(list, elem) {
-        var obj = {
-            "reference": $stateParams.id,
-            "label": elem.relationLabel,
-            "node": {
-                "label": elem.label,
-                "text": elem.text
-            }
+    function addItem(list) {
+        return function(elem) {
+            var obj = {
+                "reference": $stateParams.id,
+                "label": elem.relationLabel,
+                "node": {
+                    "type": elem.type,
+                    "label": elem.label,
+                    "text": ""
+                }
+            };
+
+            Graph.create(obj).$promise.then(function(data) {
+                list.push(data.node);
+                $scope.data.addNode(data.node);
+                $scope.data.addEdge(data.relation);
+                toastr.success("Created new Node");
+            }, function(response) {
+                toastr.error("Failed to create Node");
+            });
+
+            elem.label = '';
         };
-
-        Graph.create(obj).$promise.then(function (data) {
-            list.push(data.node);
-            $scope.data.addNode(data.node);
-            $scope.data.addEdge(data.relation);
-            toastr.success("Created new Node");
-        }, function(response) {
-            toastr.error("Failed to create Node");
-        });
-
-        elem.text = '';
     }
 
-    function removeNode(list, elem) {
-        var index = list.indexOf(elem);
-        if (index < 0) {
-            return;
-        }
-
-        Graph.remove(elem.id).$promise.then(function (data) {
-            list.splice(index, 1);
-            $scope.data.graph.nodes.remove(elem.id);
-            toastr.success("Removed Node");
-        }, function(response) {
-            toastr.error("Failed to remove Node");
-        });
+    function removeItem(list) {
+        return function($index) {
+            var elem = list[$index];
+            Graph.remove(elem.id).$promise.then(function(data) {
+                list.splice($index, 1);
+                $scope.data.removeNode(elem);
+                toastr.success("Removed Node");
+            }, function(response) {
+                toastr.error("Failed to remove Node");
+            });
+        };
     }
 });

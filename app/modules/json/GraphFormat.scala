@@ -16,8 +16,9 @@ object GraphFormat {
     def reads(json: JsValue) = json match {
       case JsObject(_) => {
         val node = Node.local
-        node.labels += (json \ "label").as[String]
+        node.labels += (json \ "type").as[String]
         node.properties += ("text" -> (json \ "text").as[String])
+        node.properties += ("label" -> (json \ "label").as[String])
         JsSuccess(node)
       }
       case _ => JsError()
@@ -25,7 +26,8 @@ object GraphFormat {
 
     def writes(node: Node) = JsObject(Seq(
       ("id", JsNumber(node.id)),
-      ("label", JsString(node.labels.headOption.getOrElse("").toString)),
+      ("type", JsString(node.labels.headOption.getOrElse("").toString)),
+      ("label", JsString(node.properties.getOrElse("label", StringPropertyValue("")).asInstanceOf[StringPropertyValue])),
       ("text", JsString(node.properties.getOrElse("text", StringPropertyValue("")).asInstanceOf[StringPropertyValue]))
     ));
   }

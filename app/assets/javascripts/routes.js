@@ -40,7 +40,7 @@ app.factory('httpErrorResponseInterceptor', function($q, $injector) {
             // http://stackoverflow.com/questions/20230691/injecting-state-ui-router-into-http-interceptor-causes-circular-dependency
             //var state = $injector.get('$state');
             //state.go('/');
-            toastr.error("Request failed");
+            // toastr.error("Request failed");
 
             return $q.reject(response);
         }

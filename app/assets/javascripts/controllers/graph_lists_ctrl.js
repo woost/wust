@@ -1,13 +1,22 @@
-app.controller('GraphListsCtrl', function($scope, $state, $filter, Graph, initialData) {
+app.controller('GraphListsCtrl', function($scope, $state, $filter, Graph, Utils, initialData) {
     $scope.$watch('search.label', filter);
+
+    $scope.addProblem = addProblem;
+    $scope.newProblem = {
+        label: "",
+        text: ""
+    };
 
     var nodes = new vis.DataSet();
     var edges = new vis.DataSet();
     nodes.add(initialData.nodes);
     edges.add(initialData.edges);
+
     $scope.data = {
         addNode: addNode,
         addEdge: addEdge,
+        removeNode: removeNode,
+        removeEdge: removeEdge,
         graph: {
             nodes: nodes,
             edges: edges
@@ -26,15 +35,13 @@ app.controller('GraphListsCtrl', function($scope, $state, $filter, Graph, initia
         onSelect: onSelect
     };
 
-    $scope.newProblem = {
-        label: "PROBLEM",
-        text: ""
-    };
-    $scope.addProblem = addProblem;
-
     function addProblem() {
         var obj = {
-            "node": angular.copy($scope.newProblem)
+            "node": {
+                type: "PROBLEM",
+                label: $scope.newProblem.label,
+                text: $scope.newProblem.text
+            }
         };
 
         Graph.create(obj).$promise.then(function(data) {
@@ -44,6 +51,7 @@ app.controller('GraphListsCtrl', function($scope, $state, $filter, Graph, initia
             toastr.error("Failed to create Problem");
         });
 
+        $scope.newProblem.label = "";
         $scope.newProblem.text = "";
     }
 
@@ -61,8 +69,10 @@ app.controller('GraphListsCtrl', function($scope, $state, $filter, Graph, initia
     function filter() {
         var filtered = $filter('filter')(initialData.nodes, $scope.search);
         nodes.update(filtered);
-        nodes.forEach(function(node) {
-            if (!filtered.find(function(n) { return n.id === node.id; })) {
+        angular.forEach(nodes, function(node) {
+            if ($filter('filter')(filtered, {
+                id: node.id
+            }).length === 0) {
                 nodes.remove(node.id);
             }
         });
@@ -74,10 +84,18 @@ app.controller('GraphListsCtrl', function($scope, $state, $filter, Graph, initia
         filter();
     }
 
+    function removeNode(node) {
+        Utils.removeElementBy(initialData.nodes, function(n) {
+            return n.id === node.id;
+        });
+        nodes.remove(node);
+    }
+
     function addEdge(edge) {
-        initialData.edges.push(edge);
-        console.log(edge);
         edges.add(edge);
-        filter();
+    }
+
+    function removeEdge(edge) {
+        edges.remove(edge.id);
     }
 });

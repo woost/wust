@@ -115,7 +115,11 @@ nav .nav a:hover, a:visited {
             height: 300px;
         }
     }
-    .problem_box {
+    .new_problem_box {
         padding: 20px;
+    }
+    .problem_box {
+        @include containment(50%);
+        text-align: center;
     }
 }
