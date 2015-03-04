@@ -40,17 +40,16 @@ trait ProblemGoals extends SchemaNode {
   def ideas: Set[Idea] = problemGoals.flatMap(_.ideas)
 }
 
-//object UUIDNode {
-//  import java.
-//  def local = {
-//    val node = Node.local
-//    node.properties("uuid") =
-//  }
-//}
+object UUIDNode {
+  def local = {
+    val node = Node.local
+    node.properties("uuid") = ???
+  }
+}
 
 trait DiscourseNode extends SchemaNode {
   def title: String = getStringProperty("title")
-  def title_=(newTitle: String) { node.properties += ("title" -> newTitle) }
+  def title_=(newTitle: String) { node.properties("title") = newTitle }
 }
 
 trait ConnectorNode extends SchemaNode
