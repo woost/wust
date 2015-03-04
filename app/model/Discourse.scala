@@ -17,6 +17,10 @@ trait Schema {
 
 trait SchemaGraph extends Schema {
   def nodesAs[T <: SchemaNode](label: Label, factory: Node => T) = filterNodes(graph.nodes.toSet, label, factory)
+
+  def add(schemaNode: SchemaNode): Unit = {
+    graph.nodes += schemaNode.node
+  }
 }
 
 trait SchemaNode extends Schema {
@@ -54,6 +58,10 @@ case class IdeaProblemGoal(node: Node) extends ConnectorNode {
 
 case class Goal(node: Node) extends DiscourseNode with ProblemGoals
 
+object Problem {
+  def local = Problem(Node.local)
+}
+
 case class Problem(node: Node) extends DiscourseNode with ProblemGoals
 
 case class Idea(node: Node) extends DiscourseNode
@@ -66,4 +74,5 @@ case class Discourse(graph: Graph) extends SchemaGraph {
   def goals: Set[Goal] = nodesAs("GOAL", new Goal(_))
   def problems: Set[Problem] = nodesAs("PROBLEM", new Problem(_))
   def ideas: Set[Idea] = nodesAs("IDEA", new Idea(_))
+
 }
