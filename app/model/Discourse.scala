@@ -24,25 +24,33 @@ trait SchemaGraph extends Schema {
 }
 
 trait SchemaNode extends Schema {
+  def node: Node
   implicit var graph: Graph = null
 
-  def neighboursAs[T <: SchemaNode](label: Label, factory: Node => T) = filterNodes(node.neighbours, label, factory)
+  //  def id: Long = node.id
 
-  def node: Node
+  def neighboursAs[T <: SchemaNode](label: Label, factory: Node => T) = filterNodes(node.neighbours, label, factory)
   def getStringProperty(key: String) = node.properties(key).asInstanceOf[StringPropertyValue]
 }
+
+///////////////////////////////////////////////////
 
 trait ProblemGoals extends SchemaNode {
   def problemGoals: Set[ProblemGoal] = neighboursAs("PROBLEMGOAL", new ProblemGoal(_))
   def ideas: Set[Idea] = problemGoals.flatMap(_.ideas)
 }
 
+//object UUIDNode {
+//  import java.
+//  def local = {
+//    val node = Node.local
+//    node.properties("uuid") =
+//  }
+//}
+
 trait DiscourseNode extends SchemaNode {
-
-  private var _title: String = getStringProperty("title")
-
-  def title = _title
-  def title_=(newTitle: String) { node.properties("title") = newTitle }
+  def title: String = getStringProperty("title")
+  def title_=(newTitle: String) { node.properties += ("title" -> newTitle) }
 }
 
 trait ConnectorNode extends SchemaNode
