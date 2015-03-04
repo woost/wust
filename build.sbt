@@ -24,13 +24,22 @@ pipelineStages in Assets := Seq(concat)
 
 Concat.parentDir := "public/main/javascripts"
 
-val jsAssetsDirectory = baseDirectory( _ / "app/assets/javascripts" )
+val jsAssetsDirectory = baseDirectory(_ / "app/assets/javascripts")
 
 Concat.groups := Seq(
   // http://www.scala-sbt.org/0.12.1/docs/Detailed-Topics/Paths.html
   "wust.js" -> group(
     (jsAssetsDirectory.value ** "*.js") ---
-    (jsAssetsDirectory.value / "module.js")
+      (jsAssetsDirectory.value / "module.js")
   )
 )
 
+scalacOptions ++= Seq(
+  "-encoding", "UTF-8",
+  "-unchecked",
+  "-deprecation",
+  "-feature",
+  "-Yinline", "-Yinline-warnings",
+  "-language:_"
+  //,"-Xdisable-assertions", "-optimize"
+)
