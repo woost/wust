@@ -70,6 +70,10 @@ case class ProArgument(node: Node) extends DiscourseNode
 
 case class ConArgument(node: Node) extends DiscourseNode
 
+object Discourse {
+  def empty = Discourse(Graph.empty)
+}
+
 case class Discourse(graph: Graph) extends SchemaGraph {
   def goals: Set[Goal] = nodesAs("GOAL", new Goal(_))
   def problems: Set[Problem] = nodesAs("PROBLEM", new Problem(_))
