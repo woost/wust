@@ -2,6 +2,10 @@ app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
     $stateProvider.state('help', {
         url: '/help',
         templateUrl: 'assets/views/help.html',
+    }).state('browse', {
+        url: '/browse',
+        templateUrl: 'assets/views/browse.html',
+        controller: 'BrowseCtrl',
     }).state('graphs', {
         url: '/graphs',
         templateUrl: 'assets/views/graph.html',

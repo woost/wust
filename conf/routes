@@ -6,6 +6,9 @@
 GET / controllers.Application.index(any = "none")
 
 # Play routes serving JSON to AngularJS start with /api
+GET /api/problems controllers.Problems.index
+POST /api/problems controllers.Problems.create
+
 GET /api/graphs controllers.Graphs.index
 GET /api/graphs/:id controllers.Graphs.show(id: String)
 POST /api/graphs controllers.Graphs.create

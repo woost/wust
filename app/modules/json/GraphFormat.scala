@@ -53,7 +53,12 @@ object GraphFormat {
   }
 
   implicit object DiscourseFormat extends Format[DiscourseNode] {
-    def reads(json: JsValue) = ???
+    def reads(json: JsValue) = {
+      val problem = Problem.local
+      problem.title = (json \ "title").as[String]
+      JsSuccess(problem)
+    }
+
     def writes(node: DiscourseNode) = JsObject(Seq(
       ("title", JsString(node.title))
     ))

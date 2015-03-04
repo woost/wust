@@ -108,6 +108,7 @@ nav .nav a:hover, a:visited {
         #question_list {
         }
     }
+
     .graph_box {
         @include containment(85%);
         border: 2px solid $green;
@@ -122,4 +123,10 @@ nav .nav a:hover, a:visited {
         @include containment(50%);
         text-align: center;
     }
+}
+
+// browse container
+#browse_container {
+    padding: 20px;
+    @include containment(50%);
 }
