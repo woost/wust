@@ -8,6 +8,7 @@ import renesca._
 import renesca.graph._
 import renesca.parameter.implicits._
 import modules.json.GraphFormat._
+import model._
 
 object Graphs extends Controller {
   val db = new DbService
@@ -15,7 +16,8 @@ object Graphs extends Controller {
 
   def index() = Action {
     val graph = db.queryGraph("match (n) optional match (n)-[r]-() return n,r")
-    Ok(Json.toJson(graph))
+    val discourse = Discourse(graph)
+    Ok(Json.toJson(discourse.problems.head))
   }
 
   def remove(id: String) = Action{

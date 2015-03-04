@@ -6,6 +6,7 @@ import renesca.graph._
 import renesca.parameter.implicits._
 import renesca.parameter.PropertyKey._
 import renesca.parameter.StringPropertyValue
+import model._
 
 object GraphFormat {
   implicit def LabelToString(label: Label):String = label.name
@@ -48,6 +49,14 @@ object GraphFormat {
     def writes(graph: Graph) = JsObject(Seq(
       ("nodes", JsArray(graph.nodes.toList map (Json.toJson(_)))),
       ("edges", JsArray(graph.relations.toList map (Json.toJson(_))))
+    ));
+  }
+
+  implicit object SchemaNodeFormat extends Format[SchemaNode] {
+    def reads(json: JsValue) = ???
+
+    def writes(node: SchemaNode) = JsObject(Seq(
+      ("title", node.title)
     ));
   }
 }
