@@ -1,5 +1,7 @@
 package model
 
+import java.util.UUID
+
 import renesca.graph.{Label, Graph, Node}
 import renesca.parameter.StringPropertyValue
 import renesca.parameter.implicits._
@@ -43,13 +45,16 @@ trait ProblemGoals extends SchemaNode {
 object UUIDNode {
   def local = {
     val node = Node.local
-    node.properties("uuid") = ???
+    node.properties("uuid") = UUID.randomUUID.toString
+    node
   }
 }
 
 trait DiscourseNode extends SchemaNode {
   def title: String = getStringProperty("title")
   def title_=(newTitle: String) { node.properties("title") = newTitle }
+
+  def uuid: String = getStringProperty("uuid")
 }
 
 trait ConnectorNode extends SchemaNode
@@ -66,7 +71,7 @@ case class IdeaProblemGoal(node: Node) extends ConnectorNode {
 case class Goal(node: Node) extends DiscourseNode with ProblemGoals
 
 object Problem {
-  def local = Problem(Node.local)
+  def local = Problem(UUIDNode.local)
 }
 
 case class Problem(node: Node) extends DiscourseNode with ProblemGoals
