@@ -6,28 +6,29 @@ import renesca.parameter.implicits._
 
 trait Schema {
   def graph: Graph
-  def filterNodes[T <: SchemaNode](nodes:Set[Node])(label: Label, factory: Node => T): Set[T] = nodes.filter(_.labels.contains(label)).map { node => factory(node).withGraph(graph) }
+  def filterNodes[T <: SchemaNode](nodes: Set[Node], label: Label, factory: Node => T): Set[T] = {
+    nodes.filter(_.labels.contains(label)).map { node =>
+      val schemaNode = factory(node)
+      schemaNode.graph = graph
+      schemaNode
+    }
+  }
 }
 
 trait SchemaGraph extends Schema {
-  val nodesAs = filterNodes(graph.nodes)
+  def nodesAs[T <: SchemaNode](label: Label, factory: Node => T) = filterNodes(graph.nodes.toSet, label, factory)
 }
 
 trait SchemaNode extends Schema {
-  protected implicit var graph:Graph
+  implicit var graph: Graph = null
 
-  def withGraph(graph: Graph) = {
-    this.graph = graph
-    this
-  }
-
-  val neighboursAs = filterNodes(node.neighbours)
+  def neighboursAs[T <: SchemaNode](label: Label, factory: Node => T) = filterNodes(node.neighbours, label, factory)
 
   def node: Node
   def getStringProperty(key: String) = node.properties(key).asInstanceOf[StringPropertyValue]
 }
 
-trait ProblemGoals {
+trait ProblemGoals extends SchemaNode {
   def problemGoals: Set[ProblemGoal] = neighboursAs("PROBLEMGOAL", new ProblemGoal(_))
   def ideas: Set[Idea] = problemGoals.flatMap(_.ideas)
 }
@@ -42,13 +43,13 @@ trait DiscourseNode extends SchemaNode {
 
 trait ConnectorNode extends SchemaNode
 
-case class ProblemGoal(node: Node, problem: Problem, goal: Goal) extends ConnectorNode {
-  def ideaProblemGoals: Set[IdeaProblemGoal] = node.neighboursAs("IDEAPROBLEMGOAL", new IdeaProblemGoal(_))
+case class ProblemGoal(node: Node) extends ConnectorNode {
+  def ideaProblemGoals: Set[IdeaProblemGoal] = neighboursAs("IDEAPROBLEMGOAL", new IdeaProblemGoal(_))
   def ideas: Set[Idea] = ideaProblemGoals.flatMap(_.ideas)
 }
 
-case class IdeaProblemGoal(node: Node, idea: Idea, problemGoal: ProblemGoal) extends ConnectorNode {
-  def ideas: Set[Idea] = node.neighboursAs("IDEA", new Idea(_))
+case class IdeaProblemGoal(node: Node) extends ConnectorNode {
+  def ideas: Set[Idea] = neighboursAs("IDEA", new Idea(_))
 }
 
 case class Goal(node: Node) extends DiscourseNode with ProblemGoals
