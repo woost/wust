@@ -1,94 +1,177 @@
 package model
 
-import java.util.UUID
 
-import renesca.graph.{Label, Graph, Node}
+import renesca.graph._
 import renesca.parameter.StringPropertyValue
 import renesca.parameter.implicits._
 
 trait Schema {
   def graph: Graph
-  def filterNodes[T <: SchemaNode](nodes: Set[Node], label: Label, factory: Node => T): Set[T] = {
-    nodes.filter(_.labels.contains(label)).map { node =>
-      val schemaNode = factory(node)
+}
+
+trait SchemaNodeFilter extends Schema {
+  def filterNodes[T <: SchemaNode](nodes: Set[Node], nodeFactory: SchemaNodeFactory[T]): Set[T] = {
+    nodes.filter(_.labels.contains(nodeFactory.label)).map { node =>
+      val schemaNode = nodeFactory.apply(node)
       schemaNode.graph = graph
       schemaNode
     }
   }
 }
 
-trait SchemaGraph extends Schema {
-  def nodesAs[T <: SchemaNode](label: Label, factory: Node => T) = filterNodes(graph.nodes.toSet, label, factory)
+trait SchemaGraph extends Schema with SchemaNodeFilter {
+  def nodesAs[T <: SchemaNode](NodeFactory: SchemaNodeFactory[T]) = {
+    filterNodes(graph.nodes.toSet, NodeFactory)
+  }
 
   def add(schemaNode: SchemaNode): Unit = {
     graph.nodes += schemaNode.node
   }
 }
 
-trait SchemaNode extends Schema {
+trait SchemaNodeFactory[T <: SchemaNode] {
+  def label: Label
+  def apply: (Node) => T //TODO: does not work as expected: instance(node)
+}
+
+
+trait SchemaNode extends Schema with SchemaNodeFilter {
   def node: Node
   implicit var graph: Graph = null
 
   //  def id: Long = node.id
 
-  def neighboursAs[T <: SchemaNode](label: Label, factory: Node => T) = filterNodes(node.neighbours, label, factory)
+  def neighboursAs[T <: SchemaNode](nodeFactory: SchemaNodeFactory[T]) = filterNodes(node.neighbours, nodeFactory)
   def getStringProperty(key: String) = node.properties(key).asInstanceOf[StringPropertyValue]
 }
 
-///////////////////////////////////////////////////
+trait SchemaRelation[START <: SchemaNode, END <: SchemaNode] {
+  def relation: Relation
 
-trait ProblemGoals extends SchemaNode {
-  def problemGoals: Set[ProblemGoal] = neighboursAs("PROBLEMGOAL", new ProblemGoal(_))
-  def ideas: Set[Idea] = problemGoals.flatMap(_.ideas)
+  def startNodeFactory: SchemaNodeFactory[START]
+  def endNodeFactory: SchemaNodeFactory[END]
+
+  def startNode: START = startNodeFactory.apply(relation.startNode)
+  def endNode: END = endNodeFactory.apply(relation.endNode)
+  def relationType: RelationType = relation.relationType
 }
 
-object UUIDNode {
+object UUID {
+  def applyTo(node: Node) {
+    node.properties("uuid") = java.util.UUID.randomUUID.toString
+  }
+}
+///////////////////////////////////////////////////
+
+
+trait DiscourseNode extends SchemaNode {
+  def label = node.labels.head
+  def uuid: String = getStringProperty("uuid")
+
+  def title: String = getStringProperty("title")
+  def title_=(newTitle: String) { node.properties("title") = newTitle }
+}
+
+trait HyperEdgeNode extends DiscourseNode {
+  // TODO: HyperEdgeNode does not have a title
+  override def title = ???
+  override def title_=(newTitle: String) = ???
+}
+trait ContentNode extends DiscourseNode {
+}
+
+trait DiscourseRelation[START <: DiscourseNode, END <: DiscourseNode] extends SchemaRelation[START, END]
+
+
+trait DiscourseNodeFactory[T <: DiscourseNode] extends SchemaNodeFactory[T] {
   def local = {
     val node = Node.local
-    node.properties("uuid") = UUID.randomUUID.toString
-    node
+    UUID.applyTo(node)
+    node.labels += label
+    this.apply(node)
   }
 }
 
-trait DiscourseNode extends SchemaNode {
-  def title: String = getStringProperty("title")
-  def title_=(newTitle: String) { node.properties("title") = newTitle }
-
-  def uuid: String = getStringProperty("uuid")
+object Goal extends DiscourseNodeFactory[Goal] {
+  val apply = new Goal(_)
+  val label = Label("GOAL")
+}
+object Problem extends DiscourseNodeFactory[Problem] {
+  val apply = new Problem(_)
+  val label = Label("PROBLEM")
+}
+object Idea extends DiscourseNodeFactory[Idea] {
+  val apply = new Idea(_)
+  val label = Label("IDEA")
+}
+object ProArgument extends DiscourseNodeFactory[ProArgument] {
+  val apply = new ProArgument(_)
+  val label = Label("PROARGUMENT")
+}
+object ConArgument extends DiscourseNodeFactory[ConArgument] {
+  val apply = new ConArgument(_)
+  val label = Label("CONARGUMENT")
 }
 
-trait ConnectorNode extends SchemaNode
+object IdeaProblemGoal extends DiscourseNodeFactory[IdeaProblemGoal] {
+  val apply = new IdeaProblemGoal(_)
+  val label = Label("IDEAPROBLEMGOAL")
+}
+object ProblemGoal extends DiscourseNodeFactory[ProblemGoal] {
+  val apply = new ProblemGoal(_)
+  val label = Label("PROBLEMGOAL")
+}
 
-case class ProblemGoal(node: Node) extends ConnectorNode {
-  def ideaProblemGoals: Set[IdeaProblemGoal] = neighboursAs("IDEAPROBLEMGOAL", new IdeaProblemGoal(_))
+
+trait ProblemGoals extends SchemaNode {
+  def problemGoals: Set[ProblemGoal] = neighboursAs(ProblemGoal)
+  def ideas: Set[Idea] = problemGoals.flatMap(_.ideas)
+}
+case class Goal(node: Node) extends ContentNode with ProblemGoals
+case class Problem(node: Node) extends ContentNode with ProblemGoals
+case class Idea(node: Node) extends ContentNode
+case class ProArgument(node: Node) extends ContentNode
+case class ConArgument(node: Node) extends ContentNode
+
+case class ProblemGoal(node: Node) extends HyperEdgeNode {
+  def ideaProblemGoals: Set[IdeaProblemGoal] = neighboursAs(IdeaProblemGoal)
   def ideas: Set[Idea] = ideaProblemGoals.flatMap(_.ideas)
 }
 
-case class IdeaProblemGoal(node: Node) extends ConnectorNode {
-  def ideas: Set[Idea] = neighboursAs("IDEA", new Idea(_))
+case class IdeaProblemGoal(node: Node) extends HyperEdgeNode {
+  def ideas: Set[Idea] = neighboursAs(Idea)
 }
 
-case class Goal(node: Node) extends DiscourseNode with ProblemGoals
-
-object Problem {
-  def local = Problem(UUIDNode.local)
+case class ProblemToProblemGoal(relation: Relation) extends DiscourseRelation[Problem, ProblemGoal] {
+  def startNodeFactory = Problem
+  def endNodeFactory = ProblemGoal
 }
 
-case class Problem(node: Node) extends DiscourseNode with ProblemGoals
 
-case class Idea(node: Node) extends DiscourseNode
-
-case class ProArgument(node: Node) extends DiscourseNode
-
-case class ConArgument(node: Node) extends DiscourseNode
-
-object Discourse {
-  def empty = Discourse(Graph.empty)
-}
+object Discourse {def empty = Discourse(Graph.empty) }
 
 case class Discourse(graph: Graph) extends SchemaGraph {
-  def goals: Set[Goal] = nodesAs("GOAL", new Goal(_))
-  def problems: Set[Problem] = nodesAs("PROBLEM", new Problem(_))
-  def ideas: Set[Idea] = nodesAs("IDEA", new Idea(_))
+  def goals: Set[Goal] = nodesAs(Goal)
+  def problems: Set[Problem] = nodesAs(Problem)
+  def ideas: Set[Idea] = nodesAs(Idea)
+
+  def discourseNodes: Set[DiscourseNode] = goals ++ problems ++ ideas
+  def discourseRelations: Set[DiscourseRelation[DiscourseNode, DiscourseNode]] = graph.relations.toSet.map { rawRelation: Relation =>
+    new DiscourseRelation[DiscourseNode, DiscourseNode] {
+      val relation = rawRelation
+      object endNodeFactory extends DiscourseNodeFactory[DiscourseNode] {
+        val label = rawRelation.endNode.labels.head
+        val apply = (node: Node) => new DiscourseNode {
+          override def node: Node = rawRelation.endNode
+        }
+      }
+      object startNodeFactory extends DiscourseNodeFactory[DiscourseNode] {
+        val label = rawRelation.startNode.labels.head
+        val apply = (node: Node) => new DiscourseNode {
+          override def node: Node = rawRelation.startNode
+        }
+      }
+    }
+  }
 
 }
