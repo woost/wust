@@ -12,7 +12,7 @@ trait Schema {
 trait SchemaNodeFilter extends Schema {
   def filterNodes[T <: SchemaNode](nodes: Set[Node], nodeFactory: SchemaNodeFactory[T]): Set[T] = {
     nodes.filter(_.labels.contains(nodeFactory.label)).map { node =>
-      val schemaNode = nodeFactory.apply(node)
+      val schemaNode = nodeFactory.create(node)
       schemaNode.graph = graph
       schemaNode
     }
@@ -32,7 +32,7 @@ trait SchemaGraph extends Schema with SchemaNodeFilter {
 
 trait SchemaNodeFactory[T <: SchemaNode] {
   def label: Label
-  def apply: (Node) => T //TODO: does not work as expected: instance(node)
+  def create(node: Node): T
 }
 
 
@@ -50,8 +50,8 @@ trait SchemaRelation[START <: SchemaNode, END <: SchemaNode] {
   def startNodeFactory: SchemaNodeFactory[START]
   def endNodeFactory: SchemaNodeFactory[END]
 
-  def startNode: START = startNodeFactory.apply(relation.startNode)
-  def endNode: END = endNodeFactory.apply(relation.endNode)
+  def startNode: START = startNodeFactory.create(relation.startNode)
+  def endNode: END = endNodeFactory.create(relation.endNode)
   def relationType: RelationType = relation.relationType
 }
 
@@ -87,41 +87,41 @@ trait DiscourseNodeFactory[T <: DiscourseNode] extends SchemaNodeFactory[T] {
     val node = Node.local
     UUID.applyTo(node)
     node.labels += label
-    this.apply(node)
+    this.create(node)
   }
 }
 
 trait ContentNodeFactory[T <: ContentNode] extends DiscourseNodeFactory[T] {
-  override def apply: (Node) => T
+  override def create(node: Node): T
 }
 
 object Goal extends ContentNodeFactory[Goal] {
-  val apply = new Goal(_)
+  def create(node: Node) = new Goal(node)
   val label = Label("GOAL")
 }
 object Problem extends ContentNodeFactory[Problem] {
-  val apply = new Problem(_)
+  def create(node: Node) = new Problem(node)
   val label = Label("PROBLEM")
 }
 object Idea extends ContentNodeFactory[Idea] {
-  val apply = new Idea(_)
+  def create(node: Node) = new Idea(node)
   val label = Label("IDEA")
 }
 object ProArgument extends ContentNodeFactory[ProArgument] {
-  val apply = new ProArgument(_)
+  def create(node: Node) = new ProArgument(node)
   val label = Label("PROARGUMENT")
 }
 object ConArgument extends ContentNodeFactory[ConArgument] {
-  val apply = new ConArgument(_)
+  def create(node: Node) = new ConArgument(node)
   val label = Label("CONARGUMENT")
 }
 
 object IdeaProblemGoal extends DiscourseNodeFactory[IdeaProblemGoal] {
-  val apply = new IdeaProblemGoal(_)
+  def create(node: Node) = new IdeaProblemGoal(node)
   val label = Label("IDEAPROBLEMGOAL")
 }
 object ProblemGoal extends DiscourseNodeFactory[ProblemGoal] {
-  val apply = new ProblemGoal(_)
+  def create(node: Node) = new ProblemGoal(node)
   val label = Label("PROBLEMGOAL")
 }
 
@@ -164,13 +164,13 @@ case class Discourse(graph: Graph) extends SchemaGraph {
       val relation = rawRelation
       object endNodeFactory extends DiscourseNodeFactory[DiscourseNode] {
         val label = rawRelation.endNode.labels.head
-        val apply = (node: Node) => new DiscourseNode {
+        def create(node: Node) = new DiscourseNode {
           override def node: Node = rawRelation.endNode
         }
       }
       object startNodeFactory extends DiscourseNodeFactory[DiscourseNode] {
         val label = rawRelation.startNode.labels.head
-        val apply = (node: Node) => new DiscourseNode {
+        def create(node: Node) = new DiscourseNode {
           override def node: Node = rawRelation.startNode
         }
       }

@@ -7,7 +7,12 @@ GET / controllers.Application.index(any = "none")
 
 # Play routes serving JSON to AngularJS start with /api
 GET /api/problems controllers.Problems.index
+GET /api/problems/:uuid controllers.Problems.show(uuid: String)
+GET /api/problems/:uuid/goals controllers.Problems.showGoals(uuid: String)
+GET /api/problems/:uuid/ideas controllers.Problems.showIdeas(uuid: String)
 POST /api/problems controllers.Problems.create
+
+GET /api/ideas/:uuid controllers.Ideas.show(uuid: String)
 GET /api/ideas controllers.Ideas.index
 POST /api/ideas controllers.Ideas.create
 

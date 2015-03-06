@@ -13,6 +13,7 @@ import model._
 
 trait ContentNodesController[NodeType <: ContentNode] extends Controller {
   def factory: ContentNodeFactory[NodeType]
+  def label = factory.label
   def decodeRequest(jsValue: JsValue): NodeAddRequest
 
   val db = new DbService
@@ -32,6 +33,15 @@ trait ContentNodesController[NodeType <: ContentNode] extends Controller {
     db.persistChanges(discourse.graph)
     Ok(Json.toJson(contentNode))
   }
+
+  def show(uuid: String) = Action {
+    val query = Query(s"match (n :$label {uuid: {uuid}}) return n limit 1", Map("uuid" -> uuid))
+    db.queryGraph(query).nodes.headOption match {
+      case Some(node) => Ok(Json.toJson(factory.create(node)))
+      case None       => BadRequest(s"Node with label $label and uuid $uuid not found.")
+    }
+  }
+
 }
 
 object Problems extends Controller with ContentNodesController[Problem] {
@@ -40,6 +50,17 @@ object Problems extends Controller with ContentNodesController[Problem] {
 
   def index() = Action {
     Ok(Json.toJson(wholeDiscourseGraph.problems))
+  }
+  def showGoals(uuid: String) = Action {
+    //TODO: relationtypes in query
+    val query = Query(s"match (:${ Problem.label } {uuid: {uuid}})-->(:${ ProblemGoal.label })-->(goal :${ Goal.label }) return goal", Map("uuid" -> uuid))
+    Ok(Json.toJson(db.queryGraph(query).nodes.map(Goal.create)))
+  }
+
+  def showIdeas(uuid: String) = Action {
+    //TODO: relationtypes in query
+    val query = Query(s"match (:${ Problem.label } {uuid: {uuid}})-->(:${ ProblemGoal.label })-->(:${ IdeaProblemGoal.label })-->(idea :${ Idea.label }) return idea", Map("uuid" -> uuid))
+    Ok(Json.toJson(db.queryGraph(query).nodes.map(Idea.create)))
   }
 }
 
