@@ -1,13 +1,7 @@
 app.service('Problem', function($resource) {
-    var problemService = $resource('/api/problems/:id', { id: '@id' }, {
-        query: { method: 'get', isArray: true }
-    });
-    var ideaService = $resource('/api/problems/:id/ideas', { id: '@id' }, {
-        query: { method: 'get', isArray: true }
-    });
-    var goalService = $resource('/api/problems/:id/goals', { id: '@id' }, {
-        query: { method: 'get', isArray: true }
-    });
+    var problemService = $resource('/api/problems/:id', { id: '@id' });
+    var ideaService = $resource('/api/problems/:id/ideas', { id: '@id' });
+    var goalService = $resource('/api/problems/:id/goals', { id: '@id' });
 
     this.get = get;
     this.query = query(problemService);
