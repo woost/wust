@@ -20,17 +20,17 @@ object Graphs extends Controller {
     Ok(Json.toJson(discourse))
   }
 
-  def remove(id: String) = Action{
-    val graph = db.queryGraph(Query("match (n) where n.uuid = {uuid} return n", Map("uuid" -> id)))
+  def remove(uuid: String) = Action {
+    val graph = db.queryGraph(Query("match (n) where n.uuid = {uuid} return n", Map("uuid" -> uuid)))
     graph.nodes.clear
     db.persistChanges(graph)
     Ok(JsObject(Seq()))
   }
 
-  def show(id: String) = Action {
-    val graph = db.queryGraph(Query("match (n) where n.uuid = {uuid} return n", Map("uuid" -> id)))
+  def show(uuid: String) = Action {
+    val graph = db.queryGraph(Query("match (n) where n.uuid = {uuid} return n", Map("uuid" -> uuid)))
     val nodes = Discourse(graph).discourseNodes
-    if (nodes.isEmpty) {
+    if(nodes.isEmpty) {
       BadRequest
     } else {
       Ok(Json.toJson(nodes.head))

@@ -29,6 +29,7 @@ trait SchemaGraph extends Schema with SchemaNodeFilter {
   }
 }
 
+
 trait SchemaNodeFactory[T <: SchemaNode] {
   def label: Label
   def apply: (Node) => T //TODO: does not work as expected: instance(node)
@@ -38,8 +39,6 @@ trait SchemaNodeFactory[T <: SchemaNode] {
 trait SchemaNode extends Schema with SchemaNodeFilter {
   def node: Node
   implicit var graph: Graph = null
-
-  //  def id: Long = node.id
 
   def neighboursAs[T <: SchemaNode](nodeFactory: SchemaNodeFactory[T]) = filterNodes(node.neighbours, nodeFactory)
   def getStringProperty(key: String) = node.properties(key).asInstanceOf[StringPropertyValue]
@@ -92,23 +91,27 @@ trait DiscourseNodeFactory[T <: DiscourseNode] extends SchemaNodeFactory[T] {
   }
 }
 
-object Goal extends DiscourseNodeFactory[Goal] {
+trait ContentNodeFactory[T <: ContentNode] extends DiscourseNodeFactory[T] {
+  override def apply: (Node) => T
+}
+
+object Goal extends ContentNodeFactory[Goal] {
   val apply = new Goal(_)
   val label = Label("GOAL")
 }
-object Problem extends DiscourseNodeFactory[Problem] {
+object Problem extends ContentNodeFactory[Problem] {
   val apply = new Problem(_)
   val label = Label("PROBLEM")
 }
-object Idea extends DiscourseNodeFactory[Idea] {
+object Idea extends ContentNodeFactory[Idea] {
   val apply = new Idea(_)
   val label = Label("IDEA")
 }
-object ProArgument extends DiscourseNodeFactory[ProArgument] {
+object ProArgument extends ContentNodeFactory[ProArgument] {
   val apply = new ProArgument(_)
   val label = Label("PROARGUMENT")
 }
-object ConArgument extends DiscourseNodeFactory[ConArgument] {
+object ConArgument extends ContentNodeFactory[ConArgument] {
   val apply = new ConArgument(_)
   val label = Label("CONARGUMENT")
 }

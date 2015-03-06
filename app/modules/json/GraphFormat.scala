@@ -1,6 +1,6 @@
 package modules.json
 
-import modules.requests.ProblemAdd
+import modules.requests.{IdeaAddRequest, NodeAddRequest, ProblemAddRequest}
 import play.api.libs.json._
 import renesca.graph.Graph
 import renesca.graph._
@@ -42,15 +42,25 @@ object GraphFormat {
     ))
   }
 
-  implicit object ProblemAddFormat extends Format[ProblemAdd] {
+  implicit object ProblemAddFormat extends Format[ProblemAddRequest] {
     def reads(json: JsValue) = json match {
       case JsObject(_) => {
-        JsSuccess(ProblemAdd((json \ "title").as[String]))
+        JsSuccess(ProblemAddRequest((json \ "title").as[String]))
       }
-      case otherwise => JsError()
+      case otherwise   => JsError()
     }
 
-    def writes(problemAdd: ProblemAdd) = ???
+    def writes(problemAdd: ProblemAddRequest) = ???
   }
 
+  implicit object IdeaAddFormat extends Format[IdeaAddRequest] {
+    def reads(json: JsValue) = json match {
+      case JsObject(_) => {
+        JsSuccess(IdeaAddRequest((json \ "title").as[String]))
+      }
+      case otherwise   => JsError()
+    }
+
+    def writes(problemAdd: IdeaAddRequest) = ???
+  }
 }
