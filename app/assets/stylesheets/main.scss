@@ -102,11 +102,6 @@ nav .nav a:hover, a:visited {
 // graph
 #graph_view {
     #graph_detail {
-        #idea_list {
-            width: 70%;
-        }
-        #question_list {
-        }
     }
 
     .graph_box {
@@ -115,13 +110,6 @@ nav .nav a:hover, a:visited {
         .graph_network {
             height: 300px;
         }
-    }
-    .new_problem_box {
-        padding: 20px;
-    }
-    .problem_box {
-        @include containment(50%);
-        text-align: center;
     }
 }
 

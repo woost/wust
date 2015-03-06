@@ -11,7 +11,6 @@ POST /api/problems controllers.Problems.create
 
 GET /api/graphs controllers.Graphs.index
 GET /api/graphs/:id controllers.Graphs.show(id: String)
-POST /api/graphs controllers.Graphs.create
 DELETE /api/graphs/:id controllers.Graphs.remove(id: String)
 
 # Map static resources from the /public folder to the /assets URL path

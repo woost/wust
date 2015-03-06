@@ -1,5 +1,6 @@
 package controllers
 
+import modules.requests.ProblemAdd
 import play.api.libs.json._
 import play.api.mvc.Action
 import play.api.mvc.Controller
@@ -22,11 +23,12 @@ object Problems extends Controller {
 
   def create() = Action { request =>
     val json = request.body.asJson.get
-    val problem = json.as[DiscourseNode]
+    val problemAdd = json.as[ProblemAdd]
     val discourse = Discourse.empty
+    val problem = Problem.local
+    problem.title = problemAdd.title
     discourse.add(problem)
     db.persistChanges(discourse.graph)
     Ok(Json.toJson(problem))
   }
-
 }

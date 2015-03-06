@@ -1,23 +1,10 @@
 <div class="container" id="graph_view">
     <h1>Problem Browser</h1>
 
-    <div class="filled_items">
-        <div class="graph_box">
-            <input type="text" ng-model="search.label">
-            <div vis-network ng-model="data.graph" options="data.options" on-select="data.onSelect" class="graph_network"></div>
-        </div>
-        <div class="new_problem_box">
-            Title:<br>
-            <input type="label" ng-model="newProblem.label"><br>
-            Content:<br>
-            <textarea ng-model="newProblem.text"></textarea><br>
-
-            <div class="filled_items">
-                <button class='btn' ng-click='addProblem()'>Add Problem</button>
-            </div>
-        </div>
+    <div class="graph_box">
+        <input type="text" ng-model="search.label">
+        <div vis-network ng-model="data.graph" options="data.options" on-select="data.onSelect" class="graph_network"></div>
     </div>
 
-    <div route-loading-indicator></div>
-    <div ng-if='!isRouteLoading' ui-view></div>
+    <div ui-view></div>
 </div>

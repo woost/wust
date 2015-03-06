@@ -19,12 +19,7 @@ app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
         parent: 'graphs',
         url: '/:id',
         templateUrl: 'assets/views/graph_detail.html',
-        controller: 'GraphDetailsCtrl',
-        resolve: {
-            initialData: function(Graph, $stateParams) {
-                return Graph.get($stateParams.id).$promise;
-            }
-        }
+        controller: 'GraphDetailsCtrl'
     });
 
     $urlRouterProvider.when('/', '/graphs');
@@ -44,7 +39,7 @@ app.factory('httpErrorResponseInterceptor', function($q, $injector) {
             // http://stackoverflow.com/questions/20230691/injecting-state-ui-router-into-http-interceptor-causes-circular-dependency
             //var state = $injector.get('$state');
             //state.go('/');
-            // toastr.error("Request failed");
+            toastr.error("Request failed");
 
             return $q.reject(response);
         }

@@ -1,10 +1,7 @@
-app.controller('GraphsCtrl', function($scope, $state, $filter, Graph, Utils, initialData) {
+app.controller('GraphsCtrl', function($scope, $state, $filter, Graph, initialData) {
     $scope.$watch('search.label', filter);
-
-    $scope.addProblem = addProblem;
-    $scope.newProblem = {
-        label: "",
-        text: ""
+    $scope.search = {
+        label: ""
     };
 
     var nodes = new vis.DataSet();
@@ -13,10 +10,6 @@ app.controller('GraphsCtrl', function($scope, $state, $filter, Graph, Utils, ini
     edges.add(initialData.edges);
 
     $scope.data = {
-        addNode: addNode,
-        addEdge: addEdge,
-        removeNode: removeNode,
-        removeEdge: removeEdge,
         graph: {
             nodes: nodes,
             edges: edges
@@ -35,26 +28,6 @@ app.controller('GraphsCtrl', function($scope, $state, $filter, Graph, Utils, ini
         onSelect: onSelect
     };
 
-    function addProblem() {
-        var obj = {
-            "node": {
-                type: "PROBLEM",
-                label: $scope.newProblem.label,
-                text: $scope.newProblem.text
-            }
-        };
-
-        Graph.create(obj).$promise.then(function(data) {
-            addNode(data.node);
-            toastr.success("Created new Problem");
-        }, function(response) {
-            toastr.error("Failed to create Problem");
-        });
-
-        $scope.newProblem.label = "";
-        $scope.newProblem.text = "";
-    }
-
     function onSelect(properties) {
         var id = properties.nodes[0];
         if (id === undefined) {
@@ -70,32 +43,9 @@ app.controller('GraphsCtrl', function($scope, $state, $filter, Graph, Utils, ini
         var filtered = $filter('filter')(initialData.nodes, $scope.search);
         nodes.update(filtered);
         angular.forEach(nodes, function(node) {
-            if ($filter('filter')(filtered, {
-                id: node.id
-            }).length === 0) {
+            if ($filter('filter')(filtered, { id: node.id }).length === 0) {
                 nodes.remove(node.id);
             }
         });
-    }
-
-    function addNode(node) {
-        initialData.nodes.push(node);
-        nodes.add(node);
-        filter();
-    }
-
-    function removeNode(node) {
-        Utils.removeElementBy(initialData.nodes, function(n) {
-            return n.id === node.id;
-        });
-        nodes.remove(node);
-    }
-
-    function addEdge(edge) {
-        edges.add(edge);
-    }
-
-    function removeEdge(edge) {
-        edges.remove(edge.id);
     }
 });
