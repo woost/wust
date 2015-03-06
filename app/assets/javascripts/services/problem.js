@@ -5,8 +5,8 @@ app.service('Problem', function($resource) {
 
     this.get = get;
     this.query = query(problemService);
-    this.queryIdeas = get(ideaService);
-    this.queryGoals = get(goalService);
+    this.queryIdeas = query(ideaService);
+    this.queryGoals = query(goalService);
     this.create = create;
 
     function query(service) {
