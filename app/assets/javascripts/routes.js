@@ -15,11 +15,10 @@ app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
                 return Graph.get().$promise;
             }
         }
-    }).state('graphs.detail', {
-        parent: 'graphs',
-        url: '/:id',
-        templateUrl: 'assets/views/graph_detail.html',
-        controller: 'GraphDetailsCtrl'
+    }).state('problems', {
+        url: '/problems/:id',
+        templateUrl: 'assets/views/problem.html',
+        controller: 'ProblemsCtrl',
     });
 
     $urlRouterProvider.otherwise('/');

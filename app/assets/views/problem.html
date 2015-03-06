@@ -2,4 +2,12 @@
     We have a problem, take a look:
 
     <span ng-bind="selected.problem.title"></span>
+
+    <div class="filled_items">
+        Ideas:
+        <div change-item-lists items="selected.ideas" newItem="newIdea" addItem="addIdea" removeItem="removeIdea"></div>
+
+        Goals:
+        <div change-item-lists items="selected.goals" newItem="newGoal" addItem="addGoal" removeItem="removeGoal"></div>
+    </div>
 </div>

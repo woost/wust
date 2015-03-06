@@ -32,20 +32,8 @@ app.controller('GraphsCtrl', function($scope, $state, $filter, Graph, initialDat
             edges: {
                 style: 'arrow'
             },
-        },
-        onSelect: onSelect
-    };
-
-    function onSelect(properties) {
-        var id = properties.nodes[0];
-        if (id === undefined) {
-            return;
         }
-
-        $state.go('graphs.detail', {
-            id: id
-        });
-    }
+    };
 
     function filter() {
         var filtered = $filter('filter')(initialData.nodes, $scope.search);
