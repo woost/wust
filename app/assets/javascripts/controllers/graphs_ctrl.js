@@ -4,6 +4,14 @@ app.controller('GraphsCtrl', function($scope, $state, $filter, Graph, initialDat
         label: ""
     };
 
+    initialData.nodes = initialData.nodes.map(function(node) {
+        return {
+            id: node.uuid,
+            label: node.label,
+            title: node.title
+        };
+    });
+
     var nodes = new vis.DataSet();
     var edges = new vis.DataSet();
     nodes.add(initialData.nodes);
