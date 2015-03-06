@@ -113,15 +113,19 @@ nav .nav a:hover, a:visited {
     }
 }
 
-// browse container
+// home container
 #home_container {
+    @include containment(50%);
+    text-align: center;
     #problem_create {
-        text-align: center;
-        padding: 20px;
     }
     #problem_list {
-        text-align: center;
-        padding: 20px;
+        padding: 50px;
     }
+}
+
+// problem container
+#problem_container {
     @include containment(50%);
+    text-align: center;
 }

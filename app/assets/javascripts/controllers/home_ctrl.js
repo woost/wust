@@ -4,11 +4,7 @@ app.controller("HomeCtrl", function($scope, Problem) {
         title: ""
     };
 
-    Problem.get().$promise.then(function (data) {
-        $scope.problems = data;
-    }, function (response) {
-        toastr.error("Failed to get problems");
-    });
+    $scope.problems = Problem.query();
 
     function addProblem() {
         Problem.create($scope.newProblem).$promise.then(function(data) {
