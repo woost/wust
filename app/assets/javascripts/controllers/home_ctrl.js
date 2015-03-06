@@ -1,4 +1,4 @@
-app.controller("ProblemsCtrl", function($scope, Problem) {
+app.controller("HomeCtrl", function($scope, Problem) {
     $scope.addProblem = addProblem;
     $scope.newProblem = {
         title: ""
