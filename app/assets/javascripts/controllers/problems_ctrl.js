@@ -1,12 +1,11 @@
-app.controller("BrowseCtrl", function($scope, Problem) {
+app.controller("ProblemsCtrl", function($scope, Problem) {
     $scope.addProblem = addProblem;
     $scope.newProblem = {
-        title: "asdads"
+        title: ""
     };
 
-    $scope.problems = [];
     Problem.get().$promise.then(function (data) {
-        $scope.problems = [data];
+        $scope.problems = data;
     }, function (response) {
         toastr.error("Failed to get problems");
     });

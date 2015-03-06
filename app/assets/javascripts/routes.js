@@ -2,10 +2,10 @@ app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
     $stateProvider.state('help', {
         url: '/help',
         templateUrl: 'assets/views/help.html',
-    }).state('browse', {
-        url: '/browse',
-        templateUrl: 'assets/views/browse.html',
-        controller: 'BrowseCtrl',
+    }).state('problems', {
+        url: '/problems',
+        templateUrl: 'assets/views/problem.html',
+        controller: 'ProblemsCtrl',
     }).state('graphs', {
         url: '/graphs',
         templateUrl: 'assets/views/graph.html',
@@ -22,7 +22,7 @@ app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
         controller: 'GraphDetailsCtrl'
     });
 
-    $urlRouterProvider.when('/', '/graphs');
+    $urlRouterProvider.when('/', '/problems');
     $urlRouterProvider.otherwise('/');
 
     $locationProvider.html5Mode(true);

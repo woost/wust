@@ -48,7 +48,7 @@ body {
 #pagecontent {}
 
 #main_view {
-    padding: 20px 20px;
+    padding: 50px 50px;
 }
 
 #noscriptmsg {
@@ -114,7 +114,14 @@ nav .nav a:hover, a:visited {
 }
 
 // browse container
-#browse_container {
-    padding: 20px;
+#problem_container {
+    #problem_create {
+        text-align: center;
+        padding: 20px;
+    }
+    #problem_list {
+        text-align: center;
+        padding: 20px;
+    }
     @include containment(50%);
 }

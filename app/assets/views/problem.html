@@ -1,0 +1,14 @@
+<div id="problem_container">
+    <div id="problem_create">
+        <h2>What is your problem?</h2>
+        <input size=50 type="text" ng-model="newProblem.title">
+        <button ng-click="addProblem()" class="btn btn-success"><i class="fa fa-plus"></i></button>
+    </div>
+
+    <div id="problem_list">
+        <h2>Existing problems:</h2>
+        <div ng-repeat="problem in problems">
+            {{problem.title}}
+        </div>
+    </div>
+</div>
