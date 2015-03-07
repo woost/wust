@@ -36,7 +36,7 @@ object GraphFormat {
     def reads(json: JsValue) = ???
 
     def writes(node: DiscourseNode) = JsObject(Seq(
-      ("uuid", JsString(node.uuid)),
+      ("id", JsString(node.uuid)),
       ("title", JsString(node.title)),
       ("label", JsString(node.label))
     ))

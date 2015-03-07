@@ -6,9 +6,8 @@ app.controller('GraphsCtrl', function($scope, $state, $filter, Graph, initialDat
 
     initialData.nodes = initialData.nodes.map(function(node) {
         return {
-            id: node.uuid,
+            id: node.id,
             label: node.label + ": " + node.title,
-            title: node.title
         };
     });
 
