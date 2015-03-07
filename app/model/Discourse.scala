@@ -29,8 +29,8 @@ trait SchemaGraph extends Schema with SchemaNodeFilter {
   }
 
   def add[START <: SchemaNode, END <: SchemaNode](schemaRelation: SchemaRelation[START, END]) {
-    graph.nodes += schemaRelation.startNode.node
-    graph.nodes += schemaRelation.endNode.node
+    //    graph.nodes += schemaRelation.startNode.node
+    //    graph.nodes += schemaRelation.endNode.node
     graph.relations += schemaRelation.relation
   }
 }
@@ -91,8 +91,8 @@ trait DiscourseNode extends SchemaNode {
 
 trait HyperEdgeNode extends DiscourseNode {
   // TODO: HyperEdgeNode does not have a title
-  override def title = ???
-  override def title_=(newTitle: String) = ???
+  override def title = "hosenträger"
+  override def title_=(newTitle: String) {}
 }
 trait ContentNode extends DiscourseNode {
 }
@@ -197,8 +197,10 @@ case class Discourse(graph: Graph) extends SchemaGraph {
   def goals: Set[Goal] = nodesAs(Goal)
   def problems: Set[Problem] = nodesAs(Problem)
   def ideas: Set[Idea] = nodesAs(Idea)
+  def problemGoals: Set[ProblemGoal] = nodesAs(ProblemGoal)
+  def ideaProblemGoals: Set[IdeaProblemGoal] = nodesAs(IdeaProblemGoal)
 
-  def discourseNodes: Set[DiscourseNode] = goals ++ problems ++ ideas
+  def discourseNodes: Set[DiscourseNode] = goals ++ problems ++ ideas ++ problemGoals ++ ideaProblemGoals
   def discourseRelations: Set[DiscourseRelation[DiscourseNode, DiscourseNode]] = graph.relations.toSet.map { rawRelation: Relation =>
     new DiscourseRelation[DiscourseNode, DiscourseNode] {
       val relation = rawRelation
