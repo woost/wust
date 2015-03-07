@@ -27,8 +27,7 @@ trait ContentNodesController[NodeType <: ContentNode] extends Controller {
     val json = request.body.asJson.get
     val nodeAdd = decodeRequest(json)
     val discourse = Discourse.empty
-    val contentNode = factory.local
-    contentNode.title = nodeAdd.title
+    val contentNode = factory.local(nodeAdd.title)
     discourse.add(contentNode)
     db.persistChanges(discourse.graph)
     Ok(Json.toJson(contentNode))
@@ -61,6 +60,22 @@ object Problems extends Controller with ContentNodesController[Problem] {
     //TODO: relationtypes in query
     val query = Query(s"match (:${ Problem.label } {uuid: {uuid}})-->(:${ ProblemGoal.label })-->(:${ IdeaProblemGoal.label })-->(idea :${ Idea.label }) return idea", Map("uuid" -> uuid))
     Ok(Json.toJson(db.queryGraph(query).nodes.map(Idea.create)))
+  }
+
+  def createIdea(uuid: String) = Action { request =>
+    val json = request.body.asJson.get
+    val nodeAdd = json.as[IdeaAddRequest]
+
+    val discourse = Discourse(db.queryGraph(Query(s"match (problem :${ Problem.label } {uuid: {uuid}}) return problem limit 1", Map("uuid" -> uuid))))
+    val problem = discourse.problems.head
+    val idea = Idea.local(nodeAdd.title)
+    val problemGoal = ProblemGoal.local
+    val ideaProblemGoal = IdeaProblemGoal.local
+    discourse.add(ProblemToProblemGoal.local(problem, problemGoal))
+    discourse.add(IdeaToIdeaProblemGoal.local(idea, ideaProblemGoal))
+
+    db.persistChanges(discourse.graph)
+    Ok(Json.toJson(idea))
   }
 }
 

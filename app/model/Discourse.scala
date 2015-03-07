@@ -24,8 +24,14 @@ trait SchemaGraph extends Schema with SchemaNodeFilter {
     filterNodes(graph.nodes.toSet, NodeFactory)
   }
 
-  def add(schemaNode: SchemaNode): Unit = {
+  def add(schemaNode: SchemaNode) {
     graph.nodes += schemaNode.node
+  }
+
+  def add[START <: SchemaNode, END <: SchemaNode](schemaRelation: SchemaRelation[START, END]) {
+    graph.nodes += schemaRelation.startNode.node
+    graph.nodes += schemaRelation.endNode.node
+    graph.relations += schemaRelation.relation
   }
 }
 
@@ -33,6 +39,8 @@ trait SchemaGraph extends Schema with SchemaNodeFilter {
 trait SchemaNodeFactory[T <: SchemaNode] {
   def label: Label
   def create(node: Node): T
+
+  def local: T = create(Node.local(List(label)))
 }
 
 
@@ -43,6 +51,15 @@ trait SchemaNode extends Schema with SchemaNodeFilter {
   def neighboursAs[T <: SchemaNode](nodeFactory: SchemaNodeFactory[T]) = filterNodes(node.neighbours, nodeFactory)
   def getStringProperty(key: String) = node.properties(key).asInstanceOf[StringPropertyValue]
 }
+
+trait SchemaRelationFactory[RELATION <: SchemaRelation[START, END], START <: SchemaNode, END <: SchemaNode] {
+  def create(relation: Relation): RELATION
+  def relationType: RelationType
+  def local(startNode: START, endNode: END): RELATION = {
+    create(Relation.local(startNode.node, endNode.node, relationType))
+  }
+}
+
 
 trait SchemaRelation[START <: SchemaNode, END <: SchemaNode] {
   def relation: Relation
@@ -56,8 +73,9 @@ trait SchemaRelation[START <: SchemaNode, END <: SchemaNode] {
 }
 
 object UUID {
-  def applyTo(node: Node) {
-    node.properties("uuid") = java.util.UUID.randomUUID.toString
+  def applyTo[T <: SchemaNode](node: T) = {
+    node.node.properties("uuid") = java.util.UUID.randomUUID.toString
+    node
   }
 }
 ///////////////////////////////////////////////////
@@ -83,16 +101,17 @@ trait DiscourseRelation[START <: DiscourseNode, END <: DiscourseNode] extends Sc
 
 
 trait DiscourseNodeFactory[T <: DiscourseNode] extends SchemaNodeFactory[T] {
-  def local = {
-    val node = Node.local
-    UUID.applyTo(node)
-    node.labels += label
-    this.create(node)
-  }
+  override def local = UUID.applyTo(super.local)
 }
 
 trait ContentNodeFactory[T <: ContentNode] extends DiscourseNodeFactory[T] {
   override def create(node: Node): T
+
+  def local(title: String): T = {
+    val idea = super.local
+    idea.title = title
+    idea
+  }
 }
 
 object Goal extends ContentNodeFactory[Goal] {
@@ -145,11 +164,23 @@ case class IdeaProblemGoal(node: Node) extends HyperEdgeNode {
   def ideas: Set[Idea] = neighboursAs(Idea)
 }
 
+object ProblemToProblemGoal extends SchemaRelationFactory[ProblemToProblemGoal, Problem, ProblemGoal] {
+  def create(relation: Relation) = ProblemToProblemGoal(relation)
+  def relationType = RelationType("PROBLEMTOPROBLEMGOAL")
+}
 case class ProblemToProblemGoal(relation: Relation) extends DiscourseRelation[Problem, ProblemGoal] {
   def startNodeFactory = Problem
   def endNodeFactory = ProblemGoal
 }
 
+object IdeaToIdeaProblemGoal extends SchemaRelationFactory[IdeaToIdeaProblemGoal, Idea, IdeaProblemGoal] {
+  def create(relation: Relation) = IdeaToIdeaProblemGoal(relation)
+  def relationType = RelationType("IDEATOIDEAPROBLEMGOAL")
+}
+case class IdeaToIdeaProblemGoal(relation: Relation) extends DiscourseRelation[Idea, IdeaProblemGoal] {
+  def startNodeFactory = Idea
+  def endNodeFactory = IdeaProblemGoal
+}
 
 object Discourse {def empty = Discourse(Graph.empty) }
 
