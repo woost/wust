@@ -7,8 +7,10 @@ app.directive("changeItemList", function($compile) {
             "<button class='btn btn-danger' ng-click='items.remove()($index)'><i class='fa fa-minus'></i></button>" +
             "</li>" +
             "<li class='list-group-item filled_items'>" +
+            "<form ng-submit='items.add()()'>" +
             "<input type='text' ng-model='items.new.title'>" +
-            "<button class='btn btn-success' ng-click='items.add()()'><i class='fa fa-plus'></i></button>" +
+            "<button submit-on-click class='btn btn-success'><i class='fa fa-plus'></i></button>" +
+            "</form>" +
             "</li>" +
             "</ul>",
         scope: {
