@@ -48,10 +48,8 @@ object GraphFormat {
       val simplify: PartialFunction[DiscourseNode, Replacement] = {
         case Solves(node) if node.inDegree == 1 && node.outDegree == 1   =>
           Replacement(node, node.relations, Relation.local(node.predecessors.head, node.successors.head, "SOLVES"))
-        case Prevents(node) if node.inDegree == 1 && node.outDegree == 1 =>
-          Replacement(node, node.relations, Relation.local(node.predecessors.head, node.successors.head, "OF"))
-        case Prevents(node) if node.inDegree == 2 && node.outDegree == 0 =>
-          Replacement(node, node.relations, Relation.local(node.predecessors.head, node.predecessors.last, "SOLVES"))
+        case Reaches(node) if node.inDegree == 1 && node.outDegree == 1   =>
+          Replacement(node, node.relations, Relation.local(node.predecessors.head, node.successors.head, "REACHES"))
       }
 
       var next: Option[Replacement] = discourseGraph.discourseNodes.collectFirst(simplify)
