@@ -60,10 +60,6 @@ body {
     text-align: center;
 }
 
-.container {
-    @include containment(80%);
-}
-
 .filled_items {
     display: flex;
     justify-content: space-between;
@@ -101,13 +97,16 @@ nav .nav a:hover, a:visited {
     font-size: 25px;
 }
 
-// graph
-#graph_view {
-    #graph_detail {
-    }
+// container
+.container {
+    @include containment(60%);
+    padding: 20px;
+}
 
-    .graph_box {
-        @include containment(85%);
+// graph
+#graph_container {
+    @extend .container;
+    .graph_view {
         border: 2px solid $green;
         .graph_network {
             height: 300px;
@@ -117,7 +116,7 @@ nav .nav a:hover, a:visited {
 
 // home container
 #home_container {
-    @include containment(50%);
+    @extend .container;
     text-align: center;
     #problem_create {
     }
@@ -128,6 +127,11 @@ nav .nav a:hover, a:visited {
 
 // problem container
 #problem_container {
-    @include containment(50%);
+    @extend .container;
     text-align: center;
+}
+
+// help container
+#help_container {
+    @extend .container;
 }
