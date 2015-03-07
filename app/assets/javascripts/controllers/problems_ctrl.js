@@ -1,24 +1,25 @@
 app.controller('ProblemsCtrl', function($scope, $stateParams, Problem) {
-    $scope.selected = {
-        problem: Problem.get($stateParams.id),
-        ideas: Problem.queryIdeas($stateParams.id),
-        goals: Problem.queryGoals($stateParams.id)
+    $scope.problem = Problem.get($stateParams.id);
+    $scope.connected = {
+        idea: {
+            new: {
+                title: ""
+            },
+            list: Problem.queryIdeas($stateParams.id),
+            add: functionToDo,
+            remove: functionToDo
+        },
+        goal: {
+            new: {
+                title: ""
+            },
+            list: Problem.queryGoals($stateParams.id),
+            add: functionToDo,
+            remove: functionToDo
+        }
     };
 
-    $scope.newIdea = {
-        title: ""
-    };
-
-    $scope.newGoal = {
-        title: ""
-    };
-
-    $scope.addIdea = todo;
-    $scope.removeIdea = todo;
-    $scope.addGoal = todo;
-    $scope.removeGoal = todo;
-
-    function todo() {
+    function functionToDo(something) {
         toastr.error("Hi, I am a function to be implemented");
     }
 });

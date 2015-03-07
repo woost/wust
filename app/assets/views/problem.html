@@ -1,13 +1,13 @@
 <div id="problem_container">
     We have a problem, take a look:
 
-    <span ng-bind="selected.problem.title"></span>
+    <span ng-bind=".problem.title"></span>
 
     <div class="filled_items">
         Ideas:
-        <div change-item-lists items="selected.ideas" newItem="newIdea" addItem="addIdea" removeItem="removeIdea"></div>
+        <div change-item-list items="connected.idea"></div>
 
         Goals:
-        <div change-item-lists items="selected.goals" newItem="newGoal" addItem="addGoal" removeItem="removeGoal"></div>
+        <div change-item-list items="connected.goal"></div>
     </div>
 </div>
