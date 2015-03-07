@@ -19,6 +19,17 @@ app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
         url: '/problems/:id',
         templateUrl: 'assets/views/problem.html',
         controller: 'ProblemsCtrl',
+        abstract: true
+    }).state('problems.view', {
+        parent: "problems",
+        url: '/view',
+        templateUrl: 'assets/views/problem_view.html',
+        controller: 'ProblemViewsCtrl',
+    }).state('problems.idea', {
+        parent: "problems",
+        url: '/idea/:ideaId',
+        templateUrl: 'assets/views/problem_idea.html',
+        controller: 'ProblemIdeasCtrl',
     });
 
     $urlRouterProvider.otherwise('/');
