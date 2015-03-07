@@ -191,7 +191,7 @@ case class SolvesToPrevents(relation: Relation) extends DiscourseRelation[Solves
 
 object PreventsToGoal extends SchemaRelationFactory[PreventsToGoal, Prevents, Goal] {
   def create(relation: Relation) = PreventsToGoal(relation)
-  def relationType = RelationType("SOLVESTOPREVENTS")
+  def relationType = RelationType("PREVENTSTOGOAL")
 }
 case class PreventsToGoal(relation: Relation) extends DiscourseRelation[Prevents, Goal] {
   def startNodeFactory = Prevents
