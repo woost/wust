@@ -11,6 +11,7 @@ GET /api/problems/:uuid controllers.Problems.show(uuid: String)
 GET /api/problems/:uuid/goals controllers.Problems.showGoals(uuid: String)
 GET /api/problems/:uuid/ideas controllers.Problems.showIdeas(uuid: String)
 POST /api/problems/:uuid/ideas controllers.Problems.createIdea(uuid: String)
+POST /api/problems/:uuid/goals controllers.Problems.createGoal(uuid: String)
 POST /api/problems controllers.Problems.create
 
 GET /api/ideas/:uuid controllers.Ideas.show(uuid: String)

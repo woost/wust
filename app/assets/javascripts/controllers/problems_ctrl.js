@@ -8,7 +8,7 @@ app.controller('ProblemsCtrl', function($scope, $stateParams, Problem) {
     $scope.ideas = {
         new: newIdea,
         list: ideas,
-        add: addConnected(ideas, newIdea),
+        add: addConnected(Problem.createIdea, ideas, newIdea),
         remove: functionToDo
     };
 
@@ -19,13 +19,13 @@ app.controller('ProblemsCtrl', function($scope, $stateParams, Problem) {
     $scope.goals = {
         new: newGoal,
         list: goals,
-        add: addConnected(goals, newGoal),
+        add: addConnected(Problem.createGoal, goals, newGoal),
         remove: functionToDo
     };
 
-    function addConnected(itemList, newItem) {
+    function addConnected(createFunction, itemList, newItem) {
         return function() {
-            Problem.createIdea($stateParams.id, newItem).$promise.then(function(data) {
+            createFunction($stateParams.id, newItem).$promise.then(function(data) {
                 toastr.success("Added new Item");
                 itemList.push(data);
             });

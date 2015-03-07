@@ -1,6 +1,6 @@
 package controllers
 
-import modules.requests.{IdeaAddRequest, NodeAddRequest, ProblemAddRequest}
+import modules.requests.{GoalAddRequest, IdeaAddRequest, NodeAddRequest, ProblemAddRequest}
 import play.api.libs.json._
 import play.api.mvc.Action
 import play.api.mvc.Controller
@@ -60,6 +60,26 @@ object Problems extends Controller with ContentNodesController[Problem] {
     //TODO: relationtypes in query
     val query = Query(s"match (:${ Problem.label } {uuid: {uuid}})-->(:${ Prevents.label })<--(:${ Solves.label })<--(idea :${ Idea.label }) return idea", Map("uuid" -> uuid))
     Ok(Json.toJson(db.queryGraph(query).nodes.map(Idea.create)))
+  }
+
+  def createGoal(uuid: String) = Action { request =>
+    val json = request.body.asJson.get
+    val nodeAdd = json.as[GoalAddRequest]
+
+    val discourse = Discourse(db.queryGraph(Query(s"match (problem :${ Problem.label } {uuid: {uuid}}) return problem limit 1", Map("uuid" -> uuid))))
+
+    val problem = discourse.problems.head
+    val goal = Goal.local(nodeAdd.title)
+    val prevents = Prevents.local
+
+    discourse.add(prevents)
+    discourse.add(goal)
+
+    discourse.add(ProblemToPrevents.local(problem, prevents))
+    discourse.add(PreventsToGoal.local(prevents, goal))
+
+    db.persistChanges(discourse.graph)
+    Ok(Json.toJson(goal))
   }
 
   def createIdea(uuid: String) = Action { request =>
