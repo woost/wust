@@ -10,8 +10,7 @@ app.controller("HomeCtrl", function($scope, Problem) {
         Problem.create($scope.newProblem).$promise.then(function(data) {
             $scope.problems.push(data);
             $scope.newProblem.title = "";
-        }, function(response) {
-            toastr.error("Cannot create new problem");
+            toastr.success("Added new Problem");
         });
     }
 });
