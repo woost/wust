@@ -1,5 +1,6 @@
 package modules.json
 
+import collection.mutable
 import modules.requests.{GoalAddRequest, IdeaAddRequest, NodeAddRequest, ProblemAddRequest}
 import play.api.libs.json._
 import renesca.graph.Graph
@@ -12,15 +13,6 @@ import model._
 object GraphFormat {
   implicit def LabelToString(label: Label): String = label.name
   implicit def RelationTypeToString(relationType: RelationType): String = relationType.name
-
-  implicit object DiscourseFormat extends Format[Discourse] {
-    def reads(json: JsValue) = ???
-
-    def writes(graph: Discourse) = JsObject(Seq(
-      ("nodes", JsArray(graph.discourseNodes.toList map (Json.toJson(_)))),
-      ("edges", JsArray(graph.discourseRelations.toList map (Json.toJson(_))))
-    ))
-  }
 
   implicit object DiscourseRelationFormat extends Format[DiscourseRelation[DiscourseNode, DiscourseNode]] {
     def reads(json: JsValue) = ???
@@ -40,6 +32,42 @@ object GraphFormat {
       ("title", JsString(node.title)),
       ("label", JsString(node.label))
     ))
+  }
+
+  implicit object DiscourseFormat extends Format[Discourse] {
+    def reads(json: JsValue) = ???
+
+    def writes(discourseGraph: Discourse) = {
+      implicit val newGraph = Graph(
+        discourseGraph.discourseNodes.map(_.node),
+        discourseGraph.discourseRelations.map(_.relation)
+      )
+      val newDiscourseGraph = Discourse(newGraph)
+
+      case class Replacement(deleteNode: Node, deleteRelations: Iterable[Relation], newRelation: Relation)
+      val simplify: PartialFunction[DiscourseNode, Replacement] = {
+        case Solves(node) if node.inDegree == 1 && node.outDegree == 1   =>
+          Replacement(node, node.relations, Relation.local(node.predecessors.head, node.successors.head, "SOLVES"))
+        case Prevents(node) if node.inDegree == 1 && node.outDegree == 1 =>
+          Replacement(node, node.relations, Relation.local(node.predecessors.head, node.successors.head, "OF"))
+        case Prevents(node) if node.inDegree == 2 && node.outDegree == 0 =>
+          Replacement(node, node.relations, Relation.local(node.predecessors.head, node.predecessors.last, "SOLVES"))
+      }
+
+      var next: Option[Replacement] = discourseGraph.discourseNodes.collectFirst(simplify)
+      while( { next = newDiscourseGraph.discourseNodes.collectFirst(simplify); next.isDefined }) {
+        val replacement = next.get
+        import replacement._
+        newGraph.nodes -= deleteNode
+        newGraph.relations --= deleteRelations
+        newGraph.relations += newRelation
+      }
+
+      JsObject(Seq(
+        ("nodes", Json.toJson(newDiscourseGraph.discourseNodes)),
+        ("edges", Json.toJson(newDiscourseGraph.discourseRelations))
+      ))
+    }
   }
 
   implicit object ProblemAddFormat extends Format[ProblemAddRequest] {
