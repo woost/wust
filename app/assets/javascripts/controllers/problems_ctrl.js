@@ -28,6 +28,7 @@ app.controller('ProblemsCtrl', function($scope, $stateParams, Problem) {
             createFunction($stateParams.id, newItem).$promise.then(function(data) {
                 toastr.success("Added new Item");
                 itemList.push(data);
+                newItem.title = "";
             });
         };
     }
