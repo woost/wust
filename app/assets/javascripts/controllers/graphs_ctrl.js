@@ -4,10 +4,17 @@ app.controller('GraphsCtrl', function($scope, $state, $filter, Graph, initialDat
         label: ""
     };
 
+    var colorMappings = {
+        GOAL: "#2E8B57",
+        PROBLEM: "#E0645C",
+        IDEA: "#005CA3"
+    };
+
     initialData.nodes = initialData.nodes.map(function(node) {
         return {
             id: node.id,
-            label: node.label + ": " + node.title,
+            label: node.title === "" ? "" : node.label + ": " + node.title,
+            color: colorMappings[node.label]
         };
     });
 
