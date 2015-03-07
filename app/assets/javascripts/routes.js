@@ -6,6 +6,10 @@ app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
     }).state('help', {
         url: '/help',
         templateUrl: 'assets/views/help.html',
+    }).state('vote', {
+        url: '/vote',
+        templateUrl: 'assets/views/vote.html',
+        controller: 'VotesCtrl',
     }).state('graphs', {
         url: '/graphs',
         templateUrl: 'assets/views/graph.html',

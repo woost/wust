@@ -1,0 +1,55 @@
+<div class="container">
+    <div ng-repeat="change in changes" style="display:flex;margin-bottom:50pt;">
+        <div style="text-align:center">
+            <i class="fa fa-3x fa-fw" ng-class="change.icon"></i><br/>
+            {{change.action}}
+        </div>
+
+        <div style="display:flex; flex-direction: column">
+
+            <div ng-show="change.action == 'delete'" style="padding:20px;padding-top:5px">
+                <div class="discourse_goal">{{change.affected.node.title}}</div>
+            </div>
+
+            <div ng-show="change.action == 'create'" style="padding:20px;padding-top:5px">
+                <div class="discourse_problem">{{change.affected.node.title}}</div>
+            </div>
+
+            <div ng-show="change.action == 'connect'" style="padding:20px;padding-top:5px">
+                <div style="text-align:center">
+                    <div ng-class="change.affected.startnode.class">{{change.affected.startnode.title}}</div>
+                </div>
+                <div style="display:flex;padding:10px;margin-left:120px;">
+                    <i class="fa fa-2x fa-long-arrow-down"></i>
+
+                    <div>{{change.affected.relation.title}}</div>
+                </div>
+                <div style="text-align:center">
+                    <div ng-class="change.affected.endnode.class">{{change.affected.endnode.title}}</div>
+                </div>
+            </div>
+
+            <div ng-show="change.action == 'disconnect'" style="padding:20px;padding-top:5px">
+                <div style="text-align:center">
+                    <div ng-class="change.affected.startnode.class">{{change.affected.startnode.title}}</div>
+                </div>
+                <div style="display:flex;padding:10px;margin-left:120px;">
+<span class="fa-stack fa-lg">
+                    <i class="fa fa-stack-2x fa-long-arrow-down"></i>
+                    <i class="fa fa-stack-1x fa-sliders fa-inverse"></i>
+</span>
+
+                    <div>{{change.affected.relation.title}}</div>
+                </div>
+                <div style="text-align:center">
+                    <div ng-class="change.affected.endnode.class">{{change.affected.endnode.title}}</div>
+                </div>
+            </div>
+
+            <div ng-include="'assets/views/vote_buttons.html'"></div>
+        </div>
+    </div>
+</div>
+<div class="discourse_idea">{{change.affected.node.title}}</div>
+<div class="discourse_proargument">{{change.affected.node.title}}</div>
+<div class="discourse_conargument">{{change.affected.node.title}}</div>

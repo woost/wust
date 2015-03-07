@@ -138,3 +138,17 @@ nav .nav a:hover, a:visited {
 #help_container {
     @extend .container;
 }
+
+@mixin discourse_node($bgcolor) {
+    display:inline;
+    background-color:$bgcolor;
+    border: 1px solid desaturate(darken($bgcolor, 34), 43);
+    border-radius: 4px;
+    padding: 5px;
+}
+
+.discourse_goal { @include discourse_node(#6DFFB4) }
+.discourse_problem { @include discourse_node(#FFDC6D) }
+.discourse_idea { @include discourse_node(#6DB5FF) }
+.discourse_proargument { @include discourse_node(#79FF6D) }
+.discourse_conargument { @include discourse_node(#FF6D6F) }
