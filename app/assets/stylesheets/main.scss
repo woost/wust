@@ -99,7 +99,7 @@ nav .nav a:hover, a:visited {
 
 // container
 .container {
-    @include containment(60%);
+    @include containment(80%);
     padding: 20px;
 }
 
@@ -109,7 +109,7 @@ nav .nav a:hover, a:visited {
     .graph_view {
         border: 2px solid $green;
         .graph_network {
-            height: 300px;
+            height: 400px;
         }
     }
 }
