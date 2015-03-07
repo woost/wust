@@ -182,6 +182,15 @@ case class IdeaToIdeaProblemGoal(relation: Relation) extends DiscourseRelation[I
   def endNodeFactory = IdeaProblemGoal
 }
 
+object IdeaProblemGoalToProblemGoal extends SchemaRelationFactory[IdeaProblemGoalToProblemGoal, IdeaProblemGoal, ProblemGoal] {
+  def create(relation: Relation) = IdeaProblemGoalToProblemGoal(relation)
+  def relationType = RelationType("IDEAPROBLEMGOALTOROBLEMGOAL")
+}
+case class IdeaProblemGoalToProblemGoal(relation: Relation) extends DiscourseRelation[IdeaProblemGoal, ProblemGoal] {
+  def startNodeFactory = IdeaProblemGoal
+  def endNodeFactory = ProblemGoal
+}
+
 object Discourse {def empty = Discourse(Graph.empty) }
 
 case class Discourse(graph: Graph) extends SchemaGraph {

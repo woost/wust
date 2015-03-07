@@ -67,11 +67,14 @@ object Problems extends Controller with ContentNodesController[Problem] {
     val nodeAdd = json.as[IdeaAddRequest]
 
     val discourse = Discourse(db.queryGraph(Query(s"match (problem :${ Problem.label } {uuid: {uuid}}) return problem limit 1", Map("uuid" -> uuid))))
+   
     val problem = discourse.problems.head
     val idea = Idea.local(nodeAdd.title)
     val problemGoal = ProblemGoal.local
     val ideaProblemGoal = IdeaProblemGoal.local
+
     discourse.add(ProblemToProblemGoal.local(problem, problemGoal))
+    discourse.add(IdeaProblemGoalToProblemGoal.local(ideaProblemGoal, problemGoal))
     discourse.add(IdeaToIdeaProblemGoal.local(idea, ideaProblemGoal))
 
     db.persistChanges(discourse.graph)
