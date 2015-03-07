@@ -89,7 +89,7 @@ trait DiscourseNode extends SchemaNode {
 
 trait HyperEdgeNode extends DiscourseNode {
   // TODO: HyperEdgeNode does not have a title
-  override def title = "hosenträger"
+  override def title = ""
   override def title_=(newTitle: String) {}
 }
 trait ContentNode extends DiscourseNode {
