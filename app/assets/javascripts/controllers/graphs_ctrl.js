@@ -15,7 +15,7 @@ app.controller('GraphsCtrl', function($scope, $state, $filter, Graph, initialDat
     initialData.nodes = initialData.nodes.map(function(node) {
         return {
             id: node.id,
-            label: node.title === "" ? "" : node.label + ": " + node.title,
+            label: node.title === "" ? "" : node.title,
             color: colorMappings[node.label]
         };
     });
