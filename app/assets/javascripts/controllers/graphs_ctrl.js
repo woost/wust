@@ -5,9 +5,11 @@ app.controller('GraphsCtrl', function($scope, $state, $filter, Graph, initialDat
     };
 
     var colorMappings = {
-        GOAL: "#00DDDD",
-        PROBLEM: "#DD8047",
-        IDEA: "#005CA3"
+        GOAL: "#6DFFB4",
+        PROBLEM: "#FFDC6D",
+        IDEA: "#6DB5FF",
+        PROARGUMENT: "#79FF6D",
+        CONARGUMENT: "#FF6D6F"
     };
 
     initialData.nodes = initialData.nodes.map(function(node) {
@@ -31,8 +33,10 @@ app.controller('GraphsCtrl', function($scope, $state, $filter, Graph, initialDat
         options: {
             nodes: {
                 shape: 'box',
+                radius: 4
             },
             edges: {
+                color: '#353535',
                 style: 'arrow'
             },
         }
