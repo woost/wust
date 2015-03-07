@@ -65,6 +65,11 @@ body {
     justify-content: space-between;
 }
 
+.end_items {
+    display: flex;
+    justify-content: flex-end;
+}
+
 // navigation
 nav .navbar-left {
     padding-left: 100px;
@@ -97,7 +102,7 @@ nav .nav a:hover, a:visited {
 
 // container
 .container {
-    @include containment(80%);
+    @include containment(60%);
     padding: 20px;
 }
 
