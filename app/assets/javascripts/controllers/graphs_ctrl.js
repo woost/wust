@@ -5,8 +5,8 @@ app.controller('GraphsCtrl', function($scope, $state, $filter, Graph, initialDat
     };
 
     var colorMappings = {
-        GOAL: "#2E8B57",
-        PROBLEM: "#E0645C",
+        GOAL: "#00DDDD",
+        PROBLEM: "#DD8047",
         IDEA: "#005CA3"
     };
 
@@ -29,11 +29,8 @@ app.controller('GraphsCtrl', function($scope, $state, $filter, Graph, initialDat
             edges: edges
         },
         options: {
-            navigation: true,
-            dataManipulation: false,
             nodes: {
                 shape: 'box',
-                mass: 1.2
             },
             edges: {
                 style: 'arrow'
