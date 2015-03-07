@@ -58,7 +58,7 @@ object Problems extends Controller with ContentNodesController[Problem] {
 
   def showIdeas(uuid: String) = Action {
     //TODO: relationtypes in query
-    val query = Query(s"match (:${ Problem.label } {uuid: {uuid}})-->(:${ ProblemGoal.label })-->(:${ IdeaProblemGoal.label })-->(idea :${ Idea.label }) return idea", Map("uuid" -> uuid))
+    val query = Query(s"match (:${ Problem.label } {uuid: {uuid}})-->(:${ ProblemGoal.label })<--(:${ IdeaProblemGoal.label })<--(idea :${ Idea.label }) return idea", Map("uuid" -> uuid))
     Ok(Json.toJson(db.queryGraph(query).nodes.map(Idea.create)))
   }
 
