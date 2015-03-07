@@ -4,7 +4,7 @@
     <div id="problem_create">
         <h2>What is your problem?</h2>
         <form ng-submit="addProblem()">
-            <input size=50 type="text" ng-model="newProblem.title">
+            <input size=50 type="text" ng-model="newProblem.title" required>
             <button submit-on-click class="btn btn-success"><i class="fa fa-plus"></i></button>
         </form>
     </div>

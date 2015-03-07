@@ -8,7 +8,7 @@ app.directive("changeItemList", function($compile, $stateParams) {
             "</li>" +
             "<li class='list-group-item filled_items'>" +
             "<form ng-submit='items.add()'>" +
-            "<input type='text' ng-model='items.new.title'>" +
+            "<input type='text' ng-model='items.new.title' required>" +
             "<button submit-on-click class='btn btn-success'><i class='fa fa-plus'></i></button>" +
             "</form>" +
             "</li>" +
