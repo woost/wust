@@ -4,12 +4,14 @@
         <ul class='list-group'>
             <li class='list-group-item filled_items' ng-repeat='idea in ideas | objectToArray | orderBy:"title"'>
                 <a ui-sref='problems.idea({id: problem.id, ideaId: idea.id})'>{{idea.title}}</a>
-                <button class='btn btn-danger' ng-click='removeIdea($index)'><i class='fa fa-minus'></i></button>
+                <button class='btn btn-danger' ng-click='removeIdea($index)'><i class='fa fa-minus'></i>
+                </button>
             </li>
             <li class='list-group-item filled_items'>
                 <form ng-submit='addIdea()'>
                     <input type='text' ng-model='newIdea.title'>
-                    <button submit-on-click class='btn btn-success'><i class='fa fa-plus'></i></button>
+                    <button type="submit" class='btn btn-success'><i class='fa fa-plus'></i>
+                    </button>
                 </form>
             </li>
         </ul>
