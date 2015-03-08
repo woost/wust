@@ -29,10 +29,9 @@ app.service('ItemList', function($stateParams, Graph) {
         };
     }
 
-    function Item(type, queryFunc, createFunc) {
+    function Item(queryFunc, createFunc) {
         queryFunc = queryFunc || empty;
 
-        this.type = type;
         this.list = queryFunc($stateParams.id);
         this.new = {
             title: ""

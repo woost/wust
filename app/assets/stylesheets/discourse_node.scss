@@ -1,6 +1,6 @@
 @import "colors";
 
-@mixin discourse_nodes($bgcolor) {
+@mixin discourse_node($bgcolor) {
     display: inline;
     background-color: $bgcolor;
     border: 1px solid desaturate(darken($bgcolor, 34), 43);
@@ -8,22 +8,22 @@
     padding: 5px;
 }
 
-.discourse_goals {
-    @include discourse_nodes(#6dffb4);
+.discourse_goal {
+    @include discourse_node(#6dffb4);
 }
 
-.discourse_problems {
-    @include discourse_nodes(#ffdc6d);
+.discourse_problem {
+    @include discourse_node(#ffdc6d);
 }
 
-.discourse_ideas {
-    @include discourse_nodes(#6db5ff);
+.discourse_idea {
+    @include discourse_node(#6db5ff);
 }
 
-.discourse_proarguments {
-    @include discourse_nodes(#79ff6d);
+.discourse_proargument {
+    @include discourse_node(#79ff6d);
 }
 
-.discourse_conarguments {
-    @include discourse_nodes(#ff6d6f);
+.discourse_conargument {
+    @include discourse_node(#ff6d6f);
 }

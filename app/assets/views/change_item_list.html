@@ -1,6 +1,6 @@
 <ul class='list-group'>
-    <li class='list-group-item filled_items discourse_{{items.type}}' ng-repeat='item in items.list | objectToArray | orderBy:"title"'>
-        <a ui-sref="{{items.type}}({id: item.id})">{{item.title}}</a>
+    <li class='list-group-item filled_items' ng-repeat='item in items.list | objectToArray | orderBy:"title"'>
+        <a ui-sref="{{item.label | lowercase}}s({id: item.id})" class="discourse_{{item.label | lowercase}}">{{item.title}}</a>
         <button class='btn btn-danger' ng-click='items.remove($index)'><i class='fa fa-minus'></i>
         </button>
     </li>
