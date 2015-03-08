@@ -1,0 +1,29 @@
+@import "colors";
+
+@mixin discourse_node($bgcolor) {
+    display: inline;
+    background-color: $bgcolor;
+    border: 1px solid desaturate(darken($bgcolor, 34), 43);
+    border-radius: 4px;
+    padding: 5px;
+}
+
+.discourse_goal {
+    @include discourse_node(#6dffb4);
+}
+
+.discourse_problem {
+    @include discourse_node(#ffdc6d);
+}
+
+.discourse_idea {
+    @include discourse_node(#6db5ff);
+}
+
+.discourse_proargument {
+    @include discourse_node(#79ff6d);
+}
+
+.discourse_conargument {
+    @include discourse_node(#ff6d6f);
+}

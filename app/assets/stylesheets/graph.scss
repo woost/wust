@@ -1,0 +1,12 @@
+@import "colors";
+
+// graph
+#graph_container {
+    @extend .container;
+    .graph_view {
+        border: 2px solid $green;
+        .graph_network {
+            height: 400px;
+        }
+    }
+}

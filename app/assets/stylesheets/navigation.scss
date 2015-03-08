@@ -1,0 +1,26 @@
+@import "colors";
+
+nav {
+    .navbar-left {
+        padding-left: 100px;
+    }
+    .nav {
+        a:hover, a:visited, a.active {
+            color: white !important;
+        }
+        a:hover, a:visited {
+            background-color: $green !important;
+        }
+        a.active {
+            background-color: $blue !important;
+        }
+    }
+}
+
+#navigation {
+    background-color: $dark;
+    border-width: 0px;
+    ul.nav li.dropdown:hover > ul.dropdown-menu {
+        display: block;
+    }
+}

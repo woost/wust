@@ -1,11 +1,8 @@
 //TODO: use compass for sass
 
-$red:   #E0645C;
-$orange:#DD8047;
-$dark:  #3B444B;
-$light: #DCDCCC;
-$blue:  #005CA3;
-$green: #2E8B57;
+@import "navigation";
+@import "graph";
+@import "discourse_node";
 
 @mixin font {
     font-family: 'Droid Sans', Helvetica, Arial, sans-serif;
@@ -21,7 +18,8 @@ $green: #2E8B57;
 }
 
 @mixin background_opacity($color, $opacity: 0.5) {
-    background: $color; /* fallback */
+    background: $color;
+    /* fallback */
     background: rgba($color, $opacity);
 }
 
@@ -56,7 +54,7 @@ body {
 #noscriptmsg {
     @include containment(40%);
     background-color: $green;
-    color:white;
+    color: white;
     text-align: center;
 }
 
@@ -68,32 +66,6 @@ body {
 .end_items {
     display: flex;
     justify-content: flex-end;
-}
-
-// navigation
-nav {
-    .navbar-left {
-        padding-left: 100px;
-    }
-    .nav {
-        a:hover, a:visited, a.active {
-            color: white !important;
-        }
-        a:hover, a:visited {
-            background-color: $green !important;
-        }
-        a.active {
-            background-color: $blue !important;
-        }
-    }
-}
-
-#navigation {
-    background-color: $dark;
-    border-width: 0px;
-    ul.nav li.dropdown:hover > ul.dropdown-menu {
-        display: block;
-    }
 }
 
 // route loading indicator
@@ -111,23 +83,11 @@ nav {
     padding: 20px;
 }
 
-// graph
-#graph_container {
-    @extend .container;
-    .graph_view {
-        border: 2px solid $green;
-        .graph_network {
-            height: 400px;
-        }
-    }
-}
-
 // home container
 #home_container {
     @extend .container;
     text-align: center;
-    #problem_create {
-    }
+    #problem_create {}
     #problem_list {
         padding: 50px;
     }
@@ -143,17 +103,3 @@ nav {
 #help_container {
     @extend .container;
 }
-
-@mixin discourse_node($bgcolor) {
-    display:inline;
-    background-color:$bgcolor;
-    border: 1px solid desaturate(darken($bgcolor, 34), 43);
-    border-radius: 4px;
-    padding: 5px;
-}
-
-.discourse_goal { @include discourse_node(#6DFFB4) }
-.discourse_problem { @include discourse_node(#FFDC6D) }
-.discourse_idea { @include discourse_node(#6DB5FF) }
-.discourse_proargument { @include discourse_node(#79FF6D) }
-.discourse_conargument { @include discourse_node(#FF6D6F) }
