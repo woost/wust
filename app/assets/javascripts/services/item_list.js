@@ -28,11 +28,12 @@ app.service('ItemList', function($stateParams) {
         };
     }
 
-    function Item(queryFunc, createFunc, removeFunc) {
+    function Item(type, queryFunc, createFunc, removeFunc) {
         queryFunc = queryFunc || empty;
         createFunc = createFunc || todo;
         removeFunc = removeFunc || todo;
 
+        this.type = type;
         this.list = queryFunc($stateParams.id);
         this.new = {
             title: ""
