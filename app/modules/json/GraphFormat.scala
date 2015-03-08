@@ -44,12 +44,16 @@ object GraphFormat {
       )
       val newDiscourseGraph = Discourse(newGraph)
 
-      case class Replacement(deleteNode: Node, deleteRelations: Iterable[Relation], newRelation: Relation)
+      case class Replacement(deleteNode: Node, deleteRelations: Iterable[Relation], newRelation: Option[Relation] = None)
       val simplify: PartialFunction[DiscourseNode, Replacement] = {
         case Solves(node) if node.inDegree == 1 && node.outDegree == 1   =>
-          Replacement(node, node.relations, Relation.local(node.predecessors.head, node.successors.head, "SOLVES"))
+          Replacement(node, node.relations, Some(Relation.local(node.predecessors.head, node.successors.head, "SOLVES")))
         case Reaches(node) if node.inDegree == 1 && node.outDegree == 1   =>
-          Replacement(node, node.relations, Relation.local(node.predecessors.head, node.successors.head, "REACHES"))
+          Replacement(node, node.relations, Some(Relation.local(node.predecessors.head, node.successors.head, "REACHES")))
+        case Solves(node) if node.degree < 2 =>
+          Replacement(node, node.relations)
+        case Reaches(node) if node.degree < 2 =>
+          Replacement(node, node.relations)
       }
 
       var next: Option[Replacement] = discourseGraph.discourseNodes.collectFirst(simplify)
@@ -58,7 +62,8 @@ object GraphFormat {
         import replacement._
         newGraph.nodes -= deleteNode
         newGraph.relations --= deleteRelations
-        newGraph.relations += newRelation
+        for (relation <- newRelation)
+          newGraph.relations += relation
       }
 
       JsObject(Seq(
