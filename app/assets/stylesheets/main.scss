@@ -71,16 +71,21 @@ body {
 }
 
 // navigation
-nav .navbar-left {
-    padding-left: 100px;
-}
-
-nav .nav a.active {
-    background-color: $blue !important;
-}
-
-nav .nav a:hover, a:visited {
-    background-color: $green !important;
+nav {
+    .navbar-left {
+        padding-left: 100px;
+    }
+    .nav {
+        a:hover, a:visited, a.active {
+            color: white !important;
+        }
+        a:hover, a:visited {
+            background-color: $green !important;
+        }
+        a.active {
+            background-color: $blue !important;
+        }
+    }
 }
 
 #navigation {
