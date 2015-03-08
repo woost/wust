@@ -9,14 +9,24 @@ GET / controllers.Application.index(any = "none")
 GET /api/problems controllers.Problems.index
 GET /api/problems/:uuid controllers.Problems.show(uuid: String)
 GET /api/problems/:uuid/goals controllers.Problems.showGoals(uuid: String)
+GET /api/problems/:uuid/problems controllers.Problems.showProblems(uuid: String)
 GET /api/problems/:uuid/ideas controllers.Problems.showIdeas(uuid: String)
-POST /api/problems/:uuid/ideas controllers.Problems.createIdea(uuid: String)
 POST /api/problems/:uuid/goals controllers.Problems.createGoal(uuid: String)
+POST /api/problems/:uuid/problems controllers.Problems.createProblem(uuid: String)
+POST /api/problems/:uuid/ideas controllers.Problems.createIdea(uuid: String)
 POST /api/problems controllers.Problems.create
 
-GET /api/ideas/:uuid controllers.Ideas.show(uuid: String)
 GET /api/ideas controllers.Ideas.index
+GET /api/ideas/:uuid controllers.Ideas.show(uuid: String)
+GET /api/ideas/:uuid/goals controllers.Ideas.showGoals(uuid: String)
+GET /api/ideas/:uuid/problems controllers.Ideas.showProblems(uuid: String)
 POST /api/ideas controllers.Ideas.create
+
+GET /api/goals controllers.Goals.index
+GET /api/goals/:uuid controllers.Goals.show(uuid: String)
+GET /api/goals/:uuid/problems controllers.Goals.showProblems(uuid: String)
+GET /api/goals/:uuid/ideas controllers.Goals.showIdeas(uuid: String)
+POST /api/goals controllers.Goals.create
 
 GET /api/graphs controllers.Graphs.index
 GET /api/graphs/:uuid controllers.Graphs.show(uuid: String)

@@ -17,6 +17,7 @@ object Problems extends Controller with ContentNodesController[Problem] {
   def index() = Action {
     Ok(Json.toJson(wholeDiscourseGraph.problems))
   }
+
   def showGoals(uuid: String) = Action {
     val query = Query(s"match (:${ Problem.label } {uuid: {uuid}})-[:${ Prevents.relationType }]->(goal :${ Goal.label }) return goal", Map("uuid" -> uuid))
     Ok(Json.toJson(db.queryGraph(query).nodes.map(Goal.create)))
@@ -27,11 +28,16 @@ object Problems extends Controller with ContentNodesController[Problem] {
     Ok(Json.toJson(db.queryGraph(query).nodes.map(Idea.create)))
   }
 
+  def showProblems(uuid: String) = Action {
+    val query = Query(s"match (:${ Problem.label } {uuid: {uuid}})-[:${ Causes.relationType }]-(problem :${ Problem.label }) return problem", Map("uuid" -> uuid))
+    Ok(Json.toJson(db.queryGraph(query).nodes.map(Problem.create)))
+  }
+
   def createGoal(uuid: String) = Action { request =>
     val json = request.body.asJson.get
     val nodeAdd = json.as[GoalAddRequest]
 
-    val discourse = Discourse(db.queryGraph(Query(s"match (problem :${ Problem.label } {uuid: {uuid}}) return problem limit 1", Map("uuid" -> uuid))))
+    val discourse = nodeDiscourseGraph(uuid)
 
     val problem = discourse.problems.head
     val goal = Goal.local(nodeAdd.title)
@@ -44,12 +50,28 @@ object Problems extends Controller with ContentNodesController[Problem] {
     Ok(Json.toJson(goal))
   }
 
+  def createProblem(uuid: String) = Action { request =>
+    val json = request.body.asJson.get
+    val nodeAdd = json.as[ProblemAddRequest]
+
+    val discourse = nodeDiscourseGraph(uuid)
+
+    val problem = discourse.problems.head
+    val consequence = Problem.local(nodeAdd.title)
+
+    discourse.add(consequence)
+
+    discourse.add(Causes.local(problem, consequence))
+
+    db.persistChanges(discourse.graph)
+    Ok(Json.toJson(consequence))
+  }
+
   def createIdea(uuid: String) = Action { request =>
     val json = request.body.asJson.get
     val nodeAdd = json.as[IdeaAddRequest]
 
-    //TODO query rausziehen in baseclass
-    val discourse = Discourse(db.queryGraph(Query(s"match (problem :${ Problem.label } {uuid: {uuid}}) return problem limit 1", Map("uuid" -> uuid))))
+    val discourse = nodeDiscourseGraph(uuid)
 
     val problem = discourse.problems.head
     val idea = Idea.local(nodeAdd.title)

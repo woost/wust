@@ -17,4 +17,14 @@ object Ideas extends Controller with ContentNodesController[Idea] {
   def index() = Action {
     Ok(Json.toJson(wholeDiscourseGraph.ideas))
   }
+
+  def showGoals(uuid: String) = Action {
+    val query = Query(s"match (:${ Idea.label } {uuid: {uuid}})-[:${ IdeaToReaches.relationType }]->(:${ Reaches.label })-[:${ ReachesToGoal.relationType }]->(goal :${ Goal.label }) return goal", Map("uuid" -> uuid))
+    Ok(Json.toJson(db.queryGraph(query).nodes.map(Goal.create)))
+  }
+
+  def showProblems(uuid: String) = Action {
+    val query = Query(s"match (:${ Idea.label } {uuid: {uuid}})-[:${ IdeaToSolves.relationType }]->(:${ Solves.label })-[:${ SolvesToProblem.relationType }]->(problem :${ Problem.label }) return problem", Map("uuid" -> uuid))
+    Ok(Json.toJson(db.queryGraph(query).nodes.map(Problem.create)))
+  }
 }

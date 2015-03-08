@@ -168,6 +168,15 @@ case class Reaches(node: Node) extends HyperEdgeNode {
   def ideas: Set[Idea] = neighboursAs(Idea)
 }
 
+object Causes extends SchemaRelationFactory[Causes, Problem, Problem] {
+  def create(relation: Relation) = Causes(relation)
+  def relationType = RelationType("CAUSES")
+}
+case class Causes(relation: Relation) extends DiscourseRelation[Problem, Problem] {
+  def startNodeFactory = Problem
+  def endNodeFactory = Problem
+}
+
 object Prevents extends SchemaRelationFactory[Prevents, Problem, Goal] {
   def create(relation: Relation) = Prevents(relation)
   def relationType = RelationType("PREVENTS")
