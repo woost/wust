@@ -1,5 +1,5 @@
 app.service('Graph', function($resource) {
-    var service = $resource('/api/graphs/:id', {
+    var service = $resource('/api/v1/graphs/:id', {
         id: '@id'
     });
     this.get = get;
