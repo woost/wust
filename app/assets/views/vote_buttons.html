@@ -1,3 +1,11 @@
-<button>makes sense</button>
-<button>dosn't make sense</button>
-<button>I don't know</button>
+<div style="display:flex;justify-content:space-between">
+    <button class="btn btn-default" ng-click="skip()" style="margin:10px">
+        <i class="fa fa-check-square-o text-success"></i> makes sense
+    </button>
+    <button class="btn btn-default" ng-click="skip()" style="margin:10px">
+        <i class="fa fa-forward text-warning"></i> I don't know
+    </button>
+    <button class="btn btn-default" ng-click="skip()" style="margin:10px">
+        <i class="fa fa-close text-danger"></i> dosn't make sense
+    </button>
+</div>

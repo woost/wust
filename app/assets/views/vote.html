@@ -1,11 +1,19 @@
 <div class="container">
-    <div ng-repeat="change in changes" style="display:flex;margin-bottom:50pt;">
-        <div style="text-align:center">
+    <div style="height:120px">
+        <div style="margin-bottom:50px" ng-show="showundo">
+            <button class="btn btn-default" ng-click="undo()">
+                <i class="fa fa-1x fa-arrow-left"></i>
+                undo last vote
+            </button>
+        </div>
+    </div>
+    <div style="display:flex;height:200px">
+        <div style="text-align:center;height:60px;width:60px">
             <i class="fa fa-3x fa-fw" ng-class="change.icon"></i><br/>
             {{change.action}}
         </div>
 
-        <div style="display:flex; flex-direction: column">
+        <div style="display:flex; flex-direction: column; padding-left:50px">
 
             <div ng-show="change.action == 'delete'" style="padding:20px;padding-top:5px">
                 <div class="discourse_goal">{{change.affected.node.title}}</div>
@@ -19,7 +27,7 @@
                 <div style="text-align:center">
                     <div ng-class="change.affected.startnode.class">{{change.affected.startnode.title}}</div>
                 </div>
-                <div style="display:flex;padding:10px;margin-left:120px;">
+                <div style="display:flex;padding:10px;margin-left:180px;">
                     <i class="fa fa-2x fa-long-arrow-down"></i>
 
                     <div>{{change.affected.relation.title}}</div>
@@ -33,11 +41,11 @@
                 <div style="text-align:center">
                     <div ng-class="change.affected.startnode.class">{{change.affected.startnode.title}}</div>
                 </div>
-                <div style="display:flex;padding:10px;margin-left:120px;">
-<span class="fa-stack fa-lg">
-                    <i class="fa fa-stack-2x fa-long-arrow-down"></i>
-                    <i class="fa fa-stack-1x fa-sliders fa-inverse"></i>
-</span>
+                <div style="display:flex;padding:10px;margin-left:180px;">
+                    <span class="fa-stack">
+                        <i class="fa fa-stack-2x fa-long-arrow-down"></i>
+                        <i class="fa fa-stack-2x fa-close" style="color:red"></i>
+                    </span>
 
                     <div>{{change.affected.relation.title}}</div>
                 </div>
@@ -46,10 +54,16 @@
                 </div>
             </div>
 
-            <div ng-include="'assets/views/vote_buttons.html'"></div>
+            <div ng-show="change.action == 'flag'" style="padding:20px;padding-top:5px">
+                <div class="discourse_goal">
+                    {{change.affected.node.title}}
+                </div>
+
+                <i class="fa fa-flag" style="margin-left:30px"></i> spam
+            </div>
+
+
+            <div ng-include="'assets/views/vote_buttons.html'" style="margin-top:auto"></div>
         </div>
     </div>
 </div>
-<div class="discourse_idea">{{change.affected.node.title}}</div>
-<div class="discourse_proargument">{{change.affected.node.title}}</div>
-<div class="discourse_conargument">{{change.affected.node.title}}</div>
