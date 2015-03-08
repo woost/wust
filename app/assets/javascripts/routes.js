@@ -19,21 +19,18 @@ app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
                 return Graph.get().$promise;
             }
         }
+    }).state('goals', {
+        url: '/focus/goals/:id',
+        templateUrl: 'assets/views/focus_view.html',
+        controller: 'GoalsCtrl',
     }).state('problems', {
-        url: '/problems/:id',
-        templateUrl: 'assets/views/problem.html',
+        url: '/focus/problems/:id',
+        templateUrl: 'assets/views/focus_view.html',
         controller: 'ProblemsCtrl',
-        abstract: true
-    }).state('problems.view', {
-        parent: "problems",
-        url: '/view',
-        templateUrl: 'assets/views/problem_view.html',
-        controller: 'ProblemViewsCtrl',
-    }).state('problems.idea', {
-        parent: "problems",
-        url: '/idea/:ideaId',
-        templateUrl: 'assets/views/problem_idea.html',
-        controller: 'ProblemIdeasCtrl',
+    }).state('ideas', {
+        url: '/focus/ideas/:id',
+        templateUrl: 'assets/views/focus_view.html',
+        controller: 'IdeasCtrl',
     });
 
     $urlRouterProvider.otherwise('/');
