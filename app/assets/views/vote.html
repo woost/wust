@@ -16,11 +16,11 @@
         <div style="display:flex; flex-direction: column; padding-left:50px">
 
             <div ng-show="change.action == 'delete'" style="padding:20px;padding-top:5px">
-                <div class="discourse_goal">{{change.affected.node.title}}</div>
+                <div class="discourse_goals">{{change.affected.node.title}}</div>
             </div>
 
             <div ng-show="change.action == 'create'" style="padding:20px;padding-top:5px">
-                <div class="discourse_problem">{{change.affected.node.title}}</div>
+                <div class="discourse_problems">{{change.affected.node.title}}</div>
             </div>
 
             <div ng-show="change.action == 'connect'" style="padding:20px;padding-top:5px">
@@ -55,7 +55,7 @@
             </div>
 
             <div ng-show="change.action == 'flag'" style="padding:20px;padding-top:5px">
-                <div class="discourse_goal">
+                <div class="discourse_goals">
                     {{change.affected.node.title}}
                 </div>
 
