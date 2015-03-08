@@ -1,22 +1,21 @@
 <div id="focus_view_container">
     <div class="filled_items">
         <div id="problem_view">
-            <ul>
-                <div change-item-list items='problems'></div>
-            </ul>
+            Problems:
+            <div change-item-list items='problems'></div>
         </div>
         <div id="focus_view">
             <div id="node_view">
-                {{node.title}}
+                {{node.label}}: {{node.title}}
             </div>
             <div id="idea_view">
+                Ideas:
                 <div change-item-list items='ideas'></div>
             </div>
         </div>
         <div id="goal_view">
-            <ul>
-                <div change-item-list items='goals'></div>
-            </ul>
+            Goals:
+            <div change-item-list items='goals'></div>
         </div>
     </div>
 </div>
