@@ -10,11 +10,7 @@ import renesca.parameter.implicits._
 import modules.json.GraphFormat._
 import model._
 
-trait ContentNodesController[NodeType <: ContentNode] extends Controller {
-  def factory: ContentNodeFactory[NodeType]
-  def label = factory.label
-  def decodeRequest(jsValue: JsValue): NodeAddRequest
-
+trait DatabaseController {
   val db = new DbService
   db.restService = new RestService("http://localhost:7474")
 
@@ -25,6 +21,12 @@ trait ContentNodesController[NodeType <: ContentNode] extends Controller {
   def nodeDiscourseGraph(uuid: String): Discourse = {
     Discourse(db.queryGraph(Query(s"match (node {uuid: {uuid}}) return node limit 1", Map("uuid" -> uuid))))
   }
+}
+
+trait ContentNodesController[NodeType <: ContentNode] extends Controller with DatabaseController {
+  def factory: ContentNodeFactory[NodeType]
+  def label = factory.label
+  def decodeRequest(jsValue: JsValue): NodeAddRequest
 
   def create = Action { request =>
     val json = request.body.asJson.get

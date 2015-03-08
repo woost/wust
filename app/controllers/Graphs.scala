@@ -10,26 +10,22 @@ import renesca.parameter.implicits._
 import modules.json.GraphFormat._
 import model._
 
-object Graphs extends Controller {
-  val db = new DbService
-  db.restService = new RestService("http://localhost:7474")
-
+object Graphs extends Controller with DatabaseController {
   def index() = Action {
-    val graph = db.queryGraph("match (n) optional match (n)-[r]-() return n,r")
-    val discourse = Discourse(graph)
+    val discourse = wholeDiscourseGraph
     Ok(Json.toJson(discourse))
   }
 
   def remove(uuid: String) = Action {
-    val graph = db.queryGraph(Query("match (n) where n.uuid = {uuid} return n", Map("uuid" -> uuid)))
-    graph.nodes.clear
-    db.persistChanges(graph)
+    val discourse = nodeDiscourseGraph(uuid)
+    discourse.graph.nodes.clear
+    db.persistChanges(discourse.graph)
     Ok(JsObject(Seq()))
   }
 
   def show(uuid: String) = Action {
-    val graph = db.queryGraph(Query("match (n) where n.uuid = {uuid} return n", Map("uuid" -> uuid)))
-    val nodes = Discourse(graph).discourseNodes
+    val discourse = nodeDiscourseGraph(uuid)
+    val nodes = discourse.discourseNodes
     if(nodes.isEmpty) {
       BadRequest
     } else {
