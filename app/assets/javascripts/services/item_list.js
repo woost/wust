@@ -1,4 +1,4 @@
-app.service('ItemList', function($stateParams) {
+app.service('ItemList', function($stateParams, Graph) {
     this.Item = Item;
 
     function empty() {
@@ -21,24 +21,23 @@ app.service('ItemList', function($stateParams) {
 
     function remove(removeFunc, container) {
         return function($index) {
-            removeFunc($stateParams.id, container.new).$promise.then(function(data) {
+            var elem = container.list[$index];
+            removeFunc(elem.id).$promise.then(function(data) {
                 toastr.success("Removed Item");
                 container.list.splice($index, 1);
             });
         };
     }
 
-    function Item(type, queryFunc, createFunc, removeFunc) {
+    function Item(type, queryFunc, createFunc) {
         queryFunc = queryFunc || empty;
-        createFunc = createFunc || todo;
-        removeFunc = removeFunc || todo;
 
         this.type = type;
         this.list = queryFunc($stateParams.id);
         this.new = {
             title: ""
         };
-        this.add = add(createFunc, this);
-        this.remove = remove(removeFunc, this);
+        this.add = createFunc ? add(createFunc, this) : todo;
+        this.remove = remove(Graph.remove, this);
     }
 });

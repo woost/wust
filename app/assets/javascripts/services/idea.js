@@ -1,8 +1,11 @@
-app.service('Idea', function($resource) {
+app.service('Idea', function($resource, Node) {
     var service = $resource('/api/ideas/:id', { id: '@id' });
-    this.get = get;
+    var goalService = $resource('/api/ideas/:id/goals', { id: '@id' });
+    var problemService = $resource('/api/ideas/:id/problems', { id: '@id' });
 
-    function get(id) {
-        return service.get({ id: id });
-    }
+    this.get = Node.get(service);
+    this.queryGoals = Node.query(goalService);
+    this.queryProblems = Node.query(problemService);
+    this.createGoal = Node.createConnected(goalService);
+    this.createProblem = Node.createConnected(problemService);
 });

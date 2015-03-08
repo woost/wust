@@ -20,12 +20,16 @@ GET /api/ideas controllers.Ideas.index
 GET /api/ideas/:uuid controllers.Ideas.show(uuid: String)
 GET /api/ideas/:uuid/goals controllers.Ideas.showGoals(uuid: String)
 GET /api/ideas/:uuid/problems controllers.Ideas.showProblems(uuid: String)
+POST /api/ideas/:uuid/goals controllers.Ideas.createGoal(uuid: String)
+POST /api/ideas/:uuid/problems controllers.Ideas.createProblem(uuid: String)
 POST /api/ideas controllers.Ideas.create
 
 GET /api/goals controllers.Goals.index
 GET /api/goals/:uuid controllers.Goals.show(uuid: String)
 GET /api/goals/:uuid/problems controllers.Goals.showProblems(uuid: String)
 GET /api/goals/:uuid/ideas controllers.Goals.showIdeas(uuid: String)
+POST /api/goals/:uuid/problems controllers.Goals.createProblem(uuid: String)
+POST /api/goals/:uuid/ideas controllers.Goals.createIdea(uuid: String)
 POST /api/goals controllers.Goals.create
 
 GET /api/graphs controllers.Graphs.index
