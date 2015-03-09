@@ -9,8 +9,16 @@
         #create_new {
             padding: 10px;
         }
-        #existing_list {
+        #list_existing {
+            margin: 0 auto;
+            width: 70%;
             padding: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            .node {
+                margin: 5px;
+            }
         }
     }
 }

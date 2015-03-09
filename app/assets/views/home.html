@@ -11,10 +11,10 @@
                 </form>
             </div>
 
+            <h2 ng-bind="slide.listTitle"></h2>
             <div id="list_existing">
-                <h2 ng-bind="slide.listTitle"></h2>
                 <div ng-repeat="node in slide.nodes">
-                    <a ui-sref="{{slide.state}}({id: node.id})">{{node.title}}</a>
+                    <a ui-sref="{{slide.state}}({id: node.id})" ng-class="slide.css" class="node">{{node.title}}</a>
                 </div>
             </div>
         </div>
