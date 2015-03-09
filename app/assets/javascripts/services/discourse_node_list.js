@@ -38,18 +38,33 @@ app.service('DiscourseNodeList', function(DiscourseNode) {
     function Goal() {
         Item.apply(this, arguments);
         this.state = DiscourseNode.goal.state;
-        this.css = DiscourseNode.goal.css;
+        this.css = {
+            discourse: DiscourseNode.goal.css,
+            list: "list-group",
+            node: "list-group-item",
+            new: "list-group-item"
+        };
     }
 
     function Problem() {
         Item.apply(this, arguments);
         this.state = DiscourseNode.problem.state;
-        this.css = DiscourseNode.problem.css;
+        this.css = {
+            discourse: DiscourseNode.problem.css,
+            list: "list-group",
+            node: "list-group-item",
+            new: "list-group-item"
+        };
     }
 
     function Idea() {
         Item.apply(this, arguments);
         this.state = DiscourseNode.idea.state;
-        this.css = DiscourseNode.idea.css;
+        this.css = {
+            discourse: DiscourseNode.idea.css,
+            list: "idea_list",
+            node: "idea_item",
+            new: "idea_item"
+        };
     }
 });

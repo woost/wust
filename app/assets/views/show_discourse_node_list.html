@@ -1,14 +1,12 @@
-<ul class='list-group'>
-    <li class='list-group-item filled_items' ng-repeat='item in ngModel.list'>
-        <a ui-sref="{{ngModel.state}}({id: item.id})" ng-class="ngModel.css">{{item.title}}</a>
-        <button class='btn btn-danger' ng-click='ngModel.remove($index)'><i class='fa fa-minus'></i>
-        </button>
-    </li>
-    <li class='list-group-item filled_items'>
+<div ng-class='ngModel.css.list'>
+    <div ng-class='ngModel.css.node' class='filled_items' ng-repeat='item in ngModel.list'>
+        <a ui-sref="{{ngModel.state}}({id: item.id})" ng-class="ngModel.css.discourse">{{item.title}}</a>
+        <button class='btn btn-danger' ng-click='ngModel.remove($index)'><i class='fa fa-minus'></i></button>
+    </div>
+    <div ng-class='ngModel.css.new' class='filled_items'>
         <form ng-submit='ngModel.add()'>
             <input type='text' ng-model='ngModel.new.title' required>
-            <button type="submit" class='btn btn-success'><i class='fa fa-plus'></i>
-            </button>
-       </form>
-    </li>
-</ul>
+            <button type="submit" class='btn btn-success'><i class='fa fa-plus'></i></button>
+        </form>
+    </div>
+</div>
