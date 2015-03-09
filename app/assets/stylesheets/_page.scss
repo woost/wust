@@ -13,20 +13,29 @@ h2 {
     line-height: 36px;
 }
 
+html {
+    height: 100%;
+}
+
 body {
     @include font;
     margin: 0;
     min-width: 600px;
-    height: 100%;
+    height: inherit;
     #pagecontent {
-        #main_view {
-            padding: 50px 0px 0px 0px;
-            &.ng-enter {
-                -webkit-animation: fadeIn 0.5s;
-                -moz-animation: fadeIn 0.5s;
-                -ms-animation: fadeIn 0.5s;
-                -o-animation: fadeIn 0.5s;
-                animation: fadeIn 0.5s;
+        height: inherit;
+        main {
+            height: inherit;
+            #main_view {
+                height: inherit;
+                padding: 50px 0px 0px 0px;
+                &.ng-enter {
+                    -webkit-animation: fadeIn 0.5s;
+                    -moz-animation: fadeIn 0.5s;
+                    -ms-animation: fadeIn 0.5s;
+                    -o-animation: fadeIn 0.5s;
+                    animation: fadeIn 0.5s;
+                }
             }
         }
     }

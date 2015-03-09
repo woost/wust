@@ -1,9 +1,8 @@
 #home_container {
-    padding: 20px 0px 0px 0px;
-    margin: 20px 0px 0px 0px;
+    height: inherit;
     text-align: center;
     #carousel {
-        height: 600px;
+        height: inherit;
         #slide_stripe {
             margin: 5px;
             height: 20px;
@@ -15,5 +14,4 @@
             padding: 30px;
         }
     }
-
 }
