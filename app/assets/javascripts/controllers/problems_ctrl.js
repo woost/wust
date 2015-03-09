@@ -1,6 +1,9 @@
 app.controller('ProblemsCtrl', function($scope, $stateParams, Problem, ItemList) {
-    $scope.node = Problem.get($stateParams.id);
-    $scope.goals = new ItemList.Item(Problem.queryGoals, Problem.createGoal);
-    $scope.problems = new ItemList.Item(Problem.queryProblems, Problem.createProblem);
-    $scope.ideas = new ItemList.Item(Problem.queryIdeas, Problem.createIdea);
+    var id = $stateParams.id;
+
+    $scope.nodeCss = ItemList.Problem.css;
+    $scope.node = Problem.get(id);
+    $scope.goals = new ItemList.Goal(id, Problem.queryGoals, Problem.createGoal);
+    $scope.problems = new ItemList.Problem(id, Problem.queryProblems, Problem.createProblem);
+    $scope.ideas = new ItemList.Idea(id, Problem.queryIdeas, Problem.createIdea);
 });
