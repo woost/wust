@@ -18,11 +18,11 @@ app.service('DiscourseNodeList', function(DiscourseNode) {
     }
 
     function remove(removeFunc, container) {
-        return function($index) {
-            var elem = container.list[$index];
+        return function(elem) {
+            var index = container.list.indexOf(elem);
             removeFunc(elem.id).$promise.then(function(data) {
                 toastr.success("Removed item");
-                container.list.splice($index, 1);
+                container.list.splice(index, 1);
             });
         };
     }
