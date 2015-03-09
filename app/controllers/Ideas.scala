@@ -65,6 +65,6 @@ object Ideas extends Controller with ContentNodesController[Idea] {
     discourse.add(IdeaToReaches.local(idea, reaches))
 
     db.persistChanges(discourse.graph)
-    Ok(Json.toJson(idea))
+    Ok(Json.toJson(goal))
   }
 }
