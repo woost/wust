@@ -16,6 +16,7 @@ libraryDependencies ++= Seq(
   "org.webjars" % "spin-js" % "2.0.0-1",
   "org.webjars" % "visjs" % "3.10.0",
   "org.webjars" % "toastr" % "2.1.0",
+  "org.webjars" % "animate.css" % "3.2.1",
   "com.github.renesca" %% "renesca" % "0.1.2"
 )
 

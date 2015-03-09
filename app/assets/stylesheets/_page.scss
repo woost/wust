@@ -21,6 +21,13 @@ body {
     #pagecontent {
         #main_view {
             padding: 50px 0px 0px 0px;
+            &.ng-enter {
+                -webkit-animation: fadeIn 0.5s;
+                -moz-animation: fadeIn 0.5s;
+                -ms-animation: fadeIn 0.5s;
+                -o-animation: fadeIn 0.5s;
+                animation: fadeIn 0.5s;
+            }
         }
     }
     #noscriptmsg {
