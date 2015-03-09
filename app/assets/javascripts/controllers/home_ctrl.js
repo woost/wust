@@ -1,31 +1,28 @@
-app.controller("HomeCtrl", function($scope, Problem, Goal, Idea, DiscourseNode) {
+app.controller("HomeCtrl", function($scope, $state, Problem, Goal, Idea, DiscourseNode) {
     //TODO: only get nodes from server if actually displayed
     var problems = {
         active: true,
-        state: "problems",
         newTitle: "What is your problem?",
         listTitle: "Existing problems:",
-        css: DiscourseNode.problem.css,
+        info: DiscourseNode.problem,
         nodes: Problem.query(),
         newNode: {
             title: ""
         }
     };
     var goals = {
-        state: "goals",
         newTitle: "What is your goal?",
         listTitle: "Existing goals:",
-        css: DiscourseNode.goal.css,
+        info: DiscourseNode.goal,
         nodes: Goal.query(),
         newNode: {
             title: ""
         }
     };
     var ideas = {
-        state: "ideas",
         newTitle: "What is your idea?",
         listTitle: "Existing ideas:",
-        css: DiscourseNode.idea.css,
+        info: DiscourseNode.idea,
         nodes: Idea.query(),
         newNode: {
             title: ""
@@ -41,8 +38,7 @@ app.controller("HomeCtrl", function($scope, Problem, Goal, Idea, DiscourseNode) 
     function addNode(createFunc, container) {
         return function() {
             createFunc(container.newNode).$promise.then(function(data) {
-                container.nodes.push(data);
-                container.newNode.title = "";
+                $state.go(container.info.state, { id: data.id });
                 toastr.success("Added new node");
             });
         };
