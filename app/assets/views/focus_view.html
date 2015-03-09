@@ -7,9 +7,7 @@
         <div>
             <div id="node_view">
                 <h2>Focus</h2>
-               <span ng-class="nodeCss">
-                   {{node.label}}: {{node.title}}
-               </span>
+               <span ng-bind="node.title" ng-class="nodeCss"></span>
             </div>
             <div id="idea_view">
                 <h2>Ideas:</h2>
