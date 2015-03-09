@@ -3,15 +3,19 @@
     border: 1px solid desaturate(darken($bgcolor, 34), 43);
     border-radius: 4px;
     padding: 5px;
-    @at-root a#{&} {
+    color: black;
+    text-decoration: none;
+    @at-root a:hover#{&} {
+        background-color: lighten($bgcolor, 13);
         color: black;
-        text-decoration: underline;
+        text-decoration: none;
     }
 }
 
 .discourse_goal {
     @include discourse_node(#6dffb4);
 }
+
 .discourse_problem {
     @include discourse_node(#ffdc6d);
 }
