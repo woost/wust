@@ -1,12 +1,4 @@
-app.controller('GraphsCtrl', function($scope, $state, $filter, Graph) {
-    var colorMappings = {
-        GOAL: "#6DFFB4",
-        PROBLEM: "#FFDC6D",
-        IDEA: "#6DB5FF",
-        PROARGUMENT: "#79FF6D",
-        CONARGUMENT: "#FF6D6F"
-    };
-
+app.controller('GraphsCtrl', function($scope, $state, $filter, Graph, DiscourseNode) {
     Graph.get().$promise.then(createGraph);
     var nodes = new vis.DataSet();
     var edges = new vis.DataSet();
@@ -25,7 +17,8 @@ app.controller('GraphsCtrl', function($scope, $state, $filter, Graph) {
                 color: '#353535',
                 style: 'arrow'
             },
-        }
+        },
+        onClick: onClick
     };
 
     $scope.search = {
@@ -51,7 +44,8 @@ app.controller('GraphsCtrl', function($scope, $state, $filter, Graph) {
             return {
                 id: node.id,
                 label: node.title,
-                color: colorMappings[node.label]
+                origLabel: node.label,
+                color: DiscourseNode.getColor(node.label)
             };
         });
 
@@ -59,5 +53,22 @@ app.controller('GraphsCtrl', function($scope, $state, $filter, Graph) {
         edges.add(graph.edges);
 
         $scope.$watch('search.label', filter(graph));
+    }
+
+    //TODO: see for yourself
+    function onClick(selected) {
+        var id = selected.nodes[0];
+        if (id === undefined) {
+            return;
+        }
+
+        var index = nodes.getIds().indexOf(id);
+        var label = nodes.map(function(n) {
+            return n.origLabel;
+        })[index];
+        var state = DiscourseNode.getState(label);
+        $state.go(state, {
+            id: id
+        });
     }
 });
