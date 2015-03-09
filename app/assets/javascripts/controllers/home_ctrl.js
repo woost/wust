@@ -1,11 +1,11 @@
-app.controller("HomeCtrl", function($scope, Problem, Goal, Idea, ItemList) {
+app.controller("HomeCtrl", function($scope, Problem, Goal, Idea, DiscourseNode) {
     //TODO: only get nodes from server if actually displayed
     var problems = {
         active: true,
         state: "problems",
         newTitle: "What is your problem?",
         listTitle: "Existing problems:",
-        css: ItemList.Problem.css,
+        css: DiscourseNode.problem.css,
         nodes: Problem.query(),
         newNode: {
             title: ""
@@ -15,7 +15,7 @@ app.controller("HomeCtrl", function($scope, Problem, Goal, Idea, ItemList) {
         state: "goals",
         newTitle: "What is your goal?",
         listTitle: "Existing goals:",
-        css: ItemList.Goal.css,
+        css: DiscourseNode.goal.css,
         nodes: Goal.query(),
         newNode: {
             title: ""
@@ -25,7 +25,7 @@ app.controller("HomeCtrl", function($scope, Problem, Goal, Idea, ItemList) {
         state: "ideas",
         newTitle: "What is your idea?",
         listTitle: "Existing ideas:",
-        css: ItemList.Idea.css,
+        css: DiscourseNode.idea.css,
         nodes: Idea.query(),
         newNode: {
             title: ""

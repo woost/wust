@@ -1,10 +1,4 @@
-//TODO: rename to discourse_node_list
-app.service('ItemList', function() {
-    //TODO extract to own service
-    Goal.css = "discourse_goal";
-    Problem.css = "discourse_problem";
-    Idea.css = "discourse_idea";
-
+app.service('DiscourseNodeList', function(DiscourseNode) {
     this.Goal = Goal;
     this.Problem = Problem;
     this.Idea = Idea;
@@ -43,19 +37,19 @@ app.service('ItemList', function() {
 
     function Goal() {
         Item.apply(this, arguments);
-        this.state = "goals";
-        this.css = Goal.css;
+        this.state = DiscourseNode.goal.state;
+        this.css = DiscourseNode.goal.css;
     }
 
     function Problem() {
         Item.apply(this, arguments);
-        this.state = "problems";
-        this.css = Problem.css;
+        this.state = DiscourseNode.problem.state;
+        this.css = DiscourseNode.problem.css;
     }
 
     function Idea() {
         Item.apply(this, arguments);
-        this.state = "ideas";
-        this.css = Idea.css;
+        this.state = DiscourseNode.idea.state;
+        this.css = DiscourseNode.idea.css;
     }
 });

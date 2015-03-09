@@ -1,7 +1,7 @@
-app.directive("changeItemList", function($compile, $stateParams) {
+app.directive("showDiscourseNodeList", function($compile, $stateParams) {
     return {
         restrict: 'A',
-        templateUrl: 'assets/views/change_item_list.html',
+        templateUrl: 'assets/views/show_discourse_node_list.html',
         scope: {
             items: '=',
         },
