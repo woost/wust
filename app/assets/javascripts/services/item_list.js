@@ -1,4 +1,6 @@
+//TODO: rename to discourse_node_list
 app.service('ItemList', function() {
+    //TODO extract to own service
     Goal.css = "discourse_goal";
     Problem.css = "discourse_problem";
     Idea.css = "discourse_idea";

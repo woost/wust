@@ -1,19 +1,25 @@
 <div id="home_container">
     <h1>Wust!</h1>
 
-    <div id="problem_create">
-        <h2>What is your problem?</h2>
-        <form ng-submit="addProblem()">
-            <input size=50 type="text" ng-model="newProblem.title" required>
-            <button type="submit" class="btn btn-success"><i class="fa fa-plus"></i>
-            </button>
-        </form>
-    </div>
+    <div carousel id="carousel" interval="0">
+        <div slide ng-repeat="slide in slides" active="slide.active">
+            <div id="slide" ng-class="slide.css">
+                <div id="create_new">
+                    <h2 ng-bind="slide.newTitle"></h2>
+                    <form ng-submit="slide.addNode()">
+                        <input size=50 type="text" ng-model="slide.newNode.title" required>
+                        <button type="submit" class="btn btn-success"><i class="fa fa-plus"></i>
+                        </button>
+                    </form>
+                </div>
 
-    <div id="problem_list">
-        <h2>Existing problems:</h2>
-        <div ng-repeat="problem in problems">
-            <a ui-sref="problems({id: problem.id})">{{problem.title}}</a>
+                <div id="list_existing">
+                    <h2 ng-bind="slide.listTitle"></h2>
+                    <div ng-repeat="node in slide.nodes">
+                        <a ui-sref="{{slide.state}}({id: node.id})">{{node.title}}</a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

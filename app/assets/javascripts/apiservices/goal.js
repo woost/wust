@@ -4,6 +4,8 @@ app.service('Goal', function($resource, Node) {
     var problemService = $resource('/api/v1/goals/:id/problems', { id: '@id' });
 
     this.get = Node.get(service);
+    this.create = Node.create(service);
+    this.query = Node.query(service);
     this.queryIdeas = Node.query(ideaService);
     this.queryProblems = Node.query(problemService);
     this.createIdea = Node.createConnected(ideaService);

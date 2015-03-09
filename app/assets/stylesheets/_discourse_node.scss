@@ -1,5 +1,4 @@
 @mixin discourse_node($bgcolor) {
-    display: inline;
     background-color: $bgcolor;
     border: 1px solid desaturate(darken($bgcolor, 34), 43);
     border-radius: 4px;

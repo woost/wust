@@ -1,9 +1,13 @@
 #home_container {
-    @include containment(60%);
     padding: 20px;
     text-align: center;
-    #problem_create {}
-    #problem_list {
-        padding: 50px;
+    #carousel {
+        #slide {
+            height: 600px;
+            #create_new {}
+            #existing_list {
+                padding: 50px;
+            }
+        }
     }
 }
