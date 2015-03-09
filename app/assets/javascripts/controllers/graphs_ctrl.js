@@ -1,9 +1,4 @@
-app.controller('GraphsCtrl', function($scope, $state, $filter, Graph, initialData) {
-    $scope.$watch('search.label', filter);
-    $scope.search = {
-        label: ""
-    };
-
+app.controller('GraphsCtrl', function($scope, $state, $filter, Graph) {
     var colorMappings = {
         GOAL: "#6DFFB4",
         PROBLEM: "#FFDC6D",
@@ -12,18 +7,9 @@ app.controller('GraphsCtrl', function($scope, $state, $filter, Graph, initialDat
         CONARGUMENT: "#FF6D6F"
     };
 
-    initialData.nodes = initialData.nodes.map(function(node) {
-        return {
-            id: node.id,
-            label: node.title === "" ? "" : node.title,
-            color: colorMappings[node.label]
-        };
-    });
-
+    var graph = Graph.get().$promise.then(createGraph);
     var nodes = new vis.DataSet();
     var edges = new vis.DataSet();
-    nodes.add(initialData.nodes);
-    edges.add(initialData.edges);
 
     $scope.data = {
         graph: {
@@ -42,13 +28,33 @@ app.controller('GraphsCtrl', function($scope, $state, $filter, Graph, initialDat
         }
     };
 
+    $scope.$watch('search.label', filter);
+    $scope.search = {
+        label: ""
+    };
+
     function filter() {
-        var filtered = $filter('filter')(initialData.nodes, $scope.search);
+        var filtered = $filter('filter')(graph.nodes, $scope.search);
         nodes.update(filtered);
         angular.forEach(nodes, function(node) {
-            if ($filter('filter')(filtered, { id: node.id }).length === 0) {
+            if ($filter('filter')(filtered, {
+                id: node.id
+            }).length === 0) {
                 nodes.remove(node.id);
             }
         });
+    }
+
+    function createGraph(graph) {
+        graph.nodes = graph.nodes.map(function(node) {
+            return {
+                id: node.id,
+                label: node.title,
+                color: colorMappings[node.label]
+            };
+        });
+
+        nodes.add(graph.nodes);
+        edges.add(graph.edges);
     }
 });

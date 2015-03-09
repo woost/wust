@@ -14,11 +14,6 @@ app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
         url: '/graphs',
         templateUrl: 'assets/views/graph.html',
         controller: 'GraphsCtrl',
-        resolve: {
-            initialData: function(Graph) {
-                return Graph.get().$promise;
-            }
-        }
     }).state('goals', {
         url: '/focus/goals/:id',
         templateUrl: 'assets/views/focus_view.html',
