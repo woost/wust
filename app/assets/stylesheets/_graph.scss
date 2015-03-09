@@ -1,10 +1,9 @@
 #graph_container {
-    @include containment(60%);
-    padding: 20px;
+    height: inherit;
     .graph_view {
-        border: 2px solid $green;
+        height: inherit;
         .graph_network {
-            height: 400px;
+            height: 90%;
         }
     }
 }
