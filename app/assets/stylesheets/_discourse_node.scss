@@ -2,10 +2,11 @@
     $bordercolor: desaturate(darken($bgcolor, 34), 43);
     $bgcolor-highlight: lighten($bgcolor, 13);
     &.node {
+        display: inline-block;
         background-color: $bgcolor;
         border: 1px solid $bordercolor;
         border-radius: 4px;
-        padding: 5px 15px 5px 12px;
+        padding: 0px 15px 0px 12px;
         color: black;
         text-decoration: none;
         @at-root a:hover#{&} {
