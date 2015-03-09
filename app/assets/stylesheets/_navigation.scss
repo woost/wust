@@ -22,3 +22,9 @@ nav {
         display: block;
     }
 }
+
+// display dropdown menu in collapsed navbar above page
+// http://stackoverflow.com/questions/20199308/bootstrap-3-nav-dropdown
+.navbar-collapse.in {
+    overflow-y: visible;
+}
