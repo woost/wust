@@ -1,7 +1,8 @@
-.idea_list {
-    display: flex;
-    flex-wrap: wrap;
-    .idea_item {
-        margin: 10px;
+#show_discourse_node_list {
+    .idea_list {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .node_list {
     }
 }

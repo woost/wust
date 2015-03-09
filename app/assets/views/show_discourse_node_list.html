@@ -1,20 +1,19 @@
-<div ng-class='ngModel.css.list'>
-    <div ng-class='ngModel.css.node' class='filled_items' ng-repeat='item in ngModel.list'>
-        <div ng-class="ngModel.css.discourse" class="node">
-            <a ui-sref="{{ngModel.state}}({id: item.id})">{{item.title}}</a>
-            <button style="margin-left:9px; margin-right:-5px" class='btn btn-default btn-xs' ng-click='ngModel.remove($index)'><i class='fa fa-minus text-danger'></i></button>
+<div id="show_discourse_node_list">
+    <div ng-class='ngModel.css.list'>
+        <div ng-repeat='node in ngModel.list'>
+            <div ng-include="ngModel.template"></div>
         </div>
-    </div>
-    <div ng-class='ngModel.css.new' class='filled_items'>
-        <form ng-submit='ngModel.add()' >
-            <div class="input-group">
-                <input type='text' class="form-control" ng-model='ngModel.new.title' required>
-                <span class="input-group-btn">
-                    <button type="submit"
-                        class='btn btn-default'><i class='fa fa-plus
-                            text-success'></i></button>
-                </span>
-            </div>
-        </form>
+        <div ng-class='ngModel.css.new'>
+            <form ng-submit='ngModel.add()' >
+                <div class="input-group">
+                    <input type='text' class="form-control" ng-model='ngModel.new.title' required>
+                    <span class="input-group-btn">
+                        <button type="submit"
+                            class='btn btn-default'><i class='fa fa-plus
+                                text-success'></i></button>
+                    </span>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
