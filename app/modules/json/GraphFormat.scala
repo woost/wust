@@ -39,8 +39,8 @@ object GraphFormat {
 
     def writes(discourseGraph: Discourse) = {
       implicit val newGraph = Graph(
-        discourseGraph.discourseNodes.map(_.node),
-        discourseGraph.discourseRelations.map(_.relation)
+        discourseGraph.nodes.map(_.node),
+        discourseGraph.relations.map(_.relation)
       )
       val newDiscourseGraph = Discourse(newGraph)
 
@@ -56,8 +56,8 @@ object GraphFormat {
           Replacement(node, node.relations)
       }
 
-      var next: Option[Replacement] = discourseGraph.discourseNodes.collectFirst(simplify)
-      while( { next = newDiscourseGraph.discourseNodes.collectFirst(simplify); next.isDefined }) {
+      var next: Option[Replacement] = discourseGraph.nodes.collectFirst(simplify)
+      while( { next = newDiscourseGraph.nodes.collectFirst(simplify); next.isDefined }) {
         val replacement = next.get
         import replacement._
         newGraph.nodes -= deleteNode
@@ -67,8 +67,8 @@ object GraphFormat {
       }
 
       JsObject(Seq(
-        ("nodes", Json.toJson(newDiscourseGraph.discourseNodes)),
-        ("edges", Json.toJson(newDiscourseGraph.discourseRelations))
+        ("nodes", Json.toJson(newDiscourseGraph.nodes)),
+        ("edges", Json.toJson(newDiscourseGraph.relations))
       ))
     }
   }

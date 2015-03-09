@@ -267,8 +267,8 @@ case class Discourse(graph: Graph) extends SchemaGraph {
   def reaches: Set[Reaches] = nodesAs(Reaches)
   def solves: Set[Solves] = nodesAs(Solves)
 
-  def discourseNodes: Set[DiscourseNode] = goals ++ problems ++ ideas ++ reaches ++ solves
-  def discourseRelations: Set[DiscourseRelation[DiscourseNode, DiscourseNode]] = graph.relations.toSet.map { rawRelation: Relation =>
+  def nodes: Set[DiscourseNode] = goals ++ problems ++ ideas ++ reaches ++ solves
+  def relations: Set[DiscourseRelation[DiscourseNode, DiscourseNode]] = graph.relations.toSet.map { rawRelation: Relation =>
     new DiscourseRelation[DiscourseNode, DiscourseNode] {
       val relation = rawRelation
       object endNodeFactory extends DiscourseNodeFactory[DiscourseNode] {

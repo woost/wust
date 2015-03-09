@@ -12,7 +12,7 @@ object Search extends Controller with DatabaseController {
     val regexTerm = ".*" + term.replace(" ", ".*") + ".*"
     val discourse = Discourse(db.queryGraph(Query("match (n) where n.title =~ {term} return n", Map("term" -> regexTerm))))
 
-    Ok(Json.toJson(discourse.problems))
+    Ok(Json.toJson(discourse.nodes))
   }
 }
 

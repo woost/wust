@@ -25,7 +25,7 @@ object Graphs extends Controller with DatabaseController {
 
   def show(uuid: String) = Action {
     val discourse = nodeDiscourseGraph(uuid)
-    val nodes = discourse.discourseNodes
+    val nodes = discourse.nodes
     if(nodes.isEmpty) {
       BadRequest
     } else {
