@@ -9,21 +9,31 @@
         padding: 0px 15px 0px 12px;
         color: black;
         text-decoration: none;
-        @at-root a:hover#{&} {
-            background-color: $bgcolor-highlight;
-            color: black;
-            text-decoration: none;
-        }
+    }
+    @at-root a:hover#{&}, &.btn:hover, &.panel a:hover .panel-heading {
+        background-color: $bgcolor-highlight;
+        color: black;
+        text-decoration: none;
+    }
+    &.btn {
+        background-color: $bgcolor;
+        border: 1px solid $bordercolor;
+        color: black;
     }
     &.panel {
         border-color: $bordercolor;
         .panel-heading {
             background-color: $bgcolor;
             border-color: $bordercolor;
+            h3 {
+                color: black;
+                text-align: left;
+            }
         }
+        margin: 5px;
     }
     // icons
-    &.node, &.panel .panel-heading h3 {
+    &.node, &.panel .panel-heading h3, &.btn {
         &:before {
             font-family: FontAwesome;
             content: $icon;

@@ -1,8 +1,4 @@
 #show_discourse_node_list {
-    .btn_node {
-        margin-left: 9px;
-        margin-right: -9px;
-    }
     .node {
         margin: 5px;
     }
@@ -10,6 +6,5 @@
         display: flex;
         flex-wrap: wrap;
     }
-    .node_list {
-    }
+    .node_list {}
 }

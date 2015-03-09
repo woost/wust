@@ -1,4 +1,6 @@
-<span ng-class="ngModel.css.discourse" class="node">
-    <a ui-sref="{{ngModel.state}}({id: node.id})">{{node.title}}</a>
-    <button class='btn btn-default btn-xs btn_node' ng-click='ngModel.remove(node)'><i class='fa fa-minus text-danger'></i></button>
-</span>
+<div class="btn-group" role="group" style="padding:3px">
+    <button ng-class="ngModel.css.discourse" class="btn" ui-sref="{{ngModel.state}}({id: node.id})">{{node.title}}</button>
+    <button class='btn btn-default' ng-click='ngModel.remove(node)'><i class='fa fa-minus text-default'></i>
+    </button>
+</div>
+<!-- TODO: inline -->
