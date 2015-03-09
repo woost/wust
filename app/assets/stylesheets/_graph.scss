@@ -1,8 +1,8 @@
-@import "colors";
+@import "base";
 
-// graph
 #graph_container {
-    @extend .container;
+    @include containment(60%);
+    padding: 20px;
     .graph_view {
         border: 2px solid $green;
         .graph_network {

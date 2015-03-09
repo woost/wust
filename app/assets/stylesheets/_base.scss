@@ -1,0 +1,41 @@
+$red: #e0645c;
+$orange: #dd8047;
+$dark: #3b444b;
+$light: #dcdccc;
+$blue: #005ca3;
+$green: seagreen;
+
+@mixin font {
+    font-family: 'Droid Sans', Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 25px;
+}
+
+@mixin containment($width) {
+    padding: 0px;
+    margin: 20px auto;
+    width: $width;
+    min-width: 600px;
+}
+
+@mixin background_opacity($color, $opacity: 0.5) {
+    background: $color; // fallback
+    background: rgba($color, $opacity);
+}
+
+// container
+.container {
+    @include containment(60%);
+    padding: 20px;
+}
+
+// flex items
+.filled_items {
+    display: flex;
+    justify-content: space-between;
+}
+
+.end_items {
+    display: flex;
+    justify-content: flex-end;
+}

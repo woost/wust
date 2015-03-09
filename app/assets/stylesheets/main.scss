@@ -1,105 +1,11 @@
 //TODO: use compass for sass
 
 @import "navigation";
+@import "page";
+@import "route_loading";
+
+@import "home";
+@import "help";
 @import "graph";
 @import "discourse_node";
-
-@mixin font {
-    font-family: 'Droid Sans', Helvetica, Arial, sans-serif;
-    font-size: 14px;
-    line-height: 25px;
-}
-
-@mixin containment($width) {
-    padding: 0px;
-    margin: 20px auto;
-    width: $width;
-    min-width: 600px;
-}
-
-@mixin background_opacity($color, $opacity: 0.5) {
-    background: $color;
-    /* fallback */
-    background: rgba($color, $opacity);
-}
-
-// main application
-h1 {
-    @include font;
-    text-align: center;
-    text-transform: uppercase;
-    font-size: 30px;
-    line-height: 45px;
-}
-
-h2 {
-    @include font;
-    text-align: center;
-    font-size: 24px;
-    line-height: 36px;
-}
-
-body {
-    @include font;
-    margin: 0;
-    min-width: 600px;
-}
-
-#pagecontent {}
-
-#main_view {
-    padding: 50px 50px;
-}
-
-#noscriptmsg {
-    @include containment(40%);
-    background-color: $green;
-    color: white;
-    text-align: center;
-}
-
-.filled_items {
-    display: flex;
-    justify-content: space-between;
-}
-
-.end_items {
-    display: flex;
-    justify-content: flex-end;
-}
-
-// route loading indicator
-.loading_indicator {
-    padding: 140px;
-    margin: auto;
-    text-align: center;
-    font-weight: bold;
-    font-size: 25px;
-}
-
-// container
-.container {
-    @include containment(60%);
-    padding: 20px;
-}
-
-// home container
-#home_container {
-    @extend .container;
-    text-align: center;
-    #problem_create {}
-    #problem_list {
-        padding: 50px;
-    }
-}
-
-// problem container
-#problem_container {
-    @extend .container;
-    text-align: center;
-}
-
-// help container
-#help_container {
-    @extend .container;
-}
+@import "focus_view";
