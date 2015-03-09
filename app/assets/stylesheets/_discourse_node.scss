@@ -1,5 +1,3 @@
-@import "base";
-
 @mixin discourse_node($bgcolor) {
     display: inline;
     background-color: $bgcolor;
