@@ -1,28 +1,26 @@
 <div id="focus_view_container">
-    <div class="filled_items">
-        <div id="problem_view">
-            <h2>Causes:</h2>
-            <div show-discourse-node-list ng-model='problems'></div>
-        </div>
-        <div id="focus_view_center">
-            <div id="node_view">
-                <div class="panel panel-default" ng-class="nodeCss">
-                    <div class="panel-heading">
-                        <h3 class="panel-title" ng-bind="node.title">Panel title</h3>
-                    </div>
-                    <div class="panel-body">
-                        Panel content
-                    </div>
+    <div id="problem_view">
+        <h2>Causes:</h2>
+        <div show-discourse-node-list ng-model='problems'></div>
+    </div>
+    <div id="focus_view_center">
+        <div id="node_view">
+            <div class="panel panel-default" ng-class="nodeCss">
+                <div class="panel-heading">
+                    <h3 class="panel-title" ng-bind="node.title">Panel title</h3>
+                </div>
+                <div class="panel-body">
+                    Panel content
                 </div>
             </div>
-            <div id="idea_view">
-                <h2>Ideas:</h2>
-                <div show-discourse-node-list ng-model='ideas'></div>
-            </div>
         </div>
-        <div id="goal_view">
-            <h2>Goals:</h2>
-            <div show-discourse-node-list ng-model='goals'></div>
+        <div id="idea_view">
+            <h2>Ideas:</h2>
+            <div show-discourse-node-list ng-model='ideas'></div>
         </div>
+    </div>
+    <div id="goal_view">
+        <h2>Goals:</h2>
+        <div show-discourse-node-list ng-model='goals'></div>
     </div>
 </div>

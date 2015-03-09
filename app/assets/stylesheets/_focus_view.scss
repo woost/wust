@@ -1,11 +1,12 @@
 #focus_view_container {
+    display: flex;
+    justify-content: space-between;
     padding: 20px;
     text-align: center;
     #node_view {
         padding: 50px;
     }
-}
-
-#focus_view_center {
-    flex-grow: 1;
+    #focus_view_center {
+        flex-grow: 1;
+    }
 }

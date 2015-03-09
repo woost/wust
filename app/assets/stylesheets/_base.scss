@@ -22,20 +22,3 @@ $green: seagreen;
     background: $color; // fallback
     background: rgba($color, $opacity);
 }
-
-// container
-.container {
-    @include containment(60%);
-    padding: 20px;
-}
-
-// flex items
-.filled_items {
-    display: flex;
-    justify-content: space-between;
-}
-
-.end_items {
-    display: flex;
-    justify-content: flex-end;
-}
