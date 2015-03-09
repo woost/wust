@@ -1,13 +1,19 @@
 <div id="focus_view_container">
     <div class="filled_items">
         <div id="problem_view">
-            <h2>Problems:</h2>
+            <h2>Causes:</h2>
             <div show-discourse-node-list ng-model='problems'></div>
         </div>
-        <div>
+        <div id="focus_view_center">
             <div id="node_view">
-                <h2>Focus</h2>
-               <span ng-bind="node.title" ng-class="nodeCss"></span>
+                <div class="panel panel-default" ng-class="nodeCss">
+                    <div class="panel-heading">
+                        <h3 class="panel-title" ng-bind="node.title">Panel title</h3>
+                    </div>
+                    <div class="panel-body">
+                        Panel content
+                    </div>
+                </div>
             </div>
             <div id="idea_view">
                 <h2>Ideas:</h2>
