@@ -1,9 +1,10 @@
 app.directive("showDiscourseNodeList", function($compile, $stateParams) {
     return {
         restrict: 'A',
+        require: '^ngModel',
         templateUrl: 'assets/views/show_discourse_node_list.html',
         scope: {
-            items: '=',
+            ngModel: '=',
         },
         link: function(scope, element, attrs) {
         }
