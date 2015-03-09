@@ -3,21 +3,20 @@
 
     <div carousel id="carousel" interval="0">
         <div slide ng-repeat="slide in slides" active="slide.active">
-            <div id="slide" ng-class="slide.css">
-                <div id="create_new">
-                    <h2 ng-bind="slide.newTitle"></h2>
-                    <form ng-submit="slide.addNode()">
-                        <input size=50 type="text" ng-model="slide.newNode.title" required>
-                        <button type="submit" class="btn btn-success"><i class="fa fa-plus"></i>
-                        </button>
-                    </form>
-                </div>
+            <div id="slide_stripe" ng-class="slide.css"></div>
+            <div id="create_new">
+                <h2 ng-bind="slide.newTitle"></h2>
+                <form ng-submit="slide.addNode()">
+                    <input size=50 type="text" ng-model="slide.newNode.title" required>
+                    <button type="submit" class="btn btn-success"><i class="fa fa-plus"></i>
+                    </button>
+                </form>
+            </div>
 
-                <div id="list_existing">
-                    <h2 ng-bind="slide.listTitle"></h2>
-                    <div ng-repeat="node in slide.nodes">
-                        <a ui-sref="{{slide.state}}({id: node.id})">{{node.title}}</a>
-                    </div>
+            <div id="list_existing">
+                <h2 ng-bind="slide.listTitle"></h2>
+                <div ng-repeat="node in slide.nodes">
+                    <a ui-sref="{{slide.state}}({id: node.id})">{{node.title}}</a>
                 </div>
             </div>
         </div>

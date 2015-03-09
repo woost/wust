@@ -2,12 +2,16 @@
     padding: 20px;
     text-align: center;
     #carousel {
-        #slide {
-            height: 600px;
-            #create_new {}
-            #existing_list {
-                padding: 50px;
-            }
+        height: 600px;
+        #slide_stripe {
+            margin: 5px;
+            height: 20px;
+        }
+        #create_new {
+            padding: 10px;
+        }
+        #existing_list {
+            padding: 30px;
         }
     }
 }
