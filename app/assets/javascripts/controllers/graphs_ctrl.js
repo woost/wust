@@ -7,7 +7,7 @@ app.controller('GraphsCtrl', function($scope, $state, $filter, Graph) {
         CONARGUMENT: "#FF6D6F"
     };
 
-    var graph = Graph.get().$promise.then(createGraph);
+    Graph.get().$promise.then(createGraph);
     var nodes = new vis.DataSet();
     var edges = new vis.DataSet();
 
@@ -28,21 +28,22 @@ app.controller('GraphsCtrl', function($scope, $state, $filter, Graph) {
         }
     };
 
-    $scope.$watch('search.label', filter);
     $scope.search = {
         label: ""
     };
 
-    function filter() {
-        var filtered = $filter('filter')(graph.nodes, $scope.search);
-        nodes.update(filtered);
-        angular.forEach(nodes, function(node) {
-            if ($filter('filter')(filtered, {
-                id: node.id
-            }).length === 0) {
-                nodes.remove(node.id);
-            }
-        });
+    function filter(graph) {
+        return function() {
+            var filtered = $filter('filter')(graph.nodes, $scope.search);
+            nodes.update(filtered);
+            angular.forEach(nodes, function(node) {
+                if ($filter('filter')(filtered, {
+                    id: node.id
+                }).length === 0) {
+                    nodes.remove(node.id);
+                }
+            });
+        };
     }
 
     function createGraph(graph) {
@@ -56,5 +57,7 @@ app.controller('GraphsCtrl', function($scope, $state, $filter, Graph) {
 
         nodes.add(graph.nodes);
         edges.add(graph.edges);
+
+        $scope.$watch('search.label', filter(graph));
     }
 });
