@@ -1,12 +1,15 @@
 <div id="focus_view_container">
     <div class="filled_items">
         <div id="problem_view">
-            Problems:
+            <h2>Problems:</h2>
             <div change-item-list items='problems'></div>
         </div>
-        <div id="focus_view">
-            <div id="node_view" ng-class="nodeCss">
-                {{node.label}}: {{node.title}}
+        <div>
+            <div id="node_view">
+                <h2>Focus</h2>
+               <span ng-class="nodeCss">
+                   {{node.label}}: {{node.title}}
+               </span>
             </div>
             <div id="idea_view">
                 Ideas:
@@ -14,7 +17,7 @@
             </div>
         </div>
         <div id="goal_view">
-            Goals:
+            <h2>Goals:</h2>
             <div change-item-list items='goals'></div>
         </div>
     </div>
