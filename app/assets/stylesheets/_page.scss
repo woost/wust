@@ -17,17 +17,16 @@ body {
     @include font;
     margin: 0;
     min-width: 600px;
-}
-
-#pagecontent {}
-
-#main_view {
-    padding: 50px 50px;
-}
-
-#noscriptmsg {
-    @include containment(40%);
-    background-color: $green;
-    color: white;
-    text-align: center;
+    height: 100%;
+    #pagecontent {
+        #main_view {
+            padding: 50px 0px 0px 0px;
+        }
+    }
+    #noscriptmsg {
+        @include containment(40%);
+        background-color: $green;
+        color: white;
+        text-align: center;
+    }
 }
