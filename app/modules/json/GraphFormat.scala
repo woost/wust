@@ -46,29 +46,34 @@ object GraphFormat {
 
       case class Replacement(deleteNode: Node, deleteRelations: Iterable[Relation], newRelation: Option[Relation] = None)
       val simplify: PartialFunction[DiscourseNode, Replacement] = {
-        case Solves(node) if node.inDegree == 1 && node.outDegree == 1   =>
+        case Solves(node) if node.inDegree == 1 && node.outDegree == 1  =>
           Replacement(node, node.relations, Some(Relation.local(node.predecessors.head, node.successors.head, "SOLVES")))
-        case Reaches(node) if node.inDegree == 1 && node.outDegree == 1   =>
+        case Reaches(node) if node.inDegree == 1 && node.outDegree == 1 =>
           Replacement(node, node.relations, Some(Relation.local(node.predecessors.head, node.successors.head, "REACHES")))
-        case Solves(node) if node.degree < 2 =>
+        case Solves(node) if node.degree < 2                            =>
           Replacement(node, node.relations)
-        case Reaches(node) if node.degree < 2 =>
+        case Reaches(node) if node.degree < 2                           =>
           Replacement(node, node.relations)
       }
 
-      var next: Option[Replacement] = discourseGraph.nodes.collectFirst(simplify)
+      val fakeRelations = mutable.ArrayBuffer.empty[DiscourseRelation[DiscourseNode, DiscourseNode]]
+
+      var next: Option[Replacement] = None
       while( { next = newDiscourseGraph.nodes.collectFirst(simplify); next.isDefined }) {
         val replacement = next.get
         import replacement._
         newGraph.nodes -= deleteNode
         newGraph.relations --= deleteRelations
-        for (relation <- newRelation)
-          newGraph.relations += relation
+        fakeRelations ++= newRelation.map(newRel => new DiscourseRelation[DiscourseNode, DiscourseNode] {
+          val relation = newRel
+          val startNode = new DiscourseNode {val node = relation.startNode }
+          val endNode = new DiscourseNode {val node = relation.endNode }
+        })
       }
 
       JsObject(Seq(
         ("nodes", Json.toJson(newDiscourseGraph.nodes)),
-        ("edges", Json.toJson(newDiscourseGraph.relations))
+        ("edges", Json.toJson(newDiscourseGraph.relations ++ fakeRelations))
       ))
     }
   }
