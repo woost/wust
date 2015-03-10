@@ -7,10 +7,14 @@
             <form ng-submit='ngModel.add()'>
                 <div class="input-group">
                     <div class="input-group">
-                        <input type="text" ng-model="ngModel.new.title" class="form-control" placeholder="find" typeahead="node for node in ngModel.search($viewValue)" typeahead-on-select="ngModel.onSelect($item,$model,$label)" typeahead-template-url="search_item.html" required>
+                        <input type='text' class="form-control" ng-model='ngModel.new.title' required>
+                        <input type="text" ng-model="searchSelected" class="form-control" placeholder="find" typeahead="node for node in getNodes($viewValue)" typeahead-on-select="onSelect($item,$model,$label)" typeahead-template-url="search_item.html">
+                        <!-- <script type="text/ng-template" id="search_item.html"> -->
+                        <!--     <a href="#" class="node" ng-class="match.model.css" ng-bind="match.model.title"></a> -->
+                        <!-- </script> -->
                         <span class="input-group-btn">
                             <button class="btn btn-default" type="submit">
-                                <i class='fa fa-plus text-default'></i>
+                                <i class="fa fa-search"></i>
                             </button>
                         </span>
                     </div>

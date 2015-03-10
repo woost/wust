@@ -1,11 +1,9 @@
 app.controller('SearchCtrl', function($scope, Search, DiscourseNode, $state) {
-    $scope.selected = undefined;
-
     $scope.getNodes = getNodes;
     $scope.onSelect = onSelect;
 
     function getNodes(term) {
-        return Search(term).$promise.then(function(response) {
+        return Search.query(term).$promise.then(function(response) {
             return response.map(function(item) {
                 item.css = DiscourseNode.getCss(item.label);
                 return item;

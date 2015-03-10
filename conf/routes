@@ -37,6 +37,7 @@ GET /api/v1/graphs/:uuid controllers.Graphs.show(uuid: String)
 DELETE /api/v1/graphs/:uuid controllers.Graphs.remove(uuid: String)
 
 GET /api/v1/search/:term controllers.Search.index(term: String)
+GET /api/v1/search/:term/:label controllers.Search.indexWithLabel(term: String, label: String)
 
 # Map static resources from the /public folder to the /assets URL path
 GET /assets/*file controllers.Assets.at(path="/public", file)

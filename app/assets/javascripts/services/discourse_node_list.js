@@ -1,4 +1,4 @@
-app.service('DiscourseNodeList', function(DiscourseNode) {
+app.service('DiscourseNodeList', function(DiscourseNode, Search) {
     this.Goal = Goal;
     this.Problem = Problem;
     this.Idea = Idea;
@@ -27,17 +27,42 @@ app.service('DiscourseNodeList', function(DiscourseNode) {
         };
     }
 
+    // TODO: extract into service /search_ctrl
+    function search(searchFunc) {
+        return function(term) {
+            return searchFunc(term).$promise.then(function(response) {
+                return response.map(function(item) {
+                    item.css = DiscourseNode.getCss(item.label);
+                    return item;
+                });
+            });
+        };
+    }
+
+    function onSearchSelect(createFunc, container) {
+        return function($item, $model, $label) {
+            //TODO: this adds a new item, should just connect to an existing one:
+            container.new = $item;
+            add(createFunc, container)();
+        };
+    }
+
     function Item(id, queryFunc, createFunc, removeFunc) {
         this.id = id;
-        this.new = { title: "" };
+        this.new = {
+            title: ""
+        };
         this.list = queryFunc ? queryFunc(this.id) : [];
         this.add = createFunc ? add(createFunc, this) : todo;
         this.remove = removeFunc ? remove(removeFunc, this) : todo;
+        this.search = search(Search.query);
+        this.onSelect = onSearchSelect(createFunc, this);
     }
 
     function Goal() {
         Item.apply(this, arguments);
         this.state = DiscourseNode.goal.state;
+        this.search = search(Search.queryGoals);
         this.style = {
             template: "show_discourse_node_list.html",
             discourse: DiscourseNode.goal.css,
@@ -48,6 +73,7 @@ app.service('DiscourseNodeList', function(DiscourseNode) {
     function Problem() {
         Item.apply(this, arguments);
         this.state = DiscourseNode.problem.state;
+        this.search = search(Search.queryProblems);
         this.style = {
             template: "show_discourse_node_list.html",
             discourse: DiscourseNode.problem.css,
@@ -58,6 +84,7 @@ app.service('DiscourseNodeList', function(DiscourseNode) {
     function Idea() {
         Item.apply(this, arguments);
         this.state = DiscourseNode.idea.state;
+        this.search = search(Search.queryIdeas);
         this.style = {
             template: "show_discourse_idea_list.html",
             discourse: DiscourseNode.idea.css,
