@@ -38,8 +38,8 @@ app.service('DiscourseNodeList', function(DiscourseNode) {
     function Goal() {
         Item.apply(this, arguments);
         this.state = DiscourseNode.goal.state;
-        this.template = "show_discourse_node_list.html";
-        this.css = {
+        this.style = {
+            template: "show_discourse_node_list.html",
             discourse: DiscourseNode.goal.css,
             list: "node_list",
         };
@@ -48,8 +48,8 @@ app.service('DiscourseNodeList', function(DiscourseNode) {
     function Problem() {
         Item.apply(this, arguments);
         this.state = DiscourseNode.problem.state;
-        this.template = "show_discourse_node_list.html";
-        this.css = {
+        this.style = {
+            template: "show_discourse_node_list.html",
             discourse: DiscourseNode.problem.css,
             list: "node_list",
         };
@@ -58,8 +58,8 @@ app.service('DiscourseNodeList', function(DiscourseNode) {
     function Idea() {
         Item.apply(this, arguments);
         this.state = DiscourseNode.idea.state;
-        this.template = "show_discourse_idea_list.html";
-        this.css = {
+        this.style = {
+            template: "show_discourse_idea_list.html",
             discourse: DiscourseNode.idea.css,
             list: "idea_list",
         };

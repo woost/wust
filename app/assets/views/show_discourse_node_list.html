@@ -1,9 +1,9 @@
 <div id="show_discourse_node_list">
-    <div ng-class='ngModel.css.list'>
+    <div ng-class='ngModel.style.list'>
         <div ng-repeat='node in ngModel.list'>
-            <div ng-include="ngModel.template"></div>
+            <div ng-include="ngModel.style.template"></div>
         </div>
-        <div ng-class='ngModel.css.new'>
+        <div>
             <form ng-submit='ngModel.add()'>
                 <div class="input-group">
                     <input type='text' class="form-control" ng-model='ngModel.new.title' required>
@@ -19,13 +19,13 @@
 
 <script type="text/ng-template" id="show_discourse_node_list.html">
     <div class="btn-group" role="group" style="padding:3px">
-        <button ng-class="ngModel.css.discourse" class="btn" ui-sref="{{ngModel.state}}({id: node.id})">{{node.title}}</button>
+        <button ng-class="ngModel.style.discourse" class="btn" ui-sref="{{ngModel.state}}({id: node.id})">{{node.title}}</button>
         <button class='btn btn-default' ng-click='ngModel.remove(node)'><i class='fa fa-minus text-default'></i></button>
     </div>
 </script>
 
 <script type="text/ng-template" id="show_discourse_idea_list.html">
-    <div class="panel panel-default" ng-class="ngModel.css.discourse">
+    <div class="panel panel-default" ng-class="ngModel.style.discourse">
         <a ui-sref="{{ngModel.state}}({id: node.id})">
             <div class="panel-heading">
                 <h3 class="panel-title">{{node.title}}</h3>
