@@ -55,18 +55,10 @@ app.controller('GraphsCtrl', function($scope, $state, $filter, Graph, DiscourseN
         $scope.$watch('search.label', filter(graph));
     }
 
-    //TODO: see for yourself
     function onClick(selected) {
         var id = selected.nodes[0];
-        if (id === undefined) {
-            return;
-        }
-
-        var index = nodes.getIds().indexOf(id);
-        var label = nodes.map(function(n) {
-            return n.origLabel;
-        })[index];
-        var state = DiscourseNode.getState(label);
+        var node = nodes.get(id);
+        var state = DiscourseNode.getState(node.origLabel);
         $state.go(state, {
             id: id
         });

@@ -7,22 +7,24 @@ app.service('DiscourseNodeList', function(DiscourseNode, Search) {
         toastr.error("not implemented");
     }
 
-    function add(createFunc, container) {
+    function add(createFunc) {
         return function() {
-            createFunc(container.id, container.new).$promise.then(function(data) {
+            var self = this;
+            createFunc(self.id, self.new).$promise.then(function(data) {
                 toastr.success("Added new item");
-                container.list.push(data);
-                container.new.title = "";
+                self.list.push(data);
+                self.new.title = "";
             });
         };
     }
 
-    function remove(removeFunc, container) {
+    function remove(removeFunc) {
         return function(elem) {
-            var index = container.list.indexOf(elem);
+            var self = this;
+            var index = self.list.indexOf(elem);
             removeFunc(elem.id).$promise.then(function(data) {
                 toastr.success("Removed item");
-                container.list.splice(index, 1);
+                self.list.splice(index, 1);
             });
         };
     }
@@ -39,11 +41,11 @@ app.service('DiscourseNodeList', function(DiscourseNode, Search) {
         };
     }
 
-    function onSearchSelect(createFunc, container) {
+    function onSearchSelect(createFunc) {
         return function($item, $model, $label) {
             //TODO: this adds a new item, should just connect to an existing one:
-            container.new = $item;
-            add(createFunc, container)();
+            this.new = $item;
+            this.add();
         };
     }
 
@@ -53,10 +55,10 @@ app.service('DiscourseNodeList', function(DiscourseNode, Search) {
             title: ""
         };
         this.list = queryFunc ? queryFunc(this.id) : [];
-        this.add = createFunc ? add(createFunc, this) : todo;
-        this.remove = removeFunc ? remove(removeFunc, this) : todo;
+        this.add = createFunc ? add(createFunc) : todo;
+        this.remove = removeFunc ? remove(removeFunc) : todo;
+        this.onSelect = createFunc ? onSearchSelect(createFunc) : todo;
         this.search = search(Search.query);
-        this.onSelect = onSearchSelect(createFunc, this);
     }
 
     function Goal() {

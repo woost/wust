@@ -7,7 +7,6 @@ app.directive('setNgAnimate', function ($animate) {
             $scope.$watch( function() {
                 return $scope.$eval($attrs.setNgAnimate, $scope);
             }, function(valnew, valold){
-                console.log('Directive animation Enabled: ' + valnew);
                 $animate.enabled(!!valnew, $element);
             });
         }

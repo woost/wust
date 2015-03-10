@@ -1,5 +1,5 @@
 <div id="home_container">
-    <div set-ng-animate='false' carousel id="carousel" interval="0">
+    <div carousel set-ng-animate='false' on-carousel-change="onSlideChanged(nextSlide, direction)" id="carousel" interval="0">
         <div slide ng-repeat="slide in slides" active="slide.active">
             <div id="slide_stripe" ng-class="slide.info.css"></div>
             <div id="create_new">

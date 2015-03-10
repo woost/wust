@@ -5,7 +5,8 @@ app.controller("HomeCtrl", function($scope, $state, Problem, Goal, Idea, Discour
         newTitle: "What is your problem?",
         listTitle: "Existing problems:",
         info: DiscourseNode.problem,
-        nodes: Problem.query(),
+        queryNodes: queryNodes(Problem.query),
+        addNode: addNode(Problem.create),
         newNode: {
             title: ""
         }
@@ -14,7 +15,8 @@ app.controller("HomeCtrl", function($scope, $state, Problem, Goal, Idea, Discour
         newTitle: "What is your goal?",
         listTitle: "Existing goals:",
         info: DiscourseNode.goal,
-        nodes: Goal.query(),
+        queryNodes: queryNodes(Goal.query),
+        addNode: addNode(Goal.create),
         newNode: {
             title: ""
         }
@@ -23,23 +25,43 @@ app.controller("HomeCtrl", function($scope, $state, Problem, Goal, Idea, Discour
         newTitle: "What is your idea?",
         listTitle: "Existing ideas:",
         info: DiscourseNode.idea,
-        nodes: Idea.query(),
+        queryNodes: queryNodes(Idea.query),
+        addNode: addNode(Idea.create),
         newNode: {
             title: ""
         }
     };
 
-    problems.addNode = addNode(Problem.create, problems);
-    goals.addNode = addNode(Goal.create, goals);
-    ideas.addNode = addNode(Idea.create, ideas);
+    var slides = [problems, goals, ideas];
+    $scope.slides = slides;
 
-    $scope.slides = [problems, goals, ideas];
+    $scope.$watch(function() {
+        for (var i = 0; i < slides.length; i++) {
+            if (slides[i].active) {
+                return slides[i];
+            }
+        }
+    }, function(currentSlide, previousSlide) {
+        currentSlide.queryNodes();
+    });
 
-    function addNode(createFunc, container) {
+    function addNode(createFunc) {
         return function() {
-            createFunc(container.newNode).$promise.then(function(data) {
-                $state.go(container.info.state, { id: data.id });
+            var self = this;
+            createFunc(self.newNode).$promise.then(function(data) {
                 toastr.success("Added new node");
+                $state.go(self.info.state, {
+                    id: data.id
+                });
+            });
+        };
+    }
+
+    function queryNodes(queryFunc) {
+        return function() {
+            var self = this;
+            queryFunc().$promise.then(function(data) {
+                self.nodes = data;
             });
         };
     }
