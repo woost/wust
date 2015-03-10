@@ -9,11 +9,37 @@
                     <input type='text' class="form-control" ng-model='ngModel.new.title' required>
                     <span class="input-group-btn">
                         <button type="submit"
-                            class='btn btn-default'><i class='fa fa-plus
-                                text-default'></i></button>
+                            class='btn btn-default'><i class='fa fa-plus text-default'></i></button>
                     </span>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<script type="text/ng-template" id="show_discourse_node_list.html">
+    <div class="btn-group" role="group" style="padding:3px">
+        <button ng-class="ngModel.css.discourse" class="btn" ui-sref="{{ngModel.state}}({id: node.id})">{{node.title}}</button>
+        <button class='btn btn-default' ng-click='ngModel.remove(node)'><i class='fa fa-minus text-default'></i></button>
+    </div>
+</script>
+
+<script type="text/ng-template" id="show_discourse_idea_list.html">
+    <div class="panel panel-default" ng-class="ngModel.css.discourse">
+        <a ui-sref="{{ngModel.state}}({id: node.id})">
+            <div class="panel-heading">
+                <h3 class="panel-title">{{node.title}}</h3>
+
+            </div>
+        </a>
+        <div class="panel-body">
+            Panel content
+            <br />
+            <!-- <span class="discourse_proargument node">pro</span> -->
+            <!-- <span class="discourse_conargument node">con</span> -->
+            <button class='btn btn-default btn-xs pull-right' ng-click='ngModel.remove(node)'>
+                <i class='fa fa-minus'></i>
+            </button>
+        </div>
+    </div>
+</script>
