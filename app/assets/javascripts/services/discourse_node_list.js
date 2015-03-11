@@ -22,7 +22,7 @@ app.service('DiscourseNodeList', function(DiscourseNode, Search) {
         return function(elem) {
             var self = this;
             var index = self.list.indexOf(elem);
-            removeFunc(elem.id).$promise.then(function(data) {
+            removeFunc(self.id, elem.id).$promise.then(function(data) {
                 toastr.success("Removed item");
                 self.list.splice(index, 1);
             });

@@ -15,21 +15,4 @@ object Graphs extends Controller with DatabaseController {
     val discourse = wholeDiscourseGraph
     Ok(Json.toJson(discourse))
   }
-
-  def remove(uuid: String) = Action {
-    val discourse = nodeDiscourseGraph(uuid)
-    discourse.graph.nodes.clear
-    db.persistChanges(discourse.graph)
-    Ok(JsObject(Seq()))
-  }
-
-  def show(uuid: String) = Action {
-    val discourse = nodeDiscourseGraph(uuid)
-    val nodes = discourse.nodes
-    if(nodes.isEmpty) {
-      BadRequest
-    } else {
-      Ok(Json.toJson(nodes.head))
-    }
-  }
 }

@@ -25,6 +25,14 @@ trait ContentNodesController[NodeType <: ContentNode] extends Controller with Da
     Ok(Json.toJson(contentNode))
   }
 
+  // TODO: leaks hyperedges
+  def remove(uuid: String) = Action {
+    val discourse = nodeDiscourseGraph(uuid)
+    discourse.graph.nodes.clear
+    db.persistChanges(discourse.graph)
+    Ok(JsObject(Seq()))
+  }
+
   def show(uuid: String) = Action {
     val query = Query(s"match (n :$label {uuid: {uuid}}) return n limit 1", Map("uuid" -> uuid))
     db.queryGraph(query).nodes.headOption match {

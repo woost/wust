@@ -62,4 +62,11 @@ object Goals extends Controller with ContentNodesController[Goal] {
     db.persistChanges(discourse.graph)
     Ok(Json.toJson(idea))
   }
+
+  def removeProblem(uuid: String, uuidProblem: String) = Action {
+    val discourse = relationDiscourseGraph(uuidProblem, Prevents.relationType, uuid)
+    discourse.graph.relations.clear()
+    db.persistChanges(discourse.graph)
+    Ok(JsObject(Seq()))
+  }
 }

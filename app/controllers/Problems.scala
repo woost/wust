@@ -29,7 +29,7 @@ object Problems extends Controller with ContentNodesController[Problem] {
   }
 
   def showProblems(uuid: String) = Action {
-    val query = Query(s"match (:${ Problem.label } {uuid: {uuid}})-[:${ Causes.relationType }]-(problem :${ Problem.label }) return problem", Map("uuid" -> uuid))
+    val query = Query(s"match (:${ Problem.label } {uuid: {uuid}})<-[:${ Causes.relationType }]-(problem :${ Problem.label }) return problem", Map("uuid" -> uuid))
     Ok(Json.toJson(db.queryGraph(query).nodes.map(Problem.create)))
   }
 
@@ -57,14 +57,14 @@ object Problems extends Controller with ContentNodesController[Problem] {
     val discourse = nodeDiscourseGraph(uuid)
 
     val problem = discourse.problems.head
-    val consequence = Problem.local(nodeAdd.title)
+    val cause = Problem.local(nodeAdd.title)
 
-    discourse.add(consequence)
+    discourse.add(cause)
 
-    discourse.add(Causes.local(problem, consequence))
+    discourse.add(Causes.local(cause, problem))
 
     db.persistChanges(discourse.graph)
-    Ok(Json.toJson(consequence))
+    Ok(Json.toJson(cause))
   }
 
   def createIdea(uuid: String) = Action { request =>
@@ -85,6 +85,20 @@ object Problems extends Controller with ContentNodesController[Problem] {
 
     db.persistChanges(discourse.graph)
     Ok(Json.toJson(idea))
+  }
+
+  def removeGoal(uuid: String, uuidGoal: String) = Action {
+    val discourse = relationDiscourseGraph(uuid, Prevents.relationType, uuidGoal)
+    discourse.graph.relations.clear()
+    db.persistChanges(discourse.graph)
+    Ok(JsObject(Seq()))
+  }
+
+  def removeProblem(uuid: String, uuidProblem: String) = Action {
+    val discourse = relationDiscourseGraph(uuidProblem, Causes.relationType, uuid)
+    discourse.graph.relations.clear()
+    db.persistChanges(discourse.graph)
+    Ok(JsObject(Seq()))
   }
 }
 

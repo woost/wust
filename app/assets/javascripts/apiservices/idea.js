@@ -5,6 +5,7 @@ app.service('Idea', function($resource, Node) {
 
     this.get = Node.get(service);
     this.create = Node.create(service);
+    this.remove = Node.remove(service);
     this.query = Node.query(service);
     this.queryGoals = Node.query(goalService);
     this.queryProblems = Node.query(problemService);

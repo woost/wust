@@ -2,6 +2,7 @@ package controllers
 
 import model._
 import renesca._
+import renesca.graph.RelationType
 import renesca.parameter.implicits._
 
 trait DatabaseController {
@@ -14,5 +15,9 @@ trait DatabaseController {
 
   def nodeDiscourseGraph(uuid: String): Discourse = {
     Discourse(db.queryGraph(Query(s"match (node {uuid: {uuid}}) return node limit 1", Map("uuid" -> uuid))))
+  }
+
+  def relationDiscourseGraph(uuidFrom: String, relationType: RelationType, uuidTo: String): Discourse = {
+    Discourse(db.queryGraph(Query(s"match (from {uuid: {uuidFrom}})-[r:${relationType}]-(to {uuid: {uuidTo}}) return from, r, to", Map("uuidFrom" -> uuidFrom, "uuidTo" -> uuidTo))))
   }
 }
