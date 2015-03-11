@@ -1,0 +1,32 @@
+GET /problems controllers.Problems.index
+GET /problems/:uuid controllers.Problems.show(uuid: String)
+GET /problems/:uuid/goals controllers.Problems.showGoals(uuid: String)
+GET /problems/:uuid/problems controllers.Problems.showProblems(uuid: String)
+GET /problems/:uuid/ideas controllers.Problems.showIdeas(uuid: String)
+POST /problems/:uuid/goals controllers.Problems.createGoal(uuid: String)
+POST /problems/:uuid/problems controllers.Problems.createProblem(uuid: String)
+POST /problems/:uuid/ideas controllers.Problems.createIdea(uuid: String)
+POST /problems controllers.Problems.create
+
+GET /ideas controllers.Ideas.index
+GET /ideas/:uuid controllers.Ideas.show(uuid: String)
+GET /ideas/:uuid/goals controllers.Ideas.showGoals(uuid: String)
+GET /ideas/:uuid/problems controllers.Ideas.showProblems(uuid: String)
+POST /ideas/:uuid/goals controllers.Ideas.createGoal(uuid: String)
+POST /ideas/:uuid/problems controllers.Ideas.createProblem(uuid: String)
+POST /ideas controllers.Ideas.create
+
+GET /goals controllers.Goals.index
+GET /goals/:uuid controllers.Goals.show(uuid: String)
+GET /goals/:uuid/problems controllers.Goals.showProblems(uuid: String)
+GET /goals/:uuid/ideas controllers.Goals.showIdeas(uuid: String)
+POST /goals/:uuid/problems controllers.Goals.createProblem(uuid: String)
+POST /goals/:uuid/ideas controllers.Goals.createIdea(uuid: String)
+POST /goals controllers.Goals.create
+
+GET /graphs controllers.Graphs.index
+GET /graphs/:uuid controllers.Graphs.show(uuid: String)
+DELETE /graphs/:uuid controllers.Graphs.remove(uuid: String)
+
+GET /search/:term controllers.Search.index(term: String)
+GET /search/:term/:label controllers.Search.indexWithLabel(term: String, label: String)

@@ -1,43 +1,8 @@
-# Routes
-# This file defines all application routes (Higher priority routes first)
-# ~~~~
-
 # Home page
 GET / controllers.Application.index(any = "none")
 
-# Play routes serving JSON to AngularJS start with /api
-GET /api/v1/problems controllers.Problems.index
-GET /api/v1/problems/:uuid controllers.Problems.show(uuid: String)
-GET /api/v1/problems/:uuid/goals controllers.Problems.showGoals(uuid: String)
-GET /api/v1/problems/:uuid/problems controllers.Problems.showProblems(uuid: String)
-GET /api/v1/problems/:uuid/ideas controllers.Problems.showIdeas(uuid: String)
-POST /api/v1/problems/:uuid/goals controllers.Problems.createGoal(uuid: String)
-POST /api/v1/problems/:uuid/problems controllers.Problems.createProblem(uuid: String)
-POST /api/v1/problems/:uuid/ideas controllers.Problems.createIdea(uuid: String)
-POST /api/v1/problems controllers.Problems.create
-
-GET /api/v1/ideas controllers.Ideas.index
-GET /api/v1/ideas/:uuid controllers.Ideas.show(uuid: String)
-GET /api/v1/ideas/:uuid/goals controllers.Ideas.showGoals(uuid: String)
-GET /api/v1/ideas/:uuid/problems controllers.Ideas.showProblems(uuid: String)
-POST /api/v1/ideas/:uuid/goals controllers.Ideas.createGoal(uuid: String)
-POST /api/v1/ideas/:uuid/problems controllers.Ideas.createProblem(uuid: String)
-POST /api/v1/ideas controllers.Ideas.create
-
-GET /api/v1/goals controllers.Goals.index
-GET /api/v1/goals/:uuid controllers.Goals.show(uuid: String)
-GET /api/v1/goals/:uuid/problems controllers.Goals.showProblems(uuid: String)
-GET /api/v1/goals/:uuid/ideas controllers.Goals.showIdeas(uuid: String)
-POST /api/v1/goals/:uuid/problems controllers.Goals.createProblem(uuid: String)
-POST /api/v1/goals/:uuid/ideas controllers.Goals.createIdea(uuid: String)
-POST /api/v1/goals controllers.Goals.create
-
-GET /api/v1/graphs controllers.Graphs.index
-GET /api/v1/graphs/:uuid controllers.Graphs.show(uuid: String)
-DELETE /api/v1/graphs/:uuid controllers.Graphs.remove(uuid: String)
-
-GET /api/v1/search/:term controllers.Search.index(term: String)
-GET /api/v1/search/:term/:label controllers.Search.indexWithLabel(term: String, label: String)
+# Map api routes
+-> /api/v1 api.Routes
 
 # Map static resources from the /public folder to the /assets URL path
 GET /assets/*file controllers.Assets.at(path="/public", file)
