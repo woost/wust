@@ -1,0 +1,16 @@
+<form ng-submit='onSubmit()()'>
+    <div class="input-group">
+        <div class="input-group">
+            <input type="text" class="form-control" placeholder="find" ng-model='ngModel.title' typeahead="node for node in getNodes($viewValue)" typeahead-on-select="onSelect()($item)" typeahead-template-url="discourse_node_search_item.html" required>
+            <span class="input-group-btn">
+                <button class="btn btn-default" type="submit">
+                    <i ng-class='iconClass'></i>
+                </button>
+            </span>
+        </div>
+    </div>
+</form>
+
+<script type="text/ng-template" id="discourse_node_search_item.html">
+    <a href="#" class="node" ng-class="match.model.css" ng-bind="match.model.title"></a>
+</script>

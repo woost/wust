@@ -1,21 +1,16 @@
 app.controller('SearchCtrl', function($scope, Search, DiscourseNode, $state) {
-    $scope.getNodes = getNodes;
+    $scope.searchTyped = {
+        title: ""
+    };
+
+    $scope.searchNodes = Search.query;
     $scope.onSelect = onSelect;
 
-    function getNodes(term) {
-        return Search.query(term).$promise.then(function(response) {
-            return response.map(function(item) {
-                item.css = DiscourseNode.getCss(item.label);
-                return item;
-            });
-        });
-    }
-
-    function onSelect($item, $model, $label) {
+    function onSelect($item) {
         var state = DiscourseNode.getState($item.label);
         $state.go(state, {
             id: $item.id
         });
-        $scope.searchSelected = "";
+        $scope.searchTyped.title = "";
     }
 });

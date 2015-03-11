@@ -29,24 +29,10 @@ app.service('DiscourseNodeList', function(DiscourseNode, Search) {
         };
     }
 
-    // TODO: extract into service /search_ctrl
-    function search(searchFunc) {
-        return function(term) {
-            return searchFunc(term).$promise.then(function(response) {
-                return response.map(function(item) {
-                    item.css = DiscourseNode.getCss(item.label);
-                    return item;
-                });
-            });
-        };
-    }
-
-    function onSearchSelect(createFunc) {
-        return function($item, $model, $label) {
-            //TODO: this adds a new item, should just connect to an existing one:
-            this.new = $item;
-            this.add();
-        };
+    function onSearchSelect($item) {
+        //TODO: this adds a new item, should just connect to an existing one:
+        this.new = $item;
+        this.add();
     }
 
     function Item(id, queryFunc, createFunc, removeFunc) {
@@ -55,42 +41,38 @@ app.service('DiscourseNodeList', function(DiscourseNode, Search) {
             title: ""
         };
         this.list = queryFunc ? queryFunc(this.id) : [];
-        this.add = createFunc ? add(createFunc) : todo;
-        this.remove = removeFunc ? remove(removeFunc) : todo;
-        this.onSelect = createFunc ? onSearchSelect(createFunc) : todo;
-        this.search = search(Search.query);
+        this.add = createFunc ? add(createFunc).bind(this) : todo;
+        this.remove = removeFunc ? remove(removeFunc).bind(this) : todo;
+        this.onSelect = onSearchSelect.bind(this);
     }
 
     function Goal() {
         Item.apply(this, arguments);
-        this.state = DiscourseNode.goal.state;
-        this.search = search(Search.queryGoals);
+        this.search = Search.queryGoals;
+        this.info = DiscourseNode.problem;
         this.style = {
-            template: "show_discourse_node_list.html",
-            discourse: DiscourseNode.goal.css,
-            list: "node_list",
+            templateurl: "show_discourse_node_list.html",
+            listcss: "discourse_node_list",
         };
     }
 
     function Problem() {
         Item.apply(this, arguments);
-        this.state = DiscourseNode.problem.state;
-        this.search = search(Search.queryProblems);
+        this.search = Search.queryProblems;
+        this.info = DiscourseNode.problem;
         this.style = {
-            template: "show_discourse_node_list.html",
-            discourse: DiscourseNode.problem.css,
-            list: "node_list",
+            templateUrl: "show_discourse_node_list.html",
+            listCss: "discourse_node_list",
         };
     }
 
     function Idea() {
         Item.apply(this, arguments);
-        this.state = DiscourseNode.idea.state;
-        this.search = search(Search.queryIdeas);
+        this.search = Search.queryIdeas;
+        this.info = DiscourseNode.idea;
         this.style = {
-            template: "show_discourse_idea_list.html",
-            discourse: DiscourseNode.idea.css,
-            list: "idea_list",
+            templateUrl: "show_discourse_idea_list.html",
+            listCss: "discourse_idea_list",
         };
     }
 });

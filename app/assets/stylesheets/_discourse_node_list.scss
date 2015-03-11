@@ -1,10 +1,7 @@
 #show_discourse_node_list {
-    .node {
-        margin: 5px;
-    }
-    .idea_list {
+    .discourse_idea_list {
         display: flex;
         flex-wrap: wrap;
     }
-    .node_list {}
+    .discourse_node_list {}
 }
