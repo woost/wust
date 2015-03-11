@@ -49,10 +49,10 @@ app.service('DiscourseNodeList', function(DiscourseNode, Search) {
     function Goal() {
         Item.apply(this, arguments);
         this.search = Search.queryGoals;
-        this.info = DiscourseNode.problem;
+        this.info = DiscourseNode.goal;
         this.style = {
-            templateurl: "show_discourse_node_list.html",
-            listcss: "discourse_node_list",
+            templateUrl: "show_discourse_node_list.html",
+            listCss: "discourse_node_list",
         };
     }
 
