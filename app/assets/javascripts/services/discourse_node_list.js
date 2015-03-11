@@ -11,19 +11,19 @@ app.service('DiscourseNodeList', function(DiscourseNode, Search) {
         return function() {
             var self = this;
             createFunc(self.id, self.new).$promise.then(function(data) {
-                toastr.success("Added new item");
+                toastr.success("Added new node");
                 self.list.push(data);
                 self.new.title = "";
             });
         };
     }
 
-    function remove(removeFunc) {
+    function disconnect(disconnectFunc) {
         return function(elem) {
             var self = this;
             var index = self.list.indexOf(elem);
-            removeFunc(self.id, elem.id).$promise.then(function(data) {
-                toastr.success("Removed item");
+            disconnectFunc(self.id, elem.id).$promise.then(function(data) {
+                toastr.success("Disconnected node");
                 self.list.splice(index, 1);
             });
         };
@@ -35,19 +35,19 @@ app.service('DiscourseNodeList', function(DiscourseNode, Search) {
         this.add();
     }
 
-    function Item(id, queryFunc, createFunc, removeFunc) {
+    function Node(id, queryFunc, createFunc, disconnectFunc) {
         this.id = id;
         this.new = {
             title: ""
         };
         this.list = queryFunc ? queryFunc(this.id) : [];
         this.add = createFunc ? add(createFunc).bind(this) : todo;
-        this.remove = removeFunc ? remove(removeFunc).bind(this) : todo;
+        this.disconnect = disconnectFunc ? disconnect(disconnectFunc).bind(this) : todo;
         this.onSelect = onSearchSelect.bind(this);
     }
 
     function Goal() {
-        Item.apply(this, arguments);
+        Node.apply(this, arguments);
         this.search = Search.queryGoals;
         this.info = DiscourseNode.goal;
         this.style = {
@@ -57,7 +57,7 @@ app.service('DiscourseNodeList', function(DiscourseNode, Search) {
     }
 
     function Problem() {
-        Item.apply(this, arguments);
+        Node.apply(this, arguments);
         this.search = Search.queryProblems;
         this.info = DiscourseNode.problem;
         this.style = {
@@ -67,7 +67,7 @@ app.service('DiscourseNodeList', function(DiscourseNode, Search) {
     }
 
     function Idea() {
-        Item.apply(this, arguments);
+        Node.apply(this, arguments);
         this.search = Search.queryIdeas;
         this.info = DiscourseNode.idea;
         this.style = {

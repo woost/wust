@@ -1,4 +1,4 @@
-app.controller('IdeasCtrl', function($scope, $stateParams, Idea, DiscourseNodeList, DiscourseNode) {
+app.controller('IdeasCtrl', function($scope, $stateParams, Idea, DiscourseNodeList, DiscourseNodeView, DiscourseNode) {
     var id = $stateParams.id;
 
     $scope.nodeCss = DiscourseNode.idea.css;
@@ -6,4 +6,5 @@ app.controller('IdeasCtrl', function($scope, $stateParams, Idea, DiscourseNodeLi
     $scope.goals = new DiscourseNodeList.Goal(id, Idea.queryGoals, Idea.createGoal);
     $scope.problems = new DiscourseNodeList.Problem(id, Idea.queryProblems, Idea.createProblem);
     $scope.ideas = new DiscourseNodeList.Idea();
+    $scope.removeFocused = DiscourseNodeView.removeFocused(Idea.remove, id);
 });
