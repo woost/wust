@@ -73,7 +73,3 @@ app.factory('httpErrorResponseInterceptor', function($q, $injector) {
 app.config(function($httpProvider) {
     $httpProvider.interceptors.push('httpErrorResponseInterceptor');
 });
-
-app.run(function($rootScope, StateHistory) {
-    $rootScope.$on('$stateChangeStart', StateHistory.onStateChange);
-});

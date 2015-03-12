@@ -18,22 +18,12 @@ app.service('DiscourseNode', function() {
     };
 
     this.get = get;
-    this.getByState = getByState;
 
     var mappings = {
         GOAL: this.goal,
         PROBLEM: this.problem,
         IDEA: this.idea,
     };
-
-    function getByState(state) {
-        for (var prop in mappings) {
-            if (mappings.hasOwnProperty(prop)) {
-                if (mappings[prop].state === state)
-                    return mappings[prop];
-            }
-        }
-    }
 
     function get(label) {
         return mappings[label];

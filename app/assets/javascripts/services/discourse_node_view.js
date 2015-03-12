@@ -1,4 +1,4 @@
-app.factory('DiscourseNodeView', function($state, $stateParams, DiscourseNodeList) {
+app.factory('DiscourseNodeView', function($state, $stateParams, NodeHistory, DiscourseNodeList) {
     return function(scope, nodeInfo, service) {
         var id = $stateParams.id;
 
@@ -8,13 +8,14 @@ app.factory('DiscourseNodeView', function($state, $stateParams, DiscourseNodeLis
         scope.problems = new DiscourseNodeList.Problem(id, service);
         scope.ideas = new DiscourseNodeList.Idea(id, service);
         scope.removeFocused = removeFocused(id, service.remove);
+        NodeHistory.add(scope.node);
     };
 
     function removeFocused(id, removeFunc) {
         return function() {
             removeFunc(id).$promise.then(function(data) {
                 toastr.success("Removed node");
-                $state.go('home');
+                $state.go('browse');
             });
         };
     }

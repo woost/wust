@@ -57,7 +57,7 @@ $discourse_conargument_color: #ff6d6f;
 }
 
 .discourse_idea {
-    @include discourse_node($discourse_idea_color);
+    @include discourse_node($discourse_idea_color, "");
 }
 
 .discourse_proargument {

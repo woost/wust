@@ -1,3 +1,3 @@
-app.controller('FooterCtrl', function($scope, StateHistory) {
-    $scope.states = StateHistory.states;
+app.controller('FooterCtrl', function($scope, NodeHistory) {
+    $scope.visited = NodeHistory.visited;
 });

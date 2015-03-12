@@ -1,5 +1,5 @@
 <div id="footer">
     <i class="fa fa-eye"></i>
 
-    <a ui-draggable="true" drag="state.params" ng-repeat="state in states" class="node" ui-sref="{{state.info.name}}({id: state.params.id})" ng-class="state.css"></a>
+    <a ui-draggable="true" drag="item.node" ng-repeat="item in visited" class="node" ui-sref="{{item.info.state}}({id: item.node.id})" ng-class="item.info.css">{{item.node.title | limitTo: 10}}<span ng-show="item.node.title.length > 10">...</span></a>
 </div>
