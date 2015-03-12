@@ -1,7 +1,7 @@
 app.service('Idea', function($resource, Node) {
     var service = $resource('/api/v1/ideas/:id', { id: '@id' });
-    var goalService = $resource('/api/v1/ideas/:id/goals', { id: '@id' });
-    var problemService = $resource('/api/v1/ideas/:id/problems', { id: '@id' });
+    var goalService = $resource('/api/v1/ideas/:id/goals/:otherId', { id: '@id', otherId: '@otherId'});
+    var problemService = $resource('/api/v1/ideas/:id/problems/:otherId', { id: '@id', otherId: '@otherId'});
 
     this.get = Node.get(service);
     this.create = Node.create(service);

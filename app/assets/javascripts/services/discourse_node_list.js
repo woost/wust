@@ -1,24 +1,23 @@
-app.service('DiscourseNodeList', function(DiscourseNode, Search) {
-    this.Goal = Goal;
-    this.Problem = Problem;
-    this.Idea = Idea;
+app.service('DiscourseNodeList', function(DiscourseNode, Idea, Problem, Goal, Search) {
+    this.Goal = GoalNode;
+    this.Problem = ProblemNode;
+    this.Idea = IdeaNode;
 
     function todo() {
         toastr.error("not implemented");
     }
 
-    function add(createFunc) {
+    function create(createFunc) {
         return function() {
             var self = this;
-            createFunc(self.id, self.new).$promise.then(function(data) {
-                toastr.success("Added new node");
-                self.list.push(data);
-                self.new.title = "";
+            createFunc(self.new).$promise.then(function(data) {
+                toastr.success("Created new node");
+                self.add(data);
             });
         };
     }
 
-    function disconnect(disconnectFunc) {
+    function remove(disconnectFunc) {
         return function(elem) {
             var self = this;
             var index = self.list.indexOf(elem);
@@ -29,25 +28,30 @@ app.service('DiscourseNodeList', function(DiscourseNode, Search) {
         };
     }
 
-    function onSearchSelect($item) {
-        //TODO: this adds a new item, should just connect to an existing one:
-        this.new = $item;
-        this.add();
+    function add(connectFunc) {
+        return function($item) {
+            var self = this;
+            connectFunc(self.id, $item.id).$promise.then(function(data) {
+                toastr.success("Connected node");
+                self.list.push(data);
+                self.new.title = "";
+            });
+        };
     }
 
-    function Node(id, queryFunc, createFunc, disconnectFunc) {
+    function Node(id, queryFunc, connectFunc, disconnectFunc) {
         this.id = id;
         this.new = {
             title: ""
         };
         this.list = queryFunc ? queryFunc(this.id) : [];
-        this.add = createFunc ? add(createFunc).bind(this) : todo;
-        this.disconnect = disconnectFunc ? disconnect(disconnectFunc).bind(this) : todo;
-        this.onSelect = onSearchSelect.bind(this);
+        this.remove = disconnectFunc ? remove(disconnectFunc).bind(this) : todo;
+        this.add = connectFunc ? add(connectFunc).bind(this) : todo;
     }
 
-    function Goal() {
+    function GoalNode() {
         Node.apply(this, arguments);
+        this.create = create(Goal.create).bind(this);
         this.search = Search.queryGoals;
         this.info = DiscourseNode.goal;
         this.style = {
@@ -56,8 +60,9 @@ app.service('DiscourseNodeList', function(DiscourseNode, Search) {
         };
     }
 
-    function Problem() {
+    function ProblemNode() {
         Node.apply(this, arguments);
+        this.create = create(Problem.create).bind(this);
         this.search = Search.queryProblems;
         this.info = DiscourseNode.problem;
         this.style = {
@@ -66,8 +71,9 @@ app.service('DiscourseNodeList', function(DiscourseNode, Search) {
         };
     }
 
-    function Idea() {
+    function IdeaNode() {
         Node.apply(this, arguments);
+        this.create = create(Idea.create).bind(this);
         this.search = Search.queryIdeas;
         this.info = DiscourseNode.idea;
         this.style = {

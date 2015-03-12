@@ -28,43 +28,31 @@ object Ideas extends Controller with ContentNodesController[Idea] {
     Ok(Json.toJson(db.queryGraph(query).nodes.map(Problem.create)))
   }
 
-  def createProblem(uuid: String) = Action { request =>
-    val json = request.body.asJson.get
-    val nodeAdd = json.as[ProblemAddRequest]
-
-    val discourse = nodeDiscourseGraph(uuid)
-
-    val idea = discourse.ideas.head
-    val problem = Problem.local(nodeAdd.title)
-    val solves = Solves.local
-
-    discourse.add(solves)
-    discourse.add(problem)
-
-    discourse.add(SolvesToProblem.local(solves, problem))
-    discourse.add(IdeaToSolves.local(idea, solves))
-
-    db.persistChanges(discourse.graph)
-    Ok(Json.toJson(problem))
-  }
-
-  def createGoal(uuid: String) = Action { request =>
-    val json = request.body.asJson.get
-    val nodeAdd = json.as[GoalAddRequest]
-
-    val discourse = nodeDiscourseGraph(uuid)
-
-    val idea = discourse.ideas.head
-    val goal = Goal.local(nodeAdd.title)
+  def connectGoal(uuid: String, uuidGoal: String) = Action {
+    val discourse = nodeDiscourseGraph(List(uuid, uuidGoal))
+    val idea = discourse.ideas.find(p => p.uuid == uuid).get
+    val goal = discourse.goals.find(p => p.uuid == uuidGoal).get
     val reaches = Reaches.local
 
     discourse.add(reaches)
-    discourse.add(goal)
-
     discourse.add(ReachesToGoal.local(reaches, goal))
     discourse.add(IdeaToReaches.local(idea, reaches))
 
     db.persistChanges(discourse.graph)
     Ok(Json.toJson(goal))
+  }
+
+  def connectProblem(uuid: String, uuidProblem: String) = Action {
+    val discourse = nodeDiscourseGraph(List(uuid, uuidProblem))
+    val idea = discourse.ideas.find(p => p.uuid == uuid).get
+    val problem = discourse.problems.find(p => p.uuid == uuidProblem).get
+    val solves = Solves.local
+
+    discourse.add(solves)
+    discourse.add(SolvesToProblem.local(solves, problem))
+    discourse.add(IdeaToSolves.local(idea, solves))
+
+    db.persistChanges(discourse.graph)
+    Ok(Json.toJson(problem))
   }
 }

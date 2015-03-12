@@ -26,16 +26,10 @@ object Goals extends Controller with ContentNodesController[Goal] {
     Ok(Json.toJson(db.queryGraph(query).nodes.map(Problem.create)))
   }
 
-  def createProblem(uuid: String) = Action { request =>
-    val json = request.body.asJson.get
-    val nodeAdd = json.as[ProblemAddRequest]
-
-    val discourse = nodeDiscourseGraph(uuid)
-
-    val goal = discourse.goals.head
-    val problem = Problem.local(nodeAdd.title)
-
-    discourse.add(problem)
+  def connectProblem(uuid: String, uuidProblem: String) = Action {
+    val discourse = nodeDiscourseGraph(List(uuid, uuidProblem))
+    val goal = discourse.goals.find(p => p.uuid == uuid).get
+    val problem = discourse.problems.find(p => p.uuid == uuidProblem).get
 
     discourse.add(Prevents.local(problem, goal))
 
@@ -43,19 +37,13 @@ object Goals extends Controller with ContentNodesController[Goal] {
     Ok(Json.toJson(problem))
   }
 
-  def createIdea(uuid: String) = Action { request =>
-    val json = request.body.asJson.get
-    val nodeAdd = json.as[IdeaAddRequest]
-
-    val discourse = nodeDiscourseGraph(uuid)
-
-    val goal = discourse.goals.head
-    val idea = Idea.local(nodeAdd.title)
+  def connectIdea(uuid: String, uuidIdea: String) = Action {
+    val discourse = nodeDiscourseGraph(List(uuid, uuidIdea))
+    val goal = discourse.goals.find(p => p.uuid == uuid).get
+    val idea = discourse.ideas.find(p => p.uuid == uuidIdea).get
     val reaches = Reaches.local
 
     discourse.add(reaches)
-    discourse.add(idea)
-
     discourse.add(ReachesToGoal.local(reaches, goal))
     discourse.add(IdeaToReaches.local(idea, reaches))
 
@@ -63,7 +51,7 @@ object Goals extends Controller with ContentNodesController[Goal] {
     Ok(Json.toJson(idea))
   }
 
-  def removeProblem(uuid: String, uuidProblem: String) = Action {
+  def disconnectProblem(uuid: String, uuidProblem: String) = Action {
     val discourse = relationDiscourseGraph(uuidProblem, Prevents.relationType, uuid)
     discourse.graph.relations.clear()
     db.persistChanges(discourse.graph)

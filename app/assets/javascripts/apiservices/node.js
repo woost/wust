@@ -7,8 +7,8 @@ app.service('Node', function() {
     this.removeConnected = removeConnected;
 
     function createConnected(service) {
-        return function(id, obj) {
-            return service.save({id: id}, obj);
+        return function(id, otherId) {
+            return service.save({id: id, otherId: otherId});
         };
     }
 

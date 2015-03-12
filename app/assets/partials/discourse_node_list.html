@@ -4,7 +4,7 @@
             <div ng-include="ngModel.style.templateUrl"></div>
         </div>
         <div>
-        <div discourse-node-search-form ng-model='ngModel.new' on-submit='ngModel.add' on-select="ngModel.onSelect" search-nodes='ngModel.search' icon-class="fa fa-plus"></div>
+        <div discourse-node-search-form ng-model='ngModel.new' on-submit='ngModel.create' on-select="ngModel.add" search-nodes='ngModel.search' icon-class="fa fa-plus"></div>
         </div>
     </div>
 </div>
@@ -12,7 +12,7 @@
 <script type="text/ng-template" id="show_discourse_node_list.html">
     <div class="btn-group" role="group" style="padding:3px">
         <button ng-class="ngModel.info.css" class="btn" ui-sref="{{ngModel.info.state}}({id: node.id})">{{node.title}}</button>
-        <button class='btn btn-default' ng-click='ngModel.disconnect(node)'><i class='fa fa-minus text-default'></i></button>
+        <button class='btn btn-default' ng-click='ngModel.remove(node)'><i class='fa fa-minus text-default'></i></button>
     </div>
 </script>
 
@@ -29,7 +29,7 @@
             <br />
             <!-- <span class="discourse_proargument node">pro</span> -->
             <!-- <span class="discourse_conargument node">con</span> -->
-            <button class='btn btn-default btn-xs pull-right' ng-click='ngModel.disconnect(node)'>
+            <button class='btn btn-default btn-xs pull-right' ng-click='ngModel.remove(node)'>
                 <i class='fa fa-minus'></i>
             </button>
         </div>

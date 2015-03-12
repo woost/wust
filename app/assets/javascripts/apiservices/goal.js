@@ -1,6 +1,6 @@
 app.service('Goal', function($resource, Node) {
     var service = $resource('/api/v1/goals/:id', { id: '@id' });
-    var ideaService = $resource('/api/v1/goals/:id/ideas', { id: '@id' });
+    var ideaService = $resource('/api/v1/goals/:id/ideas/:otherId', { id: '@id', otherId: '@otherId'});
     var problemService = $resource('/api/v1/goals/:id/problems/:otherId', { id: '@id', otherId: '@otherId' });
 
     this.get = Node.get(service);
