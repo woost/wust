@@ -17,6 +17,7 @@ libraryDependencies ++= Seq(
   "org.webjars" % "visjs" % "3.11.0",
   "org.webjars" % "toastr" % "2.1.0",
   "org.webjars" % "animate.css" % "3.2.1",
+  "org.webjars" % "angular-dragdrop" % "1.0.6-1",
   "com.github.renesca" %% "renesca" % "0.1.2"
 )
 

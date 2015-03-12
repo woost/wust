@@ -1,7 +1,30 @@
 #show_discourse_node_list {
     .discourse_idea_list {
+        padding: 4px;
         display: flex;
         flex-wrap: wrap;
+        &.on-drag-enter {
+            background-color: $discourse_idea_color;
+        }
     }
-    .discourse_node_list {}
+    .discourse_problem_list {
+        padding: 4px;
+        &.on-drag-enter {
+            background-color: $discourse_problem_color;
+        }
+    }
+    .discourse_goal_list {
+        padding: 4px;
+        &.on-drag-enter {
+            background-color: $discourse_goal_color;
+        }
+    }
+
+    .on-drag-hover:after {
+        content: 'Drop to connect';
+        display: block;
+        color: white;
+        font-size: x-large;
+        font-weight: 800;
+    }
 }

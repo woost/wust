@@ -56,7 +56,7 @@ app.service('DiscourseNodeList', function(DiscourseNode, Idea, Problem, Goal, Se
         this.info = DiscourseNode.goal;
         this.style = {
             templateUrl: "show_discourse_node_list.html",
-            listCss: "discourse_node_list",
+            listCss: "discourse_goal_list",
         };
     }
 
@@ -65,7 +65,7 @@ app.service('DiscourseNodeList', function(DiscourseNode, Idea, Problem, Goal, Se
         this.info = DiscourseNode.problem;
         this.style = {
             templateUrl: "show_discourse_node_list.html",
-            listCss: "discourse_node_list",
+            listCss: "discourse_problem_list",
         };
     }
 

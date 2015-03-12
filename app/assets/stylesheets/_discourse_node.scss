@@ -1,3 +1,9 @@
+$discourse_goal_color: #6dffb4;
+$discourse_problem_color: #ffdc6d;
+$discourse_idea_color: #6db5ff;
+$discourse_proargument_color: #79ff6d;
+$discourse_conargument_color: #ff6d6f;
+
 @mixin discourse_node($bgcolor, $icon: "") {
     $bordercolor: desaturate(darken($bgcolor, 34), 43);
     $bgcolor-highlight: lighten($bgcolor, 13);
@@ -43,21 +49,21 @@
 }
 
 .discourse_goal {
-    @include discourse_node(#6dffb4, "");
+    @include discourse_node($discourse_goal_color, "");
 }
 
 .discourse_problem {
-    @include discourse_node(#ffdc6d, "");
+    @include discourse_node($discourse_problem_color, "");
 }
 
 .discourse_idea {
-    @include discourse_node(#6db5ff, "");
+    @include discourse_node($discourse_idea_color);
 }
 
 .discourse_proargument {
-    @include discourse_node(#79ff6d);
+    @include discourse_node($discourse_proargument_color);
 }
 
 .discourse_conargument {
-    @include discourse_node(#ff6d6f);
+    @include discourse_node($discourse_conargument_color);
 }

@@ -1,4 +1,5 @@
 <div id="footer">
     <i class="fa fa-eye"></i>
-    <a ng-repeat="state in states" class="node" ui-sref="{{state.info.name}}({id: state.params.id})" ng-class="state.css"></a>
+
+    <a ui-draggable="true" drag="state.params" ng-repeat="state in states" class="node" ui-sref="{{state.info.name}}({id: state.params.id})" ng-class="state.css"></a>
 </div>

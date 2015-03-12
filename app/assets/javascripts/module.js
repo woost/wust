@@ -3,4 +3,5 @@ var app = angular.module("wust", [
     'ngAnimate',
     'ui.router',
     'ui.bootstrap',
+    'ang-drag-drop',
 ]);

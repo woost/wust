@@ -1,10 +1,8 @@
 <div id="show_discourse_node_list">
-    <div ng-class='ngModel.style.listCss'>
+    <div discourse-node-search-form ng-model='ngModel.new' on-submit='ngModel.create' on-select="ngModel.add" search-nodes='ngModel.search' icon-class="fa fa-plus"></div>
+    <div ui-on-Drop="ngModel.add($data)" ng-class='ngModel.style.listCss'>
         <div ng-repeat='node in ngModel.list'>
             <div ng-include="ngModel.style.templateUrl"></div>
-        </div>
-        <div>
-        <div discourse-node-search-form ng-model='ngModel.new' on-submit='ngModel.create' on-select="ngModel.add" search-nodes='ngModel.search' icon-class="fa fa-plus"></div>
         </div>
     </div>
 </div>
