@@ -11,7 +11,9 @@ app.controller('GraphsCtrl', function($scope, $state, $filter, Graph, DiscourseN
         options: {
             nodes: {
                 shape: 'box',
-                radius: 4
+                radius: 4,
+                iconFontFace: 'FontAwesome',
+                icon: "\uf0c3"
             },
             edges: {
                 color: '#353535',
