@@ -1,4 +1,4 @@
-app.controller("HomeCtrl", function($scope, $state, Problem, Goal, Idea, DiscourseNode) {
+app.controller("BrowseCtrl", function($scope, $state, Problem, Goal, Idea, DiscourseNode) {
     //TODO: only get nodes from server if actually displayed
     var problems = {
         active: true,

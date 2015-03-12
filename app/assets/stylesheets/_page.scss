@@ -36,6 +36,9 @@ body {
                     -o-animation: fadeIn 0.5s;
                     animation: fadeIn 0.5s;
                 }
+                & > .ng-scope {
+                    height: inherit;
+                }
             }
         }
     }

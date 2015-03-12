@@ -1,4 +1,4 @@
-app.controller('SearchCtrl', function($scope, Search, DiscourseNode, $state) {
+app.controller('NavigationCtrl', function($scope, Search, DiscourseNode, $state) {
     $scope.searchTyped = {
         title: ""
     };

@@ -1,34 +1,49 @@
 app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
-    $stateProvider.state('home', {
+    $stateProvider.state('page', {
         url: '/',
-        templateUrl: 'assets/views/home.html',
-        controller: 'HomeCtrl',
-    }).state('help', {
-        url: '/help',
-        templateUrl: 'assets/views/help.html',
+        abstract: true,
+        views: {
+            'navigation': {
+                templateUrl: 'assets/views/navigation.html',
+                controller: 'NavigationCtrl',
+            },
+            'content': {
+                template: '<div ui-view></div>'
+            }
+        }
+    }).state('browse', {
+        parent: 'page',
+        url: 'browse',
+        templateUrl: 'assets/views/browse.html',
+        controller: 'BrowseCtrl',
     }).state('vote', {
-        url: '/vote',
+        parent: 'page',
+        url: 'vote',
         templateUrl: 'assets/views/vote.html',
         controller: 'VotesCtrl',
-    }).state('graphs', {
-        url: '/graphs',
+    }).state('graph', {
+        parent: 'page',
+        url: 'graph',
         templateUrl: 'assets/views/graph.html',
         controller: 'GraphsCtrl',
     }).state('goals', {
-        url: '/focus/goals/:id',
+        parent: 'page',
+        url: 'goals/:id',
         templateUrl: 'assets/views/focus_view.html',
         controller: 'GoalsCtrl',
     }).state('problems', {
-        url: '/focus/problems/:id',
+        parent: 'page',
+        url: 'problems/:id',
         templateUrl: 'assets/views/focus_view.html',
         controller: 'ProblemsCtrl',
     }).state('ideas', {
-        url: '/focus/ideas/:id',
+        parent: 'page',
+        url: 'ideas/:id',
         templateUrl: 'assets/views/focus_view.html',
         controller: 'IdeasCtrl',
     });
 
-    $urlRouterProvider.otherwise('/');
+    $urlRouterProvider.otherwise('/browse');
 
     $locationProvider.html5Mode(true);
 });

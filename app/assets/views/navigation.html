@@ -11,17 +11,15 @@
 
         <div class="collapse navbar-collapse" id="navigation_links">
             <ul class="nav navbar-nav nav-pills navbar-left">
-                <li><a ui-sref="home" ui-sref-active="active"><i class="fa fa-paper-plane"></i> Browse</a>
+                <li><a ui-sref="browse" ui-sref-active="active"><i class="fa fa-paper-plane"></i> Browse</a>
                 </li>
-                <li><a ui-sref="graphs" ui-sref-active="active"><i class="fa fa-connectdevelop"></i> Graphs</a>
+                <li><a ui-sref="graph" ui-sref-active="active"><i class="fa fa-connectdevelop"></i> Graph</a>
                 </li>
                 <li><a ui-sref="vote" ui-sref-active="active"><i class="fa fa-check-square-o"></i> Vote</a>
                 </li>
-                <li ng-hide="true"><a ui-sref="help" ui-sref-active="active"><i class="fa fa-question"></i> Help</a>
-                </li>
             </ul>
 
-            <div discourse-node-search-form ng-model='searchTyped' on-select="onSelect" search-nodes='searchNodes' icon-class="fa fa-search" class="navbar-form navbar-left" role="search" ng-controller="SearchCtrl"></div>
+            <div discourse-node-search-form ng-model='searchTyped' on-select="onSelect" search-nodes='searchNodes' icon-class="fa fa-search" class="navbar-form navbar-left" role="search"></div>
         </div>
     </div>
 </nav>
