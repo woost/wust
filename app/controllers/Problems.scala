@@ -69,27 +69,16 @@ object Problems extends Controller with ContentNodesController[Problem] {
     Ok(Json.toJson(idea))
   }
 
-  def disconnectGoal(uuid: String, uuidGoal: String) = Action {
-    val discourse = relationDiscourseGraph(uuid, Prevents.relationType, uuidGoal)
-    discourse.graph.relations.clear()
-    db.persistChanges(discourse.graph)
-    Ok(JsObject(Seq()))
+  def disconnectGoal(uuid: String, uuidGoal: String) = {
+    disconnect(uuid, Prevents.relationType, uuidGoal)
   }
 
-  def disconnectProblem(uuid: String, uuidProblem: String) = Action {
-    val discourse = relationDiscourseGraph(uuidProblem, Causes.relationType, uuid)
-    discourse.graph.relations.clear()
-    db.persistChanges(discourse.graph)
-    Ok(JsObject(Seq()))
+  def disconnectProblem(uuid: String, uuidProblem: String) = {
+    disconnect(uuidProblem, Causes.relationType, uuid)
   }
 
-  def disconnectIdea(uuid: String, uuidIdea: String) = Action {
-    val discourse = relationDiscourseGraph(uuidIdea, List(IdeaToSolves.relationType, SolvesToProblem.relationType), uuid)
-    val connectorNodes = discourse.nodes.filter(node => !List(uuid, uuidIdea).contains(node.uuid))
-    discourse.graph.nodes --= connectorNodes.map(_.node)
-
-    db.persistChanges(discourse.graph)
-    Ok(JsObject(Seq()))
+  def disconnectIdea(uuid: String, uuidIdea: String) = {
+    disconnect(uuidIdea, List(IdeaToSolves.relationType, SolvesToProblem.relationType), uuid)
   }
 }
 

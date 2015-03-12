@@ -2,10 +2,10 @@ package controllers
 
 import modules.requests.{GoalAddRequest, IdeaAddRequest, NodeAddRequest, ProblemAddRequest}
 import play.api.libs.json._
-import play.api.mvc.Action
-import play.api.mvc.Controller
+import play.api.mvc.{AnyContent, Action, Controller}
 
 import renesca._
+import renesca.graph.RelationType
 import renesca.parameter.implicits._
 import modules.json.GraphFormat._
 import model._
@@ -41,4 +41,16 @@ trait ContentNodesController[NodeType <: ContentNode] extends Controller with Da
     }
   }
 
+  def disconnect(uuidFrom: String, relationType: RelationType, uuidTo: String): Action[AnyContent] = {
+    disconnect(uuidFrom, List(relationType), uuidTo)
+  }
+
+  def disconnect(uuidFrom: String, relationTypes: Seq[RelationType], uuidTo: String) = Action {
+    val discourse = relationDiscourseGraph(uuidFrom, relationTypes, uuidTo)
+    val connectorNodes = discourse.nodes.filter(node => !List(uuidFrom, uuidTo).contains(node.uuid))
+    discourse.graph.nodes --= connectorNodes.map(_.node)
+    discourse.graph.relations.clear()
+    db.persistChanges(discourse.graph)
+    Ok(JsObject(Seq()))
+  }
 }
