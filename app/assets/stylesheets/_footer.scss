@@ -1,11 +1,13 @@
 #footer {
     z-index: 1001;
+    padding: 3px;
     position: fixed;
     bottom: 0;
     height: 30px;
-    background-color: $dark;
     width: 100%;
-    #recent_description {
-        color: white;
+    background-color: $dark;
+    color: white;
+    .node {
+        padding: auto;
     }
 }
