@@ -24,10 +24,7 @@ trait DatabaseController {
     if(uuids.isEmpty)
       return Discourse.empty
 
-    val uuidMap: ParameterMap = uuids.zipWithIndex.map { case (uuid, i) => s"node_$i" -> uuid }.toMap
-    val nodeMatcher = uuidMap.keys.map(key => s"($key {uuid: {$key}})").mkString(",")
-
-    Discourse(db.queryGraph(Query(s"match $nodeMatcher return *", uuidMap)))
+    Discourse(db.queryGraph(Query("match (n) where n.uuid in {uuids} return *", Map("uuids" -> uuids))))
   }
 
   def relationDiscourseGraph(uuidFrom: String, relationType: RelationType, uuidTo: String): Discourse = {
