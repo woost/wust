@@ -3,8 +3,8 @@ app.controller('ProblemsCtrl', function($scope, $stateParams, Problem, Discourse
 
     $scope.nodeCss = DiscourseNode.problem.css;
     $scope.node = Problem.get(id);
-    $scope.goals = new DiscourseNodeList.Goal(id, Problem.queryGoals, Problem.createGoal, Problem.removeGoal);
-    $scope.problems = new DiscourseNodeList.Problem(id, Problem.queryProblems, Problem.createProblem, Problem.removeProblem);
-    $scope.ideas = new DiscourseNodeList.Idea(id, Problem.queryIdeas, Problem.createIdea);
+    $scope.goals = new DiscourseNodeList.Goal(id, Problem);
+    $scope.problems = new DiscourseNodeList.Problem(id, Problem);
+    $scope.ideas = new DiscourseNodeList.Idea(id, Problem);
     $scope.removeFocused = DiscourseNodeView.removeFocused(Problem.remove, id);
 });

@@ -12,4 +12,5 @@ app.service('Goal', function($resource, Node) {
     this.createIdea = Node.createConnected(ideaService);
     this.createProblem = Node.createConnected(problemService);
     this.removeProblem = Node.removeConnected(problemService);
+    this.removeIdea = Node.removeConnected(ideaService);
 });

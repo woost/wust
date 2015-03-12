@@ -39,20 +39,21 @@ app.service('DiscourseNodeList', function(DiscourseNode, Idea, Problem, Goal, Se
         };
     }
 
-    function Node(id, queryFunc, connectFunc, disconnectFunc) {
+    function Node(id, createFunc, queryFunc, connectFunc, disconnectFunc, searchFunc) {
         this.id = id;
         this.new = {
             title: ""
         };
         this.list = queryFunc ? queryFunc(this.id) : [];
+        this.create = createFunc ? create(createFunc).bind(this): todo;
         this.remove = disconnectFunc ? remove(disconnectFunc).bind(this) : todo;
         this.add = connectFunc ? add(connectFunc).bind(this) : todo;
+        this.search = searchFunc ? searchFunc : Search.query;
     }
 
-    function GoalNode() {
-        Node.apply(this, arguments);
-        this.create = create(Goal.create).bind(this);
-        this.search = Search.queryGoals;
+    function GoalNode(id, node) {
+        node = node || {};
+        Node.call(this, id, Goal.create, node.queryGoals, node.createGoal, node.removeGoal, Search.queryGoals);
         this.info = DiscourseNode.goal;
         this.style = {
             templateUrl: "show_discourse_node_list.html",
@@ -60,10 +61,9 @@ app.service('DiscourseNodeList', function(DiscourseNode, Idea, Problem, Goal, Se
         };
     }
 
-    function ProblemNode() {
-        Node.apply(this, arguments);
-        this.create = create(Problem.create).bind(this);
-        this.search = Search.queryProblems;
+    function ProblemNode(id, node) {
+        node = node || {};
+        Node.call(this, id, Problem.create, node.queryProblems, node.createProblem, node.removeProblem, Search.queryProblems);
         this.info = DiscourseNode.problem;
         this.style = {
             templateUrl: "show_discourse_node_list.html",
@@ -71,10 +71,9 @@ app.service('DiscourseNodeList', function(DiscourseNode, Idea, Problem, Goal, Se
         };
     }
 
-    function IdeaNode() {
-        Node.apply(this, arguments);
-        this.create = create(Idea.create).bind(this);
-        this.search = Search.queryIdeas;
+    function IdeaNode(id, node) {
+        node = node || {};
+        Node.call(this, id, Idea.create, node.queryIdeas, node.createIdea, node.removeIdea, Search.queryIdeas);
         this.info = DiscourseNode.idea;
         this.style = {
             templateUrl: "show_discourse_idea_list.html",

@@ -29,6 +29,14 @@ trait DatabaseController {
   }
 
   def relationDiscourseGraph(uuidFrom: String, relationType: RelationType, uuidTo: String): Discourse = {
-    Discourse(db.queryGraph(Query(s"match (from {uuid: {uuidFrom}})-[r:${relationType}]-(to {uuid: {uuidTo}}) return from, r, to", Map("uuidFrom" -> uuidFrom, "uuidTo" -> uuidTo))))
+    relationDiscourseGraph(uuidFrom, List(relationType), uuidTo)
+  }
+
+  def relationDiscourseGraph(uuidFrom: String, relationTypes: Seq[RelationType], uuidTo: String): Discourse = {
+    if (relationTypes.isEmpty)
+      return Discourse.empty
+
+    val relationMatcher = relationTypes.map(rel => s"-[$rel]->").mkString("()")
+    Discourse(db.queryGraph(Query(s"match (from {uuid: {uuidFrom}})${relationMatcher}(to {uuid: {uuidTo}}) return *", Map("uuidFrom" -> uuidFrom, "uuidTo" -> uuidTo))))
   }
 }

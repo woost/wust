@@ -57,4 +57,12 @@ object Goals extends Controller with ContentNodesController[Goal] {
     db.persistChanges(discourse.graph)
     Ok(JsObject(Seq()))
   }
+
+  def disconnectIdea(uuid: String, uuidIdea: String) = Action {
+    val discourse = relationDiscourseGraph(uuidIdea, List(IdeaToReaches.relationType, ReachesToGoal.relationType), uuid)
+    val connectorNodes = discourse.nodes.filter(node => !List(uuid, uuidIdea).contains(node.uuid))
+    discourse.graph.nodes --= connectorNodes.map(_.node)
+    db.persistChanges(discourse.graph)
+    Ok(JsObject(Seq()))
+  }
 }

@@ -9,6 +9,7 @@ POST /problems/:uuid/ideas/:uuidIdea controllers.Problems.connectIdea(uuid: Stri
 POST /problems controllers.Problems.create
 DELETE /problems/:uuid/goals/:uuidGoal controllers.Problems.disconnectGoal(uuid: String, uuidGoal: String)
 DELETE /problems/:uuid/problems/:uuidProblem controllers.Problems.disconnectProblem(uuid: String, uuidProblem: String)
+DELETE /problems/:uuid/ideas/:uuidIdea controllers.Problems.disconnectIdea(uuid: String, uuidIdea: String)
 DELETE /problems/:uuid controllers.Problems.remove(uuid: String)
 
 GET /ideas controllers.Ideas.index
@@ -18,6 +19,8 @@ GET /ideas/:uuid/problems controllers.Ideas.showProblems(uuid: String)
 POST /ideas/:uuid/goals/:uuidGoal controllers.Ideas.connectGoal(uuid: String, uuidGoal: String)
 POST /ideas/:uuid/problems/:uuidProblem controllers.Ideas.connectProblem(uuid: String, uuidProblem: String)
 POST /ideas controllers.Ideas.create
+DELETE /ideas/:uuid/goals/:uuidGoal controllers.Ideas.disconnectGoal(uuid: String, uuidGoal: String)
+DELETE /ideas/:uuid/problems/:uuidProblem controllers.Ideas.disconnectProblem(uuid: String, uuidProblem: String)
 DELETE /ideas/:uuid controllers.Ideas.remove(uuid: String)
 
 GET /goals controllers.Goals.index
@@ -28,6 +31,7 @@ GET /goals/:uuid/ideas controllers.Goals.showIdeas(uuid: String)
 POST /goals/:uuid/problems/:uuidProblem controllers.Goals.connectProblem(uuid: String, uuidProblem: String)
 POST /goals/:uuid/ideas/:uuidIdea controllers.Goals.connectIdea(uuid: String, uuidIdea: String)
 DELETE /goals/:uuid/problems/:uuidProblem controllers.Goals.disconnectProblem(uuid: String, uuidProblem: String)
+DELETE /goals/:uuid/ideas/:uuidIdea controllers.Goals.disconnectIdea(uuid: String, uuidIdea: String)
 DELETE /goals/:uuid controllers.Goals.remove(uuid: String)
 
 GET /graphs controllers.Graphs.index
