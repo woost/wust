@@ -13,7 +13,7 @@
 
             <h2 ng-bind="slide.listTitle"></h2>
             <div id="list_existing">
-                <div ng-repeat="node in slide.nodes">
+                <div ng-repeat="node in slide.nodes | filter:{title: slide.newNode.title || ''}">
                     <a ui-sref="{{slide.info.state}}({id: node.id})" ng-class="slide.info.css" class="node">{{node.title}}</a>
                 </div>
             </div>
