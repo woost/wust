@@ -91,10 +91,8 @@ object Ideas extends Controller with ContentNodesController[Idea] {
   }
 
   def disconnectIdea(uuid: String, uuidIdea: String) = Action {
-    val discourse = relationDiscourseGraph(uuid, SubIdea.relationType, uuidIdea)
-    val connectorNodes = discourse.nodes.filter(node => !List(uuid, uuidIdea).contains(node.uuid))
-    discourse.graph.nodes --= connectorNodes.map(_.node)
-
+    val discourse = relationDiscourseGraph(uuidIdea, SubIdea.relationType, uuid)
+    discourse.graph.relations.clear()
     db.persistChanges(discourse.graph)
     Ok(JsObject(Seq()))
   }
