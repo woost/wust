@@ -23,6 +23,8 @@ libraryDependencies ++= Seq(
 // javascript file groups
 pipelineStages := Seq(concat)
 
+pipelineStages in Assets := Seq(concat)
+
 Concat.parentDir := "public/main/javascripts"
 
 val jsAssetsDirectory = baseDirectory(_ / "app/assets/javascripts")
