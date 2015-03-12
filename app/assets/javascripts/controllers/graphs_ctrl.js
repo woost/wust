@@ -47,7 +47,7 @@ app.controller('GraphsCtrl', function($scope, $state, $filter, Graph, DiscourseN
                 id: node.id,
                 label: node.title,
                 origLabel: node.label,
-                color: DiscourseNode.getColor(node.label)
+                color: DiscourseNode.get(node.label).color
             };
         });
 
@@ -60,7 +60,7 @@ app.controller('GraphsCtrl', function($scope, $state, $filter, Graph, DiscourseN
     function onClick(selected) {
         var id = selected.nodes[0];
         var node = nodes.get(id);
-        var state = DiscourseNode.getState(node.origLabel);
+        var state = DiscourseNode.get(node.origLabel).state;
         $state.go(state, {
             id: id
         });

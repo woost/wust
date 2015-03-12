@@ -1,9 +1,7 @@
-#graph_container {
-    height: inherit;
-    .graph_view {
-        height: inherit;
-        .graph_network {
-            height: 90%;
-        }
+#graph_view {
+    overflow: hidden;
+    height: 100%;
+    .graph_network {
+        height: 100%;
     }
 }

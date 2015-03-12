@@ -13,32 +13,26 @@ h2 {
     line-height: 36px;
 }
 
-html {
-    height: 100%;
-}
-
-body {
+html, body {
     @include font;
     margin: 0;
     min-width: 600px;
-    height: inherit;
-    #pagecontent {
+    height: 100%;
+    main {
+        padding: 50px 0px 30px 0px;
         height: inherit;
-        main {
+        #main_view {
+            overflow: auto;
             height: inherit;
-            #main_view {
+            &.ng-enter {
+                -webkit-animation: fadeIn 0.5s;
+                -moz-animation: fadeIn 0.5s;
+                -ms-animation: fadeIn 0.5s;
+                -o-animation: fadeIn 0.5s;
+                animation: fadeIn 0.5s;
+            }
+            & > .ng-scope {
                 height: inherit;
-                padding: 50px 0px 0px 0px;
-                &.ng-enter {
-                    -webkit-animation: fadeIn 0.5s;
-                    -moz-animation: fadeIn 0.5s;
-                    -ms-animation: fadeIn 0.5s;
-                    -o-animation: fadeIn 0.5s;
-                    animation: fadeIn 0.5s;
-                }
-                & > .ng-scope {
-                    height: inherit;
-                }
             }
         }
     }

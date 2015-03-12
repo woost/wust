@@ -1,0 +1,11 @@
+#footer {
+    z-index: 1001;
+    position: fixed;
+    bottom: 0;
+    height: 30px;
+    background-color: $dark;
+    width: 100%;
+    #recent_description {
+        color: white;
+    }
+}

@@ -8,7 +8,11 @@ app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
                 controller: 'NavigationCtrl',
             },
             'content': {
-                template: '<div ui-view></div>'
+                template: '<div ui-view></div>',
+            },
+            'footer': {
+                templateUrl: 'assets/views/footer.html',
+                controller: 'FooterCtrl',
             }
         }
     }).state('browse', {
@@ -68,4 +72,8 @@ app.factory('httpErrorResponseInterceptor', function($q, $injector) {
 
 app.config(function($httpProvider) {
     $httpProvider.interceptors.push('httpErrorResponseInterceptor');
+});
+
+app.run(function($rootScope, StateHistory) {
+    $rootScope.$on('$stateChangeStart', StateHistory.onStateChange);
 });

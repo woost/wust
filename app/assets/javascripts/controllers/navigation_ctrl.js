@@ -7,7 +7,7 @@ app.controller('NavigationCtrl', function($scope, Search, DiscourseNode, $state)
     $scope.onSelect = onSelect;
 
     function onSelect($item) {
-        var state = DiscourseNode.getState($item.label);
+        var state = DiscourseNode.get($item.label).state;
         $state.go(state, {
             id: $item.id
         });

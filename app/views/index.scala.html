@@ -1,18 +1,15 @@
 <!DOCTYPE html>
 
 <html ng-app='wust'>
+    <head>
+        <base href="/">
+        <title>Wust</title>
+        @includes()
+        @noscript()
+    </head>
 
-<head>
-    <base href="/">
-    <title>Wust</title>
-    @includes()
-    @noscript()
-</head>
-
-<body>
-    <div id="pagecontent">
+    <body>
         @main_view()
-    </div>
-</body>
+    </body>
 
 </html>

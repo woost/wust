@@ -17,9 +17,8 @@ app.service('DiscourseNode', function() {
         color: "#6DB5FF",
     };
 
-    this.getState = getProperty("state");
-    this.getCss = getProperty("css");
-    this.getColor = getProperty("color");
+    this.get = get;
+    this.getByState = getByState;
 
     var mappings = {
         GOAL: this.goal,
@@ -27,9 +26,16 @@ app.service('DiscourseNode', function() {
         IDEA: this.idea,
     };
 
-    function getProperty(property) {
-        return function(label) {
-            return mappings[label][property];
-        };
+    function getByState(state) {
+        for (var prop in mappings) {
+            if (mappings.hasOwnProperty(prop)) {
+                if (mappings[prop].state === state)
+                    return mappings[prop];
+            }
+        }
+    }
+
+    function get(label) {
+        return mappings[label];
     }
 });

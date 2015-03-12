@@ -16,7 +16,7 @@ app.directive("discourseNodeSearchForm", function(DiscourseNode) {
             function getNodes(term) {
                 return $scope.searchNodes()(term).$promise.then(function(response) {
                     return response.map(function(item) {
-                        item.css = DiscourseNode.getCss(item.label);
+                        item.css = DiscourseNode.get(item.label).css;
                         return item;
                     });
                 });
