@@ -4,7 +4,7 @@ version := "1.0-SNAPSHOT"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala, SbtWeb)
 
-scalaVersion := "2.11.5"
+scalaVersion := "2.11.6"
 
 libraryDependencies ++= Seq(
   "org.webjars" %% "webjars-play" % "2.3.0-2",
@@ -14,7 +14,7 @@ libraryDependencies ++= Seq(
   "org.webjars" % "font-awesome" % "4.3.0-1",
   "org.webjars" % "bootstrap" % "3.3.2-1",
   "org.webjars" % "spin-js" % "2.0.0-1",
-  "org.webjars" % "visjs" % "3.10.0",
+  "org.webjars" % "visjs" % "3.11.0",
   "org.webjars" % "toastr" % "2.1.0",
   "org.webjars" % "animate.css" % "3.2.1",
   "com.github.renesca" %% "renesca" % "0.1.2"
