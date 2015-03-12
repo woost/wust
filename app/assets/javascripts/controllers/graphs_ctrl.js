@@ -59,6 +59,9 @@ app.controller('GraphsCtrl', function($scope, $state, $filter, Graph, DiscourseN
 
     function onClick(selected) {
         var id = selected.nodes[0];
+        if (id === undefined)
+            return;
+
         var node = nodes.get(id);
         var state = DiscourseNode.get(node.origLabel).state;
         $state.go(state, {
