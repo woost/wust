@@ -38,7 +38,8 @@ trait DatabaseController {
     if(relationTypes.isEmpty)
       return Discourse.empty
 
-    val relationMatcher = relationTypes.map(rel => s"-[$rel]->").mkString("()")
-    Discourse(db.queryGraph(Query(s"match (from {uuid: {uuidFrom}})${ relationMatcher }(to {uuid: {uuidTo}}) return *", Map("uuidFrom" -> uuidFrom, "uuidTo" -> uuidTo))))
+    val relationMatcher = relationTypes.map(rel => s"-[`$rel`]->").mkString("()")
+    Discourse(db.queryGraph(Query(s"match (from {uuid: {uuidFrom}})${ relationMatcher }(to {uuid: {uuidTo}}) return *",
+      Map("uuidFrom" -> uuidFrom, "uuidTo" -> uuidTo))))
   }
 }
