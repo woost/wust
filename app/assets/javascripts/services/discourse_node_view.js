@@ -14,6 +14,7 @@ app.factory('DiscourseNodeView', function($state, $stateParams, NodeHistory, Dis
     function removeFocused(id, removeFunc) {
         return function() {
             removeFunc(id).$promise.then(function(data) {
+                NodeHistory.remove(id);
                 toastr.success("Removed node");
                 $state.go('browse');
             });

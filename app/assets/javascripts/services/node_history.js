@@ -3,18 +3,22 @@ app.service("NodeHistory", function(DiscourseNode, Utils) {
     var visited = [];
     this.visited = visited;
     this.add = add;
+    this.remove = remove;
+
+    function remove(id) {
+        Utils.removeElementBy(visited, function(item) {
+            return id === item.node.id;
+        });
+    }
 
     function add(node) {
-        node.$promise.then(function(data) {
+        node.$promise.then(function(node) {
             var obj = {
-                node: data,
-                info: DiscourseNode.get(data.label)
+                node: node,
+                info: DiscourseNode.get(node.label)
             };
 
-            Utils.removeElementBy(visited, function(item) {
-                return data.id === item.node.id;
-            });
-
+            remove(node.id);
             visited.push(obj);
             if (visited.length > maximum) {
                 visited.splice(0, visited.length - maximum);
