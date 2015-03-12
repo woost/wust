@@ -39,21 +39,20 @@ app.service('DiscourseNodeList', function(DiscourseNode, Idea, Problem, Goal, Se
         };
     }
 
-    function Node(id, createFunc, queryFunc, connectFunc, disconnectFunc, searchFunc) {
+    function Node(id, connService, createFunc, searchFunc) {
         this.id = id;
         this.new = {
             title: ""
         };
-        this.list = queryFunc ? queryFunc(this.id) : [];
+        this.list = connService.query ? connService.query(this.id) : [];
+        this.remove = connService.remove ? remove(connService.remove).bind(this) : todo;
+        this.add = connService.create ? add(connService.create).bind(this) : todo;
         this.create = createFunc ? create(createFunc).bind(this): todo;
-        this.remove = disconnectFunc ? remove(disconnectFunc).bind(this) : todo;
-        this.add = connectFunc ? add(connectFunc).bind(this) : todo;
         this.search = searchFunc ? searchFunc : Search.query;
     }
 
-    function GoalNode(id, node) {
-        node = node || {};
-        Node.call(this, id, Goal.create, node.queryGoals, node.createGoal, node.removeGoal, Search.queryGoals);
+    function GoalNode(id, nodeService) {
+        Node.call(this, id, nodeService ? nodeService.goals : {}, Goal.create, Search.queryGoals);
         this.info = DiscourseNode.goal;
         this.style = {
             templateUrl: "show_discourse_node_list.html",
@@ -61,9 +60,8 @@ app.service('DiscourseNodeList', function(DiscourseNode, Idea, Problem, Goal, Se
         };
     }
 
-    function ProblemNode(id, node) {
-        node = node || {};
-        Node.call(this, id, Problem.create, node.queryProblems, node.createProblem, node.removeProblem, Search.queryProblems);
+    function ProblemNode(id, nodeService) {
+        Node.call(this, id, nodeService ? nodeService.problems : {}, Problem.create, Search.queryProblems);
         this.info = DiscourseNode.problem;
         this.style = {
             templateUrl: "show_discourse_node_list.html",
@@ -71,9 +69,8 @@ app.service('DiscourseNodeList', function(DiscourseNode, Idea, Problem, Goal, Se
         };
     }
 
-    function IdeaNode(id, node) {
-        node = node || {};
-        Node.call(this, id, Idea.create, node.queryIdeas, node.createIdea, node.removeIdea, Search.queryIdeas);
+    function IdeaNode(id, nodeService) {
+        Node.call(this, id, nodeService ? nodeService.ideas : {}, Idea.create, Search.queryIdeas);
         this.info = DiscourseNode.idea;
         this.style = {
             templateUrl: "show_discourse_idea_list.html",

@@ -179,6 +179,24 @@ case class Reaches(node: Node) extends HyperEdgeNode {
   def ideas: Set[Idea] = neighboursAs(Idea)
 }
 
+object SubIdea extends SchemaRelationFactory[SubIdea, Idea, Idea] {
+  def create(relation: Relation) = SubIdea(relation, startNodeFactory.create(relation.startNode), endNodeFactory.create(relation.endNode))
+  def relationType = RelationType("SUBIDEA")
+  def startNodeFactory = Idea
+  def endNodeFactory = Idea
+}
+
+case class SubIdea(relation: Relation, startNode: Idea, endNode: Idea) extends DiscourseRelation[Idea, Idea]
+
+object SubGoal extends SchemaRelationFactory[SubGoal, Goal, Goal] {
+  def create(relation: Relation) = SubGoal(relation, startNodeFactory.create(relation.startNode), endNodeFactory.create(relation.endNode))
+  def relationType = RelationType("SUBGOAL")
+  def startNodeFactory = Goal
+  def endNodeFactory = Goal
+}
+
+case class SubGoal(relation: Relation, startNode: Goal, endNode: Goal) extends DiscourseRelation[Goal, Goal]
+
 object Causes extends SchemaRelationFactory[Causes, Problem, Problem] {
   def create(relation: Relation) = Causes(relation, startNodeFactory.create(relation.startNode), endNodeFactory.create(relation.endNode))
   def relationType = RelationType("CAUSES")
@@ -277,6 +295,8 @@ case class Discourse(graph: Graph) extends SchemaGraph {
 
 
   // relations
+  def subIdeas: Set[SubIdea] = relationsAs(SubIdea)
+  def subGoals: Set[SubGoal] = relationsAs(SubGoal)
   def causes: Set[Causes] = relationsAs(Causes)
   def prevents: Set[Prevents] = relationsAs(Prevents)
   def supportsSolves: Set[SupportsSolves] = relationsAs(SupportsSolves)
@@ -289,7 +309,7 @@ case class Discourse(graph: Graph) extends SchemaGraph {
   def reachesToGoal: Set[ReachesToGoal] = relationsAs(ReachesToGoal)
 
   def relations: Set[_ <: DiscourseRelation[DiscourseNode, DiscourseNode]] = {
-    causes ++ prevents ++
+    subIdeas ++ subGoals ++ causes ++ prevents ++
       ideaToSolves ++ ideaToReaches ++ solvesToProblem ++ reachesToGoal ++
       supportsSolves ++ opposesSolves ++ supportsReaches ++ opposesReaches
   }

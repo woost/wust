@@ -1,38 +1,44 @@
+GET /goals controllers.Goals.index
+GET /goals/:uuid controllers.Goals.show(uuid: String)
+GET /goals/:uuid/goals controllers.Goals.showGoals(uuid: String)
+GET /goals/:uuid/problems controllers.Goals.showProblems(uuid: String)
+GET /goals/:uuid/ideas controllers.Goals.showIdeas(uuid: String)
+POST /goals controllers.Goals.create
+POST /goals/:uuid/goals/:uuidGoal controllers.Goals.connectGoal(uuid: String, uuidGoal: String)
+POST /goals/:uuid/problems/:uuidProblem controllers.Goals.connectProblem(uuid: String, uuidProblem: String)
+POST /goals/:uuid/ideas/:uuidIdea controllers.Goals.connectIdea(uuid: String, uuidIdea: String)
+DELETE /goals/:uuid controllers.Goals.remove(uuid: String)
+DELETE /goals/:uuid/goals/:uuidGoal controllers.Goals.disconnectGoal(uuid: String, uuidGoal: String)
+DELETE /goals/:uuid/problems/:uuidProblem controllers.Goals.disconnectProblem(uuid: String, uuidProblem: String)
+DELETE /goals/:uuid/ideas/:uuidIdea controllers.Goals.disconnectIdea(uuid: String, uuidIdea: String)
+
 GET /problems controllers.Problems.index
 GET /problems/:uuid controllers.Problems.show(uuid: String)
 GET /problems/:uuid/goals controllers.Problems.showGoals(uuid: String)
 GET /problems/:uuid/problems controllers.Problems.showProblems(uuid: String)
 GET /problems/:uuid/ideas controllers.Problems.showIdeas(uuid: String)
+POST /problems controllers.Problems.create
 POST /problems/:uuid/goals/:uuidGoal controllers.Problems.connectGoal(uuid: String, uuidGoal: String)
 POST /problems/:uuid/problems/:uuidProblem controllers.Problems.connectProblem(uuid: String, uuidProblem: String)
 POST /problems/:uuid/ideas/:uuidIdea controllers.Problems.connectIdea(uuid: String, uuidIdea: String)
-POST /problems controllers.Problems.create
+DELETE /problems/:uuid controllers.Problems.remove(uuid: String)
 DELETE /problems/:uuid/goals/:uuidGoal controllers.Problems.disconnectGoal(uuid: String, uuidGoal: String)
 DELETE /problems/:uuid/problems/:uuidProblem controllers.Problems.disconnectProblem(uuid: String, uuidProblem: String)
 DELETE /problems/:uuid/ideas/:uuidIdea controllers.Problems.disconnectIdea(uuid: String, uuidIdea: String)
-DELETE /problems/:uuid controllers.Problems.remove(uuid: String)
 
 GET /ideas controllers.Ideas.index
 GET /ideas/:uuid controllers.Ideas.show(uuid: String)
 GET /ideas/:uuid/goals controllers.Ideas.showGoals(uuid: String)
 GET /ideas/:uuid/problems controllers.Ideas.showProblems(uuid: String)
+GET /ideas/:uuid/ideas controllers.Ideas.showIdeas(uuid: String)
+POST /ideas controllers.Ideas.create
 POST /ideas/:uuid/goals/:uuidGoal controllers.Ideas.connectGoal(uuid: String, uuidGoal: String)
 POST /ideas/:uuid/problems/:uuidProblem controllers.Ideas.connectProblem(uuid: String, uuidProblem: String)
-POST /ideas controllers.Ideas.create
+POST /ideas/:uuid/ideas/:uuidIdea controllers.Ideas.connectIdea(uuid: String, uuidIdea: String)
+DELETE /ideas/:uuid controllers.Ideas.remove(uuid: String)
 DELETE /ideas/:uuid/goals/:uuidGoal controllers.Ideas.disconnectGoal(uuid: String, uuidGoal: String)
 DELETE /ideas/:uuid/problems/:uuidProblem controllers.Ideas.disconnectProblem(uuid: String, uuidProblem: String)
-DELETE /ideas/:uuid controllers.Ideas.remove(uuid: String)
-
-GET /goals controllers.Goals.index
-POST /goals controllers.Goals.create
-GET /goals/:uuid controllers.Goals.show(uuid: String)
-GET /goals/:uuid/problems controllers.Goals.showProblems(uuid: String)
-GET /goals/:uuid/ideas controllers.Goals.showIdeas(uuid: String)
-POST /goals/:uuid/problems/:uuidProblem controllers.Goals.connectProblem(uuid: String, uuidProblem: String)
-POST /goals/:uuid/ideas/:uuidIdea controllers.Goals.connectIdea(uuid: String, uuidIdea: String)
-DELETE /goals/:uuid/problems/:uuidProblem controllers.Goals.disconnectProblem(uuid: String, uuidProblem: String)
-DELETE /goals/:uuid/ideas/:uuidIdea controllers.Goals.disconnectIdea(uuid: String, uuidIdea: String)
-DELETE /goals/:uuid controllers.Goals.remove(uuid: String)
+DELETE /ideas/:uuid/ideas/:uuidIdea controllers.Ideas.disconnectIdea(uuid: String, uuidIdea: String)
 
 GET /graphs controllers.Graphs.index
 

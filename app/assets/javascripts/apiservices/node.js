@@ -1,44 +1,85 @@
-app.service('Node', function() {
-    this.query = query;
-    this.get = get;
-    this.create = create;
-    this.remove = remove;
-    this.createConnected = createConnected;
-    this.removeConnected = removeConnected;
+app.factory('Node', function($resource) {
+    return function(name) {
+        var prefix = '/api/v1/' + name;
+        var service = $resource(prefix + '/:id', {
+            id: '@id'
+        });
+        var goalService = $resource(prefix + '/:id/goals/:otherId', {
+            id: '@id',
+            otherId: '@otherId'
+        });
+        var ideaService = $resource(prefix + '/:id/ideas/:otherId', {
+            id: '@id',
+            otherId: '@otherId'
+        });
+        var problemService = $resource(prefix + '/:id/problems/:otherId', {
+            id: '@id',
+            otherId: '@otherId'
+        });
 
-    function createConnected(service) {
-        return function(id, otherId) {
-            return service.save({id: id, otherId: otherId});
-        };
-    }
+        this.get = get(service);
+        this.create = create(service);
+        this.remove = remove(service);
+        this.query = query(service);
 
-    function removeConnected(service) {
-        return function(id, otherId) {
-            return service.remove({id: id, otherId: otherId});
-        };
-    }
+        this.goals = getCallbackObject(goalService);
+        this.problems = getCallbackObject(problemService);
+        this.ideas = getCallbackObject(ideaService);
 
-    function query(service) {
-        return function(id) {
-            return service.query({ id: id });
-        };
-    }
+        function getCallbackObject(service) {
+            return {
+                query: query(service),
+                create: createConnected(service),
+                remove: removeConnected(service)
+            };
+        }
 
-    function get(service) {
-        return function(id) {
-            return service.get({ id: id });
-        };
-    }
+        function createConnected(service) {
+            return function(id, otherId) {
+                return service.save({
+                    id: id,
+                    otherId: otherId
+                });
+            };
+        }
 
-    function remove(service) {
-        return function(id) {
-            return service.remove({ id: id });
-        };
-    }
+        function removeConnected(service) {
+            return function(id, otherId) {
+                return service.remove({
+                    id: id,
+                    otherId: otherId
+                });
+            };
+        }
 
-    function create(service) {
-        return function(obj) {
-            return service.save(obj);
-        };
-    }
+        function query(service) {
+            return function(id) {
+                return service.query({
+                    id: id
+                });
+            };
+        }
+
+        function get(service) {
+            return function(id) {
+                return service.get({
+                    id: id
+                });
+            };
+        }
+
+        function remove(service) {
+            return function(id) {
+                return service.remove({
+                    id: id
+                });
+            };
+        }
+
+        function create(service) {
+            return function(obj) {
+                return service.save(obj);
+            };
+        }
+    };
 });

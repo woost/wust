@@ -5,6 +5,6 @@ app.controller('IdeasCtrl', function($scope, $stateParams, Idea, DiscourseNodeLi
     $scope.node = Idea.get(id);
     $scope.goals = new DiscourseNodeList.Goal(id, Idea);
     $scope.problems = new DiscourseNodeList.Problem(id, Idea);
-    $scope.ideas = new DiscourseNodeList.Idea();
-    $scope.removeFocused = DiscourseNodeView.removeFocused(Idea.remove, id);
+    $scope.ideas = new DiscourseNodeList.Idea(id, Idea);
+    $scope.removeFocused = DiscourseNodeView.removeFocused(id, Idea.remove);
 });

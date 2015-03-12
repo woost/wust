@@ -6,5 +6,5 @@ app.controller('ProblemsCtrl', function($scope, $stateParams, Problem, Discourse
     $scope.goals = new DiscourseNodeList.Goal(id, Problem);
     $scope.problems = new DiscourseNodeList.Problem(id, Problem);
     $scope.ideas = new DiscourseNodeList.Idea(id, Problem);
-    $scope.removeFocused = DiscourseNodeView.removeFocused(Problem.remove, id);
+    $scope.removeFocused = DiscourseNodeView.removeFocused(id, Problem.remove);
 });

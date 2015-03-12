@@ -28,6 +28,11 @@ object Ideas extends Controller with ContentNodesController[Idea] {
     Ok(Json.toJson(db.queryGraph(query).nodes.map(Problem.create)))
   }
 
+  def showIdeas(uuid: String) = Action {
+    val query = Query(s"match (:${ Idea.label } {uuid: {uuid}})<-[:${ SubIdea.relationType }]-(idea :${ Idea.label }) return idea", Map("uuid" -> uuid))
+    Ok(Json.toJson(db.queryGraph(query).nodes.map(Idea.create)))
+  }
+
   def connectGoal(uuid: String, uuidGoal: String) = Action {
     val discourse = nodeDiscourseGraph(List(uuid, uuidGoal))
     val idea = discourse.ideas.find(p => p.uuid == uuid).get
@@ -56,6 +61,26 @@ object Ideas extends Controller with ContentNodesController[Idea] {
     Ok(Json.toJson(problem))
   }
 
+  def connectIdea(uuid: String, uuidIdea: String) = Action {
+    val discourse = nodeDiscourseGraph(List(uuid, uuidIdea))
+    val idea = discourse.ideas.find(p => p.uuid == uuid).get
+    val subIdea = discourse.ideas.find(p => p.uuid == uuidIdea).get
+
+    discourse.add(SubIdea.local(subIdea, idea))
+
+    db.persistChanges(discourse.graph)
+    Ok(Json.toJson(subIdea))
+  }
+
+  def disconnectGoal(uuid: String, uuidGoal: String) = Action {
+    val discourse = relationDiscourseGraph(uuid, List(IdeaToReaches.relationType, ReachesToGoal.relationType), uuidGoal)
+    val connectorNodes = discourse.nodes.filter(node => !List(uuid, uuidGoal).contains(node.uuid))
+    discourse.graph.nodes --= connectorNodes.map(_.node)
+
+    db.persistChanges(discourse.graph)
+    Ok(JsObject(Seq()))
+  }
+
   def disconnectProblem(uuid: String, uuidProblem: String) = Action {
     val discourse = relationDiscourseGraph(uuid, List(IdeaToSolves.relationType, SolvesToProblem.relationType), uuidProblem)
     val connectorNodes = discourse.nodes.filter(node => !List(uuid, uuidProblem).contains(node.uuid))
@@ -65,9 +90,9 @@ object Ideas extends Controller with ContentNodesController[Idea] {
     Ok(JsObject(Seq()))
   }
 
-  def disconnectGoal(uuid: String, uuidGoal: String) = Action {
-    val discourse = relationDiscourseGraph(uuid, List(IdeaToReaches.relationType, ReachesToGoal.relationType), uuidGoal)
-    val connectorNodes = discourse.nodes.filter(node => !List(uuid, uuidGoal).contains(node.uuid))
+  def disconnectIdea(uuid: String, uuidIdea: String) = Action {
+    val discourse = relationDiscourseGraph(uuid, SubIdea.relationType, uuidIdea)
+    val connectorNodes = discourse.nodes.filter(node => !List(uuid, uuidIdea).contains(node.uuid))
     discourse.graph.nodes --= connectorNodes.map(_.node)
 
     db.persistChanges(discourse.graph)

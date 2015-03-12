@@ -16,14 +16,30 @@ object Goals extends Controller with ContentNodesController[Goal] {
     Ok(Json.toJson(wholeDiscourseGraph.goals))
   }
 
-  def showIdeas(uuid: String) = Action {
-    val query = Query(s"match (:${ Goal.label } {uuid: {uuid}})<-[:${ ReachesToGoal.relationType }]-(:${ Reaches.label })<-[:${ IdeaToReaches.relationType }]-(idea :${ Idea.label }) return idea", Map("uuid" -> uuid))
+  def showGoals(uuid: String) = Action {
+    val query = Query(s"match (:${ Goal.label } {uuid: {uuid}})<-[:${ SubGoal.relationType }]-(goal :${ Goal.label }) return goal", Map("uuid" -> uuid))
     Ok(Json.toJson(db.queryGraph(query).nodes.map(Goal.create)))
   }
 
   def showProblems(uuid: String) = Action {
     val query = Query(s"match (:${ Goal.label } {uuid: {uuid}})<-[:${ Prevents.relationType }]-(problem :${ Problem.label }) return problem", Map("uuid" -> uuid))
     Ok(Json.toJson(db.queryGraph(query).nodes.map(Problem.create)))
+  }
+
+  def showIdeas(uuid: String) = Action {
+    val query = Query(s"match (:${ Goal.label } {uuid: {uuid}})<-[:${ ReachesToGoal.relationType }]-(:${ Reaches.label })<-[:${ IdeaToReaches.relationType }]-(idea :${ Idea.label }) return idea", Map("uuid" -> uuid))
+    Ok(Json.toJson(db.queryGraph(query).nodes.map(Idea.create)))
+  }
+
+  def connectGoal(uuid: String, uuidGoal: String) = Action {
+    val discourse = nodeDiscourseGraph(List(uuid, uuidGoal))
+    val goal = discourse.goals.find(p => p.uuid == uuid).get
+    val subGoal = discourse.goals.find(p => p.uuid == uuidGoal).get
+
+    discourse.add(SubGoal.local(subGoal, goal))
+
+    db.persistChanges(discourse.graph)
+    Ok(Json.toJson(subGoal))
   }
 
   def connectProblem(uuid: String, uuidProblem: String) = Action {
@@ -49,6 +65,13 @@ object Goals extends Controller with ContentNodesController[Goal] {
 
     db.persistChanges(discourse.graph)
     Ok(Json.toJson(idea))
+  }
+
+  def disconnectGoal(uuid: String, uuidGoal: String) = Action {
+    val discourse = relationDiscourseGraph(uuidGoal, SubGoal.relationType, uuid)
+    discourse.graph.relations.clear()
+    db.persistChanges(discourse.graph)
+    Ok(JsObject(Seq()))
   }
 
   def disconnectProblem(uuid: String, uuidProblem: String) = Action {
