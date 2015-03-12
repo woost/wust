@@ -21,7 +21,7 @@ libraryDependencies ++= Seq(
 )
 
 // javascript file groups
-pipelineStages in Assets := Seq(concat)
+pipelineStages := Seq(concat)
 
 Concat.parentDir := "public/main/javascripts"
 
