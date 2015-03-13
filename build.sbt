@@ -12,12 +12,12 @@ libraryDependencies ++= Seq(
   "org.webjars" % "angular-ui-router" % "0.2.13",
   "org.webjars" % "angular-ui-bootstrap" % "0.12.1",
   "org.webjars" % "font-awesome" % "4.3.0-1",
-  "org.webjars" % "bootstrap" % "3.3.2-1",
+  "org.webjars" % "bootstrap" % "3.3.2-2",
   "org.webjars" % "lodash" % "3.3.1",
   "org.webjars" % "spin-js" % "2.0.0-1",
   "org.webjars" % "visjs" % "3.11.0",
   "org.webjars" % "toastr" % "2.1.0",
-  "org.webjars" % "animate.css" % "3.2.1",
+  "org.webjars" % "animate.css" % "3.2.3",
   "org.webjars" % "angular-dragdrop" % "1.0.6-1",
   "com.github.renesca" %% "renesca" % "0.1.2"
 )
@@ -35,7 +35,7 @@ Concat.groups := Seq(
   // http://www.scala-sbt.org/0.12.1/docs/Detailed-Topics/Paths.html
   "wust.js" -> group(
     (jsAssetsDirectory.value ** "*.js") ---
-      (jsAssetsDirectory.value / "module.js")
+    (jsAssetsDirectory.value / "module.js")
   )
 )
 
