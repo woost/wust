@@ -1,7 +1,7 @@
 <form ng-submit='onSubmit()()'>
     <div class="input-group">
         <div class="input-group">
-            <input type="text" class="form-control" placeholder="find" ng-model='ngModel.title' typeahead="node for node in getNodes($viewValue)" typeahead-on-select="onSelect()($item)" typeahead-input-formatter="formatLabel($item)" typeahead-template-url="discourse_node_search_item.html" required>
+            <input type="text" class="form-control" placeholder="find" ng-model='ngModel.title' typeahead="node for node in getNodes($viewValue)" typeahead-on-select="onSelect()($item)" typeahead-input-formatter="formatLabel()" typeahead-template-url="discourse_node_search_item.html" required>
             <span class="input-group-btn">
                 <button class="btn btn-default" type="submit">
                     <i ng-class='iconClass'></i>

@@ -8,37 +8,31 @@ app.service('DiscourseNodeList', function(DiscourseNode, Idea, Problem, Goal, Se
     }
 
     function create(createFunc) {
-        return function() {
-            var self = this;
-            createFunc(self.new).$promise.then(function(data) {
-                toastr.success("Created new node");
-                self.add(data);
-            });
-        };
+        var self = this;
+        createFunc(self.new).$promise.then(function(data) {
+            toastr.success("Created new node");
+            self.add(data);
+        });
     }
 
-    function remove(disconnectFunc) {
-        return function(elem) {
-            var self = this;
-            disconnectFunc(self.id, elem.id).$promise.then(function(data) {
-                toastr.success("Disconnected node");
-                _.remove(self.list, elem);
-            });
-        };
+    function remove(disconnectFunc, elem) {
+        var self = this;
+        disconnectFunc(self.id, elem.id).$promise.then(function(data) {
+            toastr.success("Disconnected node");
+            _.remove(self.list, elem);
+        });
     }
 
-    function add(connectFunc) {
-        return function($item) {
-            var self = this;
-            if (_.any(self.list, { id: $item.id }))
-                return;
+    function add(connectFunc, item) {
+        var self = this;
+        if (_.any(self.list, { id: item.id }))
+            return;
 
-            connectFunc(self.id, $item.id).$promise.then(function(data) {
-                toastr.success("Connected node");
-                self.list.push(data);
-                self.new.title = "";
-            });
-        };
+        connectFunc(self.id, item.id).$promise.then(function(data) {
+            toastr.success("Connected node");
+            self.list.push(data);
+            self.new.title = "";
+        });
     }
 
     function Node(id, connService, createFunc, searchFunc) {
@@ -47,10 +41,11 @@ app.service('DiscourseNodeList', function(DiscourseNode, Idea, Problem, Goal, Se
             title: ""
         };
         this.list = connService.query ? connService.query(this.id) : [];
-        this.remove = connService.remove ? remove(connService.remove).bind(this) : todo;
-        this.add = connService.create ? add(connService.create).bind(this) : todo;
-        this.create = createFunc ? create(createFunc).bind(this): todo;
+        this.remove = connService.remove ? _.wrap(connService.remove, remove) : todo;
+        this.add = connService.create ? _.wrap(connService.create, add) : todo;
+        this.create = createFunc ? _.wrap(createFunc, create) : todo;
         this.search = searchFunc ? searchFunc : Search.query;
+        _.bindAll(this);
     }
 
     function GoalNode(id, nodeService) {
