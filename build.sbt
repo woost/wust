@@ -4,8 +4,10 @@ name := "wust"
 
 val jsAssetsDirectory = baseDirectory(_ / "app/assets/javascripts")
 
+val scalaV = "2.11.6"
+
 lazy val wust = (project in file(".")).settings(
-  scalaVersion := "2.11.6",
+  scalaVersion := scalaV,
   libraryDependencies ++= Seq(
     "org.webjars" %% "webjars-play" % "2.3.0-2",
     "com.vmunier" %% "play-scalajs-scripts" % "0.1.0",
@@ -50,6 +52,7 @@ aggregate(projectToRef(scalajs))
 
 lazy val scalajs = (project in file("scalajs")).
 settings(
+  scalaVersion := scalaV,
   persistLauncher := true, // launch main class on website load
   persistLauncher in Test := false
 ).enablePlugins(ScalaJSPlugin, ScalaJSPlay)

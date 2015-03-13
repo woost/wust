@@ -17,6 +17,7 @@ import js.Dynamic.{ global => g }
 @JSExport
 object Wust extends JSApp {
   def main() {
-    g.alert("Hello from ScalaJs!")
+    // g.alert("Hello from ScalaJs!")
+    println("Hello from ScalaJs!")
   }
 }
