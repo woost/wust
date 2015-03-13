@@ -1,20 +1,20 @@
 app.service('Search', function($resource) {
-    var service = $resource('/api/v1/search/:term/:label', {
+    var prefix = '/api/v1/';
+
+    var service = $resource('/api/v1/search/:term/:type', {
         term: "@term",
-        label: "@label"
+        type: "@type"
     });
 
-    this.query = query();
-    this.queryIdeas = query("IDEA");
-    this.queryGoals = query("GOAL");
-    this.queryProblems = query("PROBLEM");
+    this.query = _.wrap(undefined, query);
+    this.queryGoals = _.wrap("goals", query);
+    this.queryProblems = _.wrap("problems", query);
+    this.queryIdeas = _.wrap("ideas", query);
 
-    function query(label) {
-        return function(term) {
-            return service.query({
-                term: term,
-                label: label
-            });
-        };
+    function query(type, term) {
+        return service.query({
+            term: term,
+            type: type
+        });
     }
 });
