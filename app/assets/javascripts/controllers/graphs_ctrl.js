@@ -28,9 +28,31 @@ app.controller('GraphsCtrl', function($scope, $state, $filter, Graph, DiscourseN
     };
 
     function filter(graph) {
-        var filtered = $filter('filter')(graph.nodes, $scope.search);
-        nodes.update(filtered);
-        nodes.remove(_.difference(nodes.getIds(), _.map(filtered, "id")));
+        var nodeMap = _(graph.nodes).map(function(node) {
+            var res = {};
+            res[node.id] = node;
+            return res;
+        }).reduce(_.merge);
+
+        var edgeMap = _(graph.edges).map(function(edge) {
+            var res = {};
+            res[edge.from] = [edge.to];
+            res[edge.to] = [edge.from];
+            return res;
+        }).reduce(_.partialRight(_.merge, function(a, b) {
+            return a ? a.concat(b) : b;
+        }, _));
+
+        return function() {
+            var filtered = $filter('filter')(graph.nodes, $scope.search);
+            var ids = _.map(filtered, "id");
+            for (var i = 0; i < ids.length; i++) {
+                ids = _.union(ids, edgeMap[ids[i]]);
+            }
+
+            nodes.remove(_.difference(nodes.getIds(), ids));
+            nodes.update(_.map(ids, _.propertyOf(nodeMap)));
+        };
     }
 
     function createGraph(graph) {
@@ -46,7 +68,7 @@ app.controller('GraphsCtrl', function($scope, $state, $filter, Graph, DiscourseN
         nodes.add(graph.nodes);
         edges.add(graph.edges);
 
-        $scope.$watch('search.label', _.wrap(graph, filter));
+        $scope.$watch('search.label', filter(graph));
     }
 
     function onClick(selected) {
