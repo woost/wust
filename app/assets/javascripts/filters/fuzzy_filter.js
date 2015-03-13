@@ -4,7 +4,7 @@ app.filter('fuzzyFilter', ['$filter',
             _.forIn(obj, function(value, key) {
                 _.each(value.split(' '), function(val) {
                     var search = {};
-                    search[key] = val;
+                    search[key] = val || "";
                     data = $filter('filter')(data, search);
                 });
             });
