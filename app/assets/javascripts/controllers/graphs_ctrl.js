@@ -28,11 +28,9 @@ app.controller('GraphsCtrl', function($scope, $state, $filter, Graph, DiscourseN
     };
 
     function filter(graph) {
-        return function() {
-            var filtered = $filter('filter')(graph.nodes, $scope.search);
-            nodes.update(filtered);
-            nodes.remove(_.difference(nodes.getIds(), _.map(filtered, "id")));
-        };
+        var filtered = $filter('filter')(graph.nodes, $scope.search);
+        nodes.update(filtered);
+        nodes.remove(_.difference(nodes.getIds(), _.map(filtered, "id")));
     }
 
     function createGraph(graph) {
@@ -48,7 +46,7 @@ app.controller('GraphsCtrl', function($scope, $state, $filter, Graph, DiscourseN
         nodes.add(graph.nodes);
         edges.add(graph.edges);
 
-        $scope.$watch('search.label', filter(graph));
+        $scope.$watch('search.label', _.wrap(graph, filter));
     }
 
     function onClick(selected) {

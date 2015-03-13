@@ -22,10 +22,11 @@ app.service('DiscourseNode', function() {
 
     this.get = get;
 
-    var mappings = {};
-    mappings[this.goal.label] = this.goal;
-    mappings[this.problem.label] = this.problem;
-    mappings[this.idea.label] = this.idea;
+    var mappings = _([this.goal, this.problem, this.idea]).map(function(node) {
+        var res = {};
+        res[node.label] = node;
+        return res;
+    }).reduce(_.merge);
 
     function get(label) {
         return mappings[label];

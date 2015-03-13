@@ -7,17 +7,15 @@ app.factory('DiscourseNodeView', function($state, $stateParams, NodeHistory, Dis
         scope.goals = new DiscourseNodeList.Goal(id, service);
         scope.problems = new DiscourseNodeList.Problem(id, service);
         scope.ideas = new DiscourseNodeList.Idea(id, service);
-        scope.removeFocused = removeFocused(id, service.remove);
+        scope.removeFocused = _.partial(removeFocused, id, service.remove);
         NodeHistory.add(scope.node);
     };
 
     function removeFocused(id, removeFunc) {
-        return function() {
-            removeFunc(id).$promise.then(function(data) {
-                NodeHistory.remove(id);
-                toastr.success("Removed node");
-                $state.go('browse');
-            });
-        };
+        removeFunc(id).$promise.then(function(data) {
+            NodeHistory.remove(id);
+            toastr.success("Removed node");
+            $state.go('browse');
+        });
     }
 });
