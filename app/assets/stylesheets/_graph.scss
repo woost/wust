@@ -4,4 +4,15 @@
     .graph_network {
         height: 100%;
     }
+    .link {
+        fill: none;
+        stroke: #666;
+        stroke-width: 1.5px;
+    }
+    .circle {
+    }
+    text {
+        fill: #000;
+        font: 10px sans-serif;
+    }
 }
