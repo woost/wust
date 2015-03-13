@@ -44,7 +44,7 @@ app.controller('GraphsCtrl', function($scope, $state, $filter, Graph, DiscourseN
         }, _));
 
         return function() {
-            var filtered = $filter('filter')(graph.nodes, $scope.search);
+            var filtered = $filter('fuzzyFilter')(graph.nodes, $scope.search);
             var ids = _.map(filtered, "id");
             for (var i = 0; i < ids.length; i++) {
                 ids = _.union(ids, edgeMap[ids[i]]);
