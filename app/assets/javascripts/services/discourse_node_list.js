@@ -20,10 +20,9 @@ app.service('DiscourseNodeList', function(DiscourseNode, Idea, Problem, Goal, Se
     function remove(disconnectFunc) {
         return function(elem) {
             var self = this;
-            var index = self.list.indexOf(elem);
             disconnectFunc(self.id, elem.id).$promise.then(function(data) {
                 toastr.success("Disconnected node");
-                self.list.splice(index, 1);
+                _.remove(self.list, elem);
             });
         };
     }
@@ -31,6 +30,9 @@ app.service('DiscourseNodeList', function(DiscourseNode, Idea, Problem, Goal, Se
     function add(connectFunc) {
         return function($item) {
             var self = this;
+            if (_.any(self.list, { id: $item.id }))
+                return;
+
             connectFunc(self.id, $item.id).$promise.then(function(data) {
                 toastr.success("Connected node");
                 self.list.push(data);

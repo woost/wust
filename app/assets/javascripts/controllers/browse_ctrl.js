@@ -36,11 +36,7 @@ app.controller("BrowseCtrl", function($scope, $state, Problem, Goal, Idea, Disco
     $scope.slides = slides;
 
     $scope.$watch(function() {
-        for (var i = 0; i < slides.length; i++) {
-            if (slides[i].active) {
-                return slides[i];
-            }
-        }
+        return _.find(slides, { active: true });
     }, function(currentSlide, previousSlide) {
         currentSlide.queryNodes();
     });

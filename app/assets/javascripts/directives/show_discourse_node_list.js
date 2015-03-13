@@ -5,8 +5,6 @@ app.directive("showDiscourseNodeList", function($compile, $stateParams) {
         templateUrl: 'assets/partials/discourse_node_list.html',
         scope: {
             ngModel: '=',
-        },
-        link: function(scope, element, attrs) {
         }
     };
 });

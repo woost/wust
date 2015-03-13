@@ -12,12 +12,12 @@ app.directive("discourseNodeSearchForm", function(DiscourseNode) {
         link: function($scope, element, attrs) {
             $scope.getNodes = getNodes;
             $scope.iconClass = attrs.iconClass;
+            $scope.formatLabel = function() { return ''; };
 
             function getNodes(term) {
                 return $scope.searchNodes()(term).$promise.then(function(response) {
                     return response.map(function(item) {
-                        item.css = DiscourseNode.get(item.label).css;
-                        return item;
+                        return _.merge(item, { css: DiscourseNode.get(item.label).css });
                     });
                 });
             }

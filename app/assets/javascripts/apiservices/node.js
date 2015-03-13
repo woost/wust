@@ -1,21 +1,14 @@
 app.factory('Node', function($resource) {
     return function(name) {
         var prefix = '/api/v1/' + name;
+
         var service = $resource(prefix + '/:id', {
             id: '@id'
         });
-        var goalService = $resource(prefix + '/:id/goals/:otherId', {
-            id: '@id',
-            otherId: '@otherId'
-        });
-        var ideaService = $resource(prefix + '/:id/ideas/:otherId', {
-            id: '@id',
-            otherId: '@otherId'
-        });
-        var problemService = $resource(prefix + '/:id/problems/:otherId', {
-            id: '@id',
-            otherId: '@otherId'
-        });
+
+        var goalService = createResource("goals");
+        var ideaService = createResource("ideas");
+        var problemService = createResource("problems");
 
         this.get = get(service);
         this.create = create(service);
@@ -25,6 +18,13 @@ app.factory('Node', function($resource) {
         this.goals = getCallbackObject(goalService);
         this.problems = getCallbackObject(problemService);
         this.ideas = getCallbackObject(ideaService);
+
+        function createResource(resource) {
+            return $resource(prefix + '/:id/' + resource + '/:otherId', {
+                id: '@id',
+                otherId: '@otherId'
+            });
+        }
 
         function getCallbackObject(service) {
             return {

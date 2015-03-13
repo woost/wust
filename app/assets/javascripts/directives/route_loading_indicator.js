@@ -19,20 +19,19 @@
                 var target = elem[0];
                 scope.isRouteLoading = false;
 
-                scope.$on('$stateChangeStart', function() {
+                scope.$on('$stateChangeStart', startSpinner);
+                scope.$on('$stateChangeError', stopSpinner);
+                scope.$on('$stateChangeSuccess', stopSpinner);
+
+                function startSpinner() {
                     scope.isRouteLoading = true;
                     spinner.spin(target);
-                });
+                }
 
-                scope.$on('$stateChangeError', function() {
+                function stopSpinner() {
                     scope.isRouteLoading = false;
                     spinner.stop();
-                });
-
-                scope.$on('$stateChangeSuccess', function() {
-                    scope.isRouteLoading = false;
-                    spinner.stop();
-                });
+                }
             }
         };
     });

@@ -31,13 +31,7 @@ app.controller('GraphsCtrl', function($scope, $state, $filter, Graph, DiscourseN
         return function() {
             var filtered = $filter('filter')(graph.nodes, $scope.search);
             nodes.update(filtered);
-            angular.forEach(nodes, function(node) {
-                if ($filter('filter')(filtered, {
-                    id: node.id
-                }).length === 0) {
-                    nodes.remove(node.id);
-                }
-            });
+            nodes.remove(_.difference(nodes.getIds(), _.map(filtered, "id")));
         };
     }
 
@@ -58,10 +52,10 @@ app.controller('GraphsCtrl', function($scope, $state, $filter, Graph, DiscourseN
     }
 
     function onClick(selected) {
-        var id = selected.nodes[0];
-        if (id === undefined)
+        if (!_.any(selected.nodes))
             return;
 
+        var id = selected.nodes[0];
         var node = nodes.get(id);
         var state = DiscourseNode.get(node.origLabel).state;
         $state.go(state, {

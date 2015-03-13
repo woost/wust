@@ -13,6 +13,7 @@ libraryDependencies ++= Seq(
   "org.webjars" % "angular-ui-bootstrap" % "0.12.1",
   "org.webjars" % "font-awesome" % "4.3.0-1",
   "org.webjars" % "bootstrap" % "3.3.2-1",
+  "org.webjars" % "lodash" % "3.3.1",
   "org.webjars" % "spin-js" % "2.0.0-1",
   "org.webjars" % "visjs" % "3.11.0",
   "org.webjars" % "toastr" % "2.1.0",

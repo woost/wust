@@ -1,4 +1,4 @@
-app.service("NodeHistory", function(DiscourseNode, Utils) {
+app.service("NodeHistory", function(DiscourseNode) {
     var maximum = 8;
     var visited = [];
     this.visited = visited;
@@ -6,7 +6,7 @@ app.service("NodeHistory", function(DiscourseNode, Utils) {
     this.remove = remove;
 
     function remove(id) {
-        Utils.removeElementBy(visited, function(item) {
+        _.remove(visited, function(item) {
             return id === item.node.id;
         });
     }
@@ -20,9 +20,7 @@ app.service("NodeHistory", function(DiscourseNode, Utils) {
 
             remove(node.id);
             visited.push(obj);
-            if (visited.length > maximum) {
-                visited.splice(0, visited.length - maximum);
-            }
+            visited.splice(0, visited.length - maximum);
         });
 
     }
