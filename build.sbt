@@ -19,7 +19,6 @@ lazy val wust = (project in file(".")).settings(
     "org.webjars" % "bootstrap" % "3.3.2-2",
     "org.webjars" % "lodash" % "3.3.1",
     "org.webjars" % "spin-js" % "2.0.0-1",
-    "org.webjars" % "visjs" % "3.11.0",
     "org.webjars" % "d3js" % "3.5.3",
     "org.webjars" % "toastr" % "2.1.0",
     "org.webjars" % "animate.css" % "3.2.3",
