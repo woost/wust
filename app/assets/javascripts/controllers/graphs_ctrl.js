@@ -21,54 +21,55 @@ app.controller('GraphsCtrl', function($scope, $state, $filter, Graph, DiscourseN
     };
 
     $scope.search = {
-        label: ""
+        title: ""
     };
 
-    // function filter(graph) {
-    //     var nodeMap = _(graph.nodes).map(function(node) {
-    //         var res = {};
-    //         res[node.id] = node;
-    //         return res;
-    //     }).reduce(_.merge);
+    function filter(graph) {
+        var nodeMap = _(graph.nodes).map(function(node) {
+            var res = {};
+            res[node.id] = node;
+            return res;
+        }).reduce(_.merge);
 
-    //     var edgeMap = _(graph.edges).map(function(edge) {
-    //         var res = {};
-    //         res[edge.from] = [edge.to];
-    //         res[edge.to] = [edge.from];
-    //         return res;
-    //     }).reduce(_.partialRight(_.merge, function(a, b) {
-    //         return a ? a.concat(b) : b;
-    //     }, _));
+        var edgeMap = _(graph.edges).map(function(edge) {
+            var res = {};
+            res[edge.from] = [edge.to];
+            res[edge.to] = [edge.from];
+            return res;
+        }).reduce(_.partialRight(_.merge, function(a, b) {
+            return a ? a.concat(b) : b;
+        }, _));
 
-    //     return function() {
-    //         var filtered = $filter('fuzzyFilter')(graph.nodes, $scope.search);
-    //         var ids = _.map(filtered, "id");
-    //         for (var i = 0; i < ids.length; i++) {
-    //             ids = _.union(ids, edgeMap[ids[i]]);
-    //         }
+        return function() {
+            var filtered = $filter('fuzzyFilter')(graph.nodes, $scope.search);
+            var ids = _.map(filtered, "id");
+            for (var i = 0; i < ids.length; i++) {
+                ids = _.union(ids, edgeMap[ids[i]]);
+            }
 
-    //         nodes.remove(_.difference(nodes.getIds(), ids));
-    //         nodes.update(_.map(ids, _.propertyOf(nodeMap)));
-    //     };
-    // }
+            $scope.data.graph.nodes = _.map(ids, _.propertyOf(nodeMap));
+            $scope.data.graph.edges = _.select(graph.edges, function(edge) {
+                return _(ids).includes(edge.from) && _(ids).includes(edge.to);
+            });
+        };
+    }
 
     function createGraph(graph) {
         graph.edges = graph.edges.map(function(edge) {
-            return {
+            return _.defaults(edge, {
                 source: _.findIndex(graph.nodes, {
                     id: edge.from
                 }),
                 target: _.findIndex(graph.nodes, {
                     id: edge.to
                 }),
-                label: edge.label,
                 strength: 1
-            };
+            });
         });
 
         $scope.data.graph.nodes = graph.nodes;
         $scope.data.graph.edges = graph.edges;
-        // $scope.$watch('search.label', filter(graph));
+        $scope.$watch('search.title', filter(graph));
     }
 
     function onClick(selected) {

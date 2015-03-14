@@ -14,7 +14,7 @@ app.directive('d3Graph', function(DiscourseNode) {
             //     onClick(properties);
             // });
 
-            scope.$watchCollection("ngModel.nodes", function() {
+            scope.$watchCollection("ngModel", function() {
                 var graph = scope.ngModel;
 
                 var color = d3.scale.category20();
