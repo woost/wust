@@ -55,15 +55,19 @@ app.controller('GraphsCtrl', function($scope, $state, $filter, Graph, DiscourseN
     }
 
     function createGraph(graph) {
+        // TODO: not efficient
+        // we need to reference nodes via their index in the nodes array, because d3 is weird.
         graph.edges = graph.edges.map(function(edge) {
-            return _.defaults(edge, {
+            return _.merge(edge, {
                 source: _.findIndex(graph.nodes, {
                     id: edge.from
                 }),
                 target: _.findIndex(graph.nodes, {
                     id: edge.to
                 }),
-                strength: 1
+                label: edge.label.toLowerCase(),
+                // TODO: calculate real connection strength
+                strength: _.random(5)
             });
         });
 
@@ -72,15 +76,10 @@ app.controller('GraphsCtrl', function($scope, $state, $filter, Graph, DiscourseN
         $scope.$watch('search.title', filter(graph));
     }
 
-    function onClick(selected) {
-        if (!_.any(selected.nodes))
-            return;
-
-        var id = selected.nodes[0];
-        var node = nodes.get(id);
-        var state = DiscourseNode.get(node.origLabel).state;
+    function onClick(d, i) {
+        var state = DiscourseNode.get(d.label).state;
         $state.go(state, {
-            id: id
+            id: d.id
         });
     }
 });
