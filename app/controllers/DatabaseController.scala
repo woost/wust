@@ -10,7 +10,10 @@ import play.api.Play.current
 
 trait DatabaseController {
   val db = new DbService
-  db.restService = new RestService("db.neo4j.url".configOrElse("http://localhost:7474"))
+  db.restService = new RestService(
+    server = "db.neo4j.url".configOrElse("http://localhost:7474"),
+    credentials = Some(spray.http.BasicHttpCredentials("db.neo4j.user".configOrElse("neo4j"),"db.neo4j.pass".configOrElse("neo4j")))
+  )
 
   def wholeDiscourseGraph: Discourse = {
     Discourse(db.queryGraph("match (n) optional match (n)-[r]-() return n,r"))
