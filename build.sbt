@@ -40,7 +40,6 @@ lazy val wust = (project in file(".")).settings(
 enablePlugins(PlayScala, SbtWeb)
 // aggregate(projectToRef(scalajs))
 
-
 lazy val scalajs = (project in file("scalajs")).
 settings(
   scalaVersion := scalaV,
