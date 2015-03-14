@@ -24,8 +24,8 @@ angular.module("wust").controller("BrowseCtrl", function($scope, $state, Problem
         newTitle: "What is your idea?",
         listTitle: "Existing ideas:",
         info: DiscourseNode.idea,
-        queryNodes: _.wrap(Idea.query, queryNodes),
-        addNode: _.wrap(Idea.create, addNode),
+        queryNodes: _.wrap(Idea.query, queryNodes), // listing existing nodes
+        addNode: _.wrap(Idea.create, addNode), // adding new nodes
         newNode: {
             title: ""
         }
@@ -34,26 +34,18 @@ angular.module("wust").controller("BrowseCtrl", function($scope, $state, Problem
     var slides = [problems, goals, ideas];
     $scope.slides = slides;
 
-    $scope.$watch(function() {
-        return _.find(slides, "active");
-    }, function(currentSlide, previousSlide) {
-        currentSlide.queryNodes();
-    });
+    $scope.$watch(() => _.find(slides, "active"), (currentSlide, previousSlide) => currentSlide.queryNodes());
 
     function addNode(createFunc) {
-        var self = this;
-        createFunc(self.newNode).$promise.then(function(data) {
+        createFunc(this.newNode).$promise.then(data => {
             toastr.success("Added new node");
-            $state.go(self.info.state, {
+            $state.go(this.info.state, {
                 id: data.id
             });
         });
     }
 
     function queryNodes(queryFunc) {
-        var self = this;
-        queryFunc().$promise.then(function(data) {
-            self.nodes = data;
-        });
+        queryFunc().$promise.then(data => this.nodes = data);
     }
 });

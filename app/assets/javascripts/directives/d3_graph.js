@@ -7,9 +7,9 @@ angular.module("wust").directive('d3Graph', function(DiscourseNode) {
             onClick: '&',
         },
         link: function(scope, element) {
-            var onClick = scope.onClick() || function(d, i) {};
+            var onClick = scope.onClick() || _.noop;
 
-            scope.$watchCollection("ngModel", function() {
+            scope.$watchCollection("ngModel", () => {
                 var graph = scope.ngModel;
 
                 var width = "100%";
@@ -46,15 +46,11 @@ angular.module("wust").directive('d3Graph', function(DiscourseNode) {
                     .data(graph.edges)
                     .enter().append("line")
                     .attr("class", "link")
-                    .style("stroke-width", function(d) {
-                        return d.strength;
-                    });
+                    .style("stroke-width", d => d.strength);
 
                 link
                     .append("title")
-                    .text(function(d) {
-                        return d.label;
-                    });
+                    .text(d => d.label);
 
                 var linktext = svg.selectAll("g.linklabelholder")
                     .data(graph.edges)
@@ -62,25 +58,19 @@ angular.module("wust").directive('d3Graph', function(DiscourseNode) {
                     .append("text")
                     .attr("class", "linklabel")
                     .attr("text-anchor", "middle")
-                    .text(function(d) {
-                        return d.label;
-                    });
+                    .text(d => d.label);
 
                 var node = svg.selectAll(".node")
                     .data(graph.nodes)
                     .enter().append("circle")
                     .attr("class", "node")
                     .attr("r", 30)
-                    .style("fill", function(d) {
-                        return DiscourseNode.get(d.label).color;
-                    })
+                    .style("fill", d => DiscourseNode.get(d.label).color)
                     .call(force.drag);
 
                 node
                     .append("title")
-                    .text(function(d) {
-                        return d.title;
-                    });
+                    .text(d => d.title);
 
                 var nodetext = svg.selectAll("g.nodelabelholder")
                     .data(graph.nodes)
@@ -88,45 +78,26 @@ angular.module("wust").directive('d3Graph', function(DiscourseNode) {
                     .append("text")
                     .attr("class", "nodelabel")
                     .attr("text-anchor", "middle")
-                    .text(function(d) {
-                        return d.title;
-                    })
+                    .text(d => d.title)
                     .on("click", onClick);
 
                 force.on("tick", tick);
 
                 function tick() {
                     link
-                        .attr("x1", function(d) {
-                            return d.source.x;
-                        })
-                        .attr("y1", function(d) {
-                            return d.source.y;
-                        })
-                        .attr("x2", function(d) {
-                            return d.target.x;
-                        })
-                        .attr("y2", function(d) {
-                            return d.target.y;
-                        });
+                        .attr("x1", d => d.source.x)
+                        .attr("y1", d => d.source.y)
+                        .attr("x2", d => d.target.x)
+                        .attr("y2", d => d.target.y);
 
                     linktext
-                        .attr("transform", function(d) {
-                            return "translate(" + (d.source.x + d.target.x) / 2 + "," + (d.source.y + d.target.y) / 2 + ")";
-                        });
+                        .attr("transform", d => "translate(" + (d.source.x + d.target.x) / 2 + "," + (d.source.y + d.target.y) / 2 + ")");
 
                     node
-                        .attr("cx", function(d) {
-                            return d.x;
-                        })
-                        .attr("cy", function(d) {
-                            return d.y;
-                        });
+                        .attr("cx", d => d.x)
+                        .attr("cy", d => d.y);
 
-                    nodetext
-                        .attr("transform", function(d) {
-                            return "translate(" + d.x + "," + d.y + ")";
-                        });
+                    nodetext.attr("transform", d => "translate(" + d.x + "," + d.y + ")");
                 }
 
                 function redraw() {

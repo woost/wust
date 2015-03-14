@@ -12,18 +12,19 @@ angular.module("wust").controller('GraphsCtrl', function($scope, $state, $filter
     };
 
     function filter(graph) {
-        var nodeMap = _(graph.nodes).map(function(node) {
+        var nodeMap = _(graph.nodes).map(node => {
             var res = {};
             res[node.id] = node;
             return res;
         }).reduce(_.merge);
 
-        var edgeMap = _(graph.edges).map(function(edge) {
+        var edgeMap = _(graph.edges).map(edge => {
+            //todo: helper function to construct object with var on lhs
             var res = {};
             res[edge.from] = [edge.to];
             res[edge.to] = [edge.from];
             return res;
-        }).reduce(_.partialRight(_.merge, function(a, b) {
+        }).reduce(_.partialRight(_.merge, (a, b) => {
             return a ? a.concat(b) : b;
         }, _));
 
@@ -35,7 +36,7 @@ angular.module("wust").controller('GraphsCtrl', function($scope, $state, $filter
             }
 
             $scope.graph.nodes = _.map(ids, _.propertyOf(nodeMap));
-            $scope.graph.edges = _.select(graph.edges, function(edge) {
+            $scope.graph.edges = _.select(graph.edges, edge => {
                 return _(ids).includes(edge.from) && _(ids).includes(edge.to);
             });
         };
@@ -44,7 +45,7 @@ angular.module("wust").controller('GraphsCtrl', function($scope, $state, $filter
     function createGraph(graph) {
         // TODO: not efficient
         // we need to reference nodes via their index in the nodes array, because d3 is weird.
-        graph.edges = graph.edges.map(function(edge) {
+        graph.edges = graph.edges.map(edge => {
             return _.merge(edge, {
                 source: _.findIndex(graph.nodes, {
                     id: edge.from

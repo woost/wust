@@ -20,15 +20,11 @@ angular.module("wust").service('DiscourseNode', function() {
         label: "IDEA"
     };
 
-    this.get = get;
-
-    var mappings = _([this.goal, this.problem, this.idea]).map(function(node) {
+    var mappings = _([this.goal, this.problem, this.idea]).map(node => {
         var res = {};
         res[node.label] = node;
         return res;
     }).reduce(_.merge);
 
-    function get(label) {
-        return mappings[label];
-    }
+    this.get = (property) => mappings[property];
 });
