@@ -24,7 +24,7 @@ lazy val wust = (project in file(".")).settings(
     "org.webjars" % "angular-dragdrop" % "1.0.6-1",
     "com.github.renesca" %% "renesca" % "0.1.2"
   ),
-scalaJSProjects := Seq(scalajs),
+// scalaJSProjects := Seq(scalajs),
 // javascript file groups
 pipelineStages := Seq(concat),
 pipelineStages in Assets := Seq(concat),
@@ -46,8 +46,8 @@ Concat.groups := Seq(
     //,"-Xdisable-assertions", "-optimize"
   )
 ).
-enablePlugins(PlayScala, SbtWeb).
-aggregate(projectToRef(scalajs))
+enablePlugins(PlayScala, SbtWeb)
+// aggregate(projectToRef(scalajs))
 
 
 lazy val scalajs = (project in file("scalajs")).
