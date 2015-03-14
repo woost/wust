@@ -19,6 +19,9 @@ app.directive('d3Graph', function(DiscourseNode) {
 
                 var color = d3.scale.category20();
 
+                var width = "100%";
+                var height = "100%";
+
                 //TODO: center
                 var force = d3.layout.force()
                     .charge(-120)
@@ -28,8 +31,25 @@ app.directive('d3Graph', function(DiscourseNode) {
                 d3.select("svg").remove();
 
                 var svg = d3.select(element[0]).append("svg")
-                    .attr("width", "100%")
-                    .attr("height", "100%");
+                    .attr("width", width)
+                    .attr("height", height)
+                    .attr("pointer-events", "all")
+                    .append('svg:g')
+                    .call(d3.behavior.zoom().on("zoom", redraw))
+                    .append('svg:g');
+
+                svg.append('svg:rect')
+                    .attr('width', width)
+                    .attr('height', height)
+                    .attr('fill', 'white');
+
+                function redraw() {
+                    if (redraw.scale === d3.event.scale)
+                        return;
+
+                    redraw.scale = d3.event.scale;
+                    svg.attr("transform", "translate(" + d3.event.translate + ")" + " scale(" + d3.event.scale + ")");
+                }
 
                 force
                     .nodes(graph.nodes)
@@ -64,7 +84,9 @@ app.directive('d3Graph', function(DiscourseNode) {
                         return d.title;
                     });
 
-                force.on("tick", function() {
+                force.on("tick", tick);
+
+                function tick() {
                     link.attr("x1", function(d) {
                         return d.source.x;
                     })
@@ -84,7 +106,7 @@ app.directive('d3Graph', function(DiscourseNode) {
                         .attr("cy", function(d) {
                             return d.y;
                         });
-                });
+                }
             });
         }
     };
