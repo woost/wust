@@ -15,4 +15,3 @@ dist
 /.settings
 
 .sass-cache
-Gemfile.lock
