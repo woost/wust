@@ -7,6 +7,9 @@ val scalaV = "2.11.6"
 // ecmascript 6
 TraceurKeys.sourceFileNames := Seq("javascripts/**/*.js")
 
+// use compass with sbt-sass
+sassOptions in Assets ++= Seq("--compass", "-r", "compass")
+
 lazy val wust = (project in file(".")).settings(
   scalaVersion := scalaV,
   libraryDependencies ++= Seq(
