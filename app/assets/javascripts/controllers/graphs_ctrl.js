@@ -1,4 +1,4 @@
-app.controller('GraphsCtrl', function($scope, $state, $filter, Graph, DiscourseNode) {
+angular.module("wust").controller('GraphsCtrl', function($scope, $state, $filter, Graph, DiscourseNode) {
     Graph.get().$promise.then(createGraph);
 
     $scope.onClick = onClick;

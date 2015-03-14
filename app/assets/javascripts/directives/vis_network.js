@@ -1,4 +1,4 @@
-app.directive('visNetwork', function() {
+angular.module("wust").directive('visNetwork', function() {
     return {
         restrict: 'A',
         require: '^ngModel',

@@ -1,4 +1,4 @@
-app.service("NodeHistory", function(DiscourseNode) {
+angular.module("wust").service("NodeHistory", function(DiscourseNode) {
     var maximum = 8;
     var visited = [];
     this.visited = visited;

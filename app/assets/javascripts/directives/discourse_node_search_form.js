@@ -1,4 +1,4 @@
-app.directive("discourseNodeSearchForm", function(DiscourseNode) {
+angular.module("wust").directive("discourseNodeSearchForm", function(DiscourseNode) {
     return {
         restrict: 'A',
         require: 'ngModel',

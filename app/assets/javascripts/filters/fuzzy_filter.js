@@ -1,4 +1,4 @@
-app.filter('fuzzyFilter', ['$filter',
+angular.module("wust").filter('fuzzyFilter', ['$filter',
     function($filter) {
         return function(data, obj) {
             _.forIn(obj, function(value, key) {

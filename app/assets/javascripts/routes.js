@@ -1,4 +1,4 @@
-app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
+angular.module("wust").config(function($stateProvider, $urlRouterProvider, $locationProvider) {
     $stateProvider.state('page', {
         url: '/',
         abstract: true,
@@ -52,7 +52,7 @@ app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
     $locationProvider.html5Mode(true);
 });
 
-app.factory('httpErrorResponseInterceptor', function($q, $injector) {
+angular.module("wust").factory('httpErrorResponseInterceptor', function($q, $injector) {
     return {
         response: function(responseData) {
             return responseData;
@@ -70,6 +70,6 @@ app.factory('httpErrorResponseInterceptor', function($q, $injector) {
     };
 });
 
-app.config(function($httpProvider) {
+angular.module("wust").config(function($httpProvider) {
     $httpProvider.interceptors.push('httpErrorResponseInterceptor');
 });

@@ -1,5 +1,5 @@
 (function(Spinner) {
-    app.directive("routeLoadingIndicator", function() {
+    angular.module("wust").directive("routeLoadingIndicator", function() {
         return {
             restrict: 'A',
             template: "<div ng-show='isRouteLoading' class='center-block loading_indicator'>" +

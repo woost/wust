@@ -2,9 +2,10 @@ import sbt.Project.projectToRef
 
 name := "wust"
 
-val jsAssetsDirectory = baseDirectory(_ / "app/assets/javascripts")
-
 val scalaV = "2.11.6"
+
+// ecmascript 6
+TraceurKeys.sourceFileNames := Seq("javascripts/**/*.js")
 
 lazy val wust = (project in file(".")).settings(
   scalaVersion := scalaV,
@@ -26,17 +27,6 @@ lazy val wust = (project in file(".")).settings(
     "com.github.renesca" %% "renesca" % "0.1.2"
   ),
 // scalaJSProjects := Seq(scalajs),
-// javascript file groups
-pipelineStages := Seq(concat),
-pipelineStages in Assets := Seq(concat),
-Concat.parentDir := "public/main/javascripts",
-Concat.groups := Seq(
-  // http://www.scala-sbt.org/0.12.1/docs/Detailed-Topics/Paths.html
-  "wust.js" -> group(
-    (jsAssetsDirectory.value ** "*.js") ---
-    (jsAssetsDirectory.value / "module.js")
-  )
-),
   scalacOptions ++= Seq(
     "-encoding", "UTF-8",
     "-unchecked",
@@ -57,6 +47,4 @@ settings(
   persistLauncher := true, // launch main class on website load
   persistLauncher in Test := false
 ).enablePlugins(ScalaJSPlugin, ScalaJSPlay)
-
-
 

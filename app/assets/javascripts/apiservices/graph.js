@@ -1,4 +1,4 @@
-app.service('Graph', function($resource) {
+angular.module("wust").service('Graph', function($resource) {
     var service = $resource('/api/v1/graphs/:id', {
         id: '@id'
     });

@@ -24,10 +24,8 @@ resolvers += Resolver.url("GitHub repository", url("http://shaggyyeti.github.io/
 
   addSbtPlugin("com.typesafe.sbt" % "sbt-mocha" % "1.0.0")
 
+  // ecmascript 6
+  addSbtPlugin("com.typesafe.sbt" % "sbt-traceur" % "1.0.0")
 
   // use sass preprocessor for css
   addSbtPlugin("default" % "sbt-sass" % "0.1.9")
-
-
-  // concatenate javascript files
-  addSbtPlugin("net.ground5hark.sbt" % "sbt-concat" % "0.1.8")

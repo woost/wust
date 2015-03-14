@@ -1,4 +1,4 @@
-app.directive("showDiscourseNodeList", function($compile, $stateParams) {
+angular.module("wust").directive("showDiscourseNodeList", function($compile, $stateParams) {
     return {
         restrict: 'A',
         require: 'ngModel',

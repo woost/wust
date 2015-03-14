@@ -1,4 +1,4 @@
-app.directive('d3Graph', function(DiscourseNode) {
+angular.module("wust").directive('d3Graph', function(DiscourseNode) {
     return {
         restrict: 'A',
         require: '^ngModel',

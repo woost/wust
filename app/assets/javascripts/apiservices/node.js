@@ -1,4 +1,4 @@
-app.factory('Node', function($resource) {
+angular.module("wust").factory('Node', function($resource) {
     return function(name) {
         var prefix = '/api/v1/' + name;
 

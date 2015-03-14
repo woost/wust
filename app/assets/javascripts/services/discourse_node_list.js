@@ -1,4 +1,4 @@
-app.service('DiscourseNodeList', function(DiscourseNode, Idea, Problem, Goal, Search) {
+angular.module("wust").service('DiscourseNodeList', function(DiscourseNode, Idea, Problem, Goal, Search) {
     this.Goal = GoalNode;
     this.Problem = ProblemNode;
     this.Idea = IdeaNode;

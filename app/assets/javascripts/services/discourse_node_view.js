@@ -1,4 +1,4 @@
-app.factory('DiscourseNodeView', function($state, $stateParams, NodeHistory, DiscourseNodeList) {
+angular.module("wust").factory('DiscourseNodeView', function($state, $stateParams, NodeHistory, DiscourseNodeList) {
     return function(scope, nodeInfo, service) {
         var id = $stateParams.id;
 
