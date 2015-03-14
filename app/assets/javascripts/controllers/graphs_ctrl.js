@@ -1,23 +1,10 @@
 app.controller('GraphsCtrl', function($scope, $state, $filter, Graph, DiscourseNode) {
     Graph.get().$promise.then(createGraph);
-    $scope.data = {
-        graph: {
-            nodes: [],
-            edges: []
-        },
-        options: {
-            nodes: {
-                shape: 'box',
-                radius: 4,
-                iconFontFace: 'FontAwesome',
-                icon: "\uf0c3"
-            },
-            edges: {
-                color: '#353535',
-                style: 'arrow'
-            },
-        },
-        onClick: onClick
+
+    $scope.onClick = onClick;
+    $scope.graph = {
+        nodes: [],
+        edges: []
     };
 
     $scope.search = {
@@ -47,8 +34,8 @@ app.controller('GraphsCtrl', function($scope, $state, $filter, Graph, DiscourseN
                 ids = _.union(ids, edgeMap[ids[i]]);
             }
 
-            $scope.data.graph.nodes = _.map(ids, _.propertyOf(nodeMap));
-            $scope.data.graph.edges = _.select(graph.edges, function(edge) {
+            $scope.graph.nodes = _.map(ids, _.propertyOf(nodeMap));
+            $scope.graph.edges = _.select(graph.edges, function(edge) {
                 return _(ids).includes(edge.from) && _(ids).includes(edge.to);
             });
         };
@@ -67,12 +54,12 @@ app.controller('GraphsCtrl', function($scope, $state, $filter, Graph, DiscourseN
                 }),
                 label: edge.label.toLowerCase(),
                 // TODO: calculate real connection strength
-                strength: _.random(5)
+                strength: _.random(1, 5)
             });
         });
 
-        $scope.data.graph.nodes = graph.nodes;
-        $scope.data.graph.edges = graph.edges;
+        $scope.graph.nodes = graph.nodes;
+        $scope.graph.edges = graph.edges;
         $scope.$watch('search.title', filter(graph));
     }
 

@@ -5,7 +5,6 @@ app.directive('d3Graph', function(DiscourseNode) {
         scope: {
             ngModel: '=',
             onClick: '&',
-            options: '='
         },
         link: function(scope, element) {
             var onClick = scope.onClick() || function(d, i) {};
@@ -93,21 +92,6 @@ app.directive('d3Graph', function(DiscourseNode) {
                         return d.title;
                     })
                     .on("click", onClick);
-
-
-                // node
-                //     .append("svg:text")
-                //     .attr("text-anchor", "middle")
-                //     .attr("fill", "black")
-                //     .attr("font-size", function(d) {
-                //         return "9px";
-                //     })
-                //     .attr("font-weight", function(d) {
-                //         return "100";
-                //     })
-                //     .text(function(d) {
-                //         return d.title;
-                //     });
 
                 force.on("tick", tick);
 
