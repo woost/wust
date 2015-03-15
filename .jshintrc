@@ -4,7 +4,7 @@
     "maxerr" : 50, // {int} Maximum error before stopping
     // Enforcing
     "bitwise" : true, // true: Prohibit bitwise operators (&, |, ^, etc.)
-    "camelcase" : false, // true: Identifiers must be in camelCase
+    "camelcase" : true, // true: Identifiers must be in camelCase
     "curly" : false, // true: Require {} for every new block or scope
     "eqeqeq" : true, // true: Require triple equals (===) for comparison
     "forin" : true, // true: Require filtering for..in loops with obj.hasOwnProperty()
@@ -49,9 +49,10 @@
     "laxbreak" : false, // true: Tolerate possibly unsafe line breakings
     "laxcomma" : false, // true: Tolerate comma-first style coding
     "loopfunc" : false, // true: Tolerate functions being defined in loops
-    "multistr" : false, // true: Tolerate multi-line strings
+    "multistr" : true, // true: Tolerate multi-line strings
     "noyield" : false, // true: Tolerate generator functions with no yield statement in them.
-    "notypeof" : false, // true: Tolerate invalid typeof operator values "proto" : false, // true: Tolerate using the `__proto__` property
+    "notypeof" : false, // true: Tolerate invalid typeof operator values "proto" : false
+    "proto" : false, // true: Tolerate using the `__proto__` property
     "scripturl" : false, // true: Tolerate script-targeted URLs
     "shadow" : false, // true: Allows re-define variables later in code e.g. `var x=1; x=2;`
     "sub" : false, // true: Tolerate using `[]` notation when it can still be expressed in dot notation
