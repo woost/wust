@@ -16,6 +16,12 @@ $discourse_conargument_color: #ff6d6f;
         color: black;
         text-decoration: none;
     }
+    &.svgnode {
+        fill: $bgcolor;
+        stroke: $bordercolor;
+        stroke-width: 1;
+        stroke-linejoin: round;
+    }
     @at-root a:hover#{&}, &.btn:hover, &.panel a:hover .panel-heading {
         background-color: $bgcolor-highlight;
         color: black;
@@ -46,6 +52,10 @@ $discourse_conargument_color: #ff6d6f;
             padding-right: 9px;
         }
     }
+}
+
+.yo {
+    fill: yellow;
 }
 
 .discourse_goal {

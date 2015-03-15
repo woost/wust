@@ -51,10 +51,10 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                     .links(graph.edges)
                     .start();
 
-                var link = svg.append("g").selectAll(".link")
+                var link = svg.append("g").selectAll(".svglink")
                     .data(graph.edges)
                     .enter().append("line")
-                    .attr("class", "link")
+                    .attr("class", "svglink")
                     .style("stroke-width", d => d.strength);
 
                 link
@@ -69,12 +69,14 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                     .attr("text-anchor", "middle")
                     .text(d => d.label);
 
-                var node = svg.append("g").selectAll(".node")
+                var node = svg.append("g").selectAll(".svgnode")
                     .data(graph.nodes)
-                    .enter().append("circle")
-                    .attr("class", "node")
-                    .attr("r", 30)
-                    .style("fill", d => DiscourseNode.get(d.label).color)
+                    .enter().append("rect")
+                    .attr("class", d => DiscourseNode.get(d.label).css + " svgnode")
+                    .attr("width", 30)
+                    .attr("height", 30)
+                    .attr("rx", 4)
+                    .attr("ry", 4)
                     .call(drag)
                     .on("dblclick", doubleclicked);
 
@@ -104,8 +106,8 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                         .attr("transform", d => "translate(" + (d.source.x + d.target.x) / 2 + "," + (d.source.y + d.target.y) / 2 + ")");
 
                     node
-                        .attr("cx", d => d.x)
-                        .attr("cy", d => d.y);
+                        .attr("x", d => d.x - 15) // TODO
+                        .attr("y", d => d.y - 15);
 
                     nodetext.attr("transform", d => "translate(" + d.x + "," + d.y + ")");
                 }
