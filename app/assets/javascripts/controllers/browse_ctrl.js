@@ -34,7 +34,7 @@ angular.module("wust").controller("BrowseCtrl", function($scope, $state, Problem
     var slides = [problems, goals, ideas];
     $scope.slides = slides;
 
-    $scope.$watch(() => _.find(slides, "active"), (currentSlide, previousSlide) => currentSlide.queryNodes());
+    $scope.$watch(() => _.find(slides, "active"), currentSlide => currentSlide.queryNodes());
 
     function addNode(createFunc) {
         createFunc(this.newNode).$promise.then(data => {

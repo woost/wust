@@ -1,5 +1,7 @@
-angular.module("wust").factory('DiscourseNodeView', function($state, $stateParams, NodeHistory, DiscourseNodeList) {
-    return function(scope, nodeInfo, service) {
+angular.module("wust").service("DiscourseNodeView", function($state, $stateParams, NodeHistory, DiscourseNodeList) {
+    this.setScope = setScope;
+
+    function setScope(scope, nodeInfo, service) {
         var id = $stateParams.id;
 
         scope.nodeCss = nodeInfo.css;
@@ -9,13 +11,13 @@ angular.module("wust").factory('DiscourseNodeView', function($state, $stateParam
         scope.ideas = new DiscourseNodeList.Idea(id, service);
         scope.removeFocused = _.partial(removeFocused, id, service.remove);
         NodeHistory.add(scope.node);
-    };
+    }
 
     function removeFocused(id, removeFunc) {
-        removeFunc(id).$promise.then(function(data) {
+        removeFunc(id).$promise.then(() => {
             NodeHistory.remove(id);
             toastr.success("Removed node");
-            $state.go('browse');
+            $state.go("browse");
         });
     }
 });

@@ -1,63 +1,63 @@
-angular.module("wust").controller('VotesCtrl', function($scope) {
+angular.module("wust").controller("VotesCtrl", function($scope) {
     $scope.changes = [{
-        action: 'delete',
-        icon: 'fa-trash-o',
+        action: "delete",
+        icon: "fa-trash-o",
         affected: {
             node: {
-                title: 'Du bist doof',
-                class: 'discourse_goal node'
+                title: "Du bist doof",
+                class: "discourse_goal node"
             }
         }
     }, {
-        action: 'create',
-        icon: 'fa-star-o',
+        action: "create",
+        icon: "fa-star-o",
         affected: {
             node: {
-                title: 'Ich bin zu dick',
-                class: 'discourse_problem node'
+                title: "Ich bin zu dick",
+                class: "discourse_problem node"
             }
         }
     }, {
-        action: 'connect',
-        icon: 'fa-compress',
+        action: "connect",
+        icon: "fa-compress",
         affected: {
             startnode: {
-                title: 'Ich ernähre mich schlecht',
-                class: 'discourse_problem node'
+                title: "Ich ernähre mich schlecht",
+                class: "discourse_problem node"
             },
             relation: {
-                title: 'causes'
+                title: "causes"
             },
             endnode: {
-                title: 'Ich bin zu dick',
-                class: 'discourse_problem node'
+                title: "Ich bin zu dick",
+                class: "discourse_problem node"
             }
         }
     }, {
-        action: 'disconnect',
-        icon: 'fa-expand',
+        action: "disconnect",
+        icon: "fa-expand",
         affected: {
             startnode: {
-                title: 'PC neustarten',
-                class: 'discourse_idea node'
+                title: "PC neustarten",
+                class: "discourse_idea node"
             },
             relation: {
-                title: 'solves'
+                title: "solves"
             },
             endnode: {
-                title: 'Ich ernähre mich schlecht',
-                class: 'discourse_problem node'
+                title: "Ich ernähre mich schlecht",
+                class: "discourse_problem node"
             }
         }
     }, {
-        action: 'flag',
-        icon: 'fa-flag',
+        action: "flag",
+        icon: "fa-flag",
         affected: {
             node: {
-                title: 'Buy Viagra!',
-                class: 'discourse_goal node'
+                title: "Buy Viagra!",
+                class: "discourse_goal node"
             },
-            flag: 'spam'
+            flag: "spam"
         }
     }, ];
 

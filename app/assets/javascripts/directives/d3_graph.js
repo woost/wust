@@ -1,10 +1,10 @@
-angular.module("wust").directive('d3Graph', function(DiscourseNode) {
+angular.module("wust").directive("d3Graph", function(DiscourseNode) {
     return {
-        restrict: 'A',
-        require: '^ngModel',
+        restrict: "A",
+        require: "^ngModel",
         scope: {
-            ngModel: '=',
-            onClick: '&',
+            ngModel: "=",
+            onClick: "&",
         },
         link: function(scope, element) {
             var onClick = scope.onClick() || _.noop;
@@ -27,15 +27,15 @@ angular.module("wust").directive('d3Graph', function(DiscourseNode) {
                     .attr("width", width)
                     .attr("height", height)
                     .attr("pointer-events", "all")
-                    .append('svg:g')
+                    .append("svg:g")
                     .call(d3.behavior.zoom().on("zoom", redraw))
-                    .append('svg:g');
+                    .append("svg:g");
 
                 svg
-                    .append('svg:rect')
-                    .attr('width', width)
-                    .attr('height', height)
-                    .attr('fill', 'white');
+                    .append("svg:rect")
+                    .attr("width", width)
+                    .attr("height", height)
+                    .attr("fill", "white");
 
                 force
                     .nodes(graph.nodes)

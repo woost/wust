@@ -1,4 +1,4 @@
-angular.module("wust").service('DiscourseNode', function() {
+angular.module("wust").service("DiscourseNode", function() {
     this.goal = {
         css: "discourse_goal",
         state: "goals",

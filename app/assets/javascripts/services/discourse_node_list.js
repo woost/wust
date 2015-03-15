@@ -1,4 +1,4 @@
-angular.module("wust").service('DiscourseNodeList', function(DiscourseNode, Idea, Problem, Goal, Search) {
+angular.module("wust").service("DiscourseNodeList", function(DiscourseNode, Idea, Problem, Goal, Search) {
     [ this.Goal, this.Problem, this.Idea ] = nodeClasses();
 
     function todo() {
@@ -13,7 +13,7 @@ angular.module("wust").service('DiscourseNodeList', function(DiscourseNode, Idea
     }
 
     function remove(disconnectFunc, elem) {
-        disconnectFunc(this.id, elem.id).$promise.then(data => {
+        disconnectFunc(this.id, elem.id).$promise.then(() => {
             toastr.success("Disconnected node");
             _.remove(this.list, elem);
         });

@@ -1,4 +1,4 @@
-angular.module("wust").controller('GraphsCtrl', function($scope, $state, $filter, Graph, DiscourseNode) {
+angular.module("wust").controller("GraphsCtrl", function($scope, $state, $filter, Graph, DiscourseNode) {
     Graph.get().$promise.then(createGraph);
 
     $scope.onClick = onClick;
@@ -29,7 +29,7 @@ angular.module("wust").controller('GraphsCtrl', function($scope, $state, $filter
         }, _));
 
         return function() {
-            var filtered = $filter('fuzzyFilter')(graph.nodes, $scope.search);
+            var filtered = $filter("fuzzyFilter")(graph.nodes, $scope.search);
             var ids = _.map(filtered, "id");
             for (var i = 0; i < ids.length; i++) {
                 ids = _.union(ids, edgeMap[ids[i]]);
@@ -61,10 +61,10 @@ angular.module("wust").controller('GraphsCtrl', function($scope, $state, $filter
 
         $scope.graph.nodes = graph.nodes;
         $scope.graph.edges = graph.edges;
-        $scope.$watch('search.title', filter(graph));
+        $scope.$watch("search.title", filter(graph));
     }
 
-    function onClick(d, i) {
+    function onClick(d) {
         var state = DiscourseNode.get(d.label).state;
         $state.go(state, {
             id: d.id

@@ -1,11 +1,11 @@
-angular.module("wust").filter('fuzzyFilter', ['$filter',
+angular.module("wust").filter("fuzzyFilter", ["$filter",
     function($filter) {
         return (data, obj) => {
             _.forIn(obj, (value, key) => {
-                _.each(value.split(' '), (val) => {
+                _.each(value.split(" "), (val) => {
                     var search = {};
                     search[key] = val || "";
-                    data = $filter('filter')(data, search);
+                    data = $filter("filter")(data, search);
                 });
             });
 
