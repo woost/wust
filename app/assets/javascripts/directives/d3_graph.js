@@ -28,7 +28,9 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                     .attr("height", height)
                     .attr("pointer-events", "all")
                     .append("svg:g")
-                    .call(d3.behavior.zoom().on("zoom", redraw))
+                    .call(d3.behavior.zoom()
+                    .scaleExtent([0.1, 3])
+                    .on("zoom", redraw))
                     .append("svg:g");
 
                 svg
