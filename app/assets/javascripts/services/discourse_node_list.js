@@ -73,7 +73,7 @@ angular.module("wust").service("DiscourseNodeList", function(DiscourseNode, Idea
 
         class IdeaNode extends Node {
             constructor(id, nodeService = {}) {
-                super(id, Problem.create, nodeService.ideas, Search.queryIdeas);
+                super(id, Idea.create, nodeService.ideas, Search.queryIdeas);
                 this.info = DiscourseNode.idea;
                 this.style = {
                     templateUrl: "show_discourse_idea_list.html",
