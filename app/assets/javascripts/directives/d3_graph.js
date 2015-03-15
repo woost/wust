@@ -69,30 +69,26 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                     .attr("text-anchor", "middle")
                     .text(d => d.label);
 
+
+
                 var node = svg.append("g").selectAll(".svgnode")
                     .data(graph.nodes)
-                    .enter().append("rect")
-                    .attr("class", d => DiscourseNode.get(d.label).css + " svgnode")
-                    .attr("width", 30)
-                    .attr("height", 30)
-                    .attr("rx", 4)
-                    .attr("ry", 4)
+                    .enter().append("g")
                     .call(drag)
                     .on("dblclick", doubleclicked);
+                // .on("click", onClick);
 
-                node
-                    .append("title")
-                    .text(d => d.title);
+                var htmlnode = node.append("foreignObject")
+                    .attr("width", 600)
+                    .attr("height", 600)
+                    .append("xhtml:div")
+                    .attr("class", d => "node " + DiscourseNode.get(d.label).css)
+                    .html(d => d.title);
 
-                var nodetext = svg.append("g").selectAll("g.nodelabelholder")
-                    .data(graph.nodes)
-                    .enter().append("g").attr("class", "nodelabelholder")
-                    .append("text")
-                    .attr("class", "nodelabel")
-                    .attr("text-anchor", "middle")
-                    .text(d => d.title)
-                    .on("click", onClick);
-
+                // node
+                //     .append("title")
+                //     .text(d => d.title)
+                //     
                 force.on("tick", tick);
 
                 function tick() {
@@ -105,11 +101,8 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                     linktext
                         .attr("transform", d => "translate(" + (d.source.x + d.target.x) / 2 + "," + (d.source.y + d.target.y) / 2 + ")");
 
-                    node
-                        .attr("x", d => d.x - 15) // TODO
-                        .attr("y", d => d.y - 15);
 
-                    nodetext.attr("transform", d => "translate(" + d.x + "," + d.y + ")");
+                    node.attr("transform", d => "translate(" + d.x + "," + d.y + ")");
                 }
 
                 function zoomed() {
