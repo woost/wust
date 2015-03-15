@@ -23,21 +23,27 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
 
                 d3.select("svg").remove();
 
-                var svg = d3.select(element[0]).append("svg")
-                    .attr("width", width)
-                    .attr("height", height)
-                    .attr("pointer-events", "all")
-                    .append("svg:g")
-                    .call(d3.behavior.zoom()
-                    .scaleExtent([0.1, 3])
-                    .on("zoom", redraw))
-                    .append("svg:g");
+                // define events
+                var zoom = d3.behavior.zoom().scaleExtent([1, 10]).on("zoom", zoomed);
+                var drag = d3.behavior.drag().origin((d) => d)
+                    .on("dragstart", dragstarted)
+                    .on("drag", dragged)
+                    .on("dragend", dragended);
 
-                svg
-                    .append("svg:rect")
+                var mainSvg = d3.select(element[0])
+                    .append("svg")
                     .attr("width", width)
                     .attr("height", height)
-                    .attr("fill", "white");
+                    .append("g")
+                    .call(zoom);
+
+                var rectSvg = mainSvg.append("rect")
+                    .attr("width", width)
+                    .attr("height", height)
+                    .style("fill", "none")
+                    .style("pointer-events", "all");
+
+                var svg = mainSvg.append("g");
 
                 force
                     .nodes(graph.nodes)
@@ -68,7 +74,7 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                     .attr("class", "node")
                     .attr("r", 30)
                     .style("fill", d => DiscourseNode.get(d.label).color)
-                    .call(force.drag);
+                    .call(drag);
 
                 node
                     .append("title")
@@ -102,12 +108,21 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                     nodetext.attr("transform", d => "translate(" + d.x + "," + d.y + ")");
                 }
 
-                function redraw() {
-                    if (redraw.scale === d3.event.scale)
-                        return;
+                function zoomed() {
+                    svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+                }
 
-                    redraw.scale = d3.event.scale;
-                    svg.attr("transform", "translate(" + d3.event.translate + ")" + " scale(" + d3.event.scale + ")");
+                function dragstarted() {
+                    d3.event.sourceEvent.stopPropagation();
+                    d3.select(this).classed("dragging", true);
+                }
+
+                function dragged(d) {
+                    d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
+                }
+
+                function dragended(d) {
+                    d3.select(this).classed("dragging", false);
                 }
             });
         }
