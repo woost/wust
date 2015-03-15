@@ -17,8 +17,8 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
 
                 //TODO: center
                 var force = d3.layout.force()
-                    .charge(-1200)
-                    .linkDistance(200)
+                    .charge(-120)
+                    .linkDistance(60)
                     .size([800, 600]);
 
                 d3.select("svg").remove();
@@ -50,7 +50,7 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                     .links(graph.edges)
                     .start();
 
-                var link = svg.selectAll(".link")
+                var link = svg.append("g").selectAll(".link")
                     .data(graph.edges)
                     .enter().append("line")
                     .attr("class", "link")
@@ -60,7 +60,7 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                     .append("title")
                     .text(d => d.label);
 
-                var linktext = svg.selectAll("g.linklabelholder")
+                var linktext = svg.append("g").selectAll("g.linklabelholder")
                     .data(graph.edges)
                     .enter().append("g").attr("class", "linklabelholder")
                     .append("text")
@@ -68,19 +68,20 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                     .attr("text-anchor", "middle")
                     .text(d => d.label);
 
-                var node = svg.selectAll(".node")
+                var node = svg.append("g").selectAll(".node")
                     .data(graph.nodes)
                     .enter().append("circle")
                     .attr("class", "node")
                     .attr("r", 30)
                     .style("fill", d => DiscourseNode.get(d.label).color)
+                    .on("click", clicked)
                     .call(drag);
 
                 node
                     .append("title")
                     .text(d => d.title);
 
-                var nodetext = svg.selectAll("g.nodelabelholder")
+                var nodetext = svg.append("g").selectAll("g.nodelabelholder")
                     .data(graph.nodes)
                     .enter().append("g").attr("class", "nodelabelholder")
                     .append("text")
@@ -106,6 +107,10 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                         .attr("cy", d => d.y);
 
                     nodetext.attr("transform", d => "translate(" + d.x + "," + d.y + ")");
+                }
+
+                function clicked() {
+                    d3.event.preventDefault();
                 }
 
                 function zoomed() {
