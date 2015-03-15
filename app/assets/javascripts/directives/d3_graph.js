@@ -116,6 +116,9 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
 
                 function doubleclicked(d) {
                     d3.select(this).classed("fixed", d.fixed = false);
+                    // need to explicitly resume the force, otherwise the graph
+                    // is stuck until a node is dragged
+                    force.resume();
                 }
 
                 function dragstarted(d) {
