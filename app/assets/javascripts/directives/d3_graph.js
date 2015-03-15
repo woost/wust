@@ -81,7 +81,10 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                 var htmlnode = node.append("foreignObject")
                     .attr("width", 600)
                     .attr("height", 600)
+                    .style("text-align", "center")
                     .append("xhtml:div")
+                    .style("margin-top", "290px")
+                    .style("max-width", "150px")
                     .attr("class", d => "node " + DiscourseNode.get(d.label).css)
                     .html(d => d.title);
 
@@ -102,7 +105,7 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                         .attr("transform", d => "translate(" + (d.source.x + d.target.x) / 2 + "," + (d.source.y + d.target.y) / 2 + ")");
 
 
-                    node.attr("transform", d => "translate(" + d.x + "," + d.y + ")");
+                    node.attr("transform", d => "translate(" + (d.x - 300) + "," + (d.y - 300) + ")");
                 }
 
                 function zoomed() {
