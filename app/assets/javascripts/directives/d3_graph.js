@@ -12,15 +12,14 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
             scope.$watchCollection("ngModel", () => {
                 var graph = scope.ngModel;
 
-                var width = "100%";
-                var height = "100%";
+                var width = element[0].offsetWidth;
+                var height = element[0].offsetHeight;
 
-                //TODO: center
                 var force = d3.layout.force()
                     .gravity(0.05)
                     .charge(-400)
                     .linkDistance(150)
-                    .size([800, 600]);
+                    .size([width, height]);
 
                 d3.select("svg").remove();
 
