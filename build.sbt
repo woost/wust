@@ -13,22 +13,26 @@ sassOptions in Assets ++= Seq("--compass", "-r", "compass")
 lazy val wust = (project in file(".")).settings(
   scalaVersion := scalaV,
   libraryDependencies ++= Seq(
-    "org.webjars" %% "webjars-play" % "2.3.0-2",
+    // database
+    "com.github.renesca" %% "renesca" % "0.1.3",
+    // scalajs
     "com.vmunier" %% "play-scalajs-scripts" % "0.1.0",
+    // "org.webjars" %% "webjars-play" % "2.3.0-2",
+    // angular
     "org.webjars" % "angularjs" % "1.3.14",
     "org.webjars" % "angular-ui-router" % "0.2.13",
     "org.webjars" % "angular-ui-bootstrap" % "0.12.1",
+    "org.webjars" % "angular-dragdrop" % "1.0.6-1",
+    // basic js libraries
+    "org.webjars" % "lodash" % "3.3.1",
     "org.webjars" % "font-awesome" % "4.3.0-1",
     "org.webjars" % "bootstrap" % "3.3.2-2",
-    "org.webjars" % "lodash" % "3.3.1",
-    "org.webjars" % "spin-js" % "2.0.0-1",
     "org.webjars" % "d3js" % "3.5.3",
     "org.webjars" % "toastr" % "2.1.0",
-    "org.webjars" % "animate.css" % "3.2.3",
-    "org.webjars" % "angular-dragdrop" % "1.0.6-1",
-    "com.github.renesca" %% "renesca" % "0.1.3"
-  ),
-// scalaJSProjects := Seq(scalajs),
+    "org.webjars" % "spin-js" % "2.0.0-1", // really?
+    "org.webjars" % "animate.css" % "3.2.3" // do we still need this with compass animations?
+    ),
+  // scalaJSProjects := Seq(scalajs),
   scalacOptions ++= Seq(
     "-encoding", "UTF-8",
     "-unchecked",
