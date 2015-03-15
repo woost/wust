@@ -34,23 +34,24 @@ angular.module("wust").service('DiscourseNodeList', function(DiscourseNode, Idea
 
     function nodeClasses() {
         class Node {
-            constructor(id, connService, createFunc, searchFunc) {
+            constructor(id, createFunc, connService = {}, searchFunc = Search.query) {
                 this.id = id;
                 this.new = {
                     title: ""
                 };
+
                 this.list = connService.query ? connService.query(this.id) : [];
                 this.remove = connService.remove ? _.wrap(connService.remove, remove) : todo;
                 this.add = connService.create ? _.wrap(connService.create, add) : todo;
-                this.create = createFunc ? _.wrap(createFunc, create) : todo;
-                this.search = searchFunc ? searchFunc : Search.query;
+                this.create = _.wrap(createFunc, create);
+                this.search = searchFunc;
                 _.bindAll(this);
             }
         }
 
         class GoalNode extends Node {
-            constructor(id, nodeService) {
-                super(id, nodeService ? nodeService.goals : {}, Goal.create, Search.queryGoals);
+            constructor(id, nodeService = {}) {
+                super(id, Goal.create, nodeService.goals, Search.queryGoals);
                 this.info = DiscourseNode.goal;
                 this.style = {
                     templateUrl: "show_discourse_node_list.html",
@@ -60,8 +61,8 @@ angular.module("wust").service('DiscourseNodeList', function(DiscourseNode, Idea
         }
 
         class ProblemNode extends Node {
-            constructor(id, nodeService) {
-                super(id, nodeService ? nodeService.problems : {}, Problem.create, Search.queryProblems);
+            constructor(id, nodeService = {}) {
+                super(id, Problem.create, nodeService.problems, Search.queryProblems);
                 this.info = DiscourseNode.problem;
                 this.style = {
                     templateUrl: "show_discourse_node_list.html",
@@ -71,8 +72,8 @@ angular.module("wust").service('DiscourseNodeList', function(DiscourseNode, Idea
         }
 
         class IdeaNode extends Node {
-            constructor(id, nodeService) {
-                super(id, nodeService ? nodeService.ideas : {}, Idea.create, Search.queryIdeas);
+            constructor(id, nodeService = {}) {
+                super(id, Problem.create, nodeService.ideas, Search.queryIdeas);
                 this.info = DiscourseNode.idea;
                 this.style = {
                     templateUrl: "show_discourse_idea_list.html",
