@@ -16,15 +16,16 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                 var height = element[0].offsetHeight;
 
                 var force = d3.layout.force()
-                    .gravity(0.05)
-                    .charge(-400)
-                    .linkDistance(150)
+                    .friction(0.90)
+                    // .gravity(0.05)
+                    .charge(-1000)
+                    .linkDistance(100)
                     .size([width, height]);
 
                 d3.select("svg").remove();
 
                 // define events
-                var zoom = d3.behavior.zoom().scaleExtent([1, 10]).on("zoom", zoomed);
+                var zoom = d3.behavior.zoom().scaleExtent([0.1, 10]).on("zoom", zoomed);
                 var drag = force.drag()
                     .on("dragstart", dragstarted)
                     .on("drag", dragged);
@@ -34,7 +35,8 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                     .attr("width", width)
                     .attr("height", height)
                     .append("g")
-                    .call(zoom);
+                    .call(zoom)
+                    .on("dblclick.zoom", null);
 
                 var rectSvg = mainSvg.append("rect")
                     .attr("width", width)
@@ -73,7 +75,8 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                     .attr("class", "node")
                     .attr("r", 30)
                     .style("fill", d => DiscourseNode.get(d.label).color)
-                    .call(drag);
+                    .call(drag)
+                    .on("dblclick", doubleclicked);
 
                 node
                     .append("title")
@@ -111,8 +114,13 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                     svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
                 }
 
-                function dragstarted() {
+                function doubleclicked(d) {
+                    d3.select(this).classed("fixed", d.fixed = false);
+                }
+
+                function dragstarted(d) {
                     d3.event.sourceEvent.stopPropagation();
+                    d3.select(this).classed("fixed", d.fixed = true);
                 }
 
                 function dragged(d) {
