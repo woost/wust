@@ -17,7 +17,8 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
 
                 //TODO: center
                 var force = d3.layout.force()
-                    .charge(-120)
+                    .gravity(0.05)
+                    .charge(-400)
                     .linkDistance(150)
                     .size([800, 600]);
 
