@@ -30,7 +30,10 @@ lazy val wust = (project in file(".")).settings(
     "org.webjars" % "d3js" % "3.5.3",
     "org.webjars" % "toastr" % "2.1.0",
     "org.webjars" % "spin-js" % "2.0.0-1", // really?
-    "org.webjars" % "animate.css" % "3.2.3" // do we still need this with compass animations?
+    "org.webjars" % "animate.css" % "3.2.3", // do we still need this with compass animations?
+    // atmosphere
+    "org.atmosphere" % "atmosphere-play" % "2.1.0",
+    "org.webjars" % "atmosphere-javascript" % "2.2.3"
     ),
   // scalaJSProjects := Seq(scalajs),
   scalacOptions ++= Seq(
