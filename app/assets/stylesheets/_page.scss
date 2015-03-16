@@ -37,8 +37,9 @@ html, body {
         }
     }
     #noscriptmsg {
-        @include containment(40%);
-        background-color: $green;
+        margin: 20px auto;
+        width: 40%;
+        background-color: seagreen;
         color: white;
         text-align: center;
     }

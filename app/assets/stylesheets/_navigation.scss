@@ -7,16 +7,16 @@ nav {
             color: white !important;
         }
         a:hover, a:visited {
-            background-color: $green !important;
+            background-color: seagreen !important;
         }
         a.active {
-            background-color: $blue !important;
+            background-color: #005ca3 !important;
         }
     }
 }
 
 #navigation {
-    background-color: $dark;
+    background-color: #3b444b;
     border-width: 0px;
     ul.nav li.dropdown:hover > ul.dropdown-menu {
         display: block;
