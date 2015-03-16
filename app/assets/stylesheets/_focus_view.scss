@@ -1,12 +1,14 @@
+@import "compass/css3/flexbox";
+
 #focus_view_container {
-    display: flex;
-    justify-content: space-between;
+    @include display-flex(flex);
+    @include justify-content(space-between);
     padding: 20px;
     text-align: center;
     #node_view {
         padding: 50px;
     }
     #focus_view_center {
-        flex-grow: 1;
+        @include flex-grow(1);
     }
 }

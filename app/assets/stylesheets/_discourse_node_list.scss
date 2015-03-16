@@ -1,8 +1,10 @@
+@import "compass/css3/flexbox";
+
 #show_discourse_node_list {
     .discourse_idea_list {
         padding: 6px;
-        display: flex;
-        flex-wrap: wrap;
+        @include display-flex(flex);
+        @include flex-wrap(wrap);
         &.on-drag-enter {
             background-color: $discourse_idea_color;
         }
