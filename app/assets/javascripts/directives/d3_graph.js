@@ -19,7 +19,7 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                     .friction(0.90)
                     // .gravity(0.05)
                     .charge(-1000)
-                    .linkDistance(100)
+                    .linkDistance(120)
                     .size([width, height]);
 
                 d3.select("svg").remove();
@@ -61,13 +61,21 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                     .append("title")
                     .text(d => d.label);
 
-                var linktext = svg.append("g").selectAll("g.linklabelholder")
+                var linktextSvg = svg.append("g").selectAll("g.linklabelholder")
                     .data(graph.edges)
-                    .enter().append("g").attr("class", "linklabelholder")
-                    .append("text")
-                    .attr("class", "linklabel")
-                    .attr("text-anchor", "middle")
-                    .text(d => d.label);
+                    .enter().append("g");
+
+                var linktextHtml = linktextSvg
+                    .append("foreignObject")
+                    .attr("width", 600)
+                    .attr("height", 600)
+                    .style("text-align", "center")
+                    .append("xhtml:span")
+                    .style("line-height", "600px")
+                    // .style("text-shadow", "white -1px 0px, white 0px 1px, white 1px 0px, white 0px -1px")
+                    .style("background", "white")
+                    .style("padding", "1px")
+                    .html(d => d.label);
 
 
 
@@ -78,13 +86,14 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                     .on("dblclick", doubleclicked);
                 // .on("click", onClick);
 
-                var htmlnode = node.append("foreignObject")
+                var nodeHtml = node.append("foreignObject")
                     .attr("width", 600)
                     .attr("height", 600)
                     .style("text-align", "center")
                     .append("xhtml:div")
                     .style("margin-top", "290px")
                     .style("max-width", "150px")
+                    .style("cursor", "move")
                     .attr("class", d => "node " + DiscourseNode.get(d.label).css)
                     .html(d => d.title);
 
@@ -101,8 +110,8 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                         .attr("x2", d => d.target.x)
                         .attr("y2", d => d.target.y);
 
-                    linktext
-                        .attr("transform", d => "translate(" + (d.source.x + d.target.x) / 2 + "," + (d.source.y + d.target.y) / 2 + ")");
+                    linktextSvg
+                        .attr("transform", d => "translate(" + ((d.source.x + d.target.x) / 2 - 300) + "," + ((d.source.y + d.target.y) / 2 - 300) + ")");
 
 
                     node.attr("transform", d => "translate(" + (d.x - 300) + "," + (d.y - 300) + ")");

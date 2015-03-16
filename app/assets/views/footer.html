@@ -1,7 +1,7 @@
 <div id="footer">
     <i class="fa fa-history"></i>
 
-    <a ui-draggable="true" drag="item.node" drag-channel="{{item.node.label}}" ng-repeat="item in visited" class="node" ui-sref="{{item.info.state}}({id: item.node.id})" ng-class="item.info.css">
+    <a ui-draggable="true" drag="item.node" drag-channel="{{item.node.label}}" ng-repeat="item in visited" class="node" style="margin-left:3px" ui-sref="{{item.info.state}}({id: item.node.id})" ng-class="item.info.css">
         {{item.node.title | limitTo: 10}}<span ng-show="item.node.title.length > 10">...</span>
     </a>
 </div>
