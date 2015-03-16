@@ -30,6 +30,9 @@ html, body {
                 -ms-animation: fadeIn 0.5s;
                 -o-animation: fadeIn 0.5s;
                 animation: fadeIn 0.5s;
+                // why is it not working with compass?
+                // @import "compass/css3/animation";
+                // @include animation(fadeIn, 5.5s);
             }
             & > .ng-scope {
                 height: inherit;
