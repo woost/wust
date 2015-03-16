@@ -1,5 +1,4 @@
 h1 {
-    @include font;
     text-align: center;
     text-transform: uppercase;
     font-size: 30px;
@@ -7,14 +6,14 @@ h1 {
 }
 
 h2 {
-    @include font;
     text-align: center;
     font-size: 24px;
     line-height: 36px;
 }
 
 html, body {
-    @include font;
+    font-family: 'Droid Sans', Helvetica, Arial, sans-serif;
+    font-size: 14px;
     margin: 0;
     min-width: 600px;
     height: 100%;
