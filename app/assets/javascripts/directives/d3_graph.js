@@ -30,38 +30,47 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                     .on("dragstart", dragstarted)
                     .on("drag", dragged);
 
-                var mainSvg = d3.select(element[0])
+                var svg = d3.select(element[0])
                     .append("svg")
                     .attr("width", width)
                     .attr("height", height)
-                    .append("g")
+                    // .append("g")
                     .call(zoom)
                     .on("dblclick.zoom", null);
 
-                var rectSvg = mainSvg.append("rect")
-                    .attr("width", width)
-                    .attr("height", height)
-                    .style("fill", "none")
+                svg.append("svg:defs").append("svg:marker")
+                    .attr("id", "arrow")
+                    .attr("viewBox", "0 -5 10 10")
+                    .attr("refX", 6)
+                    .attr("markerWidth", 3)
+                    .attr("markerHeight", 3)
+                    .attr("orient", "auto")
+                    .attr("stroke", "green")
+                    .attr("stroke-width", "2")
+                    .append("svg:path")
+                    .attr("d", "M0,-5L10,0L0,5")
+                    .attr("fill", "red");
+
+
+                var container = svg.append("g")
                     .style("pointer-events", "all");
 
-                var svg = mainSvg.append("g");
 
                 force
                     .nodes(graph.nodes)
                     .links(graph.edges)
                     .start();
 
-                var link = svg.append("g").selectAll(".svglink")
+
+                var link = container.selectAll(".svglink")
                     .data(graph.edges)
                     .enter().append("line")
                     .attr("class", "svglink")
-                    .style("stroke-width", d => d.strength);
+                    .style("stroke-width", 1)
+                    .style("stroke", "#999")
+                    .style("marker-end", "url(#arrow)");
 
-                link
-                    .append("title")
-                    .text(d => d.label);
-
-                var linktextSvg = svg.append("g").selectAll("g.linklabelholder")
+                var linktextSvg = container.append("g").selectAll("g.linklabelholder")
                     .data(graph.edges)
                     .enter().append("g");
 
@@ -79,7 +88,7 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
 
 
 
-                var node = svg.append("g").selectAll(".svgnode")
+                var node = container.append("g").selectAll(".svgnode")
                     .data(graph.nodes)
                     .enter().append("g")
                     .call(drag)
@@ -90,6 +99,7 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                     .attr("width", 600)
                     .attr("height", 600)
                     .style("text-align", "center")
+                    // .style("opacity", "0.5")
                     .append("xhtml:div")
                     .style("margin-top", "290px")
                     .style("max-width", "150px")
@@ -97,10 +107,6 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                     .attr("class", d => "node " + DiscourseNode.get(d.label).css)
                     .html(d => d.title);
 
-                // node
-                //     .append("title")
-                //     .text(d => d.title)
-                //     
                 force.on("tick", tick);
 
                 function tick() {
@@ -118,7 +124,7 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                 }
 
                 function zoomed() {
-                    svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+                    container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
                 }
 
                 function doubleclicked(d) {
