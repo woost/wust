@@ -5,7 +5,7 @@ name := "wust"
 val scalaV = "2.11.6"
 
 // ecmascript 6
-TraceurKeys.sourceFileNames := Seq("javascripts/**/*.js")
+TraceurKeys.sourceFileNames := Seq("javascripts/module.js", "javascripts/routes.js", "javascripts/*/*.js")
 
 // use compass with sbt-sass
 sassOptions in Assets ++= Seq("--compass", "-r", "compass")
