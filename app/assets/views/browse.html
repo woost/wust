@@ -5,9 +5,12 @@
             <div id="create_new">
                 <h2 ng-bind="slide.newTitle"></h2>
                 <form ng-submit="slide.addNode()">
-                    <input size=50 type="text" ng-model="slide.newNode.title" required>
-                    <button type="submit" class="btn btn-success"><i class="fa fa-plus"></i>
-                    </button>
+                    <div class="input-group">
+                        <input type="text" class="form-control" ng-model="slide.newNode.title" required>
+                        <span class="input-group-btn">
+                            <button type="submit" class="btn btn-success"><i class="fa fa-plus"></i> </button>
+                        </span>
+                    </div>
                 </form>
             </div>
 
