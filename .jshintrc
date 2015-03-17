@@ -71,10 +71,11 @@
     // Custom Globals
     "globals" : {}, // additional predefined global variables
     "predef": [
-        "angular",
         "_",
-        "toastr",
+        "angular",
+        "atmosphere",
         "d3",
+        "toastr",
         "Spinner"
     ]
 }

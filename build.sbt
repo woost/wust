@@ -7,6 +7,8 @@ val scalaV = "2.11.6"
 lazy val wust = (project in file(".")).settings(
   scalaVersion := scalaV,
   libraryDependencies ++= Seq(
+    cache,
+    ws,
     // database
     "com.github.renesca" %% "renesca" % "0.1.3",
     // scalajs
@@ -27,10 +29,11 @@ lazy val wust = (project in file(".")).settings(
     "org.webjars" % "animate.css" % "3.2.3", // do we still need this with compass animations?
     // atmosphere
     "org.atmosphere" % "atmosphere-play" % "2.1.0",
-    "org.webjars" % "atmosphere-javascript" % "2.2.3"
+    "org.webjars" % "atmosphere-javascript" % "2.2.3",
+    "javax.servlet" % "javax.servlet-api" % "3.1.0" withSources()
   ),
   // ecmascript 6
-  TraceurKeys.sourceFileNames := Seq("javascripts/module.js", "javascripts/routes.js", "javascripts/*/*.js"),
+  TraceurKeys.sourceFileNames := Seq("javascripts/module.js", "javascripts/routes.js", "javascripts/*/**/*.js"),
   // use compass with sbt-sass
   sassOptions in Assets ++= Seq("--compass", "-r", "compass"),
   // scalaJSProjects := Seq(scalajs),
@@ -44,13 +47,13 @@ lazy val wust = (project in file(".")).settings(
     //,"-Xdisable-assertions", "-optimize"
   )
 ).
-enablePlugins(PlayScala, SbtWeb)
+  enablePlugins(PlayScala, SbtWeb)
 // aggregate(projectToRef(scalajs))
 
 lazy val scalajs = (project in file("scalajs")).
-settings(
-  scalaVersion := scalaV,
-  persistLauncher := true, // launch main class on website load
-  persistLauncher in Test := false
-).enablePlugins(ScalaJSPlugin, ScalaJSPlay)
+  settings(
+    scalaVersion := scalaV,
+    persistLauncher := true, // launch main class on website load
+    persistLauncher in Test := false
+  ).enablePlugins(ScalaJSPlugin, ScalaJSPlay)
 

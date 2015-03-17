@@ -3,6 +3,7 @@ package controllers
 import modules.requests.{GoalAddRequest, IdeaAddRequest, NodeAddRequest, ProblemAddRequest}
 import play.api.libs.json._
 import play.api.mvc.{AnyContent, Action, Controller}
+import org.atmosphere.play.AtmosphereCoordinator.{instance => atmosphere}
 
 import renesca._
 import renesca.graph.RelationType
@@ -22,6 +23,11 @@ trait ContentNodesController[NodeType <: ContentNode] extends Controller with Da
     val contentNode = factory.local(nodeAdd.title)
     discourse.add(contentNode)
     db.persistChanges(discourse.graph)
+
+    // broadcast change to subscribed atmosphere clients
+    val broadcaster = atmosphere.framework.metaBroadcaster()
+    broadcaster.broadcastTo("/", "Atmosphere Broadcast message")
+
     Ok(Json.toJson(contentNode))
   }
 
