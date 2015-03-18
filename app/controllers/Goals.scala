@@ -38,8 +38,9 @@ object Goals extends Controller with ContentNodesController[Goal] {
     val subGoal = discourse.goals.find(p => p.uuid == uuidGoal).get
 
     discourse.add(SubGoal.local(subGoal, goal))
-
     db.persistChanges(discourse.graph)
+
+    broadcast(uuid, JsonChange("connect", Json.toJson(goal)))
     Ok(Json.toJson(subGoal))
   }
 
@@ -49,8 +50,9 @@ object Goals extends Controller with ContentNodesController[Goal] {
     val problem = discourse.problems.find(p => p.uuid == uuidProblem).get
 
     discourse.add(Prevents.local(problem, goal))
-
     db.persistChanges(discourse.graph)
+
+    broadcast(uuid, JsonChange("connect", Json.toJson(problem)))
     Ok(Json.toJson(problem))
   }
 
@@ -63,23 +65,27 @@ object Goals extends Controller with ContentNodesController[Goal] {
     discourse.add(reaches)
     discourse.add(ReachesToGoal.local(reaches, goal))
     discourse.add(IdeaToReaches.local(idea, reaches))
-
     db.persistChanges(discourse.graph)
+
+    broadcast(uuid, JsonChange("connect", Json.toJson(idea)))
     Ok(Json.toJson(idea))
   }
 
   def disconnectGoal(uuid: String, uuidGoal: String) = Action {
     disconnect(uuidGoal, SubGoal.relationType, uuid)
+    broadcastDisconnect(uuid,uuidGoal,"goal")
     Ok(JsObject(Seq()))
   }
 
   def disconnectProblem(uuid: String, uuidProblem: String) = Action {
     disconnect(uuidProblem, Prevents.relationType, uuid)
+    broadcastDisconnect(uuid,uuidProblem,"problem")
     Ok(JsObject(Seq()))
   }
 
   def disconnectIdea(uuid: String, uuidIdea: String) = Action {
     disconnect(uuidIdea, List(IdeaToReaches.relationType, ReachesToGoal.relationType), uuid)
+    broadcastDisconnect(uuid,uuidIdea,"Idea")
     Ok(JsObject(Seq()))
   }
 }

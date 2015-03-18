@@ -79,19 +79,19 @@ object Problems extends Controller with ContentNodesController[Problem] {
 
   def disconnectGoal(uuid: String, uuidGoal: String) = Action {
     disconnect(uuid, Prevents.relationType, uuidGoal)
-    broadcast(uuid, JsonChange("disconnect", JsString(uuidGoal)))
+    broadcastDisconnect(uuid,uuidGoal,"goal")
     Ok(JsObject(Seq()))
   }
 
   def disconnectProblem(uuid: String, uuidProblem: String) = Action {
     disconnect(uuidProblem, Causes.relationType, uuid)
-    broadcast(uuid, JsonChange("disconnect", JsString(uuidProblem)))
+    broadcastDisconnect(uuid,uuidProblem,"problem")
     Ok(JsObject(Seq()))
   }
 
   def disconnectIdea(uuid: String, uuidIdea: String) = Action {
     disconnect(uuidIdea, List(IdeaToSolves.relationType, SolvesToProblem.relationType), uuid)
-    broadcast(uuid, JsonChange("disconnect", JsString(uuidIdea)))
+    broadcastDisconnect(uuid,uuidIdea,"Idea")
     Ok(JsObject(Seq()))
   }
 }

@@ -71,4 +71,8 @@ trait ContentNodesController[NodeType <: ContentNode] extends Controller with Da
     val broadcaster = atmosphere.framework.metaBroadcaster
     broadcaster.broadcastTo(s"/live/v1/$apiname/$uuid", data)
   }
+
+  def broadcastDisconnect(uuid: String, otherUuid: String, label: String): Unit = {
+    broadcast(uuid, JsObject(Seq(("id", JsString(otherUuid)), ("label", JsString(label)))))
+  }
 }
