@@ -1,8 +1,8 @@
 angular.module("wust").factory("Node", function($resource) {
     return function(name) {
-        var prefix = "/api/v1/" + name;
+        var prefix = `/api/v1/${name}`;
 
-        var service = $resource(prefix + "/:id", {
+        var service = $resource(`${prefix}/:id`, {
             id: "@id"
         });
 
@@ -20,7 +20,7 @@ angular.module("wust").factory("Node", function($resource) {
         this.ideas = getCallbackObject(ideaService);
 
         function createResource(resource) {
-            return $resource(prefix + "/:id/" + resource + "/:otherId", {
+            return $resource(`${prefix}/:id/${resource}/:otherId`, {
                 id: "@id",
                 otherId: "@otherId"
             });

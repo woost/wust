@@ -1,7 +1,7 @@
 angular.module("wust").service("Search", function($resource) {
     var prefix = "/api/v1/search";
 
-    var service = $resource(prefix + "/:term/:type", {
+    var service = $resource(`${prefix}/:term/:type`, {
         term: "@term",
         type: "@type"
     });
