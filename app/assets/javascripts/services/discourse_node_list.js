@@ -51,7 +51,7 @@ angular.module("wust").service("DiscourseNodeList", function(DiscourseNode, Idea
                 this.search = searchFunc;
                 _.bindAll(this);
 
-                this.push = _.wrap(this.list.push, withUniq);
+                this.push = _.wrap(this.list.push.bind(this.list), withUniq);
             }
         }
 
