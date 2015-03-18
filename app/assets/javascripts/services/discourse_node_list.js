@@ -1,5 +1,5 @@
 angular.module("wust").service("DiscourseNodeList", function(DiscourseNode, Idea, Problem, Goal, Search) {
-    [ this.Goal, this.Problem, this.Idea ] = nodeClasses();
+    [this.Goal, this.Problem, this.Idea] = nodeClasses();
 
     function todo() {
         toastr.error("not implemented");
@@ -20,16 +20,20 @@ angular.module("wust").service("DiscourseNodeList", function(DiscourseNode, Idea
     }
 
     function add(connectFunc, item) {
-        if (_.any(this.list, {
-            id: item.id
-        }))
-            return;
-
         connectFunc(this.id, item.id).$promise.then(data => {
             toastr.success("Connected node");
             this.list.push(data);
             this.new.title = "";
         });
+    }
+
+    function withUniq(func, item) {
+        if (_.any(this.list, {
+            id: item.id
+        }))
+            return;
+
+        func(item);
     }
 
     function nodeClasses() {
@@ -42,10 +46,12 @@ angular.module("wust").service("DiscourseNodeList", function(DiscourseNode, Idea
 
                 this.list = connService.query ? connService.query(this.id) : [];
                 this.remove = connService.remove ? _.wrap(connService.remove, remove) : todo;
-                this.add = connService.create ? _.wrap(connService.create, add) : todo;
+                this.add = connService.create ? _.wrap(_.wrap(connService.create, add).bind(this), withUniq) : todo;
                 this.create = _.wrap(createFunc, create);
                 this.search = searchFunc;
                 _.bindAll(this);
+
+                this.push = _.wrap(this.list.push, withUniq);
             }
         }
 

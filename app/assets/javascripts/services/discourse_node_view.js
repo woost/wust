@@ -19,13 +19,10 @@ angular.module("wust").service("DiscourseNodeView", function($state, $stateParam
 
     function onMessage(scope, message) {
         scope.$apply(() => {
-            console.log(message);
             switch (message.type) {
-                case "create":
-                    console.log("in switch");
+                case "connect":
                     var list = listOf(message.data);
-                    console.log(list);
-                    scope[list].list.push(message.data);
+                    scope[list].push(message.data);
                     break;
 
                 default:
