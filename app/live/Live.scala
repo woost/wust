@@ -9,7 +9,7 @@ import org.atmosphere.config.service.{Disconnect, Ready, ManagedService, Message
 import org.atmosphere.cpr.{AtmosphereResourceEvent, AtmosphereResource}
 
 
-@ManagedService(path = "/live/v1/problems/{page:[a-z0-9\\-A-Z]*}")
+@ManagedService(path = "/live/v1/{page:.*}")
 class Live {
   @Ready
   def onReady(resource: AtmosphereResource) {
@@ -19,9 +19,9 @@ class Live {
   }
 
   @Message
-  def send(implicit resource:AtmosphereResource, msg:String) = {
+  def send(implicit resource: AtmosphereResource, msg: String) = {
     // all messages sent to this client are passed through this method
-    println(s"Sending '${msg}' to ${resource.uuid}")
+    println(s"Sending '${ msg }' to ${ resource.uuid }")
     msg
   }
 }
