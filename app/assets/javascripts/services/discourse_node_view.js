@@ -1,4 +1,4 @@
-angular.module("wust").service("DiscourseNodeView", function($state, $stateParams, NodeHistory, DiscourseNodeList) {
+angular.module("wust").service("DiscourseNodeView", function($state, $stateParams, NodeHistory, DiscourseNodeList, Live) {
     this.setScope = setScope;
 
     function setScope(scope, nodeInfo, service) {
@@ -11,6 +11,14 @@ angular.module("wust").service("DiscourseNodeView", function($state, $stateParam
         scope.ideas = new DiscourseNodeList.Idea(id, service);
         scope.removeFocused = _.partial(removeFocused, id, service.remove);
         NodeHistory.add(scope.node);
+
+        scope.messages = [];
+
+        Live.subscribe(_.wrap(scope, onMessage));
+    }
+
+    function onMessage(scope, response) {
+        scope.messages.push(response);
     }
 
     function removeFocused(id, removeFunc) {
