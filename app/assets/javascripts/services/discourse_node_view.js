@@ -1,4 +1,4 @@
-angular.module("wust").service("DiscourseNodeView", function($state, $stateParams, NodeHistory, DiscourseNodeList, Live) {
+angular.module("wust").service("DiscourseNodeView", function($state, $stateParams, NodeHistory, DiscourseNodeList, Live, DiscourseNode) {
     this.setScope = setScope;
 
     function setScope(scope, nodeInfo, service) {
@@ -14,12 +14,34 @@ angular.module("wust").service("DiscourseNodeView", function($state, $stateParam
 
         scope.messages = [];
 
-        // Live.subscribe(_.wrap(scope, onMessage));
-        Live.subscribe("/live/v1", message => console.log("received message: " + message));
+        Live.subscribe(`/live/v1/${nodeInfo.state}/${id}`, _.wrap(scope, onMessage));
     }
 
-    function onMessage(scope, response) {
-        scope.messages.push(response);
+    function onMessage(scope, message) {
+        scope.$apply(() => {
+            console.log(message);
+            switch (message.type) {
+                case "create":
+                    console.log("in switch");
+                    var list = listOf(message.data);
+                    console.log(list);
+                    scope[list].list.push(message.data);
+                    break;
+
+                default:
+            }
+        });
+    }
+
+    function listOf(node) {
+        switch (node.label) {
+            case DiscourseNode.goal.label:
+                return "goals";
+            case DiscourseNode.problem.label:
+                return "problems";
+            case DiscourseNode.idea.label:
+                return "ideas";
+        }
     }
 
     function removeFocused(id, removeFunc) {

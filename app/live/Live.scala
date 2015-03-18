@@ -9,7 +9,7 @@ import org.atmosphere.config.service.{Disconnect, Ready, ManagedService, Message
 import org.atmosphere.cpr.{AtmosphereResourceEvent, AtmosphereResource}
 
 
-@ManagedService(path = "/live/v1")
+@ManagedService(path = "/live/v1/problems/{page:[a-z0-9\\-A-Z]*}")
 class Live {
   @Ready
   def onReady(resource: AtmosphereResource) {

@@ -1,5 +1,6 @@
 package controllers
 
+import org.atmosphere.play.AtmosphereCoordinator.{instance => atmosphere}
 import modules.requests.{GoalAddRequest, IdeaAddRequest, NodeAddRequest, ProblemAddRequest}
 import play.api.libs.json._
 import play.api.mvc.Action
@@ -39,6 +40,12 @@ object Problems extends Controller with ContentNodesController[Problem] {
     val goal = discourse.goals.find(p => p.uuid == uuidGoal).get
 
     discourse.add(Prevents.local(problem, goal))
+
+    //TODO: shared code: label <-> api mapping
+
+    // broadcast change to subscribed atmosphere clients
+    val broadcaster = atmosphere.framework.metaBroadcaster
+    broadcaster.broadcastTo(s"/live/v1/problems/$uuid", JsObject(Seq(("type",JsString("create")),("data",Json.toJson(goal)))))
 
     db.persistChanges(discourse.graph)
     Ok(Json.toJson(goal))

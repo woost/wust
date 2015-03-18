@@ -24,10 +24,6 @@ trait ContentNodesController[NodeType <: ContentNode] extends Controller with Da
     discourse.add(contentNode)
     db.persistChanges(discourse.graph)
 
-    // broadcast change to subscribed atmosphere clients
-    val broadcaster = atmosphere.framework.metaBroadcaster
-    broadcaster.broadcastTo("/live/v1", s"created node '${nodeAdd.title}'")
-
     Ok(Json.toJson(contentNode))
   }
 
