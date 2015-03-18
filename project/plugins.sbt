@@ -17,6 +17,8 @@ resolvers += Resolver.url("GitHub repository", url("http://shaggyyeti.github.io/
   // web plugins
   addSbtPlugin("com.typesafe.sbt" % "sbt-jshint" % "1.0.3")
 
+  libraryDependencies += "org.webjars" % "jshint-node" % "2.6.3-2" // override sbt-jshint depenency until it contains the new version
+
   addSbtPlugin("com.typesafe.sbt" % "sbt-rjs" % "1.0.1")
 
   addSbtPlugin("com.typesafe.sbt" % "sbt-digest" % "1.0.0")
