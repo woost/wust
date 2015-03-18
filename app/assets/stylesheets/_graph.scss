@@ -1,8 +1,13 @@
 #graph_view {
     overflow: hidden;
     height: 100%;
+    position: relative;
     .graph_network {
         height: 100%;
+    }
+    #filter_input {
+        width: 30%;
+        position: absolute;
     }
     .svglink {
         fill: none;
