@@ -13,6 +13,7 @@ import model._
 
 object Problems extends Controller with ContentNodesController[Problem] {
   override def factory = model.Problem
+  override def apiname = "problems"
   override def decodeRequest(jsValue: JsValue) = jsValue.as[ProblemAddRequest]
 
   def index() = Action {
@@ -40,14 +41,10 @@ object Problems extends Controller with ContentNodesController[Problem] {
     val goal = discourse.goals.find(p => p.uuid == uuidGoal).get
 
     discourse.add(Prevents.local(problem, goal))
-
-    //TODO: shared code: label <-> api mapping
-
-    // broadcast change to subscribed atmosphere clients
-    val broadcaster = atmosphere.framework.metaBroadcaster
-    broadcaster.broadcastTo(s"/live/v1/problems/$uuid", JsObject(Seq(("type",JsString("create")),("data",Json.toJson(goal)))))
-
     db.persistChanges(discourse.graph)
+
+    broadcast(uuid, JsonChange("connect", Json.toJson(goal)))
+
     Ok(Json.toJson(goal))
   }
 
@@ -57,8 +54,10 @@ object Problems extends Controller with ContentNodesController[Problem] {
     val cause = discourse.problems.find(p => p.uuid == uuidProblem).get
 
     discourse.add(Causes.local(cause, consequence))
-
     db.persistChanges(discourse.graph)
+
+    broadcast(uuid, JsonChange("connect", Json.toJson(cause)))
+
     Ok(Json.toJson(cause))
   }
 
@@ -71,21 +70,29 @@ object Problems extends Controller with ContentNodesController[Problem] {
     discourse.add(solves)
     discourse.add(SolvesToProblem.local(solves, problem))
     discourse.add(IdeaToSolves.local(idea, solves))
-
     db.persistChanges(discourse.graph)
+
+    broadcast(uuid, JsonChange("connect", Json.toJson(idea)))
+
     Ok(Json.toJson(idea))
   }
 
-  def disconnectGoal(uuid: String, uuidGoal: String) = {
+  def disconnectGoal(uuid: String, uuidGoal: String) = Action {
     disconnect(uuid, Prevents.relationType, uuidGoal)
+    broadcast(uuid, JsonChange("disconnect", JsString(uuidGoal)))
+    Ok(JsObject(Seq()))
   }
 
-  def disconnectProblem(uuid: String, uuidProblem: String) = {
+  def disconnectProblem(uuid: String, uuidProblem: String) = Action {
     disconnect(uuidProblem, Causes.relationType, uuid)
+    broadcast(uuid, JsonChange("disconnect", JsString(uuidProblem)))
+    Ok(JsObject(Seq()))
   }
 
-  def disconnectIdea(uuid: String, uuidIdea: String) = {
+  def disconnectIdea(uuid: String, uuidIdea: String) = Action {
     disconnect(uuidIdea, List(IdeaToSolves.relationType, SolvesToProblem.relationType), uuid)
+    broadcast(uuid, JsonChange("disconnect", JsString(uuidIdea)))
+    Ok(JsObject(Seq()))
   }
 }
 

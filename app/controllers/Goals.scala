@@ -10,6 +10,7 @@ import renesca.parameter.implicits._
 
 object Goals extends Controller with ContentNodesController[Goal] {
   override def factory = model.Goal
+  override def apiname = "goals"
   override def decodeRequest(jsValue: JsValue) = jsValue.as[GoalAddRequest]
 
   def index() = Action {
@@ -67,15 +68,18 @@ object Goals extends Controller with ContentNodesController[Goal] {
     Ok(Json.toJson(idea))
   }
 
-  def disconnectGoal(uuid: String, uuidGoal: String) = {
+  def disconnectGoal(uuid: String, uuidGoal: String) = Action {
     disconnect(uuidGoal, SubGoal.relationType, uuid)
+    Ok(JsObject(Seq()))
   }
 
-  def disconnectProblem(uuid: String, uuidProblem: String) = {
+  def disconnectProblem(uuid: String, uuidProblem: String) = Action {
     disconnect(uuidProblem, Prevents.relationType, uuid)
+    Ok(JsObject(Seq()))
   }
 
-  def disconnectIdea(uuid: String, uuidIdea: String) = {
+  def disconnectIdea(uuid: String, uuidIdea: String) = Action {
     disconnect(uuidIdea, List(IdeaToReaches.relationType, ReachesToGoal.relationType), uuid)
+    Ok(JsObject(Seq()))
   }
 }

@@ -12,8 +12,10 @@ import modules.json.GraphFormat._
 import model._
 
 trait ContentNodesController[NodeType <: ContentNode] extends Controller with DatabaseController {
+  //TODO: shared code: label <-> api mapping
   def factory: ContentNodeFactory[NodeType]
   def label = factory.label
+  def apiname: String
   def decodeRequest(jsValue: JsValue): NodeAddRequest
 
   def create = Action { request =>
@@ -43,16 +45,30 @@ trait ContentNodesController[NodeType <: ContentNode] extends Controller with Da
     }
   }
 
-  def disconnect(uuidFrom: String, relationType: RelationType, uuidTo: String): Action[AnyContent] = {
+  def disconnect(uuidFrom: String, relationType: RelationType, uuidTo: String) {
     disconnect(uuidFrom, List(relationType), uuidTo)
   }
 
-  def disconnect(uuidFrom: String, relationTypes: Seq[RelationType], uuidTo: String) = Action {
+  def disconnect(uuidFrom: String, relationTypes: Seq[RelationType], uuidTo: String) {
     val discourse = relationDiscourseGraph(uuidFrom, relationTypes, uuidTo)
-    val connectorNodes = discourse.nodes.filter(node => !List(uuidFrom, uuidTo).contains(node.uuid))
-    discourse.graph.nodes --= connectorNodes.map(_.node)
+
+    // all nodes which lie on a path between fromNode and toNode
+    val connectorNodes = discourse.nodes.filter(node => node.uuid != uuidFrom || node.uuid != uuidTo)
+
+    discourse.graph.nodes --= connectorNodes.map(_.node) //TODO: wrap boilerplate
     discourse.graph.relations.clear()
     db.persistChanges(discourse.graph)
-    Ok(JsObject(Seq()))
+
+  }
+
+  def JsonChange(changeType: String, data: JsValue) = JsObject(Seq(
+    ("type", JsString(changeType)),
+    ("data", data)
+  ))
+
+
+  def broadcast(uuid: String, data: JsValue): Unit = {
+    val broadcaster = atmosphere.framework.metaBroadcaster
+    broadcaster.broadcastTo(s"/live/v1/$apiname/$uuid", data)
   }
 }

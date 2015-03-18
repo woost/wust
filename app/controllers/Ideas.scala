@@ -12,6 +12,7 @@ import model._
 
 object Ideas extends Controller with ContentNodesController[Idea] {
   override def factory = model.Idea
+  override def apiname = "ideas"
   override def decodeRequest(jsValue: JsValue) = jsValue.as[IdeaAddRequest]
 
   def index() = Action {
@@ -72,15 +73,18 @@ object Ideas extends Controller with ContentNodesController[Idea] {
     Ok(Json.toJson(subIdea))
   }
 
-  def disconnectGoal(uuid: String, uuidGoal: String) = {
+  def disconnectGoal(uuid: String, uuidGoal: String) = Action {
     disconnect(uuid, List(IdeaToReaches.relationType, ReachesToGoal.relationType), uuidGoal)
+    Ok(JsObject(Seq()))
   }
 
-  def disconnectProblem(uuid: String, uuidProblem: String) = {
+  def disconnectProblem(uuid: String, uuidProblem: String) = Action {
     disconnect(uuid, List(IdeaToSolves.relationType, SolvesToProblem.relationType), uuidProblem)
+    Ok(JsObject(Seq()))
   }
 
-  def disconnectIdea(uuid: String, uuidIdea: String) = {
+  def disconnectIdea(uuid: String, uuidIdea: String) = Action {
     disconnect(uuidIdea, SubIdea.relationType, uuid)
+    Ok(JsObject(Seq()))
   }
 }
