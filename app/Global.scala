@@ -16,10 +16,8 @@ class Global extends GlobalSettings {
     atmosphere.shutdown()
   }
 
+  // needed for atmosphere
   override def onRouteRequest(request: RequestHeader): Handler = {
-    val framework: AtmosphereFramework = atmosphere().framework()
-    //    println("is broadcast specified: "+ framework.isBroadcasterSpecified)
     Router.dispatch(request)
   }
-
 }

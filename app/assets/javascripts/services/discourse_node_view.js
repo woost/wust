@@ -14,7 +14,8 @@ angular.module("wust").service("DiscourseNodeView", function($state, $stateParam
 
         scope.messages = [];
 
-        Live.subscribe(_.wrap(scope, onMessage));
+        // Live.subscribe(_.wrap(scope, onMessage));
+        Live.subscribe("/live/v1", response => console.log("received message: " + response.responseBody));
     }
 
     function onMessage(scope, response) {

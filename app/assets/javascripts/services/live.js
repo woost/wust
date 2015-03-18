@@ -2,8 +2,7 @@ angular.module("wust").service("Live", function() {
     this.subscribe = subscribe;
 
     var request = {
-        //TODO: current location
-        url: "http://localhost:9000/live",
+        //TODO: decide on atmosphere client configuration
         contentType: "application/json",
         trackMessageLength: true,
         shared: true,
@@ -11,23 +10,23 @@ angular.module("wust").service("Live", function() {
         fallbackTransport: "long-polling"
     };
 
-    request.onOpen = function(response) {
-        console.log("Atmosphere connected using " + response.transport);
-    };
-
     request.onTransportFailure = function(errorMsg, request) {
-        console.log(errorMsg);
+        console.log("Atmosphere error: " + errorMsg);
     };
 
     request.onClose = function(response) {
         console.log("Atmosphere disconnected");
     };
 
-    function subscribe(handler) {
+    function subscribe(url, handler) {
         var newRequest = _.merge({
-            onMessage: handler
+            url: location.origin + url,
+            onMessage: handler,
+            onOpen: response => {
+                console.log("Atmosphere connected on " + url + " (" + response.transport + ")");
+            }
         }, request);
-        console.log("subscribing...");
+        console.log("subscribing to " + url);
         atmosphere.subscribe(newRequest);
     }
 });
