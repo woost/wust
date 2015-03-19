@@ -75,7 +75,7 @@
         "angular",
         "atmosphere",
         "d3",
-        "toastr",
+        "humane",
         "Spinner"
     ]
 }

@@ -2,26 +2,26 @@ angular.module("wust").service("DiscourseNodeList", function(DiscourseNode, Idea
     [this.Goal, this.Problem, this.Idea] = nodeClasses();
 
     function todo() {
-        toastr.error("not implemented");
+        humane.error("not implemented");
     }
 
     function create(createFunc) {
         createFunc(this.new).$promise.then(data => {
-            toastr.success("Created new node");
+            humane.success("Created new node");
             this.add(data);
         });
     }
 
     function remove(disconnectFunc, elem) {
         disconnectFunc(this.id, elem.id).$promise.then(() => {
-            toastr.success("Disconnected node");
+            humane.success("Disconnected node");
             _.remove(this.list, elem);
         });
     }
 
     function add(connectFunc, item) {
         connectFunc(this.id, item.id).$promise.then(data => {
-            toastr.success("Connected node");
+            humane.success("Connected node");
             this.list.push(data);
             this.new.title = "";
         });
@@ -29,8 +29,8 @@ angular.module("wust").service("DiscourseNodeList", function(DiscourseNode, Idea
 
     function withUniq(func, item) {
         if (_.any(this.list, {
-            id: item.id
-        }))
+                id: item.id
+            }))
             return;
 
         func(item);

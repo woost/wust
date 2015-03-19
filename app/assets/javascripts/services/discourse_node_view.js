@@ -50,7 +50,7 @@ angular.module("wust").service("DiscourseNodeView", function($state, $stateParam
     function removeFocused(id, removeFunc) {
         removeFunc(id).$promise.then(() => {
             NodeHistory.remove(id);
-            toastr.success("Removed node");
+            humane.success("Removed node");
             $state.go("browse");
         });
     }

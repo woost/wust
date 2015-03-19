@@ -38,7 +38,7 @@ angular.module("wust").controller("BrowseCtrl", function($scope, $state, Problem
 
     function addNode(createFunc) {
         createFunc(this.newNode).$promise.then(data => {
-            toastr.success("Added new node");
+            humane.success("Added new node");
             $state.go(this.info.state, {
                 id: data.id
             });

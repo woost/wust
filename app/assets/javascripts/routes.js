@@ -52,7 +52,7 @@ angular.module("wust").config(function($stateProvider, $urlRouterProvider, $loca
     $locationProvider.html5Mode(true);
 });
 
-angular.module("wust").factory("httpErrorResponseInterceptor", function($q /*, $injector*/) {
+angular.module("wust").factory("httpErrorResponseInterceptor", function($q /*, $injector*/ ) {
     return {
         response: function(responseData) {
             return responseData;
@@ -63,7 +63,7 @@ angular.module("wust").factory("httpErrorResponseInterceptor", function($q /*, $
             // http://stackoverflow.com/questions/20230691/injecting-state-ui-router-into-http-interceptor-causes-circular-dependency
             //var state = $injector.get("$state");
             //state.go("/");
-            toastr.error("Request failed");
+            humane.error("Request failed");
 
             return $q.reject(response);
         }
