@@ -6,8 +6,8 @@ angular.module("wust").service("DiscourseNodeList", function(DiscourseNode, Idea
     }
 
     function create(createFunc) {
-        createFunc(this.new).$promise.then(data => {
-            this.add(data);
+        createFunc(this.model.new).$promise.then(data => {
+            this.model.add(data);
             humane.success("Created new node");
         });
     }
@@ -22,7 +22,7 @@ angular.module("wust").service("DiscourseNodeList", function(DiscourseNode, Idea
     function add(connectFunc, item) {
         connectFunc(this.id, item.id).$promise.then(data => {
             this.addNode(data);
-            this.new.title = "";
+            this.model.new.title = "";
             humane.success("Connected node");
         });
     }
@@ -31,35 +31,35 @@ angular.module("wust").service("DiscourseNodeList", function(DiscourseNode, Idea
         class NodeList {
             constructor(id, createFunc, connService = {}, searchFunc = Search.query) {
                 this.id = id;
-                this.new = {
-                    title: ""
+                this.model = {
+                    new: {
+                        title: ""
+                    },
+                    list: connService.query ? connService.query(this.id) : [],
+                    remove: connService.remove ? _.wrap(connService.remove, remove.bind(this)) : todo,
+                    add: connService.create ? _.wrap(connService.create, add.bind(this)) : todo,
+                    create: _.wrap(createFunc, create.bind(this)),
+                    search: searchFunc
                 };
-
-                this.list = connService.query ? connService.query(this.id) : [];
-                this.remove = connService.remove ? _.wrap(connService.remove, remove) : todo;
-                this.add = connService.create ? _.wrap(connService.create, add) : todo;
-                this.create = _.wrap(createFunc, create);
-                this.search = searchFunc;
-                _.bindAll(this);
             }
 
             addNode(elem) {
-                if (_.any(this.list, {id: elem.id}))
+                if (_.any(this.model.list, {id: elem.id}))
                     return;
 
-                this.list.push(elem);
+                return this.model.list.push(elem);
             }
 
             removeNode(id) {
-                _.remove(this.list, {id: id});
+                return _.remove(this.model.list, {id: id});
             }
         }
 
         class GoalNodeList extends NodeList {
             constructor(id, nodeService = {}) {
                 super(id, Goal.create, nodeService.goals, Search.queryGoals);
-                this.info = DiscourseNode.goal;
-                this.style = {
+                this.model.info = DiscourseNode.goal;
+                this.model.style = {
                     templateUrl: "show_discourse_node_list.html",
                     listCss: "discourse_goal_list",
                 };
@@ -69,8 +69,8 @@ angular.module("wust").service("DiscourseNodeList", function(DiscourseNode, Idea
         class ProblemNodeList extends NodeList {
             constructor(id, nodeService = {}) {
                 super(id, Problem.create, nodeService.problems, Search.queryProblems);
-                this.info = DiscourseNode.problem;
-                this.style = {
+                this.model.info = DiscourseNode.problem;
+                this.model.style = {
                     templateUrl: "show_discourse_node_list.html",
                     listCss: "discourse_problem_list",
                 };
@@ -80,8 +80,8 @@ angular.module("wust").service("DiscourseNodeList", function(DiscourseNode, Idea
         class IdeaNodeList extends NodeList {
             constructor(id, nodeService = {}) {
                 super(id, Idea.create, nodeService.ideas, Search.queryIdeas);
-                this.info = DiscourseNode.idea;
-                this.style = {
+                this.model.info = DiscourseNode.idea;
+                this.model.style = {
                     templateUrl: "show_discourse_idea_list.html",
                     listCss: "discourse_idea_list",
                 };
