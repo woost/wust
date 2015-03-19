@@ -62,7 +62,7 @@ trait ContentNodesController[NodeType <: ContentNode] extends Controller with Da
 
   }
 
-  def JsonChange(changeType: String, data: JsValue) = JsObject(Seq(
+  def jsonChange(changeType: String, data: JsValue) = JsObject(Seq(
     ("type", JsString(changeType)),
     ("data", data)
   ))
@@ -74,6 +74,7 @@ trait ContentNodesController[NodeType <: ContentNode] extends Controller with Da
   }
 
   def broadcastDisconnect(uuid: String, otherUuid: String, label: String): Unit = {
-    broadcast(uuid, JsObject(Seq(("id", JsString(otherUuid)), ("label", JsString(label)))))
+    broadcast(uuid,
+      jsonChange("disconnect", JsObject(Seq(("id", JsString(otherUuid)), ("label", JsString(label))))))
   }
 }

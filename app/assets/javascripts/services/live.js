@@ -21,7 +21,11 @@ angular.module("wust").service("Live", function() {
     function subscribe(url, handler) {
         var newRequest = _.merge({
             url: location.origin + url,
-            onMessage: response => handler(JSON.parse(response.responseBody)),
+            onMessage: response => {
+                var json = JSON.parse(response.responseBody);
+                console.log(json);
+                handler(json);
+            },
             onOpen: response => {
                 console.log("Atmosphere connected on " + url + " (" + response.transport + ")");
             }

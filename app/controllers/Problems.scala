@@ -43,7 +43,7 @@ object Problems extends Controller with ContentNodesController[Problem] {
     discourse.add(Prevents.local(problem, goal))
     db.persistChanges(discourse.graph)
 
-    broadcast(uuid, JsonChange("connect", Json.toJson(goal)))
+    broadcast(uuid, jsonChange("connect", Json.toJson(goal)))
 
     Ok(Json.toJson(goal))
   }
@@ -56,7 +56,7 @@ object Problems extends Controller with ContentNodesController[Problem] {
     discourse.add(Causes.local(cause, consequence))
     db.persistChanges(discourse.graph)
 
-    broadcast(uuid, JsonChange("connect", Json.toJson(cause)))
+    broadcast(uuid, jsonChange("connect", Json.toJson(cause)))
 
     Ok(Json.toJson(cause))
   }
@@ -72,26 +72,26 @@ object Problems extends Controller with ContentNodesController[Problem] {
     discourse.add(IdeaToSolves.local(idea, solves))
     db.persistChanges(discourse.graph)
 
-    broadcast(uuid, JsonChange("connect", Json.toJson(idea)))
+    broadcast(uuid, jsonChange("connect", Json.toJson(idea)))
 
     Ok(Json.toJson(idea))
   }
 
   def disconnectGoal(uuid: String, uuidGoal: String) = Action {
     disconnect(uuid, Prevents.relationType, uuidGoal)
-    broadcastDisconnect(uuid,uuidGoal,"goal")
+    broadcastDisconnect(uuid, uuidGoal, "GOAL")
     Ok(JsObject(Seq()))
   }
 
   def disconnectProblem(uuid: String, uuidProblem: String) = Action {
     disconnect(uuidProblem, Causes.relationType, uuid)
-    broadcastDisconnect(uuid,uuidProblem,"problem")
+    broadcastDisconnect(uuid, uuidProblem, "PROBLEM")
     Ok(JsObject(Seq()))
   }
 
   def disconnectIdea(uuid: String, uuidIdea: String) = Action {
     disconnect(uuidIdea, List(IdeaToSolves.relationType, SolvesToProblem.relationType), uuid)
-    broadcastDisconnect(uuid,uuidIdea,"Idea")
+    broadcastDisconnect(uuid, uuidIdea, "IDEA")
     Ok(JsObject(Seq()))
   }
 }
