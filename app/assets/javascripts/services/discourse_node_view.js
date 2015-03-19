@@ -23,12 +23,12 @@ angular.module("wust").service("DiscourseNodeView", function($state, $stateParam
             switch (message.type) {
                 case "connect":
                     list = listOf(message.data);
-                    scope[list].push(message.data);
+                    scope[list].addNode(message.data);
                     break;
 
                 case "disconnect":
                     list = listOf(message.data);
-                    _.remove(scope[list].list, node => node.id === message.data.id);
+                    scope[list].removeNode(message.data.id);
                     break;
 
                 default:
