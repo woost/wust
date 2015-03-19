@@ -13,6 +13,7 @@ import model._
 
 trait ContentNodesController[NodeType <: ContentNode] extends Controller with DatabaseController {
   //TODO: shared code: label <-> api mapping
+  //TODO: use transactions instead of db
   def factory: ContentNodeFactory[NodeType]
   def label = factory.label
   def apiname: String
@@ -53,7 +54,7 @@ trait ContentNodesController[NodeType <: ContentNode] extends Controller with Da
     val discourse = relationDiscourseGraph(uuidFrom, relationTypes, uuidTo)
 
     // all nodes which lie on a path between fromNode and toNode
-    val connectorNodes = discourse.nodes.filter(node => node.uuid != uuidFrom || node.uuid != uuidTo)
+    val connectorNodes = discourse.nodes.filter(node => uuidFrom != node.uuid && uuidTo != node.uuid)
 
     discourse.graph.nodes --= connectorNodes.map(_.node) //TODO: wrap boilerplate
     discourse.graph.relations.clear()
