@@ -64,7 +64,7 @@ settings(
 lazy val macros = (project in file("macros")).
 settings(
   scalaVersion := scalaV,
-  libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaV
+  libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaV,
   resolvers += Resolver.sonatypeRepo("releases"),
   resolvers += Resolver.sonatypeRepo("snapshots"),
   addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0-M5" cross CrossVersion.full)
