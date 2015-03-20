@@ -32,23 +32,23 @@ lazy val wust = (project in file(".")).settings(
     "org.webjars" % "atmosphere-javascript" % "2.2.3",
     "javax.servlet" % "javax.servlet-api" % "3.1.0" withSources()
   ),
-// ecmascript 6
-TraceurKeys.sourceFileNames := Seq("javascripts/module.js", "javascripts/routes.js", "javascripts/*/**/*.js"),
-// use compass with sbt-sass
-sassOptions in Assets ++= Seq("--compass", "-r", "compass"),
-// scalaJSProjects := Seq(scalajs),
-scalacOptions ++= Seq(
-  "-encoding", "UTF-8",
-  "-unchecked",
-  "-deprecation",
-  "-feature",
-  "-Yinline", "-Yinline-warnings",
-  "-language:_"
-  //,"-Xdisable-assertions", "-optimize"
-),
-resolvers += Resolver.sonatypeRepo("releases"),
-resolvers += Resolver.sonatypeRepo("snapshots"),
-addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0-M5" cross CrossVersion.full)
+  // ecmascript 6
+  TraceurKeys.sourceFileNames := Seq("javascripts/module.js", "javascripts/routes.js", "javascripts/*/**/*.js"),
+  // use compass with sbt-sass
+  sassOptions in Assets ++= Seq("--compass", "-r", "compass"),
+  // scalaJSProjects := Seq(scalajs),
+  scalacOptions ++= Seq(
+    "-encoding", "UTF-8",
+    "-unchecked",
+    "-deprecation",
+    "-feature",
+    "-Yinline", "-Yinline-warnings",
+    "-language:_"
+    //,"-Xdisable-assertions", "-optimize"
+  ),
+  resolvers += Resolver.sonatypeRepo("releases"),
+  resolvers += Resolver.sonatypeRepo("snapshots"),
+  addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0-M5" cross CrossVersion.full)
 ).
 enablePlugins(PlayScala, SbtWeb).
 aggregate(projectToRef(macros)).
@@ -65,4 +65,7 @@ lazy val macros = (project in file("macros")).
 settings(
   scalaVersion := scalaV,
   libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaV
+  resolvers += Resolver.sonatypeRepo("releases"),
+  resolvers += Resolver.sonatypeRepo("snapshots"),
+  addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0-M5" cross CrossVersion.full)
 )
