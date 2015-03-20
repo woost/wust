@@ -7,6 +7,7 @@ val scalaV = "2.11.6"
 lazy val wust = (project in file(".")).settings(
   scalaVersion := scalaV,
   libraryDependencies ++= Seq(
+    "org.scala-lang" % "scala-reflect" % scalaV,
     cache,
     ws,
     // database
@@ -44,7 +45,10 @@ scalacOptions ++= Seq(
   "-Yinline", "-Yinline-warnings",
   "-language:_"
   //,"-Xdisable-assertions", "-optimize"
-)
+),
+resolvers += Resolver.sonatypeRepo("releases"),
+resolvers += Resolver.sonatypeRepo("snapshots"),
+addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0-M5" cross CrossVersion.full)
 ).
 enablePlugins(PlayScala, SbtWeb)
 // aggregate(projectToRef(scalajs))
