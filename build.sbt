@@ -50,8 +50,9 @@ resolvers += Resolver.sonatypeRepo("releases"),
 resolvers += Resolver.sonatypeRepo("snapshots"),
 addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0-M5" cross CrossVersion.full)
 ).
-enablePlugins(PlayScala, SbtWeb)
-// aggregate(projectToRef(scalajs))
+enablePlugins(PlayScala, SbtWeb).
+aggregate(projectToRef(macros)).
+dependsOn(macros)
 
 lazy val scalajs = (project in file("scalajs")).
 settings(
@@ -60,3 +61,8 @@ settings(
   persistLauncher in Test := false
 ).enablePlugins(ScalaJSPlugin, ScalaJSPlay)
 
+lazy val macros = (project in file("macros")).
+settings(
+  scalaVersion := scalaV,
+  libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaV
+)
