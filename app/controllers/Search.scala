@@ -10,7 +10,7 @@ import renesca.parameter.implicits._
 
 object Search extends Controller with DatabaseController {
   def search(term: String, labelOpt:Option[Label]) = Action {
-    val regexTerm = ".*" + term.replace(" ", ". *") + ".*"
+    val regexTerm = "(?i).*" + term.replace(" ", ". *") + ".*"
     val nodeMatch = labelOpt match {
       case Some(label) => s"n:`$label`"
       case None => "n"
