@@ -6,6 +6,7 @@ import play.mvc.Http.RequestHeader
 import play.{Application, GlobalSettings}
 
 class Global extends GlobalSettings {
+
   override def onStart(application: Application) {
     atmosphere.framework.addInitParameter(ApplicationConfig.WEBSOCKET_CONTENT_TYPE, "application/json")
     atmosphere.discover(classOf[live.Live])

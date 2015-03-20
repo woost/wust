@@ -4,10 +4,16 @@ name := "wust"
 
 val scalaV = "2.11.6"
 
+val paradiseVersion = "2.1.0-M5"
+
+// TODO: use this syntax to share settings
+// lazy val wust: Project = Project( "wust", file("."),
+//   settings = sharedsettings
+//   ) dependsOn(macros)
+
 lazy val wust = (project in file(".")).settings(
   scalaVersion := scalaV,
   libraryDependencies ++= Seq(
-    "org.scala-lang" % "scala-reflect" % scalaV,
     cache,
     ws,
     // database
@@ -38,11 +44,11 @@ lazy val wust = (project in file(".")).settings(
   sassOptions in Assets ++= Seq("--compass", "-r", "compass"),
   // scalaJSProjects := Seq(scalajs),
   scalacOptions ++= scalacOpts,
-  addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0-M5" cross CrossVersion.full)
+  addCompilerPlugin("org.scalamacros" % "paradise" % paradiseVersion cross CrossVersion.full)
 ).
 enablePlugins(PlayScala, SbtWeb).
-aggregate(projectToRef(macros)).
 dependsOn(macros)
+// aggregate(projectToRef(scalajs)).
 
 lazy val scalajs = (project in file("scalajs")).
 settings(
@@ -55,8 +61,8 @@ settings(
 lazy val macros = (project in file("macros")).
 settings(
   scalaVersion := scalaV,
+  addCompilerPlugin("org.scalamacros" % "paradise" % paradiseVersion cross CrossVersion.full),
   libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaV,
-  addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0-M5" cross CrossVersion.full),
   scalacOptions ++= scalacOpts
 )
 
