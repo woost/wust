@@ -37,17 +37,7 @@ lazy val wust = (project in file(".")).settings(
   // use compass with sbt-sass
   sassOptions in Assets ++= Seq("--compass", "-r", "compass"),
   // scalaJSProjects := Seq(scalajs),
-  scalacOptions ++= Seq(
-    "-encoding", "UTF-8",
-    "-unchecked",
-    "-deprecation",
-    "-feature",
-    "-Yinline", "-Yinline-warnings",
-    "-language:_"
-    //,"-Xdisable-assertions", "-optimize"
-  ),
-  resolvers += Resolver.sonatypeRepo("releases"),
-  resolvers += Resolver.sonatypeRepo("snapshots"),
+  scalacOptions ++= scalacOpts,
   addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0-M5" cross CrossVersion.full)
 ).
 enablePlugins(PlayScala, SbtWeb).
@@ -58,14 +48,24 @@ lazy val scalajs = (project in file("scalajs")).
 settings(
   scalaVersion := scalaV,
   persistLauncher := true, // launch main class on website load
-  persistLauncher in Test := false
+  persistLauncher in Test := false,
+  scalacOptions ++= scalacOpts
 ).enablePlugins(ScalaJSPlugin, ScalaJSPlay)
 
 lazy val macros = (project in file("macros")).
 settings(
   scalaVersion := scalaV,
   libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaV,
-  resolvers += Resolver.sonatypeRepo("releases"),
-  resolvers += Resolver.sonatypeRepo("snapshots"),
-  addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0-M5" cross CrossVersion.full)
+  addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0-M5" cross CrossVersion.full),
+  scalacOptions ++= scalacOpts
 )
+
+val scalacOpts = Seq(
+    "-encoding", "UTF-8",
+    "-unchecked",
+    "-deprecation",
+    "-feature",
+    "-Yinline", "-Yinline-warnings",
+    "-language:_"
+    //,"-Xdisable-assertions", "-optimize"
+  )
