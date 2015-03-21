@@ -9,6 +9,7 @@ import renesca.parameter.implicits._
 import renesca.parameter.PropertyKey._
 import renesca.parameter.StringPropertyValue
 import model._
+import model.WustSchema._
 
 object GraphFormat {
   implicit def LabelToString(label: Label): String = label.name

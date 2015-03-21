@@ -9,10 +9,11 @@ import play.api.mvc.Controller
 import renesca._
 import renesca.parameter.implicits._
 import modules.json.GraphFormat._
-import model._
+import model.WustSchema._
+import model.Discourse
 
 object Problems extends Controller with ContentNodesController[Problem] {
-  override def factory = model.Problem
+  override def factory = Problem
   override def apiname = "problems"
   override def decodeRequest(jsValue: JsValue) = jsValue.as[ProblemAddRequest]
 

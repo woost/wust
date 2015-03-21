@@ -8,10 +8,11 @@ import play.api.mvc.Controller
 import renesca._
 import renesca.parameter.implicits._
 import modules.json.GraphFormat._
-import model._
+import model.WustSchema._
+import model.Discourse
 
 object Ideas extends Controller with ContentNodesController[Idea] {
-  override def factory = model.Idea
+  override def factory = Idea
   override def apiname = "ideas"
   override def decodeRequest(jsValue: JsValue) = jsValue.as[IdeaAddRequest]
 

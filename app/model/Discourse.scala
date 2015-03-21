@@ -123,159 +123,164 @@ trait ContentNodeFactory[T <: ContentNode] extends DiscourseNodeFactory[T] {
   }
 }
 
-object Goal extends ContentNodeFactory[Goal] {
-  def create(node: Node) = new Goal(node)
-  val label = Label("GOAL")
-}
-object Problem extends ContentNodeFactory[Problem] {
-  def create(node: Node) = new Problem(node)
-  val label = Label("PROBLEM")
-}
-object Idea extends ContentNodeFactory[Idea] {
-  def create(node: Node) = new Idea(node)
-  val label = Label("IDEA")
-}
-object ProArgument extends ContentNodeFactory[ProArgument] {
-  def create(node: Node) = new ProArgument(node)
-  val label = Label("PROARGUMENT")
-}
-object ConArgument extends ContentNodeFactory[ConArgument] {
-  def create(node: Node) = new ConArgument(node)
-  val label = Label("CONARGUMENT")
+object WustSchema {
+
+  object Goal extends ContentNodeFactory[Goal] {
+    def create(node: Node) = new Goal(node)
+    val label = Label("GOAL")
+  }
+  object Problem extends ContentNodeFactory[Problem] {
+    def create(node: Node) = new Problem(node)
+    val label = Label("PROBLEM")
+  }
+  object Idea extends ContentNodeFactory[Idea] {
+    def create(node: Node) = new Idea(node)
+    val label = Label("IDEA")
+  }
+  object ProArgument extends ContentNodeFactory[ProArgument] {
+    def create(node: Node) = new ProArgument(node)
+    val label = Label("PROARGUMENT")
+  }
+  object ConArgument extends ContentNodeFactory[ConArgument] {
+    def create(node: Node) = new ConArgument(node)
+    val label = Label("CONARGUMENT")
+  }
+
+  object Solves extends DiscourseNodeFactory[Solves] {
+    def create(node: Node) = new Solves(node)
+    val label = Label("SOLVES")
+  }
+  object Reaches extends DiscourseNodeFactory[Reaches] {
+    def create(node: Node) = new Reaches(node)
+    val label = Label("REACHES")
+  }
+
+  case class Goal(node: Node) extends ContentNode {
+    def reaches: Set[Reaches] = neighboursAs(Reaches)
+    def ideas: Set[Idea] = reaches.flatMap(_.ideas)
+  }
+  case class Problem(node: Node) extends ContentNode {
+    def solves: Set[Solves] = neighboursAs(Solves)
+    def ideas: Set[Idea] = solves.flatMap(_.ideas)
+  }
+  case class Idea(node: Node) extends ContentNode {
+    def solves: Set[Solves] = neighboursAs(Solves)
+    def reaches: Set[Reaches] = neighboursAs(Reaches)
+    def problems: Set[Problem] = solves.flatMap(_.problems)
+    def goals: Set[Goal] = reaches.flatMap(_.goals)
+  }
+  case class ProArgument(node: Node) extends ContentNode
+  case class ConArgument(node: Node) extends ContentNode
+
+  case class Solves(node: Node) extends HyperEdgeNode {
+    def problems: Set[Problem] = neighboursAs(Problem)
+    def ideas: Set[Idea] = neighboursAs(Idea)
+  }
+  case class Reaches(node: Node) extends HyperEdgeNode {
+    def goals: Set[Goal] = neighboursAs(Goal)
+    def ideas: Set[Idea] = neighboursAs(Idea)
+  }
+
+  object SubIdea extends SchemaRelationFactory[SubIdea, Idea, Idea] {
+    def create(relation: Relation) = SubIdea(relation, startNodeFactory.create(relation.startNode), endNodeFactory.create(relation.endNode))
+    def relationType = RelationType("SUBIDEA")
+    def startNodeFactory = Idea
+    def endNodeFactory = Idea
+  }
+
+  case class SubIdea(relation: Relation, startNode: Idea, endNode: Idea) extends DiscourseRelation[Idea, Idea]
+
+  object SubGoal extends SchemaRelationFactory[SubGoal, Goal, Goal] {
+    def create(relation: Relation) = SubGoal(relation, startNodeFactory.create(relation.startNode), endNodeFactory.create(relation.endNode))
+    def relationType = RelationType("SUBGOAL")
+    def startNodeFactory = Goal
+    def endNodeFactory = Goal
+  }
+
+  case class SubGoal(relation: Relation, startNode: Goal, endNode: Goal) extends DiscourseRelation[Goal, Goal]
+
+  object Causes extends SchemaRelationFactory[Causes, Problem, Problem] {
+    def create(relation: Relation) = Causes(relation, startNodeFactory.create(relation.startNode), endNodeFactory.create(relation.endNode))
+    def relationType = RelationType("CAUSES")
+    def startNodeFactory = Problem
+    def endNodeFactory = Problem
+  }
+  case class Causes(relation: Relation, startNode: Problem, endNode: Problem) extends DiscourseRelation[Problem, Problem]
+
+  object Prevents extends SchemaRelationFactory[Prevents, Problem, Goal] {
+    def create(relation: Relation) = Prevents(relation, startNodeFactory.create(relation.startNode), endNodeFactory.create(relation.endNode))
+    def relationType = RelationType("PREVENTS")
+    def startNodeFactory = Problem
+    def endNodeFactory = Goal
+  }
+  case class Prevents(relation: Relation, startNode: Problem, endNode: Goal) extends DiscourseRelation[Problem, Goal]
+
+  object SupportsSolves extends SchemaRelationFactory[SupportsSolves, ProArgument, Solves] {
+    def create(relation: Relation) = SupportsSolves(relation, startNodeFactory.create(relation.startNode), endNodeFactory.create(relation.endNode))
+    def relationType = RelationType("SUPPORTSSOLVES")
+    def startNodeFactory = ProArgument
+    def endNodeFactory = Solves
+  }
+  case class SupportsSolves(relation: Relation, startNode: ProArgument, endNode: Solves) extends DiscourseRelation[ProArgument, Solves]
+
+  object OpposesSolves extends SchemaRelationFactory[OpposesSolves, ConArgument, Solves] {
+    def create(relation: Relation) = OpposesSolves(relation, startNodeFactory.create(relation.startNode), endNodeFactory.create(relation.endNode))
+    def relationType = RelationType("OPPOSESSOLVES")
+    def startNodeFactory = ConArgument
+    def endNodeFactory = Solves
+  }
+  case class OpposesSolves(relation: Relation, startNode: ConArgument, endNode: Solves) extends DiscourseRelation[ConArgument, Solves]
+
+  object SupportsReaches extends SchemaRelationFactory[SupportsReaches, ProArgument, Reaches] {
+    def create(relation: Relation) = SupportsReaches(relation, startNodeFactory.create(relation.startNode), endNodeFactory.create(relation.endNode))
+    def relationType = RelationType("SUPPORTSREACHES")
+    def startNodeFactory = ProArgument
+    def endNodeFactory = Reaches
+  }
+  case class SupportsReaches(relation: Relation, startNode: ProArgument, endNode: Reaches) extends DiscourseRelation[ProArgument, Reaches]
+
+  object OpposesReaches extends SchemaRelationFactory[OpposesReaches, ConArgument, Reaches] {
+    def create(relation: Relation) = OpposesReaches(relation, startNodeFactory.create(relation.startNode), endNodeFactory.create(relation.endNode))
+    def relationType = RelationType("OPPOSESREACHES")
+    def startNodeFactory = ConArgument
+    def endNodeFactory = Reaches
+  }
+  case class OpposesReaches(relation: Relation, startNode: ConArgument, endNode: Reaches) extends DiscourseRelation[ConArgument, Reaches]
+
+  object IdeaToSolves extends SchemaRelationFactory[IdeaToSolves, Idea, Solves] {
+    def create(relation: Relation) = IdeaToSolves(relation, startNodeFactory.create(relation.startNode), endNodeFactory.create(relation.endNode))
+    def relationType = RelationType("IDEATOSOLVES")
+    def startNodeFactory = Idea
+    def endNodeFactory = Solves
+  }
+  case class IdeaToSolves(relation: Relation, startNode: Idea, endNode: Solves) extends DiscourseRelation[Idea, Solves]
+
+  object IdeaToReaches extends SchemaRelationFactory[IdeaToReaches, Idea, Reaches] {
+    def create(relation: Relation) = IdeaToReaches(relation, startNodeFactory.create(relation.startNode), endNodeFactory.create(relation.endNode))
+    def relationType = RelationType("IDEATOREACHES")
+    def startNodeFactory = Idea
+    def endNodeFactory = Reaches
+  }
+  case class IdeaToReaches(relation: Relation, startNode: Idea, endNode: Reaches) extends DiscourseRelation[Idea, Reaches]
+
+  object SolvesToProblem extends SchemaRelationFactory[SolvesToProblem, Solves, Problem] {
+    def create(relation: Relation) = SolvesToProblem(relation, startNodeFactory.create(relation.startNode), endNodeFactory.create(relation.endNode))
+    def relationType = RelationType("SOLVESTOPROBLEM")
+    def startNodeFactory = Solves
+    def endNodeFactory = Problem
+  }
+  case class SolvesToProblem(relation: Relation, startNode: Solves, endNode: Problem) extends DiscourseRelation[Solves, Problem]
+
+  object ReachesToGoal extends SchemaRelationFactory[ReachesToGoal, Reaches, Goal] {
+    def create(relation: Relation) = ReachesToGoal(relation, startNodeFactory.create(relation.startNode), endNodeFactory.create(relation.endNode))
+    def relationType = RelationType("SOLVESTOPROBLEM")
+    def startNodeFactory = Reaches
+    def endNodeFactory = Goal
+  }
+  case class ReachesToGoal(relation: Relation, startNode: Reaches, endNode: Goal) extends DiscourseRelation[Reaches, Goal]
 }
 
-object Solves extends DiscourseNodeFactory[Solves] {
-  def create(node: Node) = new Solves(node)
-  val label = Label("SOLVES")
-}
-object Reaches extends DiscourseNodeFactory[Reaches] {
-  def create(node: Node) = new Reaches(node)
-  val label = Label("REACHES")
-}
-
-case class Goal(node: Node) extends ContentNode {
-  def reaches: Set[Reaches] = neighboursAs(Reaches)
-  def ideas: Set[Idea] = reaches.flatMap(_.ideas)
-}
-case class Problem(node: Node) extends ContentNode {
-  def solves: Set[Solves] = neighboursAs(Solves)
-  def ideas: Set[Idea] = solves.flatMap(_.ideas)
-}
-case class Idea(node: Node) extends ContentNode {
-  def solves: Set[Solves] = neighboursAs(Solves)
-  def reaches: Set[Reaches] = neighboursAs(Reaches)
-  def problems: Set[Problem] = solves.flatMap(_.problems)
-  def goals: Set[Goal] = reaches.flatMap(_.goals)
-}
-case class ProArgument(node: Node) extends ContentNode
-case class ConArgument(node: Node) extends ContentNode
-
-case class Solves(node: Node) extends HyperEdgeNode {
-  def problems: Set[Problem] = neighboursAs(Problem)
-  def ideas: Set[Idea] = neighboursAs(Idea)
-}
-case class Reaches(node: Node) extends HyperEdgeNode {
-  def goals: Set[Goal] = neighboursAs(Goal)
-  def ideas: Set[Idea] = neighboursAs(Idea)
-}
-
-object SubIdea extends SchemaRelationFactory[SubIdea, Idea, Idea] {
-  def create(relation: Relation) = SubIdea(relation, startNodeFactory.create(relation.startNode), endNodeFactory.create(relation.endNode))
-  def relationType = RelationType("SUBIDEA")
-  def startNodeFactory = Idea
-  def endNodeFactory = Idea
-}
-
-case class SubIdea(relation: Relation, startNode: Idea, endNode: Idea) extends DiscourseRelation[Idea, Idea]
-
-object SubGoal extends SchemaRelationFactory[SubGoal, Goal, Goal] {
-  def create(relation: Relation) = SubGoal(relation, startNodeFactory.create(relation.startNode), endNodeFactory.create(relation.endNode))
-  def relationType = RelationType("SUBGOAL")
-  def startNodeFactory = Goal
-  def endNodeFactory = Goal
-}
-
-case class SubGoal(relation: Relation, startNode: Goal, endNode: Goal) extends DiscourseRelation[Goal, Goal]
-
-object Causes extends SchemaRelationFactory[Causes, Problem, Problem] {
-  def create(relation: Relation) = Causes(relation, startNodeFactory.create(relation.startNode), endNodeFactory.create(relation.endNode))
-  def relationType = RelationType("CAUSES")
-  def startNodeFactory = Problem
-  def endNodeFactory = Problem
-}
-case class Causes(relation: Relation, startNode: Problem, endNode: Problem) extends DiscourseRelation[Problem, Problem]
-
-object Prevents extends SchemaRelationFactory[Prevents, Problem, Goal] {
-  def create(relation: Relation) = Prevents(relation, startNodeFactory.create(relation.startNode), endNodeFactory.create(relation.endNode))
-  def relationType = RelationType("PREVENTS")
-  def startNodeFactory = Problem
-  def endNodeFactory = Goal
-}
-case class Prevents(relation: Relation, startNode: Problem, endNode: Goal) extends DiscourseRelation[Problem, Goal]
-
-object SupportsSolves extends SchemaRelationFactory[SupportsSolves, ProArgument, Solves] {
-  def create(relation: Relation) = SupportsSolves(relation, startNodeFactory.create(relation.startNode), endNodeFactory.create(relation.endNode))
-  def relationType = RelationType("SUPPORTSSOLVES")
-  def startNodeFactory = ProArgument
-  def endNodeFactory = Solves
-}
-case class SupportsSolves(relation: Relation, startNode: ProArgument, endNode: Solves) extends DiscourseRelation[ProArgument, Solves]
-
-object OpposesSolves extends SchemaRelationFactory[OpposesSolves, ConArgument, Solves] {
-  def create(relation: Relation) = OpposesSolves(relation, startNodeFactory.create(relation.startNode), endNodeFactory.create(relation.endNode))
-  def relationType = RelationType("OPPOSESSOLVES")
-  def startNodeFactory = ConArgument
-  def endNodeFactory = Solves
-}
-case class OpposesSolves(relation: Relation, startNode: ConArgument, endNode: Solves) extends DiscourseRelation[ConArgument, Solves]
-
-object SupportsReaches extends SchemaRelationFactory[SupportsReaches, ProArgument, Reaches] {
-  def create(relation: Relation) = SupportsReaches(relation, startNodeFactory.create(relation.startNode), endNodeFactory.create(relation.endNode))
-  def relationType = RelationType("SUPPORTSREACHES")
-  def startNodeFactory = ProArgument
-  def endNodeFactory = Reaches
-}
-case class SupportsReaches(relation: Relation, startNode: ProArgument, endNode: Reaches) extends DiscourseRelation[ProArgument, Reaches]
-
-object OpposesReaches extends SchemaRelationFactory[OpposesReaches, ConArgument, Reaches] {
-  def create(relation: Relation) = OpposesReaches(relation, startNodeFactory.create(relation.startNode), endNodeFactory.create(relation.endNode))
-  def relationType = RelationType("OPPOSESREACHES")
-  def startNodeFactory = ConArgument
-  def endNodeFactory = Reaches
-}
-case class OpposesReaches(relation: Relation, startNode: ConArgument, endNode: Reaches) extends DiscourseRelation[ConArgument, Reaches]
-
-object IdeaToSolves extends SchemaRelationFactory[IdeaToSolves, Idea, Solves] {
-  def create(relation: Relation) = IdeaToSolves(relation, startNodeFactory.create(relation.startNode), endNodeFactory.create(relation.endNode))
-  def relationType = RelationType("IDEATOSOLVES")
-  def startNodeFactory = Idea
-  def endNodeFactory = Solves
-}
-case class IdeaToSolves(relation: Relation, startNode: Idea, endNode: Solves) extends DiscourseRelation[Idea, Solves]
-
-object IdeaToReaches extends SchemaRelationFactory[IdeaToReaches, Idea, Reaches] {
-  def create(relation: Relation) = IdeaToReaches(relation, startNodeFactory.create(relation.startNode), endNodeFactory.create(relation.endNode))
-  def relationType = RelationType("IDEATOREACHES")
-  def startNodeFactory = Idea
-  def endNodeFactory = Reaches
-}
-case class IdeaToReaches(relation: Relation, startNode: Idea, endNode: Reaches) extends DiscourseRelation[Idea, Reaches]
-
-object SolvesToProblem extends SchemaRelationFactory[SolvesToProblem, Solves, Problem] {
-  def create(relation: Relation) = SolvesToProblem(relation, startNodeFactory.create(relation.startNode), endNodeFactory.create(relation.endNode))
-  def relationType = RelationType("SOLVESTOPROBLEM")
-  def startNodeFactory = Solves
-  def endNodeFactory = Problem
-}
-case class SolvesToProblem(relation: Relation, startNode: Solves, endNode: Problem) extends DiscourseRelation[Solves, Problem]
-
-object ReachesToGoal extends SchemaRelationFactory[ReachesToGoal, Reaches, Goal] {
-  def create(relation: Relation) = ReachesToGoal(relation, startNodeFactory.create(relation.startNode), endNodeFactory.create(relation.endNode))
-  def relationType = RelationType("SOLVESTOPROBLEM")
-  def startNodeFactory = Reaches
-  def endNodeFactory = Goal
-}
-case class ReachesToGoal(relation: Relation, startNode: Reaches, endNode: Goal) extends DiscourseRelation[Reaches, Goal]
+import WustSchema._
 
 object Discourse {def empty = Discourse(Graph.empty) }
 

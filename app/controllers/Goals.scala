@@ -7,9 +7,11 @@ import play.api.libs.json._
 import play.api.mvc.{Action, Controller}
 import renesca._
 import renesca.parameter.implicits._
+import model.WustSchema._
+import model.Discourse
 
 object Goals extends Controller with ContentNodesController[Goal] {
-  override def factory = model.Goal
+  override def factory = Goal
   override def apiname = "goals"
   override def decodeRequest(jsValue: JsValue) = jsValue.as[GoalAddRequest]
 
