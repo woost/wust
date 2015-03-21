@@ -31,8 +31,9 @@ lazy val wust = (project in file(".")).settings(
     "org.webjars" % "font-awesome" % "4.3.0-1",
     "org.webjars" % "bootstrap" % "3.3.4",
     "org.webjars" % "d3js" % "3.5.3",
+    "org.webjars.bower" % "humane-js" % "3.2.2",
     "org.webjars" % "spin-js" % "2.0.0-1", // really?
-    "org.webjars" % "animate.css" % "3.2.5", // do we still need this with compass animations?
+    "org.webjars" % "animate.css" % "3.2.5",
     // atmosphere
     "org.atmosphere" % "atmosphere-play" % "2.1.1",
     "org.webjars" % "atmosphere-javascript" % "2.2.8",
