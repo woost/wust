@@ -123,37 +123,15 @@ trait ContentNodeFactory[T <: ContentNode] extends DiscourseNodeFactory[T] {
   }
 }
 
+@macros.GraphSchema
 object WustSchema {
-
-  object Goal extends ContentNodeFactory[Goal] {
-    def create(node: Node) = new Goal(node)
-    val label = Label("GOAL")
-  }
-  object Problem extends ContentNodeFactory[Problem] {
-    def create(node: Node) = new Problem(node)
-    val label = Label("PROBLEM")
-  }
-  object Idea extends ContentNodeFactory[Idea] {
-    def create(node: Node) = new Idea(node)
-    val label = Label("IDEA")
-  }
-  object ProArgument extends ContentNodeFactory[ProArgument] {
-    def create(node: Node) = new ProArgument(node)
-    val label = Label("PROARGUMENT")
-  }
-  object ConArgument extends ContentNodeFactory[ConArgument] {
-    def create(node: Node) = new ConArgument(node)
-    val label = Label("CONARGUMENT")
-  }
-
-  object Solves extends DiscourseNodeFactory[Solves] {
-    def create(node: Node) = new Solves(node)
-    val label = Label("SOLVES")
-  }
-  object Reaches extends DiscourseNodeFactory[Reaches] {
-    def create(node: Node) = new Reaches(node)
-    val label = Label("REACHES")
-  }
+  val nodes = List(
+    ("Goal","GOAL"),
+    ("Problem","PROBLEM"),
+    ("Idea","IDEA"),
+    ("ProArgument","PROARGUMENT"),
+    ("ConArgument","CONARGUMENT")
+  )
 
   case class Goal(node: Node) extends ContentNode {
     def reaches: Set[Reaches] = neighboursAs(Reaches)
@@ -171,6 +149,19 @@ object WustSchema {
   }
   case class ProArgument(node: Node) extends ContentNode
   case class ConArgument(node: Node) extends ContentNode
+
+
+
+
+  object Solves extends DiscourseNodeFactory[Solves] {
+    def create(node: Node) = new Solves(node)
+    val label = Label("SOLVES")
+  }
+  object Reaches extends DiscourseNodeFactory[Reaches] {
+    def create(node: Node) = new Reaches(node)
+    val label = Label("REACHES")
+  }
+
 
   case class Solves(node: Node) extends HyperEdgeNode {
     def problems: Set[Problem] = neighboursAs(Problem)
