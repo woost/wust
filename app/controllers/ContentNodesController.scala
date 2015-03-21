@@ -9,6 +9,7 @@ import renesca._
 import renesca.graph.RelationType
 import renesca.parameter.implicits._
 import modules.json.GraphFormat._
+import model.WustSchema._
 import model._
 
 trait ContentNodesController[NodeType <: ContentNode] extends Controller with DatabaseController {

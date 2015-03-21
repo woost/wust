@@ -10,7 +10,6 @@ import renesca._
 import renesca.parameter.implicits._
 import modules.json.GraphFormat._
 import model.WustSchema._
-import model.Discourse
 
 object Problems extends Controller with ContentNodesController[Problem] {
   override def factory = Problem

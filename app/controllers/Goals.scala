@@ -8,7 +8,6 @@ import play.api.mvc.{Action, Controller}
 import renesca._
 import renesca.parameter.implicits._
 import model.WustSchema._
-import model.Discourse
 
 object Goals extends Controller with ContentNodesController[Goal] {
   override def factory = Goal

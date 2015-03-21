@@ -7,7 +7,6 @@ import renesca.Query
 import renesca.graph.Label
 import renesca.parameter.implicits._
 import model.WustSchema._
-import model.Discourse
 
 object Search extends Controller with DatabaseController {
   def search(term: String, labelOpt:Option[Label]) = Action {

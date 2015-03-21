@@ -1,5 +1,6 @@
 package controllers
 
+import model.WustSchema._
 import model._
 import renesca._
 import renesca.graph.RelationType

@@ -43,7 +43,7 @@ lazy val wust = (project in file(".")).settings(
   // use compass with sbt-sass
   sassOptions in Assets ++= Seq("--compass", "-r", "compass"),
   // scalaJSProjects := Seq(scalajs),
-  scalacOptions ++= scalacOpts,
+  scalacOptions ++= scalacOpts, //++ scalacMacroOpts,
   addCompilerPlugin("org.scalamacros" % "paradise" % paradiseVersion cross CrossVersion.full)
 ).
 enablePlugins(PlayScala, SbtWeb).
@@ -75,3 +75,8 @@ val scalacOpts = Seq(
     "-language:_"
     //,"-Xdisable-assertions", "-optimize"
   )
+
+val scalacMacroOpts = Seq(
+    "-Ymacro-debug-lite",
+    "-Yshow-trees-stringified"
+)
