@@ -23,15 +23,21 @@ object GraphSchemaMacro {
     }
     """ :: Nil =>
 
-        val nodeFactories = nodedef.map{
-            case q"""(${name:String},${label:String})""" =>
-            q"""
+        val (nodeFactories,nodeSets) = nodedef.map{
+            case q"""(${name:String},${plural:String},${label:String})""" =>
+            (q"""
+
             object ${TermName(name)} extends ContentNodeFactory[${TypeName(name)}] {
                 def create(node: Node) = new ${TypeName(name)}(node)
                 val label = Label($label)
             }
-            """
-        }
+
+            """,q"""
+
+            def ${TermName(plural)}: Set[${TypeName(name)}] = nodesAs(${TermName(name)})
+
+            """)
+        }.unzip
 
         val (relationFactories, relationClasses, relationSets) = relationdef.map{
             case q"""(${name:String}, ${plural:String}, ${relationtype:String},
@@ -74,6 +80,7 @@ object GraphSchemaMacro {
             object Discourse {def empty = new Discourse(Graph.empty) }
 
             case class Discourse($discourseParams) extends $discourseParents {
+                ..$nodeSets
                 ..$relationSets
 
                 ..$discoursebody

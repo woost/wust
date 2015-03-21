@@ -127,11 +127,11 @@ trait ContentNodeFactory[T <: ContentNode] extends DiscourseNodeFactory[T] {
 object WustSchema {
 
   val nodes = List(
-    ("Goal","GOAL"),
-    ("Problem","PROBLEM"),
-    ("Idea","IDEA"),
-    ("ProArgument","PROARGUMENT"),
-    ("ConArgument","CONARGUMENT")
+    ("Goal","goals","GOAL"),
+    ("Problem","problems","PROBLEM"),
+    ("Idea","ideas","IDEA"),
+    ("ProArgument","proArguments","PROARGUMENT"),
+    ("ConArgument","conArguments","CONARGUMENT")
   )
 
   val relations = List(
@@ -191,11 +191,6 @@ object WustSchema {
 
 
   case class Discourse(graph: Graph) extends SchemaGraph {
-    // nodes
-    def goals: Set[Goal] = nodesAs(Goal)
-    def problems: Set[Problem] = nodesAs(Problem)
-    def ideas: Set[Idea] = nodesAs(Idea)
-
     // hyperedge nodes
     def reaches: Set[Reaches] = nodesAs(Reaches)
     def solves: Set[Solves] = nodesAs(Solves)
@@ -205,10 +200,9 @@ object WustSchema {
     }
 
     def relations: Set[_ <: DiscourseRelation[DiscourseNode, DiscourseNode]] = {
-      // subIdeas ++ subGoals ++ causes ++ prevents ++
-      //   ideaToSolves ++ ideaToReaches ++ solvesToProblem ++ reachesToGoal ++
-      //   supportsSolves ++ opposesSolves ++ supportsReaches ++ opposesReaches
-      ???
+      subIdeas ++ subGoals ++ causes ++ prevents ++
+        ideaToSolves ++ ideaToReaches ++ solvesToProblems ++ reachesToGoals ++
+        supportsSolves ++ opposesSolves ++ supportsReaches ++ opposesReaches
     }
 
 }
