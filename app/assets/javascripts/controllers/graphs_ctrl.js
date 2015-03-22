@@ -12,12 +12,6 @@ angular.module("wust").controller("GraphsCtrl", function($scope, $state, $filter
     };
 
     function filter(graph) {
-        var nodeMap = _(graph.nodes).map(node => {
-            var res = {};
-            res[node.id] = node;
-            return res;
-        }).reduce(_.merge);
-
         var edgeMap = _(graph.edges).map(edge => {
             //todo: helper function to construct object with var on lhs
             var res = {};
@@ -31,13 +25,17 @@ angular.module("wust").controller("GraphsCtrl", function($scope, $state, $filter
         return function() {
             var filtered = $filter("fuzzyFilter")(graph.nodes, $scope.search);
             var ids = _.map(filtered, "id");
-            for (var i = 0; i < ids.length; i++) {
+            for (let i = 0; i < ids.length; i++) {
                 ids = _.union(ids, edgeMap[ids[i]]);
             }
 
-            $scope.graph.nodes = _.map(ids, _.propertyOf(nodeMap));
-            $scope.graph.edges = _.select(graph.edges, edge => {
-                return _(ids).includes(edge.from) && _(ids).includes(edge.to);
+            $scope.graph.nodes = _.map(graph.nodes, node => {
+                var visible = _(ids).includes(node.id);
+                return _.merge(node, {visible: visible});
+            });
+            $scope.graph.edges = _.map(graph.edges, edge => {
+                var visible = _(ids).includes(edge.from) && _(ids).includes(edge.to);
+                return _.merge(edge, {visible: visible});
             });
         };
     }

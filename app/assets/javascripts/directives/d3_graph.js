@@ -71,6 +71,7 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                     .data(graph.edges).enter()
                     .append("line")
                     .attr("class", "svglink")
+                    .style("visibility", d => d.visible ? "visible" : "hidden")
                     .style("stroke-width", 1)
                     .style("stroke", "#999")
                     .style("marker-end", "url(#arrow)");
@@ -85,6 +86,7 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                 var linktextHtml = linktextFo.append("xhtml:span")
                     // .style("text-shadow", "white -1px 0px, white 0px 1px, white 1px 0px, white 0px -1px")
                     .style("background", "white")
+                    .style("visibility", d => d.visible ? "visible" : "hidden")
                     .html(d => d.label);
 
                 setForeignObjectDimensions(linktextFo, linktextHtml);
@@ -92,8 +94,8 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                 // create nodes in the svg container
                 var node = container.append("g")
                     .selectAll(".svgnode")
-                    .data(graph.nodes)
-                    .enter().append("g")
+                    .data(graph.nodes).enter()
+                    .append("g")
                     .call(drag)
                     .on("click", clicked)
                     .on("dblclick", onDoubleClick);
@@ -105,6 +107,7 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                 var nodeHtml = nodeFo.append("xhtml:div")
                     .style("max-width", "150px")
                     .style("cursor", "move")
+                    .style("visibility", d => d.visible ? "visible" : "hidden")
                     .attr("class", d => "node " + DiscourseNode.get(d.label).css)
                     .html(d => d.title);
 
