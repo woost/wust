@@ -7,7 +7,7 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
             onClick: "&",
         },
         link: function(scope, element) {
-            var onClick = scope.onClick() || _.noop;
+            var onDoubleClick = scope.onClick() || _.noop;
 
             scope.$watchCollection("ngModel", () => {
                 var graph = scope.ngModel;
@@ -92,8 +92,8 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                     .data(graph.nodes)
                     .enter().append("g")
                     .call(drag)
-                    .on("dblclick", doubleclicked);
-                // .on("click", onClick);
+                    .on("click", clicked)
+                    .on("dblclick", onDoubleClick);
 
                 var nodeHtml = node.append("foreignObject")
                     .attr("width", 600)
@@ -127,19 +127,47 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                     container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
                 }
 
-                function doubleclicked(d) {
+                function unsetFixedPosition(d) {
                     d3.select(this).classed("fixed", d.fixed = false);
                     // need to explicitly resume the force, otherwise the graph
                     // is stuck until a node is dragged
                     force.resume();
                 }
 
-                function dragstarted(d) {
+                function setFixedPosition(d) {
+                    // prevent d3 from interpreting this as panning
                     d3.event.sourceEvent.stopPropagation();
+
                     d3.select(this).classed("fixed", d.fixed = true);
                 }
 
+                // keep track whether the node is currently being dragged
+                var isDragging = false;
+
+                function clicked(d) {
+                    // do not interpret this as a click if we dragged earlier.
+                    if (!isDragging) {
+                        // we wait a moment before unsetting the fixed position in
+                        // case the user wants to double click the node, so it does
+                        // not float away beforehand.
+                        _.delay(unsetFixedPosition, 180, d);
+                    }
+
+                    isDragging = false;
+                }
+
+                function dragstarted(d) {
+                    setFixedPosition(d);
+                }
+
                 function dragged(d) {
+                    // check whether there was a substantial mouse movement. if
+                    // not, we will interpret this as a click event after the
+                    // mouse button is released (see clicked handler).
+                    var diff = Math.abs(d.x - d3.event.x) + Math.abs(d.y - d3.event.y);
+                    isDragging = isDragging || (diff > 1);
+
+                    // do the actually dragging
                     d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
                 }
             });
