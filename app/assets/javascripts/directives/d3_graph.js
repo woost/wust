@@ -154,6 +154,8 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
 
                 function setFixedPosition(d) {
                     d3.select(this).classed("fixed", d.fixed = true);
+
+                    force.resume();
                 }
 
                 // keep track whether the node is currently being dragged
