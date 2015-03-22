@@ -111,7 +111,7 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                     .attr("class", d => "node " + DiscourseNode.get(d.label).css)
                     .html(d => d.title);
 
-                setForeignObjectDimensions(nodeFo, nodeHtml);
+                var nodeRects = setForeignObjectDimensions(nodeFo, nodeHtml);
 
                 // register tick function
                 force.on("tick", tick);
@@ -119,12 +119,16 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                 // we need to set the height and weight of the foreignobject
                 // to the dimensions of the inner html container.
                 function setForeignObjectDimensions(fo, html) {
+                    var boundingRects = [];
                     for (var i = 0; i < fo[0].length; i++) {
                         var rect = html[0][i].getBoundingClientRect();
                         var curr = fo[0][i];
                         curr.setAttribute("width", rect.width);
                         curr.setAttribute("height", rect.height);
+                        boundingRects.push(rect);
                     }
+
+                    return boundingRects;
                 }
 
                 function tick() {
@@ -139,7 +143,7 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
 
                     node.attr("transform", d => {
                         // center the node
-                        var rect = nodeHtml[0][d.index].getBoundingClientRect();
+                        var rect = nodeRects[d.index];
                         return "translate(" + (d.x - rect.width / 2) + "," + (d.y - rect.height / 2) + ")";
                     });
                 }
