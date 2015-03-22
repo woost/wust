@@ -26,5 +26,5 @@ angular.module("wust").service("DiscourseNode", function() {
         return res;
     }).reduce(_.merge);
 
-    this.get = (property) => mappings[property];
+    this.get = _.propertyOf(mappings);
 });
