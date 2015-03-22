@@ -1,3 +1,3 @@
--requried field in webkit browser does not apply
--clickable foreignobject in graph with firefox (resize to size of inner div?)
--dragging node over screen left/right edges wraps the node position to the other side
+-requried form field does not apply (webkit only)
+-dragging node over screen left/right edges wraps the node position to the other
+side (webkit only)
