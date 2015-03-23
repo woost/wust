@@ -4,6 +4,10 @@ import scala.reflect.macros.whitebox
 import scala.language.experimental.macros
 import scala.annotation.StaticAnnotation
 
+class GraphSchema extends StaticAnnotation {
+  def macroTransform(annottees: Any*): Any = macro GraphSchemaMacro.impl
+}
+
 object GraphSchemaMacro {
   // TODO: why are implicits not working here?
   // implicit def treeToString(l: Tree): String = l match { case Literal(Constant(string: String)) => string }
@@ -13,18 +17,14 @@ object GraphSchemaMacro {
 
     c.Expr[Any](annottees.map(_.tree).toList match {
       case q"""
-    object $name extends ..$parents {
-        val nodes = List(..$rawNodeDefs)
-        val relations = List(..$rawRelationDefs)
+        object $name extends ..$parents {
+            val schemaName = ${schemaName: String}
+            val nodeType = ${nodeType: String}
 
-        ..$body
-
-        case class Discourse($discourseParams) extends $discourseParents {
-            ..$discoursebody
+            val nodes = List(..$rawNodeDefs)
+            val relations = List(..$rawRelationDefs)
         }
-
-    }
-    """ :: Nil =>
+        """ :: Nil =>
         val nodeDefs: List[(String, String, String, String, List[String], List[(String, String, String)], List[(String, String, String)])] = rawNodeDefs.map {
           case q"(${className: String},${plural: String},${label: String}, ${factory: String}, List(..$traits), List(..$neighboursChains), List(..$revNeighboursChains))" =>
             (className, plural, label, factory,
@@ -102,7 +102,7 @@ object GraphSchemaMacro {
             """, q"""
 
             case class ${ TypeName(name) }(relation: Relation, startNode: ${ TypeName(startNode) }, endNode: ${ TypeName(endNode) })
-                       extends DiscourseRelation[${ TypeName(startNode) }, ${ TypeName(endNode) }]
+                       extends SchemaRelation[${ TypeName(startNode) }, ${ TypeName(endNode) }]
 
             """, q"""
 
@@ -112,6 +112,9 @@ object GraphSchemaMacro {
 
         }.unzip3
 
+        val allNodes = nodePlurals.values.foldLeft[Tree](q"Set.empty") { case (q"$all", plural) => q"$all ++ ${ TermName(plural) }" }
+        val allRelations = relationPlurals.values.foldLeft[Tree](q"Set.empty") { case (q"$all", plural) => q"$all ++ ${ TermName(plural) }" }
+
 
         q"""
         object $name extends ..$parents {
@@ -120,22 +123,16 @@ object GraphSchemaMacro {
             ..$relationFactories
             ..$relationClasses
 
-            ..$body
-
-            object Discourse {def empty = new Discourse(Graph.empty) }
-
-            case class Discourse($discourseParams) extends $discourseParents {
+            object ${ TermName(schemaName) } {def empty = new ${ TypeName(schemaName) }(Graph.empty) }
+            case class ${ TypeName(schemaName) }(graph: Graph) extends SchemaGraph {
                 ..$nodeSets
                 ..$relationSets
 
-                ..$discoursebody
+                def nodes: Set[${ TypeName(nodeType) }] = $allNodes
+                def relations: Set[_ <: SchemaRelation[${ TypeName(nodeType) },${ TypeName(nodeType) }]] = $allRelations
             }
-
         }
         """
     })
   }
-}
-class GraphSchema extends StaticAnnotation {
-  def macroTransform(annottees: Any*): Any = macro GraphSchemaMacro.impl
 }

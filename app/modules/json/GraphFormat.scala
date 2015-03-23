@@ -15,10 +15,10 @@ object GraphFormat {
   implicit def LabelToString(label: Label): String = label.name
   implicit def RelationTypeToString(relationType: RelationType): String = relationType.name
 
-  implicit object DiscourseRelationFormat extends Format[DiscourseRelation[DiscourseNode, DiscourseNode]] {
+  implicit object DiscourseRelationFormat extends Format[SchemaRelation[DiscourseNode, DiscourseNode]] {
     def reads(json: JsValue) = ???
 
-    def writes(relation: DiscourseRelation[DiscourseNode, DiscourseNode]) = JsObject(Seq(
+    def writes(relation: SchemaRelation[DiscourseNode, DiscourseNode]) = JsObject(Seq(
       ("label", JsString(relation.relationType)),
       ("from", JsString(relation.startNode.uuid)),
       ("to", JsString(relation.endNode.uuid))
@@ -57,7 +57,7 @@ object GraphFormat {
           Replacement(node, node.relations)
       }
 
-      val fakeRelations = mutable.ArrayBuffer.empty[DiscourseRelation[DiscourseNode, DiscourseNode]]
+      val fakeRelations = mutable.ArrayBuffer.empty[SchemaRelation[DiscourseNode, DiscourseNode]]
 
       var next: Option[Replacement] = None
       while( { next = newDiscourseGraph.nodes.collectFirst(simplify); next.isDefined }) {
@@ -65,7 +65,7 @@ object GraphFormat {
         import replacement._
         newGraph.nodes -= deleteNode
         newGraph.relations --= deleteRelations
-        fakeRelations ++= newRelation.map(newRel => new DiscourseRelation[DiscourseNode, DiscourseNode] {
+        fakeRelations ++= newRelation.map(newRel => new SchemaRelation[DiscourseNode, DiscourseNode] {
           val relation = newRel
           val startNode = new DiscourseNode {val node = relation.startNode }
           val endNode = new DiscourseNode {val node = relation.endNode }

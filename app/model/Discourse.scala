@@ -108,9 +108,6 @@ trait HyperEdgeNode extends DiscourseNode {
 trait ContentNode extends DiscourseNode {
 }
 
-trait DiscourseRelation[+START <: DiscourseNode, +END <: DiscourseNode] extends SchemaRelation[START, END]
-
-
 trait DiscourseNodeFactory[T <: DiscourseNode] extends SchemaNodeFactory[T] {
   override def local = UUID.applyTo(super.local)
 }
@@ -128,9 +125,13 @@ trait ContentNodeFactory[T <: ContentNode] extends DiscourseNodeFactory[T] {
 @macros.GraphSchema
 object WustSchema {
   //TODO: generate indirect neighbour-accessors based on hypernodes
+  //TODO: named node/relation groups
+
+  val schemaName = "Discourse"
+  val nodeType = "DiscourseNode"
 
   val nodes = List(
-    // (className, plural, label, factoryType, nodeTraits, indirect neighbours, indirect reverse neighbours
+    // (className, plural, label, factoryType, nodeTraits, indirect successors, indirect predecessors
     ("Goal", "goals", "GOAL", "ContentNodeFactory", List("ContentNode"), List(), List(("ideas", "IdeaToReaches", "ReachesToGoal"))),
     ("Problem", "problems", "PROBLEM", "ContentNodeFactory", List("ContentNode"), List(), List(("ideas", "IdeaToSolves", "SolvesToProblem"))),
     ("Idea", "ideas", "IDEA", "ContentNodeFactory", List("ContentNode"), List(("problems", "IdeaToSolves", "SolvesToProblem"), ("goals", "IdeaToReaches", "ReachesToGoal")), List()),
@@ -155,20 +156,6 @@ object WustSchema {
     ("SolvesToProblem", "solvesToProblems", "SOLVESTOPROBLEM", "Solves", "Problem"),
     ("ReachesToGoal", "reachesToGoals", "REACHESTOGOAL", "Reaches", "Goal")
   )
-
-  case class Discourse(graph: Graph) extends SchemaGraph {
-    def nodes: Set[DiscourseNode] = {
-      goals ++ problems ++ ideas ++ reaches ++ solves
-    }
-
-    def relations: Set[_ <: DiscourseRelation[DiscourseNode, DiscourseNode]] = {
-      subIdeas ++ subGoals ++ causes ++ prevents ++
-        ideaToSolves ++ ideaToReaches ++ solvesToProblems ++ reachesToGoals ++
-        supportsSolves ++ opposesSolves ++ supportsReaches ++ opposesReaches
-    }
-
-  }
-
 }
 
 
