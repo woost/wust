@@ -117,25 +117,32 @@ trait ContentNodeFactory[T <: ContentNode] extends DiscourseNodeFactory[T] {
   override def create(node: Node): T
 
   def local(title: String): T = {
-    val idea = super.local
-    idea.title = title
-    idea
+    val node = super.local
+    node.title = title
+    node
   }
 }
 
 @macros.GraphSchema
 object WustSchema {
+  //TODO: check if nodes on indirect path exist in neighbour sets
+  //TODO: generate all node neighbour-accessors based on the relations
+  //TODO: generate indirect neighbour-accessors based on hypernodes
 
   val nodes = List(
-    ("Goal","goals","GOAL"),
-    ("Problem","problems","PROBLEM"),
-    ("Idea","ideas","IDEA"),
-    ("ProArgument","proArguments","PROARGUMENT"),
-    ("ConArgument","conArguments","CONARGUMENT")
+    // (className, plural, label, factoryType, nodeTraits, neighbours, indirect neighbours
+    ("Goal", "goals", "GOAL", "ContentNodeFactory", List("DiscourseNode", "ContentNode"), List("Reaches"), List(("Reaches", "Idea"))),
+    ("Problem", "problems", "PROBLEM", "ContentNodeFactory", List("ContentNode"), List("Solves"), List(("Solves", "Idea"))),
+    ("Idea", "ideas", "IDEA", "ContentNodeFactory", List("ContentNode"), List("Solves", "Reaches"), List(("Solves", "Problem"), ("Reaches", "Goal"))),
+    ("ProArgument", "proArguments", "PROARGUMENT", "ContentNodeFactory", List("ContentNode"), List(), List()),
+    ("ConArgument", "conArguments", "CONARGUMENT", "ContentNodeFactory", List("ContentNode"), List(), List()),
+    ("Solves", "solves", "SOLVES", "DiscourseNodeFactory", List("HyperEdgeNode"), List("Problem", "Idea"), List()),
+    ("Reaches", "reaches", "REACHES", "DiscourseNodeFactory", List("HyperEdgeNode"), List("Goal", "Idea"), List())
   )
 
   val relations = List(
-    ("SubIdea","subIdeas", "SUBIDEA","Idea","Idea"),
+    // (className, plural, relationType, startNode, endNode)
+    ("SubIdea", "subIdeas", "SUBIDEA", "Idea", "Idea"),
     ("SubGoal", "subGoals", "SUBGOAL", "Goal", "Goal"),
     ("Causes", "causes", "CAUSES", "Problem", "Problem"),
     ("Prevents", "prevents", "PREVENTS", "Problem", "Goal"),
@@ -149,52 +156,7 @@ object WustSchema {
     ("ReachesToGoal", "reachesToGoals", "REACHESTOGOAL", "Reaches", "Goal")
   )
 
-
-  case class Goal(node: Node) extends ContentNode {
-    def reaches: Set[Reaches] = neighboursAs(Reaches)
-    def ideas: Set[Idea] = reaches.flatMap(_.ideas)
-  }
-  case class Problem(node: Node) extends ContentNode {
-    def solves: Set[Solves] = neighboursAs(Solves)
-    def ideas: Set[Idea] = solves.flatMap(_.ideas)
-  }
-  case class Idea(node: Node) extends ContentNode {
-    def solves: Set[Solves] = neighboursAs(Solves)
-    def reaches: Set[Reaches] = neighboursAs(Reaches)
-    def problems: Set[Problem] = solves.flatMap(_.problems)
-    def goals: Set[Goal] = reaches.flatMap(_.goals)
-  }
-  case class ProArgument(node: Node) extends ContentNode
-  case class ConArgument(node: Node) extends ContentNode
-
-
-
-
-  object Solves extends DiscourseNodeFactory[Solves] {
-    def create(node: Node) = new Solves(node)
-    val label = Label("SOLVES")
-  }
-  object Reaches extends DiscourseNodeFactory[Reaches] {
-    def create(node: Node) = new Reaches(node)
-    val label = Label("REACHES")
-  }
-
-
-  case class Solves(node: Node) extends HyperEdgeNode {
-    def problems: Set[Problem] = neighboursAs(Problem)
-    def ideas: Set[Idea] = neighboursAs(Idea)
-  }
-  case class Reaches(node: Node) extends HyperEdgeNode {
-    def goals: Set[Goal] = neighboursAs(Goal)
-    def ideas: Set[Idea] = neighboursAs(Idea)
-  }
-
-
   case class Discourse(graph: Graph) extends SchemaGraph {
-    // hyperedge nodes
-    def reaches: Set[Reaches] = nodesAs(Reaches)
-    def solves: Set[Solves] = nodesAs(Solves)
-
     def nodes: Set[DiscourseNode] = {
       goals ++ problems ++ ideas ++ reaches ++ solves
     }
@@ -205,7 +167,7 @@ object WustSchema {
         supportsSolves ++ opposesSolves ++ supportsReaches ++ opposesReaches
     }
 
-}
+  }
 
 }
 

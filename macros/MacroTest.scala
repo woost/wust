@@ -9,7 +9,7 @@ object GraphSchemaMacro {
     import c.universe._
 
     c.Expr[Any](annottees.map(_.tree).toList match {
-    case q"""
+      case q"""
     object $name extends ..$parents {
         val nodes = List(..$nodedef)
         val relations = List(..$relationdef)
@@ -23,55 +23,72 @@ object GraphSchemaMacro {
     }
     """ :: Nil =>
 
-        val (nodeFactories,nodeSets) = nodedef.map{
-            case q"""(${name:String},${plural:String},${label:String})""" =>
-            (q"""
+        val nodePlurals: Map[String, String] = nodedef.map { case q"""(${className: String},${plural: String},$_, $_, List(..$_), List(..$_), List(..$_))""" => className -> plural }.toMap
+        val (nodeFactories, nodeClasses, nodeSets) = nodedef.map {
+          //  ("Goal", "goals", "GOAL", "ContentNodeFactory", List("ContentNode"), List("Reaches"), List(List("Reaches", "Idea"))),
+          case q"""(${className: String},${plural: String},${label: String}, ${factory: String}, List(..$traits), List(..$neighbours), List(..$neighboursChain))""" =>
+            val withTraits = traits.map { case q"""${traitName: String}""" => TypeName(traitName) }
+            val directNeighbours = neighbours.map {
+              case q"""${nodeName: String}""" =>
+                q"""def ${ TermName(nodePlurals(nodeName)) }:Set[${ TypeName(nodeName) }] = neighboursAs(${ TermName(nodeName) })"""
+            }
+            val indirectNeighbours = neighboursChain.map {
+              case q"""(${over: String}, ${nodeName: String})""" =>
+                q"""def ${ TermName(nodePlurals(nodeName)) }:Set[${ TypeName(nodeName) }] = ${ TermName(nodePlurals(over)) }.flatMap(_.${ TermName(nodePlurals(nodeName)) })"""
+            }
+            ( q"""
 
-            object ${TermName(name)} extends ContentNodeFactory[${TypeName(name)}] {
-                def create(node: Node) = new ${TypeName(name)}(node)
+            object ${ TermName(className) } extends ${ TypeName(factory) }[${ TypeName(className) }] {
+                def create(node: Node) = new ${ TypeName(className) }(node)
                 val label = Label($label)
             }
 
-            """,q"""
+            """, q"""
 
-            def ${TermName(plural)}: Set[${TypeName(name)}] = nodesAs(${TermName(name)})
-
-            """)
-        }.unzip
-
-        val (relationFactories, relationClasses, relationSets) = relationdef.map{
-            case q"""(${name:String}, ${plural:String}, ${relationtype:String},
-                      ${startNode:String}, ${endNode:String})""" =>
-            (q"""
-
-            object ${TermName(name)} extends SchemaRelationFactory[${TypeName(name)}, ${TypeName(startNode)}, ${TypeName(endNode)}] {
-                def create(relation: Relation) = ${TermName(name)}(relation,
-                  startNodeFactory.create(relation.startNode),
-                  endNodeFactory.create(relation.endNode))
-                def relationType = RelationType($relationtype)
-                def startNodeFactory = ${TermName(startNode)}
-                def endNodeFactory = ${TermName(endNode)}
+            case class ${ TypeName(className) }(node: Node) extends ..$withTraits {
+              ..$directNeighbours
+              ..$indirectNeighbours
             }
-
-            """,q"""
-
-            case class ${TypeName(name)}(relation: Relation, startNode: ${TypeName(startNode)}, endNode: ${TypeName(endNode)})
-                       extends DiscourseRelation[${TypeName(startNode)}, ${TypeName(endNode)}]
 
             """, q"""
 
-            def ${TermName(plural)}: Set[${TypeName(name)}] = relationsAs(${TermName(name)})
+            def ${ TermName(plural) }: Set[${ TypeName(className) }] = nodesAs(${ TermName(className) })
+
+            """)
+        }.unzip3
+
+        val (relationFactories, relationClasses, relationSets) = relationdef.map {
+          case q"""(${name: String}, ${plural: String}, ${relationtype: String},
+                      ${startNode: String}, ${endNode: String})""" =>
+            ( q"""
+
+            object ${ TermName(name) } extends SchemaRelationFactory[${ TypeName(name) }, ${ TypeName(startNode) }, ${ TypeName(endNode) }] {
+                def create(relation: Relation) = ${ TermName(name) }(relation,
+                  startNodeFactory.create(relation.startNode),
+                  endNodeFactory.create(relation.endNode))
+                def relationType = RelationType($relationtype)
+                def startNodeFactory = ${ TermName(startNode) }
+                def endNodeFactory = ${ TermName(endNode) }
+            }
+
+            """, q"""
+
+            case class ${ TypeName(name) }(relation: Relation, startNode: ${ TypeName(startNode) }, endNode: ${ TypeName(endNode) })
+                       extends DiscourseRelation[${ TypeName(startNode) }, ${ TypeName(endNode) }]
+
+            """, q"""
+
+            def ${ TermName(plural) }: Set[${ TypeName(name) }] = relationsAs(${ TermName(name) })
 
             """)
 
         }.unzip3
 
-        // val plurals = relationdef.map{case pq"""(_,${plural:String},_,_,_)""" => plural}
-
 
         q"""
         object $name extends ..$parents {
             ..$nodeFactories
+            ..$nodeClasses
             ..$relationFactories
             ..$relationClasses
 
@@ -92,5 +109,5 @@ object GraphSchemaMacro {
   }
 }
 class GraphSchema extends StaticAnnotation {
-  def macroTransform(annottees: Any*) = macro GraphSchemaMacro.impl
+  def macroTransform(annottees: Any*): Any = macro GraphSchemaMacro.impl
 }
