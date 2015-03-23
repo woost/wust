@@ -1,4 +1,4 @@
 -requried form field does not apply (webkit only)
 -dragging node over screen left/right edges wraps the node position to the other
 side (webkit only)
--graph: double clicking on a sticky node makes the node unsticky immediately after the first click
+-graph: edge labels are not centered
