@@ -1,18 +1,20 @@
 package macros
 
-import scala.reflect.macros.whitebox.Context
+import scala.reflect.macros.whitebox
 import scala.language.experimental.macros
 import scala.annotation.StaticAnnotation
 
 object GraphSchemaMacro {
-  def impl(c: Context)(annottees: c.Expr[Any]*): c.Expr[Any] = {
+  // TODO: why are implicits not working here?
+  // implicit def treeToString(l: Tree): String = l match { case Literal(Constant(string: String)) => string }
+  def impl(c: whitebox.Context)(annottees: c.Expr[Any]*): c.Expr[Any] = {
     import c.universe._
 
     c.Expr[Any](annottees.map(_.tree).toList match {
       case q"""
     object $name extends ..$parents {
-        val nodes = List(..$nodedef)
-        val relations = List(..$relationdef)
+        val nodes = List(..$rawNodeDefs)
+        val relations = List(..$rawRelationDefs)
 
         ..$body
 
@@ -22,19 +24,29 @@ object GraphSchemaMacro {
 
     }
     """ :: Nil =>
+        val nodeDefs: List[(String, String, String, String, List[String], List[String], List[(String, String)])] = rawNodeDefs.map {
+          case q"(${className: String},${plural: String},${label: String}, ${factory: String}, List(..$traits), List(..$neighbours), List(..$neighboursChains))" =>
+            (className, plural, label, factory,
+              traits.map { case q"${traitName: String}" => traitName },
+              neighbours.map { case q"${neighbour: String}" => neighbour },
+              neighboursChains.map { case q"(${over: String}, ${nodeName: String})" => (over, nodeName) })
+        }
 
-        val nodePlurals: Map[String, String] = nodedef.map { case q"""(${className: String},${plural: String},$_, $_, List(..$_), List(..$_), List(..$_))""" => className -> plural }.toMap
-        val (nodeFactories, nodeClasses, nodeSets) = nodedef.map {
+        val relationDefs: List[(String, String, String, String, String)] = rawRelationDefs.map {
+          case q"""(${name: String}, ${plural: String}, ${relationType: String}, ${startNode: String}, ${endNode: String})""" =>
+            (name, plural, relationType, startNode, endNode)
+        }
+
+        val nodePlurals: Map[String, String] = nodeDefs.map { case (className, plural, _, _, _, _, _) => className -> plural }.toMap
+        val (nodeFactories, nodeClasses, nodeSets) = nodeDefs.map {
           //  ("Goal", "goals", "GOAL", "ContentNodeFactory", List("ContentNode"), List("Reaches"), List(List("Reaches", "Idea"))),
-          case q"""(${className: String},${plural: String},${label: String}, ${factory: String}, List(..$traits), List(..$neighbours), List(..$neighboursChain))""" =>
-            val withTraits = traits.map { case q"""${traitName: String}""" => TypeName(traitName) }
-            val directNeighbours = neighbours.map {
-              case q"""${nodeName: String}""" =>
-                q"""def ${ TermName(nodePlurals(nodeName)) }:Set[${ TypeName(nodeName) }] = neighboursAs(${ TermName(nodeName) })"""
+          case (className, plural, label, factory, traits, neighbours, neighboursChain) =>
+            val traitsTypes = traits.map { TypeName(_) }
+            val directNeighbours = neighbours.map { nodeName =>
+              q"""def ${ TermName(nodePlurals(nodeName)) }:Set[${ TypeName(nodeName) }] = neighboursAs(${ TermName(nodeName) })"""
             }
-            val indirectNeighbours = neighboursChain.map {
-              case q"""(${over: String}, ${nodeName: String})""" =>
-                q"""def ${ TermName(nodePlurals(nodeName)) }:Set[${ TypeName(nodeName) }] = ${ TermName(nodePlurals(over)) }.flatMap(_.${ TermName(nodePlurals(nodeName)) })"""
+            val indirectNeighbours = neighboursChain.map { case (over, nodeName) =>
+              q"""def ${ TermName(nodePlurals(nodeName)) }:Set[${ TypeName(nodeName) }] = ${ TermName(nodePlurals(over)) }.flatMap(_.${ TermName(nodePlurals(nodeName)) })"""
             }
             ( q"""
 
@@ -45,7 +57,7 @@ object GraphSchemaMacro {
 
             """, q"""
 
-            case class ${ TypeName(className) }(node: Node) extends ..$withTraits {
+            case class ${ TypeName(className) }(node: Node) extends ..$traitsTypes {
               ..$directNeighbours
               ..$indirectNeighbours
             }
@@ -57,9 +69,8 @@ object GraphSchemaMacro {
             """)
         }.unzip3
 
-        val (relationFactories, relationClasses, relationSets) = relationdef.map {
-          case q"""(${name: String}, ${plural: String}, ${relationtype: String},
-                      ${startNode: String}, ${endNode: String})""" =>
+        val (relationFactories, relationClasses, relationSets) = relationDefs.map {
+          case (name, plural, relationtype, startNode, endNode) =>
             ( q"""
 
             object ${ TermName(name) } extends SchemaRelationFactory[${ TypeName(name) }, ${ TypeName(startNode) }, ${ TypeName(endNode) }] {
