@@ -1,8 +1,8 @@
 humane.error = humane.spawn({
     addnCls: "humane-libnotify-error",
-    timeout: 1000
+    timeout: 700
 });
 
 humane.success = humane.spawn({
-    timeout: 1000
+    timeout: 700
 });
