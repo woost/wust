@@ -57,6 +57,8 @@ trait SchemaNode extends Schema with SchemaNodeFilter {
   implicit var graph: Graph = null
 
   def neighboursAs[T <: SchemaNode](nodeFactory: SchemaNodeFactory[T]) = filterNodes(node.neighbours, nodeFactory)
+  def successorsAs[T <: SchemaNode](nodeFactory: SchemaNodeFactory[T]) = filterNodes(node.successors, nodeFactory)
+  def predecessorsAs[T <: SchemaNode](nodeFactory: SchemaNodeFactory[T]) = filterNodes(node.predecessors, nodeFactory)
   def getStringProperty(key: String) = node.properties(key).asInstanceOf[StringPropertyValue]
 }
 
@@ -125,19 +127,17 @@ trait ContentNodeFactory[T <: ContentNode] extends DiscourseNodeFactory[T] {
 
 @macros.GraphSchema
 object WustSchema {
-  //TODO: check if nodes on indirect path exist in neighbour sets
-  //TODO: generate all node neighbour-accessors based on the relations
   //TODO: generate indirect neighbour-accessors based on hypernodes
 
   val nodes = List(
-    // (className, plural, label, factoryType, nodeTraits, neighbours, indirect neighbours
-    ("Goal", "goals", "GOAL", "ContentNodeFactory", List("DiscourseNode", "ContentNode"), List("Reaches"), List(("Reaches", "Idea"))),
-    ("Problem", "problems", "PROBLEM", "ContentNodeFactory", List("ContentNode"), List("Solves"), List(("Solves", "Idea"))),
-    ("Idea", "ideas", "IDEA", "ContentNodeFactory", List("ContentNode"), List("Solves", "Reaches"), List(("Solves", "Problem"), ("Reaches", "Goal"))),
+    // (className, plural, label, factoryType, nodeTraits, indirect neighbours, indirect reverse neighbours
+    ("Goal", "goals", "GOAL", "ContentNodeFactory", List("ContentNode"), List(), List(("ideas", "IdeaToReaches", "ReachesToGoal"))),
+    ("Problem", "problems", "PROBLEM", "ContentNodeFactory", List("ContentNode"), List(), List(("ideas", "IdeaToSolves", "SolvesToProblem"))),
+    ("Idea", "ideas", "IDEA", "ContentNodeFactory", List("ContentNode"), List(("problems", "IdeaToSolves", "SolvesToProblem"), ("goals", "IdeaToReaches", "ReachesToGoal")), List()),
     ("ProArgument", "proArguments", "PROARGUMENT", "ContentNodeFactory", List("ContentNode"), List(), List()),
     ("ConArgument", "conArguments", "CONARGUMENT", "ContentNodeFactory", List("ContentNode"), List(), List()),
-    ("Solves", "solves", "SOLVES", "DiscourseNodeFactory", List("HyperEdgeNode"), List("Problem", "Idea"), List()),
-    ("Reaches", "reaches", "REACHES", "DiscourseNodeFactory", List("HyperEdgeNode"), List("Goal", "Idea"), List())
+    ("Solves", "solves", "SOLVES", "DiscourseNodeFactory", List("HyperEdgeNode"), List(), List()),
+    ("Reaches", "reaches", "REACHES", "DiscourseNodeFactory", List("HyperEdgeNode"), List(), List())
   )
 
   val relations = List(
