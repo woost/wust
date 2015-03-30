@@ -53,6 +53,7 @@ trait SchemaNodeFactory[+T <: SchemaNode] {
 
 
 trait SchemaNode extends Schema with SchemaNodeFilter {
+  def label = node.labels.head
   def node: Node
   implicit var graph: Graph = null
 
@@ -91,41 +92,27 @@ object UUID {
 }
 ///////////////////////////////////////////////////
 
-
-trait DiscourseNode extends SchemaNode {
-  def label = node.labels.head
-  def uuid: String = getStringProperty("uuid")
-
-  def title: String = getStringProperty("title")
-  def title_=(newTitle: String) { node.properties("title") = newTitle }
-}
-
-trait HyperEdgeNode extends DiscourseNode {
-  // TODO: HyperEdgeNode does not have a title
-  override def title = ""
-  override def title_=(newTitle: String) {}
-}
-trait ContentNode extends DiscourseNode {
-}
-
-trait DiscourseNodeFactory[T <: DiscourseNode] extends SchemaNodeFactory[T] {
-  override def local = UUID.applyTo(super.local)
-}
-
-trait ContentNodeFactory[T <: ContentNode] extends DiscourseNodeFactory[T] {
-  override def create(node: Node): T
-
-  def local(title: String): T = {
-    val node = super.local
-    node.title = title
-    node
-  }
-}
-
 @macros.GraphSchema
 object WustSchema {
+  @macros.Node trait DiscourseNode extends SchemaNode { var title: String; val uuid: String }
+  @macros.Node trait ContentNode extends DiscourseNode
+  @macros.Node trait HyperEdgeNode extends DiscourseNode
+
+  trait DiscourseNodeFactory[T <: DiscourseNode] extends SchemaNodeFactory[T] {
+    override def local = UUID.applyTo(super.local)
+  }
+
+  trait ContentNodeFactory[T <: ContentNode] extends DiscourseNodeFactory[T] {
+    def local(title: String): T = {
+      val node = super.local
+      node.title = title
+      println(node.uuid)
+      node
+    }
+  }
+
   //TODO: generate indirect neighbour-accessors based on hypernodes
-  //TODO: named node/relation groups
+  //TODO: named node/relation groups (based on nodeTraits?)
 
   val schemaName = "Discourse"
   val nodeType = "DiscourseNode"
@@ -156,6 +143,7 @@ object WustSchema {
     ("SolvesToProblem", "solvesToProblems", "SOLVESTOPROBLEM", "Solves", "Problem"),
     ("ReachesToGoal", "reachesToGoals", "REACHESTOGOAL", "Reaches", "Goal")
   )
-}
 
+
+}
 

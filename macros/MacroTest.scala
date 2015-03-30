@@ -5,19 +5,57 @@ import scala.language.experimental.macros
 import scala.annotation.StaticAnnotation
 
 class GraphSchema extends StaticAnnotation {
-  def macroTransform(annottees: Any*): Any = macro GraphSchemaMacro.impl
+  def macroTransform(annottees: Any*): Any = macro GraphSchemaMacro.schema
+}
+
+class Node extends StaticAnnotation {
+  def macroTransform(annottees: Any*): Any = macro GraphSchemaMacro.node
 }
 
 object GraphSchemaMacro {
+
+  def node(c: whitebox.Context)(annottees: c.Expr[Any]*): c.Expr[Any] = {
+    import c.universe._
+
+    c.Expr[Any](annottees.map(_.tree).toList match {
+      case q"""
+      $mods trait $nodeType extends ..$rawProvidedNodeParents {
+      ..$nodeBodyDef
+      }
+      """ :: Nil =>
+        val providedNodeParents = rawProvidedNodeParents.map { _.toString }
+        val nodeParents = if(providedNodeParents.nonEmpty && providedNodeParents != List("scala.AnyRef")) providedNodeParents.map(TypeName(_)) else List(TypeName("SchemaNode"))
+        def getter(name: TermName, typeName: Tree) = q"""
+            def ${ TermName(name.toString) }:$typeName = node.properties(${ name.toString }).asInstanceOf[${ TypeName(typeName.toString + "PropertyValue") }] """
+
+        def setter(name: TermName, typeName: Tree) = q"""
+            def ${ TermName(name.toString + "_$eq") }(newValue:$typeName){ node.properties(${ name.toString }) = newValue} """
+
+        val nodeBody = nodeBodyDef.flatMap {
+          case q"val $propertyName:$propertyType" => List(getter(propertyName, propertyType))
+          case q"var $propertyName:$propertyType" => List(getter(propertyName, propertyType), setter(propertyName, propertyType))
+          case somethingElse                      => List(somethingElse)
+        }
+
+        q"""
+        trait $nodeType extends ..$nodeParents {
+        ..$nodeBody
+        }
+        """
+    })
+  }
   // TODO: why are implicits not working here?
   // implicit def treeToString(l: Tree): String = l match { case Literal(Constant(string: String)) => string }
+  // TODO: validation: nodeTraits(propertyTypes)
 
-  def impl(c: whitebox.Context)(annottees: c.Expr[Any]*): c.Expr[Any] = {
+  def schema(c: whitebox.Context)(annottees: c.Expr[Any]*): c.Expr[Any] = {
     import c.universe._
 
     c.Expr[Any](annottees.map(_.tree).toList match {
       case q"""
         object $name extends ..$parents {
+            ..$body
+
             val schemaName = ${schemaName: String}
             val nodeType = ${nodeType: String}
 
@@ -25,6 +63,7 @@ object GraphSchemaMacro {
             val relations = List(..$rawRelationDefs)
         }
         """ :: Nil =>
+
         val nodeDefs: List[(String, String, String, String, List[String], List[(String, String, String)], List[(String, String, String)])] = rawNodeDefs.map {
           case q"(${className: String},${plural: String},${label: String}, ${factory: String}, List(..$traits), List(..$neighboursChains), List(..$revNeighboursChains))" =>
             (className, plural, label, factory,
@@ -42,12 +81,10 @@ object GraphSchemaMacro {
         val relationStarts: Map[String, String] = relationDefs.map { case (className, _, _, startNode, _) => className -> startNode }.toMap
         val relationEnds: Map[String, String] = relationDefs.map { case (className, _, _, _, endNode) => className -> endNode }.toMap
 
-        def rev(s: String) = "rev_" + s
-
-
         val (nodeFactories, nodeClasses, nodeSets) = nodeDefs.map {
           //  ("Goal", "goals", "GOAL", "ContentNodeFactory", List("ContentNode"), List("Reaches"), List(List("Reaches", "Idea"))),
           case (className, plural, label, factory, traits, neighboursChains, revNeighboursChains) =>
+            def rev(s: String) = "rev_" + s
             val traitsTypes = traits.map { TypeName(_) }
             val directNeighbours = relationDefs.collect {
               case (relationName, relationPlural, _, `className`, endNode) =>
@@ -118,6 +155,8 @@ object GraphSchemaMacro {
 
         q"""
         object $name extends ..$parents {
+            ..$body
+
             ..$nodeFactories
             ..$nodeClasses
             ..$relationFactories
