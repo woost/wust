@@ -2,3 +2,6 @@
 -dragging node over screen left/right edges wraps the node position to the other
 side (webkit only)
 -graph: edge labels are not centered
+
+# What is needed to manage the project in the project?
+- Scopes
