@@ -10,7 +10,7 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
             var onDoubleClick = scope.onClick() || _.noop;
 
             // watch for changes in the ngModel
-            scope.$watchCollection("ngModel", () => {
+            scope.$on("d3graph_redraw", () => {
                 // get current graph
                 var graph = scope.ngModel;
 
@@ -71,7 +71,6 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                     .data(graph.edges).enter()
                     .append("line")
                     .attr("class", "svglink")
-                    .style("visibility", d => d.visible ? "visible" : "hidden")
                     .style("stroke-width", 1)
                     .style("stroke", "#999")
                     .style("marker-end", "url(#arrow)");
@@ -86,7 +85,6 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                 var linktextHtml = linktextFo.append("xhtml:span")
                     // .style("text-shadow", "white -1px 0px, white 0px 1px, white 1px 0px, white 0px -1px")
                     .style("background", "white")
-                    .style("visibility", d => d.visible ? "visible" : "hidden")
                     .html(d => d.label);
 
                 setForeignObjectDimensions(linktextFo, linktextHtml);
@@ -101,13 +99,11 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                     .on("dblclick", onDoubleClick);
 
                 var nodeFo = node.append("foreignObject")
-                    .style("opacity", "0.8")
                     .style("text-align", "center");
 
                 var nodeHtml = nodeFo.append("xhtml:div")
                     .style("max-width", "150px")
                     .style("cursor", "move")
-                    .style("visibility", d => d.visible ? "visible" : "hidden")
                     .attr("class", d => "node " + DiscourseNode.get(d.label).css)
                     .html(d => d.title);
 
@@ -115,6 +111,28 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
 
                 // register tick function
                 force.on("tick", tick);
+
+                // reset visibility after filtering
+                scope.$on("d3graph_filter", setVisibility);
+
+                // reset visibility of nodes after filtering
+                function setVisibility() {
+                    for (let i = 0; i < graph.nodes.length; i++) {
+                        let fo = nodeFo[0][i];
+                        let node = graph.nodes[i];
+                        fo.style.opacity = node.marked ? 1.0 : 0.5;
+                        fo.style.visibility = node.visible ? "visible" : "hidden";
+                    }
+
+                    for (let i = 0; i < graph.edges.length; i++) {
+                        let line = link[0][i];
+                        let fo = linktextFo[0][i];
+                        let edge = graph.edges[i];
+                        let visibility = edge.visible ? "visible" : "hidden";
+                        line.style.visibility = visibility;
+                        fo.style.visibility = visibility;
+                    }
+                }
 
                 // we need to set the height and weight of the foreignobject
                 // to the dimensions of the inner html container.
