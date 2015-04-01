@@ -23,6 +23,7 @@ trait ContentNodesController[NodeType <: ContentNode] extends Controller with Da
   def create = Action { request =>
     val json = request.body.asJson.get
     val nodeAdd = decodeRequest(json)
+
     val discourse = Discourse.empty
     val contentNode = factory.local(nodeAdd.title)
     discourse.add(contentNode)
@@ -44,6 +45,20 @@ trait ContentNodesController[NodeType <: ContentNode] extends Controller with Da
     db.queryGraph(query).nodes.headOption match {
       case Some(node) => Ok(Json.toJson(factory.create(node)))
       case None       => BadRequest(s"Node with label $label and uuid $uuid not found.")
+    }
+  }
+
+  def update(uuid: String) = Action { request =>
+    val json = request.body.asJson.get
+    val nodeAdd = decodeRequest(json)
+    val discourse = nodeDiscourseGraph(uuid)
+    discourse.nodes.headOption match {
+      case Some(node) => {
+        node.title = nodeAdd.title
+        db.persistChanges(discourse.graph)
+        Ok(Json.toJson(node))
+      }
+      case None       => BadRequest(s"Node with uuid $uuid not found.")
     }
   }
 

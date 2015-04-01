@@ -32,6 +32,7 @@ lazy val wust = (project in file(".")).settings(
     "org.webjars" % "bootstrap" % "3.3.4",
     "org.webjars" % "d3js" % "3.5.3",
     "org.webjars.bower" % "humane-js" % "3.2.2",
+    "org.webjars.bower" % "angular-xeditable" % "0.1.9",
     "org.webjars" % "spin-js" % "2.0.0-1", // really?
     "org.webjars" % "animate.css" % "3.2.5",
     // atmosphere
