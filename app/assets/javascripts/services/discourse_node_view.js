@@ -10,7 +10,7 @@ angular.module("wust").service("DiscourseNodeView", function($state, $stateParam
         scope.problems = new DiscourseNodeList.Problem(id, service);
         scope.ideas = new DiscourseNodeList.Idea(id, service);
         scope.removeFocused = _.partial(removeFocused, id, service.remove);
-        scope.updateFocused = _.partial(updateFocused, id, service.update);
+        scope.updateFocused = _.partial(updateFocused, id, scope.node, service.update);
         NodeHistory.add(scope.node);
 
         scope.messages = [];
@@ -56,7 +56,7 @@ angular.module("wust").service("DiscourseNodeView", function($state, $stateParam
         });
     }
 
-    function updateFocused(id, updateFunc, node) {
+    function updateFocused(id, node, updateFunc) {
         console.log(node);
         updateFunc(id, node).$promise.then(() => {
             humane.success("Updated node");
