@@ -47,7 +47,7 @@ angular.module("wust").controller("GraphsCtrl", function($scope, $state, $filter
 
             // broadcast event for d3 directive to reset the visibility for the
             // graph
-            $scope.$broadcast("d3graph_filter", $scope.search.title);
+            $scope.$broadcast("d3graph_filter");
         };
     }
 

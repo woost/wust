@@ -116,7 +116,7 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                 scope.$on("d3graph_filter", setVisibility);
 
                 // reset visibility of nodes after filtering
-                function setVisibility(event, searchQuery) {
+                function setVisibility() {
                     // set node visibility
                     _.each(graph.nodes, (node, i) => {
                         let fo = nodeFo[0][i];
@@ -133,11 +133,7 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                         fo.style.visibility = visibility;
                     });
 
-                    // focus first match
-                    if (!searchQuery.trim()) {
-                        return;
-                    }
-
+                    // focus marked nodes
                     var marked = _.select(graph.nodes, {marked: true});
                     if (_.isEmpty(marked)) {
                         return;
