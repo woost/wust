@@ -116,22 +116,45 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                 scope.$on("d3graph_filter", setVisibility);
 
                 // reset visibility of nodes after filtering
-                function setVisibility() {
-                    for (let i = 0; i < graph.nodes.length; i++) {
+                function setVisibility(event, searchQuery) {
+                    // set node visibility
+                    _.each(graph.nodes, (node, i) => {
                         let fo = nodeFo[0][i];
-                        let node = graph.nodes[i];
                         fo.style.opacity = node.marked ? 1.0 : 0.5;
                         fo.style.visibility = node.visible ? "visible" : "hidden";
-                    }
+                    });
 
-                    for (let i = 0; i < graph.edges.length; i++) {
+                    // set edge visibility
+                    _.each(graph.edges, (edge, i) => {
                         let line = link[0][i];
                         let fo = linktextFo[0][i];
-                        let edge = graph.edges[i];
                         let visibility = edge.visible ? "visible" : "hidden";
                         line.style.visibility = visibility;
                         fo.style.visibility = visibility;
+                    });
+
+                    // focus first match
+                    if (!searchQuery.trim()) {
+                        return;
                     }
+
+                    var marked = _.select(graph.nodes, {marked: true});
+                    if (_.isEmpty(marked)) {
+                        return;
+                    }
+
+                    var min = [_.min(marked, "x").x, _.min(marked, "y").y];
+                    var max = [_.max(marked, "x").x, _.max(marked, "y").y];
+                    var center = [(max[0] + min[0]) / 2, (max[1] + min[1]) / 2];
+
+                    var scale;
+                    if( max[0] === min[0] || max[1] === min[1] )
+                        scale = 1;
+                    else
+                        scale = Math.min(1, 0.9 * width / (max[0] - min[0]), 0.9 * height / (max[1] - min[1]));
+
+                    let translate = [width/2 - center[0] * scale, height/2 - center[1] * scale];
+                    svg.transition().duration(750).call(zoom.translate(translate).scale(scale).event);
                 }
 
                 // we need to set the height and weight of the foreignobject
@@ -143,7 +166,7 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                         var curr = fo[0][i];
                         curr.setAttribute("width", rect.width);
                         curr.setAttribute("height", rect.height);
-                        boundingRects.push(rect);
+                        boundingRects.push(_.pick(rect, ["width", "height"]));
                     }
 
                     return boundingRects;
