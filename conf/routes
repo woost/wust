@@ -1,11 +1,11 @@
 # Home page
 GET / controllers.Application.index(any = "none")
 
-# Map api routes
--> /api/v1 api.Routes
-
 # Map static resources from the /public folder to the /assets URL path
 GET /assets/*file controllers.Assets.at(path="/public", file)
+
+# Map api routes
+-> /api/v1 api.Routes
 
 # Redirect all unknown routes to the index page
 GET /*any controllers.Application.index(any)
