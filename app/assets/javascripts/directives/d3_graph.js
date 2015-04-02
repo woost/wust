@@ -144,28 +144,25 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                     var center = [(max[0] + min[0]) / 2, (max[1] + min[1]) / 2];
 
                     var scale;
-                    if( max[0] === min[0] || max[1] === min[1] )
+                    if( max[0] === min[0] || max[1] === min[1] ) {
                         scale = 1;
-                    else
+                    } else {
                         scale = Math.min(1, 0.9 * width / (max[0] - min[0]), 0.9 * height / (max[1] - min[1]));
+                    }
 
-                    let translate = [width/2 - center[0] * scale, height/2 - center[1] * scale];
+                    var translate = [width/2 - center[0] * scale, height/2 - center[1] * scale];
                     svg.transition().duration(750).call(zoom.translate(translate).scale(scale).event);
                 }
 
                 // we need to set the height and weight of the foreignobject
                 // to the dimensions of the inner html container.
                 function setForeignObjectDimensions(fo, html) {
-                    var boundingRects = [];
-                    for (var i = 0; i < fo[0].length; i++) {
+                    return _.map(fo[0], (curr, i) => {
                         var rect = html[0][i].getBoundingClientRect();
-                        var curr = fo[0][i];
                         curr.setAttribute("width", rect.width);
                         curr.setAttribute("height", rect.height);
-                        boundingRects.push(_.pick(rect, ["width", "height"]));
-                    }
-
-                    return boundingRects;
+                        return _.pick(rect, ["width", "height"]);
+                    });
                 }
 
                 function tick() {
