@@ -94,10 +94,6 @@ object UUID {
 
 @macros.GraphSchema
 object WustSchema {
-  @macros.Node trait DiscourseNode extends SchemaNode { var title: String; val uuid: String }
-  @macros.Node trait ContentNode extends DiscourseNode
-  @macros.Node trait HyperEdgeNode extends DiscourseNode
-
   trait DiscourseNodeFactory[T <: DiscourseNode] extends SchemaNodeFactory[T] {
     override def local = UUID.applyTo(super.local)
   }
@@ -111,39 +107,49 @@ object WustSchema {
     }
   }
 
+  @Node trait DiscourseNode extends SchemaNode {
+    var title: String;
+    val uuid: String
+  }
+  @Node trait ContentNode extends DiscourseNode {def factory: ContentNodeFactory}
+  @Node trait HyperEdgeNode extends DiscourseNode {def factory: DiscourseNodeFactory}
+
   //TODO: generate indirect neighbour-accessors based on hypernodes
   //TODO: named node/relation groups (based on nodeTraits?)
 
   val schemaName = "Discourse"
+  // @macros.Schema class Discourse
   val nodeType = "DiscourseNode"
 
-  val nodes = List(
-    // (className, plural, label, factoryType, nodeTraits, indirect successors, indirect predecessors
-    ("Goal", "goals", "GOAL", "ContentNodeFactory", List("ContentNode"), List(), List(("ideas", "IdeaToReaches", "ReachesToGoal"))),
-    ("Problem", "problems", "PROBLEM", "ContentNodeFactory", List("ContentNode"), List(), List(("ideas", "IdeaToSolves", "SolvesToProblem"))),
-    ("Idea", "ideas", "IDEA", "ContentNodeFactory", List("ContentNode"), List(("problems", "IdeaToSolves", "SolvesToProblem"), ("goals", "IdeaToReaches", "ReachesToGoal")), List()),
-    ("ProArgument", "proArguments", "PROARGUMENT", "ContentNodeFactory", List("ContentNode"), List(), List()),
-    ("ConArgument", "conArguments", "CONARGUMENT", "ContentNodeFactory", List("ContentNode"), List(), List()),
-    ("Solves", "solves", "SOLVES", "DiscourseNodeFactory", List("HyperEdgeNode"), List(), List()),
-    ("Reaches", "reaches", "REACHES", "DiscourseNodeFactory", List("HyperEdgeNode"), List(), List())
-  )
+  @Node("GOAL", "goals")
+  class Goal extends ContentNode {
+    def ideas = IdeaToReaches <-- ReachesToGoal
+  }
+  @Node("PROBLEM", "problems")
+  class Problem extends ContentNode {
+    def ideas = IdeaToSolves <-- SolvesToProblem
+  }
+  @Node("IDEA", "ideas")
+  class Idea extends ContentNode {
+    def problems = IdeaToSolves --> SolvesToProblem
+    def goals = IdeaToReaches --> ReachesToGoal
+  }
+  @Node("PROARGUMENT", "proArguments") class ProArgument extends ContentNode
+  @Node("CONARGUMENT", "conArguments") class ConArgument extends ContentNode
+  @Node("SOLVES", "solves") class Solves extends HyperEdgeNode
+  @Node("REACHES", "reaches") class Reaches extends HyperEdgeNode
 
-  val relations = List(
-    // (className, plural, relationType, startNode, endNode)
-    ("SubIdea", "subIdeas", "SUBIDEA", "Idea", "Idea"),
-    ("SubGoal", "subGoals", "SUBGOAL", "Goal", "Goal"),
-    ("Causes", "causes", "CAUSES", "Problem", "Problem"),
-    ("Prevents", "prevents", "PREVENTS", "Problem", "Goal"),
-    ("SupportsSolves", "supportsSolves", "SUPPORTSSOLVES", "ProArgument", "Solves"),
-    ("OpposesSolves", "opposesSolves", "OPPOSESSOLVES", "ConArgument", "Solves"),
-    ("SupportsReaches", "supportsReaches", "SUPPORTSREACHES", "ProArgument", "Reaches"),
-    ("OpposesReaches", "opposesReaches", "OPPOSESREACHES", "ConArgument", "Reaches"),
-    ("IdeaToSolves", "ideaToSolves", "IDEATOSOLVES", "Idea", "Solves"),
-    ("IdeaToReaches", "ideaToReaches", "IDEATOREACHES", "Idea", "Reaches"),
-    ("SolvesToProblem", "solvesToProblems", "SOLVESTOPROBLEM", "Solves", "Problem"),
-    ("ReachesToGoal", "reachesToGoals", "REACHESTOGOAL", "Reaches", "Goal")
-  )
-
-
+  @Relation("SUBIDEA", "subIdeas") class SubIdea(startNode: Idea, endNode: Idea)
+  @Relation("SUBGOAL", "subGoals") class SubGoal(startNode: Goal, endNode: Goal)
+  @Relation("CAUSES", "causes") class Causes(startNode: Problem, endNode: Problem)
+  @Relation("PREVENTS", "prevents") class Prevents(startNode: Problem, endNode: Goal)
+  @Relation("SUPPORTSSOLVES", "supportsSolves") class SupportsSolves(startNode: ProArgument, endNode: Solves)
+  @Relation("OPPOSESSOLVES", "opposesSolves") class OpposesSolves(startNode: ConArgument, endNode: Solves)
+  @Relation("SUPPORTSREACHES", "supportsReaches") class SupportsReaches(startNode: ProArgument, endNode: Reaches)
+  @Relation("OPPOSESREACHES", "opposesReaches") class OpposesReaches(startNode: ConArgument, endNode: Reaches)
+  @Relation("IDEATOSOLVES", "ideaToSolves") class IdeaToSolves(startNode: Idea, endNode: Solves)
+  @Relation("IDEATOREACHES", "ideaToReaches") class IdeaToReaches(startNode: Idea, endNode: Reaches)
+  @Relation("SOLVESTOPROBLEM", "solvesToProblems") class SolvesToProblem(startNode: Solves, endNode: Problem)
+  @Relation("REACHESTOGOAL", "reachesToGoals") class ReachesToGoal(startNode: Reaches, endNode: Goal)
 }
 

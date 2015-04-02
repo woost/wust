@@ -1,174 +1,204 @@
 package macros
 
 import scala.reflect.macros.whitebox
+import collection.mutable
 import scala.language.experimental.macros
+import PartialFunction._
 import scala.annotation.StaticAnnotation
 
 class GraphSchema extends StaticAnnotation {
-  def macroTransform(annottees: Any*): Any = macro GraphSchemaMacro.schema
-}
-
-class Node extends StaticAnnotation {
-  def macroTransform(annottees: Any*): Any = macro GraphSchemaMacro.node
+  def macroTransform(annottees: Any*): Any = macro GraphSchemaMacro.graphSchema
 }
 
 object GraphSchemaMacro {
-
-  def node(c: whitebox.Context)(annottees: c.Expr[Any]*): c.Expr[Any] = {
-    import c.universe._
-
-    c.Expr[Any](annottees.map(_.tree).toList match {
-      case q"""
-      $mods trait $nodeType extends ..$rawProvidedNodeParents {
-      ..$nodeBodyDef
-      }
-      """ :: Nil =>
-        val providedNodeParents = rawProvidedNodeParents.map { _.toString }
-        val nodeParents = if(providedNodeParents.nonEmpty && providedNodeParents != List("scala.AnyRef")) providedNodeParents.map(TypeName(_)) else List(TypeName("SchemaNode"))
-        def getter(name: TermName, typeName: Tree) = q"""
-            def ${ TermName(name.toString) }:$typeName = node.properties(${ name.toString }).asInstanceOf[${ TypeName(typeName.toString + "PropertyValue") }] """
-
-        def setter(name: TermName, typeName: Tree) = q"""
-            def ${ TermName(name.toString + "_$eq") }(newValue:$typeName){ node.properties(${ name.toString }) = newValue} """
-
-        val nodeBody = nodeBodyDef.flatMap {
-          case q"val $propertyName:$propertyType" => List(getter(propertyName, propertyType))
-          case q"var $propertyName:$propertyType" => List(getter(propertyName, propertyType), setter(propertyName, propertyType))
-          case somethingElse                      => List(somethingElse)
-        }
-
-        q"""
-        trait $nodeType extends ..$nodeParents {
-        ..$nodeBody
-        }
-        """
-    })
-  }
   // TODO: why are implicits not working here?
   // implicit def treeToString(l: Tree): String = l match { case Literal(Constant(string: String)) => string }
-  // TODO: validation: nodeTraits(propertyTypes)
+  // TODO: validation: nodeTraits(propertyTypes), nodes need to inherit exactly one NodeTrait
 
-  def schema(c: whitebox.Context)(annottees: c.Expr[Any]*): c.Expr[Any] = {
+  def graphSchema(c: whitebox.Context)(annottees: c.Expr[Any]*): c.Expr[Any] = {
     import c.universe._
 
+
+    object SchemaPattern {
+      def unapply(tree: Tree) = condOpt(tree) {
+        case q""" object $schemaName extends ..$schemaParents { ..$schemaStatements } """ =>
+          (schemaName, schemaParents, schemaStatements)
+      }
+    }
+
+    object NodeTraitPattern {
+      def unapply(tree: Tree) = condOpt(tree) {
+        //http://stackoverflow.com/questions/26305528/scala-annotations-are-not-found
+        case q""" $mods trait $traitName extends ..$traitParents { ..$traitBody } """ if mods.annotations.collectFirst {
+            case Apply(Select(New(Ident(TypeName("Node"))), termNames.CONSTRUCTOR), Nil) => true
+            case _ => false
+        }.get =>
+          (traitName, traitParents.map {_.toString}, traitBody)
+      }
+    }
+
+    object RelationPattern {
+      def unapply(tree: Tree) = condOpt(tree) {
+        case q"""@Relation(${relationType: String}, ${plural: String}) class $className (startNode:$startNode, endNode:$endNode) {..$relationBody}""" =>
+          (relationType, plural, className.toString, startNode.toString, endNode.toString, relationBody)
+      }
+    }
+
+    object NodePattern {
+      //TODO:...
+      def unapply(tree: Tree) = condOpt(tree) {
+        case q"""$mods class $className extends ${parentTrait:TypeName} { ..$nodeStatements }""" if mods.annotations.collectFirst {
+            case Apply(Select(New(Ident(TypeName("Node"))), termNames.CONSTRUCTOR), List(Literal(Constant(label: String)), Literal(Constant(plural: String)))) => true
+            case _ => false
+        }.get =>
+          val (label, plural) = mods.annotations.collectFirst {
+              case Apply(Select(New(Ident(TypeName("Node"))), termNames.CONSTRUCTOR), List(Literal(Constant(label: String)), Literal(Constant(plural: String)))) => (label, plural)
+          }.get
+          (label, plural, className, parentTrait, nodeStatements)
+      }
+    }
+
+
+
+
     c.Expr[Any](annottees.map(_.tree).toList match {
-      case q"""
-        object $name extends ..$parents {
-            ..$body
+      case SchemaPattern(schemaName, schemaParents, schemaStatements) :: Nil =>
 
-            val schemaName = ${schemaName: String}
-            val nodeType = ${nodeType: String}
+        val schemaInnerName: String = schemaStatements.collectFirst { case q"val schemaName = ${schemaName: String}" => schemaName }.get
+        val nodeTypeName: String = schemaStatements.collectFirst { case q"val nodeType = ${nodeType: String}" => nodeType }.get
+        val nodeTypeToFactoryType: Map[TypeName, Tree] = schemaStatements.collect {
+          case NodeTraitPattern(traitName, _, traitBody) => 
+            println(traitBody)
+            traitBody.collect {
+            case q"def factory:$factoryType" => traitName -> factoryType
+          }
+        }.flatten.toMap
+        println(nodeTypeToFactoryType)
 
-            val nodes = List(..$rawNodeDefs)
-            val relations = List(..$rawRelationDefs)
-        }
-        """ :: Nil =>
-
-        val nodeDefs: List[(String, String, String, String, List[String], List[(String, String, String)], List[(String, String, String)])] = rawNodeDefs.map {
-          case q"(${className: String},${plural: String},${label: String}, ${factory: String}, List(..$traits), List(..$neighboursChains), List(..$revNeighboursChains))" =>
-            (className, plural, label, factory,
-              traits.map { case q"${traitName: String}" => traitName },
-              neighboursChains.map { case q"(${name: String}, ${rel1: String}, ${rel2: String})" => (name, rel1, rel2) },
-              revNeighboursChains.map { case q"(${name: String}, ${rel1: String}, ${rel2: String})" => (name, rel1, rel2) })
-        }
-        val nodePlurals: Map[String, String] = nodeDefs.map { case (className, plural, _, _, _, _, _) => className -> plural }.toMap
-
-        val relationDefs: List[(String, String, String, String, String)] = rawRelationDefs.map {
-          case q"(${name: String}, ${plural: String}, ${relationType: String}, ${startNode: String}, ${endNode: String})" =>
-            (name, plural, relationType, startNode, endNode)
-        }
-        val relationPlurals: Map[String, String] = relationDefs.map { case (className, plural, _, _, _) => className -> plural }.toMap
-        val relationStarts: Map[String, String] = relationDefs.map { case (className, _, _, startNode, _) => className -> startNode }.toMap
-        val relationEnds: Map[String, String] = relationDefs.map { case (className, _, _, _, endNode) => className -> endNode }.toMap
-
-        val (nodeFactories, nodeClasses, nodeSets) = nodeDefs.map {
-          //  ("Goal", "goals", "GOAL", "ContentNodeFactory", List("ContentNode"), List("Reaches"), List(List("Reaches", "Idea"))),
-          case (className, plural, label, factory, traits, neighboursChains, revNeighboursChains) =>
-            def rev(s: String) = "rev_" + s
-            val traitsTypes = traits.map { TypeName(_) }
-            val directNeighbours = relationDefs.collect {
-              case (relationName, relationPlural, _, `className`, endNode) =>
-                q"""def ${ TermName(relationPlurals(relationName)) }:Set[${ TypeName(endNode) }] = successorsAs(${ TermName(endNode) })"""
-            }
-            val directRevNeighbours = relationDefs.collect {
-              case (relationName, relationPlural, _, startNode, `className`) =>
-                q"""def ${ TermName(rev(relationPlurals(relationName))) }:Set[${ TypeName(startNode) }] = predecessorsAs(${ TermName(startNode) })"""
-            }
-            val indirectNeighbours = neighboursChains.map { case (name, rel1, rel2) =>
-              q"""def ${ TermName(name) }:Set[${ TypeName(relationEnds(rel2)) }] = ${ TermName(relationPlurals(rel1)) }.flatMap(_.${ TermName(relationPlurals(rel2)) })"""
-            }
-            val indirectRevNeighbours = revNeighboursChains.map { case (name, rel1, rel2) =>
-              q"""def ${ TermName(name) }:Set[${ TypeName(relationStarts(rel1)) }] = ${ TermName(rev(relationPlurals(rel2))) }.flatMap(_.${ TermName(rev(relationPlurals(rel1))) })"""
-            }
-            ( q"""
-
-            object ${ TermName(className) } extends ${ TypeName(factory) }[${ TypeName(className) }] {
-                def create(node: Node) = new ${ TypeName(className) }(node)
-                val label = Label($label)
-            }
-
-            """, q"""
-
-            case class ${ TypeName(className) }(node: Node) extends ..$traitsTypes {
-              ..$directNeighbours
-              ..$directRevNeighbours
-              ..$indirectNeighbours
-              ..$indirectRevNeighbours
-            }
-
-            """, q"""
-
-            def ${ TermName(plural) }: Set[${ TypeName(className) }] = nodesAs(${ TermName(className) })
-
-            """)
-        }.unzip3
-
-        val (relationFactories, relationClasses, relationSets) = relationDefs.map {
-          case (name, plural, relationtype, startNode, endNode) =>
-            ( q"""
-
-            object ${ TermName(name) } extends SchemaRelationFactory[${ TypeName(name) }, ${ TypeName(startNode) }, ${ TypeName(endNode) }] {
-                def create(relation: Relation) = ${ TermName(name) }(relation,
-                  startNodeFactory.create(relation.startNode),
-                  endNodeFactory.create(relation.endNode))
-                def relationType = RelationType($relationtype)
-                def startNodeFactory = ${ TermName(startNode) }
-                def endNodeFactory = ${ TermName(endNode) }
-            }
-
-            """, q"""
-
-            case class ${ TypeName(name) }(relation: Relation, startNode: ${ TypeName(startNode) }, endNode: ${ TypeName(endNode) })
-                       extends SchemaRelation[${ TypeName(startNode) }, ${ TypeName(endNode) }]
-
-            """, q"""
-
-            def ${ TermName(plural) }: Set[${ TypeName(name) }] = relationsAs(${ TermName(name) })
-
-            """)
-
-        }.unzip3
-
+    val nodePlurals: Map[String, String] = schemaStatements.collect { case NodePattern(_,plural, className, _, _) => className.toString -> plural }.toMap
+        val relationPlurals: Map[String, String] = schemaStatements.collect { case RelationPattern(_,plural,className,_,_,_) => className -> plural }.toMap
+      val relationStarts: Map[String, String] = schemaStatements.collect { case RelationPattern(_,_,className,startNode,_,_) => className -> startNode }.toMap
+      val relationEnds: Map[String, String] = schemaStatements.collect { case RelationPattern(_,_,className,_,endNode,_) => className -> endNode }.toMap
         val allNodes = nodePlurals.values.foldLeft[Tree](q"Set.empty") { case (q"$all", plural) => q"$all ++ ${ TermName(plural) }" }
         val allRelations = relationPlurals.values.foldLeft[Tree](q"Set.empty") { case (q"$all", plural) => q"$all ++ ${ TermName(plural) }" }
 
+        val nodeTraits: List[Tree] = schemaStatements.collect {
+          // has side effects on nodeTypeToFactory mapping
+          case NodeTraitPattern(traitName, traitParents, traitStatements) =>
+            def getter(name: String, typeName: Tree) =
+              q""" def ${TermName(name)}:$typeName = node.properties(${name}).asInstanceOf[${TypeName(typeName.toString + "PropertyValue")}] """
+            def setter(name: String, typeName: Tree) =
+              q""" def ${TermName(name + "_$eq")}(newValue:$typeName){ node.properties(${name}) = newValue} """
+            val traitBody = traitStatements.flatMap {
+              case q"val $propertyName:$propertyType" => List(getter(propertyName.toString, propertyType))
+              case q"var $propertyName:$propertyType" => List(getter(propertyName.toString, propertyType), setter(propertyName.toString, propertyType))
+              case q"def factory:$factoryType" => Nil
+              case somethingElse => List(somethingElse)
+            }
+            val traitParentsWithSchemaNode = (if(traitParents.nonEmpty && traitParents != List("scala.AnyRef")) traitParents else List("SchemaNode")).map(TypeName(_))
+
+            q""" trait $traitName extends ..$traitParentsWithSchemaNode { ..$traitBody } """
+        }
+
+        val relationFactories: List[Tree] = schemaStatements.collect {
+          case RelationPattern(relationType, plural, className, startNode, endNode, relationBody) =>
+            q"""
+           object ${TermName(className)} extends SchemaRelationFactory[${TypeName(className)}, ${TypeName(startNode)}, ${TypeName(endNode)}] {
+               def create(relation: Relation) = ${TermName(className)}(relation,
+                 startNodeFactory.create(relation.startNode),
+                 endNodeFactory.create(relation.endNode))
+               def relationType = RelationType($relationType)
+               def startNodeFactory = ${TermName(startNode)}
+               def endNodeFactory = ${TermName(endNode)}
+           }
+           """
+        }
+
+        val relationClasses: List[Tree] = schemaStatements.collect {
+          case RelationPattern(relationType, plural, className, startNode, endNode, relationBody) =>
+            q"""
+           case class ${TypeName(className)}(relation: Relation, startNode: ${TypeName(startNode)}, endNode: ${TypeName(endNode)})
+             extends SchemaRelation[${TypeName(startNode)}, ${TypeName(endNode)}] {
+             ..$relationBody
+             }
+           """
+        }
+
+        val relationSets: List[Tree] = schemaStatements.collect {
+          case RelationPattern(relationType, plural, className, startNode, endNode, relationBody) =>
+            q""" def ${TermName(plural)}: Set[${TypeName(className)}] = relationsAs(${TermName(className)}) """
+        }
+
+        val nodeFactories: List[Tree] = schemaStatements.collect {
+          case NodePattern(label, plural, className, parentTrait, nodeStatements) =>
+           q"""
+           object ${TermName(className.toString)} extends ${nodeTypeToFactoryType(parentTrait)}[$className] { def create(node: Node) = new $className(node)
+               val label = Label($label)
+           }
+           """
+        }
+        val nodeClasses: List[Tree] = schemaStatements.collect {
+          case NodePattern(label, plural, className, parentTrait, nodeStatements) =>
+            val classNameStr = className.toString
+            def rev(s: String) = "rev_" + s
+            val directNeighbours = schemaStatements.collect {
+              case RelationPattern((_, _, relationName, `classNameStr`, endNode, _)) =>
+                q"""def ${TermName(relationPlurals(relationName))}:Set[${TypeName(endNode)}] = successorsAs(${TermName(endNode)})"""
+            }
+            val directRevNeighbours = schemaStatements.collect {
+              case RelationPattern((_, _, relationName, startNode, `classNameStr`, _)) =>
+                q"""def ${TermName(rev(relationPlurals(relationName)))}:Set[${TypeName(startNode)}] = predecessorsAs(${TermName(startNode)})"""
+            }
+
+            val nodeBody = nodeStatements.map{
+              case q"""def $chainName = $rel1 --> $rel2""" => 
+                q"""def $chainName:Set[${TypeName(relationEnds(rel2.toString))}] = ${TermName(relationPlurals(rel1.toString))}.flatMap(_.${TermName(relationPlurals(rel2.toString))})"""
+              case q"""def $chainName = $rel1 <-- $rel2""" => 
+                q"""def $chainName:Set[${TypeName(relationStarts(rel1.toString))}] = ${TermName(rev(relationPlurals(rel2.toString)))}.flatMap(_.${TermName(rev(relationPlurals(rel1.toString)))})"""
+              case otherStatement => otherStatement
+            }
+
+            q"""
+           case class $className(node: Node) extends $parentTrait {
+             ..$directNeighbours
+             ..$directRevNeighbours
+             ..$nodeBody
+           }
+           """
+        }
+
+        val nodeSets: List[Tree] = schemaStatements.collect {
+          case NodePattern(label, plural, className, parentTrait, nodeStatements) =>
+            q""" def ${TermName(plural)}: Set[$className] = nodesAs(${TermName(className.toString)}) """
+        }
+
+
+        val statementPatterns = List(NodeTraitPattern, RelationPattern, NodePattern)
+
+
+        val otherStatements = schemaStatements.flatMap {
+          case NodeTraitPattern(_) | RelationPattern(_) | NodePattern(_) => None
+          case other => Some(other)
+        }
+
 
         q"""
-        object $name extends ..$parents {
-            ..$body
-
+        object ${TermName(schemaName.toString)} extends ..$schemaParents {
+            ..$nodeTraits
             ..$nodeFactories
             ..$nodeClasses
             ..$relationFactories
             ..$relationClasses
 
-            object ${ TermName(schemaName) } {def empty = new ${ TypeName(schemaName) }(Graph.empty) }
-            case class ${ TypeName(schemaName) }(graph: Graph) extends SchemaGraph {
+            ..$otherStatements
+
+            object ${ TermName(schemaInnerName) } {def empty = new ${ TypeName(schemaInnerName) }(Graph.empty) }
+            case class ${ TypeName(schemaInnerName) }(graph: Graph) extends SchemaGraph {
                 ..$nodeSets
                 ..$relationSets
 
-                def nodes: Set[${ TypeName(nodeType) }] = $allNodes
-                def relations: Set[_ <: SchemaRelation[${ TypeName(nodeType) },${ TypeName(nodeType) }]] = $allRelations
+                def nodes: Set[${ TypeName(nodeTypeName) }] = $allNodes
+                def relations: Set[_ <: SchemaRelation[${ TypeName(nodeTypeName) },${ TypeName(nodeTypeName) }]] = $allRelations
             }
         }
         """
