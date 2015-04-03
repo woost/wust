@@ -36,9 +36,10 @@ lazy val wust = (project in file(".")).settings(
     "org.webjars" % "spin-js" % "2.0.0-1", // really?
     "org.webjars" % "animate.css" % "3.2.5",
     // atmosphere
-    "org.atmosphere" % "atmosphere-play" % "2.1.0",
-    "org.webjars" % "atmosphere-javascript" % "2.2.8",
-    "javax.servlet" % "javax.servlet-api" % "3.1.0" withSources()
+    "org.atmosphere" % "atmosphere-play" % "2.1.1" exclude("javax.servlet", "servlet-api"),
+    "javax.servlet" % "javax.servlet-api" % "3.1.0", // to fix atmosphere-play 2.1.1 which wrongly depends on servlet-api 2.5 - https://github.com/Atmosphere/atmosphere-play/issues/30
+    "org.webjars" % "atmosphere-javascript" % "2.2.8"
+
   ),
   // ecmascript 6
   TraceurKeys.sourceFileNames := Seq("javascripts/module.js", "javascripts/routes.js", "javascripts/*/**/*.js"),
