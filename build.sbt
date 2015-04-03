@@ -36,7 +36,7 @@ lazy val wust = (project in file(".")).settings(
     "org.webjars" % "spin-js" % "2.0.0-1", // really?
     "org.webjars" % "animate.css" % "3.2.5",
     // atmosphere
-    "org.atmosphere" % "atmosphere-play" % "2.1.1",
+    "org.atmosphere" % "atmosphere-play" % "2.1.0",
     "org.webjars" % "atmosphere-javascript" % "2.2.8",
     "javax.servlet" % "javax.servlet-api" % "3.1.0" withSources()
   ),
