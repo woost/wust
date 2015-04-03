@@ -1,4 +1,4 @@
-<div class="container">
+<div id="vote_container">
     <div style="height:120px">
         <div style="margin-bottom:50px" ng-show="showundo">
             <button class="btn btn-default" ng-click="undo()">
@@ -6,14 +6,13 @@
             </button>
         </div>
     </div>
-    <div style="display:flex;height:200px">
+    <div id="description_container">
         <div style="text-align:center;height:60px;width:60px">
             <i class="fa fa-3x fa-fw" ng-class="change.icon"></i>
             <br/> {{change.action}}
         </div>
 
-        <div style="display:flex; flex-direction: column; padding-left:50px">
-
+        <div id="action_container">
             <div ng-show="change.action == 'delete'" style="padding:20px;padding-top:5px">
                 <span ng-class="change.affected.node.class">{{change.affected.node.title}}</span>
             </div>
@@ -26,7 +25,7 @@
                 <div style="text-align:center">
                     <span ng-class="change.affected.startnode.class">{{change.affected.startnode.title}}</span>
                 </div>
-                <div style="display:flex;padding:10px;margin-left:180px;">
+                <div class="relation_title">
                     <i class="fa fa-2x fa-long-arrow-down"></i>
 
                     <div>{{change.affected.relation.title}}</div>
@@ -40,7 +39,7 @@
                 <div style="text-align:center">
                     <span ng-class="change.affected.startnode.class">{{change.affected.startnode.title}}</span>
                 </div>
-                <div style="display:flex;padding:10px;margin-left:180px;">
+                <div class="relation_title">
                     <span class="fa-stack">
                         <i class="fa fa-stack-2x fa-long-arrow-down"></i>
                         <i class="fa fa-stack-2x fa-close" style="color:red"></i>
