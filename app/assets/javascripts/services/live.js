@@ -1,4 +1,4 @@
-angular.module("wust").service("Live", function() {
+angular.module("wust").service("Live", function($rootScope) {
     this.subscribe = subscribe;
 
     var request = {
@@ -30,7 +30,14 @@ angular.module("wust").service("Live", function() {
                 console.log("Atmosphere connected on " + url + " (" + response.transport + ")");
             }
         }, request);
+
         console.log("subscribing to " + url);
         atmosphere.subscribe(newRequest);
+
+        var deregisterEvent = $rootScope.$on("$stateChangeSuccess", () => {
+            console.log("unsubscribing " + url);
+            atmosphere.unsubscribe(newRequest);
+            deregisterEvent();
+        });
     }
 });
