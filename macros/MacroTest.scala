@@ -68,12 +68,10 @@ object GraphSchemaMacro {
         val nodeTypeName: String = schemaStatements.collectFirst { case q"val nodeType = ${nodeType: String}" => nodeType }.get
         val nodeTypeToFactoryType: Map[TypeName, Tree] = schemaStatements.collect {
           case NodeTraitPattern(traitName, _, traitBody) => 
-            println(traitBody)
             traitBody.collect {
             case q"def factory:$factoryType" => traitName -> factoryType
           }
         }.flatten.toMap
-        println(nodeTypeToFactoryType)
 
     def nameToPlural(name: String): String = {
       val lower = name(0).toLower + name.substring(1, name.length)
