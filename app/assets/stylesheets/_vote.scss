@@ -1,0 +1,18 @@
+@import "compass/css3/flexbox";
+
+#vote_container {
+    #description_container {
+        @include display-flex(flex);
+        height: 200px;
+        .relation_title {
+            @include display-flex(flex);
+            padding: 10px;
+            margin-left: 180px;
+        }
+        #action_container {
+            @include display-flex(flex);
+            @include flex-direction(column);
+            padding-left: 50px
+        }
+    }
+}
