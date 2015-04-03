@@ -26,6 +26,16 @@ object GraphSchemaMacro {
       }
     }
 
+    object InnerSchemaPattern {
+      def unapply(tree: Tree) = condOpt(tree) {
+        case q""" $mods class $innerName extends ${_} { def nodes:Set[$superNodeTrait] }""" if mods.annotations.collectFirst {
+          case Apply(Select(New(Ident(TypeName("Schema"))), termNames.CONSTRUCTOR), Nil) => true
+          case _ => false
+        }.get =>
+          (innerName, superNodeTrait)
+      }
+    }
+        
     object NodeTraitPattern {
       def unapply(tree: Tree) = condOpt(tree) {
         //http://stackoverflow.com/questions/26305528/scala-annotations-are-not-found
@@ -64,8 +74,8 @@ object GraphSchemaMacro {
     c.Expr[Any](annottees.map(_.tree).toList match {
       case SchemaPattern(schemaName, schemaParents, schemaStatements) :: Nil =>
 
-        val schemaInnerName: String = schemaStatements.collectFirst { case q"val schemaName = ${schemaName: String}" => schemaName }.get
-        val nodeTypeName: String = schemaStatements.collectFirst { case q"val nodeType = ${nodeType: String}" => nodeType }.get
+        val (innerSchemaName,superNodeTrait) = schemaStatements.collectFirst { case InnerSchemaPattern(innerName, superNodeTrait) => (innerName.toString, superNodeTrait.toString) }.get
+
         val nodeTypeToFactoryType: Map[TypeName, Tree] = schemaStatements.collect {
           case NodeTraitPattern(traitName, _, traitBody) => 
             traitBody.collect {
@@ -180,7 +190,7 @@ object GraphSchemaMacro {
 
 
         val otherStatements = schemaStatements.flatMap {
-          case NodeTraitPattern(_) | RelationPattern(_) | NodePattern(_) => None
+          case NodeTraitPattern(_) | RelationPattern(_) | NodePattern(_) | InnerSchemaPattern(_) => None
           case other => Some(other)
         }
 
@@ -195,13 +205,13 @@ object GraphSchemaMacro {
 
             ..$otherStatements
 
-            object ${ TermName(schemaInnerName) } {def empty = new ${ TypeName(schemaInnerName) }(Graph.empty) }
-            case class ${ TypeName(schemaInnerName) }(graph: Graph) extends SchemaGraph {
+            object ${ TermName(innerSchemaName) } {def empty = new ${ TypeName(innerSchemaName) }(Graph.empty) }
+            case class ${ TypeName(innerSchemaName) }(graph: Graph) extends SchemaGraph {
                 ..$nodeSets
                 ..$relationSets
 
-                def nodes: Set[${ TypeName(nodeTypeName) }] = $allNodes
-                def relations: Set[_ <: SchemaRelation[${ TypeName(nodeTypeName) },${ TypeName(nodeTypeName) }]] = $allRelations
+                def nodes: Set[${ TypeName(superNodeTrait) }] = $allNodes
+                def relations: Set[_ <: SchemaRelation[${ TypeName(superNodeTrait) },${ TypeName(superNodeTrait) }]] = $allRelations
             }
         }
         """

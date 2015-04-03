@@ -94,6 +94,10 @@ object UUID {
 
 @macros.GraphSchema
 object WustSchema {
+  @Schema class Discourse {
+    def nodes:Set[DiscourseNode]
+  }
+
   trait DiscourseNodeFactory[T <: DiscourseNode] extends SchemaNodeFactory[T] {
     override def local = UUID.applyTo(super.local)
   }
@@ -117,9 +121,6 @@ object WustSchema {
   //TODO: generate indirect neighbour-accessors based on hypernodes
   //TODO: named node/relation groups (based on nodeTraits?)
 
-  val schemaName = "Discourse"
-  // @macros.Schema class Discourse
-  val nodeType = "DiscourseNode"
 
   @Node("GOAL")
   class Goal extends ContentNode {
