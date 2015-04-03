@@ -121,35 +121,35 @@ object WustSchema {
   // @macros.Schema class Discourse
   val nodeType = "DiscourseNode"
 
-  @Node("GOAL", "goals")
+  @Node("GOAL")
   class Goal extends ContentNode {
     def ideas = IdeaToReaches <-- ReachesToGoal
   }
-  @Node("PROBLEM", "problems")
+  @Node("PROBLEM")
   class Problem extends ContentNode {
     def ideas = IdeaToSolves <-- SolvesToProblem
   }
-  @Node("IDEA", "ideas")
+  @Node("IDEA")
   class Idea extends ContentNode {
     def problems = IdeaToSolves --> SolvesToProblem
     def goals = IdeaToReaches --> ReachesToGoal
   }
-  @Node("PROARGUMENT", "proArguments") class ProArgument extends ContentNode
-  @Node("CONARGUMENT", "conArguments") class ConArgument extends ContentNode
-  @Node("SOLVES", "solves") class Solves extends HyperEdgeNode
-  @Node("REACHES", "reaches") class Reaches extends HyperEdgeNode
+  @Node("PROARGUMENT") class ProArgument extends ContentNode
+  @Node("CONARGUMENT") class ConArgument extends ContentNode
+  @Node("SOLVES") class Solves extends HyperEdgeNode
+  @Node("REACHES") class Reaches extends HyperEdgeNode
 
-  @Relation("SUBIDEA", "subIdeas") class SubIdea(startNode: Idea, endNode: Idea)
-  @Relation("SUBGOAL", "subGoals") class SubGoal(startNode: Goal, endNode: Goal)
-  @Relation("CAUSES", "causes") class Causes(startNode: Problem, endNode: Problem)
-  @Relation("PREVENTS", "prevents") class Prevents(startNode: Problem, endNode: Goal)
-  @Relation("SUPPORTSSOLVES", "supportsSolves") class SupportsSolves(startNode: ProArgument, endNode: Solves)
-  @Relation("OPPOSESSOLVES", "opposesSolves") class OpposesSolves(startNode: ConArgument, endNode: Solves)
-  @Relation("SUPPORTSREACHES", "supportsReaches") class SupportsReaches(startNode: ProArgument, endNode: Reaches)
-  @Relation("OPPOSESREACHES", "opposesReaches") class OpposesReaches(startNode: ConArgument, endNode: Reaches)
-  @Relation("IDEATOSOLVES", "ideaToSolves") class IdeaToSolves(startNode: Idea, endNode: Solves)
-  @Relation("IDEATOREACHES", "ideaToReaches") class IdeaToReaches(startNode: Idea, endNode: Reaches)
-  @Relation("SOLVESTOPROBLEM", "solvesToProblems") class SolvesToProblem(startNode: Solves, endNode: Problem)
-  @Relation("REACHESTOGOAL", "reachesToGoals") class ReachesToGoal(startNode: Reaches, endNode: Goal)
+  @Relation("SUBIDEA") class SubIdea(startNode: Idea, endNode: Idea)
+  @Relation("SUBGOAL") class SubGoal(startNode: Goal, endNode: Goal)
+  @Relation("CAUSES") class Causes(startNode: Problem, endNode: Problem)
+  @Relation("PREVENTS") class Prevents(startNode: Problem, endNode: Goal)
+  @Relation("SUPPORTSSOLVES") class SupportsSolves(startNode: ProArgument, endNode: Solves)
+  @Relation("OPPOSESSOLVES") class OpposesSolves(startNode: ConArgument, endNode: Solves)
+  @Relation("SUPPORTSREACHES") class SupportsReaches(startNode: ProArgument, endNode: Reaches)
+  @Relation("OPPOSESREACHES") class OpposesReaches(startNode: ConArgument, endNode: Reaches)
+  @Relation("IDEATOSOLVES") class IdeaToSolves(startNode: Idea, endNode: Solves)
+  @Relation("IDEATOREACHES") class IdeaToReaches(startNode: Idea, endNode: Reaches)
+  @Relation("SOLVESTOPROBLEM") class SolvesToProblem(startNode: Solves, endNode: Problem)
+  @Relation("REACHESTOGOAL") class ReachesToGoal(startNode: Reaches, endNode: Goal)
 }
 
