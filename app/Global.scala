@@ -1,11 +1,10 @@
-import org.atmosphere.cpr.{ApplicationConfig, AtmosphereFramework}
+import org.atmosphere.cpr.ApplicationConfig
 import org.atmosphere.play.AtmosphereCoordinator.{instance => atmosphere}
-import org.atmosphere.play.Router
-import play.api.mvc.Handler
-import play.mvc.Http.RequestHeader
-import play.{Application, GlobalSettings}
+import org.atmosphere.play.{Router => atmosphereRouter}
+import play.api.mvc.{Handler, RequestHeader}
+import play.api._
 
-class Global extends GlobalSettings {
+object Global extends GlobalSettings {
 
   override def onStart(application: Application) {
     atmosphere.framework.addInitParameter(ApplicationConfig.WEBSOCKET_CONTENT_TYPE, "application/json")
@@ -17,8 +16,10 @@ class Global extends GlobalSettings {
     atmosphere.shutdown()
   }
 
-  // needed for atmosphere
-  override def onRouteRequest(request: RequestHeader): Handler = {
-    Router.dispatch(request)
+  override def onRouteRequest(request: RequestHeader): Option[Handler] = {
+    atmosphereRouter.dispatch(request) match {
+      case Some(result) => Some(result)
+      case None         => super.onRouteRequest(request)
+    }
   }
 }
