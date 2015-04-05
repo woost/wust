@@ -1,10 +1,16 @@
 package controllers
 
-import modules.requests.{GoalAddRequest, IdeaAddRequest, NodeAddRequest, ProblemAddRequest}
-import play.api.libs.json._
-import play.api.mvc.{AnyContent, Action, Controller}
+import com.mohiva.play.silhouette.api.Silhouette
+import com.mohiva.play.silhouette.impl.authenticators.JWTAuthenticator
+import model.WustSchema._
+import model.authorizations._
+import model.users.User
+import modules.cake.HeaderEnvironmentModule
+import modules.json.GraphFormat._
+import modules.requests.NodeAddRequest
 import org.atmosphere.play.AtmosphereCoordinator.{instance => atmosphere}
-
+import play.api.libs.json._
+import play.api.mvc.Action
 import renesca._
 import renesca.graph.RelationType
 import renesca.parameter.implicits._
@@ -12,7 +18,7 @@ import modules.json.GraphFormat._
 import model.WustSchema._
 import model._
 
-trait ContentNodesController[NodeType <: ContentNode] extends Controller with DatabaseController {
+trait ContentNodesController[NodeType <: ContentNode] extends Silhouette[User, JWTAuthenticator] with HeaderEnvironmentModule with DatabaseController {
   //TODO: shared code: label <-> api mapping
   //TODO: use transactions instead of db
   def factory: ContentNodeFactory[NodeType]
@@ -20,24 +26,31 @@ trait ContentNodesController[NodeType <: ContentNode] extends Controller with Da
   def apiname: String
   def decodeRequest(jsValue: JsValue): NodeAddRequest
 
-  def create = Action { request =>
-    val json = request.body.asJson.get
-    val nodeAdd = decodeRequest(json)
+  def create = UserAwareAction { request =>
+    request.identity match {
+      case Some(user) =>
+        val json = request.body.asJson.get
+        val nodeAdd = decodeRequest(json)
 
-    val discourse = Discourse.empty
-    val contentNode = factory.local(nodeAdd.title)
-    discourse.add(contentNode)
-    db.persistChanges(discourse.graph)
+        val discourse = Discourse.empty
+        val contentNode = factory.local(nodeAdd.title)
+        discourse.add(contentNode)
+        db.persistChanges(discourse.graph)
 
-    Ok(Json.toJson(contentNode))
+        // TODO: HTTP status Created
+        Ok(Json.toJson(contentNode))
+
+      case None => BadRequest("Only users who are logged in can create Nodes")
+    }
   }
 
   // TODO: leaks hyperedges
-  def remove(uuid: String) = Action {
-    val discourse = nodeDiscourseGraph(uuid)
-    discourse.graph.nodes.clear
-    db.persistChanges(discourse.graph)
-    Ok(JsObject(Seq()))
+  def remove(uuid: String) = SecuredAction(WithRole(God)) {
+    implicit request =>
+      val discourse = nodeDiscourseGraph(uuid)
+      discourse.graph.nodes.clear
+      db.persistChanges(discourse.graph)
+      Ok(JsObject(Seq()))
   }
 
   def show(uuid: String) = Action {
