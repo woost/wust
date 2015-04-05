@@ -10,6 +10,7 @@ import renesca._
 import renesca.parameter.implicits._
 import modules.json.GraphFormat._
 import model.WustSchema._
+import spray.can.Http.ConnectionAttemptFailedException
 
 object Problems extends Controller with ContentNodesController[Problem] {
   override def factory = Problem
@@ -17,7 +18,11 @@ object Problems extends Controller with ContentNodesController[Problem] {
   override def decodeRequest(jsValue: JsValue) = jsValue.as[ProblemAddRequest]
 
   def index() = Action {
-    Ok(Json.toJson(wholeDiscourseGraph.problems))
+    try {
+      Ok(Json.toJson(wholeDiscourseGraph.problems))
+    } catch {
+      case _: ConnectionAttemptFailedException => InternalServerError("No database connectivity.")
+    }
   }
 
   def showGoals(uuid: String) = Action {
