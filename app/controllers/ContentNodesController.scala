@@ -11,8 +11,13 @@ import renesca.parameter.implicits._
 import modules.json.GraphFormat._
 import model.WustSchema._
 import model._
+import play.api.mvc.{Action, RequestHeader}
+import securesocial.core._
+import model.DemoUser
 
-trait ContentNodesController[NodeType <: ContentNode] extends Controller with DatabaseController {
+trait ContentNodesController[NodeType <: ContentNode] extends Controller with securesocial.core.SecureSocial[DemoUser] with DatabaseController {
+  override implicit val env: RuntimeEnvironment[DemoUser]
+
   //TODO: shared code: label <-> api mapping
   //TODO: use transactions instead of db
   def factory: ContentNodeFactory[NodeType]
@@ -20,7 +25,7 @@ trait ContentNodesController[NodeType <: ContentNode] extends Controller with Da
   def apiname: String
   def decodeRequest(jsValue: JsValue): NodeAddRequest
 
-  def create = Action { request =>
+  def create = SecuredAction { request =>
     val json = request.body.asJson.get
     val nodeAdd = decodeRequest(json)
 
