@@ -45,7 +45,7 @@ object Ideas extends Controller with ContentNodesController[Idea] {
     discourse.add(IdeaToReaches.local(idea, reaches))
     db.persistChanges(discourse.graph)
 
-    broadcast(uuid, jsonChange("connect", Json.toJson(goal)))
+    broadcastConnect(uuid, goal)
     Ok(Json.toJson(goal))
   }
 
@@ -60,7 +60,7 @@ object Ideas extends Controller with ContentNodesController[Idea] {
     discourse.add(IdeaToSolves.local(idea, solves))
     db.persistChanges(discourse.graph)
 
-    broadcast(uuid, jsonChange("connect", Json.toJson(problem)))
+    broadcastConnect(uuid, problem)
     Ok(Json.toJson(problem))
   }
 
@@ -72,7 +72,7 @@ object Ideas extends Controller with ContentNodesController[Idea] {
     discourse.add(SubIdea.local(subIdea, idea))
     db.persistChanges(discourse.graph)
 
-    broadcast(uuid, jsonChange("connect", Json.toJson(subIdea)))
+    broadcastConnect(uuid, subIdea)
     Ok(Json.toJson(subIdea))
   }
 

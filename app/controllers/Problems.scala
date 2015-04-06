@@ -48,7 +48,7 @@ object Problems extends Controller with ContentNodesController[Problem] {
     discourse.add(Prevents.local(problem, goal))
     db.persistChanges(discourse.graph)
 
-    broadcast(uuid, jsonChange("connect", Json.toJson(goal)))
+    broadcastConnect(uuid, goal)
 
     Ok(Json.toJson(goal))
   }
@@ -61,7 +61,7 @@ object Problems extends Controller with ContentNodesController[Problem] {
     discourse.add(Causes.local(cause, consequence))
     db.persistChanges(discourse.graph)
 
-    broadcast(uuid, jsonChange("connect", Json.toJson(cause)))
+    broadcastConnect(uuid, cause)
 
     Ok(Json.toJson(cause))
   }
@@ -77,7 +77,7 @@ object Problems extends Controller with ContentNodesController[Problem] {
     discourse.add(IdeaToSolves.local(idea, solves))
     db.persistChanges(discourse.graph)
 
-    broadcast(uuid, jsonChange("connect", Json.toJson(idea)))
+    broadcastConnect(uuid, idea)
 
     Ok(Json.toJson(idea))
   }
