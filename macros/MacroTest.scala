@@ -51,6 +51,13 @@ object GraphSchemaMacro {
       }
     }
 
+    object HyperRelationPattern {
+      def unapply(tree: Tree) = condOpt(tree) {
+        case q"""@HyperRelation class $className (startNode:$startNode, endNode:$endNode) {..$relationBody}""" =>
+          (className.toString, startNode.toString, endNode.toString, relationBody)
+      }
+    }
+
     object NodePattern {
       def unapply(tree: Tree) = condOpt(tree) {
         case q"""@Node class $className extends ${parentTrait:TypeName} { ..$nodeStatements }""" =>

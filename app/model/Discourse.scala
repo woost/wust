@@ -38,8 +38,16 @@ trait SchemaGraph extends Schema with SchemaNodeFilter {
     graph.nodes += schemaNode.node
   }
 
-  def add[START <: SchemaNode, END <: SchemaNode](schemaRelation: SchemaRelation[START, END]) {
-    graph.relations += schemaRelation.relation
+  def add[START <: SchemaNode, END <: SchemaNode](schemaAbstractRelation: SchemaAbstractRelation[START, END]) {
+    schemaRelation match {
+      case relation:HyperRelation => 
+        graph.nodes += relation.node
+        graph.relations += relation.startRelation
+        graph.relations += relation.endRelation
+
+      case relation:SchemaRelation =>
+        graph.relations += relation.relation
+    }
   }
 }
 
@@ -76,12 +84,20 @@ trait SchemaRelationFactory[RELATION <: SchemaRelation[START, END], START <: Sch
 }
 
 
-trait SchemaRelation[+START <: SchemaNode, +END <: SchemaNode] {
-  def relation: Relation
+trait SchemaAbstractRelation[+START <: SchemaNode, +END <: SchemaNode] {
   def startNode: START
   def endNode: END
+}
 
+trait SchemaRelation[+START <: SchemaNode, +END <: SchemaNode] extends SchemaAbstractRelation[START, END]  {
+  def relation: Relation
   def relationType: RelationType = relation.relationType
+}
+
+trait HyperRelation[+START <: SchemaNode, +END <: SchemaNode] extends SchemaAbstractRelation[START, END] {
+  def node:SchemaNode
+  def startRelation:SchemaRelation[START, SchemaNode]
+  def endRelation:SchemaRelation[SchemaNode, END]
 }
 
 object UUID {
@@ -138,8 +154,34 @@ object WustSchema {
   }
   @Node class ProArgument extends ContentNode
   @Node class ConArgument extends ContentNode
-  @Node class Solves extends HyperEdgeNode
-  @Node class Reaches extends HyperEdgeNode
+  // @HyperRelation class Solves(startNode: Idea, endNode: Problem)
+  // @HyperRelation class Reaches(startNode: Idea, endNode: Goal)
+  
+  trait HyperRelationFactory[StartNode, EndNode, MiddleNode, StartRelation, EndRelation] extends SchemaNodeFactory[MiddleNode]{
+    def local(startNode:StartNode, endNode:EndNode) = {
+      val node = middleNodeCreate(Node.local())
+      val startRelation = startRelationCreate(Relation.local())
+      val endRelation = endRelationCreate(Relation.local())
+    }
+
+    def lable:Label
+    def middleNodeCreate(node:Node):MiddleNode
+    def startRelationCreate(relation:Relation):StartRelation
+    def endRelationCreate(relation:Relation):EndRelation
+
+  
+  }
+
+  object Solves extends HyperRelationFactory[Idea, Problem] {
+      def middleNodeCreate(node:Node) = SolvesNode(node)
+  }
+  case class SolvesNode(node:Node) extends SchemaNode 
+  case class IdeaToSolves(relation:Relation) extends SchemaRelation[Idea, SolvesNode] 
+  case class SolvesToProblem(relation:Relation) extends SchemaRelation[SolvesNode, Problem] 
+  case class Solves(node:SolvesNode, startRelation:IdeaToSolves, endRelation:SolvesToProblem) extends HyperRelation[Idea, Problem] {
+    def startNode = startRelation.startNode
+    def endNode = endRelation.endNode
+  }
 
   @Relation class SubIdea(startNode: Idea, endNode: Idea)
   @Relation class SubGoal(startNode: Goal, endNode: Goal)
@@ -149,9 +191,5 @@ object WustSchema {
   @Relation class OpposesSolves(startNode: ConArgument, endNode: Solves)
   @Relation class SupportsReaches(startNode: ProArgument, endNode: Reaches)
   @Relation class OpposesReaches(startNode: ConArgument, endNode: Reaches)
-  @Relation class IdeaToSolves(startNode: Idea, endNode: Solves)
-  @Relation class IdeaToReaches(startNode: Idea, endNode: Reaches)
-  @Relation class SolvesToProblem(startNode: Solves, endNode: Problem)
-  @Relation class ReachesToGoal(startNode: Reaches, endNode: Goal)
 }
 
