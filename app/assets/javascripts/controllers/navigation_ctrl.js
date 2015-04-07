@@ -3,7 +3,7 @@ angular.module("wust").controller("NavigationCtrl", function($scope, Search, Dis
         title: ""
     };
 
-    $scope.searchNodes = Search.all.$collection;
+    $scope.searchNodes = Search.all.$search.bind(Search.all);
     $scope.onSelect = onSelect;
 
     function onSelect($item) {

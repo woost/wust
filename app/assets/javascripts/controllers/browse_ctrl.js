@@ -4,7 +4,7 @@ angular.module("wust").controller("BrowseCtrl", function($scope, $state, Problem
         newTitle: "What is your problem?",
         listTitle: "Existing problems:",
         info: DiscourseNode.problem,
-        queryNodes: _.wrap(Problem.$collection, queryNodes),
+        queryNodes: _.wrap(Problem, queryNodes),
         addNode: addNode,
         newNode: Problem.$build({
             title: ""
@@ -14,7 +14,7 @@ angular.module("wust").controller("BrowseCtrl", function($scope, $state, Problem
         newTitle: "What is your goal?",
         listTitle: "Existing goals:",
         info: DiscourseNode.goal,
-        queryNodes: _.wrap(Goal.$collection, queryNodes),
+        queryNodes: _.wrap(Goal, queryNodes),
         addNode: addNode,
         newNode: Goal.$build({
             title: ""
@@ -24,7 +24,7 @@ angular.module("wust").controller("BrowseCtrl", function($scope, $state, Problem
         newTitle: "What is your idea?",
         listTitle: "Existing ideas:",
         info: DiscourseNode.idea,
-        queryNodes: _.wrap(Idea.$collection, queryNodes), // listing existing nodes
+        queryNodes: _.wrap(Idea, queryNodes), // listing existing nodes
         addNode: addNode,
         newNode: Idea.$build({
             title: ""
@@ -45,7 +45,7 @@ angular.module("wust").controller("BrowseCtrl", function($scope, $state, Problem
         });
     }
 
-    function queryNodes(queryFunc) {
-        queryFunc().$then(data => this.nodes = data);
+    function queryNodes(service) {
+        service.$search().$then(data => this.nodes = data);
     }
 });
