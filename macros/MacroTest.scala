@@ -19,6 +19,7 @@ object GraphSchemaMacro {
     import c.universe._
 
 
+    // TODO: Expose everything as strings
     object SchemaPattern {
       def unapply(tree: Tree) = condOpt(tree) {
         case q""" object $schemaName extends ..$schemaParents { ..$schemaStatements } """ =>
@@ -28,10 +29,7 @@ object GraphSchemaMacro {
 
     object InnerSchemaPattern {
       def unapply(tree: Tree) = condOpt(tree) {
-        case q""" $mods class $innerName extends ${_} { def nodes:Set[$superNodeTrait] }""" if mods.annotations.collectFirst {
-          case Apply(Select(New(Ident(TypeName("Schema"))), termNames.CONSTRUCTOR), Nil) => true
-          case _ => false
-        }.get =>
+        case q""" @Schema class $innerName extends ${_} { def nodes:Set[$superNodeTrait] }""" =>
           (innerName, superNodeTrait)
       }
     }
@@ -49,22 +47,15 @@ object GraphSchemaMacro {
 
     object RelationPattern {
       def unapply(tree: Tree) = condOpt(tree) {
-        case q"""@Relation(${relationType: String}) class $className (startNode:$startNode, endNode:$endNode) {..$relationBody}""" =>
-          (relationType, className.toString, startNode.toString, endNode.toString, relationBody)
+        case q"""@Relation class $className (startNode:$startNode, endNode:$endNode) {..$relationBody}""" =>
+          (className.toString, startNode.toString, endNode.toString, relationBody)
       }
     }
 
     object NodePattern {
-      //TODO:...
       def unapply(tree: Tree) = condOpt(tree) {
-        case q"""$mods class $className extends ${parentTrait:TypeName} { ..$nodeStatements }""" if mods.annotations.collectFirst {
-            case Apply(Select(New(Ident(TypeName("Node"))), termNames.CONSTRUCTOR), List(Literal(Constant(label: String)))) => true
-            case _ => false
-        }.get =>
-          val label = mods.annotations.collectFirst {
-              case Apply(Select(New(Ident(TypeName("Node"))), termNames.CONSTRUCTOR), List(Literal(Constant(label: String)))) => label
-          }.get
-          (label, className.toString, parentTrait, nodeStatements)
+        case q"""@Node class $className extends ${parentTrait:TypeName} { ..$nodeStatements }""" =>
+          (className.toString, parentTrait, nodeStatements)
       }
     }
 
@@ -83,16 +74,17 @@ object GraphSchemaMacro {
           }
         }.flatten.toMap
 
-    def nameToPlural(name: String): String = {
-      val lower = name(0).toLower + name.substring(1, name.length)
-      if (lower.endsWith("s"))
-        return lower
-
-      return lower + "s";
+    def nameToPlural(name: String) = {
+      val lower = name.take(1).toLowerCase + name.drop(1)
+      val suffix = if (lower.endsWith("s")) "" else "s"
+      lower + suffix;
     }
-    val nodes: Seq[String] = schemaStatements.collect { case NodePattern(_, className, _, _) => className }
-    val relationStarts: Map[String, String] = schemaStatements.collect { case RelationPattern(_,className,startNode,_,_) => className -> startNode }.toMap
-    val relationEnds: Map[String, String] = schemaStatements.collect { case RelationPattern(_,className,_,endNode,_) => className -> endNode }.toMap
+
+    def nameToLabel(name: String) = name.toUpperCase
+
+    val nodes: Seq[String] = schemaStatements.collect { case NodePattern( className, _, _) => className }
+    val relationStarts: Map[String, String] = schemaStatements.collect { case RelationPattern(className,startNode,_,_) => className -> startNode }.toMap
+    val relationEnds: Map[String, String] = schemaStatements.collect { case RelationPattern(className,_,endNode,_) => className -> endNode }.toMap
     val allNodes = nodes.foldLeft[Tree](q"Set.empty") { case (q"$all", name) => q"$all ++ ${ TermName(nameToPlural(name)) }" }
     val allRelations = relationStarts.keys.foldLeft[Tree](q"Set.empty") { case (q"$all", name) => q"$all ++ ${ TermName(nameToPlural(name)) }" }
 
@@ -115,13 +107,13 @@ object GraphSchemaMacro {
         }
 
         val relationFactories: List[Tree] = schemaStatements.collect {
-          case RelationPattern(relationType, className, startNode, endNode, relationBody) =>
+          case RelationPattern( className, startNode, endNode, relationBody) =>
             q"""
            object ${TermName(className)} extends SchemaRelationFactory[${TypeName(className)}, ${TypeName(startNode)}, ${TypeName(endNode)}] {
                def create(relation: Relation) = ${TermName(className)}(relation,
                  startNodeFactory.create(relation.startNode),
                  endNodeFactory.create(relation.endNode))
-               def relationType = RelationType($relationType)
+               def relationType = RelationType(${nameToLabel(className)})
                def startNodeFactory = ${TermName(startNode)}
                def endNodeFactory = ${TermName(endNode)}
            }
@@ -129,7 +121,7 @@ object GraphSchemaMacro {
         }
 
         val relationClasses: List[Tree] = schemaStatements.collect {
-          case RelationPattern(relationType, className, startNode, endNode, relationBody) =>
+          case RelationPattern( className, startNode, endNode, relationBody) =>
             q"""
            case class ${TypeName(className)}(relation: Relation, startNode: ${TypeName(startNode)}, endNode: ${TypeName(endNode)})
              extends SchemaRelation[${TypeName(startNode)}, ${TypeName(endNode)}] {
@@ -139,27 +131,27 @@ object GraphSchemaMacro {
         }
 
         val relationSets: List[Tree] = schemaStatements.collect {
-          case RelationPattern(relationType, className, startNode, endNode, relationBody) =>
+          case RelationPattern( className, startNode, endNode, relationBody) =>
             q""" def ${TermName(nameToPlural(className))}: Set[${TypeName(className)}] = relationsAs(${TermName(className)}) """
         }
 
         val nodeFactories: List[Tree] = schemaStatements.collect {
-          case NodePattern(label, className, parentTrait, nodeStatements) =>
+          case NodePattern( className, parentTrait, nodeStatements) =>
            q"""
            object ${TermName(className)} extends ${nodeTypeToFactoryType(parentTrait)}[${TypeName(className)}] { def create(node: Node) = new ${TypeName(className)}(node)
-               val label = Label($label)
+               val label = Label(${nameToLabel(className)})
            }
            """
         }
         val nodeClasses: List[Tree] = schemaStatements.collect {
-          case NodePattern(label, className, parentTrait, nodeStatements) =>
+          case NodePattern( className, parentTrait, nodeStatements) =>
             def rev(s: String) = "rev_" + s
             val directNeighbours = schemaStatements.collect {
-              case RelationPattern((_, relationName, `className`, endNode, _)) =>
+              case RelationPattern(relationName, `className`, endNode, _) =>
                 q"""def ${TermName(nameToPlural(relationName))}:Set[${TypeName(endNode)}] = successorsAs(${TermName(endNode)})"""
             }
             val directRevNeighbours = schemaStatements.collect {
-              case RelationPattern((_, relationName, startNode, `className`, _)) =>
+              case RelationPattern( relationName, startNode, `className`, _) =>
                 q"""def ${TermName(rev(nameToPlural(relationName)))}:Set[${TypeName(startNode)}] = predecessorsAs(${TermName(startNode)})"""
             }
 
@@ -181,7 +173,7 @@ object GraphSchemaMacro {
         }
 
         val nodeSets: List[Tree] = schemaStatements.collect {
-          case NodePattern(label, className, parentTrait, nodeStatements) =>
+          case NodePattern( className, parentTrait, nodeStatements) =>
             q""" def ${TermName(nameToPlural(className))}: Set[${TypeName(className)}] = nodesAs(${TermName(className)}) """
         }
 
