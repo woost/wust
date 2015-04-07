@@ -1,5 +1,5 @@
 angular.module("wust").controller("GraphsCtrl", function($scope, $state, $filter, Graph, DiscourseNode) {
-    Graph.get().$promise.then(createGraph);
+    Graph.$collection().$then(createGraph);
 
     $scope.onClick = onClick;
     $scope.graph = {

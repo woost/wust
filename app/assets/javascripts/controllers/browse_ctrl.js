@@ -4,31 +4,31 @@ angular.module("wust").controller("BrowseCtrl", function($scope, $state, Problem
         newTitle: "What is your problem?",
         listTitle: "Existing problems:",
         info: DiscourseNode.problem,
-        queryNodes: _.wrap(Problem.query, queryNodes),
-        addNode: _.wrap(Problem.create, addNode),
-        newNode: {
+        queryNodes: _.wrap(Problem.$collection, queryNodes),
+        addNode: addNode,
+        newNode: Problem.$build({
             title: ""
-        }
+        })
     };
     var goals = {
         newTitle: "What is your goal?",
         listTitle: "Existing goals:",
         info: DiscourseNode.goal,
-        queryNodes: _.wrap(Goal.query, queryNodes),
-        addNode: _.wrap(Goal.create, addNode),
-        newNode: {
+        queryNodes: _.wrap(Goal.$collection, queryNodes),
+        addNode: addNode,
+        newNode: Goal.$build({
             title: ""
-        }
+        })
     };
     var ideas = {
         newTitle: "What is your idea?",
         listTitle: "Existing ideas:",
         info: DiscourseNode.idea,
-        queryNodes: _.wrap(Idea.query, queryNodes), // listing existing nodes
-        addNode: _.wrap(Idea.create, addNode), // adding new nodes
-        newNode: {
+        queryNodes: _.wrap(Idea.$collection, queryNodes), // listing existing nodes
+        addNode: addNode,
+        newNode: Idea.$build({
             title: ""
-        }
+        })
     };
 
     var slides = [problems, goals, ideas];
@@ -36,8 +36,8 @@ angular.module("wust").controller("BrowseCtrl", function($scope, $state, Problem
 
     $scope.$watch(() => _.find(slides, "active"), currentSlide => currentSlide.queryNodes());
 
-    function addNode(createFunc) {
-        createFunc(this.newNode).$promise.then(data => {
+    function addNode() {
+        this.newNode.$save().$then(data => {
             humane.success("Added new node");
             $state.go(this.info.state, {
                 id: data.id
@@ -46,6 +46,6 @@ angular.module("wust").controller("BrowseCtrl", function($scope, $state, Problem
     }
 
     function queryNodes(queryFunc) {
-        queryFunc().$promise.then(data => this.nodes = data);
+        queryFunc().$then(data => this.nodes = data);
     }
 });

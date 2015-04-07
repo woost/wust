@@ -1,3 +1,3 @@
-angular.module("wust").service("Idea", function(DiscourseNode, Node) {
-    return new Node("ideas");
+angular.module("wust").factory("Idea", function(restmod) {
+    return restmod.model("/ideas");
 });

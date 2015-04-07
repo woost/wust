@@ -45,7 +45,7 @@ DELETE /ideas/:uuid/ideas/:uuidIdea controllers.Ideas.disconnectIdea(uuid: Strin
 
 GET /graphs controllers.Graphs.index
 
-GET /search/:term controllers.Search.index(term: String)
-GET /search/:term/goals controllers.Search.indexGoals(term: String)
-GET /search/:term/problems controllers.Search.indexProblems(term: String)
-GET /search/:term/ideas controllers.Search.indexIdeas(term: String)
+GET /search/all/:term controllers.Search.index(term: String)
+GET /search/goals/:term controllers.Search.indexGoals(term: String)
+GET /search/problems/:term controllers.Search.indexProblems(term: String)
+GET /search/ideas/:term controllers.Search.indexIdeas(term: String)

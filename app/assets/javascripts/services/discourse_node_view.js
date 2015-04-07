@@ -5,13 +5,15 @@ angular.module("wust").service("DiscourseNodeView", function($state, $stateParam
         var id = $stateParams.id;
 
         scope.nodeCss = nodeInfo.css;
-        scope.node = service.get(id);
-        scope.goals = new DiscourseNodeList.Goal(id, service);
-        scope.problems = new DiscourseNodeList.Problem(id, service);
-        scope.ideas = new DiscourseNodeList.Idea(id, service);
-        scope.removeFocused = _.partial(removeFocused, id, service.remove);
-        scope.updateFocused = _.partial(updateFocused, id, scope.node, service.update);
-        NodeHistory.add(scope.node);
+        var nodePath = service.one(id);
+        var nodePromise = nodePath.get();
+        scope.node = nodePromise.$object;
+        scope.goals = new DiscourseNodeList.Goal(nodePath);
+        scope.problems = new DiscourseNodeList.Problem(nodePath);
+        scope.ideas = new DiscourseNodeList.Idea(nodePath);
+        scope.removeFocused = _.partial(removeFocused, scope.node);
+        scope.updateFocused = _.partial(updateFocused, scope.node);
+        NodeHistory.add(nodePromise);
 
         scope.messages = [];
 
@@ -48,17 +50,16 @@ angular.module("wust").service("DiscourseNodeView", function($state, $stateParam
         }
     }
 
-    function removeFocused(id, removeFunc) {
-        removeFunc(id).$promise.then(() => {
-            NodeHistory.remove(id);
+    function removeFocused(node) {
+        node.$destroy().$then(() => {
+            NodeHistory.remove(node.id);
             humane.success("Removed node");
             $state.go("browse");
         });
     }
 
-    function updateFocused(id, node, updateFunc) {
-        console.log(node);
-        updateFunc(id, node).$promise.then(() => {
+    function updateFocused(node) {
+        node.$save().$then(() => {
             humane.success("Updated node");
         });
     }

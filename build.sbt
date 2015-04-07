@@ -26,6 +26,7 @@ lazy val wust = (project in file(".")).settings(
     "org.webjars.bower" % "angular-ui-router" % "0.2.13",
     "org.webjars.bower" % "angular-bootstrap" % "0.12.1",
     "org.webjars.bower" % "angular-native-dragdrop" % "1.1.0",
+    "org.webjars.bower" % "angular-restmod" % "1.1.8",
     // basic js libraries
     "org.webjars.bower" % "lodash" % "3.6.0",
     "org.webjars" % "font-awesome" % "4.3.0-1",
@@ -42,7 +43,7 @@ lazy val wust = (project in file(".")).settings(
 
   ),
   // ecmascript 6
-  TraceurKeys.sourceFileNames := Seq("javascripts/module.js", "javascripts/routes.js", "javascripts/*/**/*.js"),
+  TraceurKeys.sourceFileNames := Seq("javascripts/module.js", "javascripts/*/**/*.js"),
   // use compass with sbt-sass
   sassOptions in Assets ++= Seq("--compass", "-r", "compass"),
   // scalaJSProjects := Seq(scalajs),

@@ -12,7 +12,7 @@ angular.module("wust").service("NodeHistory", function(DiscourseNode) {
     }
 
     function add(node) {
-        node.$promise.then(function(node) {
+        node.$then(function(node) {
             var obj = {
                 node: node,
                 info: DiscourseNode.get(node.label)

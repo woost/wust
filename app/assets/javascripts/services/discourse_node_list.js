@@ -1,27 +1,20 @@
 angular.module("wust").service("DiscourseNodeList", function(DiscourseNode, Idea, Problem, Goal, Search) {
     [this.Goal, this.Problem, this.Idea] = nodeClasses();
 
-    function todo() {
-        humane.error("not implemented");
-    }
-
-    function create(createFunc) {
-        createFunc(this.model.new).$promise.then(data => {
-            this.model.add(data);
+    function create(func) {
+        this.model.new.$save().$then(data => {
             humane.success("Created new node");
         });
     }
 
-    function remove(disconnectFunc, elem) {
-        disconnectFunc(this.id, elem.id).$promise.then(() => {
-            this.removeNode(elem.id);
+    function remove(func, elem) {
+        elem.$destroy().$then(() => {
             humane.success("Disconnected node");
         });
     }
 
-    function add(connectFunc, item) {
-        connectFunc(this.id, item.id).$promise.then(data => {
-            this.addNode(data);
+    function add(func, elem) {
+        elem.$save().$then(data => {
             this.model.new.title = "";
             humane.success("Connected node");
         });
@@ -29,17 +22,16 @@ angular.module("wust").service("DiscourseNodeList", function(DiscourseNode, Idea
 
     function nodeClasses() {
         class NodeList {
-            constructor(id, createFunc, connService = {}, searchFunc = Search.query) {
-                this.id = id;
+                constructor(service, connService = {}, searchService = Search.all) {
                 this.model = {
-                    new: {
+                    new: service.$build({
                         title: ""
-                    },
-                    list: connService.query ? connService.query(this.id) : [],
-                    remove: connService.remove ? _.wrap(connService.remove, remove.bind(this)) : todo,
-                    add: connService.create ? _.wrap(connService.create, add.bind(this)) : todo,
-                    create: _.wrap(createFunc, create.bind(this)),
-                    search: searchFunc
+                    }),
+                    list: connService.$collection(),
+                    remove: remove.bind(this),
+                    add: add.bind(this),
+                    create: create.bind(this),
+                    search: searchService.$collection
                 };
             }
 
@@ -56,8 +48,8 @@ angular.module("wust").service("DiscourseNodeList", function(DiscourseNode, Idea
         }
 
         class GoalNodeList extends NodeList {
-            constructor(id, nodeService = {}) {
-                super(id, Goal.create, nodeService.goals, Search.queryGoals);
+            constructor(nodeService = {}) {
+                super(Goal, nodeService.goals, Search.goals);
                 this.model.info = DiscourseNode.goal;
                 this.model.style = {
                     templateUrl: "show_discourse_node_list.html",
@@ -67,8 +59,8 @@ angular.module("wust").service("DiscourseNodeList", function(DiscourseNode, Idea
         }
 
         class ProblemNodeList extends NodeList {
-            constructor(id, nodeService = {}) {
-                super(id, Problem.create, nodeService.problems, Search.queryProblems);
+            constructor(nodeService = {}) {
+                super(Problem, nodeService.problems, Search.problems);
                 this.model.info = DiscourseNode.problem;
                 this.model.style = {
                     templateUrl: "show_discourse_node_list.html",
@@ -78,8 +70,8 @@ angular.module("wust").service("DiscourseNodeList", function(DiscourseNode, Idea
         }
 
         class IdeaNodeList extends NodeList {
-            constructor(id, nodeService = {}) {
-                super(id, Idea.create, nodeService.ideas, Search.queryIdeas);
+            constructor(nodeService = {}) {
+                super(Idea, nodeService.ideas, Search.ideas);
                 this.model.info = DiscourseNode.idea;
                 this.model.style = {
                     templateUrl: "show_discourse_idea_list.html",
