@@ -19,7 +19,6 @@ object GraphSchemaMacro {
     import c.universe._
 
 
-    // TODO: Expose everything as strings
     object SchemaPattern {
       def unapply(tree: Tree) = condOpt(tree) {
         case q""" object $schemaName extends ..$schemaParents { ..$schemaStatements } """ =>
@@ -182,7 +181,7 @@ object GraphSchemaMacro {
 
 
         val otherStatements = schemaStatements.flatMap {
-          case NodeTraitPattern(_) | RelationPattern(_) | NodePattern(_) | InnerSchemaPattern(_) => None
+          case NodeTraitPattern(_,_,_) | RelationPattern(_,_,_,_) | NodePattern(_,_,_) | InnerSchemaPattern(_,_) => None
           case other => Some(other)
         }
 
