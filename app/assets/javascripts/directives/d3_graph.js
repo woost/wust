@@ -14,6 +14,11 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                 // get current graph
                 var graph = scope.ngModel;
 
+                // add index to edge
+                // TODO: how to avoid this?  we need to access the
+                // foreignobjects and html direcives through the edge
+                _.each(graph.edges, (e, i) => e.index = i);
+
                 // get dimensions
                 var width = element[0].offsetWidth;
                 var height = element[0].offsetHeight;
@@ -87,7 +92,7 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                     .style("background", "white")
                     .html(d => d.label);
 
-                setForeignObjectDimensions(linktextFo, linktextHtml);
+                var linktextRects = setForeignObjectDimensions(linktextFo, linktextHtml);
 
                 // create nodes in the svg container
                 var node = container.append("g")
@@ -134,7 +139,9 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                     });
 
                     // focus marked nodes
-                    var marked = _.select(graph.nodes, {marked: true});
+                    var marked = _.select(graph.nodes, {
+                        marked: true
+                    });
                     if (_.isEmpty(marked)) {
                         return;
                     }
@@ -144,13 +151,13 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                     var center = [(max[0] + min[0]) / 2, (max[1] + min[1]) / 2];
 
                     var scale;
-                    if( max[0] === min[0] || max[1] === min[1] ) {
+                    if (max[0] === min[0] || max[1] === min[1]) {
                         scale = 1;
                     } else {
                         scale = Math.min(1, 0.9 * width / (max[0] - min[0]), 0.9 * height / (max[1] - min[1]));
                     }
 
-                    var translate = [width/2 - center[0] * scale, height/2 - center[1] * scale];
+                    var translate = [width / 2 - center[0] * scale, height / 2 - center[1] * scale];
                     svg.transition().duration(750).call(zoom.translate(translate).scale(scale).event);
                 }
 
@@ -172,8 +179,11 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                         .attr("x2", d => d.target.x)
                         .attr("y2", d => d.target.y);
 
-                    linktextSvg
-                        .attr("transform", d => "translate(" + ((d.source.x + d.target.x) / 2) + "," + ((d.source.y + d.target.y) / 2) + ")");
+                    linktextSvg.attr("transform", d => {
+                        // center the linktext
+                        var rect = linktextRects[d.index];
+                        return "translate(" + (((d.source.x + d.target.x) / 2) - rect.width / 2) + "," + (((d.source.y + d.target.y) / 2) - rect.height / 2) + ")";
+                    });
 
                     node.attr("transform", d => {
                         // center the node
