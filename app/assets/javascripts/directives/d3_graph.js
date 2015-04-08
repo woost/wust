@@ -1,4 +1,4 @@
-angular.module("wust").directive("d3Graph", function(DiscourseNode) {
+angular.module("wust").directive("d3Graph", function(DiscourseNode, $window) {
     return {
         restrict: "A",
         require: "^ngModel",
@@ -20,8 +20,15 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                 _.each(graph.edges, (e, i) => e.index = i);
 
                 // get dimensions
-                var width = element[0].offsetWidth;
-                var height = element[0].offsetHeight;
+                var width, height;
+                [width, height] = getElementDimensions(element[0]);
+
+                angular.element($window).bind("resize", () => {
+                    [width, height] = getElementDimensions(element[0]);
+                    svg.attr("width", width);
+                    svg.attr("height", height);
+                    focusMarkedNodes();
+                });
 
                 // force configuration
                 var force = d3.layout.force()
@@ -138,7 +145,13 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                         fo.style.visibility = visibility;
                     });
 
-                    // focus marked nodes
+
+                    // focus the marked nodes
+                    focusMarkedNodes();
+                }
+
+                // focus the marked nodes and scale zoom accordingly
+                function focusMarkedNodes() {
                     var marked = _.select(graph.nodes, {
                         marked: true
                     });
@@ -170,6 +183,10 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode) {
                         curr.setAttribute("height", rect.height);
                         return _.pick(rect, ["width", "height"]);
                     });
+                }
+
+                function getElementDimensions(element) {
+                    return [element.offsetWidth, element.offsetHeight];
                 }
 
                 function tick() {
