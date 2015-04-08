@@ -27,11 +27,11 @@ angular.module("wust").service("DiscourseNodeList", function(DiscourseNode, Idea
                     new: service.$build({
                         title: ""
                     }),
-                    list: connService.$collection(),
+                    list: connService.$search(),
                     remove: remove.bind(this),
                     add: add.bind(this),
                     create: create.bind(this),
-                    search: searchService.$collection
+                    search: searchService.$search
                 };
             }
 
