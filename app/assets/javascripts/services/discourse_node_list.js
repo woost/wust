@@ -32,7 +32,7 @@ angular.module("wust").service("DiscourseNodeList", function(DiscourseNode, Idea
             }
 
             add(elem) {
-                this.connService.$find(elem.id).$save().$then(data => {
+                this.connService.$create({id: elem.id}).$then(data => {
                     humane.success("Connected node");
                 });
             }

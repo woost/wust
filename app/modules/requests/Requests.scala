@@ -7,3 +7,5 @@ trait NodeAddRequest extends UserRequest {
 case class ProblemAddRequest(title: String) extends NodeAddRequest
 case class IdeaAddRequest(title: String) extends NodeAddRequest
 case class GoalAddRequest(title: String) extends NodeAddRequest
+
+case class ConnectRequest(uuid: String)

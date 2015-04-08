@@ -1,7 +1,7 @@
 package controllers
 
 import org.atmosphere.play.AtmosphereCoordinator.{instance => atmosphere}
-import modules.requests.{GoalAddRequest, IdeaAddRequest, NodeAddRequest, ProblemAddRequest}
+import modules.requests._
 import play.api.libs.json._
 import play.api.mvc.Action
 import play.api.mvc.Controller
@@ -40,10 +40,13 @@ object Problems extends Controller with ContentNodesController[Problem] {
     Ok(Json.toJson(db.queryGraph(query).nodes.map(Problem.create)))
   }
 
-  def connectGoal(uuid: String, uuidGoal: String) = Action {
-    val discourse = nodeDiscourseGraph(List(uuid, uuidGoal))
+  def connectGoal(uuid: String) = Action { request =>
+    val json = request.body.asJson.get
+    val connect = json.as[ConnectRequest]
+
+    val discourse = nodeDiscourseGraph(List(uuid, connect.uuid))
     val problem = discourse.problems.find(p => p.uuid == uuid).get
-    val goal = discourse.goals.find(p => p.uuid == uuidGoal).get
+    val goal = discourse.goals.find(p => p.uuid == connect.uuid).get
 
     discourse.add(Prevents.local(problem, goal))
     db.persistChanges(discourse.graph)
@@ -53,10 +56,13 @@ object Problems extends Controller with ContentNodesController[Problem] {
     Ok(Json.toJson(goal))
   }
 
-  def connectProblem(uuid: String, uuidProblem: String) = Action {
-    val discourse = nodeDiscourseGraph(List(uuid, uuidProblem))
+  def connectProblem(uuid: String) = Action { request =>
+    val json = request.body.asJson.get
+    val connect = json.as[ConnectRequest]
+
+    val discourse = nodeDiscourseGraph(List(uuid, connect.uuid))
     val consequence = discourse.problems.find(p => p.uuid == uuid).get
-    val cause = discourse.problems.find(p => p.uuid == uuidProblem).get
+    val cause = discourse.problems.find(p => p.uuid == connect.uuid).get
 
     discourse.add(Causes.local(cause, consequence))
     db.persistChanges(discourse.graph)
@@ -66,10 +72,13 @@ object Problems extends Controller with ContentNodesController[Problem] {
     Ok(Json.toJson(cause))
   }
 
-  def connectIdea(uuid: String, uuidIdea: String) = Action {
-    val discourse = nodeDiscourseGraph(List(uuid, uuidIdea))
+  def connectIdea(uuid: String) = Action { request =>
+    val json = request.body.asJson.get
+    val connect = json.as[ConnectRequest]
+
+    val discourse = nodeDiscourseGraph(List(uuid, connect.uuid))
     val problem = discourse.problems.find(p => p.uuid == uuid).get
-    val idea = discourse.ideas.find(p => p.uuid == uuidIdea).get
+    val idea = discourse.ideas.find(p => p.uuid == connect.uuid).get
     val solves = Solves.local
 
     discourse.add(solves)

@@ -1,7 +1,7 @@
 package modules.json
 
 import collection.mutable
-import modules.requests.{GoalAddRequest, IdeaAddRequest, NodeAddRequest, ProblemAddRequest}
+import modules.requests._
 import play.api.libs.json._
 import renesca.graph.Graph
 import renesca.graph._
@@ -110,5 +110,16 @@ object GraphFormat {
     }
 
     def writes(problemAdd: IdeaAddRequest) = ???
+  }
+
+  implicit object ConnectFormat extends Format[ConnectRequest] {
+    def reads(json: JsValue) = json match {
+      case JsObject(_) => {
+        JsSuccess(ConnectRequest((json \ "id").as[String]))
+      }
+      case otherwise   => JsError()
+    }
+
+    def writes(connect: ConnectRequest) = ???
   }
 }
