@@ -47,13 +47,13 @@ object GraphFormat {
 
       case class Replacement(deleteNode: Node, deleteRelations: Iterable[Relation], newRelation: Option[Relation] = None)
       val simplify: PartialFunction[DiscourseNode, Replacement] = {
-        case Solves(node) if node.inDegree == 1 && node.outDegree == 1  =>
+        case SolvesNode(node) if node.inDegree == 1 && node.outDegree == 1  =>
           Replacement(node, node.relations, Some(Relation.local(node.predecessors.head, node.successors.head, "SOLVES")))
-        case Reaches(node) if node.inDegree == 1 && node.outDegree == 1 =>
+        case ReachesNode(node) if node.inDegree == 1 && node.outDegree == 1 =>
           Replacement(node, node.relations, Some(Relation.local(node.predecessors.head, node.successors.head, "REACHES")))
-        case Solves(node) if node.degree < 2                            =>
+        case SolvesNode(node) if node.degree < 2                            =>
           Replacement(node, node.relations)
-        case Reaches(node) if node.degree < 2                           =>
+        case ReachesNode(node) if node.degree < 2                           =>
           Replacement(node, node.relations)
       }
 

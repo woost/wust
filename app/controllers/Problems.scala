@@ -31,7 +31,7 @@ object Problems extends Controller with ContentNodesController[Problem] {
   }
 
   def showIdeas(uuid: String) = Action {
-    val query = Query(s"match (:${ Problem.label } {uuid: {uuid}})<-[:${ SolvesToProblem.relationType }]-(:${ Solves.label })<-[:${ IdeaToSolves.relationType }]-(idea :${ Idea.label }) return idea", Map("uuid" -> uuid))
+    val query = Query(s"match (:${ Problem.label } {uuid: {uuid}})<-[:${ Solves.endRelationType }]-(:${ Solves.label })<-[:${ Solves.startRelationType }]-(idea :${ Idea.label }) return idea", Map("uuid" -> uuid))
     Ok(Json.toJson(db.queryGraph(query).nodes.map(Idea.create)))
   }
 
@@ -79,11 +79,8 @@ object Problems extends Controller with ContentNodesController[Problem] {
     val discourse = nodeDiscourseGraph(List(uuid, connect.uuid))
     val problem = discourse.problems.find(p => p.uuid == uuid).get
     val idea = discourse.ideas.find(p => p.uuid == connect.uuid).get
-    val solves = Solves.local
 
-    discourse.add(solves)
-    discourse.add(SolvesToProblem.local(solves, problem))
-    discourse.add(IdeaToSolves.local(idea, solves))
+    discourse.add(Solves.local(idea, problem))
     db.persistChanges(discourse.graph)
 
     broadcastConnect(uuid, idea)
@@ -104,7 +101,7 @@ object Problems extends Controller with ContentNodesController[Problem] {
   }
 
   def disconnectIdea(uuid: String, uuidIdea: String) = Action {
-    disconnect(uuidIdea, List(IdeaToSolves.relationType, SolvesToProblem.relationType), uuid)
+    disconnect(uuidIdea, List(Solves.startRelationType, Solves.endRelationType), uuid)
     broadcastDisconnect(uuid, uuidIdea, "IDEA")
     Ok(JsObject(Seq()))
   }
