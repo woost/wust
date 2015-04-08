@@ -22,7 +22,7 @@ lazy val wust = (project in file(".")).settings(
     "com.vmunier" %% "play-scalajs-scripts" % "0.1.0",
     // "org.webjars" %% "webjars-play" % "2.3.0-2",
     // angular
-    "org.webjars.bower" % "angular" % "1.3.15",
+    "org.webjars" % "angularjs" % "1.3.15",
     "org.webjars.bower" % "angular-ui-router" % "0.2.13",
     "org.webjars.bower" % "angular-bootstrap" % "0.12.1",
     "org.webjars.bower" % "angular-native-dragdrop" % "1.1.0",
