@@ -1,5 +1,7 @@
 angular.module("wust").controller("GraphsCtrl", function($scope, $state, $filter, Graph, DiscourseNode) {
-    Graph.$search().$then(createGraph);
+    //TODO: we should not need an id here, but restmod won't let me use $find
+    //without an id or $search when returning a single object (expects array)
+    Graph.$find(1).$then(createGraph);
 
     $scope.onClick = onClick;
     $scope.graph = {

@@ -12,13 +12,15 @@ angular.module("wust").service("NodeHistory", function(DiscourseNode) {
     }
 
     function add(node) {
-        var obj = {
-            node: node,
-            info: DiscourseNode.get(node.label)
-        };
+        node.$then(function(node) {
+            var obj = {
+                node: node,
+                info: DiscourseNode.get(node.label)
+            };
 
-        remove(node.id);
-        visited.push(obj);
-        visited.splice(0, visited.length - maximum);
+            remove(node.id);
+            visited.push(obj);
+            visited.splice(0, visited.length - maximum);
+        });
     }
 });
