@@ -4,5 +4,4 @@
              urlPrefix: "/api/v1"
          }
      });
-     restmodProvider.rebase("AMSApi");
  });

@@ -5,15 +5,14 @@ angular.module("wust").service("DiscourseNodeView", function($state, $stateParam
         var id = $stateParams.id;
 
         scope.nodeCss = nodeInfo.css;
-        var nodePath = service.one(id);
-        var nodePromise = nodePath.get();
-        scope.node = nodePromise.$object;
+        var nodePath = service.$new(id);
+        scope.node = nodePath.$fetch();
         scope.goals = new DiscourseNodeList.Goal(nodePath);
         scope.problems = new DiscourseNodeList.Problem(nodePath);
         scope.ideas = new DiscourseNodeList.Idea(nodePath);
         scope.removeFocused = _.partial(removeFocused, scope.node);
         scope.updateFocused = _.partial(updateFocused, scope.node);
-        NodeHistory.add(nodePromise);
+        NodeHistory.add(scope.node);
 
         scope.messages = [];
 
