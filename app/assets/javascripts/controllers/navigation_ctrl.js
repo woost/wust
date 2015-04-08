@@ -3,8 +3,12 @@ angular.module("wust").controller("NavigationCtrl", function($scope, Search, Dis
         title: ""
     };
 
-    $scope.searchNodes = Search.all.$search.bind(Search.all);
+    $scope.searchNodes = searchNodes;
     $scope.onSelect = onSelect;
+
+    function searchNodes(title) {
+        return Search.$search({title: title});
+    }
 
     function onSelect($item) {
         var state = DiscourseNode.get($item.label).state;

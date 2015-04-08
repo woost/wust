@@ -15,9 +15,7 @@ angular.module("wust").directive("discourseNodeSearchForm", function(DiscourseNo
             $scope.formatLabel = _.constant("");
 
             function getNodes(term) {
-                return $scope.searchNodes()(term).$then(response => {
-                    return _.map(response, item => _.merge(item, { css: DiscourseNode.get(item.label).css }));
-                });
+                return $scope.searchNodes()(term).$then(response => _.map(response, item => _.merge(item, {css: DiscourseNode.get(item.label).css}))).$asPromise();
             }
         }
     };
