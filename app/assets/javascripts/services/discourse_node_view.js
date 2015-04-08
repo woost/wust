@@ -1,15 +1,14 @@
-angular.module("wust").service("DiscourseNodeView", function($state, $stateParams, NodeHistory, DiscourseNodeList, Live, DiscourseNode) {
-    this.setScope = setScope;
+angular.module("wust").factory("DiscourseNodeView", function($state, $stateParams, NodeHistory, DiscourseNodeList, Live, DiscourseNode) {
+    return setScope;
 
     function setScope(scope, nodeInfo, service) {
         var id = $stateParams.id;
 
         scope.nodeCss = nodeInfo.css;
-        var nodePath = service.$new(id);
-        scope.node = nodePath.$fetch();
-        scope.goals = new DiscourseNodeList.Goal(nodePath);
-        scope.problems = new DiscourseNodeList.Problem(nodePath);
-        scope.ideas = new DiscourseNodeList.Idea(nodePath);
+        scope.node = service.$find(id);
+        scope.goals = new DiscourseNodeList.Goal(scope.node);
+        scope.problems = new DiscourseNodeList.Problem(scope.node);
+        scope.ideas = new DiscourseNodeList.Idea(scope.node);
         scope.removeFocused = _.partial(removeFocused, scope.node);
         scope.updateFocused = _.partial(updateFocused, scope.node);
         NodeHistory.add(scope.node);

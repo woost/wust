@@ -6,9 +6,7 @@ angular.module("wust").service("NodeHistory", function(DiscourseNode) {
     this.remove = remove;
 
     function remove(id) {
-        _.remove(visited, function(item) {
-            return id === item.node.id;
-        });
+        _.remove(visited, (item) => id === item.node.id);
     }
 
     function add(node) {

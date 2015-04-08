@@ -4,7 +4,7 @@ angular.module("wust").controller("BrowseCtrl", function($scope, $state, Problem
         newTitle: "What is your problem?",
         listTitle: "Existing problems:",
         info: DiscourseNode.problem,
-        queryNodes: _.wrap(Problem, queryNodes),
+        service: Problem,
         addNode: addNode,
         newNode: Problem.$build({
             title: ""
@@ -14,7 +14,7 @@ angular.module("wust").controller("BrowseCtrl", function($scope, $state, Problem
         newTitle: "What is your goal?",
         listTitle: "Existing goals:",
         info: DiscourseNode.goal,
-        queryNodes: _.wrap(Goal, queryNodes),
+        service: Goal,
         addNode: addNode,
         newNode: Goal.$build({
             title: ""
@@ -24,17 +24,16 @@ angular.module("wust").controller("BrowseCtrl", function($scope, $state, Problem
         newTitle: "What is your idea?",
         listTitle: "Existing ideas:",
         info: DiscourseNode.idea,
-        queryNodes: _.wrap(Idea, queryNodes), // listing existing nodes
+        service: Idea,
         addNode: addNode,
         newNode: Idea.$build({
             title: ""
         })
     };
 
-    var slides = [problems, goals, ideas];
-    $scope.slides = slides;
+    $scope.slides = [problems, goals, ideas];
 
-    $scope.$watch(() => _.find(slides, "active"), currentSlide => currentSlide.queryNodes());
+    $scope.$watch(() => _.find($scope.slides, "active"), active => setNodes(active));
 
     function addNode() {
         this.newNode.$save().$then(data => {
@@ -45,7 +44,7 @@ angular.module("wust").controller("BrowseCtrl", function($scope, $state, Problem
         });
     }
 
-    function queryNodes(service) {
-        service.$search().$then(data => this.nodes = data);
+    function setNodes(slide) {
+        slide.nodes = slide.service.$search();
     }
 });
