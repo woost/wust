@@ -8,7 +8,6 @@ angular.module("wust").service("DiscourseNodeList", function(DiscourseNode, Idea
                     title: ""
                 });
                 this.list = connService.$search();
-                this.connService = connService;
                 this.info = nodeInfo;
                 this.style = styleInfo;
                 // this binds all this methods to this, which is needed here,
@@ -32,7 +31,7 @@ angular.module("wust").service("DiscourseNodeList", function(DiscourseNode, Idea
             }
 
             add(elem) {
-                this.connService.$create({id: elem.id}).$then(data => {
+                this.list.$create(_.pick(elem, "id")).$then(data => {
                     humane.success("Connected node");
                 });
             }
