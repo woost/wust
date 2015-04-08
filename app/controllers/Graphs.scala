@@ -11,7 +11,7 @@ import modules.json.GraphFormat._
 import model._
 
 object Graphs extends Controller with DatabaseController {
-  def show(id: String) = Action {
+  def show() = Action {
     val discourse = wholeDiscourseGraph
     Ok(Json.toJson(discourse))
   }

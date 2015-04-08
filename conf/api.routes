@@ -43,6 +43,6 @@ DELETE /ideas/:uuid/goals/:uuidGoal controllers.Ideas.disconnectGoal(uuid: Strin
 DELETE /ideas/:uuid/problems/:uuidProblem controllers.Ideas.disconnectProblem(uuid: String, uuidProblem: String)
 DELETE /ideas/:uuid/ideas/:uuidIdea controllers.Ideas.disconnectIdea(uuid: String, uuidIdea: String)
 
-GET /graphs/:id controllers.Graphs.show(id: String)
+GET /graphs controllers.Graphs.show
 
 GET /search controllers.Search.index(label: Option[String], title: Option[String])
