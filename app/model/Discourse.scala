@@ -5,108 +5,141 @@ import renesca.graph._
 import renesca.parameter.StringPropertyValue
 import renesca.parameter.implicits._
 
-trait Schema {
-  def graph: Graph
-}
+package object schema {
 
-trait SchemaNodeFilter extends Schema {
-  def filterNodes[T <: SchemaNode](nodes: Set[Node], nodeFactory: SchemaNodeFactory[T]): Set[T] = {
-    nodes.filter(_.labels.contains(nodeFactory.label)).map { node =>
-      val schemaNode = nodeFactory.create(node)
-      schemaNode.graph = graph
-      schemaNode
+  trait SchemaNodeFilter {
+    def graph: Graph
+
+    def filterNodes[T <: SchemaNode](nodes: Set[Node], nodeFactory: SchemaNodeFactory[T]): Set[T] = {
+      nodes.filter(_.labels.contains(nodeFactory.label)).map { node =>
+        val schemaNode = nodeFactory.create(node)
+        schemaNode.graph = graph
+        schemaNode
+      }
+    }
+
+    def filterRelations[RELATION <: SchemaRelation[START, END], START <: SchemaNode, END <: SchemaNode]
+    (relations: Set[Relation], relationFactory: SchemaRelationFactory[RELATION, START, END]): Set[RELATION] = {
+      relations.filter(_.relationType == relationFactory.relationType).map(relationFactory.create)
     }
   }
 
-  def filterRelations[RELATION <: SchemaRelation[START, END], START <: SchemaNode, END <: SchemaNode]
-  (relations: Set[Relation], relationFactory: SchemaRelationFactory[RELATION, START, END]): Set[RELATION] = {
-    relations.filter(_.relationType == relationFactory.relationType).map(relationFactory.create)
-  }
-}
+  trait SchemaGraph extends SchemaNodeFilter {
+    def nodesAs[T <: SchemaNode](nodeFactory: SchemaNodeFactory[T]) = {
+      filterNodes(graph.nodes.toSet, nodeFactory)
+    }
 
-trait SchemaGraph extends Schema with SchemaNodeFilter {
-  def nodesAs[T <: SchemaNode](nodeFactory: SchemaNodeFactory[T]) = {
-    filterNodes(graph.nodes.toSet, nodeFactory)
-  }
+    def relationsAs[RELATION <: SchemaRelation[START, END], START <: SchemaNode, END <: SchemaNode]
+    (relationFactory: SchemaRelationFactory[RELATION, START, END]) = {
+      filterRelations(graph.relations.toSet, relationFactory)
+    }
 
-  def relationsAs[RELATION <: SchemaRelation[START, END], START <: SchemaNode, END <: SchemaNode]
-  (relationFactory: SchemaRelationFactory[RELATION, START, END]) = {
-    filterRelations(graph.relations.toSet, relationFactory)
-  }
+    def add(schemaItem: SchemaItem) {
+      schemaItem match {
+        case hyperRelation: HyperRelation[_, _, _, _, _] =>
+          graph.nodes += hyperRelation.node
+          graph.relations += hyperRelation.startRelation.relation
+          graph.relations += hyperRelation.endRelation.relation
 
-  def add(schemaNode: SchemaNode) {
-    graph.nodes += schemaNode.node
-  }
+        case relation: SchemaRelation[_, _] =>
+          graph.relations += relation.relation
 
-  def add[START <: SchemaNode, END <: SchemaNode](schemaAbstractRelation: SchemaAbstractRelation[START, END]) {
-    schemaAbstractRelation match {
-      case relation: HyperRelation[START, END] =>
-        graph.nodes += relation.node.node
-        graph.relations += relation.startRelation.relation
-        graph.relations += relation.endRelation.relation
-
-      case relation: SchemaRelation[START, END] =>
-        graph.relations += relation.relation
+        case schemaNode: SchemaNode =>
+          graph.nodes += schemaNode.node
+      }
     }
   }
-}
 
+  sealed trait SchemaItem
 
-trait SchemaNodeFactory[+T <: SchemaNode] {
-  def label: Label
-  def create(node: Node): T
+  trait SchemaNode extends SchemaItem with SchemaNodeFilter {
+    def label = node.labels.head
+    def node: Node
+    implicit var graph: Graph = null
 
-  def local: T = create(Node.local(List(label)))
-}
-
-
-trait SchemaNode extends Schema with SchemaNodeFilter {
-  def label = node.labels.head
-  def node: Node
-  implicit var graph: Graph = null
-
-  def neighboursAs[T <: SchemaNode](nodeFactory: SchemaNodeFactory[T]) = filterNodes(node.neighbours, nodeFactory)
-  def successorsAs[T <: SchemaNode](nodeFactory: SchemaNodeFactory[T]) = filterNodes(node.successors, nodeFactory)
-  def predecessorsAs[T <: SchemaNode](nodeFactory: SchemaNodeFactory[T]) = filterNodes(node.predecessors, nodeFactory)
-  def getStringProperty(key: String) = node.properties(key).asInstanceOf[StringPropertyValue]
-}
-
-trait SchemaRelationFactory[RELATION <: SchemaRelation[START, END], START <: SchemaNode, END <: SchemaNode] {
-  def relationType: RelationType
-
-  def create(relation: Relation): RELATION
-  def startNodeFactory: SchemaNodeFactory[START]
-  def endNodeFactory: SchemaNodeFactory[END]
-
-  def local(startNode: START, endNode: END): RELATION = {
-    create(Relation.local(startNode.node, endNode.node, relationType))
+    def neighboursAs[T <: SchemaNode](nodeFactory: SchemaNodeFactory[T]) = filterNodes(node.neighbours, nodeFactory)
+    def successorsAs[T <: SchemaNode](nodeFactory: SchemaNodeFactory[T]) = filterNodes(node.successors, nodeFactory)
+    def predecessorsAs[T <: SchemaNode](nodeFactory: SchemaNodeFactory[T]) = filterNodes(node.predecessors, nodeFactory)
+    def getStringProperty(key: String) = node.properties(key).asInstanceOf[StringPropertyValue]
   }
-}
+
+  trait SchemaAbstractRelation[+START <: SchemaNode, +END <: SchemaNode] {
+    def startNode: START
+    def endNode: END
+  }
+
+  trait SchemaRelation[+START <: SchemaNode, +END <: SchemaNode] extends SchemaItem with SchemaAbstractRelation[START, END] {
+    def relation: Relation
+    def relationType: RelationType = relation.relationType
+  }
 
 
-trait SchemaAbstractRelation[+START <: SchemaNode, +END <: SchemaNode] {
-  def startNode: START
-  def endNode: END
-}
+  trait HyperRelation[+STARTNODE <: SchemaNode, STARTRELATION <: SchemaRelation[STARTNODE, HYPERRELATION],
+  HYPERRELATION <: HyperRelation[STARTNODE, STARTRELATION, HYPERRELATION, ENDRELATION, ENDNODE],
+  ENDRELATION <: SchemaRelation[HYPERRELATION, ENDNODE],
+  +ENDNODE <: SchemaNode]
+    extends SchemaItem with SchemaAbstractRelation[STARTNODE, ENDNODE] with SchemaNode {
+    protected[schema] var _startRelation: STARTRELATION = _
+    protected[schema] var _endRelation: ENDRELATION = _
+    def startRelation = _startRelation
+    def endRelation = _endRelation
+    def startNode = startRelation.startNode
+    def endNode = endRelation.endNode
+  }
 
-trait SchemaRelation[+START <: SchemaNode, +END <: SchemaNode] extends SchemaAbstractRelation[START, END] {
-  def relation: Relation
-  def relationType: RelationType = relation.relationType
-}
 
-trait HyperRelation[+START <: SchemaNode, +END <: SchemaNode] extends SchemaAbstractRelation[START, END] {
-  def node: SchemaNode
-  def startRelation: SchemaRelation[START, SchemaNode]
-  def endRelation: SchemaRelation[SchemaNode, END]
-}
+  trait SchemaNodeFactory[+T <: SchemaNode] {
+    def label: Label
+    def create(node: Node): T
 
-object UUID {
-  def applyTo[T <: SchemaNode](node: T) = {
-    node.node.properties("uuid") = java.util.UUID.randomUUID.toString
-    node
+    def local: T = create(Node.local(List(label)))
+  }
+
+  trait SchemaRelationFactory[RELATION <: SchemaRelation[START, END], START <: SchemaNode, END <: SchemaNode] {
+    def relationType: RelationType
+
+    def create(relation: Relation): RELATION
+    def startNodeFactory: SchemaNodeFactory[START]
+    def endNodeFactory: SchemaNodeFactory[END]
+
+    def local(startNode: START, endNode: END): RELATION = {
+      create(Relation.local(startNode.node, endNode.node, relationType))
+    }
+  }
+
+  trait SchemaHyperRelationFactory[
+  STARTNODE <: SchemaNode, STARTRELATION <: SchemaRelation[STARTNODE, HYPERRELATION],
+  HYPERRELATION <: HyperRelation[STARTNODE, STARTRELATION, HYPERRELATION, ENDRELATION, ENDNODE],
+  ENDRELATION <: SchemaRelation[HYPERRELATION, ENDNODE], ENDNODE <: SchemaNode] extends SchemaNodeFactory[HYPERRELATION] {
+
+    //    override def create(node: Node): HYPERRELATION = ???
+    override def label: Label
+
+    def local(startNode: STARTNODE, endNode: ENDNODE): HYPERRELATION = {
+      val middleNode = super[SchemaNodeFactory].local
+      middleNode._startRelation = startRelationCreate(startNode, Relation.local(startNode.node, middleNode.node, startRelationType), middleNode)
+      middleNode._endRelation = endRelationCreate(middleNode, Relation.local(middleNode.node, endNode.node, endRelationType), endNode)
+      middleNode
+    }
+
+    def startRelationType: RelationType
+    def startRelationCreate(startNode: STARTNODE, relation: Relation, endNode: HYPERRELATION): STARTRELATION
+    def endRelationType: RelationType
+    def endRelationCreate(startNode: HYPERRELATION, relation: Relation, endNode: ENDNODE): ENDRELATION
+    //    def createHyperRelation(startRelation: STARTRELATION, middleNode: HYPERRELATION, endRelation: ENDRELATION): HYPERRELATION
+  }
+
+
+  object UUID {
+    def applyTo[T <: SchemaNode](node: T) = {
+      node.node.properties("uuid") = java.util.UUID.randomUUID.toString
+      node
+    }
   }
 }
 ///////////////////////////////////////////////////
+
+import schema._
 
 @macros.GraphSchema
 object WustSchema {
@@ -127,6 +160,7 @@ object WustSchema {
   }
 
   @Node trait DiscourseNode extends SchemaNode {
+    //TODO: title only belongs to ContentNode
     var title: String;
     val uuid: String
   }
@@ -156,76 +190,37 @@ object WustSchema {
   // @HyperRelation class Solves(startNode: Idea, endNode: Problem)
   // @HyperRelation class Reaches(startNode: Idea, endNode: Goal)
 
-  trait HyperRelationFactory[
-  HYPERRELATION <: HyperRelation[STARTNODE, ENDNODE],
-  STARTNODE <: SchemaNode, STARTRELATION <: SchemaRelation[STARTNODE, MIDDLENODE],
-  MIDDLENODE <: SchemaNode,
-  ENDRELATION <: SchemaRelation[MIDDLENODE, ENDNODE], ENDNODE <: SchemaNode] {
-    def local(startNode: STARTNODE, endNode: ENDNODE): HYPERRELATION = {
-      val middleNode = middleNodeFactory.local
-      val startRelation = startRelationCreate(startNode, Relation.local(startNode.node, middleNode.node, startRelationType), middleNode)
-      val endRelation = endRelationCreate(middleNode, Relation.local(middleNode.node, endNode.node, endRelationType), endNode)
-      create(startRelation, middleNode, endRelation)
-    }
-
-    def label: Label
-    def startRelationType: RelationType
-    def startRelationCreate(startNode: STARTNODE, relation: Relation, endNode: MIDDLENODE): STARTRELATION
-    def endRelationType: RelationType
-    def endRelationCreate(startNode: MIDDLENODE, relation: Relation, endNode: ENDNODE): ENDRELATION
-    def middleNodeFactory: SchemaNodeFactory[MIDDLENODE]
-    def create(startRelation: STARTRELATION, middleNode: MIDDLENODE, endRelation: ENDRELATION): HYPERRELATION
-  }
-
-  object Solves extends HyperRelationFactory[Solves, Idea, IdeaToSolves, SolvesNode, SolvesToProblem, Problem] {
-    def label = SolvesNode.label
-    def startRelationType = "IDEATOSOLVES"
-    def startRelationCreate(startNode: Idea, relation: Relation, endNode: SolvesNode) = IdeaToSolves(startNode, relation, endNode)
-    def endRelationType = "SOLVESTOIDEA"
-    def endRelationCreate(startNode: SolvesNode, relation: Relation, endNode: Problem) = SolvesToProblem(startNode, relation, endNode)
-    def middleNodeFactory = SolvesNode
-    def create(startRelation: IdeaToSolves, middleNode: SolvesNode, endRelation: SolvesToProblem) = new Solves(startRelation, middleNode, endRelation)
-  }
-  object SolvesNode extends SchemaNodeFactory[SolvesNode] {
+  object Solves extends SchemaHyperRelationFactory[Idea, IdeaToSolves, Solves, SolvesToProblem, Problem] {
     override def label: Label = "SOLVES"
-    override def create(node: Node): SolvesNode = new SolvesNode(node)
+    override def create(node: Node): Solves = new Solves(node)
+    override def startRelationType = "IDEATOSOLVES"
+    override def startRelationCreate(startNode: Idea, relation: Relation, endNode: Solves) = IdeaToSolves(startNode, relation, endNode)
+    override def endRelationType = "SOLVESTOPROBLEM"
+    override def endRelationCreate(startNode: Solves, relation: Relation, endNode: Problem) = SolvesToProblem(startNode, relation, endNode)
   }
-  case class SolvesNode(node: Node) extends HyperEdgeNode
-  case class IdeaToSolves(startNode: Idea, relation: Relation, endNode: SolvesNode) extends SchemaRelation[Idea, SolvesNode]
-  case class SolvesToProblem(startNode: SolvesNode, relation: Relation, endNode: Problem) extends SchemaRelation[SolvesNode, Problem]
-  case class Solves(startRelation: IdeaToSolves, node: SolvesNode, endRelation: SolvesToProblem) extends HyperRelation[Idea, Problem] {
-    def startNode = startRelation.startNode
-    def endNode = endRelation.endNode
-  }
+  case class IdeaToSolves(startNode: Idea, relation: Relation, endNode: Solves) extends SchemaRelation[Idea, Solves]
+  case class SolvesToProblem(startNode: Solves, relation: Relation, endNode: Problem) extends SchemaRelation[Solves, Problem]
+  case class Solves(node: Node) extends HyperRelation[Idea, IdeaToSolves, Solves, SolvesToProblem, Problem] with HyperEdgeNode
 
-  object Reaches extends HyperRelationFactory[Reaches, Idea, IdeaToReaches, ReachesNode, ReachesToGoal, Goal] {
-    def label = ReachesNode.label
-    def startRelationType = "IDEATOREACHES"
-    def startRelationCreate(startNode: Idea, relation: Relation, endNode: ReachesNode) = IdeaToReaches(startNode, relation, endNode)
-    def endRelationType = "REACHESTOIDEA"
-    def endRelationCreate(startNode: ReachesNode, relation: Relation, endNode: Goal) = ReachesToGoal(startNode, relation, endNode)
-    def middleNodeFactory = ReachesNode
-    def create(startRelation: IdeaToReaches, middleNode: ReachesNode, endRelation: ReachesToGoal) = new Reaches(startRelation, middleNode, endRelation)
-  }
-  object ReachesNode extends SchemaNodeFactory[ReachesNode] {
+  object Reaches extends SchemaHyperRelationFactory[Idea, IdeaToReaches, Reaches, ReachesToGoal, Goal] {
     override def label: Label = "REACHES"
-    override def create(node: Node): ReachesNode = new ReachesNode(node)
+    override def create(node: Node): Reaches = new Reaches(node)
+    override def startRelationType = "IDEATOREACHES"
+    override def startRelationCreate(startNode: Idea, relation: Relation, endNode: Reaches) = IdeaToReaches(startNode, relation, endNode)
+    override def endRelationType = "REACHESTOGOAL"
+    override def endRelationCreate(startNode: Reaches, relation: Relation, endNode: Goal) = ReachesToGoal(startNode, relation, endNode)
   }
-  case class ReachesNode(node: Node) extends HyperEdgeNode
-  case class IdeaToReaches(startNode: Idea, relation: Relation, endNode: ReachesNode) extends SchemaRelation[Idea, ReachesNode]
-  case class ReachesToGoal(startNode: ReachesNode, relation: Relation, endNode: Goal) extends SchemaRelation[ReachesNode, Goal]
-  case class Reaches(startRelation: IdeaToReaches, node: ReachesNode, endRelation: ReachesToGoal) extends HyperRelation[Idea, Goal] {
-    def startNode = startRelation.startNode
-    def endNode = endRelation.endNode
-  }
+  case class IdeaToReaches(startNode: Idea, relation: Relation, endNode: Reaches) extends SchemaRelation[Idea, Reaches]
+  case class ReachesToGoal(startNode: Reaches, relation: Relation, endNode: Goal) extends SchemaRelation[Reaches, Goal]
+  case class Reaches(node: Node) extends HyperRelation[Idea, IdeaToReaches, Reaches, ReachesToGoal, Goal] with HyperEdgeNode
 
   @Relation class SubIdea(startNode: Idea, endNode: Idea)
   @Relation class SubGoal(startNode: Goal, endNode: Goal)
   @Relation class Causes(startNode: Problem, endNode: Problem)
   @Relation class Prevents(startNode: Problem, endNode: Goal)
-  @Relation class SupportsSolves(startNode: ProArgument, endNode: SolvesNode)
-  @Relation class OpposesSolves(startNode: ConArgument, endNode: SolvesNode)
-  @Relation class SupportsReaches(startNode: ProArgument, endNode: ReachesNode)
-  @Relation class OpposesReaches(startNode: ConArgument, endNode: ReachesNode)
+  @Relation class SupportsSolves(startNode: ProArgument, endNode: Solves)
+  @Relation class OpposesSolves(startNode: ConArgument, endNode: Solves)
+  @Relation class SupportsReaches(startNode: ProArgument, endNode: Reaches)
+  @Relation class OpposesReaches(startNode: ConArgument, endNode: Reaches)
 }
 
