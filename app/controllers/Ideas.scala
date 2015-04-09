@@ -20,7 +20,7 @@ object Ideas extends Controller with ContentNodesController[Idea] {
   }
 
   def showGoals(uuid: String) = Action {
-    val query = Query(s"match (:${ Idea.label } {uuid: {uuid}})-[:${ Reaches.startRelationType }]->(:${ Reaches.label })-[:${ Reaches.endRelationType }]->(goal :${ Goal.label }) return goal", Map("uuid" -> uuid))
+    val query = Query(s"match (:${ Idea.label } {uuid: {uuid}})-[:${ Achieves.startRelationType }]->(:${ Achieves.label })-[:${ Achieves.endRelationType }]->(goal :${ Goal.label }) return goal", Map("uuid" -> uuid))
     Ok(Json.toJson(db.queryGraph(query).nodes.map(Goal.create)))
   }
 
@@ -42,7 +42,7 @@ object Ideas extends Controller with ContentNodesController[Idea] {
     val idea = discourse.ideas.find(p => p.uuid == uuid).get
     val goal = discourse.goals.find(p => p.uuid == connect.uuid).get
 
-    discourse.add(Reaches.local(idea, goal))
+    discourse.add(Achieves.local(idea, goal))
     db.persistChanges(discourse.graph)
 
     broadcastConnect(uuid, goal)
@@ -80,7 +80,7 @@ object Ideas extends Controller with ContentNodesController[Idea] {
   }
 
   def disconnectGoal(uuid: String, uuidGoal: String) = Action {
-    disconnect(uuid, List(Reaches.startRelationType, Reaches.endRelationType), uuidGoal)
+    disconnect(uuid, List(Achieves.startRelationType, Achieves.endRelationType), uuidGoal)
     broadcastDisconnect(uuid, uuidGoal, "GOAL")
     Ok(JsObject(Seq()))
   }

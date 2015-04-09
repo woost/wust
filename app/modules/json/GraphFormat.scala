@@ -50,11 +50,11 @@ object GraphFormat {
       val simplify: PartialFunction[DiscourseNode, Replacement] = {
         case Solves(node) if node.inDegree == 1 && node.outDegree == 1  =>
           Replacement(node, node.relations, Some(Relation.local(node.predecessors.head, node.successors.head, "SOLVES")))
-        case Reaches(node) if node.inDegree == 1 && node.outDegree == 1 =>
+        case Achieves(node) if node.inDegree == 1 && node.outDegree == 1 =>
           Replacement(node, node.relations, Some(Relation.local(node.predecessors.head, node.successors.head, "REACHES")))
         case Solves(node) if node.degree < 2                            =>
           Replacement(node, node.relations)
-        case Reaches(node) if node.degree < 2                           =>
+        case Achieves(node) if node.degree < 2                           =>
           Replacement(node, node.relations)
       }
 

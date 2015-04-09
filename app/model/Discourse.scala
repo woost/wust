@@ -112,9 +112,6 @@ package object schema {
   HYPERRELATION <: HyperRelation[STARTNODE, STARTRELATION, HYPERRELATION, ENDRELATION, ENDNODE],
   ENDRELATION <: SchemaRelation[HYPERRELATION, ENDNODE], ENDNODE <: SchemaNode] extends SchemaNodeFactory[HYPERRELATION] {
 
-    //    override def create(node: Node): HYPERRELATION = ???
-    override def label: Label
-
     def local(startNode: STARTNODE, endNode: ENDNODE): HYPERRELATION = {
       val middleNode = super[SchemaNodeFactory].local
       middleNode._startRelation = startRelationCreate(startNode, Relation.local(startNode.node, middleNode.node, startRelationType), middleNode)
@@ -126,7 +123,6 @@ package object schema {
     def startRelationCreate(startNode: STARTNODE, relation: Relation, endNode: HYPERRELATION): STARTRELATION
     def endRelationType: RelationType
     def endRelationCreate(startNode: HYPERRELATION, relation: Relation, endNode: ENDNODE): ENDRELATION
-    //    def createHyperRelation(startRelation: STARTRELATION, middleNode: HYPERRELATION, endRelation: ENDRELATION): HYPERRELATION
   }
 
 
@@ -144,6 +140,7 @@ import schema._
 @macros.GraphSchema
 object WustSchema {
   @Schema class Discourse {
+    // TODO: generate Sets for all node traits
     def nodes: Set[DiscourseNode]
   }
 
@@ -161,12 +158,11 @@ object WustSchema {
 
   @Node trait DiscourseNode extends SchemaNode {
     //TODO: title only belongs to ContentNode
-    var title: String;
+    var title: String
     val uuid: String
   }
   //TODO: infer factory name
   @Node trait ContentNode extends DiscourseNode {def factory: ContentNodeFactory }
-  @Node trait HyperEdgeNode extends DiscourseNode {def factory: DiscourseNodeFactory }
 
   //TODO: generate indirect neighbour-accessors based on hypernodes
   //TODO: named node/relation groups (based on nodeTraits?)
@@ -188,7 +184,7 @@ object WustSchema {
   @Node class ProArgument extends ContentNode
   @Node class ConArgument extends ContentNode
   // @HyperRelation class Solves(startNode: Idea, endNode: Problem)
-  // @HyperRelation class Reaches(startNode: Idea, endNode: Goal)
+  // @HyperRelation class Achieves(startNode: Idea, endNode: Goal)
 
   object Solves extends SchemaHyperRelationFactory[Idea, IdeaToSolves, Solves, SolvesToProblem, Problem] {
     override def label: Label = "SOLVES"
@@ -200,27 +196,27 @@ object WustSchema {
   }
   case class IdeaToSolves(startNode: Idea, relation: Relation, endNode: Solves) extends SchemaRelation[Idea, Solves]
   case class SolvesToProblem(startNode: Solves, relation: Relation, endNode: Problem) extends SchemaRelation[Solves, Problem]
-  case class Solves(node: Node) extends HyperRelation[Idea, IdeaToSolves, Solves, SolvesToProblem, Problem] with HyperEdgeNode
+  case class Solves(node: Node) extends HyperRelation[Idea, IdeaToSolves, Solves, SolvesToProblem, Problem] with DiscourseNode
 
-  object Reaches extends SchemaHyperRelationFactory[Idea, IdeaToReaches, Reaches, ReachesToGoal, Goal] {
-    override def label: Label = "REACHES"
-    override def create(node: Node): Reaches = new Reaches(node)
-    override def startRelationType = "IDEATOREACHES"
-    override def startRelationCreate(startNode: Idea, relation: Relation, endNode: Reaches) = IdeaToReaches(startNode, relation, endNode)
-    override def endRelationType = "REACHESTOGOAL"
-    override def endRelationCreate(startNode: Reaches, relation: Relation, endNode: Goal) = ReachesToGoal(startNode, relation, endNode)
+  object Achieves extends SchemaHyperRelationFactory[Idea, IdeaToAchieves, Achieves, AchievesToGoal, Goal] {
+    override def label: Label = "ACHIEVES"
+    override def create(node: Node): Achieves = new Achieves(node)
+    override def startRelationType = "IDEATOACHIEVES"
+    override def startRelationCreate(startNode: Idea, relation: Relation, endNode: Achieves) = IdeaToAchieves(startNode, relation, endNode)
+    override def endRelationType = "ACHIEVESTOGOAL"
+    override def endRelationCreate(startNode: Achieves, relation: Relation, endNode: Goal) = AchievesToGoal(startNode, relation, endNode)
   }
-  case class IdeaToReaches(startNode: Idea, relation: Relation, endNode: Reaches) extends SchemaRelation[Idea, Reaches]
-  case class ReachesToGoal(startNode: Reaches, relation: Relation, endNode: Goal) extends SchemaRelation[Reaches, Goal]
-  case class Reaches(node: Node) extends HyperRelation[Idea, IdeaToReaches, Reaches, ReachesToGoal, Goal] with HyperEdgeNode
+  case class IdeaToAchieves(startNode: Idea, relation: Relation, endNode: Achieves) extends SchemaRelation[Idea, Achieves]
+  case class AchievesToGoal(startNode: Achieves, relation: Relation, endNode: Goal) extends SchemaRelation[Achieves, Goal]
+  case class Achieves(node: Node) extends HyperRelation[Idea, IdeaToAchieves, Achieves, AchievesToGoal, Goal] with DiscourseNode
 
   @Relation class SubIdea(startNode: Idea, endNode: Idea)
   @Relation class SubGoal(startNode: Goal, endNode: Goal)
   @Relation class Causes(startNode: Problem, endNode: Problem)
   @Relation class Prevents(startNode: Problem, endNode: Goal)
-  @Relation class SupportsSolves(startNode: ProArgument, endNode: Solves)
-  @Relation class OpposesSolves(startNode: ConArgument, endNode: Solves)
-  @Relation class SupportsReaches(startNode: ProArgument, endNode: Reaches)
-  @Relation class OpposesReaches(startNode: ConArgument, endNode: Reaches)
+  @Relation class SupportsSolution(startNode: ProArgument, endNode: Solves)
+  @Relation class OpposesSolution(startNode: ConArgument, endNode: Solves)
+  @Relation class SupportsAchievement(startNode: ProArgument, endNode: Achieves)
+  @Relation class OpposesAchievement(startNode: ConArgument, endNode: Achieves)
 }
 
