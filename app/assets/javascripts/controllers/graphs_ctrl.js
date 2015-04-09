@@ -13,11 +13,10 @@ angular.module("wust").controller("GraphsCtrl", function($scope, $state, $filter
 
     function filter(graph) {
         var edgeMap = _(graph.edges).map(edge => {
-            //todo: helper function to construct object with var on lhs
-            var res = {};
-            res[edge.from] = [edge.to];
-            res[edge.to] = [edge.from];
-            return res;
+            return {
+                [edge.from]: [edge.to],
+                [edge.to]: [edge.from]
+            };
         }).reduce(_.partialRight(_.merge, (a, b) => {
             return a ? a.concat(b) : b;
         }, _));
