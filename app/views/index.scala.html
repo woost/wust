@@ -1,3 +1,4 @@
+@(schema: play.api.libs.json.JsValue)
 <!DOCTYPE html>
 
 <html ng-app='wust'>
@@ -6,6 +7,12 @@
         <title>Wust</title>
         @includes()
         @noscript()
+
+        <script type="text/javascript" charset="utf-8">
+            var globals = {
+                schema: @Html(play.api.libs.json.Json.stringify(schema))
+            };
+        </script>
     </head>
 
     <body>
