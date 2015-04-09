@@ -1,10 +1,6 @@
 package model
 
-
 import renesca.schema._
-import renesca.graph._
-import renesca.parameter.StringPropertyValue
-import renesca.parameter.implicits._
 
 @macros.GraphSchema
 object WustSchema {

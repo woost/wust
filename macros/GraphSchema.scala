@@ -238,6 +238,9 @@ object GraphSchemaMacro {
 
         q"""
         object ${ TermName(schemaName.toString) } extends ..$schemaParents {
+            import renesca.graph._
+            import renesca.parameter.StringPropertyValue
+            import renesca.parameter.implicits._
             ..$nodeTraits
             ..$nodeFactories
             ..$nodeClasses
