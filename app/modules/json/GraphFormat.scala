@@ -10,7 +10,7 @@ import renesca.parameter.PropertyKey._
 import renesca.parameter.StringPropertyValue
 import model._
 import model.WustSchema._
-import model.schema._
+import renesca.schema._
 
 object GraphFormat {
   implicit def LabelToString(label: Label): String = label.name
@@ -48,11 +48,11 @@ object GraphFormat {
 
       case class Replacement(deleteNode: Node, deleteRelations: Iterable[Relation], newRelation: Option[Relation] = None)
       val simplify: PartialFunction[DiscourseNode, Replacement] = {
-        case Solves(node) if node.inDegree == 1 && node.outDegree == 1  =>
+        case Solves(node) if node.inDegree == 1 && node.outDegree == 1   =>
           Replacement(node, node.relations, Some(Relation.local(node.predecessors.head, node.successors.head, "SOLVES")))
         case Achieves(node) if node.inDegree == 1 && node.outDegree == 1 =>
           Replacement(node, node.relations, Some(Relation.local(node.predecessors.head, node.successors.head, "REACHES")))
-        case Solves(node) if node.degree < 2                            =>
+        case Solves(node) if node.degree < 2                             =>
           Replacement(node, node.relations)
         case Achieves(node) if node.degree < 2                           =>
           Replacement(node, node.relations)

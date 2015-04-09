@@ -67,7 +67,10 @@ lazy val macros = (project in file("macros")).
   settings(
     scalaVersion := scalaV,
     addCompilerPlugin("org.scalamacros" % "paradise" % paradiseVersion cross CrossVersion.full),
-    libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaV,
+    libraryDependencies ++= Seq(
+      "org.scala-lang" % "scala-reflect" % scalaV,
+      "com.github.renesca" %% "renesca" % "0.1.3"
+    ),
     scalacOptions ++= scalacOpts
   )
 

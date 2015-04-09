@@ -1,4 +1,4 @@
-package macros
+package renesca.schema.macros
 
 import scala.reflect.macros.whitebox
 import collection.mutable
