@@ -34,7 +34,7 @@ lazy val wust = (project in file(".")).settings(
     "org.webjars.bower" % "d3" % "3.5.5",
     "org.webjars.bower" % "humane-js" % "3.2.2",
     "org.webjars.bower" % "angular-xeditable" % "0.1.9",
-    "org.webjars.bower" % "spin.js" % "2.0.2",// really?
+    "org.webjars.bower" % "spin.js" % "2.0.2", // really?
     "org.webjars" % "animate.css" % "3.2.5",
     // atmosphere
     "org.atmosphere" % "atmosphere-play" % "2.1.1" exclude("javax.servlet", "servlet-api"),
@@ -52,7 +52,7 @@ lazy val wust = (project in file(".")).settings(
   addCompilerPlugin("org.scalamacros" % "paradise" % paradiseVersion cross CrossVersion.full)
 ).
   enablePlugins(PlayScala, SbtWeb).
-  dependsOn(macros)
+  dependsOn(schema)
 // aggregate(projectToRef(scalajs)).
 
 lazy val scalajs = (project in file("scalajs")).
@@ -62,6 +62,14 @@ lazy val scalajs = (project in file("scalajs")).
     persistLauncher in Test := false,
     scalacOptions ++= scalacOpts
   ).enablePlugins(ScalaJSPlugin, ScalaJSPlay)
+
+lazy val schema = (project in file("schema")).
+  settings(
+    scalaVersion := scalaV,
+    scalacOptions ++= scalacOpts,
+    addCompilerPlugin("org.scalamacros" % "paradise" % paradiseVersion cross CrossVersion.full)
+  ).
+  dependsOn(macros)
 
 lazy val macros = (project in file("macros")).
   settings(

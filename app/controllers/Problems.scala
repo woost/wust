@@ -14,7 +14,9 @@ import spray.can.Http.ConnectionAttemptFailedException
 
 object Problems extends Controller with ContentNodesController[Problem] {
   override def factory = Problem
+
   override def apiname = "problems"
+
   override def decodeRequest(jsValue: JsValue) = jsValue.as[ProblemAddRequest]
 
   def index() = Action {
@@ -26,17 +28,17 @@ object Problems extends Controller with ContentNodesController[Problem] {
   }
 
   def showGoals(uuid: String) = Action {
-    val query = Query(s"match (:${ Problem.label } {uuid: {uuid}})-[:${ Prevents.relationType }]->(goal :${ Goal.label }) return goal", Map("uuid" -> uuid))
+    val query = Query(s"match (:${Problem.label} {uuid: {uuid}})-[:${Prevents.relationType}]->(goal :${Goal.label}) return goal", Map("uuid" -> uuid))
     Ok(Json.toJson(db.queryGraph(query).nodes.map(Goal.create)))
   }
 
   def showIdeas(uuid: String) = Action {
-    val query = Query(s"match (:${ Problem.label } {uuid: {uuid}})<-[:${ Solves.endRelationType }]-(:${ Solves.label })<-[:${ Solves.startRelationType }]-(idea :${ Idea.label }) return idea", Map("uuid" -> uuid))
+    val query = Query(s"match (:${Problem.label} {uuid: {uuid}})<-[:${Solves.endRelationType}]-(:${Solves.label})<-[:${Solves.startRelationType}]-(idea :${Idea.label}) return idea", Map("uuid" -> uuid))
     Ok(Json.toJson(db.queryGraph(query).nodes.map(Idea.create)))
   }
 
   def showProblems(uuid: String) = Action {
-    val query = Query(s"match (:${ Problem.label } {uuid: {uuid}})<-[:${ Causes.relationType }]-(problem :${ Problem.label }) return problem", Map("uuid" -> uuid))
+    val query = Query(s"match (:${Problem.label} {uuid: {uuid}})<-[:${Causes.relationType}]-(problem :${Problem.label}) return problem", Map("uuid" -> uuid))
     Ok(Json.toJson(db.queryGraph(query).nodes.map(Problem.create)))
   }
 
