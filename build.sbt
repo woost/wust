@@ -52,7 +52,7 @@ lazy val wust = (project in file(".")).settings(
   addCompilerPlugin("org.scalamacros" % "paradise" % paradiseVersion cross CrossVersion.full)
 ).
   enablePlugins(PlayScala, SbtWeb).
-  dependsOn(schema)
+  dependsOn(schema, macros)
 // aggregate(projectToRef(scalajs)).
 
 lazy val scalajs = (project in file("scalajs")).
