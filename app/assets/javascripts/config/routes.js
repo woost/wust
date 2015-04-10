@@ -63,7 +63,7 @@ angular.module("wust").factory("httpErrorResponseInterceptor", function($q /*, $
             // http://stackoverflow.com/questions/20230691/injecting-state-ui-router-into-http-interceptor-causes-circular-dependency
             //var state = $injector.get("$state");
             //state.go("/");
-            humane.error(`Server says:<br/>${response.status} - ${response.data}`);
+            humane.error(`Server says:<br/>${response.status} - ${JSON.stringify(response.data)}`);
 
             return $q.reject(response);
         }
