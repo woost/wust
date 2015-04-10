@@ -1,7 +1,7 @@
 angular.module("wust").service("Live", function($rootScope) {
     this.subscribe = subscribe;
 
-    var request = {
+    let request = {
         //TODO: decide on atmosphere client configuration
         contentType: "application/json",
         trackMessageLength: true,
@@ -19,10 +19,10 @@ angular.module("wust").service("Live", function($rootScope) {
     };
 
     function subscribe(url, handler) {
-        var newRequest = _.merge({
+        let newRequest = _.merge({
             url: location.origin + url,
             onMessage: response => {
-                var json = JSON.parse(response.responseBody);
+                let json = JSON.parse(response.responseBody);
                 console.log(json);
                 handler(json);
             },
@@ -34,7 +34,7 @@ angular.module("wust").service("Live", function($rootScope) {
         console.log("subscribing to " + url);
         atmosphere.subscribe(newRequest);
 
-        var deregisterEvent = $rootScope.$on("$stateChangeSuccess", () => {
+        let deregisterEvent = $rootScope.$on("$stateChangeSuccess", () => {
             console.log("unsubscribing " + url);
             atmosphere.unsubscribe(newRequest);
             deregisterEvent();

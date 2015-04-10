@@ -17,7 +17,7 @@ angular.module("wust").service("DiscourseNode", function(Labels) {
         label: Labels.Idea
     };
 
-    var mappings = _([this.goal, this.problem, this.idea]).map(node => {
+    let mappings = _([this.goal, this.problem, this.idea]).map(node => {
         return {
             [node.label]: node
         };

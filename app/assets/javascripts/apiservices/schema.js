@@ -1,5 +1,5 @@
 angular.module("wust").config(function($provide) {
-    var schema = angular.copy(window.globals.schema);
+    let schema = angular.copy(window.globals.schema);
     $provide.constant("Labels", _(schema.models).map((model) => {
         return {
             [model.name]: model.label

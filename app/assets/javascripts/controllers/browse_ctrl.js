@@ -1,5 +1,5 @@
 angular.module("wust").controller("BrowseCtrl", function($scope, $state, Problem, Goal, Idea, DiscourseNode) {
-    var problems = {
+    let problems = {
         active: true,
         newTitle: "What is your problem?",
         listTitle: "Existing problems:",
@@ -10,7 +10,7 @@ angular.module("wust").controller("BrowseCtrl", function($scope, $state, Problem
             title: ""
         })
     };
-    var goals = {
+    let goals = {
         newTitle: "What is your goal?",
         listTitle: "Existing goals:",
         info: DiscourseNode.goal,
@@ -20,7 +20,7 @@ angular.module("wust").controller("BrowseCtrl", function($scope, $state, Problem
             title: ""
         })
     };
-    var ideas = {
+    let ideas = {
         newTitle: "What is your idea?",
         listTitle: "Existing ideas:",
         info: DiscourseNode.idea,

@@ -1,6 +1,6 @@
 angular.module("wust").service("NodeHistory", function(DiscourseNode) {
-    var maximum = 8;
-    var visited = [];
+    let maximum = 8;
+    let visited = [];
     this.visited = visited;
     this.add = add;
     this.remove = remove;
@@ -11,7 +11,7 @@ angular.module("wust").service("NodeHistory", function(DiscourseNode) {
 
     function add(node) {
         node.$then(function(node) {
-            var obj = {
+            let obj = {
                 node: node,
                 info: DiscourseNode.get(node.label)
             };

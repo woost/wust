@@ -8,15 +8,15 @@
                 "</div></div>",
             replace: true,
             link: function(scope, elem) {
-                var opts = {
+                let opts = {
                     length: 12,
                     lines: 8,
                     radius: 12,
                     width: 8,
                 };
 
-                var spinner = new Spinner(opts);
-                var target = elem[0];
+                let spinner = new Spinner(opts);
+                let target = elem[0];
                 scope.isRouteLoading = false;
 
                 scope.$on("$stateChangeStart", startSpinner);

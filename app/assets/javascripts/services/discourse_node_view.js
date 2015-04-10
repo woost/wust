@@ -2,7 +2,7 @@ angular.module("wust").factory("DiscourseNodeView", function($state, $stateParam
     return setScope;
 
     function setScope(scope, nodeInfo, service) {
-        var id = $stateParams.id;
+        let id = $stateParams.id;
 
         scope.nodeCss = nodeInfo.css;
         scope.node = service.$find(id);
@@ -20,7 +20,7 @@ angular.module("wust").factory("DiscourseNodeView", function($state, $stateParam
 
     function onMessage(scope, message) {
         scope.$apply(() => {
-            var list;
+            let list;
             switch (message.type) {
                 case "connect":
                     list = listOf(message.data);

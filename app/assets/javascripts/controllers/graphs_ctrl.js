@@ -12,7 +12,7 @@ angular.module("wust").controller("GraphsCtrl", function($scope, $state, $filter
     };
 
     function filter(graph) {
-        var edgeMap = _(graph.edges).map(edge => {
+        let edgeMap = _(graph.edges).map(edge => {
             return {
                 [edge.from]: [edge.to],
                 [edge.to]: [edge.from]
@@ -22,23 +22,23 @@ angular.module("wust").controller("GraphsCtrl", function($scope, $state, $filter
         }, _));
 
         return function() {
-            var filtered = $filter("fuzzyFilter")(graph.nodes, $scope.search);
-            var filteredIds = _.map(filtered, "id");
-            var ids = filteredIds;
+            let filtered = $filter("fuzzyFilter")(graph.nodes, $scope.search);
+            let filteredIds = _.map(filtered, "id");
+            let ids = filteredIds;
             for (let i = 0; i < ids.length; i++) {
                 ids = _.union(ids, edgeMap[ids[i]]);
             }
 
             $scope.graph.nodes = _.map(graph.nodes, node => {
-                var marked = _(filteredIds).includes(node.id);
-                var visible = marked || _(ids).includes(node.id);
+                let marked = _(filteredIds).includes(node.id);
+                let visible = marked || _(ids).includes(node.id);
                 return _.merge(node, {
                     visible: visible,
                     marked: marked
                 });
             });
             $scope.graph.edges = _.map(graph.edges, edge => {
-                var visible = _(ids).includes(edge.from) && _(ids).includes(edge.to);
+                let visible = _(ids).includes(edge.from) && _(ids).includes(edge.to);
                 return _.merge(edge, {
                     visible: visible
                 });
@@ -76,7 +76,7 @@ angular.module("wust").controller("GraphsCtrl", function($scope, $state, $filter
     }
 
     function onClick(d) {
-        var state = DiscourseNode.get(d.label).state;
+        let state = DiscourseNode.get(d.label).state;
         $state.go(state, {
             id: d.id
         });

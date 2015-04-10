@@ -11,7 +11,7 @@ angular.module("wust").controller("NavigationCtrl", function($scope, Search, Dis
     }
 
     function onSelect($item) {
-        var state = DiscourseNode.get($item.label).state;
+        let state = DiscourseNode.get($item.label).state;
         $state.go(state, {
             id: $item.id
         });
