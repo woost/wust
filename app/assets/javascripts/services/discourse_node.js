@@ -1,20 +1,20 @@
-angular.module("wust").service("DiscourseNode", function() {
+angular.module("wust").service("DiscourseNode", function(Labels) {
     this.goal = {
         css: "discourse_goal",
         state: "goals",
-        label: "GOAL"
+        label: Labels.Goal
     };
 
     this.problem = {
         css: "discourse_problem",
         state: "problems",
-        label: "PROBLEM"
+        label: Labels.Problem
     };
 
     this.idea = {
         css: "discourse_idea",
         state: "ideas",
-        label: "IDEA"
+        label: Labels.Idea
     };
 
     var mappings = _([this.goal, this.problem, this.idea]).map(node => {
