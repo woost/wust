@@ -17,7 +17,7 @@ angular.module("wust").controller("GraphsCtrl", function($scope, $state, $filter
                 [edge.from]: [edge.to],
                 [edge.to]: [edge.from]
             };
-        }).reduce(_.partialRight(_.merge, (a, b) => {
+        }).reduce({}, _.partialRight(_.merge, (a, b) => {
             return a ? a.concat(b) : b;
         }, _));
 
