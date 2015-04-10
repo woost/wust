@@ -6,7 +6,7 @@ import play.api.mvc._
 import play.api.libs.json._
 import play.api.libs.concurrent.Execution.Implicits._
 import com.mohiva.play.silhouette.api._
-import com.mohiva.play.silhouette.api.exceptions.AuthenticationException
+import com.mohiva.play.silhouette.api.exceptions.AuthenticatorException
 import com.mohiva.play.silhouette.api.services.AuthInfoService
 import com.mohiva.play.silhouette.api.util.PasswordHasher
 import com.mohiva.play.silhouette.impl.authenticators.JWTAuthenticator
@@ -47,7 +47,7 @@ class RestCredentialsAuthController extends Silhouette[User, JWTAuthenticator]
     request.body.validate[Credentials].map { credentials =>
       (env.providers.get(CredentialsProvider.ID) match {
         case Some(p: CredentialsProvider) => p.authenticate(credentials)
-        case _                            => Future.failed(new AuthenticationException(s"Cannot find credentials provider"))
+        case _                            => Future.failed(new AuthenticatorException(s"Cannot find credentials provider"))
       }).flatMap { loginInfo =>
         userService.retrieve(loginInfo).flatMap {
           case Some(user) => env.authenticatorService.create(user.loginInfo).flatMap { authenticator =>
@@ -59,7 +59,7 @@ class RestCredentialsAuthController extends Silhouette[User, JWTAuthenticator]
             }
           }
           case None =>
-            Future.failed(new AuthenticationException("Couldn't find user"))
+            Future.failed(new AuthenticatorException("Couldn't find user"))
         }
       }.recoverWith(exceptionHandler)
     }.recoverTotal {

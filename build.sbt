@@ -13,6 +13,7 @@ val paradiseVersion = "2.1.0-M5"
 
 lazy val wust = (project in file(".")).settings(
   scalaVersion := scalaV,
+  resolvers += "Atlassian Releases" at "https://maven.atlassian.com/public/",
   libraryDependencies ++= Seq(
     cache,
     ws,
@@ -36,7 +37,7 @@ lazy val wust = (project in file(".")).settings(
     "org.webjars.bower" % "angular-xeditable" % "0.1.9",
     "org.webjars" % "animate.css" % "3.2.5",
     // authentication / authorization
-    "com.mohiva" %% "play-silhouette" % "2.0-RC1",
+    "com.mohiva" %% "play-silhouette" % "2.0",
     "com.typesafe.play.plugins" %% "play-plugins-mailer" % "2.3.0",
     // atmosphere
     "org.atmosphere" % "atmosphere-play" % "2.1.1" exclude("javax.servlet", "servlet-api"),

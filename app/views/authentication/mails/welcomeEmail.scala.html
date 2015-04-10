@@ -1,4 +1,4 @@
-@(user: models.users.User)(implicit request: RequestHeader, lang: Lang)
+@(user: model.users.User)(implicit request: RequestHeader, lang: Lang)
 <html>
 <body>
 <p>Welcome @user.info.fullName.getOrElse("???"),</p>
