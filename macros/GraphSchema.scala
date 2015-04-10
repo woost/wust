@@ -143,8 +143,8 @@ object GraphSchemaMacro {
         }
 
         val relationSets: List[Tree] = schemaStatements.collect {
-          case RelationPattern(className, startNode, endNode, relationBody) =>
-            q""" def ${ TermName(nameToPlural(className)) }: Set[${ TypeName(className) }] = relationsAs(${ TermName(className) }) """
+          case RelationPattern(className, _, _, _) =>
+            q""" def ${TermName(nameToPlural(className))}: Set[${TypeName(className)}] = relationsAs(${TermName(className)}) """
         }
 
         val hyperRelationFactories: List[Tree] = schemaStatements.collect {
@@ -221,8 +221,8 @@ object GraphSchemaMacro {
         }
 
         val nodeSets: List[Tree] = schemaStatements.collect {
-          case NodePattern(className, parentTrait, nodeStatements) =>
-            q""" def ${ TermName(nameToPlural(className)) }: Set[${ TypeName(className) }] = nodesAs(${ TermName(className) }) """
+          case NodePattern(className, _, _) =>
+            q""" def ${TermName(nameToPlural(className))}: Set[${TypeName(className)}] = nodesAs(${TermName(className)}) """
         }
 
 
