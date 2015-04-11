@@ -34,7 +34,7 @@ angular.module("wust").service("Auth", function(restmod, authService) {
     function handleAuthentication(message, response) {
         currentUser = response;
         authService.loginConfirmed("success", authenticateRequest);
-        humane.success("Logged in");
+        humane.success(message);
     }
 
     function login(user) {
