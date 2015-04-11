@@ -1,9 +1,12 @@
 angular.module("wust").service("DiscourseNodeList", function(DiscourseNode, Idea, Problem, Goal, Search) {
     class NodeModel {
         constructor(service, connService, nodeInfo, styleInfo) {
-            this.new = service.$build({
-                title: ""
-            });
+            this.resetNew = () => {
+                this.new = service.$build({
+                    title: ""
+                });
+            };
+            this.resetNew();
             this.list = connService.$search();
             this.info = nodeInfo;
             this.style = styleInfo;
@@ -17,7 +20,7 @@ angular.module("wust").service("DiscourseNodeList", function(DiscourseNode, Idea
             this.new.$save().$then(data => {
                 humane.success("Created new node");
                 this.add(data);
-                this.new.title = "";
+                this.resetNew();
             });
         }
 
