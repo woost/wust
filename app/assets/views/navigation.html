@@ -20,11 +20,14 @@
             </ul>
 
             <div discourse-node-search-form ng-model='searchTyped' on-select="onSelect" search-nodes='searchNodes' icon-class="fa fa-search" class="navbar-form navbar-left" role="search"></div>
-            <form name="signForm" ng-hide="loggedIn()" ng-submit="login()" class="navbar-form navbar-right">
+
+            <form ng-hide="loggedIn()" name="signForm" ng-submit="authenticate()" class="navbar-form navbar-right">
                 <input class="form-control" name="username" type="text" ng-model='newUser.identifier' placeholder="Username" required>
                 <input class="form-control" name="password" type="password" ng-model='newUser.password' placeholder="Password" required>
-                <input type="submit" value="Login" class="btn btn-primary" ng-disabled="signForm.$invalid">
+                <input type="submit" value="Login" ng-click="registerUser = false" class="btn btn-primary" ng-disabled="signForm.$invalid">
+                <input type="submit" value="Register" ng-click="registerUser = true" class="btn btn-primary" ng-disabled="signForm.$invalid">
             </form>
+
             <form ng-show="loggedIn()" ng-submit="logout()" class="navbar-form navbar-right">
                 <input type="submit" value="Logout" class="btn btn-primary">
             </form>
