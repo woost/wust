@@ -5,7 +5,7 @@ angular.module("wust").filter("fuzzyFilter", ["$filter",
                 if (!_.isString(value) && !_.isNumber(value))
                     return;
 
-                _.each(value.split(" "), (val) => {
+                _.each(value.split(" "), val => {
                     data = $filter("filter")(data, {
                         [key]: val || ""
                     });

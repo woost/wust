@@ -6,11 +6,11 @@ angular.module("wust").service("NodeHistory", function(DiscourseNode) {
     this.remove = remove;
 
     function remove(id) {
-        _.remove(visited, (item) => id === item.node.id);
+        _.remove(visited, item => id === item.node.id);
     }
 
     function add(node) {
-        node.$then( data => {
+        node.$then(data => {
             let obj = {
                 node: data,
                 info: DiscourseNode.get(data.label)
