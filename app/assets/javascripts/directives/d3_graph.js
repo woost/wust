@@ -180,8 +180,8 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode, $window) {
                     });
                 }
 
-                function getElementDimensions(element) {
-                    return [element.offsetWidth, element.offsetHeight];
+                function getElementDimensions(elem) {
+                    return [elem.offsetWidth, elem.offsetHeight];
                 }
 
                 function resizeGraph() {
