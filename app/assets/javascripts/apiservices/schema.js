@@ -6,7 +6,7 @@ angular.module("wust").config(function($provide) {
         };
     }).reduce(_.merge));
     _.each(schema.models, (model) => {
-        $provide.factory(model.name, (restmod) => restmod.model(model.path, _(model.subs).map((sub) => {
+        $provide.factory(model.name, (restmod) => restmod.model(model.path).mix(_(model.subs).map((sub) => {
             return {
                 [sub.path]: {
                     [sub.type]: restmod.model()
