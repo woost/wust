@@ -1,4 +1,4 @@
-angular.module("wust").service("Auth", function(restmod) {
+angular.module("wust").service("Auth", function(restmod, authService) {
     let service = {
         signup: restmod.model("/auth/signup"),
         signin: restmod.model("/auth/signin"),
@@ -12,6 +12,7 @@ angular.module("wust").service("Auth", function(restmod) {
     this.logout = logout;
     this.loggedIn = loggedIn;
     this.getUsername = getUsername;
+    this.authenticateRequest = authenticateRequest;
 
     function loggedIn() {
         return currentUser !== undefined;
@@ -21,24 +22,34 @@ angular.module("wust").service("Auth", function(restmod) {
         return (currentUser || {}).identifier;
     }
 
+    function authenticateRequest(config) {
+        if (!currentUser) {
+            return config;
+        }
+
+        config.headers["X-Auth-Token"] = currentUser.token;
+        return config;
+    }
+
+    function handleAuthentication(message, response) {
+        currentUser = response;
+        authService.loginConfirmed("success", authenticateRequest);
+        humane.success("Logged in");
+    }
+
     function login(user) {
-        return service.signin.$create(user).$then(response => {
-            currentUser = response;
-            humane.success("Logged in");
-        });
+        service.signin.$create(user).$then(_.wrap("Logged in", handleAuthentication));
     }
 
     function register(user) {
-        return service.signup.$create(user).$then(response => {
-            currentUser = response;
-            humane.success("Registered");
-        });
+        service.signup.$create(user).$then(_.wrap("Registered", handleAuthentication));
     }
 
     function logout() {
         // TODO: should this really be a get request
-        return service.signout.$fetch().$then(response => {
+        service.signout.$fetch().$then(response => {
             currentUser = undefined;
+            authService.loginCancelled();
             humane.success("Logged out");
         });
     }

@@ -40,7 +40,7 @@ trait ContentNodesController[NodeType <: ContentNode] extends Silhouette[User, J
         // TODO: HTTP status Created
         Ok(Json.toJson(contentNode))
 
-      case None => BadRequest("Only users who are logged in can create Nodes")
+      case None => Unauthorized("Only users who are logged in can create Nodes")
     }
   }
 

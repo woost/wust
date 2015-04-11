@@ -18,7 +18,9 @@ angular.module("wust").controller("NavigationCtrl", function($scope, Auth, Searc
 
     function authenticate() {
         let func = $scope.registerUser ? Auth.register : Auth.login;
-        return func.bind(Auth)($scope.newUser);
+        func.bind(Auth, angular.copy($scope.newUser))();
+        $scope.newUser.identifier = "";
+        $scope.newUser.password = "";
     }
 
     function searchNodes(title) {

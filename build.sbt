@@ -35,6 +35,7 @@ lazy val wust = (project in file(".")).settings(
     "org.webjars.bower" % "d3" % "3.5.5",
     "org.webjars.bower" % "humane-js" % "3.2.2",
     "org.webjars.bower" % "angular-xeditable" % "0.1.9",
+    "org.webjars.bower" % "angular-http-auth" % "1.2.2",
     "org.webjars" % "animate.css" % "3.2.5",
     // authentication / authorization
     "com.mohiva" %% "play-silhouette" % "2.0",
