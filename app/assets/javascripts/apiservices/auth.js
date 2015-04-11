@@ -11,9 +11,14 @@ angular.module("wust").service("Auth", function(restmod) {
     this.register = register;
     this.logout = logout;
     this.loggedIn = loggedIn;
+    this.getUsername = getUsername;
 
     function loggedIn() {
         return currentUser !== undefined;
+    }
+
+    function getUsername() {
+        return (currentUser || {}).identifier;
     }
 
     function login(user) {

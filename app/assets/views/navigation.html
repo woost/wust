@@ -29,6 +29,7 @@
             </form>
 
             <form ng-show="loggedIn()" ng-submit="logout()" class="navbar-form navbar-right">
+                <span style="padding-right: 10px"><i class="fa fa-user"></i> {{getUsername()}}</span>
                 <input type="submit" value="Logout" class="btn btn-primary">
             </form>
         </div>

@@ -12,6 +12,7 @@ angular.module("wust").controller("NavigationCtrl", function($scope, Auth, Searc
     $scope.searchNodes = searchNodes;
     $scope.onSelect = onSelect;
     $scope.authenticate = authenticate;
+    $scope.getUsername = Auth.getUsername.bind(Auth);
     $scope.loggedIn = Auth.loggedIn.bind(Auth);
     $scope.logout = Auth.logout.bind(Auth);
 
