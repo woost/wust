@@ -11,7 +11,7 @@ angular.module("wust").service("Auth", function(restmod, jwtHelper, authService)
     this.register = _.partial(authenticate, service.signup, "Registered");
     this.logout = logout;
     this.loggedIn = loggedIn;
-    this.getUsername = _.wrap("identity", getProperty);
+    this.getUsername = _.wrap("identifier", getProperty);
     this.getToken = _.wrap("token", getProperty);
 
     function loggedIn() {
@@ -24,7 +24,7 @@ angular.module("wust").service("Auth", function(restmod, jwtHelper, authService)
 
     function authenticate(model, message, user) {
         model.$create(user).$then(response => {
-            currentUser = _.pick(response, "identity", "token");
+            currentUser = _.pick(response, "identifier", "token");
             authService.loginConfirmed("success");
             humane.success(message);
         });
