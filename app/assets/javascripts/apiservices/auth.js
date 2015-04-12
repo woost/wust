@@ -1,11 +1,10 @@
-angular.module("wust").service("Auth", function(restmod, jwtHelper, authService) {
+angular.module("wust").service("Auth", function(restmod, jwtHelper, store, authService) {
+    let authStore = store.getNamespacedStore("auth");
     let service = {
         signup: restmod.model("/auth/signup"),
         signin: restmod.model("/auth/signin"),
         signout: restmod.singleton("/auth/signout")
     };
-
-    let currentUser;
 
     this.login = _.partial(authenticate, service.signin, "Logged in");
     this.register = _.partial(authenticate, service.signup, "Registered");
@@ -15,16 +14,17 @@ angular.module("wust").service("Auth", function(restmod, jwtHelper, authService)
     this.getToken = _.wrap("token", getProperty);
 
     function loggedIn() {
-        return (currentUser !== undefined) && !jwtHelper.isTokenExpired(currentUser.token);
+        let currentUser = getCurrentUser();
+        return currentUser && !jwtHelper.isTokenExpired(currentUser.token);
     }
 
     function getProperty(name) {
-        return loggedIn() ? currentUser[name] : undefined;
+        return loggedIn() ? getCurrentUser()[name] : undefined;
     }
 
     function authenticate(model, message, user) {
         model.$create(user).$then(response => {
-            currentUser = _.pick(response, "identifier", "token");
+            authStore.set("currentUser", _.pick(response, "identifier", "token"));
             authService.loginConfirmed("success");
             humane.success(message);
         });
@@ -33,9 +33,13 @@ angular.module("wust").service("Auth", function(restmod, jwtHelper, authService)
     function logout() {
         // TODO: should this really be a get request
         service.signout.$fetch().$then(response => {
-            currentUser = undefined;
+            authStore.remove("currentUser");
             authService.loginCancelled();
             humane.success("Logged out");
         });
+    }
+
+    function getCurrentUser() {
+        return authStore.get("currentUser");
     }
 });

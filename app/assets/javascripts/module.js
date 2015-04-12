@@ -7,5 +7,7 @@ angular.module("wust", [
     "xeditable",
     "restmod",
     "http-auth-interceptor",
-    "angular-jwt"
+    "angular-jwt",
+    "ngCookies",
+    "angular-storage"
 ]);
