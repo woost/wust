@@ -1,13 +1,13 @@
 package modules.cake
 
-import com.mohiva.play.silhouette.impl.authenticators.{ CookieAuthenticator, JWTAuthenticator }
+import com.mohiva.play.silhouette.impl.authenticators.JWTAuthenticator
 import com.mohiva.play.silhouette.impl.util.BCryptPasswordHasher
 import com.mohiva.play.silhouette.impl.util.PlayCacheLayer
 import com.mohiva.play.silhouette.impl.util.SecureRandomIDGenerator
 import com.mohiva.play.silhouette.api.Environment
 import com.mohiva.play.silhouette.api.EventBus
 import com.mohiva.play.silhouette.api.util.PlayHTTPLayer
-import modules.cake.{ HeaderAuthenticatorServiceModule/*, CookieAuthenticatorServiceModule */}
+import modules.cake.HeaderAuthenticatorServiceModule
 import model.users.User
 import model.daos._
 
@@ -23,8 +23,8 @@ trait HeaderEnvironmentModule
   extends HeaderAuthenticatorServiceModule
   with UserServiceModule
   with AuthInfoServiceModule
-  with CredentialsProviderModule 
-  with SocialProviderModule 
+  with CredentialsProviderModule
+  with SocialProviderModule
   with MailServiceModule {
 
   /**
@@ -45,7 +45,10 @@ trait HeaderEnvironmentModule
       authenticatorService,
       Map(
         credentialsProvider.id -> credentialsProvider,
-        facebookProvider.id -> facebookProvider),
+        facebookProvider.id -> facebookProvider,
+        googleProvider.id -> googleProvider,
+        twitterProvider.id -> twitterProvider
+      ),
       eventBus)
   }
 

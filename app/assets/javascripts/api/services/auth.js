@@ -3,11 +3,18 @@ angular.module("wust.api").service("Auth", function($rootScope, $window, restmod
     let userKey = "currentUser";
     let service = {
         signup: restmod.model("/auth/signup"),
-        signin: restmod.model("/auth/signin"),
+        signin: {
+            credentials: restmod.model("/auth/signin/credentials"),
+            facebook: restmod.model("/auth/signin/facebook")
+        },
+        link: {
+            facebook: restmod.model("/auth/link/facebook")
+        },
         signout: restmod.singleton("/auth/signout")
     };
 
-    this.login = _.partial(authenticate, service.signin, "Logged in");
+    this.login = _.mapValues(service.signin, model => _.partial(authenticate, model, "Logged in"));
+    this.link = _.mapValues(service.link, model => _.wrap(model, link));
     this.register = _.partial(authenticate, service.signup, "Registered");
     this.logout = logout;
     this.loggedIn = loggedIn;
@@ -32,6 +39,12 @@ angular.module("wust.api").service("Auth", function($rootScope, $window, restmod
 
     function getProperty(name) {
         return loggedIn() ? authStore.get(userKey)[name] : undefined;
+    }
+
+    function link(model, user) {
+        model.$create(user).$then(response => {
+            humane.success("Linked");
+        });
     }
 
     function authenticate(model, message, user) {

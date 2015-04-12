@@ -31,7 +31,7 @@ trait SocialProviderModule {
    * @return The OAuth2 state provider implementation.
    */
   lazy val stateProvider: OAuth2StateProvider = new DummyStateProvider
-  
+
   /**
    * Provides the OAuth1 token secret provider.
    *
@@ -47,7 +47,7 @@ trait SocialProviderModule {
       expirationTime = Play.configuration.getInt("silhouette.oauth1TokenSecretProvider.expirationTime").get
     ), Clock())
   }
-  
+
   /**
    * Provides the Facebook provider.
    *
@@ -72,7 +72,7 @@ trait SocialProviderModule {
    * @param httpLayer The HTTP layer implementation.
    * @return The Google provider.
    */
-  lazy val provideGoogleProvider = {
+  lazy val googleProvider = {
     GoogleProvider(httpLayer, stateProvider, OAuth2Settings(
       authorizationURL = Play.configuration.getString("silhouette.google.authorizationURL"),
       accessTokenURL = Play.configuration.getString("silhouette.google.accessTokenURL").get,
@@ -89,7 +89,7 @@ trait SocialProviderModule {
    * @param httpLayer The HTTP layer implementation.
    * @return The Twitter provider.
    */
-  lazy val provideTwitterProvider = {
+  lazy val twitterProvider = {
     val settings = OAuth1Settings(
       requestTokenURL = Play.configuration.getString("silhouette.twitter.requestTokenURL").get,
       accessTokenURL = Play.configuration.getString("silhouette.twitter.accessTokenURL").get,

@@ -16,7 +16,7 @@ angular.module("wust").controller("NavigationCtrl", function($scope, Auth, Searc
     $scope.logout = Auth.logout.bind(Auth);
 
     function authenticate(register) {
-        let func = register ? Auth.register : Auth.login;
+        let func = register ? Auth.register : Auth.login.credentials;
         func.bind(Auth, angular.copy($scope.newUser))();
         $scope.newUser.identifier = "";
         $scope.newUser.password = "";
