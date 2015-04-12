@@ -83,6 +83,23 @@ trait SocialProviderModule {
   }
 
   /**
+   * Provides the Github provider.
+   *
+   * @param cacheLayer The cache layer implementation.
+   * @param httpLayer The HTTP layer implementation.
+   * @return The Github provider.
+   */
+  lazy val githubProvider = {
+    GitHubProvider(httpLayer, stateProvider, OAuth2Settings(
+      authorizationURL = Play.configuration.getString("silhouette.github.authorizationURL"),
+      accessTokenURL = Play.configuration.getString("silhouette.github.accessTokenURL").get,
+      redirectURL = Play.configuration.getString("silhouette.github.redirectURL").get,
+      clientID = Play.configuration.getString("silhouette.github.clientID").get,
+      clientSecret = Play.configuration.getString("silhouette.github.clientSecret").get,
+      scope = Play.configuration.getString("silhouette.github.scope")))
+  }
+
+  /**
    * Provides the Twitter provider.
    *
    * @param cacheLayer The cache layer implementation.

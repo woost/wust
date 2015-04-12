@@ -47,6 +47,7 @@ trait HeaderEnvironmentModule
         credentialsProvider.id -> credentialsProvider,
         facebookProvider.id -> facebookProvider,
         googleProvider.id -> googleProvider,
+        githubProvider.id -> githubProvider,
         twitterProvider.id -> twitterProvider
       ),
       eventBus)
