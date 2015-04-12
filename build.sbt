@@ -28,6 +28,9 @@ lazy val wust = (project in file(".")).settings(
     "org.webjars.bower" % "angular-bootstrap" % "0.12.1",
     "org.webjars.bower" % "angular-native-dragdrop" % "1.1.0",
     "org.webjars.bower" % "angular-restmod" % "1.1.8",
+    // js auth
+    "org.webjars.bower" % "angular-http-auth" % "1.2.2",
+    "org.webjars.bower" % "angular-jwt" % "0.0.7",
     // basic js libraries
     "org.webjars.bower" % "lodash" % "3.6.0",
     "org.webjars" % "font-awesome" % "4.3.0-1",
@@ -35,7 +38,6 @@ lazy val wust = (project in file(".")).settings(
     "org.webjars.bower" % "d3" % "3.5.5",
     "org.webjars.bower" % "humane-js" % "3.2.2",
     "org.webjars.bower" % "angular-xeditable" % "0.1.9",
-    "org.webjars.bower" % "angular-http-auth" % "1.2.2",
     "org.webjars" % "animate.css" % "3.2.5",
     // authentication / authorization
     "com.mohiva" %% "play-silhouette" % "2.0",

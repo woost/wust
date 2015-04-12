@@ -6,5 +6,6 @@ angular.module("wust", [
     "ang-drag-drop",
     "xeditable",
     "restmod",
-    "http-auth-interceptor"
+    "http-auth-interceptor",
+    "angular-jwt"
 ]);

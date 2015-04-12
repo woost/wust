@@ -1,4 +1,4 @@
-angular.module("wust").service("Auth", function(restmod, authService) {
+angular.module("wust").service("Auth", function(restmod, jwtHelper, authService) {
     let service = {
         signup: restmod.model("/auth/signup"),
         signin: restmod.model("/auth/signin"),
@@ -7,42 +7,27 @@ angular.module("wust").service("Auth", function(restmod, authService) {
 
     let currentUser;
 
-    this.login = login;
-    this.register = register;
+    this.login = _.partial(authenticate, service.signin, "Logged in");
+    this.register = _.partial(authenticate, service.signup, "Registered");
     this.logout = logout;
     this.loggedIn = loggedIn;
-    this.getUsername = getUsername;
-    this.authenticateRequest = authenticateRequest;
+    this.getUsername = _.wrap("identity", getProperty);
+    this.getToken = _.wrap("token", getProperty);
 
     function loggedIn() {
-        return currentUser !== undefined;
+        return (currentUser !== undefined) && !jwtHelper.isTokenExpired(currentUser.token);
     }
 
-    function getUsername() {
-        return (currentUser || {}).identifier;
+    function getProperty(name) {
+        return loggedIn() ? currentUser[name] : undefined;
     }
 
-    function authenticateRequest(config) {
-        if (!currentUser) {
-            return config;
-        }
-
-        config.headers["X-Auth-Token"] = currentUser.token;
-        return config;
-    }
-
-    function handleAuthentication(message, response) {
-        currentUser = response;
-        authService.loginConfirmed("success", authenticateRequest);
-        humane.success(message);
-    }
-
-    function login(user) {
-        service.signin.$create(user).$then(_.wrap("Logged in", handleAuthentication));
-    }
-
-    function register(user) {
-        service.signup.$create(user).$then(_.wrap("Registered", handleAuthentication));
+    function authenticate(model, message, user) {
+        model.$create(user).$then(response => {
+            currentUser = _.pick(response, "identity", "token");
+            authService.loginConfirmed("success");
+            humane.success(message);
+        });
     }
 
     function logout() {
