@@ -75,7 +75,6 @@
         "angular",
         "atmosphere",
         "d3",
-        "humane",
-        "Spinner"
+        "humane"
     ]
 }
