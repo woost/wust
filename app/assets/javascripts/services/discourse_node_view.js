@@ -9,8 +9,8 @@ angular.module("wust").factory("DiscourseNodeView", function($state, $stateParam
         scope.goals = new DiscourseNodeList.Goal(scope.node);
         scope.problems = new DiscourseNodeList.Problem(scope.node);
         scope.ideas = new DiscourseNodeList.Idea(scope.node);
-        scope.removeFocused = _.partial(removeFocused, scope.node);
-        scope.updateFocused = _.partial(updateFocused, scope.node);
+        scope.removeFocused = _.wrap(scope.node, removeFocused);
+        scope.updateFocused = _.wrap(scope.node, updateFocused);
         NodeHistory.add(scope.node);
 
         scope.messages = [];
