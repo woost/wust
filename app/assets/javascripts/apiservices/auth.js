@@ -1,5 +1,6 @@
-angular.module("wust").service("Auth", function(restmod, jwtHelper, store, authService) {
+angular.module("wust").service("Auth", function($rootScope, $window, restmod, jwtHelper, store, authService) {
     let authStore = store.getNamespacedStore("auth");
+    let userKey = "currentUser";
     let service = {
         signup: restmod.model("/auth/signup"),
         signin: restmod.model("/auth/signin"),
@@ -13,18 +14,29 @@ angular.module("wust").service("Auth", function(restmod, jwtHelper, store, authS
     this.getUsername = _.wrap("identifier", getProperty);
     this.getToken = _.wrap("token", getProperty);
 
+    // every time the window gets focused, clear the inMemoryCache of the store,
+    // so all changes in store get propagated into our current angular session.
+    // if the value has changed, we trigger rerendering of the whole.
+    $window.onfocus = () => {
+        let prev = authStore.get(userKey);
+        delete authStore.inMemoryCache[userKey];
+        if (prev !== authStore.get(userKey)) {
+            $rootScope.$apply();
+        }
+    };
+
     function loggedIn() {
-        let currentUser = getCurrentUser();
+        let currentUser = authStore.get(userKey);
         return currentUser && !jwtHelper.isTokenExpired(currentUser.token);
     }
 
     function getProperty(name) {
-        return loggedIn() ? getCurrentUser()[name] : undefined;
+        return loggedIn() ? authStore.get(userKey)[name] : undefined;
     }
 
     function authenticate(model, message, user) {
         model.$create(user).$then(response => {
-            authStore.set("currentUser", _.pick(response, "identifier", "token"));
+            authStore.set(userKey, _.pick(response, "identifier", "token"));
             authService.loginConfirmed("success");
             humane.success(message);
         });
@@ -33,13 +45,9 @@ angular.module("wust").service("Auth", function(restmod, jwtHelper, store, authS
     function logout() {
         // TODO: should this really be a get request
         service.signout.$fetch().$then(response => {
-            authStore.remove("currentUser");
+            authStore.remove(userKey);
             authService.loginCancelled();
             humane.success("Logged out");
         });
-    }
-
-    function getCurrentUser() {
-        return authStore.get("currentUser");
     }
 });
