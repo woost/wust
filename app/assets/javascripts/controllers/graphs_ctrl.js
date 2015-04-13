@@ -51,22 +51,6 @@ angular.module("wust").controller("GraphsCtrl", function($scope, $state, $filter
     }
 
     function createGraph(graph) {
-        // TODO: not efficient
-        // we need to reference nodes via their index in the nodes array, because d3 is weird.
-        graph.edges = graph.edges.map(edge => {
-            return _.merge(edge, {
-                source: _.findIndex(graph.nodes, {
-                    id: edge.from
-                }),
-                target: _.findIndex(graph.nodes, {
-                    id: edge.to
-                }),
-                label: edge.label.toLowerCase(),
-                // TODO: calculate real connection strength
-                strength: _.random(1, 5)
-            });
-        });
-
         $scope.graph.nodes = graph.nodes;
         $scope.graph.edges = graph.edges;
         $scope.$watch("search.title", filter(graph));
