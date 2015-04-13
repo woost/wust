@@ -65,7 +65,7 @@ trait ContentNodesController[NodeType <: ContentNode] extends Silhouette[User, J
     val json = request.body.asJson.get
     val nodeAdd = decodeRequest(json)
     val discourse = nodeDiscourseGraph(uuid)
-    discourse.nodes.headOption match {
+    discourse.contentNodes.headOption match {
       case Some(node) => {
         node.title = nodeAdd.title
         db.persistChanges(discourse.graph)
@@ -83,7 +83,7 @@ trait ContentNodesController[NodeType <: ContentNode] extends Silhouette[User, J
     val discourse = relationDiscourseGraph(uuidFrom, relationTypes, uuidTo)
 
     // all nodes which lie on a path between fromNode and toNode
-    val connectorNodes = discourse.nodes.filter(node => uuidFrom != node.uuid && uuidTo != node.uuid)
+    val connectorNodes = discourse.contentNodes.filter(node => uuidFrom != node.uuid && uuidTo != node.uuid)
 
     discourse.graph.nodes --= connectorNodes.map(_.node) //TODO: wrap boilerplate
     discourse.graph.relations.clear()

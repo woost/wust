@@ -12,14 +12,14 @@ object Search extends Controller with DatabaseController {
   def index(label: Option[String], title: Option[String]) = Action {
     val titleRegex = title match {
       case Some(title) => "(?i).*" + title.replace(" ", ". *") + ".*"
-      case None => ""
+      case None        => ""
     }
     val nodeMatch = label match {
-      case Some(label) => s"n:`${Label(label)}`"
-      case None => "n"
+      case Some(label) => s"n:`${ Label(label) }`"
+      case None        => "n"
     }
 
     val discourse = Discourse(db.queryGraph(Query(s"match ($nodeMatch) where n.title =~ {term} return n limit 15", Map("term" -> titleRegex))))
-    Ok(Json.toJson(discourse.nodes))
+    Ok(Json.toJson(discourse.contentNodes))
   }
 }

@@ -16,20 +16,20 @@ object GraphFormat {
   implicit def LabelToString(label: Label): String = label.name
   implicit def RelationTypeToString(relationType: RelationType): String = relationType.name
 
-  implicit object DiscourseRelationFormat extends Format[SchemaRelation[DiscourseNode, DiscourseNode]] {
+  implicit object DiscourseRelationFormat extends Format[SchemaRelation[ContentNode, ContentNode]] {
     def reads(json: JsValue) = ???
 
-    def writes(relation: SchemaRelation[DiscourseNode, DiscourseNode]) = JsObject(Seq(
+    def writes(relation: SchemaRelation[ContentNode, ContentNode]) = JsObject(Seq(
       ("label", JsString(relation.relationType)),
       ("from", JsString(relation.startNode.uuid)),
       ("to", JsString(relation.endNode.uuid))
     ))
   }
 
-  implicit object DiscourseNodeFormat extends Format[DiscourseNode] {
+  implicit object ContentNodeFormat extends Format[ContentNode] {
     def reads(json: JsValue) = ???
 
-    def writes(node: DiscourseNode) = JsObject(Seq(
+    def writes(node: ContentNode) = JsObject(Seq(
       ("id", JsString(node.uuid)),
       ("title", JsString(node.title)),
       ("label", JsString(node.label))
@@ -41,13 +41,13 @@ object GraphFormat {
 
     def writes(discourseGraph: Discourse) = {
       implicit val newGraph = Graph(
-        discourseGraph.nodes.map(_.node),
-        discourseGraph.relations.map(_.relation)
+        discourseGraph.graph.nodes,
+        discourseGraph.graph.relations
       )
       val newDiscourseGraph = Discourse(newGraph)
 
       case class Replacement(deleteNode: Node, deleteRelations: Iterable[Relation], newRelation: Option[Relation] = None)
-      val simplify: PartialFunction[DiscourseNode, Replacement] = {
+      val simplify: PartialFunction[SchemaHyperRelation[ContentNode, _ <: SchemaRelation[ContentNode, _], _ <: SchemaHyperRelation[ContentNode, _, _, _, ContentNode] with UuidNode, _ <: SchemaRelation[_, ContentNode], ContentNode] with UuidNode, Replacement] = {
         case Solves(node) if node.inDegree == 1 && node.outDegree == 1   =>
           Replacement(node, node.relations, Some(Relation.local(node.predecessors.head, node.successors.head, "SOLVES")))
         case Achieves(node) if node.inDegree == 1 && node.outDegree == 1 =>
@@ -58,24 +58,24 @@ object GraphFormat {
           Replacement(node, node.relations)
       }
 
-      val fakeRelations = mutable.ArrayBuffer.empty[SchemaRelation[DiscourseNode, DiscourseNode]]
+      val fakeRelations = mutable.ArrayBuffer.empty[SchemaRelation[ContentNode, ContentNode]]
 
       var next: Option[Replacement] = None
-      while( { next = newDiscourseGraph.nodes.collectFirst(simplify); next.isDefined }) {
+      while( { next = newDiscourseGraph.contentNodeHyperRelations.collectFirst(simplify); next.isDefined }) {
         val replacement = next.get
         import replacement._
         newGraph.nodes -= deleteNode
         newGraph.relations --= deleteRelations
-        fakeRelations ++= newRelation.map(newRel => new SchemaRelation[DiscourseNode, DiscourseNode] {
+        fakeRelations ++= newRelation.map(newRel => new SchemaRelation[ContentNode, ContentNode] {
           val relation = newRel
-          val startNode = new DiscourseNode {val node = relation.startNode }
-          val endNode = new DiscourseNode {val node = relation.endNode }
+          val startNode = new ContentNode {val node = relation.startNode }
+          val endNode = new ContentNode {val node = relation.endNode }
         })
       }
 
       JsObject(Seq(
-        ("nodes", Json.toJson(newDiscourseGraph.nodes)),
-        ("edges", Json.toJson(newDiscourseGraph.relations ++ fakeRelations))
+        ("nodes", Json.toJson(newDiscourseGraph.contentNodes)),
+        ("edges", Json.toJson(newDiscourseGraph.contentNodeRelations ++ fakeRelations))
       ))
     }
   }
