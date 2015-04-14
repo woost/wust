@@ -1,4 +1,4 @@
-angular.module("wust").service("Auth", function($rootScope, $window, restmod, jwtHelper, store, authService) {
+angular.module("wust").service("Auth", function($rootScope, $window, restmod, jwtHelper, store) {
     let authStore = store.getNamespacedStore("auth");
     let userKey = "currentUser";
     let service = {
@@ -37,7 +37,6 @@ angular.module("wust").service("Auth", function($rootScope, $window, restmod, jw
     function authenticate(model, message, user) {
         model.$create(user).$then(response => {
             authStore.set(userKey, _.pick(response, "identifier", "token"));
-            authService.loginConfirmed("success");
             humane.success(message);
         });
     }
@@ -46,7 +45,6 @@ angular.module("wust").service("Auth", function($rootScope, $window, restmod, jw
         // TODO: should this really be a get request
         service.signout.$fetch().$then(response => {
             authStore.remove(userKey);
-            authService.loginCancelled();
             humane.success("Logged out");
         });
     }
