@@ -1,21 +1,27 @@
 angular.module("wust.api").service("Auth", function($rootScope, $window, restmod, jwtHelper, store) {
+    // use localstorage (fallback to cookies) for persisting the current user
+    // and the jwt token
     let authStore = store.getNamespacedStore("auth");
     let userKey = "currentUser";
+
+    // setup restmod models for authentication
     let service = {
         signup: restmod.model("/auth/signup"),
-        signin: {
-            credentials: restmod.model("/auth/signin/credentials"),
-            facebook: restmod.model("/auth/signin/facebook")
+        signin: restmod.model("/auth/signin/credentials"),
+        oauth: {
+            github: restmod.model("/auth/signin/github")
         },
         link: {
-            facebook: restmod.model("/auth/link/facebook")
+            github: restmod.model("/auth/link/github")
         },
         signout: restmod.singleton("/auth/signout")
     };
 
-    this.login = _.mapValues(service.signin, model => _.partial(authenticate, model, "Logged in"));
-    this.link = _.mapValues(service.link, model => _.wrap(model, link));
+    // public methods
     this.register = _.partial(authenticate, service.signup, "Registered");
+    this.login = _.partial(authenticate, service.signin, "Logged in");
+    this.oauth = _.mapValues(service.oauth, model => _.wrap(model, oauth));
+    this.link = _.mapValues(service.link, model => _.wrap(model, link));
     this.logout = logout;
     this.loggedIn = loggedIn;
     this.getUsername = _.wrap("identifier", getProperty);
@@ -23,7 +29,7 @@ angular.module("wust.api").service("Auth", function($rootScope, $window, restmod
 
     // every time the window gets focused, clear the inMemoryCache of the store,
     // so all changes in store get propagated into our current angular session.
-    // if the value has changed, we trigger rerendering of the whole.
+    // if the value has changed, we trigger rerendering of the whole page.
     $window.onfocus = () => {
         let prev = authStore.get(userKey);
         delete authStore.inMemoryCache[userKey];
@@ -44,6 +50,12 @@ angular.module("wust.api").service("Auth", function($rootScope, $window, restmod
     function link(model, user) {
         model.$create(user).$then(response => {
             humane.success("Linked");
+        });
+    }
+
+    function oauth(model) {
+        model.$create().$then(response => {
+            console.log(response);
         });
     }
 

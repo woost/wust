@@ -11,13 +11,14 @@ angular.module("wust").controller("NavigationCtrl", function($scope, Auth, Searc
     $scope.searchNodes = searchNodes;
     $scope.onSelect = onSelect;
     $scope.authenticate = authenticate;
-    $scope.getUsername = Auth.getUsername.bind(Auth);
-    $scope.loggedIn = Auth.loggedIn.bind(Auth);
-    $scope.logout = Auth.logout.bind(Auth);
+    $scope.oauth = Auth.oauth;
+    $scope.getUsername = Auth.getUsername;
+    $scope.loggedIn = Auth.loggedIn;
+    $scope.logout = Auth.logout;
 
     function authenticate(register) {
-        let func = register ? Auth.register : Auth.login.credentials;
-        func.bind(Auth, angular.copy($scope.newUser))();
+        let func = register ? Auth.register : Auth.login;
+        func(angular.copy($scope.newUser));
         $scope.newUser.identifier = "";
         $scope.newUser.password = "";
     }
