@@ -1,22 +1,23 @@
-<div id="show_discourse_node_list">
-    <div discourse-node-search-form ng-model='ngModel.new' on-submit='ngModel.create' on-select="ngModel.add" search-nodes='ngModel.search' icon-class="fa fa-plus"></div>
-    <div ui-on-Drop="ngModel.add($data)" ng-class='ngModel.style.listCss' drop-channel="{{ngModel.info.label}}">
-        <div ng-repeat='node in ngModel.list | orderBy:"title"'>
-            <div ng-include="ngModel.style.templateUrl"></div>
+<div class="show_discourse_node_list">
+    <h2>{{nodeModel.title}}:</h2>
+    <div ui-on-Drop="nodeModel.add($data)" ng-class='nodeModel.style.listCss' drop-channel="{{nodeModel.info.label}}">
+        <div ng-repeat='node in nodeModel.list | orderBy:"title"'>
+            <div ng-include="nodeModel.style.templateUrl"></div>
         </div>
+        <div discourse-node-search-form ng-model='nodeModel.new' on-submit='nodeModel.create' on-select="nodeModel.add" search-nodes='nodeModel.search' icon-class="fa fa-plus" class="discourse_node_search_form"></div>
     </div>
 </div>
 
 <script type="text/ng-template" id="show_discourse_node_list.html">
     <div class="btn-group" role="group" style="padding:3px">
-        <a ng-class="ngModel.info.css" class="btn" ui-sref="{{ngModel.info.state}}({id: node.id})">{{node.title}}</a>
-        <button class='btn btn-default' ng-click='ngModel.remove(node)'><i class='fa fa-minus text-default'></i></button>
+        <a ng-class="nodeModel.info.css" class="btn" ui-sref="{{nodeModel.info.state}}({id: node.id})">{{node.title}}</a>
+        <button class='btn btn-default' ng-click='nodeModel.remove(node)'><i class='fa fa-minus text-default'></i></button>
     </div>
 </script>
 
 <script type="text/ng-template" id="show_discourse_idea_list.html">
-    <div class="panel panel-default" ng-class="ngModel.info.css">
-        <a ui-sref="{{ngModel.info.state}}({id: node.id})">
+    <div class="panel panel-default" ng-class="nodeModel.info.css">
+        <a ui-sref="{{nodeModel.info.state}}({id: node.id})">
             <div class="panel-heading">
                 <h3 class="panel-title">{{node.title}}</h3>
 
@@ -27,7 +28,7 @@
             <br />
             <!-- <span class="discourse_proargument node">pro</span> -->
             <!-- <span class="discourse_conargument node">con</span> -->
-            <button class='btn btn-default btn-xs pull-right' ng-click='ngModel.remove(node)'>
+            <button class='btn btn-default btn-xs pull-right' ng-click='nodeModel.remove(node)'>
                 <i class='fa fa-minus'></i>
             </button>
         </div>

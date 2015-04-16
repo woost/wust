@@ -1,3 +1,8 @@
-angular.module("wust").controller("ProblemsCtrl", function($scope, Problem, DiscourseNodeView, DiscourseNode) {
-    DiscourseNodeView($scope, DiscourseNode.Problem, Problem);
+angular.module("wust").controller("ProblemsCtrl", function($scope, $stateParams, Problem, DiscourseNode, DiscourseNodeList) {
+    $scope.nodeInfo = DiscourseNode.Problem;
+    $scope.node = Problem.$find($stateParams.id);
+    $scope.top = new DiscourseNodeList.Goal($scope.node.goals);
+    $scope.left = new DiscourseNodeList.Problem($scope.node.causes, "Causes");
+    $scope.right = new DiscourseNodeList.Problem($scope.node.consequences, "Consequences");
+    $scope.bottom = new DiscourseNodeList.Idea($scope.node.ideas);
 });

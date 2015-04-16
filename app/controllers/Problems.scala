@@ -7,7 +7,8 @@ import model.WustSchema._
 object Problems extends ContentNodesController[Problem] {
   override def nodeSchema = NodeSchema("problems", Problem, Map(
     "goals" -> StartConnectSchema(Prevents),
-    "problems" -> EndConnectSchema(Causes),
+    "causes" -> EndConnectSchema(Causes),
+    "consequences" -> StartConnectSchema(Causes),
     "ideas" -> EndConnectSchema(Solves)
   ))
 }

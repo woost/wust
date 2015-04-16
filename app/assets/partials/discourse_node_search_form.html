@@ -1,7 +1,7 @@
 <form ng-submit='onSubmit()()'>
     <div class="input-group">
         <div class="input-group">
-            <input type="text" class="form-control" ng-model='ngModel.title'
+            <input type="text" class="form-control" ng-model='ngModel.title' size="10"
                    typeahead="node for node in getNodes($viewValue)" typeahead-on-select="onSelect()($item)"
                    typeahead-input-formatter="formatLabel()" typeahead-template-url="discourse_node_search_item.html"
                    required>

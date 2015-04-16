@@ -4,7 +4,7 @@ angular.module("wust").directive("showDiscourseNodeList", function() {
         require: "ngModel",
         templateUrl: "assets/partials/discourse_node_list.html",
         scope: {
-            ngModel: "=",
+            nodeModel: "=",
         }
     };
 });

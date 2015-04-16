@@ -1,10 +1,11 @@
 @import "compass/css3/flexbox";
 
-#show_discourse_node_list {
+.show_discourse_node_list {
     .discourse_idea_list {
         padding: 6px;
         @include display-flex(flex);
         @include flex-wrap(wrap);
+        @include justify-content(center);
         &.on-drag-enter {
             background-color: $discourse_idea_color;
         }
@@ -17,16 +18,21 @@
     }
     .discourse_goal_list {
         padding: 6px;
+        @include display-flex(flex);
+        @include flex-wrap(wrap);
+        @include justify-content(center);
         &.on-drag-enter {
             background-color: $discourse_goal_color;
         }
+    }
+    .discourse_node_search_form {
+        padding: 3px;
     }
 
     .on-drag-hover:after {
         content: 'Drop to connect';
         display: block;
-        color: white;
+        color: black;
         font-size: x-large;
-        font-weight: 800;
     }
 }

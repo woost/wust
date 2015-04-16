@@ -1,11 +1,14 @@
 <div id="focus_view_container">
-    <div id="problem_view">
-        <h2>Problems:</h2>
-        <div show-discourse-node-list ng-model='problems.model'></div>
+    <div ng-if='left' id="left_view">
+        <div show-discourse-node-list node-model='left.model'></div>
     </div>
     <div id="focus_view_center">
+        <div ng-if='top' id="top_view">
+            <div show-discourse-node-list node-model='top.model'></div>
+        </div>
         <div id="node_view">
-            <div class="panel panel-default" ng-class="nodeCss">
+            <h2>Focus:</h2>
+            <div class="panel panel-default" ng-class="nodeInfo.css">
                 <div class="panel-heading">
                     <h3 editable-textarea="node.title" e-rows="7" e-cols="40" onaftersave="updateFocused()" style="display:inline;" class="panel-title" ng-bind="node.title"></h3>
                     <button class="pull-right btn btn-xs btn-danger" ng-click="removeFocused()"><i class="fa fa-trash-o"></i></button>
@@ -15,16 +18,11 @@
                 </div>
             </div>
         </div>
-        <div id="idea_view">
-            <h2>Ideas:</h2>
-            <div show-discourse-node-list ng-model='ideas.model'></div>
+        <div ng-if="bottom" id="bottom_view">
+            <div show-discourse-node-list node-model='bottom.model'></div>
         </div>
     </div>
-    <div id="goal_view">
-        <h2>Goals:</h2>
-        <div show-discourse-node-list ng-model='goals.model'></div>
+    <div ng-if="right" id="right_view">
+        <div show-discourse-node-list node-model='right.model'></div>
     </div>
 </div>
-<ul>
-    <li ng-repeat="message in messages" ng-bind="message"></li>
-</ul>

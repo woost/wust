@@ -33,17 +33,17 @@ angular.module("wust").config(function($stateProvider, $urlRouterProvider, $loca
     }).state(DiscourseNodeProvider.Goal.state, {
         parent: "page",
         url: "goals/:id",
-        templateUrl: "assets/views/focus_view.html",
+        templateUrl: "assets/views/node_focus.html",
         controller: "GoalsCtrl",
     }).state(DiscourseNodeProvider.Problem.state, {
         parent: "page",
         url: "problems/:id",
-        templateUrl: "assets/views/focus_view.html",
+        templateUrl: "assets/views/node_focus.html",
         controller: "ProblemsCtrl",
     }).state(DiscourseNodeProvider.Idea.state, {
         parent: "page",
         url: "ideas/:id",
-        templateUrl: "assets/views/focus_view.html",
+        templateUrl: "assets/views/node_focus.html",
         controller: "IdeasCtrl",
     });
 

@@ -10,15 +10,13 @@ angular.module("wust").service("NodeHistory", function(DiscourseNode) {
     }
 
     function add(node) {
-        node.$then(data => {
-            let obj = {
-                node: data,
-                info: DiscourseNode.get(data.label)
-            };
+        let obj = {
+            node,
+            info: DiscourseNode.get(node.label)
+        };
 
-            remove(data.id);
-            visited.push(obj);
-            visited.splice(0, visited.length - maximum);
-        });
+        remove(node.id);
+        visited.push(obj);
+        visited.splice(0, visited.length - maximum);
     }
 });

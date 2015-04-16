@@ -1,22 +1,17 @@
-angular.module("wust").factory("DiscourseNodeView", function($state, $stateParams, NodeHistory, DiscourseNodeList, Live, DiscourseNode) {
-    return setScope;
-
-    function setScope(scope, nodeInfo, service) {
-        let id = $stateParams.id;
-
-        scope.nodeCss = nodeInfo.css;
-        scope.node = service.$find(id);
-        scope.goals = new DiscourseNodeList.Goal(scope.node);
-        scope.problems = new DiscourseNodeList.Problem(scope.node);
-        scope.ideas = new DiscourseNodeList.Idea(scope.node);
-        scope.removeFocused = _.wrap(scope.node, removeFocused);
-        scope.updateFocused = _.wrap(scope.node, updateFocused);
-        NodeHistory.add(scope.node);
-
-        scope.messages = [];
-
-        Live.subscribe(`${nodeInfo.state}/${id}`, _.wrap(scope, onMessage));
-    }
+angular.module("wust").directive("focusView", function($state, NodeHistory, Live, DiscourseNode) {
+    return {
+        restrict: "A",
+        templateUrl: "assets/partials/focus_view.html",
+        scope: true,
+        link: function($scope) {
+            $scope.node.$then(data => {
+                Live.subscribe(`${$scope.nodeInfo.state}/${data.id}`, _.wrap($scope, onMessage));
+                NodeHistory.add($scope.node);
+            });
+            $scope.removeFocused = _.wrap($scope.node, removeFocused);
+            $scope.updateFocused = _.wrap($scope.node, updateFocused);
+        }
+    };
 
     function onMessage(scope, message) {
         scope.$apply(() => {
