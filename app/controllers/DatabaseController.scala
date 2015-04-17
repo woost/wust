@@ -20,15 +20,16 @@ trait DatabaseController {
     Discourse(db.queryGraph("match (n) optional match (n)-[r]-() return n,r"))
   }
 
-  def nodeDiscourseGraph(uuid: String): Discourse = {
-    nodeDiscourseGraph(List(uuid))
-  }
-
-  def nodeDiscourseGraph(uuids: Seq[String]): Discourse = {
+  def nodeDiscourseGraph(uuids: String*): Discourse = {
     if(uuids.isEmpty)
       return Discourse.empty
 
     Discourse(db.queryGraph(Query("match (n) where n.uuid in {uuids} return *", Map("uuids" -> uuids))))
+  }
+
+  def discourseNodes(uuids: String*) = {
+    val discourse = nodeDiscourseGraph(uuids:_*)
+    (discourse, uuids.map {uuid => discourse.uuidNodes.find(_.uuid == uuid).get})
   }
 
   def relationDiscourseGraph(uuidFrom: String, relationType: RelationType, uuidTo: String): Discourse = {

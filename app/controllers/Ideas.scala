@@ -38,10 +38,7 @@ object Ideas extends Controller with ContentNodesController[Idea] {
     val json = request.body.asJson.get
     val connect = json.as[ConnectRequest]
 
-    val discourse = nodeDiscourseGraph(List(uuid, connect.uuid))
-    val idea = discourse.ideas.find(p => p.uuid == uuid).get
-    val goal = discourse.goals.find(p => p.uuid == connect.uuid).get
-
+    val (discourse, Seq(idea: Idea, goal: Goal)) = discourseNodes(uuid, connect.uuid)
     discourse.add(Achieves.local(idea, goal))
     db.persistChanges(discourse.graph)
 
@@ -53,10 +50,7 @@ object Ideas extends Controller with ContentNodesController[Idea] {
     val json = request.body.asJson.get
     val connect = json.as[ConnectRequest]
 
-    val discourse = nodeDiscourseGraph(List(uuid, connect.uuid))
-    val idea = discourse.ideas.find(p => p.uuid == uuid).get
-    val problem = discourse.problems.find(p => p.uuid == connect.uuid).get
-
+    val (discourse, Seq(idea: Idea, problem: Problem)) = discourseNodes(uuid, connect.uuid)
     discourse.add(Solves.local(idea, problem))
     db.persistChanges(discourse.graph)
 
@@ -68,10 +62,7 @@ object Ideas extends Controller with ContentNodesController[Idea] {
     val json = request.body.asJson.get
     val connect = json.as[ConnectRequest]
 
-    val discourse = nodeDiscourseGraph(List(uuid, connect.uuid))
-    val idea = discourse.ideas.find(p => p.uuid == uuid).get
-    val subIdea = discourse.ideas.find(p => p.uuid == connect.uuid).get
-
+    val (discourse, Seq(idea: Idea, subIdea: Idea)) = discourseNodes(uuid, connect.uuid)
     discourse.add(SubIdea.local(subIdea, idea))
     db.persistChanges(discourse.graph)
 
