@@ -5,47 +5,35 @@ POST   /auth/signin               controllers.security.rest.RestCredentialsAuthC
 POST   /auth/signup               controllers.security.rest.RestSignUpController.signUp
 GET    /auth/signout              controllers.security.rest.RestSignUpController.signOut
 
-GET /goals controllers.Goals.index
-GET /goals/:uuid controllers.Goals.show(uuid: String)
+-> /goals controllers.Goals
 GET /goals/:uuid/goals controllers.Goals.showGoals(uuid: String)
 GET /goals/:uuid/problems controllers.Goals.showProblems(uuid: String)
 GET /goals/:uuid/ideas controllers.Goals.showIdeas(uuid: String)
-PUT /goals/:uuid controllers.Goals.update(uuid: String)
-POST /goals controllers.Goals.create
 POST /goals/:uuid/goals controllers.Goals.connectGoal(uuid: String)
 POST /goals/:uuid/problems controllers.Goals.connectProblem(uuid: String)
 POST /goals/:uuid/ideas controllers.Goals.connectIdea(uuid: String)
-DELETE /goals/:uuid controllers.Goals.remove(uuid: String)
 DELETE /goals/:uuid/goals/:uuidGoal controllers.Goals.disconnectGoal(uuid: String, uuidGoal: String)
 DELETE /goals/:uuid/problems/:uuidProblem controllers.Goals.disconnectProblem(uuid: String, uuidProblem: String)
 DELETE /goals/:uuid/ideas/:uuidIdea controllers.Goals.disconnectIdea(uuid: String, uuidIdea: String)
 
-GET /problems controllers.Problems.index
-GET /problems/:uuid controllers.Problems.show(uuid: String)
+-> /goals controllers.Problems
 GET /problems/:uuid/goals controllers.Problems.showGoals(uuid: String)
 GET /problems/:uuid/problems controllers.Problems.showProblems(uuid: String)
 GET /problems/:uuid/ideas controllers.Problems.showIdeas(uuid: String)
-PUT /problems/:uuid controllers.Problems.update(uuid: String)
-POST /problems controllers.Problems.create
 POST /problems/:uuid/goals controllers.Problems.connectGoal(uuid: String)
 POST /problems/:uuid/problems controllers.Problems.connectProblem(uuid: String)
 POST /problems/:uuid/ideas controllers.Problems.connectIdea(uuid: String)
-DELETE /problems/:uuid controllers.Problems.remove(uuid: String)
 DELETE /problems/:uuid/goals/:uuidGoal controllers.Problems.disconnectGoal(uuid: String, uuidGoal: String)
 DELETE /problems/:uuid/problems/:uuidProblem controllers.Problems.disconnectProblem(uuid: String, uuidProblem: String)
 DELETE /problems/:uuid/ideas/:uuidIdea controllers.Problems.disconnectIdea(uuid: String, uuidIdea: String)
 
-GET /ideas controllers.Ideas.index
-GET /ideas/:uuid controllers.Ideas.show(uuid: String)
+-> /goals controllers.Ideas
 GET /ideas/:uuid/goals controllers.Ideas.showGoals(uuid: String)
 GET /ideas/:uuid/problems controllers.Ideas.showProblems(uuid: String)
 GET /ideas/:uuid/ideas controllers.Ideas.showIdeas(uuid: String)
-PUT /ideas/:uuid controllers.Ideas.update(uuid: String)
-POST /ideas controllers.Ideas.create
 POST /ideas/:uuid/goals controllers.Ideas.connectGoal(uuid: String)
 POST /ideas/:uuid/problems controllers.Ideas.connectProblem(uuid: String)
 POST /ideas/:uuid/ideas controllers.Ideas.connectIdea(uuid: String)
-DELETE /ideas/:uuid controllers.Ideas.remove(uuid: String)
 DELETE /ideas/:uuid/goals/:uuidGoal controllers.Ideas.disconnectGoal(uuid: String, uuidGoal: String)
 DELETE /ideas/:uuid/problems/:uuidProblem controllers.Ideas.disconnectProblem(uuid: String, uuidProblem: String)
 DELETE /ideas/:uuid/ideas/:uuidIdea controllers.Ideas.disconnectIdea(uuid: String, uuidIdea: String)

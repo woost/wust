@@ -3,14 +3,13 @@ package controllers
 import modules.requests._
 import play.api.libs.json._
 import play.api.mvc.Action
-import play.api.mvc.Controller
 
 import renesca._
 import renesca.parameter.implicits._
 import modules.json.GraphFormat._
 import model.WustSchema._
 
-object Ideas extends Controller with ContentNodesController[Idea] {
+object Ideas extends ContentNodesController[Idea] {
   override def factory = Idea
   override def apiname = "ideas"
   override def decodeRequest(jsValue: JsValue) = jsValue.as[IdeaAddRequest]

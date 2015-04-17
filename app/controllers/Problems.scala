@@ -4,7 +4,6 @@ import org.atmosphere.play.AtmosphereCoordinator.{instance => atmosphere}
 import modules.requests._
 import play.api.libs.json._
 import play.api.mvc.Action
-import play.api.mvc.Controller
 
 import renesca._
 import renesca.parameter.implicits._
@@ -12,7 +11,7 @@ import modules.json.GraphFormat._
 import model.WustSchema._
 import spray.can.Http.ConnectionAttemptFailedException
 
-object Problems extends Controller with ContentNodesController[Problem] {
+object Problems extends ContentNodesController[Problem] {
   override def factory = Problem
 
   override def apiname = "problems"

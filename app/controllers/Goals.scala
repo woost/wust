@@ -4,12 +4,12 @@ import model._
 import modules.json.GraphFormat._
 import modules.requests._
 import play.api.libs.json._
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.Action
 import renesca._
 import renesca.parameter.implicits._
 import model.WustSchema._
 
-object Goals extends Controller with ContentNodesController[Goal] {
+object Goals extends ContentNodesController[Goal] {
   override def factory = Goal
   override def apiname = "goals"
   override def decodeRequest(jsValue: JsValue) = jsValue.as[GoalAddRequest]

@@ -11,6 +11,7 @@ import modules.requests.NodeAddRequest
 import org.atmosphere.play.AtmosphereCoordinator.{instance => atmosphere}
 import play.api.libs.json._
 import play.api.mvc.Action
+import play.api.mvc.Controller
 import renesca._
 import renesca.graph.RelationType
 import renesca.parameter.implicits._
@@ -18,7 +19,7 @@ import modules.json.GraphFormat._
 import model.WustSchema._
 import model._
 
-trait ContentNodesController[NodeType <: ContentNode] extends Silhouette[User, JWTAuthenticator] with HeaderEnvironmentModule with DatabaseController {
+trait ContentNodesController[NodeType <: ContentNode] extends ResourceRouter[String] with Silhouette[User, JWTAuthenticator] with HeaderEnvironmentModule with DatabaseController with Controller {
   //TODO: shared code: label <-> api mapping
   //TODO: use transactions instead of db
   def factory: ContentNodeFactory[NodeType]
@@ -45,7 +46,7 @@ trait ContentNodesController[NodeType <: ContentNode] extends Silhouette[User, J
   }
 
   // TODO: leaks hyperedges
-  def remove(uuid: String) = SecuredAction(WithRole(God)) {
+  def destroy(uuid: String) = SecuredAction(WithRole(God)) {
     implicit request =>
       val discourse = nodeDiscourseGraph(uuid)
       discourse.graph.nodes.clear
