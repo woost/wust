@@ -33,56 +33,44 @@ object Goals extends ContentNodesController[Goal] {
     Ok(Json.toJson(db.queryGraph(query).nodes.map(Idea.create)))
   }
 
-  def connectGoal(uuid: String) = Action { request =>
-    val json = request.body.asJson.get
-    val connect = json.as[ConnectRequest]
+  def connectGoal(uuid: String) = Action(parse.json) { request =>
+    val connect = request.body.as[ConnectRequest]
 
-    val (discourse, Seq(goal: Goal, subGoal: Goal)) = discourseNodes(uuid, connect.uuid)
-    discourse.add(SubGoal.local(subGoal, goal))
-    db.persistChanges(discourse.graph)
-
+    val (subGoal, _) = connectNodes(connect.uuid, uuid, SubGoal.local)
     broadcastConnect(uuid, subGoal)
     Ok(Json.toJson(subGoal))
   }
 
-  def connectProblem(uuid: String) = Action { request =>
-    val json = request.body.asJson.get
-    val connect = json.as[ConnectRequest]
+  def connectProblem(uuid: String) = Action(parse.json) { request =>
+    val connect = request.body.as[ConnectRequest]
 
-    val (discourse, Seq(goal: Goal, problem: Problem)) = discourseNodes(uuid, connect.uuid)
-    discourse.add(Prevents.local(problem, goal))
-    db.persistChanges(discourse.graph)
-
+    val (problem, _) = connectNodes(connect.uuid, uuid, Prevents.local)
     broadcastConnect(uuid, problem)
     Ok(Json.toJson(problem))
   }
 
-  def connectIdea(uuid: String) = Action { request =>
-    val json = request.body.asJson.get
-    val connect = json.as[ConnectRequest]
+  def connectIdea(uuid: String) = Action(parse.json) { request =>
+    val connect = request.body.as[ConnectRequest]
 
-    val (discourse, Seq(goal: Goal, idea: Idea)) = discourseNodes(uuid, connect.uuid)
-    discourse.add(Achieves.local(idea, goal))
-    db.persistChanges(discourse.graph)
-
+    val (idea, _) = connectNodes(connect.uuid, uuid, Achieves.local)
     broadcastConnect(uuid, idea)
     Ok(Json.toJson(idea))
   }
 
   def disconnectGoal(uuid: String, uuidGoal: String) = Action {
-    disconnect(uuidGoal, SubGoal.relationType, uuid)
+    disconnectNodes(uuidGoal, SubGoal.relationType, uuid)
     broadcastDisconnect(uuid, uuidGoal, "GOAL")
     Ok(JsObject(Seq()))
   }
 
   def disconnectProblem(uuid: String, uuidProblem: String) = Action {
-    disconnect(uuidProblem, Prevents.relationType, uuid)
+    disconnectNodes(uuidProblem, Prevents.relationType, uuid)
     broadcastDisconnect(uuid, uuidProblem, "PROBLEM")
     Ok(JsObject(Seq()))
   }
 
   def disconnectIdea(uuid: String, uuidIdea: String) = Action {
-    disconnect(uuidIdea, List(Achieves.startRelationType, Achieves.endRelationType), uuid)
+    disconnectNodes(uuidIdea, List(Achieves.startRelationType, Achieves.endRelationType), uuid)
     broadcastDisconnect(uuid, uuidIdea, "IDEA")
     Ok(JsObject(Seq()))
   }

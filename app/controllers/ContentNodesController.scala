@@ -13,6 +13,7 @@ import play.api.libs.json._
 import play.api.mvc.Action
 import play.api.mvc.Controller
 import renesca._
+import renesca.schema.SchemaItem
 import renesca.graph.RelationType
 import renesca.parameter.implicits._
 import modules.json.GraphFormat._
@@ -62,9 +63,8 @@ trait ContentNodesController[NodeType <: ContentNode] extends ResourceRouter[Str
     }
   }
 
-  def update(uuid: String) = Action { request =>
-    val json = request.body.asJson.get
-    val nodeAdd = decodeRequest(json)
+  def update(uuid: String) = Action(parse.json) { request =>
+    val nodeAdd = decodeRequest(request.body)
     val discourse = nodeDiscourseGraph(uuid)
     discourse.contentNodes.headOption match {
       case Some(node) => {
@@ -76,11 +76,18 @@ trait ContentNodesController[NodeType <: ContentNode] extends ResourceRouter[Str
     }
   }
 
-  def disconnect(uuidFrom: String, relationType: RelationType, uuidTo: String) {
-    disconnect(uuidFrom, List(relationType), uuidTo)
+  def connectNodes[FROM <: UuidNode, TO <: UuidNode](uuid: String, otherUuid: String, createFunc: (FROM, TO) => SchemaItem) = {
+    val (discourse, Seq(from: FROM, to: TO)) = discourseNodes(uuid, otherUuid)
+    discourse.add(createFunc(from, to))
+    db.persistChanges(discourse.graph)
+    (from, to)
   }
 
-  def disconnect(uuidFrom: String, relationTypes: Seq[RelationType], uuidTo: String) {
+  def disconnectNodes(uuidFrom: String, relationType: RelationType, uuidTo: String) {
+    disconnectNodes(uuidFrom, List(relationType), uuidTo)
+  }
+
+  def disconnectNodes(uuidFrom: String, relationTypes: Seq[RelationType], uuidTo: String) {
     val discourse = relationDiscourseGraph(uuidFrom, relationTypes, uuidTo)
 
     // all nodes which lie on a path between fromNode and toNode
@@ -89,14 +96,12 @@ trait ContentNodesController[NodeType <: ContentNode] extends ResourceRouter[Str
     discourse.graph.nodes --= connectorNodes.map(_.node) //TODO: wrap boilerplate
     discourse.graph.relations.clear()
     db.persistChanges(discourse.graph)
-
   }
 
   def jsonChange(changeType: String, data: JsValue) = JsObject(Seq(
     ("type", JsString(changeType)),
     ("data", data)
   ))
-
 
   private def broadcast(uuid: String, data: JsValue): Unit = {
     val broadcaster = atmosphere.framework.metaBroadcaster
