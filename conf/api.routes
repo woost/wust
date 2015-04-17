@@ -16,7 +16,7 @@ DELETE /goals/:uuid/goals/:uuidGoal controllers.Goals.disconnectGoal(uuid: Strin
 DELETE /goals/:uuid/problems/:uuidProblem controllers.Goals.disconnectProblem(uuid: String, uuidProblem: String)
 DELETE /goals/:uuid/ideas/:uuidIdea controllers.Goals.disconnectIdea(uuid: String, uuidIdea: String)
 
--> /goals controllers.Problems
+-> /problems controllers.Problems
 GET /problems/:uuid/goals controllers.Problems.showGoals(uuid: String)
 GET /problems/:uuid/problems controllers.Problems.showProblems(uuid: String)
 GET /problems/:uuid/ideas controllers.Problems.showIdeas(uuid: String)
@@ -27,7 +27,7 @@ DELETE /problems/:uuid/goals/:uuidGoal controllers.Problems.disconnectGoal(uuid:
 DELETE /problems/:uuid/problems/:uuidProblem controllers.Problems.disconnectProblem(uuid: String, uuidProblem: String)
 DELETE /problems/:uuid/ideas/:uuidIdea controllers.Problems.disconnectIdea(uuid: String, uuidIdea: String)
 
--> /goals controllers.Ideas
+-> /ideas controllers.Ideas
 GET /ideas/:uuid/goals controllers.Ideas.showGoals(uuid: String)
 GET /ideas/:uuid/problems controllers.Ideas.showProblems(uuid: String)
 GET /ideas/:uuid/ideas controllers.Ideas.showIdeas(uuid: String)
