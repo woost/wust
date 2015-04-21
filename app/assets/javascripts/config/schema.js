@@ -1,8 +1,11 @@
 angular.module("wust").config(function($provide) {
     let schema = angular.copy(window.globals.schema);
-    $provide.constant("Labels", _(schema.models).map(model => {
+    $provide.constant("SchemaInfo", _(schema.models).map(model => {
         return {
-            [model.name]: model.label
+            [model.name]: {
+                label: model.label,
+                state: model.path
+            }
         };
     }).reduce(_.merge));
     _.each(schema.models, model => {

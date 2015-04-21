@@ -1,21 +1,15 @@
-angular.module("wust").service("DiscourseNode", function(Labels) {
-    this.goal = {
+angular.module("wust").service("DiscourseNode", function(SchemaInfo) {
+    this.goal = _.merge({
         css: "discourse_goal",
-        state: "goals",
-        label: Labels.Goal
-    };
+    }, SchemaInfo.Goal);
 
-    this.problem = {
+    this.problem = _.merge({
         css: "discourse_problem",
-        state: "problems",
-        label: Labels.Problem
-    };
+    }, SchemaInfo.Problem);
 
-    this.idea = {
+    this.idea = _.merge({
         css: "discourse_idea",
-        state: "ideas",
-        label: Labels.Idea
-    };
+    }, SchemaInfo.Idea);
 
     let mappings = _([this.goal, this.problem, this.idea]).map(node => {
         return {
