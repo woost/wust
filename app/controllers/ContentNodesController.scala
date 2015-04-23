@@ -76,29 +76,33 @@ trait ContentNodesController[NodeType <: ContentNode] extends ResourceRouter[Str
     }
   }
 
-  def connectNodes[START <: UuidNode, RELATION <: SchemaAbstractRelation[START, END] with SchemaItem, END <: UuidNode](uuid: String, otherUuid: String, factory: SchemaAbstractRelationFactory[START, RELATION, END]) = {
-    val (discourse, (start, end)) = discourseNodes[START, END](uuid, otherUuid)
+  def connectNodes[START <: UuidNode, RELATION <: SchemaAbstractRelation[START, END] with SchemaItem, END <: UuidNode](startUuid: String, factory: SchemaAbstractRelationFactory[START, RELATION, END], endUuid: String) = {
+    val (discourse, (start, end)) = discourseNodes[START, END](startUuid, endUuid)
     discourse.add(factory.local(start, end))
     db.persistChanges(discourse.graph)
     (start, end)
   }
 
-  def disconnectNodes(uuidFrom: String, relationType: RelationType, uuidTo: String) {
-    disconnectNodes(uuidFrom, List(relationType), uuidTo)
+  def disconnectNodes[START <: UuidNode, RELATION <: SchemaRelation[START,END], END <: UuidNode](startUuid: String, factory: SchemaRelationFactory[START,RELATION,END], endUuid: String) {
+      disconnectNodes(startUuid, List(factory.relationType), endUuid)
   }
 
-  def disconnectNodes(uuidFrom: String, relationTypes: Seq[RelationType], uuidTo: String) {
-    val discourse = relationDiscourseGraph(uuidFrom, relationTypes, uuidTo)
+  def disconnectNodes[START <: UuidNode, RELATION <: SchemaHyperRelation[START,_,RELATION,_,END], END <: UuidNode](startUuid: String, factory: SchemaHyperRelationFactory[START,_,RELATION,_,END], endUuid: String) {
+      disconnectNodes(startUuid, List(factory.startRelationType, factory.endRelationType), endUuid)
+  }
+
+  private def disconnectNodes(startUuid: String, relationTypes: Seq[RelationType], endUuid: String) {
+    val discourse = relationDiscourseGraph(startUuid, relationTypes, endUuid)
 
     // all nodes which lie on a path between fromNode and toNode
-    val connectorNodes = discourse.contentNodes.filter(node => uuidFrom != node.uuid && uuidTo != node.uuid)
+    val connectorNodes = discourse.contentNodes.filter(node => startUuid != node.uuid && endUuid != node.uuid)
 
     discourse.graph.nodes --= connectorNodes.map(_.node) //TODO: wrap boilerplate
     discourse.graph.relations.clear()
     db.persistChanges(discourse.graph)
   }
 
-  def jsonChange(changeType: String, data: JsValue) = JsObject(Seq(
+  private def jsonChange(changeType: String, data: JsValue) = JsObject(Seq(
     ("type", JsString(changeType)),
     ("data", data)
   ))
@@ -108,11 +112,11 @@ trait ContentNodesController[NodeType <: ContentNode] extends ResourceRouter[Str
     broadcaster.broadcastTo(s"/live/v1/$apiname/$uuid", data)
   }
 
-  def broadcastConnect(uuid: String, node: ContentNode): Unit = {
+  protected def broadcastConnect(uuid: String, node: ContentNode): Unit = {
     broadcast(uuid, jsonChange("connect", Json.toJson(node)))
   }
 
-  def broadcastDisconnect(uuid: String, otherUuid: String, label: String): Unit = {
+  protected def broadcastDisconnect(uuid: String, otherUuid: String, label: String): Unit = {
     broadcast(uuid,
       jsonChange("disconnect", JsObject(Seq(("id", JsString(otherUuid)), ("label", JsString(label))))))
   }

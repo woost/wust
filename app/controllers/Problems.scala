@@ -44,7 +44,7 @@ object Problems extends ContentNodesController[Problem] {
   def connectGoal(uuid: String) = Action(parse.json) { request =>
     val connect = request.body.as[ConnectRequest]
 
-    val (_, goal) = connectNodes(uuid, connect.uuid, Prevents)
+    val (_, goal) = connectNodes(uuid, Prevents, connect.uuid)
     broadcastConnect(uuid, goal)
     Ok(Json.toJson(goal))
   }
@@ -52,7 +52,7 @@ object Problems extends ContentNodesController[Problem] {
   def connectProblem(uuid: String) = Action(parse.json) { request =>
     val connect = request.body.as[ConnectRequest]
 
-    val (cause, _) = connectNodes(connect.uuid, uuid, Causes)
+    val (cause, _) = connectNodes(connect.uuid, Causes, uuid)
     broadcastConnect(uuid, cause)
     Ok(Json.toJson(cause))
   }
@@ -60,25 +60,25 @@ object Problems extends ContentNodesController[Problem] {
   def connectIdea(uuid: String) = Action(parse.json) { request =>
     val connect = request.body.as[ConnectRequest]
 
-    val (idea, _) = connectNodes(connect.uuid, uuid, Solves)
+    val (idea, _) = connectNodes(connect.uuid, Solves, uuid)
     broadcastConnect(uuid, idea)
     Ok(Json.toJson(idea))
   }
 
   def disconnectGoal(uuid: String, uuidGoal: String) = Action {
-    disconnectNodes(uuid, Prevents.relationType, uuidGoal)
+    disconnectNodes(uuid, Prevents, uuidGoal)
     broadcastDisconnect(uuid, uuidGoal, "GOAL")
     Ok(JsObject(Seq()))
   }
 
   def disconnectProblem(uuid: String, uuidProblem: String) = Action {
-    disconnectNodes(uuidProblem, Causes.relationType, uuid)
+    disconnectNodes(uuidProblem, Causes, uuid)
     broadcastDisconnect(uuid, uuidProblem, "PROBLEM")
     Ok(JsObject(Seq()))
   }
 
   def disconnectIdea(uuid: String, uuidIdea: String) = Action {
-    disconnectNodes(uuidIdea, List(Solves.startRelationType, Solves.endRelationType), uuid)
+    disconnectNodes(uuidIdea, Solves, uuid)
     broadcastDisconnect(uuid, uuidIdea, "IDEA")
     Ok(JsObject(Seq()))
   }

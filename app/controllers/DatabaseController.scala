@@ -40,16 +40,16 @@ trait DatabaseController {
     (discourse, (nodeWithUuid[START](discourse, startUuid), nodeWithUuid[END](discourse, endUuid)))
   }
 
-  def relationDiscourseGraph(uuidFrom: String, relationType: RelationType, uuidTo: String): Discourse = {
-    relationDiscourseGraph(uuidFrom, List(relationType), uuidTo)
+  def relationDiscourseGraph(startUuid: String, relationType: RelationType, endUuid: String): Discourse = {
+    relationDiscourseGraph(startUuid, List(relationType), endUuid)
   }
 
-  def relationDiscourseGraph(uuidFrom: String, relationTypes: Seq[RelationType], uuidTo: String): Discourse = {
+  def relationDiscourseGraph(startUuid: String, relationTypes: Seq[RelationType], endUuid: String): Discourse = {
     if(relationTypes.isEmpty)
       return Discourse.empty
 
     val relationMatcher = relationTypes.map(rel => s"-[`$rel`]->").mkString("()")
-    Discourse(db.queryGraph(Query(s"match (from {uuid: {uuidFrom}})${ relationMatcher }(to {uuid: {uuidTo}}) return *",
-      Map("uuidFrom" -> uuidFrom, "uuidTo" -> uuidTo))))
+    Discourse(db.queryGraph(Query(s"match (from {uuid: {startUuid}})${ relationMatcher }(to {uuid: {endUuid}}) return *",
+      Map("startUuid" -> startUuid, "endUuid" -> endUuid))))
   }
 }
