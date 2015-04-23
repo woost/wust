@@ -17,7 +17,7 @@ addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.3.9")
 // web plugins
 addSbtPlugin("com.typesafe.sbt" % "sbt-jshint" % "1.0.3")
 
-libraryDependencies += "org.webjars" % "jshint-node" % "2.6.3-2" // override sbt-jshint depenency until it contains the new version
+libraryDependencies += "org.webjars" % "jshint-node" % "2.6.3-2" // override sbt-jshint dependency until it contains the new version
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-rjs" % "1.0.7")
 

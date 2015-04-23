@@ -18,7 +18,7 @@ lazy val wust = (project in file(".")).settings(
     cache,
     ws,
     // scalajs
-    // "com.vmunier" %% "play-scalajs-scripts" % "0.1.0",
+    // "com.vmunier" %% "play-scalajs-scripts" % "0.2.0",
     // angular
     "org.webjars" % "angularjs" % "1.3.15",
     "org.webjars.bower" % "angular-ui-router" % "0.2.14",
@@ -39,12 +39,10 @@ lazy val wust = (project in file(".")).settings(
     "org.webjars.bower" % "humane-js" % "3.2.2",
     // authentication / authorization
     "com.mohiva" %% "play-silhouette" % "2.0",
-    "com.typesafe.play.plugins" %% "play-plugins-mailer" % "2.3.0",
+    "com.typesafe.play.plugins" %% "play-plugins-mailer" % "2.3.1",
     // atmosphere
-    "org.atmosphere" % "atmosphere-play" % "2.1.1" exclude("javax.servlet", "servlet-api"),
-    "javax.servlet" % "javax.servlet-api" % "3.1.0", // to fix atmosphere-play 2.1.1 which wrongly depends on servlet-api 2.5 - https://github.com/Atmosphere/atmosphere-play/issues/30
+    "org.atmosphere" % "atmosphere-play" % "2.1.2",
     "org.webjars.bower" % "atmosphere" % "2.2.7"
-
   ),
   // ecmascript 6
   TraceurKeys.sourceFileNames := Seq("app/*/module.js", "app/*/*/**/*.js"),
