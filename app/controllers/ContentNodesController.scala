@@ -8,7 +8,6 @@ import model.users.User
 import modules.cake.HeaderEnvironmentModule
 import modules.json.GraphFormat._
 import modules.requests.NodeAddRequest
-import org.atmosphere.play.AtmosphereCoordinator.{instance => atmosphere}
 import play.api.libs.json._
 import play.api.mvc.Action
 import play.api.mvc.Controller
@@ -25,7 +24,6 @@ trait ContentNodesController[NodeType <: ContentNode] extends ResourceRouter[Str
   //TODO: use transactions instead of db
   def factory: ContentNodeFactory[NodeType]
   def label = factory.label
-  def apiname: String
   def decodeRequest(jsValue: JsValue): NodeAddRequest
 
   def create = UserAwareAction { request =>
@@ -100,24 +98,5 @@ trait ContentNodesController[NodeType <: ContentNode] extends ResourceRouter[Str
     discourse.graph.nodes --= connectorNodes.map(_.node) //TODO: wrap boilerplate
     discourse.graph.relations.clear()
     db.persistChanges(discourse.graph)
-  }
-
-  private def jsonChange(changeType: String, data: JsValue) = JsObject(Seq(
-    ("type", JsString(changeType)),
-    ("data", data)
-  ))
-
-  private def broadcast(uuid: String, data: JsValue): Unit = {
-    val broadcaster = atmosphere.framework.metaBroadcaster
-    broadcaster.broadcastTo(s"/live/v1/$apiname/$uuid", data)
-  }
-
-  protected def broadcastConnect(uuid: String, node: ContentNode): Unit = {
-    broadcast(uuid, jsonChange("connect", Json.toJson(node)))
-  }
-
-  protected def broadcastDisconnect(uuid: String, otherUuid: String, label: String): Unit = {
-    broadcast(uuid,
-      jsonChange("disconnect", JsObject(Seq(("id", JsString(otherUuid)), ("label", JsString(label))))))
   }
 }

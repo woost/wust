@@ -1,18 +1,19 @@
 package controllers
 
+import modules.json.GraphFormat._
 import modules.requests._
 import play.api.libs.json._
 import play.api.mvc.Action
 
+import live.Broadcaster
 import renesca._
 import renesca.parameter.implicits._
-import modules.json.GraphFormat._
 import model.WustSchema._
 
 object Ideas extends ContentNodesController[Idea] {
   override def factory = Idea
-  override def apiname = "ideas"
   override def decodeRequest(jsValue: JsValue) = jsValue.as[IdeaAddRequest]
+  val broadcaster = new Broadcaster("ideas")
 
   def index() = Action {
     Ok(Json.toJson(wholeDiscourseGraph.ideas))
@@ -37,7 +38,7 @@ object Ideas extends ContentNodesController[Idea] {
     val connect = request.body.as[ConnectRequest]
 
     val (_, goal) = connectNodes(uuid, Achieves, connect.uuid)
-    broadcastConnect(uuid, goal)
+    broadcaster.broadcastConnect(uuid, goal)
     Ok(Json.toJson(goal))
   }
 
@@ -45,7 +46,7 @@ object Ideas extends ContentNodesController[Idea] {
     val connect = request.body.as[ConnectRequest]
 
     val (_, problem) = connectNodes(uuid, Solves, connect.uuid)
-    broadcastConnect(uuid, problem)
+    broadcaster.broadcastConnect(uuid, problem)
     Ok(Json.toJson(problem))
   }
 
@@ -53,25 +54,25 @@ object Ideas extends ContentNodesController[Idea] {
     val connect = request.body.as[ConnectRequest]
 
     val (subIdea, _) = connectNodes(connect.uuid, SubIdea, uuid)
-    broadcastConnect(uuid, subIdea)
+    broadcaster.broadcastConnect(uuid, subIdea)
     Ok(Json.toJson(subIdea))
   }
 
   def disconnectGoal(uuid: String, uuidGoal: String) = Action {
     disconnectNodes(uuid, Achieves, uuidGoal)
-    broadcastDisconnect(uuid, uuidGoal, "GOAL")
+    broadcaster.broadcastDisconnect(uuid, uuidGoal, "GOAL")
     Ok(JsObject(Seq()))
   }
 
   def disconnectProblem(uuid: String, uuidProblem: String) = Action {
     disconnectNodes(uuid, Solves, uuidProblem)
-    broadcastDisconnect(uuid, uuidProblem, "PROBLEM")
+    broadcaster.broadcastDisconnect(uuid, uuidProblem, "PROBLEM")
     Ok(JsObject(Seq()))
   }
 
   def disconnectIdea(uuid: String, uuidIdea: String) = Action {
     disconnectNodes(uuid, SubIdea, uuidIdea)
-    broadcastDisconnect(uuid, uuidIdea, "IDEA")
+    broadcaster.broadcastDisconnect(uuid, uuidIdea, "IDEA")
     Ok(JsObject(Seq()))
   }
 }

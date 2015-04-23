@@ -1,29 +1,22 @@
 package controllers
 
-import org.atmosphere.play.AtmosphereCoordinator.{instance => atmosphere}
+import modules.json.GraphFormat._
 import modules.requests._
 import play.api.libs.json._
 import play.api.mvc.Action
 
+import live.Broadcaster
 import renesca._
 import renesca.parameter.implicits._
-import modules.json.GraphFormat._
 import model.WustSchema._
-import spray.can.Http.ConnectionAttemptFailedException
 
 object Problems extends ContentNodesController[Problem] {
   override def factory = Problem
-
-  override def apiname = "problems"
-
   override def decodeRequest(jsValue: JsValue) = jsValue.as[ProblemAddRequest]
+  val broadcaster = new Broadcaster("problems")
 
   def index() = Action {
-    try {
-      Ok(Json.toJson(wholeDiscourseGraph.problems))
-    } catch {
-      case _: ConnectionAttemptFailedException => InternalServerError("No database connectivity.")
-    }
+    Ok(Json.toJson(wholeDiscourseGraph.problems))
   }
 
   def showGoals(uuid: String) = Action {
@@ -45,7 +38,7 @@ object Problems extends ContentNodesController[Problem] {
     val connect = request.body.as[ConnectRequest]
 
     val (_, goal) = connectNodes(uuid, Prevents, connect.uuid)
-    broadcastConnect(uuid, goal)
+    broadcaster.broadcastConnect(uuid, goal)
     Ok(Json.toJson(goal))
   }
 
@@ -53,7 +46,7 @@ object Problems extends ContentNodesController[Problem] {
     val connect = request.body.as[ConnectRequest]
 
     val (cause, _) = connectNodes(connect.uuid, Causes, uuid)
-    broadcastConnect(uuid, cause)
+    broadcaster.broadcastConnect(uuid, cause)
     Ok(Json.toJson(cause))
   }
 
@@ -61,25 +54,25 @@ object Problems extends ContentNodesController[Problem] {
     val connect = request.body.as[ConnectRequest]
 
     val (idea, _) = connectNodes(connect.uuid, Solves, uuid)
-    broadcastConnect(uuid, idea)
+    broadcaster.broadcastConnect(uuid, idea)
     Ok(Json.toJson(idea))
   }
 
   def disconnectGoal(uuid: String, uuidGoal: String) = Action {
     disconnectNodes(uuid, Prevents, uuidGoal)
-    broadcastDisconnect(uuid, uuidGoal, "GOAL")
+    broadcaster.broadcastDisconnect(uuid, uuidGoal, "GOAL")
     Ok(JsObject(Seq()))
   }
 
   def disconnectProblem(uuid: String, uuidProblem: String) = Action {
     disconnectNodes(uuidProblem, Causes, uuid)
-    broadcastDisconnect(uuid, uuidProblem, "PROBLEM")
+    broadcaster.broadcastDisconnect(uuid, uuidProblem, "PROBLEM")
     Ok(JsObject(Seq()))
   }
 
   def disconnectIdea(uuid: String, uuidIdea: String) = Action {
     disconnectNodes(uuidIdea, Solves, uuid)
-    broadcastDisconnect(uuid, uuidIdea, "IDEA")
+    broadcaster.broadcastDisconnect(uuid, uuidIdea, "IDEA")
     Ok(JsObject(Seq()))
   }
 }
