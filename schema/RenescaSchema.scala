@@ -121,13 +121,16 @@ trait SchemaNodeFactory[+T <: SchemaNode] {
   def local: T = create(Node.local(List(label)))
 }
 
-trait SchemaRelationFactory[STARTNODE <: SchemaNode, RELATIONNODE <: SchemaRelation[STARTNODE, ENDNODE], ENDNODE <: SchemaNode] {
+trait SchemaAbstractRelationFactory[STARTNODE <: SchemaNode, RELATION <: SchemaAbstractRelation[STARTNODE, ENDNODE] with SchemaItem, ENDNODE <: SchemaNode] {
+  def local(startNode: STARTNODE, endNode: ENDNODE): RELATION
+  def startNodeFactory: SchemaNodeFactory[STARTNODE]
+  def endNodeFactory: SchemaNodeFactory[ENDNODE]
+}
+
+trait SchemaRelationFactory[STARTNODE <: SchemaNode, RELATION <: SchemaRelation[STARTNODE, ENDNODE], ENDNODE <: SchemaNode] extends SchemaAbstractRelationFactory[STARTNODE, RELATION, ENDNODE] {
   def relationType: RelationType
-  //TODO: are the node factories still needed?
-  //  def startNodeFactory: SchemaNodeFactory[STARTNODE]
-  //  def endNodeFactory: SchemaNodeFactory[ENDNODE]
-  def create(relation: Relation): RELATIONNODE
-  def local(startNode: STARTNODE, endNode: ENDNODE): RELATIONNODE = {
+  def create(relation: Relation): RELATION
+  def local(startNode: STARTNODE, endNode: ENDNODE): RELATION = {
     create(Relation.local(startNode.node, endNode.node, relationType))
   }
 }
@@ -137,14 +140,12 @@ STARTNODE <: SchemaNode,
 STARTRELATION <: SchemaRelation[STARTNODE, HYPERRELATION],
 HYPERRELATION <: SchemaHyperRelation[STARTNODE, STARTRELATION, HYPERRELATION, ENDRELATION, ENDNODE],
 ENDRELATION <: SchemaRelation[HYPERRELATION, ENDNODE],
-ENDNODE <: SchemaNode] extends SchemaNodeFactory[HYPERRELATION] {
+ENDNODE <: SchemaNode] extends SchemaNodeFactory[HYPERRELATION] with SchemaAbstractRelationFactory[STARTNODE, HYPERRELATION, ENDNODE] {
 
   def startRelationType: RelationType
   def endRelationType: RelationType
 
-  def startNodeFactory: SchemaNodeFactory[STARTNODE]
   def factory: SchemaNodeFactory[HYPERRELATION]
-  def endNodeFactory: SchemaNodeFactory[ENDNODE]
 
   def startRelationCreate(relation: Relation): STARTRELATION
   def endRelationCreate(relation: Relation): ENDRELATION

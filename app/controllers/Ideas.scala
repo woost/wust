@@ -36,7 +36,7 @@ object Ideas extends ContentNodesController[Idea] {
   def connectGoal(uuid: String) = Action(parse.json) { request =>
     val connect = request.body.as[ConnectRequest]
 
-    val (_, goal) = connectNodes(uuid, connect.uuid, Achieves.local)
+    val (_, goal) = connectNodes(uuid, connect.uuid, Achieves)
     broadcastConnect(uuid, goal)
     Ok(Json.toJson(goal))
   }
@@ -44,7 +44,7 @@ object Ideas extends ContentNodesController[Idea] {
   def connectProblem(uuid: String) = Action(parse.json) { request =>
     val connect = request.body.as[ConnectRequest]
 
-    val (_, problem) = connectNodes(uuid, connect.uuid, Solves.local)
+    val (_, problem) = connectNodes(uuid, connect.uuid, Solves)
     broadcastConnect(uuid, problem)
     Ok(Json.toJson(problem))
   }
@@ -52,7 +52,7 @@ object Ideas extends ContentNodesController[Idea] {
   def connectIdea(uuid: String) = Action(parse.json) { request =>
     val connect = request.body.as[ConnectRequest]
 
-    val (subIdea, _) = connectNodes(connect.uuid, uuid, SubIdea.local)
+    val (subIdea, _) = connectNodes(connect.uuid, uuid, SubIdea)
     broadcastConnect(uuid, subIdea)
     Ok(Json.toJson(subIdea))
   }

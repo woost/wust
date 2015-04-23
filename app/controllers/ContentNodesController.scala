@@ -13,7 +13,7 @@ import play.api.libs.json._
 import play.api.mvc.Action
 import play.api.mvc.Controller
 import renesca._
-import renesca.schema.SchemaItem
+import renesca.schema._
 import renesca.graph.RelationType
 import renesca.parameter.implicits._
 import modules.json.GraphFormat._
@@ -76,11 +76,11 @@ trait ContentNodesController[NodeType <: ContentNode] extends ResourceRouter[Str
     }
   }
 
-  def connectNodes[FROM <: UuidNode, TO <: UuidNode](uuid: String, otherUuid: String, createFunc: (FROM, TO) => SchemaItem) = {
-    val (discourse, Seq(from: FROM, to: TO)) = discourseNodes(uuid, otherUuid)
-    discourse.add(createFunc(from, to))
+  def connectNodes[START <: UuidNode, RELATION <: SchemaAbstractRelation[START, END] with SchemaItem, END <: UuidNode](uuid: String, otherUuid: String, factory: SchemaAbstractRelationFactory[START, RELATION, END]) = {
+    val (discourse, (start, end)) = discourseNodes[START, END](uuid, otherUuid)
+    discourse.add(factory.local(start, end))
     db.persistChanges(discourse.graph)
-    (from, to)
+    (start, end)
   }
 
   def disconnectNodes(uuidFrom: String, relationType: RelationType, uuidTo: String) {

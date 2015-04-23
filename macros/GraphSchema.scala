@@ -220,6 +220,8 @@ object GraphSchemaMacro {
           case RelationPattern(className, startNode, endNode, _) =>
             q"""
            object ${ TermName(className) } extends SchemaRelationFactory[${ TypeName(startNode) }, ${ TypeName(className) }, ${ TypeName(endNode) }] {
+               def startNodeFactory = ${TermName(startNode)}
+               def endNodeFactory = ${TermName(endNode)}
                def relationType = RelationType(${ nameToLabel(className) })
                def create(relation: Relation) = ${ TermName(className) }(
                  ${ TermName(startNode) }.create(relation.startNode),

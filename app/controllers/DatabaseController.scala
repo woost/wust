@@ -3,6 +3,7 @@ package controllers
 import model.WustSchema._
 import model._
 import renesca._
+import renesca.schema.SchemaNode
 import renesca.graph.RelationType
 import renesca.parameter.ParameterMap
 import renesca.parameter.implicits._
@@ -16,6 +17,8 @@ trait DatabaseController {
     credentials = Some(spray.http.BasicHttpCredentials("db.neo4j.user".configOrElse("neo4j"),"db.neo4j.pass".configOrElse("neo4j")))
   )
 
+  private def nodeWithUuid[NODE <: SchemaNode](discourse: Discourse, uuid: String) = discourse.uuidNodes.find(_.uuid == uuid).get.asInstanceOf[NODE]
+
   def wholeDiscourseGraph: Discourse = {
     Discourse(db.queryGraph("match (n) optional match (n)-[r]-() return n,r"))
   }
@@ -27,9 +30,14 @@ trait DatabaseController {
     Discourse(db.queryGraph(Query("match (n) where n.uuid in {uuids} return *", Map("uuids" -> uuids))))
   }
 
-  def discourseNodes(uuids: String*) = {
+  def discourseNodes[NODE <: SchemaNode](uuids: String*) = {
     val discourse = nodeDiscourseGraph(uuids:_*)
-    (discourse, uuids.map {uuid => discourse.uuidNodes.find(_.uuid == uuid).get})
+    (discourse, uuids.map {uuid => nodeWithUuid[NODE](discourse, uuid)})
+  }
+
+  def discourseNodes[START <: SchemaNode, END <: SchemaNode](startUuid: String, endUuid: String) = {
+    val discourse = nodeDiscourseGraph(startUuid, endUuid)
+    (discourse, (nodeWithUuid[START](discourse, startUuid), nodeWithUuid[END](discourse, endUuid)))
   }
 
   def relationDiscourseGraph(uuidFrom: String, relationType: RelationType, uuidTo: String): Discourse = {
