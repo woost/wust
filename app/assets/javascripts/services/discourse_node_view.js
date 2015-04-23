@@ -15,7 +15,7 @@ angular.module("wust").factory("DiscourseNodeView", function($state, $stateParam
 
         scope.messages = [];
 
-        Live.subscribe(`/live/v1/${nodeInfo.state}/${id}`, _.wrap(scope, onMessage));
+        Live.subscribe(`${nodeInfo.state}/${id}`, _.wrap(scope, onMessage));
     }
 
     function onMessage(scope, message) {

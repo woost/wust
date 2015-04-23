@@ -1,6 +1,8 @@
 angular.module("wust").service("Live", function($rootScope) {
     this.subscribe = subscribe;
 
+    const prefix = "/live/v1/";
+
     let request = {
         //TODO: decide on atmosphere client configuration
         contentType: "application/json",
@@ -20,7 +22,7 @@ angular.module("wust").service("Live", function($rootScope) {
 
     function subscribe(url, handler) {
         let newRequest = _.merge({
-            url: location.origin + url,
+            url: location.origin + prefix + url,
             onMessage: response => {
                 let json = JSON.parse(response.responseBody);
                 console.log(json);
