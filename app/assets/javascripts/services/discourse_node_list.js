@@ -76,7 +76,7 @@ angular.module("wust").service("DiscourseNodeList", function(DiscourseNode, Idea
 
     class GoalNodeList extends NodeList {
         constructor(nodeService = {}) {
-            super(Goal, nodeService.goals, DiscourseNode.goal, {
+            super(Goal, nodeService.goals, DiscourseNode.Goal, {
                 templateUrl: "show_discourse_node_list.html",
                 listCss: "discourse_goal_list",
             });
@@ -85,7 +85,7 @@ angular.module("wust").service("DiscourseNodeList", function(DiscourseNode, Idea
 
     class ProblemNodeList extends NodeList {
         constructor(nodeService = {}) {
-            super(Problem, nodeService.problems, DiscourseNode.problem, {
+            super(Problem, nodeService.problems, DiscourseNode.Problem, {
                 templateUrl: "show_discourse_node_list.html",
                 listCss: "discourse_problem_list",
             });
@@ -94,7 +94,7 @@ angular.module("wust").service("DiscourseNodeList", function(DiscourseNode, Idea
 
     class IdeaNodeList extends NodeList {
         constructor(nodeService = {}) {
-            super(Idea, nodeService.ideas, DiscourseNode.idea, {
+            super(Idea, nodeService.ideas, DiscourseNode.Idea, {
                 templateUrl: "show_discourse_idea_list.html",
                 listCss: "discourse_idea_list",
             });

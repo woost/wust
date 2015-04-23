@@ -1,4 +1,4 @@
-angular.module("wust").config(function($stateProvider, $urlRouterProvider, $locationProvider, SchemaInfo) {
+angular.module("wust").config(function($stateProvider, $urlRouterProvider, $locationProvider, DiscourseNodeProvider) {
     $stateProvider.state("page", {
         url: "/",
         abstract: true,
@@ -30,17 +30,17 @@ angular.module("wust").config(function($stateProvider, $urlRouterProvider, $loca
         url: "graph",
         templateUrl: "assets/views/graph.html",
         controller: "GraphsCtrl",
-    }).state(SchemaInfo.Goal.state, {
+    }).state(DiscourseNodeProvider.Goal.state, {
         parent: "page",
         url: "goals/:id",
         templateUrl: "assets/views/focus_view.html",
         controller: "GoalsCtrl",
-    }).state(SchemaInfo.Problem.state, {
+    }).state(DiscourseNodeProvider.Problem.state, {
         parent: "page",
         url: "problems/:id",
         templateUrl: "assets/views/focus_view.html",
         controller: "ProblemsCtrl",
-    }).state(SchemaInfo.Idea.state, {
+    }).state(DiscourseNodeProvider.Idea.state, {
         parent: "page",
         url: "ideas/:id",
         templateUrl: "assets/views/focus_view.html",

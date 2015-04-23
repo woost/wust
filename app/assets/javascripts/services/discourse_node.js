@@ -1,21 +1,31 @@
-angular.module("wust").service("DiscourseNode", function(SchemaInfo) {
-    this.goal = _.merge({
+angular.module("wust").provider("DiscourseNode", function() {
+    this.Goal = {
         css: "discourse_goal",
-    }, SchemaInfo.Goal);
+        state: "goals"
+    };
 
-    this.problem = _.merge({
+    this.Problem = {
         css: "discourse_problem",
-    }, SchemaInfo.Problem);
+        state: "problems"
+    };
 
-    this.idea = _.merge({
+    this.Idea = {
         css: "discourse_idea",
-    }, SchemaInfo.Idea);
+        state: "ideas"
+    };
 
-    let mappings = _([this.goal, this.problem, this.idea]).map(node => {
+    this.$get = () => {
+        let mappings = _([this.Goal, this.Problem, this.Idea]).map(node => {
+            return {
+                [node.label]: node
+            };
+        }).reduce(_.merge);
+
         return {
-            [node.label]: node
+            Goal: this.Goal,
+            Problem: this.Problem,
+            Idea: this.Idea,
+            get: _.propertyOf(mappings)
         };
-    }).reduce(_.merge);
-
-    this.get = _.propertyOf(mappings);
+    };
 });

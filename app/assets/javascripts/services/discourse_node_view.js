@@ -39,11 +39,11 @@ angular.module("wust").factory("DiscourseNodeView", function($state, $stateParam
 
     function listOf(node) {
         switch (node.label) {
-            case DiscourseNode.goal.label:
+            case DiscourseNode.Goal.label:
                 return "goals";
-            case DiscourseNode.problem.label:
+            case DiscourseNode.Problem.label:
                 return "problems";
-            case DiscourseNode.idea.label:
+            case DiscourseNode.Idea.label:
                 return "ideas";
         }
     }

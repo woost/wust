@@ -3,7 +3,7 @@ angular.module("wust").controller("BrowseCtrl", function($scope, $state, Problem
         active: true,
         newTitle: "What is your problem?",
         listTitle: "Existing problems:",
-        info: DiscourseNode.problem,
+        info: DiscourseNode.Problem,
         service: Problem,
         addNode: addNode,
         newNode: Problem.$build({
@@ -13,7 +13,7 @@ angular.module("wust").controller("BrowseCtrl", function($scope, $state, Problem
     let goals = {
         newTitle: "What is your goal?",
         listTitle: "Existing goals:",
-        info: DiscourseNode.goal,
+        info: DiscourseNode.Goal,
         service: Goal,
         addNode: addNode,
         newNode: Goal.$build({
@@ -23,7 +23,7 @@ angular.module("wust").controller("BrowseCtrl", function($scope, $state, Problem
     let ideas = {
         newTitle: "What is your idea?",
         listTitle: "Existing ideas:",
-        info: DiscourseNode.idea,
+        info: DiscourseNode.Idea,
         service: Idea,
         addNode: addNode,
         newNode: Idea.$build({
