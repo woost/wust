@@ -24,8 +24,6 @@ trait ContentNodesController[NodeType <: ContentNode] extends ResourceRouter[Str
   //TODO: shared code: label <-> api mapping
   //TODO: use transactions instead of db
   def nodeSchema: NodeSchema[NodeType]
-  val broadcaster = new Broadcaster(nodeSchema.path)
-  val factory = nodeSchema.factory
 
   def create = UserAwareAction { request =>
     request.identity match {
@@ -33,7 +31,7 @@ trait ContentNodesController[NodeType <: ContentNode] extends ResourceRouter[Str
         val nodeAdd = request.body.asJson.get.as[NodeAddRequest]
 
         val discourse = Discourse.empty
-        val contentNode = factory.local(nodeAdd.title)
+        val contentNode = nodeSchema.factory.local(nodeAdd.title)
         discourse.add(contentNode)
         db.persistChanges(discourse.graph)
 
@@ -45,29 +43,31 @@ trait ContentNodesController[NodeType <: ContentNode] extends ResourceRouter[Str
   }
 
   // TODO: leaks hyperedges
+  // TODO: broadcast
   def destroy(uuid: String) = SecuredAction(WithRole(God)) {
     implicit request =>
-      val discourse = nodeDiscourseGraph(factory, uuid)
+      val discourse = nodeDiscourseGraph(nodeSchema.factory, uuid)
       discourse.graph.nodes.clear
       db.persistChanges(discourse.graph)
       Ok(JsObject(Seq()))
   }
 
   def show(uuid: String) = Action {
-    val discourse = nodeDiscourseGraph(factory, uuid)
+    val discourse = nodeDiscourseGraph(nodeSchema.factory, uuid)
   discourse.graph.nodes.headOption match {
-      case Some(node) => Ok(Json.toJson(factory.create(node)))
-      case None       => BadRequest(s"Node with label ${factory.label} and uuid $uuid not found.")
+      case Some(node) => Ok(Json.toJson(nodeSchema.factory.create(node)))
+      case None       => BadRequest(s"Node with label ${nodeSchema.factory.label} and uuid $uuid not found.")
     }
   }
 
   def update(uuid: String) = Action(parse.json) { request =>
     val nodeAdd = request.body.as[NodeAddRequest]
-    val discourse = nodeDiscourseGraph(factory, uuid)
+    val discourse = nodeDiscourseGraph(nodeSchema.factory, uuid)
     discourse.contentNodes.headOption match {
       case Some(node) => {
         node.title = nodeAdd.title
         db.persistChanges(discourse.graph)
+        Broadcaster.broadcastEdit(nodeSchema.path, node)
         Ok(Json.toJson(node))
       }
       case None       => BadRequest(s"Node with uuid $uuid not found.")
@@ -75,7 +75,7 @@ trait ContentNodesController[NodeType <: ContentNode] extends ResourceRouter[Str
   }
 
   def index() = Action {
-    val (_, nodes) = discourseNodes(factory)
+    val (_, nodes) = discourseNodes(nodeSchema.factory)
     Ok(Json.toJson(nodes))
   }
 
@@ -90,29 +90,32 @@ trait ContentNodesController[NodeType <: ContentNode] extends ResourceRouter[Str
   def connectMember(path: String, uuid: String) = Action(parse.json) { request =>
     val connect = request.body.as[ConnectRequest]
 
-    val node = nodeSchema.connectSchemas(path) match {
+    nodeSchema.connectSchemas(path) match {
       case StartConnectSchema(factory) => {
-        val (_,n) = connectNodes(uuid, factory, connect.uuid)
-        n
+        val (start,end) = connectNodes(uuid, factory, connect.uuid)
+        Broadcaster.broadcastConnect(start, factory, end)
+        Ok(Json.toJson(end))
       }
       case EndConnectSchema(factory) => {
-        val (n,_) = connectNodes(connect.uuid, factory, uuid)
-        n
+        val (start,end) = connectNodes(connect.uuid, factory, uuid)
+        Broadcaster.broadcastConnect(start, factory, end)
+        Ok(Json.toJson(start))
       }
     }
-
-    broadcaster.broadcastConnect(uuid, node)
-    Ok(Json.toJson(node))
   }
 
   def disconnectMember(path: String, uuid: String, otherUuid: String) = Action {
-    val schema = nodeSchema.connectSchemas(path)
-    schema match {
-      case StartConnectSchema(factory) => disconnectNodes(uuid, factory, otherUuid)
-      case EndConnectSchema(factory) => disconnectNodes(otherUuid, factory, uuid)
+    nodeSchema.connectSchemas(path) match {
+      case StartConnectSchema(factory) => {
+        disconnectNodes(uuid, factory, otherUuid)
+        Broadcaster.broadcastDisconnect(uuid, factory, otherUuid)
+      }
+      case EndConnectSchema(factory) => {
+        disconnectNodes(otherUuid, factory, uuid)
+        Broadcaster.broadcastDisconnect(otherUuid, factory, uuid)
+      }
     }
 
-    broadcaster.broadcastDisconnect(uuid, otherUuid, path)
     Ok(JsObject(Seq()))
   }
 }

@@ -3,12 +3,28 @@ angular.module("wust").config(function($provide, DiscourseNodeProvider) {
     _.each(schema.models, model => {
         DiscourseNodeProvider[model.name].label = model.label;
 
-        $provide.factory(model.name, restmod => restmod.model(model.path).mix(_(model.subs).map(sub => {
+        $provide.factory(model.name, (restmod, Live) => restmod.model(model.path).mix(_(model.subs).map((sub, path) => {
             return {
-                [sub.path]: {
-                    [sub.cardinality]: restmod.model()
+                [path]: {
+                    [sub.cardinality]: restmod.model().mix({
+                        $extend: {
+                            Collection: {
+                                $subscribeToLiveEvent: function(id, handler) {
+                                    return Live.subscribe(`${model.path}/${id}/${path}`, handler);
+                                }
+                            }
+                        }
+                    })
                 }
             };
-        }).reduce(_.merge)));
+        }).reduce(_.merge, {
+            $extend: {
+                Record: {
+                    $subscribeToLiveEvent: function(handler) {
+                        return Live.subscribe(`${model.path}/${this.id}`, handler);
+                    }
+                }
+            }
+        })));
     });
 });

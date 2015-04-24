@@ -102,23 +102,16 @@ object GraphFormat {
     def writes(connect: ConnectRequest) = ???
   }
 
-  trait NodeSchemaFormat[NODE <: ContentNode] extends Format[NodeSchema[NODE]] {
-    def reads(json: JsValue) = ???
-
+  implicit def nodeSchemaWrites[NODE <: ContentNode] = new Writes[NodeSchema[NODE]] {
     def writes(schema: NodeSchema[NODE]) = JsObject(Seq(
       ("label", JsString(schema.factory.label)),
       ("path", JsString(schema.path)),
       ("name", JsString(schema.name)),
-      ("subs", JsArray(schema.connectSchemas.map {
-        case (k: String,v: ConnectSchema[NODE]) => JsObject(Seq(
-          ("path", JsString(k)),
+      ("subs", JsObject(schema.connectSchemas.map {
+        case (k, v: ConnectSchema[NODE]) => (k, JsObject(Seq(
           ("cardinality", JsString(v.cardinality))
-        ))
+        )))
       }.toList))
-    ))
+  ))
   }
-
-  implicit object GoalSchemaFormat extends NodeSchemaFormat[Goal]
-  implicit object ProblemSchemaFormat extends NodeSchemaFormat[Problem]
-  implicit object IdeaSchemaFormat extends NodeSchemaFormat[Idea]
 }

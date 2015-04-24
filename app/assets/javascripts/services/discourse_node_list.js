@@ -63,8 +63,7 @@ angular.module("wust").service("DiscourseNodeList", function(DiscourseNode, Idea
             if (this.model.exists(elem))
                 return;
 
-            let listElem = this.model.list.$build(elem);
-            return this.model.list.$add(listElem);
+            this.model.list.$buildRaw(elem).$reveal();
         }
 
         removeNode(id) {
