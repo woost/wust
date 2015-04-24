@@ -80,37 +80,15 @@ object GraphFormat {
     }
   }
 
-  implicit object ProblemAddFormat extends Format[ProblemAddRequest] {
+  implicit object NodeAddFormat extends Format[NodeAddRequest] {
     def reads(json: JsValue) = json match {
       case JsObject(_) => {
-        JsSuccess(ProblemAddRequest((json \ "title").as[String]))
+        JsSuccess(NodeAddRequest((json \ "title").as[String]))
       }
       case otherwise   => JsError()
     }
 
-    def writes(problemAdd: ProblemAddRequest) = ???
-  }
-
-  implicit object GoalAddFormat extends Format[GoalAddRequest] {
-    def reads(json: JsValue) = json match {
-      case JsObject(_) => {
-        JsSuccess(GoalAddRequest((json \ "title").as[String]))
-      }
-      case otherwise   => JsError()
-    }
-
-    def writes(problemAdd: GoalAddRequest) = ???
-  }
-
-  implicit object IdeaAddFormat extends Format[IdeaAddRequest] {
-    def reads(json: JsValue) = json match {
-      case JsObject(_) => {
-        JsSuccess(IdeaAddRequest((json \ "title").as[String]))
-      }
-      case otherwise   => JsError()
-    }
-
-    def writes(problemAdd: IdeaAddRequest) = ???
+    def writes(nodeAdd: NodeAddRequest) = ???
   }
 
   implicit object ConnectFormat extends Format[ConnectRequest] {
@@ -123,4 +101,24 @@ object GraphFormat {
 
     def writes(connect: ConnectRequest) = ???
   }
+
+  trait NodeSchemaFormat[NODE <: ContentNode] extends Format[NodeSchema[NODE]] {
+    def reads(json: JsValue) = ???
+
+    def writes(schema: NodeSchema[NODE]) = JsObject(Seq(
+      ("label", JsString(schema.factory.label)),
+      ("path", JsString(schema.path)),
+      ("name", JsString(schema.name)),
+      ("subs", JsArray(schema.connectSchemas.map {
+        case (k: String,v: ConnectSchema[NODE]) => JsObject(Seq(
+          ("path", JsString(k)),
+          ("cardinality", JsString(v.cardinality))
+        ))
+      }.toList))
+    ))
+  }
+
+  implicit object GoalSchemaFormat extends NodeSchemaFormat[Goal]
+  implicit object ProblemSchemaFormat extends NodeSchemaFormat[Problem]
+  implicit object IdeaSchemaFormat extends NodeSchemaFormat[Idea]
 }

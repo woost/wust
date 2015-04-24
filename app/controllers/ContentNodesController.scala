@@ -7,7 +7,7 @@ import model.authorizations._
 import model.users.User
 import modules.cake.HeaderEnvironmentModule
 import modules.json.GraphFormat._
-import modules.requests.NodeAddRequest
+import modules.requests._
 import play.api.libs.json._
 import play.api.mvc.Action
 import play.api.mvc.Controller
@@ -18,18 +18,19 @@ import renesca.parameter.implicits._
 import modules.json.GraphFormat._
 import model.WustSchema._
 import model._
+import live.Broadcaster
 
 trait ContentNodesController[NodeType <: ContentNode] extends ResourceRouter[String] with Silhouette[User, JWTAuthenticator] with HeaderEnvironmentModule with DatabaseController with Controller {
   //TODO: shared code: label <-> api mapping
   //TODO: use transactions instead of db
-  def factory: ContentNodeFactory[NodeType]
-  def decodeRequest(jsValue: JsValue): NodeAddRequest
+  def nodeSchema: NodeSchema[NodeType]
+  val broadcaster = new Broadcaster(nodeSchema.path)
+  val factory = nodeSchema.factory
 
   def create = UserAwareAction { request =>
     request.identity match {
       case Some(user) =>
-        val json = request.body.asJson.get
-        val nodeAdd = decodeRequest(json)
+        val nodeAdd = request.body.asJson.get.as[NodeAddRequest]
 
         val discourse = Discourse.empty
         val contentNode = factory.local(nodeAdd.title)
@@ -61,7 +62,7 @@ trait ContentNodesController[NodeType <: ContentNode] extends ResourceRouter[Str
   }
 
   def update(uuid: String) = Action(parse.json) { request =>
-    val nodeAdd = decodeRequest(request.body)
+    val nodeAdd = request.body.as[NodeAddRequest]
     val discourse = nodeDiscourseGraph(factory, uuid)
     discourse.contentNodes.headOption match {
       case Some(node) => {
@@ -73,24 +74,45 @@ trait ContentNodesController[NodeType <: ContentNode] extends ResourceRouter[Str
     }
   }
 
-  protected def connectNodes[START <: UuidNode, RELATION <: SchemaAbstractRelation[START, END] with SchemaItem, END <: UuidNode](startUuid: String, factory: SchemaAbstractRelationFactory[START, RELATION, END], endUuid: String) = {
-    val (discourse, (start, end)) = discourseNodes(factory.startNodeFactory, startUuid, factory.endNodeFactory, endUuid)
-    discourse.add(factory.local(start, end))
-    db.persistChanges(discourse.graph)
-    (start, end)
+  def index() = Action {
+    val (_, nodes) = discourseNodes(factory)
+    Ok(Json.toJson(nodes))
   }
 
-  protected def disconnectNodes[START <: UuidNode, RELATION <: SchemaRelation[START,END], END <: UuidNode](startUuid: String, factory: SchemaRelationFactory[START,RELATION,END], endUuid: String) {
-      disconnectNodes(relationDiscourseGraph(startUuid, factory, endUuid))
+  // TODO: proper response on wrong path
+  def showMembers(path: String, uuid: String) = Action {
+    nodeSchema.connectSchemas(path) match {
+      case StartConnectSchema(factory) => Ok(Json.toJson(connectedNodesDiscourseGraph(uuid, factory).contentNodes))
+      case EndConnectSchema(factory) => Ok(Json.toJson(connectedNodesDiscourseGraph(factory, uuid).contentNodes))
+    }
   }
 
-  protected def disconnectNodes[START <: UuidNode, RELATION <: SchemaHyperRelation[START,_,RELATION,_,END], END <: UuidNode](startUuid: String, factory: SchemaHyperRelationFactory[START,_,RELATION,_,END], endUuid: String) {
-      disconnectNodes(relationDiscourseGraph(startUuid, factory, endUuid))
+  def connectMember(path: String, uuid: String) = Action(parse.json) { request =>
+    val connect = request.body.as[ConnectRequest]
+
+    val node = nodeSchema.connectSchemas(path) match {
+      case StartConnectSchema(factory) => {
+        val (_,n) = connectNodes(uuid, factory, connect.uuid)
+        n
+      }
+      case EndConnectSchema(factory) => {
+        val (n,_) = connectNodes(connect.uuid, factory, uuid)
+        n
+      }
+    }
+
+    broadcaster.broadcastConnect(uuid, node)
+    Ok(Json.toJson(node))
   }
 
-  private def disconnectNodes(discourse: Discourse) {
-    discourse.graph.nodes --= discourse.contentNodeHyperRelations.map(_.node) //TODO: wrap boilerplate
-    discourse.graph.relations.clear()
-    db.persistChanges(discourse.graph)
+  def disconnectMember(path: String, uuid: String, otherUuid: String) = Action {
+    val schema = nodeSchema.connectSchemas(path)
+    schema match {
+      case StartConnectSchema(factory) => disconnectNodes(uuid, factory, otherUuid)
+      case EndConnectSchema(factory) => disconnectNodes(otherUuid, factory, uuid)
+    }
+
+    broadcaster.broadcastDisconnect(uuid, otherUuid, path)
+    Ok(JsObject(Seq()))
   }
 }

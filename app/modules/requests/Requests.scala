@@ -1,11 +1,5 @@
 package modules.requests
 
 trait UserRequest
-trait NodeAddRequest extends UserRequest {
-  def title: String
-}
-case class ProblemAddRequest(title: String) extends NodeAddRequest
-case class IdeaAddRequest(title: String) extends NodeAddRequest
-case class GoalAddRequest(title: String) extends NodeAddRequest
-
-case class ConnectRequest(uuid: String)
+case class NodeAddRequest(title: String) extends UserRequest
+case class ConnectRequest(uuid: String) extends UserRequest

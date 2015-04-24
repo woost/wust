@@ -6,37 +6,19 @@ POST   /auth/signup               controllers.security.rest.RestSignUpController
 GET    /auth/signout              controllers.security.rest.RestSignUpController.signOut
 
 -> /goals controllers.Goals
-GET /goals/:uuid/goals controllers.Goals.showGoals(uuid: String)
-GET /goals/:uuid/problems controllers.Goals.showProblems(uuid: String)
-GET /goals/:uuid/ideas controllers.Goals.showIdeas(uuid: String)
-POST /goals/:uuid/goals controllers.Goals.connectGoal(uuid: String)
-POST /goals/:uuid/problems controllers.Goals.connectProblem(uuid: String)
-POST /goals/:uuid/ideas controllers.Goals.connectIdea(uuid: String)
-DELETE /goals/:uuid/goals/:uuidGoal controllers.Goals.disconnectGoal(uuid: String, uuidGoal: String)
-DELETE /goals/:uuid/problems/:uuidProblem controllers.Goals.disconnectProblem(uuid: String, uuidProblem: String)
-DELETE /goals/:uuid/ideas/:uuidIdea controllers.Goals.disconnectIdea(uuid: String, uuidIdea: String)
+GET /goals/:uuid/:path controllers.Goals.showMembers(path: String, uuid: String)
+POST /goals/:uuid/:path controllers.Goals.connectMember(path: String, uuid: String)
+DELETE /goals/:uuid/:path/:otherUuid controllers.Goals.disconnectMember(path: String, uuid: String, otherUuid: String)
 
 -> /problems controllers.Problems
-GET /problems/:uuid/goals controllers.Problems.showGoals(uuid: String)
-GET /problems/:uuid/problems controllers.Problems.showProblems(uuid: String)
-GET /problems/:uuid/ideas controllers.Problems.showIdeas(uuid: String)
-POST /problems/:uuid/goals controllers.Problems.connectGoal(uuid: String)
-POST /problems/:uuid/problems controllers.Problems.connectProblem(uuid: String)
-POST /problems/:uuid/ideas controllers.Problems.connectIdea(uuid: String)
-DELETE /problems/:uuid/goals/:uuidGoal controllers.Problems.disconnectGoal(uuid: String, uuidGoal: String)
-DELETE /problems/:uuid/problems/:uuidProblem controllers.Problems.disconnectProblem(uuid: String, uuidProblem: String)
-DELETE /problems/:uuid/ideas/:uuidIdea controllers.Problems.disconnectIdea(uuid: String, uuidIdea: String)
+GET /problems/:uuid/:path controllers.Problems.showMembers(path: String, uuid: String)
+POST /problems/:uuid/:path controllers.Problems.connectMember(path: String, uuid: String)
+DELETE /problems/:uuid/:path/:otherUuid controllers.Problems.disconnectMember(path: String, uuid: String, otherUuid: String)
 
 -> /ideas controllers.Ideas
-GET /ideas/:uuid/goals controllers.Ideas.showGoals(uuid: String)
-GET /ideas/:uuid/problems controllers.Ideas.showProblems(uuid: String)
-GET /ideas/:uuid/ideas controllers.Ideas.showIdeas(uuid: String)
-POST /ideas/:uuid/goals controllers.Ideas.connectGoal(uuid: String)
-POST /ideas/:uuid/problems controllers.Ideas.connectProblem(uuid: String)
-POST /ideas/:uuid/ideas controllers.Ideas.connectIdea(uuid: String)
-DELETE /ideas/:uuid/goals/:uuidGoal controllers.Ideas.disconnectGoal(uuid: String, uuidGoal: String)
-DELETE /ideas/:uuid/problems/:uuidProblem controllers.Ideas.disconnectProblem(uuid: String, uuidProblem: String)
-DELETE /ideas/:uuid/ideas/:uuidIdea controllers.Ideas.disconnectIdea(uuid: String, uuidIdea: String)
+GET /ideas/:uuid/:path controllers.Ideas.showMembers(path: String, uuid: String)
+POST /ideas/:uuid/:path controllers.Ideas.connectMember(path: String, uuid: String)
+DELETE /ideas/:uuid/:path/:otherUuid controllers.Ideas.disconnectMember(path: String, uuid: String, otherUuid: String)
 
 GET /graph controllers.Graphs.show
 

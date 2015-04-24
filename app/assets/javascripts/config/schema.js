@@ -6,7 +6,7 @@ angular.module("wust").config(function($provide, DiscourseNodeProvider) {
         $provide.factory(model.name, restmod => restmod.model(model.path).mix(_(model.subs).map(sub => {
             return {
                 [sub.path]: {
-                    [sub.type]: restmod.model()
+                    [sub.cardinality]: restmod.model()
                 }
             };
         }).reduce(_.merge)));
