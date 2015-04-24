@@ -20,18 +20,18 @@ object Goals extends ContentNodesController[Goal] {
   }
 
   def showGoals(uuid: String) = Action {
-    val query = Query(s"match (:${ Goal.label } {uuid: {uuid}})<-[:${ SubGoal.relationType }]-(goal :${ Goal.label }) return goal", Map("uuid" -> uuid))
-    Ok(Json.toJson(db.queryGraph(query).nodes.map(Goal.create)))
+    val discourse = connectedNodesDiscourseGraph(SubGoal, uuid)
+    Ok(Json.toJson(discourse.goals))
   }
 
   def showProblems(uuid: String) = Action {
-    val query = Query(s"match (:${ Goal.label } {uuid: {uuid}})<-[:${ Prevents.relationType }]-(problem :${ Problem.label }) return problem", Map("uuid" -> uuid))
-    Ok(Json.toJson(db.queryGraph(query).nodes.map(Problem.create)))
+    val discourse = connectedNodesDiscourseGraph(Prevents, uuid)
+    Ok(Json.toJson(discourse.problems))
   }
 
   def showIdeas(uuid: String) = Action {
-    val query = Query(s"match (:${ Goal.label } {uuid: {uuid}})<-[:${ Achieves.endRelationType }]-(:${ Achieves.label })<-[:${ Achieves.startRelationType }]-(idea :${ Idea.label }) return idea", Map("uuid" -> uuid))
-    Ok(Json.toJson(db.queryGraph(query).nodes.map(Idea.create)))
+    val discourse = connectedNodesDiscourseGraph(Achieves, uuid)
+    Ok(Json.toJson(discourse.ideas))
   }
 
   def connectGoal(uuid: String) = Action(parse.json) { request =>

@@ -23,7 +23,6 @@ trait ContentNodesController[NodeType <: ContentNode] extends ResourceRouter[Str
   //TODO: shared code: label <-> api mapping
   //TODO: use transactions instead of db
   def factory: ContentNodeFactory[NodeType]
-  def label = factory.label
   def decodeRequest(jsValue: JsValue): NodeAddRequest
 
   def create = UserAwareAction { request =>
@@ -47,23 +46,23 @@ trait ContentNodesController[NodeType <: ContentNode] extends ResourceRouter[Str
   // TODO: leaks hyperedges
   def destroy(uuid: String) = SecuredAction(WithRole(God)) {
     implicit request =>
-      val discourse = nodeDiscourseGraph(uuid)
+      val discourse = nodeDiscourseGraph(factory, uuid)
       discourse.graph.nodes.clear
       db.persistChanges(discourse.graph)
       Ok(JsObject(Seq()))
   }
 
   def show(uuid: String) = Action {
-    val query = Query(s"match (n :$label {uuid: {uuid}}) return n limit 1", Map("uuid" -> uuid))
-    db.queryGraph(query).nodes.headOption match {
+    val discourse = nodeDiscourseGraph(factory, uuid)
+  discourse.graph.nodes.headOption match {
       case Some(node) => Ok(Json.toJson(factory.create(node)))
-      case None       => BadRequest(s"Node with label $label and uuid $uuid not found.")
+      case None       => BadRequest(s"Node with label ${factory.label} and uuid $uuid not found.")
     }
   }
 
   def update(uuid: String) = Action(parse.json) { request =>
     val nodeAdd = decodeRequest(request.body)
-    val discourse = nodeDiscourseGraph(uuid)
+    val discourse = nodeDiscourseGraph(factory, uuid)
     discourse.contentNodes.headOption match {
       case Some(node) => {
         node.title = nodeAdd.title
@@ -74,28 +73,23 @@ trait ContentNodesController[NodeType <: ContentNode] extends ResourceRouter[Str
     }
   }
 
-  def connectNodes[START <: UuidNode, RELATION <: SchemaAbstractRelation[START, END] with SchemaItem, END <: UuidNode](startUuid: String, factory: SchemaAbstractRelationFactory[START, RELATION, END], endUuid: String) = {
-    val (discourse, (start, end)) = discourseNodes[START, END](startUuid, endUuid)
+  protected def connectNodes[START <: UuidNode, RELATION <: SchemaAbstractRelation[START, END] with SchemaItem, END <: UuidNode](startUuid: String, factory: SchemaAbstractRelationFactory[START, RELATION, END], endUuid: String) = {
+    val (discourse, (start, end)) = discourseNodes(factory.startNodeFactory, startUuid, factory.endNodeFactory, endUuid)
     discourse.add(factory.local(start, end))
     db.persistChanges(discourse.graph)
     (start, end)
   }
 
-  def disconnectNodes[START <: UuidNode, RELATION <: SchemaRelation[START,END], END <: UuidNode](startUuid: String, factory: SchemaRelationFactory[START,RELATION,END], endUuid: String) {
-      disconnectNodes(startUuid, List(factory.relationType), endUuid)
+  protected def disconnectNodes[START <: UuidNode, RELATION <: SchemaRelation[START,END], END <: UuidNode](startUuid: String, factory: SchemaRelationFactory[START,RELATION,END], endUuid: String) {
+      disconnectNodes(relationDiscourseGraph(startUuid, factory, endUuid))
   }
 
-  def disconnectNodes[START <: UuidNode, RELATION <: SchemaHyperRelation[START,_,RELATION,_,END], END <: UuidNode](startUuid: String, factory: SchemaHyperRelationFactory[START,_,RELATION,_,END], endUuid: String) {
-      disconnectNodes(startUuid, List(factory.startRelationType, factory.endRelationType), endUuid)
+  protected def disconnectNodes[START <: UuidNode, RELATION <: SchemaHyperRelation[START,_,RELATION,_,END], END <: UuidNode](startUuid: String, factory: SchemaHyperRelationFactory[START,_,RELATION,_,END], endUuid: String) {
+      disconnectNodes(relationDiscourseGraph(startUuid, factory, endUuid))
   }
 
-  private def disconnectNodes(startUuid: String, relationTypes: Seq[RelationType], endUuid: String) {
-    val discourse = relationDiscourseGraph(startUuid, relationTypes, endUuid)
-
-    // all nodes which lie on a path between fromNode and toNode
-    val connectorNodes = discourse.contentNodes.filter(node => startUuid != node.uuid && endUuid != node.uuid)
-
-    discourse.graph.nodes --= connectorNodes.map(_.node) //TODO: wrap boilerplate
+  private def disconnectNodes(discourse: Discourse) {
+    discourse.graph.nodes --= discourse.contentNodeHyperRelations.map(_.node) //TODO: wrap boilerplate
     discourse.graph.relations.clear()
     db.persistChanges(discourse.graph)
   }
