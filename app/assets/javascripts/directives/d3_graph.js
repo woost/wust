@@ -112,12 +112,14 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode, $window) {
                 // register tick function
                 force.on("tick", tick);
 
-                // reset visibility after filtering
+                // filter on event
                 scope.$on("d3graph_filter", filter);
+
+                // filter once with all nodes
+                filter(undefined, graph.nodes);
 
                 // filter the graph
                 function filter(event, filtered) {
-                    console.log(filtered);
                     let filteredIds = _.map(filtered, "id");
                     let ids = filteredIds;
                     for (let i = 0; i < ids.length; i++) {
