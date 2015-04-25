@@ -19,10 +19,25 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode, $window) {
                 // foreignobjects and html direcives through the edge
                 _.each(graph.edges, (e, i) => e.index = i);
 
-                // get dimensions
-                let width, height;
-                [width, height] = getElementDimensions(element[0]);
+                // create edge map, maps node ids to connected node ids.
+                // at this point, the source/target ids are not yet translated
+                // into node objects by d3. thus, we reference nodes via the
+                // given index in edge.source/target.
+                let edgeMap = _(graph.edges).map(edge => {
+                    let source = graph.nodes[edge.source].id;
+                    let target = graph.nodes[edge.target].id;
+                    return {
+                        [source]: [target],
+                        [target]: [source]
+                    };
+                }).reduce(_.partialRight(_.merge, (a, b) => {
+                    return a ? a.concat(b) : b;
+                }, _)) || {};
 
+                // get dimensions
+                let [width, height] = getElementDimensions(element[0]);
+
+                // register for resize event
                 angular.element($window).bind("resize", resizeGraph);
 
                 // force configuration
@@ -120,7 +135,35 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode, $window) {
                 force.on("tick", tick);
 
                 // reset visibility after filtering
-                scope.$on("d3graph_filter", setVisibility);
+                scope.$on("d3graph_filter", filter);
+
+                // filter the graph
+                function filter(event, filtered) {
+                    console.log(filtered);
+                    let filteredIds = _.map(filtered, "id");
+                    let ids = filteredIds;
+                    for (let i = 0; i < ids.length; i++) {
+                        ids = _.union(ids, edgeMap[ids[i]]);
+                    }
+
+                    graph.nodes = _.map(graph.nodes, node => {
+                        let marked = _(filteredIds).includes(node.id);
+                        let visible = marked || _(ids).includes(node.id);
+                        return _.merge(node, {
+                            visible: visible,
+                            marked: marked
+                        });
+                    });
+                    graph.edges = _.map(graph.edges, edge => {
+                        let visible = _(ids).includes(edge.source.id) && _(ids).includes(edge.target.id);
+                        return _.merge(edge, {
+                            visible: visible
+                        });
+                    });
+
+                    setVisibility();
+                    focusMarkedNodes();
+                }
 
                 // reset visibility of nodes after filtering
                 function setVisibility() {
@@ -139,10 +182,6 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode, $window) {
                         line.style.visibility = visibility;
                         fo.style.visibility = visibility;
                     });
-
-
-                    // focus the marked nodes
-                    focusMarkedNodes();
                 }
 
                 // focus the marked nodes and scale zoom accordingly
@@ -180,10 +219,12 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode, $window) {
                     });
                 }
 
+                // get the dimensions of a htm element
                 function getElementDimensions(elem) {
                     return [elem.offsetWidth, elem.offsetHeight];
                 }
 
+                // resize graph according to the current element dimensions
                 function resizeGraph() {
                     [width, height] = getElementDimensions(element[0]);
                     svg.attr("width", width);
@@ -191,6 +232,8 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode, $window) {
                     focusMarkedNodes();
                 }
 
+                // tick function, called in each step in the force calculation,
+                // maps elements to positions
                 function tick() {
                     link
                         .attr("x1", d => d.source.x)
@@ -211,10 +254,12 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode, $window) {
                     });
                 }
 
+                // zoom into graph
                 function zoomed() {
                     container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
                 }
 
+                // unfix the position of a given node
                 function unsetFixedPosition(d) {
                     d3.select(this).classed("fixed", d.fixed = false);
                     // need to explicitly resume the force, otherwise the graph
@@ -222,6 +267,7 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode, $window) {
                     force.resume();
                 }
 
+                // fix the position of a given node
                 function setFixedPosition(d) {
                     d3.select(this).classed("fixed", d.fixed = true);
 

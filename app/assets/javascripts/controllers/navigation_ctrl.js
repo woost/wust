@@ -3,7 +3,6 @@ angular.module("wust").controller("NavigationCtrl", function($scope, Auth, Searc
         title: ""
     };
 
-    $scope.registerUser = false;
     $scope.newUser = {
         identifier: "",
         password: ""
@@ -16,8 +15,8 @@ angular.module("wust").controller("NavigationCtrl", function($scope, Auth, Searc
     $scope.loggedIn = Auth.loggedIn.bind(Auth);
     $scope.logout = Auth.logout.bind(Auth);
 
-    function authenticate() {
-        let func = $scope.registerUser ? Auth.register : Auth.login;
+    function authenticate(register) {
+        let func = register ? Auth.register : Auth.login;
         func.bind(Auth, angular.copy($scope.newUser))();
         $scope.newUser.identifier = "";
         $scope.newUser.password = "";
