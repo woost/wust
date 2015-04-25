@@ -36,7 +36,7 @@ angular.module("wust").controller("BrowseCtrl", function($scope, $state, Problem
     $scope.$watch(() => _.find($scope.slides, "active"), active => setNodes(active));
 
     function addNode() {
-        this.newNode.$save().$then(data => {
+        angular.copy(this.newNode).$save().$then(data => {
             humane.success("Added new node");
             $state.go(this.info.state, {
                 id: data.id
