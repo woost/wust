@@ -12,7 +12,7 @@ object WustSchema {
   }
   @Node trait ContentNode extends UuidNode {
     var title: String
-    var description: String
+    var description: Option[String]
   }
 
   //TODO: generate indirect neighbour-accessors based on hyperrelations

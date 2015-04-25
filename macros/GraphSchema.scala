@@ -201,15 +201,26 @@ object GraphSchemaMacro {
 
         val nodeTraits: List[Tree] = graphSchemaStatements.collect {
           case NodeTraitPattern(traitName, traitParents, traitStatements) =>
-            def getter(name: String, typeName: Tree) =
+
+            def propertyGetter(name: String, typeName: Tree) =
               q""" def ${ TermName(name) }:$typeName = node.properties(${ name }).asInstanceOf[${ TypeName(typeName.toString + "PropertyValue") }] """
-            def setter(name: String, typeName: Tree) =
+            def propertyOptionGetter(name: String, typeName: Tree) =
+              q""" def ${ TermName(name) }:Option[$typeName] = node.properties.get(${ name }).asInstanceOf[Option[${ TypeName(typeName.toString + "PropertyValue") }]].map(propertyValueToPrimitive) """
+            def propertySetter(name: String, typeName: Tree) =
               q""" def ${ TermName(name + "_$eq") }(newValue:$typeName){ node.properties(${ name }) = newValue} """
-            val traitBody = traitStatements.flatMap {
-              case q"val $propertyName:$propertyType" => List(getter(propertyName.toString, propertyType))
-              case q"var $propertyName:$propertyType" => List(getter(propertyName.toString, propertyType), setter(propertyName.toString, propertyType))
-              case q"def factory:$factoryType"        => Nil
-              case somethingElse                      => List(somethingElse)
+            def propertyOptionSetter(name: String, typeName: Tree) =
+              q""" def ${ TermName(name + "_$eq") }(newValue:Option[$typeName]){ if(newValue.isDefined) node.properties(${ name }) = newValue.get else node.properties -= ${ name } }"""
+            def generatePropertyAccessors(statement: Tree): List[Tree] = statement match {
+              case q"val $propertyName:Option[$propertyType]" => List(propertyOptionGetter(propertyName.toString, propertyType))
+              case q"var $propertyName:Option[$propertyType]" => List(propertyOptionGetter(propertyName.toString, propertyType), propertyOptionSetter(propertyName.toString, propertyType))
+              case q"val $propertyName:$propertyType"         => List(propertyGetter(propertyName.toString, propertyType))
+              case q"var $propertyName:$propertyType"         => List(propertyGetter(propertyName.toString, propertyType), propertySetter(propertyName.toString, propertyType))
+              case somethingElse                              => List(somethingElse)
+            }
+
+            val traitBody = traitStatements.flatMap(generatePropertyAccessors(_)).flatMap {
+              case q"def factory:$factoryType" => Nil
+              case somethingElse               => List(somethingElse)
             }
             val traitParentsWithSchemaNode = (if(traitParents.nonEmpty && traitParents != List("scala.AnyRef")) traitParents else List("SchemaNode")).map(TypeName(_))
 
@@ -220,8 +231,8 @@ object GraphSchemaMacro {
           case RelationPattern(className, startNode, endNode, _) =>
             q"""
            object ${ TermName(className) } extends SchemaRelationFactory[${ TypeName(startNode) }, ${ TypeName(className) }, ${ TypeName(endNode) }] {
-               def startNodeFactory = ${TermName(startNode)}
-               def endNodeFactory = ${TermName(endNode)}
+               def startNodeFactory = ${ TermName(startNode) }
+               def endNodeFactory = ${ TermName(endNode) }
                def relationType = RelationType(${ nameToLabel(className) })
                def create(relation: Relation) = ${ TermName(className) }(
                  ${ TermName(startNode) }.create(relation.startNode),
