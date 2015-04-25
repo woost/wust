@@ -4,6 +4,7 @@ import renesca.schema._
 
 @macros.GraphSchema
 object WustSchema {
+  //TODO: Type aliases for several HyperRelation combinations
   @Group trait Discourse {List(Problem, Idea, Goal, ProArgument, ConArgument) }
 
 
@@ -36,11 +37,11 @@ object WustSchema {
   @Relation class OpposesAchievement(startNode: ConArgument, endNode: Achieves)
 
 
-  trait UUIDNodeFactory[T <: UuidNode] extends SchemaNodeFactory[T] {
+  trait UuidNodeFactory[T <: UuidNode] extends SchemaNodeFactory[T] {
     override def local = UUID.applyTo(super.local)
   }
 
-  trait ContentNodeFactory[T <: ContentNode] extends UUIDNodeFactory[T] {
+  trait ContentNodeFactory[T <: ContentNode] extends UuidNodeFactory[T] {
     def local(title: String): T = {
       val node = super.local
       node.title = title

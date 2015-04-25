@@ -71,9 +71,9 @@ object GraphSchemaMacro {
     }
 
     object HyperRelationPattern {
-      def unapply(tree: Tree): Option[(String, String, String, List[String], List[Tree])] = condOpt(tree) {
-        case q"""@HyperRelation class $hyperRelationName (startNode:$startNode, endNode:$endNode) extends ..$hyperRelationParents {..$hyperRelationStatements}""" =>
-          (hyperRelationName.toString, startNode.toString, endNode.toString, hyperRelationParents.map { _.toString } diff List("scala.AnyRef"), hyperRelationStatements)
+      def unapply(tree: Tree): Option[(String, String, String, String, List[Tree])] = condOpt(tree) {
+        case q"""@HyperRelation class $hyperRelationName (startNode:$startNode, endNode:$endNode) extends $hyperRelationParent {..$hyperRelationStatements}""" =>
+          (hyperRelationName.toString, startNode.toString, endNode.toString, hyperRelationParent.toString, hyperRelationStatements)
       }
     }
 
@@ -92,8 +92,8 @@ object GraphSchemaMacro {
           case NodeTraitPattern(traitName, traitParents, _) => traitName -> traitParents
         }.toMap
 
-        val hyperRelationToParents: Map[String, List[String]] = graphSchemaStatements.collect {
-          case HyperRelationPattern(hyperRelationName, _, _, hyperRelationParents, _) => hyperRelationName -> hyperRelationParents
+        val hyperRelationToParent: Map[String, String] = graphSchemaStatements.collect {
+          case HyperRelationPattern(hyperRelationName, _, _, hyperRelationParent, _) => hyperRelationName -> hyperRelationParent
         }.toMap
 
         val nodeTraitsWithoutChildren = nodeTraitToParents.keys.toList diff nodeTraitToParents.values.flatten.toList
@@ -135,7 +135,7 @@ object GraphSchemaMacro {
         println("nodeTraitToChildHyperRelations: " + nodeTraitToChildHyperRelations)
 
         val nodeTraitToCommonHyperNodeTraits = nodeTraitToChildHyperRelations.mapValues { childHyperRelations =>
-          childHyperRelations.map(hyperRelationName => hyperRelationToParents(hyperRelationName)).reduce(_ intersect _)
+          childHyperRelations.map(hyperRelationName => List(hyperRelationToParent(hyperRelationName))).reduce(_ intersect _)
         }
         println("nodeTraitToCommonHyperNodeTraits: " + nodeTraitToCommonHyperNodeTraits)
 
@@ -254,12 +254,15 @@ object GraphSchemaMacro {
 
 
         val hyperRelationFactories: List[Tree] = graphSchemaStatements.collect {
-          case HyperRelationPattern(className, startNode, endNode, _, _) =>
+          case HyperRelationPattern(className, startNode, endNode, hyperRelationParent, _) =>
             val startRelation = relationName(startNode, className)
             val endRelation = relationName(className, endNode)
 
             q"""
-           object ${ TermName(className) } extends SchemaHyperRelationFactory[${ TypeName(startNode) }, ${ TypeName(startRelation) }, ${ TypeName(className) }, ${ TypeName(endRelation) }, ${ TypeName(endNode) }] {
+           object ${ TermName(className) } extends SchemaHyperRelationFactory[${ TypeName(startNode) }, ${ TypeName(startRelation) }, ${ TypeName(className) }, ${ TypeName(endRelation) }, ${ TypeName(endNode) }]
+            with ${ TypeName(nodeTraitToFactory(hyperRelationParent)) }[${ TypeName(className) }] {
+               override def middleNodeLocal = super[${ TypeName(nodeTraitToFactory(hyperRelationParent)) }].local
+
                override def label = Label(${ nameToLabel(className) })
                override def startRelationType = RelationType(${ nameToLabel(startRelation) })
                override def endRelationType = RelationType(${ nameToLabel(endRelation) })
@@ -276,13 +279,13 @@ object GraphSchemaMacro {
         }
 
         val hyperRelationClasses: List[Tree] = graphSchemaStatements.collect {
-          case HyperRelationPattern(hyperRelation, startNode, endNode, hyperRelationParents, hyperRelationBody) =>
+          case HyperRelationPattern(hyperRelation, startNode, endNode, hyperRelationParent, hyperRelationBody) =>
             val startRelation = relationName(startNode, hyperRelation)
             val endRelation = relationName(hyperRelation, endNode)
             List( q"""
            case class ${ TypeName(hyperRelation) }(node:Node)
               extends SchemaHyperRelation[${ TypeName(startNode) }, ${ TypeName(startRelation) }, ${ TypeName(hyperRelation) }, ${ TypeName(endRelation) }, ${ TypeName(endNode) }]
-              with ..${ hyperRelationParents.map(TypeName(_)) } {
+              with ${ TypeName(hyperRelationParent) } {
              ..$hyperRelationBody
            }
            """, q"""

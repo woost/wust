@@ -164,8 +164,10 @@ ENDNODE <: SchemaNode] extends SchemaNodeFactory[HYPERRELATION] with SchemaAbstr
     endRelationCreate(Relation.local(middleNode.node, endNode.node, endRelationType))
   }
 
+  def middleNodeLocal: HYPERRELATION // HACK!
+
   def local(startNode: STARTNODE, endNode: ENDNODE): HYPERRELATION = {
-    val middleNode = super[SchemaNodeFactory].local
+    val middleNode = middleNodeLocal
     create(startRelationLocal(startNode, middleNode).relation, middleNode.node, endRelationLocal(middleNode, endNode).relation)
   }
 }
