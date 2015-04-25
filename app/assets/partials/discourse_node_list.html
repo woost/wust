@@ -4,7 +4,7 @@
         <div ng-repeat='node in nodeModel.list | orderBy:"title"'>
             <div ng-include="nodeModel.style.templateUrl"></div>
         </div>
-        <div discourse-node-search-form ng-model='nodeModel.new' on-submit='nodeModel.create' on-select="nodeModel.add" search-nodes='nodeModel.search' icon-class="fa fa-plus" class="discourse_node_search_form"></div>
+        <div discourse-node-search-form ng-model='nodeModel.new' on-submit='nodeModel.create()' on-select="nodeModel.add(item)" search-nodes='nodeModel.search(term)' icon-class="fa fa-plus" class="discourse_node_search_form"></div>
     </div>
 </div>
 

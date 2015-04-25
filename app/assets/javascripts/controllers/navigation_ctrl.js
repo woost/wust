@@ -26,10 +26,10 @@ angular.module("wust").controller("NavigationCtrl", function($scope, Auth, Searc
         return Search.$search({title: title});
     }
 
-    function onSelect($item) {
-        let state = DiscourseNode.get($item.label).state;
+    function onSelect(item) {
+        let state = DiscourseNode.get(item.label).state;
         $state.go(state, {
-            id: $item.id
+            id: item.id
         });
         $scope.searchTyped.title = "";
     }

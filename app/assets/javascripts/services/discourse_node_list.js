@@ -9,6 +9,7 @@ angular.module("wust").service("DiscourseNodeList", function(DiscourseNode, Idea
             this.title = title;
             this.resetNew();
             this.list = connService.$search();
+            this.waiting = [];
             this.info = nodeInfo;
             this.style = styleInfo;
             // this binds all this methods to this, which is needed here,
@@ -32,16 +33,20 @@ angular.module("wust").service("DiscourseNodeList", function(DiscourseNode, Idea
         }
 
         exists(elem) {
-            return _.any(this.list, {
+            let search = {
                 id: elem.id
-            });
+            };
+
+            return _.any(this.list, search) || _.any(this.waiting, search);
         }
 
         add(elem) {
             if (this.exists(elem))
                 return;
 
+            this.waiting.push(elem);
             this.list.$create(_.pick(elem, "id")).$then(data => {
+                _.remove(this.waiting, elem);
                 humane.success("Connected node");
             });
         }
