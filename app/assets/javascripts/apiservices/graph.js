@@ -1,5 +1,5 @@
 angular.module("wust").factory("Graph", function(restmod) {
-    return restmod.singleton("/graph", {
+    return restmod.model().mix({
         edges: {
             decode: function(edges) {
                 // TODO: not efficient
@@ -17,5 +17,5 @@ angular.module("wust").factory("Graph", function(restmod) {
                 });
             }
         }
-    });
+    }).single("/graph");
 });
