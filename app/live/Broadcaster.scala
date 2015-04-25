@@ -18,7 +18,7 @@ object Broadcaster {
   private def broadcast(apiname: String, uuid: String, data: JsValue, path: String = ""): Unit = {
     val postfix = if (path.isEmpty) "" else "/" + path
     val broadcaster = atmosphere.framework.metaBroadcaster
-    broadcaster.broadcastTo(s"/live/v1/$apiname/$uuid$postfix", data)
+    broadcaster.broadcastTo(s"${Application.apiDefinition.websocketRoot}/$apiname/$uuid$postfix", data)
   }
 
   private def connectionDistributor[START <: ContentNode, RELATION <: SchemaAbstractRelation[START,END] with SchemaItem, END <: ContentNode](startHandler: (String,String) => Unit, factory: SchemaAbstractRelationFactory[START,RELATION,END], endHandler: (String,String) => Unit) {

@@ -102,6 +102,13 @@ object GraphFormat {
     def writes(connect: ConnectRequest) = ???
   }
 
+  implicit def apiDefinitionWrites = new Writes[ApiDefinition] {
+    def writes(apiDefinition: ApiDefinition) = JsObject(Seq(
+      ("restRoot", JsString(apiDefinition.restRoot)),
+      ("websocketRoot", JsString(apiDefinition.websocketRoot))
+    ))
+  }
+
   implicit def nodeSchemaWrites[NODE <: ContentNode] = new Writes[NodeSchema[NODE]] {
     def writes(schema: NodeSchema[NODE]) = JsObject(Seq(
       ("label", JsString(schema.factory.label)),

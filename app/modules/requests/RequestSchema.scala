@@ -3,7 +3,7 @@ package modules.requests
 import renesca.schema._
 import model.WustSchema._
 
-case class RequestSchema(nodeSchemas: Seq[NodeSchema[_]])
+case class ApiDefinition(restRoot: String, websocketRoot: String)
 
 sealed trait ConnectSchema[BASENODE <: ContentNode] {
   val cardinality = "hasMany"

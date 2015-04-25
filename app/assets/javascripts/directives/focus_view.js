@@ -5,14 +5,19 @@ angular.module("wust").directive("focusView", function($state, NodeHistory) {
         scope: true,
         link: function($scope) {
             $scope.node.$then(data => {
-                data.$subscribeToLiveEvent(m => $scope.$apply(_.partial(onNodeChange, $scope.node, m)));
-                NodeHistory.add($scope.node);
-                _.each(_.compact([$scope.left, $scope.right, $scope.bottom, $scope.top]), list => {
-                    list.model.list.$subscribeToLiveEvent(data.id, m => $scope.$apply(_.partial(onConnectionChange, list, m)));
-                });
+                NodeHistory.add(data);
             });
+
+            // callbacks for removing/updating the focused node
             $scope.removeFocused = _.wrap($scope.node, removeFocused);
             $scope.updateFocused = _.wrap($scope.node, updateFocused);
+
+            // register for events for the current node, as well as all
+            // connected lists
+            $scope.node.$subscribeToLiveEvent(m => $scope.$apply(_.partial(onNodeChange, $scope.node, m)));
+            _.each(_.compact([$scope.left, $scope.right, $scope.bottom, $scope.top]), list => {
+                list.model.list.$subscribeToLiveEvent(m => $scope.$apply(_.partial(onConnectionChange, list, m)));
+            });
         }
     };
 

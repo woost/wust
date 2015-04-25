@@ -7,11 +7,13 @@ import modules.json.GraphFormat._
 import model.WustSchema._
 
 object Application extends Controller {
+  val apiDefinition = ApiDefinition("/api/v1", "/live/v1");
   val nodeSchemas = Seq(Goals.nodeSchema, Problems.nodeSchema, Ideas.nodeSchema)
 
   def index(any: String) = Action {
     Ok(views.html.index(JsObject(Seq(
-      ("models", JsArray(nodeSchemas.map(Json.toJson(_)))
-    )))))
+      ("api", Json.toJson(apiDefinition)),
+      ("models", JsArray(nodeSchemas.map(Json.toJson(_))))
+    ))))
   }
 }
