@@ -43,9 +43,13 @@ angular.module("wust").service("Auth", function($rootScope, $window, restmod, jw
 
     function logout() {
         // TODO: should this really be a get request
-        service.signout.$fetch().$then(response => {
-            authStore.remove(userKey);
+        console.log(service.signout.$fetch().$then(response => {
+            logoutLocally();
             humane.success("Logged out");
-        });
+        }).$promise.catch(logoutLocally));
+    }
+
+    function logoutLocally() {
+        authStore.remove(userKey);
     }
 });
