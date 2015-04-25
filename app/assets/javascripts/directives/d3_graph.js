@@ -1,38 +1,16 @@
 angular.module("wust").directive("d3Graph", function(DiscourseNode, $window) {
     return {
         restrict: "A",
-        require: "^ngModel",
         scope: {
-            ngModel: "=",
+            graph: "=",
             onClick: "&",
         },
         link: function(scope, element) {
             let onDoubleClick = scope.onClick() || _.noop;
 
             // watch for changes in the ngModel
-            scope.$on("d3graph_redraw", () => {
-                // get current graph
-                let graph = scope.ngModel;
-
-                // add index to edge
-                // TODO: how to avoid this?  we need to access the
-                // foreignobjects and html direcives through the edge
-                _.each(graph.edges, (e, i) => e.index = i);
-
-                // create edge map, maps node ids to connected node ids.
-                // at this point, the source/target ids are not yet translated
-                // into node objects by d3. thus, we reference nodes via the
-                // given index in edge.source/target.
-                let edgeMap = _(graph.edges).map(edge => {
-                    let source = graph.nodes[edge.source].id;
-                    let target = graph.nodes[edge.target].id;
-                    return {
-                        [source]: [target],
-                        [target]: [source]
-                    };
-                }).reduce(_.partialRight(_.merge, (a, b) => {
-                    return a ? a.concat(b) : b;
-                }, _)) || {};
+            scope.graph.$then(graph => {
+                preprocessGraph(graph);
 
                 // get dimensions
                 let [width, height] = getElementDimensions(element[0]);
@@ -143,7 +121,7 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode, $window) {
                     let filteredIds = _.map(filtered, "id");
                     let ids = filteredIds;
                     for (let i = 0; i < ids.length; i++) {
-                        ids = _.union(ids, edgeMap[ids[i]]);
+                        ids = _.union(ids, graph.edgeMap[ids[i]]);
                     }
 
                     graph.nodes = _.map(graph.nodes, node => {
@@ -307,6 +285,30 @@ angular.module("wust").directive("d3Graph", function(DiscourseNode, $window) {
                     // do the actually dragging
                     d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
                 }
+
+                // prepare graph for usage
+                function preprocessGraph(graph) {
+                    // add index to edge
+                    // TODO: how to avoid this?  we need to access the
+                    // foreignobjects and html direcives through the edge
+                    _.each(graph.edges, (e, i) => e.index = i);
+
+                    // create edge map, maps node ids to connected node ids.
+                    // at this point, the source/target ids are not yet translated
+                    // into node objects by d3. thus, we reference nodes via the
+                    // given index in edge.source/target.
+                    graph.edgeMap = _(graph.edges).map(edge => {
+                        let source = graph.nodes[edge.source].id;
+                        let target = graph.nodes[edge.target].id;
+                        return {
+                            [source]: [target],
+                            [target]: [source]
+                        };
+                    }).reduce(_.partialRight(_.merge, (a, b) => {
+                        return a ? a.concat(b) : b;
+                    }, _)) || {};
+                }
+
             });
         }
     };

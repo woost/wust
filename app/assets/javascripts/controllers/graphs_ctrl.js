@@ -4,17 +4,13 @@ angular.module("wust").controller("GraphsCtrl", function($scope, $state, $filter
         title: ""
     };
 
-    $scope.graph = Graph.$fetch().$then(create);
+    $scope.graph = Graph.$fetch();
 
     $scope.$watch("search.title", filter);
 
     function filter() {
         let filtered = $filter("fuzzyFilter")($scope.graph.nodes, $scope.search);
         $scope.$broadcast("d3graph_filter", filtered);
-    }
-
-    function create() {
-        $scope.$broadcast("d3graph_redraw");
     }
 
     function onClick(d) {
