@@ -9,16 +9,28 @@ GET    /auth/signout              controllers.security.rest.RestSignUpController
 GET /goals/:uuid/:path controllers.Goals.showMembers(path: String, uuid: String)
 POST /goals/:uuid/:path controllers.Goals.connectMember(path: String, uuid: String)
 DELETE /goals/:uuid/:path/:otherUuid controllers.Goals.disconnectMember(path: String, uuid: String, otherUuid: String)
+GET /goals/:uuid/:path/:otherUuid/:nestedPath controllers.Goals.showNestedMembers(path: String, nestedPath: String, uuid: String, otherUuid: String)
+POST /goals/:uuid/:path/:otherUuid/:nestedPath controllers.Goals.connectNestedMember(path: String, nestedPath: String, uuid: String, otherUuid: String)
+DELETE /goals/:uuid/:path/:otherUuid/:nestedPath/:nestedUuid controllers.Goals.disconnectNestedMember(path: String, nestedPath: String, uuid: String, otherUuid: String, nestedUuid: String)
 
 -> /problems controllers.Problems
 GET /problems/:uuid/:path controllers.Problems.showMembers(path: String, uuid: String)
 POST /problems/:uuid/:path controllers.Problems.connectMember(path: String, uuid: String)
 DELETE /problems/:uuid/:path/:otherUuid controllers.Problems.disconnectMember(path: String, uuid: String, otherUuid: String)
+GET /problems/:uuid/:path/:otherUuid/:nestedPath controllers.Problems.showNestedMembers(path: String, nestedPath: String, uuid: String, otherUuid: String)
+POST /problems/:uuid/:path/:otherUuid/:nestedPath controllers.Problems.connectNestedMember(path: String, nestedPath: String, uuid: String, otherUuid: String)
+DELETE /problems/:uuid/:path/:otherUuid/:nestedPath/:nestedUuid controllers.Problems.disconnectNestedMember(path: String, nestedPath: String, uuid: String, otherUuid: String, nestedUuid: String)
 
 -> /ideas controllers.Ideas
 GET /ideas/:uuid/:path controllers.Ideas.showMembers(path: String, uuid: String)
 POST /ideas/:uuid/:path controllers.Ideas.connectMember(path: String, uuid: String)
 DELETE /ideas/:uuid/:path/:otherUuid controllers.Ideas.disconnectMember(path: String, uuid: String, otherUuid: String)
+GET /ideas/:uuid/:path/:otherUuid/:nestedPath controllers.Ideas.showNestedMembers(path: String, nestedPath: String, uuid: String, otherUuid: String)
+POST /ideas/:uuid/:path/:otherUuid/:nestedPath controllers.Ideas.connectNestedMember(path: String, nestedPath: String, uuid: String, otherUuid: String)
+DELETE /ideas/:uuid/:path/:otherUuid/:nestedPath/:nestedUuid controllers.Ideas.disconnectNestedMember(path: String, nestedPath: String, uuid: String, otherUuid: String, nestedUuid: String)
+
+-> /pros controllers.ProArguments
+-> /cons controllers.ConArguments
 
 GET /graph controllers.Graphs.show
 

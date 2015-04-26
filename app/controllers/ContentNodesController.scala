@@ -54,7 +54,7 @@ trait ContentNodesController[NodeType <: ContentNode] extends ResourceRouter[Str
 
   def show(uuid: String) = Action {
     val discourse = nodeDiscourseGraph(nodeSchema.factory, uuid)
-  discourse.graph.nodes.headOption match {
+    discourse.graph.nodes.headOption match {
       case Some(node) => Ok(Json.toJson(nodeSchema.factory.create(node)))
       case None       => BadRequest(s"Node with label ${nodeSchema.factory.label} and uuid $uuid not found.")
     }
@@ -87,6 +87,20 @@ trait ContentNodesController[NodeType <: ContentNode] extends ResourceRouter[Str
     }
   }
 
+  def showNestedMembers(path: String, nestedPath: String, uuid: String, otherUuid: String) = Action {
+    nodeSchema.connectSchemas(path) match {
+      case StartHyperConnectSchema(outerFactory,connectSchemas) => connectSchemas(nestedPath) match {
+        case StartConnectSchema(factory) => Ok(Json.toJson(hyperConnectedNodesDiscourseGraph(uuid, outerFactory, otherUuid, factory).contentNodes))
+        case EndConnectSchema(factory) => Ok(Json.toJson(hyperConnectedNodesDiscourseGraph(factory, uuid, outerFactory, otherUuid).contentNodes))
+      }
+      case EndHyperConnectSchema(outerFactory,connectSchemas) => connectSchemas(nestedPath) match {
+        case StartConnectSchema(factory) => Ok(Json.toJson(hyperConnectedNodesDiscourseGraph(otherUuid, outerFactory, uuid, factory).contentNodes))
+        case EndConnectSchema(factory) => Ok(Json.toJson(hyperConnectedNodesDiscourseGraph(factory, otherUuid, outerFactory, uuid).contentNodes))
+      }
+      case _ => BadRequest(s"Not a nested path '$path'")
+    }
+  }
+
   def connectMember(path: String, uuid: String) = Action(parse.json) { request =>
     val connect = request.body.as[ConnectRequest]
 
@@ -104,6 +118,22 @@ trait ContentNodesController[NodeType <: ContentNode] extends ResourceRouter[Str
     }
   }
 
+  def connectNestedMember(path: String, nestedPath: String, uuid: String, otherUuid: String) = Action(parse.json) { request =>
+    val connect = request.body.as[ConnectRequest]
+
+    nodeSchema.connectSchemas(path) match {
+      case StartHyperConnectSchema(outerFactory,connectSchemas) => connectSchemas(nestedPath) match {
+        case StartConnectSchema(factory) => Ok(Json.toJson(startHyperConnectNodes(uuid, outerFactory, otherUuid, factory, connect.uuid)))
+        case EndConnectSchema(factory) => Ok(Json.toJson(endHyperConnectNodes(connect.uuid, factory, uuid, outerFactory, otherUuid)))
+      }
+      case EndHyperConnectSchema(outerFactory,connectSchemas) => connectSchemas(nestedPath) match {
+        case StartConnectSchema(factory) => Ok(Json.toJson(startHyperConnectNodes(otherUuid, outerFactory, uuid, factory, connect.uuid)))
+        case EndConnectSchema(factory) => Ok(Json.toJson(endHyperConnectNodes(connect.uuid, factory, otherUuid, outerFactory, uuid)))
+      }
+      case _ => BadRequest(s"Not a nested path '$path'")
+    }
+  }
+
   def disconnectMember(path: String, uuid: String, otherUuid: String) = Action {
     nodeSchema.connectSchemas(path) match {
       case StartConnection(factory) => {
@@ -117,5 +147,9 @@ trait ContentNodesController[NodeType <: ContentNode] extends ResourceRouter[Str
     }
 
     Ok(JsObject(Seq()))
+  }
+
+  def disconnectNestedMember(path: String, nestedPath: String, uuid: String, otherUuid: String, nestedUuid: String) = Action {
+    BadRequest("not implemented")
   }
 }
