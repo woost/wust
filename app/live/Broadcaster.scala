@@ -24,8 +24,8 @@ object Broadcaster {
   private def connectionDistributor[START <: ContentNode, RELATION <: SchemaAbstractRelation[START,END] with SchemaItem, END <: ContentNode](startHandler: (String,String) => Unit, factory: SchemaAbstractRelationFactory[START,RELATION,END], endHandler: (String,String) => Unit) {
     Application.nodeSchemas.foreach(nodeSchema => {
       nodeSchema.connectSchemas.foreach {
-        case (k, StartConnectSchema(f)) if factory == f => startHandler(nodeSchema.path, k)
-        case (k, EndConnectSchema(f)) if factory == f => endHandler(nodeSchema.path, k)
+        case (k, StartConnection(f)) if factory == f => startHandler(nodeSchema.path, k)
+        case (k, EndConnection(f)) if factory == f => endHandler(nodeSchema.path, k)
         case _ =>
       }
     })

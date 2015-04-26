@@ -8,6 +8,9 @@ object Goals extends ContentNodesController[Goal] {
   override def nodeSchema = NodeSchema("goals", Goal, Map(
     "goals" -> EndConnectSchema(SubGoal),
     "problems" -> EndConnectSchema(Prevents),
-    "ideas" -> EndConnectSchema(Achieves)
+    "ideas" -> EndHyperConnectSchema(Achieves, Map(
+      "pro" -> EndConnectSchema(SupportsAchievement),
+      "con" -> EndConnectSchema(OpposesAchievement)
+    ))
   ))
 }

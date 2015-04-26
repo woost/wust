@@ -6,8 +6,14 @@ import model.WustSchema._
 
 object Ideas extends ContentNodesController[Idea] {
   override def nodeSchema = NodeSchema("ideas", Idea, Map(
-    "goals" -> StartConnectSchema(Achieves),
-    "problems" -> StartConnectSchema(Solves),
+    "goals" -> StartHyperConnectSchema(Achieves, Map(
+      "pro" -> EndConnectSchema(SupportsAchievement),
+      "con" -> EndConnectSchema(OpposesAchievement)
+    )),
+    "problems" -> StartHyperConnectSchema(Solves, Map(
+      "pro" -> EndConnectSchema(SupportsSolution),
+      "con" -> EndConnectSchema(OpposesSolution)
+    )),
     "ideas" -> EndConnectSchema(SubIdea)
   ))
 }

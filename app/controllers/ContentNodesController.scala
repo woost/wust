@@ -82,8 +82,8 @@ trait ContentNodesController[NodeType <: ContentNode] extends ResourceRouter[Str
   // TODO: proper response on wrong path
   def showMembers(path: String, uuid: String) = Action {
     nodeSchema.connectSchemas(path) match {
-      case StartConnectSchema(factory) => Ok(Json.toJson(connectedNodesDiscourseGraph(uuid, factory).contentNodes))
-      case EndConnectSchema(factory) => Ok(Json.toJson(connectedNodesDiscourseGraph(factory, uuid).contentNodes))
+      case StartConnection(factory) => Ok(Json.toJson(connectedNodesDiscourseGraph(uuid, factory).contentNodes))
+      case EndConnection(factory) => Ok(Json.toJson(connectedNodesDiscourseGraph(factory, uuid).contentNodes))
     }
   }
 
@@ -91,12 +91,12 @@ trait ContentNodesController[NodeType <: ContentNode] extends ResourceRouter[Str
     val connect = request.body.as[ConnectRequest]
 
     nodeSchema.connectSchemas(path) match {
-      case StartConnectSchema(factory) => {
+      case StartConnection(factory) => {
         val (start,end) = connectNodes(uuid, factory, connect.uuid)
         Broadcaster.broadcastConnect(start, factory, end)
         Ok(Json.toJson(end))
       }
-      case EndConnectSchema(factory) => {
+      case EndConnection(factory) => {
         val (start,end) = connectNodes(connect.uuid, factory, uuid)
         Broadcaster.broadcastConnect(start, factory, end)
         Ok(Json.toJson(start))
@@ -106,11 +106,11 @@ trait ContentNodesController[NodeType <: ContentNode] extends ResourceRouter[Str
 
   def disconnectMember(path: String, uuid: String, otherUuid: String) = Action {
     nodeSchema.connectSchemas(path) match {
-      case StartConnectSchema(factory) => {
+      case StartConnection(factory) => {
         disconnectNodes(uuid, factory, otherUuid)
         Broadcaster.broadcastDisconnect(uuid, factory, otherUuid)
       }
-      case EndConnectSchema(factory) => {
+      case EndConnection(factory) => {
         disconnectNodes(otherUuid, factory, uuid)
         Broadcaster.broadcastDisconnect(otherUuid, factory, uuid)
       }
