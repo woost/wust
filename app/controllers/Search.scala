@@ -8,6 +8,8 @@ import renesca.graph.Label
 import renesca.parameter.implicits._
 import model.WustSchema._
 
+import scala.util.Try
+
 object Search extends Controller with DatabaseController {
   def index(label: Option[String], title: Option[String]) = Action {
     val titleRegex = title match {
@@ -19,7 +21,11 @@ object Search extends Controller with DatabaseController {
       case None        => "n"
     }
 
-    val discourse = Discourse(db.queryGraph(Query(s"match ($nodeMatch) where n.title =~ {term} return n limit 15", Map("term" -> titleRegex))))
+    // When Neo4j throws an error because the regexp is incorrect, return an empty Discourse instead
+    val discourse = Try(
+      Discourse(
+        db.queryGraph(Query(s"match ($nodeMatch) where n.title =~ {term} return n limit 15", Map("term" -> titleRegex))))
+    ).getOrElse(Discourse.empty)
     Ok(Json.toJson(discourse.contentNodes))
   }
 }
