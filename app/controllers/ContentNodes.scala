@@ -20,8 +20,7 @@ import model.WustSchema._
 import model._
 import live.Broadcaster
 
-trait ContentNodesController[NodeType <: ContentNode] extends ResourceRouter[String] with Silhouette[User, JWTAuthenticator] with HeaderEnvironmentModule with DatabaseController with Controller {
-  //TODO: shared code: label <-> api mapping
+trait ContentNodes[NodeType <: ContentNode] extends ResourceRouter[String] with Silhouette[User, JWTAuthenticator] with HeaderEnvironmentModule with DatabaseController with Controller {
   //TODO: use transactions instead of db
   def nodeSchema: NodeSchema[NodeType]
 

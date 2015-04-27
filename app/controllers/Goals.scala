@@ -4,7 +4,7 @@ import modules.requests._
 import renesca._
 import model.WustSchema._
 
-object Goals extends ContentNodesController[Goal] {
+object Goals extends ContentNodes[Goal] {
   override def nodeSchema = NodeSchema("goals", Goal, Map(
     "goals" -> EndConnectSchema(SubGoal),
     "problems" -> EndConnectSchema(Prevents),
