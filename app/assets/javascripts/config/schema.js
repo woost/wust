@@ -17,16 +17,26 @@ angular.module("wust").config(function($provide, DiscourseNodeProvider, LiveProv
                 return Live.subscribe(url, handler);
             }
 
+            function subMixin(sub, path) {
+                console.log(sub, path);
+            }
+
             return restmod.model(model.path).mix(_(model.subs).map((sub, path) => {
                 return {
                     [path]: {
-                        [sub.cardinality]: restmod.model().mix({
+                        [sub.cardinality]: restmod.model().mix(_.merge({
                             $extend: {
                                 Collection: {
                                     $subscribeToLiveEvent: subscribe
                                 }
                             }
-                        })
+                        }, _(sub.subs).map((sub, path) => {
+                            return {
+                                [path]: {
+                                    [sub.cardinality]: restmod.model()
+                                }
+                            };
+                        }).reduce(_.merge)))
                     }
                 };
             }).reduce(_.merge, {

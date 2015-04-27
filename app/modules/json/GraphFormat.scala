@@ -110,15 +110,38 @@ object GraphFormat {
   }
 
   implicit def nodeSchemaWrites[NODE <: ContentNode] = new Writes[NodeSchema[NODE]] {
+    // TODO: duplicate code
+    implicit def simpleConnectSchemaWrites[SCHEMANODE <: SchemaNode] = new Writes[Map[String,SimpleConnectSchema[SCHEMANODE]]] {
+      def writes(schemas: Map[String,SimpleConnectSchema[SCHEMANODE]]) = JsObject(schemas.map {
+        case (k,v) => (k, JsObject(Seq(
+          ("cardinality", JsString(v.cardinality))
+        )))
+      }.toList
+      )
+    }
+
+    implicit def connectSchemaWrites[SCHEMANODE <: SchemaNode] = new Writes[Map[String,ConnectSchema[SCHEMANODE]]] {
+      def writes(schemas: Map[String,ConnectSchema[SCHEMANODE]]) = JsObject(schemas.map {
+        case (k, v: SimpleConnectSchema[SCHEMANODE]) => (k, JsObject(Seq(
+          ("cardinality", JsString(v.cardinality))
+        )))
+        case (k, v @ StartHyperConnectSchema(_,connectSchemas)) => (k, JsObject(Seq(
+          ("cardinality", JsString(v.cardinality)),
+          ("subs", Json.toJson(connectSchemas))
+        )))
+        case (k, v @ EndHyperConnectSchema(_,connectSchemas)) => (k, JsObject(Seq(
+          ("cardinality", JsString(v.cardinality)),
+          ("subs", Json.toJson(connectSchemas))
+        )))
+      }.toList
+      )
+    }
+
     def writes(schema: NodeSchema[NODE]) = JsObject(Seq(
       ("label", JsString(schema.factory.label)),
       ("path", JsString(schema.path)),
       ("name", JsString(schema.name)),
-      ("subs", JsObject(schema.connectSchemas.map {
-        case (k, v: ConnectSchema[NODE]) => (k, JsObject(Seq(
-          ("cardinality", JsString(v.cardinality))
-        )))
-      }.toList))
-  ))
+      ("subs", Json.toJson(schema.connectSchemas))
+    ))
   }
 }

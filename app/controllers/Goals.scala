@@ -9,8 +9,8 @@ object Goals extends ContentNodesController[Goal] {
     "goals" -> EndConnectSchema(SubGoal),
     "problems" -> EndConnectSchema(Prevents),
     "ideas" -> EndHyperConnectSchema(Achieves, Map(
-      "pro" -> EndConnectSchema(SupportsAchievement),
-      "con" -> EndConnectSchema(OpposesAchievement)
+      "pros" -> EndConnectSchema(SupportsAchievement),
+      "cons" -> EndConnectSchema(OpposesAchievement)
     ))
   ))
 }

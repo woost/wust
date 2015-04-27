@@ -10,8 +10,8 @@ object Problems extends ContentNodesController[Problem] {
     "causes" -> EndConnectSchema(Causes),
     "consequences" -> StartConnectSchema(Causes),
     "ideas" -> EndHyperConnectSchema(Solves, Map(
-      "pro" -> EndConnectSchema(SupportsSolution),
-      "con" -> EndConnectSchema(OpposesSolution)
+      "pros" -> EndConnectSchema(SupportsSolution),
+      "cons" -> EndConnectSchema(OpposesSolution)
     ))
   ))
 }

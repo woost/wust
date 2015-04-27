@@ -25,6 +25,24 @@
             background-color: $discourse_goal_color;
         }
     }
+    .discourse_proargument_list {
+        padding: 6px;
+        @include display-flex(flex);
+        @include flex-wrap(wrap);
+        @include justify-content(center);
+        &.on-drag-enter {
+            background-color: $discourse_proargument_color;
+        }
+    }
+    .discourse_conargument_list {
+        padding: 6px;
+        @include display-flex(flex);
+        @include flex-wrap(wrap);
+        @include justify-content(center);
+        &.on-drag-enter {
+            background-color: $discourse_conargument_color;
+        }
+    }
     .discourse_node_search_form {
         padding: 3px;
     }

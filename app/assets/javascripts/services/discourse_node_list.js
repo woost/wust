@@ -1,4 +1,4 @@
-angular.module("wust").service("DiscourseNodeList", function(DiscourseNode, Idea, Problem, Goal, Search) {
+angular.module("wust").service("DiscourseNodeList", function(DiscourseNode, Idea, Problem, Goal, ProArgument, ConArgument, Search) {
     class NodeModel {
         constructor(service, connService, nodeInfo, title, styleInfo) {
             this.resetNew = () => {
@@ -106,9 +106,29 @@ angular.module("wust").service("DiscourseNodeList", function(DiscourseNode, Idea
         }
     }
 
+    class ProArgumentList extends NodeList {
+        constructor(connService, title = "ProArguments") {
+            super(ProArgument, connService, DiscourseNode.ProArgument, title, {
+                templateUrl: "show_discourse_node_list.html",
+                listCss: "discourse_proargument_list",
+            });
+        }
+    }
+
+    class ConArgumentList extends NodeList {
+        constructor(connService, title = "ProArguments") {
+            super(ConArgument, connService, DiscourseNode.ProArgument, title, {
+                templateUrl: "show_discourse_node_list.html",
+                listCss: "discourse_conargument_list",
+            });
+        }
+    }
+
     return {
         Goal: GoalNodeList,
         Problem: ProblemNodeList,
-        Idea: IdeaNodeList
+        Idea: IdeaNodeList,
+        ProArgument: ProArgumentList,
+        ConArgument: ConArgumentList
     };
 });
