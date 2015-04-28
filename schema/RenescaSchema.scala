@@ -86,12 +86,12 @@ trait SchemaNode extends SchemaItem with SchemaNodeFilter {
   def getStringProperty(key: String) = node.properties(key).asInstanceOf[StringPropertyValue]
 }
 
-trait SchemaAbstractRelation[+STARTNODE <: SchemaNode, +ENDNODE <: SchemaNode] {
+sealed trait SchemaAbstractRelation[+STARTNODE <: SchemaNode, +ENDNODE <: SchemaNode] extends SchemaItem {
   def startNode: STARTNODE
   def endNode: ENDNODE
 }
 
-trait SchemaRelation[+STARTNODE <: SchemaNode, +ENDNODE <: SchemaNode] extends SchemaItem with SchemaAbstractRelation[STARTNODE, ENDNODE] {
+trait SchemaRelation[+STARTNODE <: SchemaNode, +ENDNODE <: SchemaNode] extends SchemaAbstractRelation[STARTNODE, ENDNODE] {
   def relation: Relation
   def relationType: RelationType = relation.relationType
 }
@@ -103,7 +103,7 @@ STARTRELATION <: SchemaRelation[STARTNODE, HYPERRELATION],
 HYPERRELATION <: SchemaHyperRelation[STARTNODE, STARTRELATION, HYPERRELATION, ENDRELATION, ENDNODE],
 ENDRELATION <: SchemaRelation[HYPERRELATION, ENDNODE],
 +ENDNODE <: SchemaNode]
-  extends SchemaItem with SchemaAbstractRelation[STARTNODE, ENDNODE] with SchemaNode {
+  extends SchemaAbstractRelation[STARTNODE, ENDNODE] with SchemaNode {
   // wraps a node and two relations
   protected[schema] var _startRelation: STARTRELATION = _
   protected[schema] var _endRelation: ENDRELATION = _
