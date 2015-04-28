@@ -21,7 +21,7 @@ object Broadcaster {
     broadcaster.broadcastTo(s"${Application.apiDefinition.websocketRoot}/$apiname/$uuid$postfix", data)
   }
 
-  private def connectionDistributor[START <: ContentNode, RELATION <: SchemaAbstractRelation[START,END] with SchemaItem, END <: ContentNode](startHandler: (String,String) => Unit, factory: SchemaAbstractRelationFactory[START,RELATION,END], endHandler: (String,String) => Unit) {
+  private def connectionDistributor[START <: ContentNode, RELATION <: SchemaAbstractRelation[START,END], END <: ContentNode](startHandler: (String,String) => Unit, factory: SchemaAbstractRelationFactory[START,RELATION,END], endHandler: (String,String) => Unit) {
     Application.nodeSchemas.foreach(nodeSchema => {
       nodeSchema.connectSchemas.foreach {
         case (k, StartConnection(f)) if factory == f => startHandler(nodeSchema.path, k)
@@ -36,7 +36,7 @@ object Broadcaster {
     broadcast(apiname, node.uuid, jsonChange("edit", Json.toJson(node)))
   }
 
-  def broadcastConnect[START <: ContentNode, RELATION <: SchemaAbstractRelation[START,END] with SchemaItem, END <: ContentNode](startNode: START, factory: SchemaAbstractRelationFactory[START,RELATION,END], endNode: END): Unit = {
+  def broadcastConnect[START <: ContentNode, RELATION <: SchemaAbstractRelation[START,END], END <: ContentNode](startNode: START, factory: SchemaAbstractRelationFactory[START,RELATION,END], endNode: END): Unit = {
     connectionDistributor(
       (apiname, path) => broadcast(apiname, startNode.uuid, jsonChange("connect", Json.toJson(endNode)), path),
       factory,
@@ -44,7 +44,7 @@ object Broadcaster {
     )
   }
 
-  def broadcastDisconnect[START <: ContentNode, RELATION <: SchemaAbstractRelation[START,END] with SchemaItem, END <: ContentNode](startUuid: String, factory: SchemaAbstractRelationFactory[START,RELATION,END], endUuid: String): Unit = {
+  def broadcastDisconnect[START <: ContentNode, RELATION <: SchemaAbstractRelation[START,END], END <: ContentNode](startUuid: String, factory: SchemaAbstractRelationFactory[START,RELATION,END], endUuid: String): Unit = {
     connectionDistributor(
       (apiname, path) => broadcast(apiname, startUuid, jsonChange("disconnect", JsObject(Seq(("id", JsString(endUuid))))), path),
       factory,

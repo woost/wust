@@ -5,5 +5,5 @@ import renesca._
 import model.WustSchema._
 
 object ProArguments extends ContentNodes[ProArgument] {
-  override def nodeSchema = NodeSchema("pros", ProArgument, Map())
+  override def nodeSchema = NodeSchema(routePath, ProArgument, Map())
 }

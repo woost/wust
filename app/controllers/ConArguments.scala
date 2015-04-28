@@ -5,5 +5,5 @@ import renesca._
 import model.WustSchema._
 
 object ConArguments extends ContentNodes[ConArgument] {
-  override def nodeSchema = NodeSchema("cons", ConArgument, Map())
+  override def nodeSchema = NodeSchema(routePath, ConArgument, Map())
 }

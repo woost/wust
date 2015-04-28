@@ -4,8 +4,8 @@ import modules.requests._
 import renesca._
 import model.WustSchema._
 
-object Problems extends ContentNodes[Problem] with NestedNodes[Problem] {
-  override def nodeSchema = NodeSchema("problems", Problem, Map(
+object Problems extends NestedNodes[Problem] {
+  override def nodeSchema = NodeSchema(routePath, Problem, Map(
     "goals" -> StartConnectSchema(Prevents),
     "causes" -> EndConnectSchema(Causes),
     "consequences" -> StartConnectSchema(Causes),

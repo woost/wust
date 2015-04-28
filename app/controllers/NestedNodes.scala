@@ -20,8 +20,7 @@ import model.WustSchema._
 import model._
 import live.Broadcaster
 
-trait NestedNodes[NodeType <: ContentNode] extends Silhouette[User, JWTAuthenticator] with HeaderEnvironmentModule with DatabaseController with Controller {
-  //TODO: use transactions instead of db
+trait NestedNodes[NodeType <: ContentNode] extends NestedResourceRouter with ContentNodes[NodeType] {
   def nodeSchema: NodeSchema[NodeType]
 
   // TODO: proper response on wrong path
