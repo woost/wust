@@ -7,7 +7,7 @@ import play.api.mvc.Controller
 import renesca._
 import renesca.graph._
 import renesca.parameter.implicits._
-import modules.json.GraphFormat._
+import formatters.json.GraphFormat._
 import modules.db.Database._
 import model._
 

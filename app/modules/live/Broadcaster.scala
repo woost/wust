@@ -5,7 +5,7 @@ import play.api.libs.json._
 
 import model.WustSchema._
 import renesca.schema._
-import modules.json.GraphFormat._
+import formatters.json.GraphFormat._
 import modules.requests._
 import controllers.Application
 

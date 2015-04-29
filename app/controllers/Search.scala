@@ -1,6 +1,6 @@
 package controllers
 
-import modules.json.GraphFormat._
+import formatters.json.GraphFormat._
 import modules.db.Database._
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}

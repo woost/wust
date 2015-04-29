@@ -1,4 +1,4 @@
-package modules.json
+package formatters.json
 
 import collection.mutable
 import modules.requests._

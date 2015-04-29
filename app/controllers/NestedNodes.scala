@@ -6,7 +6,7 @@ import model.WustSchema._
 import model.authorizations._
 import model.users.User
 import modules.cake.HeaderEnvironmentModule
-import modules.json.GraphFormat._
+import formatters.json.GraphFormat._
 import modules.db.Database._
 import modules.requests._
 import play.api.libs.json._
@@ -16,7 +16,6 @@ import renesca._
 import renesca.schema._
 import renesca.graph.RelationType
 import renesca.parameter.implicits._
-import modules.json.GraphFormat._
 import model.WustSchema._
 import model._
 import modules.live.Broadcaster
