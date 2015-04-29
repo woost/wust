@@ -1,6 +1,7 @@
 package controllers
 
 import modules.json.GraphFormat._
+import modules.db.Database._
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
 import renesca.Query
@@ -10,7 +11,7 @@ import model.WustSchema._
 
 import scala.util.Try
 
-object Search extends Controller with DatabaseController {
+object Search extends Controller {
   def index(label: Option[String], title: Option[String]) = Action {
     val titleRegex = title match {
       case Some(title) => "(?i).*" + title.replace(" ", ". *") + ".*"

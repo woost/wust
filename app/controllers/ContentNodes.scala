@@ -16,11 +16,12 @@ import renesca.schema._
 import renesca.graph.RelationType
 import renesca.parameter.implicits._
 import modules.json.GraphFormat._
+import modules.db.Database._
 import model.WustSchema._
 import model._
 import live.Broadcaster
 
-trait ContentNodes[NodeType <: ContentNode] extends ResourceRouter with Silhouette[User, JWTAuthenticator] with HeaderEnvironmentModule with DatabaseController {
+trait ContentNodes[NodeType <: ContentNode] extends ResourceRouter with Silhouette[User, JWTAuthenticator] with HeaderEnvironmentModule {
   //TODO: use transactions instead of db
   def nodeSchema: NodeSchema[NodeType]
 

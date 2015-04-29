@@ -7,6 +7,7 @@ import model.authorizations._
 import model.users.User
 import modules.cake.HeaderEnvironmentModule
 import modules.json.GraphFormat._
+import modules.db.Database._
 import modules.requests._
 import play.api.libs.json._
 import play.api.mvc.Action

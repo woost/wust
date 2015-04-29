@@ -1,4 +1,4 @@
-package controllers
+package modules.db
 
 import model.WustSchema._
 import model._
@@ -11,7 +11,7 @@ import common.ConfigString._
 import play.api.Play.current
 import renesca.graph.Label
 
-trait DatabaseController {
+object Database {
   val db = new DbService
   db.restService = new RestService(
     server = "db.neo4j.url".configOrElse("http://localhost:7474"),
