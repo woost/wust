@@ -19,7 +19,7 @@ import renesca.parameter.implicits._
 import modules.json.GraphFormat._
 import model.WustSchema._
 import model._
-import live.Broadcaster
+import modules.live.Broadcaster
 
 trait NestedNodes[NodeType <: ContentNode] extends NestedResourceRouter with ContentNodes[NodeType] {
   def nodeSchema: NodeSchema[NodeType]

@@ -19,7 +19,7 @@ import modules.json.GraphFormat._
 import modules.db.Database._
 import model.WustSchema._
 import model._
-import live.Broadcaster
+import modules.live.Broadcaster
 
 trait ContentNodes[NodeType <: ContentNode] extends ResourceRouter with Silhouette[User, JWTAuthenticator] with HeaderEnvironmentModule {
   //TODO: use transactions instead of db

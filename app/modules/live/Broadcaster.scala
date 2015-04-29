@@ -1,4 +1,4 @@
-package live
+package modules.live
 
 import org.atmosphere.play.AtmosphereCoordinator.{instance => atmosphere}
 import play.api.libs.json._

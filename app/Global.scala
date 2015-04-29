@@ -30,7 +30,7 @@ object Global extends GlobalSettings with SecuredSettings with Logger {
   }
   override def onStart(application: Application) {
     atmosphere.framework.addInitParameter(ApplicationConfig.WEBSOCKET_CONTENT_TYPE, "application/json")
-    atmosphere.discover(classOf[live.Live])
+    atmosphere.discover(classOf[modules.live.Live])
     atmosphere.ready()
   }
 

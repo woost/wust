@@ -1,4 +1,4 @@
-package live
+package modules.live
 
 import javax.inject.Inject
 import play.api.libs.json._

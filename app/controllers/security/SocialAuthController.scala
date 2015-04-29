@@ -1,4 +1,4 @@
-package controllers.security.rest
+package controllers.security
 
 import utils.responses.rest._
 import services.UserService
@@ -21,7 +21,7 @@ import model.users.User
 /**
  * This controller manage authentication of an user by social service (like facebook and other)
  */
-class RestSocialAuthController extends Silhouette[User, JWTAuthenticator] with HeaderEnvironmentModule {
+class SocialAuthController extends Silhouette[User, JWTAuthenticator] with HeaderEnvironmentModule {
 
   /**
    * Authenticates a user against a social provider.
@@ -102,4 +102,4 @@ class RestSocialAuthController extends Silhouette[User, JWTAuthenticator] with H
 
 }
 
-object RestSocialAuthController extends RestSocialAuthController
+object SocialAuthController extends SocialAuthController

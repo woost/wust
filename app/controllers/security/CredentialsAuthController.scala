@@ -1,4 +1,4 @@
-package controllers.security.rest
+package controllers.security
 
 import utils.responses.rest._
 import services.UserService
@@ -24,7 +24,7 @@ import model.users.User
 /**
  * This controller manage authentication of an user by identifier and password
  */
-class RestCredentialsAuthController extends Silhouette[User, JWTAuthenticator]
+class CredentialsAuthController extends Silhouette[User, JWTAuthenticator]
   with HeaderEnvironmentModule {
 
   /**
@@ -69,4 +69,4 @@ class RestCredentialsAuthController extends Silhouette[User, JWTAuthenticator]
 
 }
 
-object RestCredentialsAuthController extends RestCredentialsAuthController
+object CredentialsAuthController extends CredentialsAuthController

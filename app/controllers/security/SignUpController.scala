@@ -1,4 +1,4 @@
-package controllers.security.rest
+package controllers.security
 
 import utils.responses.rest._
 import services.UserService
@@ -21,7 +21,7 @@ import model.users._
 /**
  * This controller manage registration of an user
  */
-class RestSignUpController extends Silhouette[User, JWTAuthenticator]
+class SignUpController extends Silhouette[User, JWTAuthenticator]
   with HeaderEnvironmentModule
   with AvatarServiceModule {
 
@@ -87,4 +87,4 @@ class RestSignUpController extends Silhouette[User, JWTAuthenticator]
   }
 }
 
-object RestSignUpController extends RestSignUpController
+object SignUpController extends SignUpController
