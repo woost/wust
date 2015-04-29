@@ -26,7 +26,7 @@
                 <input class="form-control" name="password" type="password" ng-model='newUser.password' placeholder="Password" required>
                 <input type="submit" value="Login" ng-click="registerUser = false" class="btn btn-primary" ng-disabled="signForm.$invalid">
                 <input type="submit" value="Register" ng-click="registerUser = true" class="btn btn-primary" ng-disabled="signForm.$invalid">
-                <button type="button" class="btn btn-primary" ng-click="oauth.github()"><i class="fa fa-github"></i></button>
+                <button type="button" class="btn btn-primary" ng-click="oauth('github')"><i class="fa fa-github"></i></button>
             </form>
 
             <form ng-show="loggedIn()" ng-submit="logout()" class="navbar-form navbar-right">

@@ -1,4 +1,4 @@
-angular.module("wust").controller("NavigationCtrl", function($scope, Auth, Search, DiscourseNode, $state) {
+angular.module("wust").controller("NavigationCtrl", function($scope, $auth, Search, DiscourseNode, $state) {
     $scope.searchTyped = {
         title: ""
     };
@@ -11,14 +11,24 @@ angular.module("wust").controller("NavigationCtrl", function($scope, Auth, Searc
     $scope.searchNodes = searchNodes;
     $scope.onSelect = onSelect;
     $scope.authenticate = authenticate;
-    $scope.oauth = Auth.oauth;
-    $scope.getUsername = Auth.getUsername;
-    $scope.loggedIn = Auth.loggedIn;
-    $scope.logout = Auth.logout;
+    $scope.oauth = oauth;
+    $scope.logout = logout;
+    $scope.getUsername = $auth.getPayload.bind($auth);
+    $scope.loggedIn = $auth.isAuthenticated.bind($auth);
 
     function authenticate(register) {
-        let func = register ? Auth.register : Auth.login;
-        func(angular.copy($scope.newUser));
+        let [message, func] = register ? ["Registered", $auth.signup] : ["Logged in", $auth.login];
+        func.bind($auth)(angular.copy($scope.newUser)).then(() => humane.success(message));
+        $scope.newUser.identifier = "";
+        $scope.newUser.password = "";
+    }
+
+    function logout() {
+        $auth.logout().then(() => humane.success("Logged out"));
+    }
+
+    function oauth(provider) {
+        $auth.authenticate(provider).then(() => humane.success("Logged in with provider"));
         $scope.newUser.identifier = "";
         $scope.newUser.password = "";
     }

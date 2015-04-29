@@ -1,7 +1,5 @@
 angular.module("wust.api", [
     "restmod",
-    "angular-jwt",
-    "ngCookies",
-    "angular-storage",
+    "satellizer",
     "wust.live"
 ]);

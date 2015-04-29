@@ -29,8 +29,7 @@ lazy val wust = (project in file(".")).settings(
     "org.webjars.bower" % "angular-native-dragdrop" % "1.1.0",
     "org.webjars.bower" % "angular-restmod" % "1.1.8",
     // js auth
-    "org.webjars.bower" % "angular-jwt" % "0.0.7",
-    "org.webjars.bower" % "a0-angular-storage" % "0.0.9",
+    "org.webjars" % "satellizer" % "0.9.4",
     // basic js libraries
     "org.webjars.bower" % "lodash" % "3.6.0",
     "org.webjars" % "font-awesome" % "4.3.0-1",

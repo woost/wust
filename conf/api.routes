@@ -1,9 +1,12 @@
 # Login/SignUp
 POST   /auth/signin/credentials   controllers.security.rest.RestCredentialsAuthController.authenticate
-POST   /auth/signin/:provider     controllers.security.rest.RestSocialAuthController.authenticate(provider)
-POST   /auth/link/:provider       controllers.security.rest.RestSocialAuthController.link(provider)
+# POST   /auth/signin/:provider     controllers.security.rest.RestSocialAuthController.authenticate(provider)
+# POST   /auth/link/:provider       controllers.security.rest.RestSocialAuthController.link(provider)
 POST   /auth/signup               controllers.security.rest.RestSignUpController.signUp
 GET    /auth/signout              controllers.security.rest.RestSignUpController.signOut
+GET    /auth/signin/:provider     controllers.security.rest.RestSocialAuthController.authenticate(provider)
+POST   /auth/signin/:provider     controllers.security.rest.RestSocialAuthController.authenticate(provider)
+
 
 -> /goals controllers.Goals
 -> /problems controllers.Problems
