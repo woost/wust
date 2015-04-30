@@ -19,7 +19,7 @@
                 </li>
             </ul>
 
-            <div discourse-node-search-form ng-model='searchTyped' on-select="onSelect(item)" search-nodes='searchNodes(term)' icon-class="fa fa-search" class="navbar-form navbar-left" role="search"></div>
+            <div discourse-node-search-form ng-model='searchTyped' on-select="onSelect(item)" on-submit="onSubmit(nodes)" search-nodes='searchNodes(term)' icon-class="fa fa-search" class="navbar-form navbar-left" role="search"></div>
 
             <form ng-hide="loggedIn()" name="signForm" ng-submit="authenticate(registerUser)" class="navbar-form navbar-right">
                 <input class="form-control" name="username" type="text" ng-model='newUser.identifier' placeholder="Username" required>
