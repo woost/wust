@@ -51,7 +51,7 @@ lazy val wust = (project in file(".")).settings(
   // ecmascript 6
   TraceurKeys.sourceFileNames := Seq("app/*/module.js", "app/*/**/*.js"),
   // use compass with sbt-sass
-  sassOptions in Assets ++= Seq("--compass", "-r", "compass", "-r", "sass-globbing"),
+  sassOptions in Assets ++= Seq("--compass", "-r", "compass", "-r", "sass-globbing", "--update", "./app/assets:./target/web/public/main"),
   // scalaJSProjects := Seq(scalajs),
   scalacOptions ++= scalacOpts,
   addCompilerPlugin("org.scalamacros" % "paradise" % paradiseVersion cross CrossVersion.full)
