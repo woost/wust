@@ -1,3 +1,4 @@
 angular.module("wust.components", [
-    "xeditable"
+   "ui.bootstrap",
+   "xeditable"
 ]);
