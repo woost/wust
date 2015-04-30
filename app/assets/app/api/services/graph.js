@@ -1,5 +1,11 @@
 angular.module("wust.api").factory("Graph", function(restmod) {
     return restmod.model().mix({
+        nodes: {
+            decode: function(nodes) {
+                // set title to lowercase label if there is no title
+                return _.each(nodes, node => node.title = node.title || node.label.toLowerCase());
+            }
+        },
         edges: {
             decode: function(edges) {
                 // TODO: not efficient

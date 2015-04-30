@@ -11,13 +11,13 @@ angular.module("wust.components").controller("GraphsCtrl", function($scope, $fil
 
     function createGraph(graph) {
         graph.nodes = graph.nodes.map(node => _.merge(node, {
-            css: node.hyperEdge ? "hyperedge" : "node " + DiscourseNode.get(node.label).css
+            css: node.hyperEdge ? "" : `node ${DiscourseNode.get(node.label).css}`
         }));
         $scope.graph = graph;
     }
 
     function filter() {
-        let filtered = $filter("fuzzyFilter")($scope.graph.nodes, $scope.search);
+        let filtered = $filter("fuzzyFilter")(_.filter($scope.graph.nodes, { hyperEdge: false}), $scope.search);
         $scope.$broadcast("d3graph_filter", filtered);
     }
 

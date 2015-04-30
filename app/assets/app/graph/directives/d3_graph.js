@@ -26,7 +26,7 @@ angular.module("wust.graph").directive("d3Graph", function($window) {
                     .friction(0.90)
                     // .gravity(0.05)
                     .charge(-1000)
-                    .linkDistance(120)
+                    .linkDistance(d => connectsHyperEdge(d) ? 60 : 120)
                     .size([width, height]);
 
                 // remove any previous svg
@@ -88,7 +88,7 @@ angular.module("wust.graph").directive("d3Graph", function($window) {
                 let linktextHtml = linktextFo.append("xhtml:span")
                     // .style("text-shadow", "white -1px 0px, white 0px 1px, white 1px 0px, white 0px -1px")
                     .style("background", "white")
-                    .html(d => d.label);
+                    .html(d => connectsHyperEdge(d) ? "" : d.label);
 
                 let linktextRects = setForeignObjectDimensions(linktextFo, linktextHtml);
 
@@ -106,7 +106,7 @@ angular.module("wust.graph").directive("d3Graph", function($window) {
 
                 let nodeHtml = nodeFo.append("xhtml:div")
                     .style("max-width", "150px")
-                    .style("cursor", "move")
+                    .style("cursor", d => d.hyperEdge ? "cursor" : "move")
                     .attr("class", d => d.css)
                     .html(d => d.title);
 
@@ -130,8 +130,8 @@ angular.module("wust.graph").directive("d3Graph", function($window) {
                     }
 
                     graph.nodes = _.map(graph.nodes, node => {
-                        let marked = _(filteredIds).includes(node.id);
-                        let visible = marked || _(ids).includes(node.id);
+                        let marked = node.hyperEdge || _(filteredIds).includes(node.id);
+                        let visible = !node.hyperEdge && marked || _(ids).includes(node.id);
                         return _.merge(node, {
                             visible: visible,
                             marked: marked
@@ -196,13 +196,19 @@ angular.module("wust.graph").directive("d3Graph", function($window) {
                 function setForeignObjectDimensions(fo, html) {
                     return _.map(fo[0], (curr, i) => {
                         let rect = html[0][i].getBoundingClientRect();
+                        //TODO: WORKAROUND
+                        // why is rect.width == 0 for all hyperedge-nodes?
+                        rect = {
+                            width: rect.width || 50,
+                            height: rect.height
+                        };
                         curr.setAttribute("width", rect.width);
                         curr.setAttribute("height", rect.height);
                         return _.pick(rect, ["width", "height"]);
                     });
                 }
 
-                // get the dimensions of a htm element
+                // get the dimensions of a html element
                 function getElementDimensions(elem) {
                     return [elem.offsetWidth, elem.offsetHeight];
                 }
@@ -261,6 +267,10 @@ angular.module("wust.graph").directive("d3Graph", function($window) {
                 let isDragging = false;
 
                 function clicked(d) {
+                    // do nothing for hyperedges
+                    if (d.hyperEdge)
+                        return;
+
                     if (isDragging) {
                         // if we were dragging before, the node should be fixed
                         setFixedPosition(d);
@@ -276,11 +286,19 @@ angular.module("wust.graph").directive("d3Graph", function($window) {
                 }
 
                 function dragstarted(d) {
+                    // do nothing for hyperedges
+                    if (d.hyperEdge)
+                        return;
+
                     // prevent d3 from interpreting this as panning
                     d3.event.sourceEvent.stopPropagation();
                 }
 
                 function dragged(d) {
+                    // do nothing for hyperedges
+                    if (d.hyperEdge)
+                        return;
+
                     // check whether there was a substantial mouse movement. if
                     // not, we will interpret this as a click event after the
                     // mouse button is released (see clicked handler).
@@ -289,6 +307,11 @@ angular.module("wust.graph").directive("d3Graph", function($window) {
 
                     // do the actually dragging
                     d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
+                }
+
+                // check whether a link connects to a hyperedge-node
+                function connectsHyperEdge(link) {
+                    return link.source.hyperEdge || link.target.hyperEdge;
                 }
 
                 // prepare graph for usage
