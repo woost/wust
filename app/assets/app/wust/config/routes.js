@@ -31,6 +31,16 @@ angular.module("wust").config(function($stateProvider, $urlRouterProvider, $loca
         url: "graph",
         templateUrl: `${templateBase}/graphs/graph.html`,
         controller: "GraphsCtrl",
+    }).state("users", {
+        parent: "page",
+        url: "users",
+        templateUrl: `${templateBase}/users/list.html`,
+        controller: "UserListsCtrl",
+    }).state("user", {
+        parent: "page",
+        url: "users/:id",
+        templateUrl: `${templateBase}/users/detail.html`,
+        controller: "UserDetailsCtrl",
     }).state(DiscourseNodeProvider.setState("Goal", "goals"), {
         parent: "page",
         url: "goals/:id",

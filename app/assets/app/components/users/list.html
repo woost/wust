@@ -1,0 +1,6 @@
+<div id="user_list_container">
+    <h1>Users</h1>
+    <div class="list-group">
+        <a ng-repeat="user in users" ui-sref="user({id: user.id})" class="list-group-item" ng-bind="user.info.fullName"></a>
+    </div>
+</div>

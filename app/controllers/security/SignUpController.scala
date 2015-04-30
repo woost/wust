@@ -28,7 +28,7 @@ class SignUpController extends Silhouette[User, JWTAuthenticator]
   /**
    * The formats for read json represent user
    */
-  implicit val restFormat = formatters.json.UserFormats.restFormat
+  implicit val restFormat = formatters.json.UserFormats.RestFormat
   implicit val signUpFormat = Json.format[SignUp]
 
   /**

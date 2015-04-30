@@ -11,10 +11,10 @@ import model.users._
  */
 object UserFormats {
 
-  val restFormat = {
-    implicit val baseInfoFormat = formatters.BaseInfoFormats.restFormat
+  object RestFormat extends Format[User] {
+    implicit val baseInfoFormat = BaseInfoFormats.restFormat
 
-    val reader = (
+    implicit val reader = (
       (__ \ "id").read[String] ~
       (__ \ "loginInfo").read[LoginInfo] ~
       (__ \ "socials").readNullable(Reads.seq[LoginInfo]) ~
@@ -24,17 +24,11 @@ object UserFormats {
       (__ \ "info").read[BaseInfo] ~
       (__ \ "roles").readNullable(Reads.set[String]).map { case Some(r) => r.map(Role.apply) case None => Set[Role](SimpleUser) })(User.apply _)
 
-    val writer = (
-      (__ \ "id").write[String] ~
-      (__ \ "loginInfo").write[LoginInfo] ~
-      (__ \ "socials").writeNullable(Writes.seq[LoginInfo]) ~
-      (__ \ "email").writeNullable[String] ~
-      (__ \ "username").writeNullable[String] ~
-      (__ \ "avatarUrl").writeNullable[String] ~
-      (__ \ "info").write[BaseInfo] ~
-      (__ \ "roles").write(Writes.set[String]).contramap[Set[Role]](_.map(_.name)))(unlift(User.unapply _))
+    def reads(user: JsValue) = JsSuccess(user.as[User])
 
-    Format(reader, writer)
+    def writes(user: User) = JsObject(Seq(
+      ("info", Json.toJson(user.info)),
+      ("id", JsString(user.id))
+    ))
   }
-
 }

@@ -1,4 +1,5 @@
 # Login/SignUp
+# TODO: should be moved to the user resource as post, patch, delete
 POST   /auth/signin               controllers.security.CredentialsAuthController.authenticate
 # POST   /auth/signin/:provider     controllers.security.SocialAuthController.authenticate(provider)
 # POST   /auth/link/:provider       controllers.security.SocialAuthController.link(provider)
@@ -10,6 +11,8 @@ GET    /auth/signout              controllers.security.SignUpController.signOut
 -> /ideas controllers.Ideas
 -> /pros controllers.ProArguments
 -> /cons controllers.ConArguments
+
+-> /users controllers.Users
 
 GET /graph controllers.Graphs.show
 

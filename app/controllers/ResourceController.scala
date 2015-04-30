@@ -54,6 +54,14 @@ trait ResourceController extends Controller {
   def destroy(id: String): EssentialAction
 }
 
+trait DefaultResourceController extends ResourceController {
+  override def index: EssentialAction = ???
+  override def create: EssentialAction = ???
+  override def show(id: String): EssentialAction = ???
+  override def update(id: String): EssentialAction = ???
+  override def destroy(id: String): EssentialAction = ???
+}
+
 /**
  * A resource router. Typically it will be implemented by an object, like so:
  *
