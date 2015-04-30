@@ -11,7 +11,7 @@ angular.module("wust.components").controller("GraphsCtrl", function($scope, $fil
 
     function createGraph(graph) {
         graph.nodes = graph.nodes.map(node => _.merge(node, {
-            css: "node " + DiscourseNode.get(node.label).css
+            css: node.hyperEdge ? "hyperedge" : "node " + DiscourseNode.get(node.label).css
         }));
         $scope.graph = graph;
     }

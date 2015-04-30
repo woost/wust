@@ -16,37 +16,32 @@ object GraphFormat {
   implicit def LabelToString(label: Label): String = label.name
   implicit def RelationTypeToString(relationType: RelationType): String = relationType.name
 
-  implicit object DiscourseRelationFormat extends Format[SchemaRelation[ContentNode, ContentNode]] {
+  implicit object DiscourseRelationFormat extends Format[SchemaRelation[UuidNode, UuidNode]] {
     def reads(json: JsValue) = ???
 
-    def writes(relation: SchemaRelation[ContentNode, ContentNode]) = JsObject(Seq(
+    def writes(relation: SchemaRelation[UuidNode, UuidNode]) = JsObject(Seq(
       ("startId", JsString(relation.startNode.uuid)),
       ("label", JsString(relation.relationType)),
       ("endId", JsString(relation.endNode.uuid))
     ))
   }
 
-  implicit object ContentNodeFormat extends Format[ContentNode] {
+  implicit object ContentNodeFormat extends Format[UuidNode] {
     def reads(json: JsValue) = ???
 
-    def writes(node: ContentNode) = JsObject(Seq(
+    def writes(node: UuidNode) = JsObject(Seq(
       ("id", JsString(node.uuid)),
-      ("label", JsString(node.label)),
-      ("title", JsString(node.title))
+      ("label", JsString(node.label))
+    ) ++ (node match {
+        case n: ContentNode => Seq(
+          ("title", JsString(n.title)),
+          ("hyperEdge", JsBoolean(false))
+        )
+        case _ => Seq(
+          ("hyperEdge", JsBoolean(true))
+        )
+      }
     ))
-  }
-
-  implicit object ContentHyperRelationFormat extends Format[SchemaHyperRelation[ContentNode, _ <: SchemaRelation[ContentNode, _], _ <: SchemaHyperRelation[ContentNode, _, _, _, ContentNode] with UuidNode, _ <: SchemaRelation[_, ContentNode], ContentNode] with UuidNode] {
-    def reads(json: JsValue) = ???
-
-    def writes(hyperRelation: SchemaHyperRelation[ContentNode, _ <: SchemaRelation[ContentNode, _], _ <: SchemaHyperRelation[ContentNode, _, _, _, ContentNode] with UuidNode, _ <: SchemaRelation[_, ContentNode], ContentNode] with UuidNode) = {
-      JsObject(Seq(
-        ("id", JsString(hyperRelation.uuid)),
-        ("startId", JsString(hyperRelation.startNode.uuid)),
-        ("label", JsString(hyperRelation.label)),
-        ("endId", JsString(hyperRelation.endNode.uuid))
-      ))
-    }
   }
 
   implicit object DiscourseFormat extends Format[Discourse] {
@@ -54,9 +49,9 @@ object GraphFormat {
 
     def writes(discourseGraph: Discourse) = {
       JsObject(Seq(
-        ("nodes", Json.toJson(discourseGraph.contentNodes)),
-        ("relations", Json.toJson(discourseGraph.contentNodeRelations)),
-        ("hyperRelations", Json.toJson(discourseGraph.contentNodeHyperRelations))
+        //TODO: this is really ugly!
+        ("nodes", Json.toJson(discourseGraph.uuidNodes ++ discourseGraph.uuidNodeHyperRelations)),
+        ("edges", Json.toJson(discourseGraph.uuidNodeRelations ++ discourseGraph.uuidNodeHyperRelations.flatMap(r => List(r.startRelation.asInstanceOf[SchemaRelation[UuidNode, UuidNode]], r.endRelation.asInstanceOf[SchemaRelation[UuidNode, UuidNode]]))))
       ))
     }
   }

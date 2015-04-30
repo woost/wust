@@ -7,10 +7,10 @@ angular.module("wust.api").factory("Graph", function(restmod) {
                 return _.map(edges, edge => {
                     return {
                         source: _.findIndex(this.nodes, {
-                            id: edge.from
+                            id: edge.startId
                         }),
                         target: _.findIndex(this.nodes, {
-                            id: edge.to
+                            id: edge.endId
                         }),
                         label: edge.label.toLowerCase()
                     };
