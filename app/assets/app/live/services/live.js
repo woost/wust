@@ -15,7 +15,7 @@ angular.module("wust.live").provider("Live", function() {
 
     this.$get = get;
 
-    function get($rootScope) {
+    function get() {
         function subscribe(url, handler) {
             let newRequest = _.merge({
                 url: location.origin + `${baseUrl}/${url}`,
@@ -32,11 +32,10 @@ angular.module("wust.live").provider("Live", function() {
             console.log("subscribing to " + url);
             atmosphere.subscribe(newRequest);
 
-            let deregisterEvent = $rootScope.$on("$stateChangeSuccess", () => {
+            return () => {
                 console.log("unsubscribing " + url);
                 atmosphere.unsubscribe(newRequest);
-                deregisterEvent();
-            });
+            };
         }
 
         return {

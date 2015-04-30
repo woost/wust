@@ -1,4 +1,4 @@
-angular.module("wust").directive("focusView", function($state, NodeHistory) {
+angular.module("wust").directive("focusView", function($state, $rootScope, $q, NodeHistory) {
     return {
         restrict: "A",
         replace: false,
@@ -14,12 +14,24 @@ angular.module("wust").directive("focusView", function($state, NodeHistory) {
 
             // register for events for the current node, as well as all
             // connected lists
-            $scope.node.$subscribeToLiveEvent(m => $scope.$apply(_.partial(onNodeChange, $scope.node, m)));
+            let unsubscribe = getUnsubscribePromise();
+            unsubscribe.then($scope.node.$subscribeToLiveEvent(m => $scope.$apply(_.partial(onNodeChange, $scope.node, m))));
             _.each(_.compact([$scope.left, $scope.right, $scope.bottom, $scope.top]), list => {
-                list.model.list.$subscribeToLiveEvent(m => $scope.$apply(_.partial(onConnectionChange, list, m)));
+                unsubscribe.then(list.model.list.$subscribeToLiveEvent(m => $scope.$apply(_.partial(onConnectionChange, list, m))));
             });
+
         }
     };
+
+    function getUnsubscribePromise() {
+        let unsubscribe = $q.defer();
+        let deregisterEvent = $rootScope.$on("$stateChangeSuccess", () => {
+            unsubscribe.resolve();
+            deregisterEvent();
+        });
+
+        return unsubscribe.promise;
+    }
 
     function onNodeChange(node, message) {
         switch (message.type) {
