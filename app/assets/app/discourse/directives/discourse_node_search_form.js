@@ -2,7 +2,7 @@ angular.module("wust.discourse").directive("discourseNodeSearchForm", function(D
     return {
         restrict: "A",
         require: "ngModel",
-        templateUrl: "assets/partials/discourse/discourse_node_search_form.html",
+        templateUrl: "assets/app/discourse/directives/discourse_node_search_form.html",
         scope: {
             ngModel: "=",
             onSubmit: "&",

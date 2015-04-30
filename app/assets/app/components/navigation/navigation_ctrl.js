@@ -1,4 +1,4 @@
-angular.module("wust").controller("NavigationCtrl", function($scope, Auth, Search, DiscourseNode, $state) {
+angular.module("wust.components").controller("NavigationCtrl", function($scope, Auth, Search, DiscourseNode, $state) {
     $scope.searchTyped = {
         title: ""
     };

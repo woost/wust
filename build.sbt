@@ -49,7 +49,7 @@ lazy val wust = (project in file(".")).settings(
 
   ),
   // ecmascript 6
-  TraceurKeys.sourceFileNames := Seq("javascripts/*/module.js", "javascripts/*/**/*.js"),
+  TraceurKeys.sourceFileNames := Seq("app/*/module.js", "app/*/**/*.js"),
   // use compass with sbt-sass
   sassOptions in Assets ++= Seq("--compass", "-r", "compass", "-r", "sass-globbing"),
   // scalaJSProjects := Seq(scalajs),

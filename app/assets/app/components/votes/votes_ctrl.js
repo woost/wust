@@ -1,4 +1,4 @@
-angular.module("wust").controller("VotesCtrl", function($scope) {
+angular.module("wust.components").controller("VotesCtrl", function($scope) {
     $scope.changes = [{
         action: "delete",
         icon: "fa-trash-o",

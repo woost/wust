@@ -1,4 +1,4 @@
-angular.module("wust").controller("BrowseCtrl", function($scope, $state, Problem, Goal, Idea, DiscourseNode) {
+angular.module("wust.components").controller("BrowseCtrl", function($scope, $state, Problem, Goal, Idea, DiscourseNode) {
     let problems = {
         active: true,
         newTitle: "What is your problem?",

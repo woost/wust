@@ -1,4 +1,4 @@
-angular.module("wust").controller("IdeasCtrl", function($scope, $stateParams, Idea, DiscourseNode, DiscourseNodeList) {
+angular.module("wust.components").controller("IdeasCtrl", function($scope, $stateParams, Idea, DiscourseNode, DiscourseNodeList) {
     $scope.nodeInfo = DiscourseNode.Idea;
     $scope.node = Idea.$find($stateParams.id);
     $scope.top = new DiscourseNodeList.Goal($scope.node.goals);

@@ -1,49 +1,50 @@
 angular.module("wust").config(function($stateProvider, $urlRouterProvider, $locationProvider, DiscourseNodeProvider) {
+    const templateBase = "assets/app/components";
     $stateProvider.state("page", {
         url: "/",
         abstract: true,
         views: {
             "navigation": {
-                templateUrl: "assets/views/navigation.html",
+                templateUrl: `${templateBase}/navigation/navigation.html`,
                 controller: "NavigationCtrl",
             },
             "content": {
                 template: "<div ui-view></div>",
             },
             "footer": {
-                templateUrl: "assets/views/footer.html",
+                templateUrl: `${templateBase}/footer/footer.html`,
                 controller: "FooterCtrl",
             }
         }
     }).state("browse", {
         parent: "page",
         url: "browse",
-        templateUrl: "assets/views/browse.html",
+        templateUrl: `${templateBase}/browse/browse.html`,
         controller: "BrowseCtrl",
     }).state("vote", {
         parent: "page",
         url: "vote",
-        templateUrl: "assets/views/vote.html",
+        templateUrl: `${templateBase}/votes/vote.html`,
         controller: "VotesCtrl",
     }).state("graph", {
         parent: "page",
         url: "graph",
-        templateUrl: "assets/views/graph.html",
+        templateUrl: `${templateBase}/graphs/graph.html`,
         controller: "GraphsCtrl",
     }).state(DiscourseNodeProvider.setState("Goal", "goals"), {
         parent: "page",
         url: "goals/:id",
-        templateUrl: "assets/views/node_focus.html",
+        templateUrl: `${templateBase}/nodes/focus_view.html`,
         controller: "GoalsCtrl",
     }).state(DiscourseNodeProvider.setState("Problem", "problems"), {
         parent: "page",
         url: "problems/:id",
-        templateUrl: "assets/views/node_focus.html",
+        templateUrl: `${templateBase}/nodes/focus_view.html`,
         controller: "ProblemsCtrl",
     }).state(DiscourseNodeProvider.setState("Idea", "ideas"), {
         parent: "page",
         url: "ideas/:id",
-        templateUrl: "assets/views/node_focus.html",
+        templateUrl: `${templateBase}/nodes/focus_view.html`,
         controller: "IdeasCtrl",
     });
 

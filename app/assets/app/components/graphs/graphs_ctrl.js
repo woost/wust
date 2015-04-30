@@ -1,4 +1,4 @@
-angular.module("wust").controller("GraphsCtrl", function($scope, $state, $filter, Graph, DiscourseNode) {
+angular.module("wust.components").controller("GraphsCtrl", function($scope, $state, $filter, Graph, DiscourseNode) {
     $scope.onClick = onClick;
     $scope.search = {
         title: ""

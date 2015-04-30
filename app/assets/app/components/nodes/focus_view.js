@@ -1,7 +1,7 @@
 angular.module("wust").directive("focusView", function($state, NodeHistory) {
     return {
         restrict: "A",
-        templateUrl: "assets/partials/wust/focus_view.html",
+        replace: false,
         scope: true,
         link: function($scope) {
             $scope.node.$then(data => {
