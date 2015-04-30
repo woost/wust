@@ -35,8 +35,8 @@ angular.module("wust.graph").directive("d3Graph", function($window) {
                 // define events
                 let zoom = d3.behavior.zoom().scaleExtent([0.1, 10]).on("zoom", zoomed);
                 let drag = force.drag()
-                    .on("dragstart", dragstarted)
-                    .on("drag", dragged);
+                    .on("dragstart", ignoreHyperEdge(dragstarted))
+                    .on("drag", ignoreHyperEdge(dragged));
 
                 // construct svg
                 let svg = d3.select(element[0])
@@ -98,7 +98,7 @@ angular.module("wust.graph").directive("d3Graph", function($window) {
                     .data(graph.nodes).enter()
                     .append("g")
                     .call(drag)
-                    .on("click", clicked)
+                    .on("click", ignoreHyperEdge(clicked))
                     .on("dblclick", onDoubleClick);
 
                 let nodeFo = node.append("foreignObject")
@@ -267,10 +267,6 @@ angular.module("wust.graph").directive("d3Graph", function($window) {
                 let isDragging = false;
 
                 function clicked(d) {
-                    // do nothing for hyperedges
-                    if (d.hyperEdge)
-                        return;
-
                     if (isDragging) {
                         // if we were dragging before, the node should be fixed
                         setFixedPosition(d);
@@ -286,19 +282,11 @@ angular.module("wust.graph").directive("d3Graph", function($window) {
                 }
 
                 function dragstarted(d) {
-                    // do nothing for hyperedges
-                    if (d.hyperEdge)
-                        return;
-
                     // prevent d3 from interpreting this as panning
                     d3.event.sourceEvent.stopPropagation();
                 }
 
                 function dragged(d) {
-                    // do nothing for hyperedges
-                    if (d.hyperEdge)
-                        return;
-
                     // check whether there was a substantial mouse movement. if
                     // not, we will interpret this as a click event after the
                     // mouse button is released (see clicked handler).
@@ -307,6 +295,18 @@ angular.module("wust.graph").directive("d3Graph", function($window) {
 
                     // do the actually dragging
                     d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
+                }
+
+                // executes specified function only for normal nodes, i.e.,
+                // ignores hyperedges
+                function ignoreHyperEdge(func) {
+                    return d => {
+                        // do nothing for hyperedges
+                        if (d.hyperEdge)
+                            return;
+
+                        func(d);
+                    };
                 }
 
                 // check whether a link connects to a hyperedge-node
