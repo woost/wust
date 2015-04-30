@@ -99,7 +99,7 @@ angular.module("wust.graph").directive("d3Graph", function($window) {
                     .append("g")
                     .call(drag)
                     .on("click", ignoreHyperEdge(clicked))
-                    .on("dblclick", onDoubleClick);
+                    .on("dblclick", ignoreHyperEdge(onDoubleClick));
 
                 let nodeFo = node.append("foreignObject")
                     .style("text-align", "center");
