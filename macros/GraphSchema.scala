@@ -186,7 +186,7 @@ object GraphSchemaMacro {
                      statements: List[Tree],
                      flatStatements: List[Tree]
                      ) extends NamePattern with SuperTypesPattern {
-      if (superTypes.size > 1)
+      if(superTypes.size > 1)
         context.abort(NoPosition, "Currently nodes are restricted to only extend one trait")
 
       def name_type = TypeName(name)
@@ -215,7 +215,7 @@ object GraphSchemaMacro {
                  hyperRelationPatterns: List[HyperRelation],
                  nodeTraitPattern: NodeTraitPattern,
                  hasOwnFactory: Boolean
-                 ) =
+                 ) = {
         new NodeTrait(
           name = nodeTraitPattern.name,
           superTypes = if(nodeTraitPattern.superTypes.nonEmpty) nodeTraitPattern.superTypes else List("SchemaNode"),
@@ -227,6 +227,7 @@ object GraphSchemaMacro {
           flatStatements = flatSuperStatements(nodeTraitPatterns, nodeTraitPattern),
           hasOwnFactory = hasOwnFactory
         )
+      }
     }
     case class NodeTrait(name: String,
                          superTypes: List[String],
@@ -269,9 +270,11 @@ object GraphSchemaMacro {
         val nodeTraitPatterns: List[NodeTraitPattern] = schema.statements.collect { case NodeTraitPattern(nodeTraitpattern) => nodeTraitpattern }
         val groupPatterns: List[GroupPattern] = schema.statements.collect { case GroupPattern(groupPattern) => groupPattern }
 
-        val nodes = nodePatterns.map { nodePattern => { import nodePattern._
-          Node(name, superTypes, superTypes.headOption.map( superType => flatSuperStatements(nodeTraitPatterns, nameToPattern(nodeTraitPatterns, superType)).size).getOrElse(0), neighbours(nodePattern, relations), rev_neighbours(nodePattern, relations), statements, flatSuperStatements(nodeTraitPatterns, nodePattern))
-        }}
+        val nodes = nodePatterns.map { nodePattern => {
+          import nodePattern._
+          Node(name, superTypes, superTypes.headOption.map(superType => flatSuperStatements(nodeTraitPatterns, nameToPattern(nodeTraitPatterns, superType)).size).getOrElse(0), neighbours(nodePattern, relations), rev_neighbours(nodePattern, relations), statements, flatSuperStatements(nodeTraitPatterns, nodePattern))
+        }
+        }
         val nodeTraits = nodeTraitPatterns.map(nodeTraitPattern => NodeTrait(nodeTraitPatterns, nodePatterns, relations, hyperRelations, nodeTraitPattern, traitCanHaveOwnFactory(nodePatterns, nodeTraitPatterns, nodeTraitPattern)))
         val groups = groupPatterns.map(groupPattern =>
           Group(groupPattern.name,
@@ -323,20 +326,58 @@ object GraphSchemaMacro {
       def patternToFlatSubTypes[P <: NamePattern with SuperTypesPattern](patterns: List[P], pattern: P): List[P] = patterns.filter { subPattern =>
         isDeepSuperType(patterns, subPattern, pattern)
       }
+
       def nodeTraitToNodes(nodeTraits: List[NodeTraitPattern], nodePatterns: List[NodePattern], nodeTrait: NodeTraitPattern): List[String] = {
-        patternToFlatSuperTypes(nodeTraits, nodeTrait).flatMap(superTrait => nodePatterns.filter(_.superTypes contains superTrait.name)).distinct.map(_.name)
+        (nodeTrait :: patternToFlatSubTypes(nodeTraits, nodeTrait)).flatMap(subTrait => nodePatterns.filter(_.superTypes contains subTrait.name)).distinct.map(_.name)
       }
+      assertX(nodeTraitToNodes(
+        List(
+          NodeTraitPattern("traitA", Nil, Nil),
+          NodeTraitPattern("traitB", List("traitA"), Nil),
+          NodeTraitPattern("traitC", Nil, Nil)
+        ),
+        List(
+          NodePattern("nodeC", List("traitA"), Nil),
+          NodePattern("nodeD", List("traitB"), Nil)
+        ),
+        NodeTraitPattern("traitA", Nil, Nil)
+      ), List("nodeC", "nodeD"))
+
       def nodeNamesToRelations[R <: StartEndNodePattern](nodeNames: List[String], relations: List[R]): List[R] = {
         relations.filter(relation => nodeNames.contains(relation.startNode) && nodeNames.contains(relation.endNode))
       }
+
       def nodeTraitToCommonHyperNodeTraits(nodeTraitPatterns: List[NodeTraitPattern], nodePatterns: List[NodePattern], hyperRelations: List[HyperRelation], nodeTrait: NodeTraitPattern): List[String] = {
-        val subHyperRelations = nodeNamesToRelations(nodeTraitToNodes(nodeTraitPatterns, nodePatterns, nodeTrait), hyperRelations)
+        val nodes = nodeTraitToNodes(nodeTraitPatterns, nodePatterns, nodeTrait)
+        val subHyperRelations = nodeNamesToRelations(nodes, hyperRelations)
         val flatSuperTypes: List[List[String]] = subHyperRelations.map(hyperRelation => patternToFlatSuperTypes(nodeTraitPatterns, hyperRelation).map(_.name))
         if(flatSuperTypes.isEmpty) Nil
         else if(flatSuperTypes.size == 1) flatSuperTypes.head
         else flatSuperTypes.reduce(_ intersect _)
       }
-      def groupToNodes(groupPatterns: List[GroupPattern], groupPattern: GroupPattern): List[String] = patternToFlatSubTypes(groupPatterns, groupPattern).flatMap(_.nodes)
+      assertX(nodeTraitToCommonHyperNodeTraits(
+        List(
+          NodeTraitPattern("traitA", Nil, Nil),
+          NodeTraitPattern("traitB", Nil, Nil),
+          NodeTraitPattern("traitC", Nil, Nil)
+        ),
+        List(
+          NodePattern("nodeC", List("traitA"), Nil),
+          NodePattern("nodeD", List("traitA"), Nil)
+        ),
+        List(
+          HyperRelation("hyperX", "nodeC", "nodeD", List("traitB", "traitC"), Nil),
+          HyperRelation("hyperY", "nodeD", "nodeC", List("traitA", "traitB", "traitC"), Nil)
+        ),
+        NodeTraitPattern("traitA", Nil, Nil)
+      ).toSet, List("traitB", "traitC").toSet)
+
+      def groupToNodes(groupPatterns: List[GroupPattern], groupPattern: GroupPattern): List[String] = (groupPattern :: patternToFlatSubTypes(groupPatterns, groupPattern)).flatMap(_.nodes)
+      assertX(groupToNodes(List(
+        GroupPattern("groupA", Nil, List("nodeA", "nodeB")),
+        GroupPattern("groupB", List("groupA"), List("nodeC", "nodeD"))
+      ), GroupPattern("groupA", Nil, List("nodeA", "nodeB"))).toSet, List("nodeA", "nodeB", "nodeC", "nodeD").toSet)
+
       def groupToRelations(groupPatterns: List[GroupPattern], relations: List[NamePattern with StartEndNodePattern], groupPattern: GroupPattern): List[String] =
         nodeNamesToRelations(groupToNodes(groupPatterns, groupPattern), relations).map(_.name)
 
@@ -344,13 +385,13 @@ object GraphSchemaMacro {
         val children = patternToFlatSubTypes(nodePatterns ::: nodeTraitPatterns, currentTrait)
         val statements = children.flatMap(_.statements)
         statements.find {
-            case q"val $x:Option[$propertyType]" => false
-            case q"var $x:Option[$propertyType]" => false
-            case q"val $x:$propertyType = $y"    => false
-            case q"var $x:$propertyType = $y"    => false
-            case q"val $x:$propertyType"         => true
-            case q"var $x:$propertyType"         => true
-            case _                               => false
+          case q"val $x:Option[$propertyType]" => false
+          case q"var $x:Option[$propertyType]" => false
+          case q"val $x:$propertyType = $y"    => false
+          case q"var $x:$propertyType = $y"    => false
+          case q"val $x:$propertyType"         => true
+          case q"var $x:$propertyType"         => true
+          case _                               => false
         }.isEmpty
       }
     }
@@ -390,11 +431,15 @@ object GraphSchemaMacro {
           def propertyOptionSetter(name: String, typeName: Tree) =
             q""" def ${ TermName(name + "_$eq") }(newValue:Option[$typeName]){ if(newValue.isDefined) node.properties(${ name }) = newValue.get else node.properties -= ${ name } }"""
           def generatePropertyAccessors(statement: Tree): List[Tree] = statement match {
-            case q"val $propertyName:Option[$propertyType]" => List(propertyOptionGetter(propertyName.toString, propertyType))
-            case q"var $propertyName:Option[$propertyType]" => List(propertyOptionGetter(propertyName.toString, propertyType), propertyOptionSetter(propertyName.toString, propertyType))
-            case q"val $propertyName:$propertyType"         => List(propertyGetter(propertyName.toString, propertyType))
-            case q"var $propertyName:$propertyType"         => List(propertyGetter(propertyName.toString, propertyType), propertySetter(propertyName.toString, propertyType))
-            case somethingElse                              => List(somethingElse)
+            case q"val $propertyName:Option[$propertyType]"      => List(propertyOptionGetter(propertyName.toString, propertyType))
+            case q"var $propertyName:Option[$propertyType]"      => List(propertyOptionGetter(propertyName.toString, propertyType), propertyOptionSetter(propertyName.toString, propertyType))
+            case q"val $propertyName:Option[$propertyType] = $x" => List(propertyOptionGetter(propertyName.toString, propertyType))
+            case q"var $propertyName:Option[$propertyType] = $x" => List(propertyOptionGetter(propertyName.toString, propertyType), propertyOptionSetter(propertyName.toString, propertyType))
+            case q"val $propertyName:$propertyType"              => List(propertyGetter(propertyName.toString, propertyType))
+            case q"var $propertyName:$propertyType"              => List(propertyGetter(propertyName.toString, propertyType), propertySetter(propertyName.toString, propertyType))
+            case q"val $propertyName:$propertyType = $x"         => List(propertyGetter(propertyName.toString, propertyType))
+            case q"var $propertyName:$propertyType = $y"         => List(propertyGetter(propertyName.toString, propertyType), propertySetter(propertyName.toString, propertyType))
+            case somethingElse                                   => List(somethingElse)
           }
 
           def generateIndirectNeighbourAccessors(schema: Schema, statement: Tree): Tree = statement match {
@@ -411,7 +456,7 @@ object GraphSchemaMacro {
               case statement@(q"var $x:Option[$propertyType]") => None
               case statement@(q"val $x:$propertyType")         => Some(statement)
               case statement@(q"var $x:$propertyType")         => Some(statement)
-              case _                                   => None
+              case _                                           => None
             }
             val localParamsWithDefault = flatStatements.collect {
               case statement@(q"val $x: $y = $default") if !default.isEmpty => statement
@@ -424,13 +469,19 @@ object GraphSchemaMacro {
 
             val localParams = List(localNonOptionalParamsWithoutDefault ::: localParamsWithDefault ::: localOptionalParamsWithoutDefault)
 
-            val properties = localNonOptionalParamsWithoutDefault.map {
-              case q"val $propertyName:$propertyType"      => propertyName
-              case q"var $propertyName:$propertyType"      => propertyName
-              case q"val $propertyName:$propertyType = $x" => propertyName
-              case q"var $propertyName:$propertyType = $x" => propertyName
+            val properties = flatStatements.flatMap {
+              case statement@(q"val $x:Option[$propertyType]")      => None
+              case statement@(q"var $x:Option[$propertyType]")      => None
+              case statement@(q"val $x:Option[$propertyType] = $y") => None
+              case statement@(q"var $x:Option[$propertyType] = $y") => None
+              case q"val $propertyName:$propertyType"               => Some(propertyName)
+              case q"var $propertyName:$propertyType"               => Some(propertyName)
+              case q"val $propertyName:$propertyType = $x"          => Some(propertyName)
+              case q"var $propertyName:$propertyType = $x"          => Some(propertyName)
             }
             val optionalProperties = flatStatements.collect {
+              case q"val $propertyName:Option[$x]"      => propertyName
+              case q"var $propertyName:Option[$x]"      => propertyName
               case q"val $propertyName:Option[$x] = $y" => propertyName
               case q"var $propertyName:Option[$x] = $y" => propertyName
             }
@@ -460,10 +511,10 @@ object GraphSchemaMacro {
           }
 
           def nodeFactories(schema: Schema): List[Tree] = schema.nodes.map { node => import node._
-            val localWithParams = if (superTypesFlatStatementsCount != flatStatements.size)
-              createLocalFactoryMethod(flatStatements, name)
-            else
-              q""
+            val localWithParams = if(superTypesFlatStatementsCount != flatStatements.size)
+                                    createLocalFactoryMethod(flatStatements, name)
+                                  else
+                                    q""
 
             val superFactory = superTypes.headOption match {
               case Some(superType) => TypeName(traitFactoryName(superType))
