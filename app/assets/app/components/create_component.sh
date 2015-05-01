@@ -12,7 +12,7 @@ component_plural="${component}s"
 
 controller_name="${component_plural^}Ctrl"
 controller_file="${component_plural}_ctrl.js"
-html_id="${component}_container"
+html_id="${component}_component"
 html_file="${component}.html"
 scss_file="_${component}.scss"
 

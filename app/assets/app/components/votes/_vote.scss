@@ -1,6 +1,6 @@
 @import "compass/css3/flexbox";
 
-#vote_container {
+#vote_component {
     #description_container {
         @include display-flex(flex);
         height: 200px;
