@@ -1,4 +1,4 @@
-angular.module("wust").directive("focusView", function($state, $rootScope, $q, NodeHistory) {
+angular.module("wust.components").directive("focusView", function($state, $rootScope, $q, NodeHistory) {
     return {
         restrict: "A",
         replace: false,
