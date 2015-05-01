@@ -44,10 +44,14 @@
         }
     }
 
+    .discourse_node_search_form {
+        padding: 2pt;
+    }
+
     .on-drag-hover:after {
         content: 'Drop to connect';
         display: block;
         color: black;
-        font-size: x-large;
+        font-size: large;
     }
 }
