@@ -164,19 +164,8 @@ ENDNODE <: SchemaNode] extends SchemaNodeFactory[HYPERRELATION] with SchemaAbstr
     endRelationCreate(Relation.local(middleNode.node, endNode.node, endRelationType))
   }
 
-  def middleNodeLocal: HYPERRELATION // HACK!
-
   def local(startNode: STARTNODE, endNode: ENDNODE): HYPERRELATION = {
-    val middleNode = middleNodeLocal
+    val middleNode = super[SchemaNodeFactory].local
     create(startRelationLocal(startNode, middleNode).relation, middleNode.node, endRelationLocal(middleNode, endNode).relation)
   }
 }
-
-
-object UUID {
-  def applyTo[T <: SchemaNode](node: T) = {
-    node.node.properties("uuid") = java.util.UUID.randomUUID.toString
-    node
-  }
-}
-

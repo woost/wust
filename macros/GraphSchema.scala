@@ -1,16 +1,30 @@
 package renesca.schema.macros
 
 import scala.reflect.macros.whitebox
-import collection.mutable
 import scala.language.experimental.macros
 import PartialFunction._
 import scala.annotation.StaticAnnotation
+
+object Helpers {
+  var asserted = 0
+  def assertX(a: Any, b: Any) { if(a != b) { println(s"### Assertion failed: $a != $b"); asserted += 1 } }
+  def crashOnAsserted() { if(asserted > 0) sys.error(s"$asserted assertions failed") }
+  def nodeToFactoryName(name: String) = name + "Factory"
+  def rev(s: String) = "rev_" + s
+  def nameToPlural(name: String) = {
+    val lower = name.take(1).toLowerCase + name.drop(1)
+    val suffix = if(lower.endsWith("s")) "" else "s"
+    lower + suffix
+  }
+  def traitFactoryName(name: String) = name + "Factory"
+  def nameToLabel(name: String) = name.toUpperCase
+  def relationName(start: String, end: String) = s"${ start }To${ end }"
+}
 
 class GraphSchema extends StaticAnnotation {
   def macroTransform(annottees: Any*): Any = macro GraphSchemaMacro.graphSchema
 }
 
-//TODO: fake annotations for the patterns, to satisfy IDE
 
 object GraphSchemaMacro {
   // TODO: why are implicits not working here?
@@ -18,355 +32,577 @@ object GraphSchemaMacro {
   // TODO: validation: nodeTraits(propertyTypes), nodes need to inherit exactly one NodeTrait
   // TODO: compile error when nodes inherit not only from nodeTraits
 
-  def graphSchema(c: whitebox.Context)(annottees: c.Expr[Any]*): c.Expr[Any] = {
-    import c.universe._
+  def graphSchema(context: whitebox.Context)(annottees: context.Expr[Any]*): context.Expr[Any] = {
+    import Helpers._
+    import context.universe._
 
+    trait NamePattern {
+      def name: String
+      //      def name_type = TypeName(name)
+      //      def name_term = TermName(name)
+      //      def name_label = nameToLabel(name)
+      //      def name_plural = nameToPlural(name)
+      //      def name_plural_term = TermName(name_plural)
+    }
+    trait SuperTypesPattern {
+      def superTypes: List[String]
+      //      def superTypes_type = superTypes.map(TypeName(_))
+    }
+    trait StartEndNodePattern {
+      def startNode: String
+      def endNode: String
+      //      def startNode_type = TypeName(startNode)
+      //      def startNode_term = TermName(startNode)
+      //      def endNode_type = TypeName(endNode)
+      //      def endNode_term = TermName(endNode)
+    }
+    trait StatementsPattern {
+      def statements: List[Tree]
+    }
 
-    object GraphSchemaPattern {
-      def unapply(tree: Tree): Option[(String, List[String], List[Tree])] = condOpt(tree) {
-        case q""" object $graphSchemaName extends ..$graphSchemaParents { ..$graphSchemaStatements } """ =>
-          (graphSchemaName.toString, graphSchemaParents.map { _.toString } diff List("scala.AnyRef"), graphSchemaStatements)
+    object SchemaPatternTree {
+      def unapply(tree: Tree): Option[SchemaPattern] = condOpt(tree) {
+        case q""" object $name extends ..$superTypes { ..$statements } """ =>
+          SchemaPattern(name.toString, superTypes.map(_.toString) diff List("scala.AnyRef"), statements)
       }
+    }
+    case class SchemaPattern(name: String, superTypes: List[String], statements: List[Tree]) extends NamePattern {
+      def name_type = TypeName(name)
+      def name_term = TermName(name)
+      def name_label = nameToLabel(name)
+      def name_plural = nameToPlural(name)
+      def name_plural_term = TermName(name_plural)
     }
 
     object GroupPattern {
       //TODO: statements
-      def unapply(tree: Tree): Option[(String, List[String], List[String])] = condOpt(tree) {
-        case q""" $mods trait $groupName extends ..$superGroups { List(..$groupNodes) }""" if mods.annotations.collectFirst {
+      //TODO: extract modifier pattern
+      def unapply(tree: Tree): Option[GroupPattern] = condOpt(tree) {
+        case q""" $mods trait $name extends ..$superTypes { List(..$groupNodes) }""" if mods.annotations.collectFirst {
           case Apply(Select(New(Ident(TypeName("Group"))), termNames.CONSTRUCTOR), Nil) => true
           case _                                                                        => false
         }.get =>
-          (groupName.toString, superGroups.map { _.toString } diff List("scala.AnyRef"), groupNodes.map { _.toString })
-        case q""" $mods trait $groupName extends ..$superGroups""" if mods.annotations.collectFirst {
+          GroupPattern(name.toString, superTypes.map { _.toString } diff List("scala.AnyRef"), groupNodes.map { _.toString })
+        case q""" $mods trait $name extends ..$superTypes""" if mods.annotations.collectFirst {
           case Apply(Select(New(Ident(TypeName("Group"))), termNames.CONSTRUCTOR), Nil) => true
           case _                                                                        => false
         }.get =>
-          (groupName.toString, superGroups.map { _.toString } diff List("scala.AnyRef"), Nil)
+          GroupPattern(name.toString, superTypes.map { _.toString } diff List("scala.AnyRef"), Nil)
       }
+    }
+    case class GroupPattern(name: String, superTypes: List[String], nodes: List[String]) extends NamePattern with SuperTypesPattern {
+      def name_type = TypeName(name)
+      def name_term = TermName(name)
+      def name_label = nameToLabel(name)
+      def name_plural = nameToPlural(name)
+      def name_plural_term = TermName(name_plural)
+      def superTypes_type = superTypes.map(TypeName(_))
     }
 
     object NodeTraitPattern {
-      def unapply(tree: Tree): Option[(String, List[String], List[Tree])] = condOpt(tree) {
+      def unapply(tree: Tree): Option[NodeTraitPattern] = condOpt(tree) {
         //http://stackoverflow.com/questions/26305528/scala-annotations-are-not-found
-        case q""" $mods trait $traitName extends ..$traitParents { ..$traitStatements } """ if mods.annotations.collectFirst {
+        case q""" $mods trait $name extends ..$superTypes { ..$statements } """ if mods.annotations.collectFirst {
           case Apply(Select(New(Ident(TypeName("Node"))), termNames.CONSTRUCTOR), Nil) => true
           case _                                                                       => false
         }.get =>
-          (traitName.toString, traitParents.map { _.toString } diff List("scala.AnyRef"), traitStatements)
+          NodeTraitPattern(name.toString, superTypes.map { _.toString } diff List("scala.AnyRef"), statements)
       }
+    }
+    case class NodeTraitPattern(name: String, superTypes: List[String], statements: List[Tree]) extends NamePattern with SuperTypesPattern with StatementsPattern {
+      def name_type = TypeName(name)
+      def name_term = TermName(name)
+      def name_label = nameToLabel(name)
+      def name_plural = nameToPlural(name)
+      def name_plural_term = TermName(name_plural)
+      def superTypes_type = superTypes.map(TypeName(_))
     }
 
     object NodePattern {
-      def unapply(tree: Tree): Option[(String, String, List[Tree])] = condOpt(tree) {
-        case q"""@Node class $nodeName extends ${nodeParentTrait: TypeName} { ..$nodeStatements }""" =>
-          (nodeName.toString, nodeParentTrait.toString, nodeStatements)
+      def unapply(tree: Tree): Option[NodePattern] = condOpt(tree) {
+        case q"""@Node class $name extends ..${superTypes} { ..$statements }""" =>
+          NodePattern(name.toString, superTypes.map { _.toString } diff List("scala.AnyRef"), statements)
       }
+    }
+    case class NodePattern(name: String, superTypes: List[String], statements: List[Tree]) extends NamePattern with SuperTypesPattern with StatementsPattern {
+      def name_type = TypeName(name)
+      def name_term = TermName(name)
+      def name_label = nameToLabel(name)
+      def name_plural = nameToPlural(name)
+      def name_plural_term = TermName(name_plural)
     }
 
     object RelationPattern {
-      def unapply(tree: Tree): Option[(String, String, String, List[Tree])] = condOpt(tree) {
-        case q"""@Relation class $relationName (startNode:$startNode, endNode:$endNode) {..$relationStatements}""" =>
-          (relationName.toString, startNode.toString, endNode.toString, relationStatements)
+      def unapply(tree: Tree): Option[Relation] = condOpt(tree) {
+        case q"""@Relation class $name (startNode:$startNode, endNode:$endNode) {..$statements}""" =>
+          Relation(name.toString, startNode.toString, endNode.toString, statements)
       }
+    }
+    case class Relation(name: String, startNode: String, endNode: String, statements: List[Tree]) extends NamePattern with StartEndNodePattern with StatementsPattern {
+      def name_type = TypeName(name)
+      def name_term = TermName(name)
+      def name_label = nameToLabel(name)
+      def name_plural = nameToPlural(name)
+      def name_plural_term = TermName(name_plural)
+      def startNode_type = TypeName(startNode)
+      def startNode_term = TermName(startNode)
+      def endNode_type = TypeName(endNode)
+      def endNode_term = TermName(endNode)
     }
 
     object HyperRelationPattern {
-      def unapply(tree: Tree): Option[(String, String, String, String, List[Tree])] = condOpt(tree) {
-        case q"""@HyperRelation class $hyperRelationName (startNode:$startNode, endNode:$endNode) extends $hyperRelationParent {..$hyperRelationStatements}""" =>
-          (hyperRelationName.toString, startNode.toString, endNode.toString, hyperRelationParent.toString, hyperRelationStatements)
+      def unapply(tree: Tree): Option[HyperRelation] = condOpt(tree) {
+        case q"""@HyperRelation class $name (startNode:$startNode, endNode:$endNode) extends ..$superTypes {..$statements}""" =>
+          HyperRelation(name.toString, startNode.toString, endNode.toString, superTypes.map { _.toString } diff List("scala.AnyRef"), statements)
+      }
+    }
+    case class HyperRelation(name: String, startNode: String, endNode: String, superTypes: List[String], statements: List[Tree]) extends NamePattern with SuperTypesPattern with StartEndNodePattern with StatementsPattern {
+      def name_type = TypeName(name)
+      def name_term = TermName(name)
+      def name_label = nameToLabel(name)
+      def name_plural = nameToPlural(name)
+      def name_plural_term = TermName(name_plural)
+      def startNode_type = TypeName(startNode)
+      def startNode_term = TermName(startNode)
+      def endNode_type = TypeName(endNode)
+      def endNode_term = TermName(endNode)
+      def superTypes_type = superTypes.map(TypeName(_))
+      def startRelation = relationName(startNode, name)
+      def startRelation_type = TypeName(startRelation)
+      def startRelation_term = TermName(startRelation)
+      def startRelation_label = nameToLabel(startRelation)
+      def endRelation = relationName(name, endNode)
+      def endRelation_type = TypeName(endRelation)
+      def endRelation_term = TermName(endRelation)
+      def endRelation_label = nameToLabel(endRelation)
+    }
+
+    case class Node(
+                     name: String,
+                     superTypes: List[String],
+                     superTypesFlatStatementsCount: Int,
+                     neighbours: List[(String, String)],
+                     rev_neighbours: List[(String, String)],
+                     statements: List[Tree],
+                     flatStatements: List[Tree]
+                     ) extends NamePattern with SuperTypesPattern {
+      if (superTypes.size > 1)
+        context.abort(NoPosition, "Currently nodes are restricted to only extend one trait")
+
+      def name_type = TypeName(name)
+      def name_term = TermName(name)
+      def name_label = nameToLabel(name)
+      def name_plural = nameToPlural(name)
+      def name_plural_term = TermName(name_plural)
+      def superTypes_type = superTypes.map(TypeName(_))
+      def neighbours_terms = neighbours.map { case (relation, endNode) =>
+        (TermName(nameToPlural(relation)), TypeName(endNode), TermName(endNode))
+      }
+      def rev_neighbours_terms = rev_neighbours.map { case (relation, startNode) =>
+        (TermName(rev(nameToPlural(relation))), TypeName(startNode), TermName(startNode))
+      }
+
+    }
+
+    object NodeTrait {
+
+      import Schema._
+
+      def apply(
+                 nodeTraitPatterns: List[NodeTraitPattern],
+                 selectedNodePatterns: List[NodePattern],
+                 relationPatterns: List[Relation],
+                 hyperRelationPatterns: List[HyperRelation],
+                 nodeTraitPattern: NodeTraitPattern,
+                 hasOwnFactory: Boolean
+                 ) =
+        new NodeTrait(
+          name = nodeTraitPattern.name,
+          superTypes = if(nodeTraitPattern.superTypes.nonEmpty) nodeTraitPattern.superTypes else List("SchemaNode"),
+          subNodes = nodeTraitToNodes(nodeTraitPatterns, selectedNodePatterns, nodeTraitPattern),
+          subRelations = nodeNamesToRelations(nodeTraitToNodes(nodeTraitPatterns, selectedNodePatterns, nodeTraitPattern), relationPatterns).map(_.name),
+          subHyperRelations = nodeNamesToRelations(nodeTraitToNodes(nodeTraitPatterns, selectedNodePatterns, nodeTraitPattern), hyperRelationPatterns).map(_.name),
+          commonHyperNodeTraits = nodeTraitToCommonHyperNodeTraits(nodeTraitPatterns, selectedNodePatterns, hyperRelationPatterns, nodeTraitPattern),
+          statements = nodeTraitPattern.statements,
+          flatStatements = flatSuperStatements(nodeTraitPatterns, nodeTraitPattern),
+          hasOwnFactory = hasOwnFactory
+        )
+    }
+    case class NodeTrait(name: String,
+                         superTypes: List[String],
+                         subNodes: List[String],
+                         subRelations: List[String],
+                         subHyperRelations: List[String],
+                         commonHyperNodeTraits: List[String],
+                         statements: List[Tree],
+                         flatStatements: List[Tree],
+                         hasOwnFactory: Boolean
+                          ) extends NamePattern with SuperTypesPattern {
+      def name_type = TypeName(name)
+      def name_term = TermName(name)
+      def name_label = nameToLabel(name)
+      def name_plural = nameToPlural(name)
+      def name_plural_term = TermName(name_plural)
+      def commonHyperNodeTraits_type = commonHyperNodeTraits.map(TypeName(_))
+      def superTypes_type = superTypes.map(TypeName(_))
+    }
+    case class Group(name: String,
+                     nodes: List[String],
+                     relations: List[String],
+                     hyperRelations: List[String],
+                     nodeTraits: List[NodeTrait]
+                      ) extends NamePattern {
+      def name_type = TypeName(name)
+      def name_term = TermName(name)
+      def name_label = nameToLabel(name)
+      def name_plural = nameToPlural(name)
+      def name_plural_term = TermName(name_plural)
+
+    }
+
+    object Schema {
+      def apply(schema: SchemaPattern): Schema = {
+        import schema._
+        val nodePatterns: List[NodePattern] = schema.statements.collect { case NodePattern(node) => node }
+        val relations: List[Relation] = schema.statements.collect { case RelationPattern(relationPattern) => relationPattern }
+        val hyperRelations: List[HyperRelation] = schema.statements.collect { case HyperRelationPattern(hyperRelationPattern) => hyperRelationPattern }
+        val nodeTraitPatterns: List[NodeTraitPattern] = schema.statements.collect { case NodeTraitPattern(nodeTraitpattern) => nodeTraitpattern }
+        val groupPatterns: List[GroupPattern] = schema.statements.collect { case GroupPattern(groupPattern) => groupPattern }
+
+        val nodes = nodePatterns.map { nodePattern => { import nodePattern._
+          Node(name, superTypes, superTypes.headOption.map( superType => flatSuperStatements(nodeTraitPatterns, nameToPattern(nodeTraitPatterns, superType)).size).getOrElse(0), neighbours(nodePattern, relations), rev_neighbours(nodePattern, relations), statements, flatSuperStatements(nodeTraitPatterns, nodePattern))
+        }}
+        val nodeTraits = nodeTraitPatterns.map(nodeTraitPattern => NodeTrait(nodeTraitPatterns, nodePatterns, relations, hyperRelations, nodeTraitPattern, traitCanHaveOwnFactory(nodePatterns, nodeTraitPatterns, nodeTraitPattern)))
+        val groups = groupPatterns.map(groupPattern =>
+          Group(groupPattern.name,
+            nodes = groupToNodes(groupPatterns, groupPattern),
+            relations = groupToRelations(groupPatterns, relations, groupPattern),
+            hyperRelations = groupToRelations(groupPatterns, hyperRelations, groupPattern),
+            nodeTraits = nodeTraitPatterns.map(nodeTraitPattern =>
+              NodeTrait(nodeTraitPatterns, groupToNodes(groupPatterns, groupPattern).map(nameToPattern(nodePatterns, _)), relations, hyperRelations, nodeTraitPattern, false))
+          )
+        )
+        Schema(name, superTypes, nodes, relations, hyperRelations, nodeTraits, groups, statements)
+      }
+
+
+      def flatSuperStatements[P <: NamePattern with SuperTypesPattern with StatementsPattern](nodeTraitPatterns: List[NodeTraitPattern], nodePattern: P): List[Tree] = {
+        val superTypes: List[StatementsPattern with NamePattern with SuperTypesPattern] = nodePattern.superTypes.map(superType => nameToPattern(nodeTraitPatterns, superType))
+        val flatSuperTypes: List[StatementsPattern] = nodePattern :: patternToFlatSuperTypes(nodeTraitPatterns, nodePattern)
+        flatSuperTypes.flatMap(_.statements)
+      }
+      assertX(flatSuperStatements(
+        List(
+          NodeTraitPattern("superx", List("supery"), List(q"def titlex:String")),
+          NodeTraitPattern("supery", Nil, List(q"def titley:String"))
+        ), NodePattern("a", List("superx"), List(q"def title:String"))).map(_.toString).toSet,
+        List(q"def titlex:String", q"def title:String", q"def titley:String").map(_.toString).toSet)
+      def nameToPattern[P <: NamePattern](patterns: List[P], name: String): P = patterns.find(_.name == name).get
+      def neighbours(nodePattern: NodePattern, relations: List[Relation]): List[(String, String)] = relations.filter(_.startNode == nodePattern.name).map(r => r.name -> r.endNode)
+      def rev_neighbours(nodePattern: NodePattern, relations: List[Relation]): List[(String, String)] = relations.filter(_.endNode == nodePattern.name).map(r => r.name -> r.startNode)
+      def isDeepSuperType[P <: NamePattern with SuperTypesPattern](patterns: List[P], subPattern: P, superPattern: P): Boolean = {
+        subPattern.superTypes match {
+          case Nil        => false
+          case superTypes => superTypes.exists { name =>
+            superPattern.name == name || isDeepSuperType(patterns, nameToPattern(patterns, name), superPattern)
+          }
+        }
+      }
+      assertX(isDeepSuperType(List(
+        NodeTraitPattern("superx", List("supery"), Nil),
+        NodeTraitPattern("supery", List("superz"), Nil),
+        NodeTraitPattern("superz", Nil, Nil)
+      ), subPattern = NodeTraitPattern("superx", List("supery"), Nil),
+        superPattern = NodeTraitPattern("superz", Nil, Nil)), true)
+
+      def patternToSuperTypes[P <: NamePattern with SuperTypesPattern](patterns: List[P], pattern: P): List[P] = pattern.superTypes.map(nameToPattern(patterns, _))
+      def patternToFlatSuperTypes[P <: NamePattern with SuperTypesPattern](patterns: List[P], pattern: P): List[P] = patterns.filter { superPattern =>
+        isDeepSuperType(patterns, pattern, superPattern)
+      }
+      def patternToSubTypes[P <: NamePattern with SuperTypesPattern](patterns: List[P], pattern: P): List[P] = patterns.filter(_.superTypes.contains(pattern.name))
+      def patternToFlatSubTypes[P <: NamePattern with SuperTypesPattern](patterns: List[P], pattern: P): List[P] = patterns.filter { subPattern =>
+        isDeepSuperType(patterns, subPattern, pattern)
+      }
+      def nodeTraitToNodes(nodeTraits: List[NodeTraitPattern], nodePatterns: List[NodePattern], nodeTrait: NodeTraitPattern): List[String] = {
+        patternToFlatSuperTypes(nodeTraits, nodeTrait).flatMap(superTrait => nodePatterns.filter(_.superTypes contains superTrait.name)).distinct.map(_.name)
+      }
+      def nodeNamesToRelations[R <: StartEndNodePattern](nodeNames: List[String], relations: List[R]): List[R] = {
+        relations.filter(relation => nodeNames.contains(relation.startNode) && nodeNames.contains(relation.endNode))
+      }
+      def nodeTraitToCommonHyperNodeTraits(nodeTraitPatterns: List[NodeTraitPattern], nodePatterns: List[NodePattern], hyperRelations: List[HyperRelation], nodeTrait: NodeTraitPattern): List[String] = {
+        val subHyperRelations = nodeNamesToRelations(nodeTraitToNodes(nodeTraitPatterns, nodePatterns, nodeTrait), hyperRelations)
+        val flatSuperTypes: List[List[String]] = subHyperRelations.map(hyperRelation => patternToFlatSuperTypes(nodeTraitPatterns, hyperRelation).map(_.name))
+        if(flatSuperTypes.isEmpty) Nil
+        else if(flatSuperTypes.size == 1) flatSuperTypes.head
+        else flatSuperTypes.reduce(_ intersect _)
+      }
+      def groupToNodes(groupPatterns: List[GroupPattern], groupPattern: GroupPattern): List[String] = patternToFlatSubTypes(groupPatterns, groupPattern).flatMap(_.nodes)
+      def groupToRelations(groupPatterns: List[GroupPattern], relations: List[NamePattern with StartEndNodePattern], groupPattern: GroupPattern): List[String] =
+        nodeNamesToRelations(groupToNodes(groupPatterns, groupPattern), relations).map(_.name)
+
+      def traitCanHaveOwnFactory(nodePatterns: List[NodePattern], nodeTraitPatterns: List[NodeTraitPattern], currentTrait: NodeTraitPattern): Boolean = {
+        val children = patternToFlatSubTypes(nodePatterns ::: nodeTraitPatterns, currentTrait)
+        val statements = children.flatMap(_.statements)
+        statements.find {
+            case q"val $x:Option[$propertyType]" => false
+            case q"var $x:Option[$propertyType]" => false
+            case q"val $x:$propertyType = $y"    => false
+            case q"var $x:$propertyType = $y"    => false
+            case q"val $x:$propertyType"         => true
+            case q"var $x:$propertyType"         => true
+            case _                               => false
+        }.isEmpty
       }
     }
 
+    case class Schema(
+                       name: String,
+                       superTypes: List[String],
+                       nodes: List[Node],
+                       relations: List[Relation],
+                       hyperRelations: List[HyperRelation],
+                       nodeTraits: List[NodeTrait],
+                       groups: List[Group],
+                       statements: List[Tree]
+                       ) extends NamePattern with SuperTypesPattern {
+      def name_type = TypeName(name)
+      def name_term = TermName(name)
+      def name_label = nameToLabel(name)
+      def name_plural = nameToPlural(name)
+      def name_plural_term = TermName(name_plural)
 
+      def superTypes_type = superTypes.map(TypeName(_))
+    }
 
+    context.Expr[Any](annottees.map(_.tree).toList match {
+      case SchemaPatternTree(schemaPattern) :: Nil =>
+        object Code {
 
+          def relationStart(schema: Schema, name: String): String = schema.relations.find(_.name == name).get.startNode
+          def relationEnd(schema: Schema, name: String): String = schema.relations.find(_.name == name).get.endNode
 
-    c.Expr[Any](annottees.map(_.tree).toList match {
-      case GraphSchemaPattern(graphSchemaName, graphSchemaParents, graphSchemaStatements) :: Nil =>
-
-        val nodeTraitNames: List[String] = graphSchemaStatements.collect {
-          case NodeTraitPattern(traitName, _, _) => traitName
-        }
-
-        val nodeTraitToParents: Map[String, List[String]] = graphSchemaStatements.collect {
-          case NodeTraitPattern(traitName, traitParents, _) => traitName -> traitParents
-        }.toMap
-
-        val hyperRelationToParent: Map[String, String] = graphSchemaStatements.collect {
-          case HyperRelationPattern(hyperRelationName, _, _, hyperRelationParent, _) => hyperRelationName -> hyperRelationParent
-        }.toMap
-
-        val nodeTraitsWithoutChildren = nodeTraitToParents.keys.toList diff nodeTraitToParents.values.flatten.toList
-        println("nodeTraitsWithoutChildren: " + nodeTraitsWithoutChildren)
-        val nodeTraitToChildren: Map[String, List[String]] = nodeTraitToParents.toList.flatMap {
-          case (traitName, parents) => parents.map { parent => parent -> traitName }
-        }.groupBy { case (parent, _) => parent }.map {
-          case (parent, parentsToNodeTraits) => parent -> parentsToNodeTraits.map { case (_, traitName) => traitName }
-        } ++ nodeTraitsWithoutChildren.map(_ -> Nil)
-        println("nodeTraitToChildren: " + nodeTraitToChildren)
-
-        val nodeTraitToFlatChildren: Map[String, List[String]] = nodeTraitToChildren.keys.map { traitName =>
-          def flatout(parent: String): List[String] = parent :: nodeTraitToChildren(parent).flatMap(flatout)
-          traitName -> flatout(traitName).distinct
-        }.toMap
-        println("nodeTraitToFlatChildren: " + nodeTraitToFlatChildren)
-
-        val nodeToTrait: Map[String, String] = graphSchemaStatements.collect {
-          case NodePattern(nodeName, parentTrait, _) => nodeName -> parentTrait
-        }.toMap
-
-        val nodeTraitToNodes: Map[String, List[String]] = nodeTraitNames.map(_ -> Nil).toMap ++ nodeToTrait.toList.groupBy { case (_, traitName) => traitName }.mapValues { list => list.map { case (nodeName, _) => nodeName } }
-        println("nodeTraitToNodes: " + nodeTraitToNodes)
-        val nodeTraitToChildNodes: Map[String, List[String]] = nodeTraitToFlatChildren.mapValues {
-          _.flatMap(childNodeTrait => nodeTraitToNodes(childNodeTrait))
-        }
-        println("nodeTraitToChildNodes: " + nodeTraitToChildNodes)
-        val nodeTraitToChildRelations: Map[String, List[String]] = nodeTraitToChildNodes.mapValues { nodeNames =>
-          graphSchemaStatements.collect {
-            case RelationPattern(relationName, startNode, endNode, _) if (nodeNames contains startNode) && (nodeNames contains endNode) => relationName
+          def propertyGetter(name: String, typeName: Tree) =
+            q""" def ${ TermName(name) }:$typeName = node.properties(${ name }).asInstanceOf[${ TypeName(typeName.toString + "PropertyValue") }] """
+          def propertyOptionGetter(name: String, typeName: Tree) =
+            q""" def ${ TermName(name) }:Option[$typeName] = node.properties.get(${ name }).asInstanceOf[Option[${ TypeName(typeName.toString + "PropertyValue") }]].map(propertyValueToPrimitive) """
+          def propertySetter(name: String, typeName: Tree) =
+            q""" def ${ TermName(name + "_$eq") }(newValue:$typeName){ node.properties(${ name }) = newValue} """
+          def propertyOptionSetter(name: String, typeName: Tree) =
+            q""" def ${ TermName(name + "_$eq") }(newValue:Option[$typeName]){ if(newValue.isDefined) node.properties(${ name }) = newValue.get else node.properties -= ${ name } }"""
+          def generatePropertyAccessors(statement: Tree): List[Tree] = statement match {
+            case q"val $propertyName:Option[$propertyType]" => List(propertyOptionGetter(propertyName.toString, propertyType))
+            case q"var $propertyName:Option[$propertyType]" => List(propertyOptionGetter(propertyName.toString, propertyType), propertyOptionSetter(propertyName.toString, propertyType))
+            case q"val $propertyName:$propertyType"         => List(propertyGetter(propertyName.toString, propertyType))
+            case q"var $propertyName:$propertyType"         => List(propertyGetter(propertyName.toString, propertyType), propertySetter(propertyName.toString, propertyType))
+            case somethingElse                              => List(somethingElse)
           }
-        }
-        println("nodeTraitToChildRelations: " + nodeTraitToChildRelations)
-        val nodeTraitToChildHyperRelations: Map[String, List[String]] = nodeTraitToChildNodes.mapValues { nodeNames =>
-          graphSchemaStatements.collect {
-            case HyperRelationPattern(hyperRelationName, startNode, endNode, _, _) if (nodeNames contains startNode) && (nodeNames contains endNode) => hyperRelationName
+
+          def generateIndirectNeighbourAccessors(schema: Schema, statement: Tree): Tree = statement match {
+            case q"""def $chainName = $rel1 --> $rel2""" =>
+              q"""def $chainName:Set[${ TypeName(relationEnd(schema, rel2.toString)) }] = ${ TermName(nameToPlural(rel1.toString)) }.flatMap(_.${ TermName(nameToPlural(rel2.toString)) })"""
+            case q"""def $chainName = $rel1 <-- $rel2""" =>
+              q"""def $chainName:Set[${ TypeName(relationStart(schema, rel1.toString)) }] = ${ TermName(rev(nameToPlural(rel2.toString))) }.flatMap(_.${ TermName(rev(nameToPlural(rel1.toString))) })"""
+            case otherStatement                          => otherStatement
           }
-        }
-        println("nodeTraitToChildHyperRelations: " + nodeTraitToChildHyperRelations)
 
-        val nodeTraitToCommonHyperNodeTraits = nodeTraitToChildHyperRelations.mapValues { childHyperRelations =>
-          childHyperRelations.map(hyperRelationName => List(hyperRelationToParent(hyperRelationName))).reduce(_ intersect _)
-        }
-        println("nodeTraitToCommonHyperNodeTraits: " + nodeTraitToCommonHyperNodeTraits)
-
-        val groupToNodes: Map[String, List[String]] = graphSchemaStatements.collect {
-          case GroupPattern(groupName, _, nodes) => groupName -> nodes
-        }.toMap
-
-        val groupToParents: Map[String, List[String]] = graphSchemaStatements.collect {
-          case GroupPattern(groupName, groupParents, _) => groupName -> groupParents
-        }.toMap
-        println("groupToParents: " + groupToParents)
-
-        val groupsWithoutChildren = groupToParents.keys.toList diff groupToParents.values.flatten.toList
-        val groupToChildren: Map[String, List[String]] = groupToParents.toList.flatMap {
-          case (groupName, parents) => parents.map { parent => parent -> groupName }
-        }.groupBy { case (parent, _) => parent }.map {
-          case (parent, parentsToGroups) => parent -> parentsToGroups.map { case (_, groupName) => groupName }
-        } ++ groupsWithoutChildren.map(_ -> Nil)
-        println("groupToChildren: " + groupToChildren)
-
-        //        val groupToFlatParents: Map[String, List[String]] = groupToParents.keys.map { groupName =>
-        //          def flatout(child: String): List[String] = child :: groupToParents(child).flatMap(flatout)
-        //          groupName -> flatout(groupName).distinct
-        //        }.toMap
-        //        println("groupToFlatParents: " + groupToFlatParents)
-
-        val groupToFlatChildren: Map[String, List[String]] = groupToChildren.keys.map { groupName =>
-          def flatout(parent: String): List[String] = parent :: groupToChildren(parent).flatMap(flatout)
-          groupName -> flatout(groupName).distinct
-        }.toMap
-        println("groupToFlatChildren: " + groupToFlatChildren)
-
-        val groupToChildNodes: Map[String, List[String]] = groupToFlatChildren.mapValues {
-          _.flatMap(childGroup => groupToNodes(childGroup))
-        }
-        println("groupToChildNodes: " + groupToChildNodes)
-
-        val groupToChildRelations: Map[String, List[String]] = groupToChildNodes.mapValues { nodeNames =>
-          graphSchemaStatements.collect {
-            case RelationPattern(relationName, startNode, endNode, _) if (nodeNames contains startNode) && (nodeNames contains endNode) => relationName
-          }
-        }
-        println("groupToChildRelations: " + groupToChildRelations)
-
-        val groupToChildHyperRelations: Map[String, List[String]] = groupToChildNodes.mapValues { nodeNames =>
-          graphSchemaStatements.collect {
-            case HyperRelationPattern(hyperRelationName, startNode, endNode, _, _) if (nodeNames contains startNode) && (nodeNames contains endNode) => hyperRelationName
-          }
-        }
-        println("groupToChildHyperRelations: " + groupToChildHyperRelations)
-
-        def nodeTraitToFactory(name: String) = name + "Factory"
-        def nameToPlural(name: String) = {
-          val lower = name.take(1).toLowerCase + name.drop(1)
-          val suffix = if(lower.endsWith("s")) "" else "s"
-          lower + suffix;
-        }
-        def nameToLabel(name: String) = name.toUpperCase
-        def relationName(start: String, end: String) = s"${ start }To${ end }"
-
-        val relationStarts: Map[String, String] = graphSchemaStatements.collect { case RelationPattern(className, startNode, _, _) => className -> startNode }.toMap
-        val relationEnds: Map[String, String] = graphSchemaStatements.collect { case RelationPattern(className, _, endNode, _) => className -> endNode }.toMap
-
-        val nodeTraits: List[Tree] = graphSchemaStatements.collect {
-          case NodeTraitPattern(traitName, traitParents, traitStatements) =>
-
-            def propertyGetter(name: String, typeName: Tree) =
-              q""" def ${ TermName(name) }:$typeName = node.properties(${ name }).asInstanceOf[${ TypeName(typeName.toString + "PropertyValue") }] """
-            def propertyOptionGetter(name: String, typeName: Tree) =
-              q""" def ${ TermName(name) }:Option[$typeName] = node.properties.get(${ name }).asInstanceOf[Option[${ TypeName(typeName.toString + "PropertyValue") }]].map(propertyValueToPrimitive) """
-            def propertySetter(name: String, typeName: Tree) =
-              q""" def ${ TermName(name + "_$eq") }(newValue:$typeName){ node.properties(${ name }) = newValue} """
-            def propertyOptionSetter(name: String, typeName: Tree) =
-              q""" def ${ TermName(name + "_$eq") }(newValue:Option[$typeName]){ if(newValue.isDefined) node.properties(${ name }) = newValue.get else node.properties -= ${ name } }"""
-            def generatePropertyAccessors(statement: Tree): List[Tree] = statement match {
-              case q"val $propertyName:Option[$propertyType]" => List(propertyOptionGetter(propertyName.toString, propertyType))
-              case q"var $propertyName:Option[$propertyType]" => List(propertyOptionGetter(propertyName.toString, propertyType), propertyOptionSetter(propertyName.toString, propertyType))
-              case q"val $propertyName:$propertyType"         => List(propertyGetter(propertyName.toString, propertyType))
-              case q"var $propertyName:$propertyType"         => List(propertyGetter(propertyName.toString, propertyType), propertySetter(propertyName.toString, propertyType))
-              case somethingElse                              => List(somethingElse)
+          def createLocalFactoryMethod(flatStatements: List[Tree], returnName: String) = {
+            val localNonOptionalParamsWithoutDefault = flatStatements.flatMap {
+              case statement@(q"val $x:Option[$propertyType]") => None
+              case statement@(q"var $x:Option[$propertyType]") => None
+              case statement@(q"val $x:$propertyType")         => Some(statement)
+              case statement@(q"var $x:$propertyType")         => Some(statement)
+              case _                                   => None
+            }
+            val localParamsWithDefault = flatStatements.collect {
+              case statement@(q"val $x: $y = $default") if !default.isEmpty => statement
+              case statement@(q"var $x: $y = $default") if !default.isEmpty => statement
+            }
+            val localOptionalParamsWithoutDefault = flatStatements.collect {
+              case statement@(q"val $propertyName:Option[$propertyType]") => q"val $propertyName:Option[$propertyType] = None"
+              case statement@(q"var $propertyName:Option[$propertyType]") => q"val $propertyName:Option[$propertyType] = None"
             }
 
-            val traitBody = traitStatements.flatMap(generatePropertyAccessors(_)).flatMap {
-              case q"def factory:$factoryType" => Nil
-              case somethingElse               => List(somethingElse)
+            val localParams = List(localNonOptionalParamsWithoutDefault ::: localParamsWithDefault ::: localOptionalParamsWithoutDefault)
+
+            val properties = localNonOptionalParamsWithoutDefault.map {
+              case q"val $propertyName:$propertyType"      => propertyName
+              case q"var $propertyName:$propertyType"      => propertyName
+              case q"val $propertyName:$propertyType = $x" => propertyName
+              case q"var $propertyName:$propertyType = $x" => propertyName
             }
-            val traitParentsWithSchemaNode = (if(traitParents.nonEmpty && traitParents != List("scala.AnyRef")) traitParents else List("SchemaNode")).map(TypeName(_))
+            val optionalProperties = flatStatements.collect {
+              case q"val $propertyName:Option[$x] = $y" => propertyName
+              case q"var $propertyName:Option[$x] = $y" => propertyName
+            }
 
-            q""" trait ${ TypeName(traitName) } extends ..$traitParentsWithSchemaNode { ..$traitBody } """
-        }
+            val propertyAssignments = properties.map { propertyName => q"schemaNode.node.properties(${ propertyName.toString }) = $propertyName" }
+            val optionalPropertyAssignments = optionalProperties.map { propertyName => q"if($propertyName.isDefined) schemaNode.node.properties(${ propertyName.toString }) = $propertyName.get" }
 
-        val relationFactories: List[Tree] = graphSchemaStatements.collect {
-          case RelationPattern(className, startNode, endNode, _) =>
+            val returnType = TypeName(returnName)
+            if(localParams.head.nonEmpty) q"""
+              def local (...$localParams): $returnType = {
+              val schemaNode = super.local
+              ..$propertyAssignments
+              ..$optionalPropertyAssignments
+              schemaNode
+              }"""
+            else q""
+          }
+
+          def nodeTraitFactories(schema: Schema): List[Tree] = schema.nodeTraits.filter(_.hasOwnFactory).map { nodeTrait => import nodeTrait._
+            val localWithParams = createLocalFactoryMethod(flatStatements, "T")
+            val factoryName = TypeName(traitFactoryName(name))
             q"""
-           object ${ TermName(className) } extends SchemaRelationFactory[${ TypeName(startNode) }, ${ TypeName(className) }, ${ TypeName(endNode) }] {
-               def startNodeFactory = ${ TermName(startNode) }
-               def endNodeFactory = ${ TermName(endNode) }
-               def relationType = RelationType(${ nameToLabel(className) })
-               def create(relation: Relation) = ${ TermName(className) }(
-                 ${ TermName(startNode) }.create(relation.startNode),
-                 relation,
-                 ${ TermName(endNode) }.create(relation.endNode))
+           trait $factoryName[T <: SchemaNode] extends SchemaNodeFactory[T] {
+             $localWithParams
            }
            """
-        }
+          }
 
-        val relationClasses: List[Tree] = graphSchemaStatements.collect {
-          case RelationPattern(className, startNode, endNode, relationBody) =>
+          def nodeFactories(schema: Schema): List[Tree] = schema.nodes.map { node => import node._
+            val localWithParams = if (superTypesFlatStatementsCount != flatStatements.size)
+              createLocalFactoryMethod(flatStatements, name)
+            else
+              q""
+
+            val superFactory = superTypes.headOption match {
+              case Some(superType) => TypeName(traitFactoryName(superType))
+              case None            => TypeName("SchemaNodeFactory")
+            }
             q"""
-           case class ${ TypeName(className) }(startNode: ${ TypeName(startNode) }, relation: Relation, endNode: ${ TypeName(endNode) })
-             extends SchemaRelation[${ TypeName(startNode) }, ${ TypeName(endNode) }] {
-             ..$relationBody
-             }
-           """
-        }
 
-
-        val hyperRelationFactories: List[Tree] = graphSchemaStatements.collect {
-          case HyperRelationPattern(className, startNode, endNode, hyperRelationParent, _) =>
-            val startRelation = relationName(startNode, className)
-            val endRelation = relationName(className, endNode)
-
-            q"""
-           object ${ TermName(className) } extends SchemaHyperRelationFactory[${ TypeName(startNode) }, ${ TypeName(startRelation) }, ${ TypeName(className) }, ${ TypeName(endRelation) }, ${ TypeName(endNode) }]
-            with ${ TypeName(nodeTraitToFactory(hyperRelationParent)) }[${ TypeName(className) }] {
-               override def middleNodeLocal = super[${ TypeName(nodeTraitToFactory(hyperRelationParent)) }].local
-
-               override def label = Label(${ nameToLabel(className) })
-               override def startRelationType = RelationType(${ nameToLabel(startRelation) })
-               override def endRelationType = RelationType(${ nameToLabel(endRelation) })
-
-               override def startNodeFactory = ${ TermName(startNode) }
-               override def factory = ${ TermName(className) }
-               override def endNodeFactory = ${ TermName(endNode) }
-
-               override def create(node: Node) = new ${ TypeName(className) }(node)
-               override def startRelationCreate(relation: Relation) = ${ TermName(startRelation) }(startNodeFactory.create(relation.startNode), relation, factory.create(relation.endNode))
-               override def endRelationCreate(relation: Relation) = ${ TermName(endRelation) }(factory.create(relation.startNode), relation, endNodeFactory.create(relation.endNode))
+           object $name_term extends $superFactory[$name_type] {
+             def create(node: Node) = new $name_type(node)
+             val label = Label($name_label)
+             $localWithParams
            }
            """
-        }
+          }
 
-        val hyperRelationClasses: List[Tree] = graphSchemaStatements.collect {
-          case HyperRelationPattern(hyperRelation, startNode, endNode, hyperRelationParent, hyperRelationBody) =>
-            val startRelation = relationName(startNode, hyperRelation)
-            val endRelation = relationName(hyperRelation, endNode)
-            List( q"""
-           case class ${ TypeName(hyperRelation) }(node:Node)
-              extends SchemaHyperRelation[${ TypeName(startNode) }, ${ TypeName(startRelation) }, ${ TypeName(hyperRelation) }, ${ TypeName(endRelation) }, ${ TypeName(endNode) }]
-              with ${ TypeName(hyperRelationParent) } {
-             ..$hyperRelationBody
-           }
-           """, q"""
-           case class ${ TypeName(startRelation) }(startNode: ${ TypeName(startNode) }, relation: Relation, endNode: ${ TypeName(hyperRelation) })
-             extends SchemaRelation[${ TypeName(startNode) }, ${ TypeName(hyperRelation) }]
-           """, q"""
-           case class ${ TypeName(endRelation) }(startNode: ${ TypeName(hyperRelation) }, relation: Relation, endNode: ${ TypeName(endNode) })
-             extends SchemaRelation[${ TypeName(hyperRelation) }, ${ TypeName(endNode) }]
-           """)
-        }.flatten
-
-        val nodeFactories: List[Tree] = graphSchemaStatements.collect {
-          case NodePattern(className, parentTrait, nodeStatements) =>
-            q"""
-           object ${ TermName(className) } extends ${ TypeName(nodeTraitToFactory(parentTrait)) }[${ TypeName(className) }] { def create(node: Node) = new ${ TypeName(className) }(node)
-               val label = Label(${ nameToLabel(className) })
-           }
-           """
-        }
-        val nodeClasses: List[Tree] = graphSchemaStatements.collect {
-          // TODO: acessors for traits
-          // TODO: create subgroups
-          case NodePattern(className, parentTrait, nodeStatements) =>
-            def rev(s: String) = "rev_" + s
-            val directNeighbours = graphSchemaStatements.collect {
-              case RelationPattern(relationName, `className`, endNode, _) =>
-                q"""def ${ TermName(nameToPlural(relationName)) }:Set[${ TypeName(endNode) }] = successorsAs(${ TermName(endNode) })"""
-            }
-            val directRevNeighbours = graphSchemaStatements.collect {
-              case RelationPattern(relationName, startNode, `className`, _) =>
-                q"""def ${ TermName(rev(nameToPlural(relationName))) }:Set[${ TypeName(startNode) }] = predecessorsAs(${ TermName(startNode) })"""
+          def nodeClasses(schema: Schema): List[Tree] = schema.nodes.map { node => import node._
+            val directNeighbours = node.neighbours_terms.map {
+              case (relationPlural, endNode_type, endNode_term) =>
+                q"""def $relationPlural:Set[$endNode_type] = successorsAs($endNode_term)"""
             }
 
-            val nodeBody = nodeStatements.map {
-              case q"""def $chainName = $rel1 --> $rel2""" =>
-                q"""def $chainName:Set[${ TypeName(relationEnds(rel2.toString)) }] = ${ TermName(nameToPlural(rel1.toString)) }.flatMap(_.${ TermName(nameToPlural(rel2.toString)) })"""
-              case q"""def $chainName = $rel1 <-- $rel2""" =>
-                q"""def $chainName:Set[${ TypeName(relationStarts(rel1.toString)) }] = ${ TermName(rev(nameToPlural(rel2.toString))) }.flatMap(_.${ TermName(rev(nameToPlural(rel1.toString))) })"""
-              case otherStatement                          => otherStatement
+            val directRevNeighbours = node.rev_neighbours_terms.map {
+              case (relationPlural, startNode_type, startNode_term) =>
+                q"""def $relationPlural:Set[$startNode_type] = predecessorsAs($startNode_term)"""
             }
+
+            val nodeBody = statements.map(generateIndirectNeighbourAccessors(schema, _)).flatMap(generatePropertyAccessors(_))
+            val superTyesWithDefault = if(superTypes.isEmpty) List(TypeName("SchemaNode")) else superTypes_type
 
             q"""
-           case class ${ TypeName(className) }(node: Node) extends ${ TypeName(parentTrait) } {
+           case class $name_type(node: Node) extends ..$superTyesWithDefault {
              ..$directNeighbours
              ..$directRevNeighbours
              ..$nodeBody
            }
            """
-        }
+          }
 
-        val groupFactories: List[Tree] = graphSchemaStatements.collect {
-          case GroupPattern(groupName, _, _) =>
-            q""" object ${ TermName(groupName) } {def empty = new ${ TypeName(groupName) }(Graph.empty) } """
-        }
+          def relationFactories(schema: Schema): List[Tree] = schema.relations.map { relation => import relation._
+            q"""
+           object $name_term extends SchemaRelationFactory[$startNode_type, $name_type, $endNode_type] {
+               def startNodeFactory = $startNode_term
+               def endNodeFactory = $endNode_term
+               def relationType = RelationType($name_label)
+               def create(relation: Relation) = $name_term(
+                 $startNode_term.create(relation.startNode),
+                 relation,
+                 $endNode_term.create(relation.endNode))
+           }
+           """
+          }
 
-        val groupClasses: List[Tree] = graphSchemaStatements.collect {
-          case GroupPattern(groupName, schemaNodeTraits, _) =>
-            val nodes: List[String] = graphSchemaStatements.collect { case NodePattern(nodeName, _, _) if groupToChildNodes(groupName) contains nodeName => nodeName }
-            val relations: List[String] = graphSchemaStatements.collect { case RelationPattern(relationName, _, _, _) if groupToChildRelations(groupName) contains relationName => relationName }
-            val hyperRelations: List[String] = graphSchemaStatements.collect { case HyperRelationPattern(hyperRelationName, _, _, _, _) if groupToChildHyperRelations(groupName) contains hyperRelationName => hyperRelationName }
+          def relationClasses(schema: Schema): List[Tree] = schema.relations.map { relation => import relation._
+            q"""
+           case class $name_type(startNode: $startNode_type, relation: Relation, endNode: $endNode_type)
+             extends SchemaRelation[$startNode_type, $endNode_type] {
+             ..$statements
+           }
+           """
+          }
+
+
+          def hyperRelationFactories(schema: Schema): List[Tree] = schema.hyperRelations.map { hyperRelation => import hyperRelation._
+            //TODO: local method based on properties (like NodeFactory)
+            q"""
+           object $name_term extends SchemaHyperRelationFactory[$startNode_type, $startRelation_type, $name_type, $endRelation_type, $endNode_type]
+             with SchemaAbstractRelationFactory[$startNode_type, $name_type, $endNode_type] {
+
+             override def label = Label($name_label)
+             override def startRelationType = RelationType($startRelation_label)
+             override def endRelationType = RelationType($endRelation_label)
+
+             override def startNodeFactory = $startNode_term
+             override def factory = $name_term
+             override def endNodeFactory = $endNode_term
+
+             override def create(node: Node) = new $name_type(node)
+             override def startRelationCreate(relation: Relation) = $startRelation_term(startNodeFactory.create(relation.startNode), relation, factory.create(relation.endNode))
+             override def endRelationCreate(relation: Relation) = $endRelation_term(factory.create(relation.startNode), relation, endNodeFactory.create(relation.endNode))
+           }
+           """
+          }
+
+          def hyperRelationClasses(schema: Schema): List[Tree] = schema.hyperRelations.map { hyperRelation => import hyperRelation._
+            //TODO: generate indirect neighbour-accessors based on hyperrelations
+            //TODO: property accessors
+            List( q"""
+           case class $name_type(node:Node)
+              extends SchemaHyperRelation[$startNode_type, $startRelation_type, $name_type, $endRelation_type, $endNode_type]
+              with ..$superTypes_type {
+             ..$statements
+           }
+           """, q"""
+           case class $startRelation_type(startNode: $startNode_type, relation: Relation, endNode: $name_type)
+             extends SchemaRelation[$startNode_type, $name_type]
+           """, q"""
+           case class $endRelation_type(startNode: $name_type, relation: Relation, endNode: $endNode_type)
+             extends SchemaRelation[$name_type, $endNode_type]
+           """)
+          }.flatten
+
+          def nodeSuperTraits(schema: Schema): List[Tree] = schema.nodeTraits.map { nodeTrait => import nodeTrait._
+            val traitBody = statements.flatMap(generatePropertyAccessors(_))
+            q""" trait $name_type extends ..$superTypes_type { ..$traitBody } """
+          }
+
+          def groupFactories(schema: Schema): List[Tree] = schema.groups.map { group => import group._
+            q""" object $name_term {def empty = new $name_type(Graph.empty) } """
+          }
+
+          def groupClasses(schema: Schema): List[Tree] = schema.groups.map { group => import group._
+            // TODO: create subgroups
 
             def itemSets(nameAs: String, names: List[String]) = names.map { name => q""" def ${ TermName(nameToPlural(name)) }: Set[${ TypeName(name) }] = ${ TermName(nameAs) }(${ TermName(name) }) """ }
+            def allOf(items: List[String]) = items.foldLeft[Tree](q"Set.empty") { case (q"$all", name) => q"$all ++ ${ TermName(nameToPlural(name)) }" }
+
             val nodeSets = itemSets("nodesAs", nodes)
             val relationSets = itemSets("relationsAs", relations)
             val hyperRelationSets = itemSets("hyperRelationsAs", hyperRelations)
 
-            def allOf(items: List[String]) = items.foldLeft[Tree](q"Set.empty") { case (q"$all", name) => q"$all ++ ${ TermName(nameToPlural(name)) }" }
-            val allNodes = allOf(nodes)
-            val allRelations = allOf(relations)
-            val allHyperRelations = allOf(hyperRelations)
-
-            val nodeTraitSets = nodeTraitNames.map { traitName => q"def ${ TermName(nameToPlural(traitName)) }:Set[${ TypeName(traitName) }] = ${ allOf(nodeTraitToChildNodes(traitName)) }" }
-            val relationTraitSets = nodeTraitNames.map { traitName => q"def ${ TermName(nameToPlural(traitName + "Relation")) }:Set[_ <: SchemaRelation[${ TypeName(traitName) }, ${ TypeName(traitName) }]] = ${ allOf(nodeTraitToChildRelations(traitName)) }" }
-            val hyperRelationTraitSets = nodeTraitNames.map { traitName =>
-              val traitType = TypeName(traitName)
-              q"""def ${ TermName(nameToPlural(traitName + "HyperRelation")) } :Set[SchemaHyperRelation[$traitType, _ <: SchemaRelation[$traitType, _], _ <: SchemaHyperRelation[$traitType, _, _, _, $traitType] with ..${ nodeTraitToCommonHyperNodeTraits(traitName).map(TypeName(_)) }, _ <: SchemaRelation[_, $traitType], $traitType] with ..${ nodeTraitToCommonHyperNodeTraits(traitName).map(TypeName(_)) }]
-              = ${ allOf(nodeTraitToChildHyperRelations(traitName)) }"""
+            val nodeTraitSets = nodeTraits.map { nodeTrait => import nodeTrait._
+              q"def $name_plural_term:Set[$name_type] = ${ allOf(subNodes) }"
+            }
+            val relationTraitSets = nodeTraits.map { nodeTrait => import nodeTrait._
+              q"def ${ TermName(nameToPlural(name + "Relation")) }:Set[_ <: SchemaRelation[$name_type, $name_type]] = ${ allOf(subRelations) }"
+            }
+            val hyperRelationTraitSets = nodeTraits.map { nodeTrait => import nodeTrait._
+              q"""def ${ TermName(nameToPlural(name + "HyperRelation")) } :Set[SchemaHyperRelation[
+                  $name_type,
+                  _ <: SchemaRelation[$name_type, _],
+                  _ <: SchemaHyperRelation[$name_type, _, _, _, $name_type] with ..$commonHyperNodeTraits_type,
+                  _ <: SchemaRelation[_, $name_type],
+                  $name_type]
+                  with ..$commonHyperNodeTraits_type]
+              = ${ allOf(subHyperRelations) }"""
             }
 
             q"""
-           case class ${ TypeName(groupName) }(graph: Graph) extends SchemaGraph {
+           case class $name_type(graph: Graph) extends SchemaGraph {
              ..$nodeSets
              ..$relationSets
              ..$hyperRelationSets
@@ -375,46 +611,55 @@ object GraphSchemaMacro {
              ..$relationTraitSets
              ..$hyperRelationTraitSets
 
-             def nodes: Set[SchemaNode] = $allNodes
-             def relations: Set[_ <: SchemaRelation[_,_]] = $allRelations
-             def hyperRelations: Set[_ <: SchemaHyperRelation[_,_,_,_,_]] = $allHyperRelations
+             def nodes: Set[SchemaNode] = ${ allOf(nodes) }
+             def relations: Set[_ <: SchemaRelation[_,_]] = ${ allOf(relations) }
+             def hyperRelations: Set[_ <: SchemaHyperRelation[_,_,_,_,_]] = ${ allOf(hyperRelations) }
            }
            """
+          }
+
+          def otherStatements(schema: Schema): List[Tree] = schema.statements.filterNot { statement =>
+            NodePattern.unapply(statement).isDefined ||
+              RelationPattern.unapply(statement).isDefined ||
+              HyperRelationPattern.unapply(statement).isDefined ||
+              NodeTraitPattern.unapply(statement).isDefined ||
+              GroupPattern.unapply(statement).isDefined
+          }
+
+
+          def schema(schema: Schema): Tree = {
+            import schema.{name_term, superTypes_type}
+            q"""
+           object $name_term extends ..$superTypes_type {
+             import renesca.graph.{Graph,Label,RelationType,Node,Relation}
+             import renesca.parameter.StringPropertyValue
+             import renesca.parameter.implicits._
+
+             ..${ nodeTraitFactories(schema) }
+             ..${ nodeFactories(schema) }
+             ..${ nodeClasses(schema) }
+
+             ..${ relationFactories(schema) }
+             ..${ relationClasses(schema) }
+
+             ..${ hyperRelationFactories(schema) }
+             ..${ hyperRelationClasses(schema) }
+
+             ..${ nodeSuperTraits(schema) }
+             ..${ groupFactories(schema) }
+             ..${ groupClasses(schema) }
+
+             ..${ otherStatements(schema) }
+           }
+           """
+          }
         }
 
-        val otherStatements = graphSchemaStatements.flatMap {
-          case NodeTraitPattern(_, _, _)
-               | RelationPattern(_, _, _, _)
-               | NodePattern(_, _, _)
-               | GroupPattern(_, _, _)
-               | HyperRelationPattern(_, _, _, _, _) => None
-          case other                                 => Some(other)
-        }
-
-
-        q"""
-       object ${ TermName(graphSchemaName) } extends ..${ graphSchemaParents.map(TypeName(_)) } {
-         import renesca.graph.{Graph,Label,RelationType,Node,Relation}
-         import renesca.parameter.StringPropertyValue
-         import renesca.parameter.implicits._
-
-         ..$nodeTraits
-         ..$nodeFactories
-         ..$nodeClasses
-
-         ..$relationFactories
-         ..$relationClasses
-
-         ..$hyperRelationFactories
-         ..$hyperRelationClasses
-
-         ..$groupFactories
-         ..$groupClasses
-
-         ..$otherStatements
-       }
-       """
-    }
-    )
+        Schema
+        Helpers.crashOnAsserted()
+        val code = Code.schema(Schema(schemaPattern))
+        code
+    })
   }
 }
+
