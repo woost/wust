@@ -1,4 +1,4 @@
-<div class="show_discourse_node_list">
+<div class="discourse_node_list">
     <h2>{{nodeModel.title}}:</h2>
     <div ui-on-Drop="nodeModel.add($data)" ng-class='nodeModel.style.listCss' drop-channel="{{nodeModel.info.label}}">
         <div ng-repeat='node in nodeModel.list | orderBy:"title"'>
@@ -15,7 +15,7 @@
     </div>
 </script>
 
-<script type="text/ng-template" id="show_discourse_idea_list.html">
+<script type="text/ng-template" id="show_extended_discourse_node_list.html">
     <div class="panel panel-default" ng-class="nodeModel.info.css">
         <a ui-sref="{{nodeModel.info.state}}({id: node.id})">
             <div class="panel-heading">

@@ -60,8 +60,11 @@ angular.module("wust.discourse").service("DiscourseNodeList", function(Discourse
     }
 
     class NodeList {
-        constructor(service, connService, nodeInfo, title, styleInfo) {
-            this.model = new NodeModel(service, connService, nodeInfo, title, styleInfo);
+        constructor(service, connService, nodeInfo, title, templateUrl) {
+            this.model = new NodeModel(service, connService, nodeInfo, title, {
+                templateUrl,
+                listCss: `${nodeInfo.css}_list`
+            });
         }
 
         addNode(elem) {
@@ -81,46 +84,31 @@ angular.module("wust.discourse").service("DiscourseNodeList", function(Discourse
 
     class GoalNodeList extends NodeList {
         constructor(connService, title = "Goals") {
-            super(Goal, connService, DiscourseNode.Goal, title, {
-                templateUrl: "show_discourse_node_list.html",
-                listCss: "discourse_goal_list",
-            });
+            super(Goal, connService, DiscourseNode.Goal, title, "show_discourse_node_list.html");
         }
     }
 
     class ProblemNodeList extends NodeList {
         constructor(connService, title = "Problems") {
-            super(Problem, connService, DiscourseNode.Problem, title, {
-                templateUrl: "show_discourse_node_list.html",
-                listCss: "discourse_problem_list",
-            });
+            super(Problem, connService, DiscourseNode.Problem, title, "show_discourse_node_list.html");
         }
     }
 
     class IdeaNodeList extends NodeList {
         constructor(connService, title = "Ideas") {
-            super(Idea, connService, DiscourseNode.Idea, title, {
-                templateUrl: "show_discourse_idea_list.html",
-                listCss: "discourse_idea_list",
-            });
+            super(Idea, connService, DiscourseNode.Idea, title, "show_extended_discourse_node_list.html");
         }
     }
 
     class ProArgumentList extends NodeList {
         constructor(connService, title = "ProArguments") {
-            super(ProArgument, connService, DiscourseNode.ProArgument, title, {
-                templateUrl: "show_discourse_node_list.html",
-                listCss: "discourse_proargument_list",
-            });
+            super(ProArgument, connService, DiscourseNode.ProArgument, title, "show_discourse_node_list.html");
         }
     }
 
     class ConArgumentList extends NodeList {
         constructor(connService, title = "ProArguments") {
-            super(ConArgument, connService, DiscourseNode.ProArgument, title, {
-                templateUrl: "show_discourse_node_list.html",
-                listCss: "discourse_conargument_list",
-            });
+            super(ConArgument, connService, DiscourseNode.ProArgument, title, "show_discourse_node_list.html");
         }
     }
 

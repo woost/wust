@@ -1,6 +1,6 @@
 @import "compass/css3/flexbox";
 
-.show_discourse_node_list {
+.discourse_node_list {
     .discourse_idea_list {
         padding: 6px;
         @include display-flex(flex);
@@ -42,9 +42,6 @@
         &.on-drag-enter {
             background-color: $discourse_conargument_color;
         }
-    }
-    .discourse_node_search_form {
-        padding: 3px;
     }
 
     .on-drag-hover:after {
