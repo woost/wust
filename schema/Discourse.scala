@@ -9,7 +9,7 @@ object WustSchema {
 
 
   @Node trait UuidNode {
-    val uuid: String
+    val uuid: String = java.util.UUID.randomUUID.toString
   }
   @Node trait ContentNode extends UuidNode {
     var title: String
@@ -35,18 +35,4 @@ object WustSchema {
   @Relation class OpposesSolution(startNode: ConArgument, endNode: Solves)
   @Relation class SupportsAchievement(startNode: ProArgument, endNode: Achieves)
   @Relation class OpposesAchievement(startNode: ConArgument, endNode: Achieves)
-
-
-  trait UuidNodeFactory[T <: UuidNode] extends SchemaNodeFactory[T] {
-    override def local = UUID.applyTo(super.local)
-  }
-
-  trait ContentNodeFactory[T <: ContentNode] extends UuidNodeFactory[T] {
-    def local(title: String): T = {
-      val node = super.local
-      node.title = title
-      node
-    }
-  }
-
 }
