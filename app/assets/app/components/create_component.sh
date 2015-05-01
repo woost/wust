@@ -41,7 +41,7 @@ controller_def=$(
 cat << EOF
 angular.module("wust.components").controller("$controller_name", function(\$scope) {
     
-})
+});
 EOF
 )
 echo "$controller_def" > $controller_file
