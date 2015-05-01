@@ -1,6 +1,7 @@
 angular.module("wust.discourse").provider("DiscourseNode", function() {
     let discourseMap = {};
     this.setLabel = _.wrap("label", set);
+    this.setCss = _.wrap("css", set);
     this.setState = _.wrap("state", set);
     this.$get = get;
 
@@ -17,9 +18,7 @@ angular.module("wust.discourse").provider("DiscourseNode", function() {
     }
 
     function set(property, name, value) {
-        discourseMap[name] = discourseMap[name] || {
-            css: `discourse_${name.toLowerCase()}`
-        };
+        discourseMap[name] = discourseMap[name] || {};
 
         discourseMap[name][property] = value;
         return value;
