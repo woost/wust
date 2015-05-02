@@ -69,20 +69,24 @@ trait NestedNodes[NodeType <: ContentNode] extends NestedResourceRouter with Con
       case StartHyperConnectSchema(outerFactory,connectSchemas) => connectSchemas(nestedPath) match {
         case StartConnectSchema(factory) => {
           val (start, end) = startHyperConnectNodes(uuid, outerFactory, otherUuid, factory, connect.uuid)
+          Broadcaster.broadcastHyperConnect(uuid, outerFactory, otherUuid, factory, end)
           Ok(Json.toJson(end))
         }
         case EndConnectSchema(factory) => {
           val (start, end) = endHyperConnectNodes(connect.uuid, factory, uuid, outerFactory, otherUuid)
+          Broadcaster.broadcastHyperConnect(uuid, outerFactory, otherUuid, factory, start)
           Ok(Json.toJson(start))
         }
       }
       case EndHyperConnectSchema(outerFactory,connectSchemas) => connectSchemas(nestedPath) match {
         case StartConnectSchema(factory) => {
           val (start, end) = startHyperConnectNodes(otherUuid, outerFactory, uuid, factory, connect.uuid)
+          Broadcaster.broadcastHyperConnect(otherUuid, outerFactory, uuid, factory, end)
           Ok(Json.toJson(end))
         }
         case EndConnectSchema(factory) => {
           val (start, end) = endHyperConnectNodes(connect.uuid, factory, otherUuid, outerFactory, uuid)
+          Broadcaster.broadcastHyperConnect(otherUuid, outerFactory, uuid, factory, start)
           Ok(Json.toJson(start))
         }
       }
@@ -110,20 +114,24 @@ trait NestedNodes[NodeType <: ContentNode] extends NestedResourceRouter with Con
       case StartHyperConnectSchema(outerFactory,connectSchemas) => connectSchemas(nestedPath) match {
         case StartConnectSchema(factory) => {
           startHyperDisconnectNodes(uuid, outerFactory, otherUuid, factory, nestedUuid)
+          Broadcaster.broadcastHyperDisconnect(uuid, outerFactory, otherUuid, factory, nestedUuid)
           Ok(JsObject(Seq()))
         }
         case EndConnectSchema(factory) => {
           endHyperDisconnectNodes(nestedUuid, factory, uuid, outerFactory, otherUuid)
+          Broadcaster.broadcastHyperDisconnect(uuid, outerFactory, otherUuid, factory, nestedUuid)
           Ok(JsObject(Seq()))
         }
       }
       case EndHyperConnectSchema(outerFactory,connectSchemas) => connectSchemas(nestedPath) match {
         case StartConnectSchema(factory) => {
           startHyperDisconnectNodes(otherUuid, outerFactory, uuid, factory, nestedUuid)
+          Broadcaster.broadcastHyperDisconnect(otherUuid, outerFactory, uuid, factory, nestedUuid)
           Ok(JsObject(Seq()))
         }
         case EndConnectSchema(factory) => {
           endHyperDisconnectNodes(nestedUuid, factory, otherUuid, outerFactory, uuid)
+          Broadcaster.broadcastHyperDisconnect(otherUuid, outerFactory, uuid, factory, nestedUuid)
           Ok(JsObject(Seq()))
         }
       }

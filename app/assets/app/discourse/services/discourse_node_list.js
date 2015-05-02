@@ -107,6 +107,20 @@ angular.module("wust.discourse").provider("DiscourseNodeList", function() {
                     create: service => nodeListCreate(service, title)
                 });
             }
+
+            subscribe(nodeList, handler) {
+                let unsubscribeFuncs = _.map(this.nestedNodeLists, (list, i) => this.list.$subscribeToLiveEvent(m => {
+                    let node = _.find(this.list, {id: m.reference});
+                    if (node !== undefined) {
+                        let list = node.nestedNodeLists[i];
+                        handler(list, m);
+                    }
+                }, `/${list.servicePath}`));
+
+                unsubscribeFuncs.push(this.list.$subscribeToLiveEvent(m => handler(nodeList, m)));
+
+                return () => _.each(unsubscribeFuncs, func => func());
+            }
         }
 
         class NodeList {
@@ -125,6 +139,10 @@ angular.module("wust.discourse").provider("DiscourseNodeList", function() {
             nested(nodeListCreate, servicePath, title) {
                 this.model.nested(nodeListCreate, servicePath, title);
                 return this;
+            }
+
+            subscribe(handler) {
+                return this.model.subscribe(this, handler);
             }
         }
 

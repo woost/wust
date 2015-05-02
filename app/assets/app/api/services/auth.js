@@ -43,10 +43,10 @@ angular.module("wust.api").service("Auth", function($rootScope, $window, restmod
 
     function logout() {
         // TODO: should this really be a get request
-        console.log(service.signout.$fetch().$then(response => {
+        service.signout.$fetch().$then(response => {
             logoutLocally();
             humane.success("Logged out");
-        }).$promise.catch(logoutLocally));
+        }).$promise.catch(logoutLocally);
     }
 
     function logoutLocally() {

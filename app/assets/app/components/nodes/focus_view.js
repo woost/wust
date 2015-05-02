@@ -17,7 +17,7 @@ angular.module("wust.components").directive("focusView", function($state, $rootS
             let unsubscribe = getUnsubscribePromise();
             unsubscribe.then($scope.node.$subscribeToLiveEvent(m => $scope.$apply(_.partial(onNodeChange, $scope.node, m))));
             _.each(_.compact([$scope.left, $scope.right, $scope.bottom, $scope.top]), list => {
-                unsubscribe.then(list.model.list.$subscribeToLiveEvent(m => $scope.$apply(_.partial(onConnectionChange, list, m))));
+                unsubscribe.then(list.subscribe((l,m) => $scope.$apply(_.partial(onConnectionChange, l, m))));
             });
 
         }

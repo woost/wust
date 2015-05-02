@@ -13,24 +13,19 @@ angular.module("wust.api").provider("Schema", function($provide, LiveProvider, r
 
         _.each(schema.models, model => {
             $provide.factory(model.name, (restmod, Live) => {
-                function subscribe(handler) {
-                    let url = this.$url().slice(schema.api.restRoot.length + 1);
-                    return Live.subscribe(url, handler);
-                }
-
                 return restmod.model(model.path).mix(_(model.subs).map((sub, path) => {
                     return {
                         [path]: {
                             [sub.cardinality]: restmod.model().mix(_.merge({
                                 $extend: {
                                     Collection: {
-                                        $subscribeToLiveEvent: subscribe
+                                        $subscribeToLiveEvent: _.partial(subscribe, Live)
                                     }
                                 }
                             }, _(sub.subs).map((sub, path) => {
                                 return {
                                     [path]: {
-                                        [sub.cardinality]: restmod.model()
+                                        [sub.cardinality]: restmod.model().mix()
                                     }
                                 };
                             }).reduce(_.merge)))
@@ -39,47 +34,17 @@ angular.module("wust.api").provider("Schema", function($provide, LiveProvider, r
                 }).reduce(_.merge, {
                     $extend: {
                         Record: {
-                            $subscribeToLiveEvent: subscribe
+                            $subscribeToLiveEvent: _.partial(subscribe, Live)
                         }
                     }
                 }));
             });
         });
-        return schema => {
-            restmodProvider.rebase({
-                $config: {
-                    urlPrefix: schema.api.restRoot
-                }
-            });
 
-            _.each(schema.models, model => {
-                $provide.factory(model.name, (restmod, Live) => {
-                    function subscribe(handler) {
-                        let url = this.$url().slice(schema.api.restRoot.length + 1);
-                        return Live.subscribe(url, handler);
-                    }
+        function subscribe(liveService, handler, nested = "") {
+            let url = this.$url().slice(schema.api.restRoot.length + 1) + nested;
 
-                    return restmod.model(model.path).mix(_(model.subs).map((sub, path) => {
-                        return {
-                            [path]: {
-                                [sub.cardinality]: restmod.model().mix({
-                                    $extend: {
-                                        Collection: {
-                                            $subscribeToLiveEvent: subscribe
-                                        }
-                                    }
-                                })
-                            }
-                        };
-                    }).reduce(_.merge, {
-                        $extend: {
-                            Record: {
-                                $subscribeToLiveEvent: subscribe
-                            }
-                        }
-                    }));
-                });
-            });
-        };
+            return liveService.subscribe(url, handler);
+        }
     }
 });
