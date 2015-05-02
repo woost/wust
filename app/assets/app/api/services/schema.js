@@ -18,10 +18,6 @@ angular.module("wust.api").provider("Schema", function($provide, LiveProvider, r
                     return Live.subscribe(url, handler);
                 }
 
-                function subMixin(sub, path) {
-                    console.log(sub, path);
-                }
-
                 return restmod.model(model.path).mix(_(model.subs).map((sub, path) => {
                     return {
                         [path]: {

@@ -4,5 +4,7 @@ angular.module("wust.components").controller("ProblemsCtrl", function($scope, $s
     $scope.top = new DiscourseNodeList.Goal($scope.node.goals);
     $scope.left = new DiscourseNodeList.Problem($scope.node.causes, "Causes");
     $scope.right = new DiscourseNodeList.Problem($scope.node.consequences, "Consequences");
-    $scope.bottom = new DiscourseNodeList.Idea($scope.node.ideas);
+    $scope.bottom = new DiscourseNodeList.Idea($scope.node.ideas)
+        .nested(DiscourseNodeList.ProArgument, "pros")
+        .nested(DiscourseNodeList.ConArgument, "cons");
 });

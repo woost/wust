@@ -9,14 +9,11 @@
 </div>
 
 <script type="text/ng-template" id="show_discourse_node_list.html">
-    <div class="btn-group" role="group" style="padding:3px">
+    <div ng-if="!nodeModel.isNested()" class="btn-group" role="group" style="padding:3px">
         <a ng-class="nodeModel.info.css" class="btn" ui-sref="{{nodeModel.info.state}}({id: node.id})">{{node.title}}</a>
         <button class='btn btn-default' ng-click='nodeModel.remove(node)'><i class='fa fa-minus text-default'></i></button>
     </div>
-</script>
-
-<script type="text/ng-template" id="show_extended_discourse_node_list.html">
-    <div class="panel panel-default" ng-class="nodeModel.info.css">
+    <div ng-if="nodeModel.isNested()" class="panel panel-default" ng-class="nodeModel.info.css">
         <a ui-sref="{{nodeModel.info.state}}({id: node.id})">
             <div class="panel-heading">
                 <h3 class="panel-title">{{node.title}}</h3>
@@ -24,10 +21,7 @@
             </div>
         </a>
         <div class="panel-body">
-            Panel content
-            <br />
-            <!-- <span class="discourse_proargument node">pro</span> -->
-            <!-- <span class="discourse_conargument node">con</span> -->
+            <div ng-repeat="nested in node.nestedNodeLists" discourse-node-list node-model='nested.model'></div>
             <button class='btn btn-default btn-xs pull-right' ng-click='nodeModel.remove(node)'>
                 <i class='fa fa-minus'></i>
             </button>
