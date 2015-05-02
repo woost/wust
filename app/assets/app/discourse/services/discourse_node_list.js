@@ -128,7 +128,7 @@ angular.module("wust.discourse").provider("DiscourseNodeList", function() {
             }
         }
 
-        return _.mapValues(nodeListDefs, (v, k) => (connService, title = v) => {
+        return _.mapValues(nodeListDefs, (v, k) => (connService, title = _.capitalize(v)) => {
             return new NodeList($injector.get(k), connService, DiscourseNode[k], title);
         });
     }
