@@ -81,47 +81,30 @@ $discourse_conargument_color: #ff6d6f;
 }
 
 .discourse_idea_list {
-    padding: 6px;
-    @include display-flex(flex);
-    @include flex-wrap(wrap);
-    @include justify-content(center);
     &.on-drag-enter {
         background-color: $discourse_idea_color;
     }
 }
 
 .discourse_problem_list {
-    padding: 6px;
     &.on-drag-enter {
         background-color: $discourse_problem_color;
     }
 }
 
 .discourse_goal_list {
-    padding: 6px;
-    @include display-flex(flex);
-    @include flex-wrap(wrap);
-    @include justify-content(center);
     &.on-drag-enter {
         background-color: $discourse_goal_color;
     }
 }
 
 .discourse_proargument_list {
-    padding: 6px;
-    @include display-flex(flex);
-    @include flex-wrap(wrap);
-    @include justify-content(center);
     &.on-drag-enter {
         background-color: $discourse_proargument_color;
     }
 }
 
 .discourse_conargument_list {
-    padding: 6px;
-    @include display-flex(flex);
-    @include flex-wrap(wrap);
-    @include justify-content(center);
     &.on-drag-enter {
         background-color: $discourse_conargument_color;
     }

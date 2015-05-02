@@ -1,10 +1,10 @@
 <div focus-view id="focus_view_component">
     <div ng-if='left' id="left_view">
-        <div discourse-node-list node-model='left.model'></div>
+        <div discourse-node-list node-model='left.model' class="discourse_node_list_vertical"></div>
     </div>
     <div id="focus_view_center">
         <div ng-if='top' id="top_view">
-            <div discourse-node-list node-model='top.model'></div>
+            <div discourse-node-list node-model='top.model' class="discourse_node_list_horizontal"></div>
         </div>
         <div id="node_view">
             <h2>Focus:</h2>
@@ -19,10 +19,10 @@
             </div>
         </div>
         <div ng-if="bottom" id="bottom_view">
-            <div discourse-node-list node-model='bottom.model'></div>
+            <div discourse-node-list node-model='bottom.model' class="discourse_node_list_horizontal"></div>
         </div>
     </div>
     <div ng-if="right" id="right_view">
-        <div discourse-node-list node-model='right.model'></div>
+        <div discourse-node-list node-model='right.model' class="discourse_node_list_vertical"></div>
     </div>
 </div>

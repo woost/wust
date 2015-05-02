@@ -1,6 +1,6 @@
-<div class="discourse_node_list">
+<div class="discourse_node_list_container">
     <h2>{{nodeModel.title}}:</h2>
-    <div ui-on-Drop="nodeModel.add($data)" ng-class='nodeModel.style.listCss' drop-channel="{{nodeModel.info.label}}">
+    <div ui-on-Drop="nodeModel.add($data)" ng-class='nodeModel.style.listCss' class='discourse_node_list' drop-channel="{{nodeModel.info.label}}">
         <div ng-repeat='node in nodeModel.list | orderBy:"title"'>
             <div ng-include="nodeModel.style.templateUrl"></div>
         </div>
