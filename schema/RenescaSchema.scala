@@ -121,12 +121,13 @@ package object schema {
 
   trait SchemaNodeFactory[+T <: SchemaNode] {
     def label: Label
+    //TODO: rename to wrap
     def create(node: Node): T
-    def local: T = create(Node.local(List(label)))
+    protected def local: T = create(Node.local(List(label)))
   }
 
   trait SchemaAbstractRelationFactory[STARTNODE <: SchemaNode, RELATION <: SchemaAbstractRelation[STARTNODE, ENDNODE] with SchemaItem, ENDNODE <: SchemaNode] {
-    def local(startNode: STARTNODE, endNode: ENDNODE): RELATION
+    // def local(startNode: STARTNODE, endNode: ENDNODE): RELATION
     def startNodeFactory: SchemaNodeFactory[STARTNODE]
     def endNodeFactory: SchemaNodeFactory[ENDNODE]
   }
@@ -134,9 +135,9 @@ package object schema {
   trait SchemaRelationFactory[STARTNODE <: SchemaNode, RELATION <: SchemaRelation[STARTNODE, ENDNODE], ENDNODE <: SchemaNode] extends SchemaAbstractRelationFactory[STARTNODE, RELATION, ENDNODE] {
     def relationType: RelationType
     def create(relation: Relation): RELATION
-    def local(startNode: STARTNODE, endNode: ENDNODE): RELATION = {
-      create(Relation.local(startNode.node, endNode.node, relationType))
-    }
+    // def local(startNode: STARTNODE, endNode: ENDNODE): RELATION = {
+    //   create(Relation.local(startNode.node, endNode.node, relationType))
+    // }
   }
 
   trait SchemaHyperRelationFactory[
@@ -168,9 +169,9 @@ package object schema {
       endRelationCreate(Relation.local(middleNode.node, endNode.node, endRelationType))
     }
 
-    def local(startNode: STARTNODE, endNode: ENDNODE): HYPERRELATION = {
-      val middleNode = super[SchemaNodeFactory].local
-      create(startRelationLocal(startNode, middleNode).relation, middleNode.node, endRelationLocal(middleNode, endNode).relation)
-    }
+    // def local(startNode: STARTNODE, endNode: ENDNODE): HYPERRELATION = {
+    //   val middleNode = super[SchemaNodeFactory].local
+    //   create(startRelationLocal(startNode, middleNode).relation, middleNode.node, endRelationLocal(middleNode, endNode).relation)
+    // }
   }
 }
