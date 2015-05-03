@@ -64,12 +64,12 @@ object GraphSchemaMacro {
             case otherStatement                          => otherStatement
           }
 
-          def createLocalFactoryMethod(flatStatements: List[Tree], returnName: String) = {
+          def createLocalFactoryMethod(flatStatements: List[Tree], schemaItem: Tree, factoryTemplate: (List[List[Tree]], List[Tree]) => Tree) = {
             val localNonOptionalParamsWithoutDefault = flatStatements.flatMap {
               case statement@(q"val $x:Option[$propertyType]") => None
               case statement@(q"var $x:Option[$propertyType]") => None
               case statement@(q"val $x:$propertyType")         => Some(statement)
-              case statement@(q"var $x:$propertyType")         => Some(statement)
+              case statement@(q"var $x:$propertyType")         => Some(statement) //TODO: test! does var work as param?
               case _                                           => None
             }
             val localParamsWithDefault = flatStatements.collect {
@@ -100,33 +100,57 @@ object GraphSchemaMacro {
               case q"var $propertyName:Option[$x] = $y" => propertyName
             }
 
-            val propertyAssignments = properties.map { propertyName => q"schemaNode.node.properties(${ propertyName.toString }) = $propertyName" }
-            val optionalPropertyAssignments = optionalProperties.map { propertyName => q"if($propertyName.isDefined) schemaNode.node.properties(${ propertyName.toString }) = $propertyName.get" }
+            val nonOptionalAssignments = properties.map { propertyName => q"$schemaItem.properties(${ propertyName.toString }) = $propertyName" }
+            val optionalPropertyAssignments = optionalProperties.map { propertyName => q"if($propertyName.isDefined) $schemaItem.properties(${ propertyName.toString }) = $propertyName.get" }
+            val propertyAssignments = nonOptionalAssignments ::: optionalPropertyAssignments
 
-            val returnType = TypeName(returnName)
-            if(localParams.head.nonEmpty) q"""
-              def local (...$localParams): $returnType = {
-              val schemaNode = super.local
-              ..$propertyAssignments
-              ..$optionalPropertyAssignments
-              schemaNode
-              }"""
-            else q""
+            factoryTemplate(localParams, propertyAssignments)
           }
 
           def nodeTraitFactories(schema: Schema): List[Tree] = schema.nodeTraits.filter(_.hasOwnFactory).map { nodeTrait => import nodeTrait._
-            val localWithParams = createLocalFactoryMethod(flatStatements, "T")
+            val localWithParams = createLocalFactoryMethod(flatStatements, q"node.node", { (localParams, propertyAssignments) =>
+              q"""
+              def local (...$localParams): NODE = {
+              val node = create(Node.local(List(label)))
+              ..$propertyAssignments
+              node
+              }"""
+            })
             val factoryName = TypeName(traitFactoryName(name))
             q"""
-           trait $factoryName[T <: SchemaNode] extends SchemaNodeFactory[T] {
+           trait $factoryName[NODE <: SchemaNode] extends SchemaNodeFactory[NODE] {
+             $localWithParams
+           }
+           """
+          }
+          def relationTraitFactories(schema: Schema): List[Tree] = schema.relationTraits.filter(_.hasOwnFactory).map { relationTrait => import relationTrait._
+            val localWithParams = createLocalFactoryMethod(flatStatements, q"relation.relation", { (localParams, propertyAssignments) =>
+              val startEndlocalParams = List(List(q"val startNode:START", q"val endNode:END") ::: localParams.head)
+              q"""
+              def local (...$startEndlocalParams): RELATION = {
+              val relation = create(Relation.local(startNode.node, endNode.node, relationType))
+              ..$propertyAssignments
+              relation
+              }"""
+            })
+            val factoryName = TypeName(traitFactoryName(name))
+            q"""
+           trait $factoryName[START <: SchemaNode, RELATION <: SchemaRelation[START,END], END] extends SchemaRelationFactory[START,RELATION,END] {
              $localWithParams
            }
            """
           }
 
           def nodeFactories(schema: Schema): List[Tree] = schema.nodes.map { node => import node._
-            val localWithParams = if(superTypesFlatStatementsCount != flatStatements.size)
-                                    createLocalFactoryMethod(flatStatements, name)
+            val localWithParams = if(superTypesFlatStatementsCount != flatStatements.size) //TODO: DRY machen, gibts auch in relationTraitfactories
+                                    createLocalFactoryMethod(flatStatements, q"node.node", { (localParams, propertyAssignments) =>
+                                      q"""
+                                    def local (...$localParams):$name_type = {
+                                    val node = create(Node.local(List(label)))
+                                    ..$propertyAssignments
+                                    node
+                                    }"""
+                                    })
                                   else
                                     q""
 
@@ -168,6 +192,15 @@ object GraphSchemaMacro {
           }
 
           def relationFactories(schema: Schema): List[Tree] = schema.relations.map { relation => import relation._
+            val localWithParams = createLocalFactoryMethod(flatStatements, q"relation.relation", { (localParams, propertyAssignments) => //TODO: DRY
+              val startEndlocalParams = List(List(q"val startNode:$startNode_type", q"val endNode:$endNode_type") ::: localParams.head)
+              q"""
+              def local (...$startEndlocalParams): $name_type = {
+              val relation = create(Relation.local(startNode.node, endNode.node, relationType))
+              ..$propertyAssignments
+              relation
+              }"""
+            })
             q"""
            object $name_term extends SchemaRelationFactory[$startNode_type, $name_type, $endNode_type] {
                def startNodeFactory = $startNode_term
@@ -177,6 +210,7 @@ object GraphSchemaMacro {
                  $startNode_term.create(relation.startNode),
                  relation,
                  $endNode_term.create(relation.endNode))
+               $localWithParams
            }
            """
           }
@@ -304,6 +338,7 @@ object GraphSchemaMacro {
              ..${ nodeFactories(schema) }
              ..${ nodeClasses(schema) }
 
+             ..${ relationTraitFactories(schema) }
              ..${ relationFactories(schema) }
              ..${ relationClasses(schema) }
 

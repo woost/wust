@@ -1,12 +1,14 @@
 package renesca
+
 package object schema {
+
   import renesca.graph._
   import renesca.parameter.StringPropertyValue
   import renesca.parameter.implicits._
 
-  type SchemaAbstractRelationFactoryStartEnd[START <: SchemaNode, END <: SchemaNode] = SchemaAbstractRelationFactory[START, _ <: SchemaAbstractRelation[START,END], END]
-  type SchemaAbstractRelationFactoryNode[NODE <: SchemaNode] = SchemaAbstractRelationFactory[_ <: NODE, _ <: SchemaAbstractRelation[_,_], _ <: NODE]
-  type SchemaAbstractRelationFactoryAny = SchemaAbstractRelationFactory[_ <: SchemaNode, _ <: SchemaAbstractRelation[_,_], _ <: SchemaNode]
+  type SchemaAbstractRelationFactoryStartEnd[START <: SchemaNode, END <: SchemaNode] = SchemaAbstractRelationFactory[START, _ <: SchemaAbstractRelation[START, END], END]
+  type SchemaAbstractRelationFactoryNode[NODE <: SchemaNode] = SchemaAbstractRelationFactory[_ <: NODE, _ <: SchemaAbstractRelation[_, _], _ <: NODE]
+  type SchemaAbstractRelationFactoryAny = SchemaAbstractRelationFactory[_ <: SchemaNode, _ <: SchemaAbstractRelation[_, _], _ <: SchemaNode]
 
   trait SchemaNodeFilter {
     def graph: Graph
@@ -31,7 +33,7 @@ package object schema {
     ENDRELATION <: SchemaRelation[HYPERRELATION, ENDNODE],
     ENDNODE <: SchemaNode]
     (nodes: Set[Node], relations: Set[Relation],
-      hyperRelationFactory: SchemaHyperRelationFactory[STARTNODE, STARTRELATION, HYPERRELATION, ENDRELATION, ENDNODE])
+     hyperRelationFactory: SchemaHyperRelationFactory[STARTNODE, STARTRELATION, HYPERRELATION, ENDRELATION, ENDNODE])
     : Set[HYPERRELATION] = {
       nodes.filter(_.labels.contains(hyperRelationFactory.label)).map { node =>
         val startRelation = relations.find(relation => relation.relationType == hyperRelationFactory.startRelationType && relation.endNode == node)
@@ -107,7 +109,7 @@ package object schema {
   HYPERRELATION <: SchemaHyperRelation[STARTNODE, STARTRELATION, HYPERRELATION, ENDRELATION, ENDNODE],
   ENDRELATION <: SchemaRelation[HYPERRELATION, ENDNODE],
   +ENDNODE <: SchemaNode]
-  extends SchemaAbstractRelation[STARTNODE, ENDNODE] with SchemaNode {
+    extends SchemaAbstractRelation[STARTNODE, ENDNODE] with SchemaNode {
     // wraps a node and two relations
     protected[schema] var _startRelation: STARTRELATION = _
     protected[schema] var _endRelation: ENDRELATION = _
@@ -123,7 +125,7 @@ package object schema {
     def label: Label
     //TODO: rename to wrap
     def create(node: Node): T
-    protected def local: T = create(Node.local(List(label)))
+    //    protected def local: T = create(Node.local(List(label)))
   }
 
   trait SchemaAbstractRelationFactory[STARTNODE <: SchemaNode, RELATION <: SchemaAbstractRelation[STARTNODE, ENDNODE] with SchemaItem, ENDNODE <: SchemaNode] {

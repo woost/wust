@@ -5,18 +5,26 @@ import scala.language.experimental.macros
 import PartialFunction._
 
 class PatternContext[C <: whitebox.Context](val context: C) {
+
   import Helpers._
   import context.universe._
 
   object Patterns {
-    trait NamePattern {
-      def name: String
+    //TODO: hack! Remove NamePattern!
+    trait Name extends NamePattern {
+      def pattern: NamePattern
+      def name = pattern.name
       //      def name_type = TypeName(name)
       //      def name_term = TermName(name)
       //      def name_label = nameToLabel(name)
       //      def name_plural = nameToPlural(name)
       //      def name_plural_term = TermName(name_plural)
     }
+
+    trait NamePattern {
+      def name: String
+    }
+
     trait SuperTypesPattern {
       def superTypes: List[String]
       //      def superTypes_type = superTypes.map(TypeName(_))
@@ -91,6 +99,30 @@ class PatternContext[C <: whitebox.Context](val context: C) {
       def superTypes_type = superTypes.map(TypeName(_))
     }
 
+    object RelationTraitPattern {
+      def unapply(tree: Tree): Option[RelationTraitPattern] = condOpt(tree) {
+        case q""" $mods trait $name extends ..$superTypes { ..$statements } """ if mods.annotations.collectFirst {
+          case Apply(Select(New(Ident(TypeName("Relation"))), termNames.CONSTRUCTOR), Nil) => true
+          case _                                                                           => false
+        }.get =>
+          RelationTraitPattern(name.toString, superTypes.map { _.toString } diff List("scala.AnyRef"), statements)
+      }
+    }
+    case class RelationTraitPattern(name: String, superTypes: List[String], statements: List[Tree]) extends NamePattern with SuperTypesPattern with StatementsPattern {
+      def name_type = TypeName(name)
+      def name_term = TermName(name)
+      def name_label = nameToLabel(name)
+      def name_plural = nameToPlural(name)
+      def name_plural_term = TermName(name_plural)
+      def superTypes_type = superTypes.map(TypeName(_))
+    }
+
+    case class RelationTrait(pattern: RelationTraitPattern, flatStatements: List[Tree], hasOwnFactory: Boolean) extends Name with SuperTypesPattern with StatementsPattern {
+      def superTypes = pattern.superTypes
+      def statements = pattern.statements
+    }
+
+
     object NodePattern {
       def unapply(tree: Tree): Option[NodePattern] = condOpt(tree) {
         case q"""@Node class $name extends ..${superTypes} { ..$statements }""" =>
@@ -106,12 +138,22 @@ class PatternContext[C <: whitebox.Context](val context: C) {
     }
 
     object RelationPattern {
-      def unapply(tree: Tree): Option[Relation] = condOpt(tree) {
-        case q"""@Relation class $name (startNode:$startNode, endNode:$endNode) {..$statements}""" =>
-          Relation(name.toString, startNode.toString, endNode.toString, statements)
+      def unapply(tree: Tree): Option[RelationPattern] = condOpt(tree) {
+        case q"""@Relation class $name (startNode:$startNode, endNode:$endNode) extends ..$superTypes {..$statements}""" =>
+          RelationPattern(name.toString, startNode.toString, endNode.toString, superTypes.map { _.toString } diff List("scala.AnyRef"), statements)
       }
     }
-    case class Relation(name: String, startNode: String, endNode: String, statements: List[Tree]) extends NamePattern with StartEndNodePattern with StatementsPattern {
+    case class RelationPattern(name: String, startNode: String, endNode: String, superTypes: List[String], statements: List[Tree]) extends NamePattern with StartEndNodePattern with SuperTypesPattern with StatementsPattern
+
+    case class Relation(pattern: RelationPattern, flatStatements:List[Tree]) extends Name with StartEndNodePattern with SuperTypesPattern with StatementsPattern {
+      if(superTypes.size > 1)
+        context.abort(NoPosition, "Currently relations are restricted to only extend one trait")
+
+      def startNode = pattern.startNode
+      def endNode = pattern.endNode
+      def superTypes = pattern.superTypes
+      def statements = pattern.statements
+
       def name_type = TypeName(name)
       def name_term = TermName(name)
       def name_label = nameToLabel(name)
@@ -124,12 +166,23 @@ class PatternContext[C <: whitebox.Context](val context: C) {
     }
 
     object HyperRelationPattern {
-      def unapply(tree: Tree): Option[HyperRelation] = condOpt(tree) {
+      def unapply(tree: Tree): Option[HyperRelationPattern] = condOpt(tree) {
         case q"""@HyperRelation class $name (startNode:$startNode, endNode:$endNode) extends ..$superTypes {..$statements}""" =>
-          HyperRelation(name.toString, startNode.toString, endNode.toString, superTypes.map { _.toString } diff List("scala.AnyRef"), statements)
+          HyperRelationPattern(name.toString, startNode.toString, endNode.toString, superTypes.map { _.toString } diff List("scala.AnyRef"), statements)
       }
     }
-    case class HyperRelation(name: String, startNode: String, endNode: String, superTypes: List[String], statements: List[Tree]) extends NamePattern with SuperTypesPattern with StartEndNodePattern with StatementsPattern {
+    case class HyperRelationPattern(name: String, startNode: String, endNode: String, superTypes: List[String], statements: List[Tree]) extends NamePattern with SuperTypesPattern with StartEndNodePattern with StatementsPattern
+
+    case class HyperRelation(pattern: HyperRelationPattern, superTypesNode: List[String], superTypesRelation: List[String]) extends NamePattern with SuperTypesPattern with StartEndNodePattern with StatementsPattern {
+      if(superTypesNode.size > 1 || superTypesRelation.size > 1)
+        context.abort(NoPosition, "Currently relations are restricted to only extend one trait")
+
+      def name = pattern.name
+      def startNode = pattern.startNode
+      def endNode = pattern.endNode
+      def superTypes = pattern.superTypes
+      def statements = pattern.statements
+
       def name_type = TypeName(name)
       def name_term = TermName(name)
       def name_label = nameToLabel(name)
@@ -151,14 +204,14 @@ class PatternContext[C <: whitebox.Context](val context: C) {
     }
 
     case class Node(
-                      name: String,
-                      superTypes: List[String],
-                      superTypesFlatStatementsCount: Int,
-                      neighbours: List[(String, String)],
-                      rev_neighbours: List[(String, String)],
-                      statements: List[Tree],
-                      flatStatements: List[Tree]
-                      ) extends NamePattern with SuperTypesPattern {
+                     name: String,
+                     superTypes: List[String],
+                     superTypesFlatStatementsCount: Int,
+                     neighbours: List[(String, String)],
+                     rev_neighbours: List[(String, String)],
+                     statements: List[Tree],
+                     flatStatements: List[Tree]
+                     ) extends NamePattern with SuperTypesPattern {
       if(superTypes.size > 1)
         context.abort(NoPosition, "Currently nodes are restricted to only extend one trait")
 
@@ -178,14 +231,14 @@ class PatternContext[C <: whitebox.Context](val context: C) {
     }
 
     case class NodeTrait(name: String,
-                          superTypes: List[String],
-                          subNodes: List[String],
-                          subRelations: List[String],
-                          subHyperRelations: List[String],
-                          commonHyperNodeTraits: List[String],
-                          statements: List[Tree],
-                          flatStatements: List[Tree],
-                          hasOwnFactory: Boolean
+                         superTypes: List[String],
+                         subNodes: List[String],
+                         subRelations: List[String],
+                         subHyperRelations: List[String],
+                         commonHyperNodeTraits: List[String],
+                         statements: List[Tree],
+                         flatStatements: List[Tree],
+                         hasOwnFactory: Boolean
                           ) extends NamePattern with SuperTypesPattern {
       def name_type = TypeName(name)
       def name_term = TermName(name)
@@ -196,10 +249,10 @@ class PatternContext[C <: whitebox.Context](val context: C) {
       def superTypes_type = superTypes.map(TypeName(_))
     }
     case class Group(name: String,
-                      nodes: List[String],
-                      relations: List[String],
-                      hyperRelations: List[String],
-                      nodeTraits: List[NodeTrait]
+                     nodes: List[String],
+                     relations: List[String],
+                     hyperRelations: List[String],
+                     nodeTraits: List[NodeTrait]
                       ) extends NamePattern {
       def name_type = TypeName(name)
       def name_term = TermName(name)
