@@ -10,11 +10,11 @@
 
 <script type="text/ng-template" id="show_discourse_node_list.html">
     <div ng-if="!nodeModel.isNested()" class="btn-group" role="group" style="padding:3px">
-        <a ng-class="nodeModel.info.css" class="btn" ui-sref="{{nodeModel.info.state}}({id: node.id})">{{node.title}}</a>
+        <a ng-class="nodeModel.info.css" class="btn" ui-sref="{{nodeModel.info.getState(node.id)}}">{{node.title}}</a>
         <button class='btn btn-default' ng-click='nodeModel.remove(node)'><i class='fa fa-minus text-default'></i></button>
     </div>
     <div ng-if="nodeModel.isNested()" class="panel panel-default" ng-class="nodeModel.info.css">
-        <a ui-sref="{{nodeModel.info.state}}({id: node.id})">
+        <a ui-sref="{{nodeModel.info.getState(node.id)}}">
             <div class="panel-heading">
                 <h3 class="panel-title">{{node.title}}</h3>
 

@@ -17,7 +17,7 @@
             <h2 ng-bind="slide.listTitle"></h2>
             <div id="list_existing">
                 <div ng-repeat="node in slide.nodes | fuzzyFilter:slide.newNode">
-                    <a ui-sref="{{slide.info.state}}({id: node.id})" ng-class="slide.info.css" class="node">{{node.title}}</a>
+                    <a ui-sref="{{slide.info.getState(node.id)}}" ng-class="slide.info.css" class="node">{{node.title}}</a>
                 </div>
             </div>
         </div>

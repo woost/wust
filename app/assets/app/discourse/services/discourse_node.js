@@ -5,7 +5,11 @@ angular.module("wust.discourse").provider("DiscourseNode", function() {
     this.setState = _.wrap("state", set);
     this.$get = get;
 
-    function get() {
+    function get($state) {
+        _.mapValues(discourseMap, node => _.merge(node, {
+            getState: id => node.state ? `${node.state}({id: "${id}"})` : ".",
+            gotoState: id => { if (node.state) $state.go(node.state, {id: id}); }
+        }));
         let mappings = _(_.values(discourseMap)).map(node => {
             return {
                 [node.label]: node

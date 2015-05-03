@@ -1,4 +1,4 @@
-angular.module("wust.components").controller("NavigationCtrl", function($scope, Auth, Search, DiscourseNode, $state) {
+angular.module("wust.components").controller("NavigationCtrl", function($scope, Auth, Search, DiscourseNode) {
     $scope.searchTyped = {
         title: ""
     };
@@ -46,9 +46,6 @@ angular.module("wust.components").controller("NavigationCtrl", function($scope, 
 
     // route to the node's page
     function focusNode(node) {
-        let state = DiscourseNode.get(node.label).state;
-        $state.go(state, {
-            id: node.id
-        });
+        DiscourseNode.get(node.label).gotoState(node.id);
     }
 });
