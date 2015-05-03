@@ -7,7 +7,7 @@ angular.module("wust.discourse").provider("DiscourseNodeList", function() {
         nodeListDefs[modelName] = modelPath;
     }
 
-    function get($injector, DiscourseNode, Search) {
+    function get($injector, $rootScope, DiscourseNode, Search) {
         class NodeModel {
             constructor(service, connService, nodeInfo, title) {
                 this.resetNew = () => {
@@ -24,7 +24,9 @@ angular.module("wust.discourse").provider("DiscourseNodeList", function() {
                 this.list = connService.$search();
 
                 // will create nested NodeLists for each added node
-                this.list.$on("after-add", (node) => this.nestedNode(node));
+                this.list.$on("after-add", (node) => {
+                    node.nestedNodeLists = _.map(this.nestedNodeLists, nodeList => nodeList.create(node[nodeList.servicePath]));
+                });
 
                 // defines the styling information for the DiscourseNodeList
                 // directive
@@ -79,26 +81,8 @@ angular.module("wust.discourse").provider("DiscourseNodeList", function() {
                 return _.any(this.list, search) || _.any(this.waiting, search);
             }
 
-            addNode(elem) {
-                if (this.exists(elem))
-                    return;
-
-                this.list.$buildRaw(elem).$reveal();
-            }
-
-            removeNode(id) {
-                let elem = _.find(this.list, {
-                    id: id
-                });
-                this.list.$remove(elem);
-            }
-
             isNested() {
                 return _.any(this.nestedNodeLists);
-            }
-
-            nestedNode(node) {
-                node.nestedNodeLists = _.map(this.nestedNodeLists, nodeList => nodeList.create(node[nodeList.servicePath]));
             }
 
             nested(nodeListCreate, servicePath, title) {
@@ -108,16 +92,28 @@ angular.module("wust.discourse").provider("DiscourseNodeList", function() {
                 });
             }
 
-            subscribe(nodeList, handler) {
+            subscribe(nodeList) {
+                let onConnectionChange = (list, message) => $rootScope.$apply(() => {
+                    switch (message.type) {
+                        case "connect":
+                            list.addNode(message.data);
+                            break;
+                        case "disconnect":
+                            list.removeNode(message.data.id);
+                            break;
+                        default:
+                    }
+                });
+
                 let unsubscribeFuncs = _.map(this.nestedNodeLists, (list, i) => this.list.$subscribeToLiveEvent(m => {
                     let node = _.find(this.list, {id: m.reference});
                     if (node !== undefined) {
                         let list = node.nestedNodeLists[i];
-                        handler(list, m);
+                        onConnectionChange(list, m);
                     }
                 }, `/${list.servicePath}`));
 
-                unsubscribeFuncs.push(this.list.$subscribeToLiveEvent(m => handler(nodeList, m)));
+                unsubscribeFuncs.push(this.list.$subscribeToLiveEvent(m => onConnectionChange(nodeList, m)));
 
                 return () => _.each(unsubscribeFuncs, func => func());
             }
@@ -129,11 +125,18 @@ angular.module("wust.discourse").provider("DiscourseNodeList", function() {
             }
 
             addNode(elem) {
-                return this.model.addNode(elem);
+                if (this.model.exists(elem))
+                    return;
+
+                this.model.list.$buildRaw(elem).$reveal();
             }
 
             removeNode(id) {
-                return this.model.removeNode(id);
+                let elem = _.find(this.model.list, {
+                    id: id
+                });
+
+                this.model.list.$remove(elem);
             }
 
             nested(nodeListCreate, servicePath, title) {
@@ -141,8 +144,8 @@ angular.module("wust.discourse").provider("DiscourseNodeList", function() {
                 return this;
             }
 
-            subscribe(handler) {
-                return this.model.subscribe(this, handler);
+            subscribe() {
+                return this.model.subscribe(this);
             }
         }
 

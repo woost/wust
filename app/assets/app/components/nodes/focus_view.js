@@ -17,7 +17,7 @@ angular.module("wust.components").directive("focusView", function($state, $rootS
             let unsubscribe = getUnsubscribePromise();
             unsubscribe.then($scope.node.$subscribeToLiveEvent(m => $scope.$apply(_.partial(onNodeChange, $scope.node, m))));
             _.each(_.compact([$scope.left, $scope.right, $scope.bottom, $scope.top]), list => {
-                unsubscribe.then(list.subscribe((l,m) => $scope.$apply(_.partial(onConnectionChange, l, m))));
+                unsubscribe.then(list.subscribe());
             });
 
         }
@@ -37,18 +37,6 @@ angular.module("wust.components").directive("focusView", function($state, $rootS
         switch (message.type) {
             case "edit":
                 _.assign(node, message.data);
-                break;
-            default:
-        }
-    }
-
-    function onConnectionChange(list, message) {
-        switch (message.type) {
-            case "connect":
-                list.addNode(message.data);
-                break;
-            case "disconnect":
-                list.removeNode(message.data.id);
                 break;
             default:
         }
