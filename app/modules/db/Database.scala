@@ -64,7 +64,7 @@ object Database {
     (discourse, (nodeWithUuid[START](discourse, startUuid), nodeWithUuid[END](discourse, endUuid)))
   }
 
-  def relationDiscourseGraph[START <: UuidNode, RELATION <: SchemaAbstractRelation[START,END], END <: UuidNode](startUuid: String, relFactory: SchemaAbstractRelationFactory[START,RELATION,END], endUuid: String): Discourse = {
+  def relationDiscourseGraph(startUuid: String, relFactory: SchemaAbstractRelationFactoryNode[UuidNode], endUuid: String): Discourse = {
     val query = s"match ${relationMatcherQueryWithUuid(startUuid, relFactory, endUuid)} return *"
     val params = Map("startUuid" -> startUuid, "endUuid" -> endUuid)
 

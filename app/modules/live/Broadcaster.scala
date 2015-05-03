@@ -56,7 +56,7 @@ object Broadcaster {
     broadcast(s"$apiname/${node.uuid}", jsonChange("edit", Json.toJson(node)))
   }
 
-  def broadcastConnect[START <: ContentNode, RELATION <: SchemaAbstractRelation[START,END], END <: ContentNode](startNode: START, factory: SchemaAbstractRelationFactory[START,RELATION,END], endNode: END): Unit = {
+  def broadcastConnect[START <: ContentNode, END <: ContentNode](startNode: START, factory: SchemaAbstractRelationFactoryStartEnd[START,END], endNode: END): Unit = {
     connectionDistributor(
       (apiname, path) => broadcast(s"$apiname/${startNode.uuid}/$path", jsonChange("connect", Json.toJson(endNode))),
       factory,
@@ -64,7 +64,7 @@ object Broadcaster {
     )
   }
 
-  def broadcastDisconnect[START <: ContentNode, RELATION <: SchemaAbstractRelation[START,END], END <: ContentNode](startUuid: String, factory: SchemaAbstractRelationFactory[START,RELATION,END], endUuid: String): Unit = {
+  def broadcastDisconnect[START <: ContentNode, END <: ContentNode](startUuid: String, factory: SchemaAbstractRelationFactoryStartEnd[START,END], endUuid: String): Unit = {
     connectionDistributor(
       (apiname, path) => broadcast(s"$apiname/$startUuid/$path", jsonChange("disconnect", JsObject(Seq(("id", JsString(endUuid)))))),
       factory,
