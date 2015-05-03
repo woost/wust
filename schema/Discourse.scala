@@ -16,6 +16,8 @@ object WustSchema {
     var description: Option[String]
   }
 
+  @Relation trait ContentRelation
+
   //TODO: generate indirect neighbour-accessors based on hyperrelations
   @Node class Goal extends ContentNode
   @Node class Problem extends ContentNode
@@ -23,13 +25,13 @@ object WustSchema {
   @Node class ProArgument extends ContentNode
   @Node class ConArgument extends ContentNode
 
-  @Relation class SubIdea(startNode: Idea, endNode: Idea)
-  @Relation class SubGoal(startNode: Goal, endNode: Goal)
-  @Relation class Causes(startNode: Problem, endNode: Problem)
+  @Relation class SubIdea(startNode: Idea, endNode: Idea) extends ContentRelation
+  @Relation class SubGoal(startNode: Goal, endNode: Goal) extends ContentRelation
+  @Relation class Causes(startNode: Problem, endNode: Problem) extends ContentRelation
 
-  @Relation class Prevents(startNode: Problem, endNode: Goal)
-  @HyperRelation class Solves(startNode: Idea, endNode: Problem) extends UuidNode
-  @HyperRelation class Achieves(startNode: Idea, endNode: Goal) extends UuidNode
+  @Relation class Prevents(startNode: Problem, endNode: Goal) extends ContentRelation
+  @HyperRelation class Solves(startNode: Idea, endNode: Problem) extends ContentRelation with UuidNode
+  @HyperRelation class Achieves(startNode: Idea, endNode: Goal) extends ContentRelation with UuidNode
 
   @Relation class SupportsSolution(startNode: ProArgument, endNode: Solves)
   @Relation class OpposesSolution(startNode: ConArgument, endNode: Solves)
