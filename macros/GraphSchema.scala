@@ -30,7 +30,7 @@ object GraphSchemaMacro {
     import schemaContext.Schemas.Schema._
 
     context.Expr[Any](annottees.map(_.tree).toList match {
-      case SchemaPatternTree(schemaPattern) :: Nil =>
+      case SchemaPattern(schemaPattern) :: Nil =>
         object Code {
 
           def relationStart(schema: Schema, name: String): String = schema.relations.find(_.name == name).get.startNode

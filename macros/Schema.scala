@@ -21,22 +21,21 @@ class SchemaContext[C <: whitebox.Context](val context: C) {
       import Schema._
 
       def apply(
+                 nodeTraitPattern: NodeTraitPattern,
                  nodeTraitPatterns: List[NodeTraitPattern],
                  relationTraitPatterns: List[RelationTraitPattern],
                  selectedNodePatterns: List[NodePattern],
                  relationPatterns: List[RelationPattern],
                  hyperRelationPatterns: List[HyperRelationPattern],
-                 nodeTraitPattern: NodeTraitPattern,
                  hasOwnFactory: Boolean
                  ) = {
         new NodeTrait(
-          name = nodeTraitPattern.name,
+          nodeTraitPattern,
           superTypes = if(nodeTraitPattern.superTypes.nonEmpty) nodeTraitPattern.superTypes else List("SchemaNode"),
           subNodes = nodeTraitToNodes(nodeTraitPatterns, selectedNodePatterns, nodeTraitPattern),
           subRelations = nodeNamesToRelations(nodeTraitToNodes(nodeTraitPatterns, selectedNodePatterns, nodeTraitPattern), relationPatterns).map(_.name),
           subHyperRelations = nodeNamesToRelations(nodeTraitToNodes(nodeTraitPatterns, selectedNodePatterns, nodeTraitPattern), hyperRelationPatterns).map(_.name),
           commonHyperNodeTraits = nodeTraitToCommonHyperNodeTraits(nodeTraitPatterns, relationTraitPatterns, selectedNodePatterns, hyperRelationPatterns, nodeTraitPattern),
-          statements = nodeTraitPattern.statements,
           flatStatements = flatSuperStatements(nodeTraitPatterns, nodeTraitPattern),
           hasOwnFactory = hasOwnFactory
         )
@@ -54,26 +53,24 @@ class SchemaContext[C <: whitebox.Context](val context: C) {
 
         val nodes = nodePatterns.map { nodePattern => {
           import nodePattern._
-          Node(name, superTypes,
-            superTypes.headOption.map(superType => flatSuperStatements(nodeTraitPatterns, nameToPattern(nodeTraitPatterns, superType)).size).getOrElse(0),
+          Node(nodePattern, superTypes.headOption.map(superType => flatSuperStatements(nodeTraitPatterns, nameToPattern(nodeTraitPatterns, superType)).size).getOrElse(0),
             neighbours(nodePattern, relationPatterns), rev_neighbours(nodePattern, relationPatterns),
-            statements, flatSuperStatements(nodeTraitPatterns, nodePattern))
+            flatSuperStatements(nodeTraitPatterns, nodePattern))
         }
         }
         val nodeTraits = nodeTraitPatterns.map(nodeTraitPattern =>
-          NodeTrait(nodeTraitPatterns, relationTraitPatterns, nodePatterns, relationPatterns, hyperRelationPatterns, nodeTraitPattern,
-            traitCanHaveOwnFactory(nodePatterns ::: hyperRelationPatterns ::: relationTraitPatterns ::: nodeTraitPatterns, nodeTraitPattern)))
+          NodeTrait(nodeTraitPattern, nodeTraitPatterns, relationTraitPatterns, nodePatterns, relationPatterns, hyperRelationPatterns, traitCanHaveOwnFactory(nodePatterns ::: hyperRelationPatterns ::: relationTraitPatterns ::: nodeTraitPatterns, nodeTraitPattern)))
         val relationTraits = relationTraitPatterns.map(relationTraitPattern =>
           RelationTrait(relationTraitPattern,
             flatSuperStatements(relationTraitPatterns, relationTraitPattern),
             traitCanHaveOwnFactory(relationPatterns ::: hyperRelationPatterns ::: nodeTraitPatterns ::: relationTraitPatterns, relationTraitPattern))) //TODO: why nodeTraitPatterns
         val groups = groupPatterns.map(groupPattern =>
-            Group(groupPattern.name,
+            Group(groupPattern,
               nodes = groupToNodes(groupPatterns, groupPattern),
               relations = groupToRelations(groupPatterns, relationPatterns, groupPattern),
               hyperRelations = groupToRelations(groupPatterns, hyperRelationPatterns, groupPattern),
               nodeTraits = nodeTraitPatterns.map(nodeTraitPattern =>
-                NodeTrait(nodeTraitPatterns, relationTraitPatterns, groupToNodes(groupPatterns, groupPattern).map(nameToPattern(nodePatterns, _)), relationPatterns, hyperRelationPatterns, nodeTraitPattern, false))
+                NodeTrait(nodeTraitPattern, nodeTraitPatterns, relationTraitPatterns, groupToNodes(groupPatterns, groupPattern).map(nameToPattern(nodePatterns, _)), relationPatterns, hyperRelationPatterns, false))
             )
           )
         val hyperRelations = hyperRelationPatterns.map(hyperRelationPattern => HyperRelation(hyperRelationPattern, filterSuperTypes(nodeTraitPatterns, hyperRelationPattern), filterSuperTypes(relationTraitPatterns, hyperRelationPattern)))
