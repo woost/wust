@@ -10,6 +10,60 @@ class PatternContext[C <: whitebox.Context](val context: C) {
   import context.universe._
 
   object Patterns {
+    case class Parameter(name: Tree, typeName: Tree, optional: Boolean, default: Option[Tree], mutable: Boolean) {
+      def canEqual(other: Any): Boolean = other.isInstanceOf[Parameter]
+      override def equals(other: Any): Boolean = other match {
+        case that: Parameter =>
+          (that canEqual this) &&
+          this.name.toString == that.name.toString &&
+          this.typeName.toString == that.typeName.toString &&
+          this.optional == that.optional &&
+          this.default.toString == that.default.toString &&
+          this.mutable == that.mutable
+        case _          => false
+      }
+      override def hashCode: Int = List(this.name.toString, this.typeName.toString, this.optional, this.default.toString, this.mutable).hashCode
+      def toParamCode: Tree = this match {
+        case Parameter(propertyName, propertyType, _, None, _)               => q"val ${TermName(propertyName.toString)}:${propertyType}"
+        case Parameter(propertyName, propertyType, _, Some(defaultValue), _) => q"val ${TermName(propertyName.toString)}:${propertyType} = ${defaultValue}"
+      }
+      def toAssignmentCode(schemaItem: Tree): Tree = this match {
+        case Parameter(propertyName, propertyType, false, _, _) => q"$schemaItem.properties(${ propertyName.toString }) = $propertyName"
+        case Parameter(propertyName, propertyType, true, _, _)  => q"if($propertyName.isDefined) $schemaItem.properties(${ propertyName.toString }) = $propertyName.get"
+      }
+    }
+    case class ParameterList(parameters: List[Parameter]) {
+      import ParameterList.supplementMissingParameters
+
+      val (withDefault, nonDefault) = parameters.sortBy(_.name.toString).partition(_.default.isDefined)
+      val (withDefaultOptional, withDefaultNonOptional) = withDefault.partition(_.optional)
+      val ordered = nonDefault ::: withDefaultNonOptional ::: withDefaultOptional
+      def toParamCode: List[List[Tree]] = List(ordered.map(_.toParamCode))
+      def toAssignmentCode(schemaItem: Tree): List[Tree] = ordered.map(_.toAssignmentCode(schemaItem))
+      def supplementMissingParametersOf(that: ParameterList): List[Tree] = this.nonDefault.map(_.name) ::: supplementMissingParameters(this.withDefault, that.withDefault) ::: supplementMissingParameters(this.withDefaultOptional, that.withDefaultOptional)
+    }
+
+    object ParameterList {
+      def supplementMissingParameters(providerParameters: List[Parameter], receiverParameters: List[Parameter]): List[Tree] = {
+        providerParameters.map(Some(_)).zipAll(receiverParameters.map(Some(_)), None, None).map{
+          case (Some(mine), Some(other)) => mine.name
+          case (Some(mine), None) => mine.default.get // we know that we only handle list of default params (put into typesystem?)
+          case (None, _) => q"" //TODO: context.abort(NoPosition, "This should never happen: Subclass has less properties than TraitFactory")
+        }
+      }
+
+      def create(flatStatements: List[Tree]): ParameterList = new ParameterList(flatStatements.collect {
+        case statement@(q"val $propertyName:Option[$propertyType] = $default") => Parameter(q"$propertyName", tq"Option[$propertyType]", optional = true, default = Some(q"$default"), mutable = false)
+        case statement@(q"var $propertyName:Option[$propertyType] = $default") => Parameter(q"$propertyName", tq"Option[$propertyType]", optional = true, default = Some(q"$default"), mutable = true)
+        case statement@(q"val $propertyName:Option[$propertyType]")            => Parameter(q"$propertyName", tq"Option[$propertyType]", optional = true, default = Some(q"None"), mutable = false)
+        case statement@(q"var $propertyName:Option[$propertyType]")            => Parameter(q"$propertyName", tq"Option[$propertyType]", optional = true, default = Some(q"None"), mutable = true)
+        case statement@(q"val $propertyName:$propertyType = $default")         => Parameter(q"$propertyName", q"$propertyType", optional = false, default = Some(q"$default"), mutable = false)
+        case statement@(q"var $propertyName:$propertyType = $default")         => Parameter(q"$propertyName", q"$propertyType", optional = false, default = Some(q"$default"), mutable = true)
+        case statement@(q"val $propertyName:$propertyType")                    => Parameter(q"$propertyName", q"$propertyType", optional = false, default = None, mutable = false)
+        case statement@(q"var $propertyName:$propertyType")                    => Parameter(q"$propertyName", q"$propertyType", optional = false, default = None, mutable = true)
+      })
+    }
+
     trait Name {
       def pattern: NamePattern
       def name = pattern.name
@@ -63,6 +117,11 @@ class PatternContext[C <: whitebox.Context](val context: C) {
       def endRelation_type = TypeName(endRelation)
       def endRelation_term = TermName(endRelation)
       def endRelation_label = nameToLabel(endRelation)
+    }
+
+    trait HasOwnFactory {
+      val hasOwnFactory: Boolean
+      val parameterList: ParameterList
     }
 
     trait Statements {
@@ -129,11 +188,15 @@ class PatternContext[C <: whitebox.Context](val context: C) {
                          subNodes: List[String],
                          subRelations: List[String],
                          subHyperRelations: List[String],
-                         commonHyperNodeTraits: List[String],
+                         commonHyperNodeNodeTraits: List[String],
+                         commonHyperNodeRelationTraits: List[String],
                          flatStatements: List[Tree],
                          hasOwnFactory: Boolean
-                          ) extends Name with SuperTypes with Statements {
-      def commonHyperNodeTraits_type = commonHyperNodeTraits.map(TypeName(_))
+                          ) extends Name with SuperTypes with Statements with HasOwnFactory {
+      def commonHyperNodeNodeTraits_type = commonHyperNodeNodeTraits.map(TypeName(_))
+      def commonHyperNodeRelationTraits_type = commonHyperNodeRelationTraits.map(TypeName(_))
+
+      val parameterList = ParameterList.create(flatStatements)
     }
 
     object RelationTraitPattern {
@@ -148,9 +211,15 @@ class PatternContext[C <: whitebox.Context](val context: C) {
 
     case class RelationTraitPattern(name: String, superTypes: List[String], statements: List[Tree]) extends NamePattern with SuperTypesPattern with StatementsPattern
 
-    case class RelationTrait(pattern: RelationTraitPattern, flatStatements: List[Tree], hasOwnFactory: Boolean) extends Name with SuperTypes with Statements {
+    case class RelationTrait(
+                            pattern: RelationTraitPattern,
+                            flatStatements: List[Tree],
+                            hasOwnFactory: Boolean
+                          ) extends Name with SuperTypes with Statements with HasOwnFactory {
       if(pattern.superTypes.size > 1)
         context.abort(NoPosition, "Currently RelationTraits are restricted to only extend one trait")
+
+      val parameterList = ParameterList.create(flatStatements)
     }
 
     object NodePattern {
@@ -164,14 +233,15 @@ class PatternContext[C <: whitebox.Context](val context: C) {
 
     case class Node(
                      pattern: NodePattern,
-                     superTypesFlatStatementsCount: Int,
                      neighbours: List[(String, String)],
                      rev_neighbours: List[(String, String)],
-                     flatStatements: List[Tree]
+                     flatStatements: List[Tree],
+                     traitFactoryParameterList: Option[ParameterList]
                      ) extends Name with SuperTypes with Statements {
       if(superTypes.size > 1)
         context.abort(NoPosition, "Currently nodes are restricted to only extend one trait")
 
+      val parameterList = ParameterList.create(flatStatements)
       def neighbours_terms = neighbours.map { case (relation, endNode) =>
         (TermName(nameToPlural(relation)), TypeName(endNode), TermName(endNode))
       }
@@ -189,9 +259,15 @@ class PatternContext[C <: whitebox.Context](val context: C) {
 
     case class RelationPattern(name: String, startNode: String, endNode: String, superTypes: List[String], statements: List[Tree]) extends NamePattern with StartEndNodePattern with SuperTypesPattern with StatementsPattern
 
-    case class Relation(pattern: RelationPattern, flatStatements:List[Tree]) extends Name with StartEndNode with SuperTypes with Statements {
+    case class Relation(
+                        pattern: RelationPattern,
+                        flatStatements:List[Tree], // TODO: rename to flatSuperStatements (same for node etc)
+                        traitFactoryParameterList: Option[ParameterList]
+                      ) extends Name with StartEndNode with SuperTypes with Statements {
       if(superTypes.size > 1)
         context.abort(NoPosition, "Currently Relations are restricted to only extend one trait")
+
+      val parameterList = ParameterList.create(flatStatements)
     }
 
     object HyperRelationPattern {
@@ -203,9 +279,17 @@ class PatternContext[C <: whitebox.Context](val context: C) {
 
     case class HyperRelationPattern(name: String, startNode: String, endNode: String, superTypes: List[String], statements: List[Tree]) extends NamePattern with SuperTypesPattern with StartEndNodePattern with StatementsPattern
 
-    case class HyperRelation(pattern: HyperRelationPattern, superNodeTypes: List[String], superRelationTypes: List[String]) extends Name with SuperTypes with StartEndNode with Statements with StartEndRelation {
+    case class HyperRelation(
+                            pattern: HyperRelationPattern,
+                            superNodeTypes: List[String],
+                            superRelationTypes: List[String],
+                            flatSuperStatements: List[Tree],
+                            traitFactoryParameterList: Option[ParameterList]
+                          ) extends Name with SuperTypes with StartEndNode with Statements with StartEndRelation {
       if(superNodeTypes.size > 1 || superRelationTypes.size > 1)
         context.abort(NoPosition, "Currently HyperRelations are restricted to only extend one trait")
+
+      val parameterList = ParameterList.create(flatSuperStatements)
     }
   }
 }

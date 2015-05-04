@@ -64,103 +64,69 @@ object GraphSchemaMacro {
             case otherStatement                          => otherStatement
           }
 
-          def createLocalFactoryMethod(flatStatements: List[Tree], schemaItem: Tree, factoryTemplate: (List[List[Tree]], List[Tree]) => Tree) = {
-            val localNonOptionalParamsWithoutDefault = flatStatements.flatMap {
-              case statement@(q"val $x:Option[$propertyType]") => None
-              case statement@(q"var $x:Option[$propertyType]") => None
-              case statement@(q"val $x:$propertyType")         => Some(statement)
-              case statement@(q"var $x:$propertyType")         => Some(statement) //TODO: test! does var work as param?
-              case _                                           => None
-            }
-            val localParamsWithDefault = flatStatements.collect {
-              case statement@(q"val $x: $y = $default") if !default.isEmpty => statement
-              case statement@(q"var $x: $y = $default") if !default.isEmpty => statement
-            }
-            val localOptionalParamsWithoutDefault = flatStatements.collect {
-              case statement@(q"val $propertyName:Option[$propertyType]") => q"val $propertyName:Option[$propertyType] = None"
-              case statement@(q"var $propertyName:Option[$propertyType]") => q"val $propertyName:Option[$propertyType] = None"
-            }
-
-            val localParams = List(localNonOptionalParamsWithoutDefault ::: localParamsWithDefault ::: localOptionalParamsWithoutDefault)
-
-            val properties = flatStatements.flatMap {
-              case statement@(q"val $x:Option[$propertyType]")      => None
-              case statement@(q"var $x:Option[$propertyType]")      => None
-              case statement@(q"val $x:Option[$propertyType] = $y") => None
-              case statement@(q"var $x:Option[$propertyType] = $y") => None
-              case q"val $propertyName:$propertyType"               => Some(propertyName)
-              case q"var $propertyName:$propertyType"               => Some(propertyName)
-              case q"val $propertyName:$propertyType = $x"          => Some(propertyName)
-              case q"var $propertyName:$propertyType = $x"          => Some(propertyName)
-            }
-            val optionalProperties = flatStatements.collect {
-              case q"val $propertyName:Option[$x]"      => propertyName
-              case q"var $propertyName:Option[$x]"      => propertyName
-              case q"val $propertyName:Option[$x] = $y" => propertyName
-              case q"var $propertyName:Option[$x] = $y" => propertyName
-            }
-
-            val nonOptionalAssignments = properties.map { propertyName => q"$schemaItem.properties(${ propertyName.toString }) = $propertyName" }
-            val optionalPropertyAssignments = optionalProperties.map { propertyName => q"if($propertyName.isDefined) $schemaItem.properties(${ propertyName.toString }) = $propertyName.get" }
-            val propertyAssignments = nonOptionalAssignments ::: optionalPropertyAssignments
-
-            factoryTemplate(localParams, propertyAssignments)
-          }
-
+          //TODO: extend supertraits factory?
           def nodeTraitFactories(schema: Schema): List[Tree] = schema.nodeTraits.filter(_.hasOwnFactory).map { nodeTrait => import nodeTrait._
-            val localWithParams = createLocalFactoryMethod(flatStatements, q"node.node", { (localParams, propertyAssignments) =>
-              q"""
-              def local (...$localParams): NODE = {
-              val node = create(Node.local(List(label)))
-              ..$propertyAssignments
-              node
-              }"""
-            })
             val factoryName = TypeName(traitFactoryName(name))
             q"""
            trait $factoryName[NODE <: SchemaNode] extends SchemaNodeFactory[NODE] {
-             $localWithParams
+              def local (...${parameterList.toParamCode}): NODE
            }
            """
           }
+
+          //TODO: extend supertraits factory?
           def relationTraitFactories(schema: Schema): List[Tree] = schema.relationTraits.filter(_.hasOwnFactory).map { relationTrait => import relationTrait._
-            val localWithParams = createLocalFactoryMethod(flatStatements, q"relation.relation", { (localParams, propertyAssignments) =>
-              val startEndlocalParams = List(List(q"val startNode:START", q"val endNode:END") ::: localParams.head)
-              q""" def local (...$startEndlocalParams): RELATION """
-            })
+            val startEndlocalParams = List(List(q"val startNode:START", q"val endNode:END") ::: parameterList.toParamCode.head)
             val factoryName = TypeName(traitFactoryName(name))
             q"""
-           trait $factoryName[START <: SchemaNode, RELATION <: SchemaRelation[START,END], END <: SchemaNode] extends SchemaAbstractRelationFactory[START,RELATION,END] {
-             $localWithParams
+           trait $factoryName[START <: SchemaNode, +RELATION <: SchemaAbstractRelation[START,END], END <: SchemaNode] extends SchemaAbstractRelationFactory[START,RELATION,END] {
+              def local (...$startEndlocalParams): RELATION
            }
            """
           }
 
-          def nodeFactories(schema: Schema): List[Tree] = schema.nodes.map { node => import node._
-            //TODO: remove if?
-            val localWithParams = if(superTypesFlatStatementsCount != flatStatements.size) //TODO: DRY machen, gibts auch in relationTraitfactories
-                                    createLocalFactoryMethod(flatStatements, q"node.node", { (localParams, propertyAssignments) =>
-                                      q"""
-                                    def local (...$localParams):$name_type = {
-                                    val node = create(Node.local(List(label)))
-                                    ..$propertyAssignments
-                                    node
-                                    }"""
-                                    })
-                                  else
-                                    q""
+          def forwardLocalMethod(parameterList: ParameterList, traitFactoryParameterList: Option[ParameterList], typeName: Tree) = {
+          if (traitFactoryParameterList.isDefined
+            && parameterList.parameters.size > traitFactoryParameterList.get.parameters.size) {
+              val parentParameterList = traitFactoryParameterList.get
+              val parentCaller = parameterList.supplementMissingParametersOf(parentParameterList)
+              q""" def local (...${parentParameterList.toParamCode}): $typeName = local(..$parentCaller) """
+            } else
+              q""
+          }
 
+          // TODO: duplicate code
+          def forwardLocalMethodStartEnd(parameterList: ParameterList, traitFactoryParameterList: Option[ParameterList], typeName: Tree, startNodeType: Tree, endNodeType: Tree) = {
+          if (traitFactoryParameterList.isDefined
+            && parameterList.parameters.size > traitFactoryParameterList.get.parameters.size) {
+              val parentParameterList = traitFactoryParameterList.get
+              val parentCaller = parameterList.supplementMissingParametersOf(parentParameterList)
+              val localParameters: List[List[Tree]] = List(List(q"val startNode:$startNodeType", q"val endNode:$endNodeType") ::: parentParameterList.toParamCode.head)
+              q""" def local (...$localParameters): $typeName = local(..${List(q"startNode", q"endNode") ::: parentCaller}) """
+            } else
+              q""
+          }
+
+          //TODO: what happens with name clashes?
+          // @Node trait traitA { val name: String }; @Node trait traitB extends traitA { val name: String }
+          def nodeFactories(schema: Schema): List[Tree] = schema.nodes.map { node => import node._
             val superFactory = TypeName(superTypes.headOption match {
-              case Some(superType) => traitFactoryName(superType)
-              case None            => "SchemaNodeFactory"
+              case Some(superType) => s"${traitFactoryName(superType)}"
+              case None            => s"SchemaNodeFactory"
             })
+
             // Extending superFactory is enough, because SchemaNodeFactory is pulled in every case.
             // This works because SchemaNodeFactory does not get any generics.
             q"""
            object $name_term extends $superFactory[$name_type] {
              def create(node: Node) = new $name_type(node)
              val label = Label($name_label)
-             $localWithParams
+             def local (...${parameterList.toParamCode}):$name_type = {
+              val node = create(Node.local(List(label)))
+              ..${parameterList.toAssignmentCode(q"node.node")}
+              node
+             }
+             ${forwardLocalMethod(parameterList, traitFactoryParameterList, tq"$name_type")}
            }
            """
           }
@@ -189,22 +155,13 @@ object GraphSchemaMacro {
           }
 
           def relationFactories(schema: Schema): List[Tree] = schema.relations.map { relation => import relation._
-            val localWithParams = createLocalFactoryMethod(flatStatements, q"relation.relation", { (localParams, propertyAssignments) => //TODO: DRY
-              val startEndlocalParams = List(List(q"val startNode:$startNode_type", q"val endNode:$endNode_type") ::: localParams.head)
-              q"""
-              def local(...$startEndlocalParams): $name_type = {
-              val relation = create(Relation.local(startNode.node, endNode.node, relationType))
-              ..$propertyAssignments
-              relation
-              }"""
+            val superRelationFactory = TypeName(superTypes.headOption match {
+              case Some(superType) => s"${traitFactoryName(superType)}"
+              case None            => s"SchemaAbstractRelationFactory"
             })
-            val superRelationFactory: TypeName = superTypes.headOption match {
-              case Some(superType) => TypeName(traitFactoryName(superType))
-              case None            => TypeName(s"SchemaAbstractRelationFactory[$startNode_type, $name_type, $endNode_type]")
-            }
             q"""
            object $name_term extends SchemaRelationFactory[$startNode_type, $name_type, $endNode_type]
-            with $superRelationFactory {
+            with $superRelationFactory[$startNode_type, $name_type, $endNode_type] {
                def startNodeFactory = $startNode_term
                def endNodeFactory = $endNode_term
                def relationType = RelationType($name_label)
@@ -212,15 +169,22 @@ object GraphSchemaMacro {
                  $startNode_term.create(relation.startNode),
                  relation,
                  $endNode_term.create(relation.endNode))
-               $localWithParams
+              def local (...${List(List(q"val startNode:$startNode_type", q"val endNode:$endNode_type") ::: parameterList.toParamCode.head)}):$name_type = {
+                val relation = create(Relation.local(startNode.node, endNode.node, relationType))
+                ..${parameterList.toAssignmentCode(q"relation.relation")}
+                relation
+              }
+              ${forwardLocalMethod(parameterList, traitFactoryParameterList, tq"$name_type")}
            }
            """
           }
 
           def relationClasses(schema: Schema): List[Tree] = schema.relations.map { relation => import relation._
+            val superTypesWithDefault = "SchemaRelation" :: superTypes
+            val superTypesWithDefaultGenerics = superTypesWithDefault.map(TypeName(_)).map(superType => tq"$superType[$startNode_type,$endNode_type]")
             q"""
            case class $name_type(startNode: $startNode_type, relation: Relation, endNode: $endNode_type)
-             extends SchemaRelation[$startNode_type, $endNode_type] {
+             extends ..$superTypesWithDefaultGenerics {
              ..$statements
            }
            """
@@ -228,13 +192,13 @@ object GraphSchemaMacro {
 
 
           def hyperRelationFactories(schema: Schema): List[Tree] = schema.hyperRelations.map { hyperRelation => import hyperRelation._
-            val superRelationFactory = superRelationTypes.headOption match {
-              case Some(superType) => tq"${ traitFactoryName(superType) }"
-              case None            => tq"SchemaAbstractRelationFactory[$startNode_type, $name_type, $endNode_type]"
-            }
+            val superRelationFactory = TypeName(superRelationTypes.headOption match {
+              case Some(superType) => s"${traitFactoryName(superType)}"
+              case None            => s"SchemaAbstractRelationFactory"
+            })
             q"""
            object $name_term extends SchemaHyperRelationFactory[$startNode_type, $startRelation_type, $name_type, $endRelation_type, $endNode_type]
-             with $superRelationFactory {
+             with $superRelationFactory[$startNode_type, $name_type, $endNode_type] {
 
              override def label = Label($name_label)
              override def startRelationType = RelationType($startRelation_label)
@@ -247,6 +211,13 @@ object GraphSchemaMacro {
              override def create(node: Node) = new $name_type(node)
              override def startRelationCreate(relation: Relation) = $startRelation_term(startNodeFactory.create(relation.startNode), relation, factory.create(relation.endNode))
              override def endRelationCreate(relation: Relation) = $endRelation_term(factory.create(relation.startNode), relation, endNodeFactory.create(relation.endNode))
+
+             def local (...${List(List(q"val startNode:$startNode_type", q"val endNode:$endNode_type") ::: parameterList.toParamCode.head)}):$name_type = {
+              val middleNode = create(Node.local(List(label)))
+              ..${parameterList.toAssignmentCode(q"middleNode.node")}
+              create(startRelationLocal(startNode, middleNode).relation, middleNode.node, endRelationLocal(middleNode, endNode).relation)
+             }
+             ${forwardLocalMethodStartEnd(parameterList, traitFactoryParameterList, tq"$name_type", tq"$startNode_type", tq"$endNode_type")}
            }
            """
           }
@@ -254,10 +225,11 @@ object GraphSchemaMacro {
           def hyperRelationClasses(schema: Schema): List[Tree] = schema.hyperRelations.map { hyperRelation => import hyperRelation._
             //TODO: generate indirect neighbour-accessors based on hyperrelations
             //TODO: property accessors
+            val superRelationTypesGenerics = superRelationTypes.map(TypeName(_)).map(superType => tq"$superType[$startNode_type,$endNode_type]")
             List( q"""
            case class $name_type(node:Node)
               extends SchemaHyperRelation[$startNode_type, $startRelation_type, $name_type, $endRelation_type, $endNode_type]
-              with ..$superTypes_type {
+              with ..${superRelationTypesGenerics ::: superNodeTypes.map(t => tq"${TypeName(t)}")} {
              ..$statements
            }
            """, q"""
@@ -270,13 +242,16 @@ object GraphSchemaMacro {
           }.flatten
 
           def nodeSuperTraits(schema: Schema): List[Tree] = schema.nodeTraits.map { nodeTrait => import nodeTrait._
+            val superTypesWithDefault = (if(superTypes.isEmpty) List("SchemaNode") else superTypes).map(TypeName(_))
             val traitBody = statements.flatMap(generatePropertyAccessors(_))
-            q""" trait $name_type extends ..$superTypes_type { ..$traitBody } """
+            q""" trait $name_type extends ..$superTypesWithDefault { ..$traitBody } """
           }
 
           def relationSuperTraits(schema: Schema): List[Tree] = schema.relationTraits.map { relationTrait => import relationTrait._
+            val superTypesWithDefault = if(superTypes.isEmpty) List("SchemaAbstractRelation") else superTypes
+            val superTypesWithDefaultGenerics = superTypesWithDefault.map(TypeName(_)).map(superType => tq"$superType[START,END]")
             val traitBody = statements.flatMap(generatePropertyAccessors(_))
-            q""" trait $name_type extends ..$superTypes_type { ..$traitBody } """
+            q""" trait $name_type[+START <: SchemaNode,+END <: SchemaNode] extends ..$superTypesWithDefaultGenerics { ..$traitBody } """
           }
 
           def groupFactories(schema: Schema): List[Tree] = schema.groups.map { group => import group._
@@ -300,13 +275,14 @@ object GraphSchemaMacro {
               q"def ${ TermName(nameToPlural(name + "Relation")) }:Set[_ <: SchemaRelation[$name_type, $name_type]] = ${ allOf(subRelations) }"
             }
             val hyperRelationTraitSets = nodeTraits.map { nodeTrait => import nodeTrait._
+              val hyperNodeRelationTraits_type = commonHyperNodeRelationTraits_type.map(t => tq"$t[$name_type, $name_type]")
               q"""def ${ TermName(nameToPlural(name + "HyperRelation")) } :Set[SchemaHyperRelation[
                   $name_type,
                   _ <: SchemaRelation[$name_type, _],
-                  _ <: SchemaHyperRelation[$name_type, _, _, _, $name_type] with ..$commonHyperNodeTraits_type,
+                  _ <: SchemaHyperRelation[$name_type, _, _, _, $name_type] with ..$commonHyperNodeNodeTraits_type with ..$hyperNodeRelationTraits_type,
                   _ <: SchemaRelation[_, $name_type],
                   $name_type]
-                  with ..$commonHyperNodeTraits_type]
+                  with ..$commonHyperNodeNodeTraits_type with ..$hyperNodeRelationTraits_type]
               = ${ allOf(subHyperRelations) }"""
             }
 
@@ -346,18 +322,19 @@ object GraphSchemaMacro {
              import renesca.parameter.implicits._
 
              ..${ nodeTraitFactories(schema) }
+             ..${ nodeSuperTraits(schema) }
+
              ..${ nodeFactories(schema) }
              ..${ nodeClasses(schema) }
 
              ..${ relationTraitFactories(schema) }
+             ..${ relationSuperTraits(schema) }
+
              ..${ relationFactories(schema) }
              ..${ relationClasses(schema) }
 
              ..${ hyperRelationFactories(schema) }
              ..${ hyperRelationClasses(schema) }
-
-             ..${ nodeSuperTraits(schema) }
-             ..${ relationSuperTraits(schema) }
 
              ..${ groupFactories(schema) }
              ..${ groupClasses(schema) }

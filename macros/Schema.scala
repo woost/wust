@@ -13,6 +13,7 @@ class SchemaContext[C <: whitebox.Context](val context: C) {
   import context.universe._
 
   import patternContext.Patterns._
+  import patternContext.Patterns
 
   object Schemas {
 
@@ -31,11 +32,12 @@ class SchemaContext[C <: whitebox.Context](val context: C) {
                  ) = {
         new NodeTrait(
           nodeTraitPattern,
-          superTypes = if(nodeTraitPattern.superTypes.nonEmpty) nodeTraitPattern.superTypes else List("SchemaNode"),
+          superTypes = nodeTraitPattern.superTypes,
           subNodes = nodeTraitToNodes(nodeTraitPatterns, selectedNodePatterns, nodeTraitPattern),
           subRelations = nodeNamesToRelations(nodeTraitToNodes(nodeTraitPatterns, selectedNodePatterns, nodeTraitPattern), relationPatterns).map(_.name),
           subHyperRelations = nodeNamesToRelations(nodeTraitToNodes(nodeTraitPatterns, selectedNodePatterns, nodeTraitPattern), hyperRelationPatterns).map(_.name),
-          commonHyperNodeTraits = nodeTraitToCommonHyperNodeTraits(nodeTraitPatterns, relationTraitPatterns, selectedNodePatterns, hyperRelationPatterns, nodeTraitPattern),
+          commonHyperNodeNodeTraits = nodeTraitToCommonHyperNodeTraits(nodeTraitPatterns, nodeTraitPatterns, selectedNodePatterns, hyperRelationPatterns, nodeTraitPattern),
+          commonHyperNodeRelationTraits = nodeTraitToCommonHyperNodeTraits(nodeTraitPatterns, relationTraitPatterns, selectedNodePatterns, hyperRelationPatterns, nodeTraitPattern),
           flatStatements = flatSuperStatements(nodeTraitPatterns, nodeTraitPattern),
           hasOwnFactory = hasOwnFactory
         )
@@ -51,15 +53,13 @@ class SchemaContext[C <: whitebox.Context](val context: C) {
         val relationTraitPatterns: List[RelationTraitPattern] = schema.statements.collect { case RelationTraitPattern(nodeTraitpattern) => nodeTraitpattern }
         val groupPatterns: List[GroupPattern] = schema.statements.collect { case GroupPattern(groupPattern) => groupPattern }
 
-        val nodes = nodePatterns.map { nodePattern => {
-          import nodePattern._
-          Node(nodePattern, superTypes.headOption.map(superType => flatSuperStatements(nodeTraitPatterns, nameToPattern(nodeTraitPatterns, superType)).size).getOrElse(0),
-            neighbours(nodePattern, relationPatterns), rev_neighbours(nodePattern, relationPatterns),
-            flatSuperStatements(nodeTraitPatterns, nodePattern))
-        }
-        }
         val nodeTraits = nodeTraitPatterns.map(nodeTraitPattern =>
           NodeTrait(nodeTraitPattern, nodeTraitPatterns, relationTraitPatterns, nodePatterns, relationPatterns, hyperRelationPatterns, traitCanHaveOwnFactory(nodePatterns ::: hyperRelationPatterns ::: relationTraitPatterns ::: nodeTraitPatterns, nodeTraitPattern)))
+        val nodes = nodePatterns.map { nodePattern => {
+          import nodePattern._
+          Node(nodePattern, neighbours(nodePattern, relationPatterns), rev_neighbours(nodePattern, relationPatterns),
+            flatSuperStatements(nodeTraitPatterns, nodePattern), findSuperFactoryParameterList(nodeTraitPatterns, nodePattern, nodeTraits))
+        }}
         val relationTraits = relationTraitPatterns.map(relationTraitPattern =>
           RelationTrait(relationTraitPattern,
             flatSuperStatements(relationTraitPatterns, relationTraitPattern),
@@ -73,18 +73,21 @@ class SchemaContext[C <: whitebox.Context](val context: C) {
                 NodeTrait(nodeTraitPattern, nodeTraitPatterns, relationTraitPatterns, groupToNodes(groupPatterns, groupPattern).map(nameToPattern(nodePatterns, _)), relationPatterns, hyperRelationPatterns, false))
             )
           )
-        val hyperRelations = hyperRelationPatterns.map(hyperRelationPattern => HyperRelation(hyperRelationPattern, filterSuperTypes(nodeTraitPatterns, hyperRelationPattern), filterSuperTypes(relationTraitPatterns, hyperRelationPattern)))
-        val relations = relationPatterns.map(relationPattern => Relation(relationPattern, flatSuperStatements(relationTraitPatterns, relationPattern)))
+        val hyperRelations = hyperRelationPatterns.map(hyperRelationPattern => HyperRelation(hyperRelationPattern, filterSuperTypes(nodeTraitPatterns, hyperRelationPattern), filterSuperTypes(relationTraitPatterns, hyperRelationPattern), flatSuperStatements(nodeTraitPatterns ::: relationTraitPatterns, hyperRelationPattern), findSuperFactoryParameterList(nodeTraitPatterns ::: relationTraitPatterns, hyperRelationPattern, relationTraits)))
+        val relations = relationPatterns.map(relationPattern => Relation(relationPattern, flatSuperStatements(relationTraitPatterns, relationPattern), findSuperFactoryParameterList(relationTraitPatterns, relationPattern, relationTraits)))
         Schema(name, superTypes, nodes, relations, hyperRelations, nodeTraits, relationTraits, groups, statements)
       }
 
+      def findSuperFactoryParameterList[P <: NamePattern with SuperTypesPattern, Q <: Patterns.Name with HasOwnFactory](patterns: List[_ <: P], pattern: P, nameClasses: List[Q]): Option[ParameterList] = patternToNameClasses(patternToFlatSuperTypes(patterns, pattern), nameClasses).find(_.hasOwnFactory).map(_.parameterList)
+
+      def patternToNameClasses[P <: Patterns.Name with HasOwnFactory](patterns: List[_ <: NamePattern], nameClasses: List[P]): List[P] = nameClasses.filter(nameClass => patterns.map(_.name).contains(nameClass.name))
 
       def filterSuperTypes(patterns: List[_ <: NamePattern], pattern: SuperTypesPattern): List[String] = {
         pattern.superTypes intersect patterns.map(_.name)
       }
-      def flatSuperStatements[P <: NamePattern with SuperTypesPattern with StatementsPattern](nodeTraitPatterns: List[NamePattern with SuperTypesPattern with StatementsPattern], nodePattern: P): List[Tree] = {
-        val superTypes: List[StatementsPattern with NamePattern with SuperTypesPattern] = nodePattern.superTypes.map(superType => nameToPattern(nodeTraitPatterns, superType))
-        val flatSuperTypes: List[StatementsPattern] = nodePattern :: patternToFlatSuperTypes(nodeTraitPatterns, nodePattern)
+      def flatSuperStatements[P <: NamePattern with SuperTypesPattern with StatementsPattern](superTypePatterns: List[NamePattern with SuperTypesPattern with StatementsPattern], pattern: P): List[Tree] = {
+        val superTypes: List[StatementsPattern with NamePattern with SuperTypesPattern] = pattern.superTypes.map(superType => nameToPattern(superTypePatterns, superType))
+        val flatSuperTypes: List[StatementsPattern] = pattern :: patternToFlatSuperTypes(superTypePatterns, pattern)
         flatSuperTypes.flatMap(_.statements)
       }
       val testNode = NodePattern("a", List("superx"), List(q"def title:String"))
@@ -99,11 +102,11 @@ class SchemaContext[C <: whitebox.Context](val context: C) {
       def neighbours(nodePattern: NodePattern, relations: List[RelationPattern]): List[(String, String)] = relations.filter(_.startNode == nodePattern.name).map(r => r.name -> r.endNode)
       def rev_neighbours(nodePattern: NodePattern, relations: List[RelationPattern]): List[(String, String)] = relations.filter(_.endNode == nodePattern.name).map(r => r.name -> r.startNode)
       def isDeepSuperType[P <: NamePattern with SuperTypesPattern](patterns: List[P], subPattern: P, superPattern: P): Boolean = {
-        assert(subPattern.superTypes.forall(superType => patterns.map(_.name) contains superType), s"${ subPattern.superTypes } ## NOT IN ## ${ patterns.map(_.name) }")
+        // assert(subPattern.superTypes.forall(superType => patterns.map(_.name) contains superType), s"${ subPattern.superTypes } ## NOT IN ## ${ patterns.map(_.name) }")
         subPattern.superTypes match {
           case Nil        => false
           case superTypes => superTypes.exists { name =>
-            superPattern.name == name || isDeepSuperType(patterns, nameToPattern(patterns, name), superPattern)
+            superPattern.name == name || (patterns.exists(_.name == name) && isDeepSuperType(patterns, nameToPattern(patterns, name), superPattern))
           }
         }
       }
@@ -143,10 +146,10 @@ class SchemaContext[C <: whitebox.Context](val context: C) {
         relations.filter(relation => nodeNames.contains(relation.startNode) && nodeNames.contains(relation.endNode))
       }
 
-      def nodeTraitToCommonHyperNodeTraits(nodeTraitPatterns: List[NodeTraitPattern], relationTraitPatterns: List[RelationTraitPattern], nodePatterns: List[NodePattern], hyperRelationPatterns: List[HyperRelationPattern], nodeTrait: NodeTraitPattern): List[String] = {
+      def nodeTraitToCommonHyperNodeTraits[P <: NamePattern with SuperTypesPattern](nodeTraitPatterns: List[NodeTraitPattern], middleNodeTraitPatterns: List[P], nodePatterns: List[NodePattern], hyperRelationPatterns: List[HyperRelationPattern], nodeTrait: NodeTraitPattern): List[String] = {
         val nodes = nodeTraitToNodes(nodeTraitPatterns, nodePatterns, nodeTrait)
         val subHyperRelations = nodeNamesToRelations(nodes, hyperRelationPatterns)
-        val flatSuperTypes: List[List[String]] = subHyperRelations.map(hyperRelation => patternToFlatSuperTypes(nodeTraitPatterns ::: relationTraitPatterns, hyperRelation).map(_.name))
+        val flatSuperTypes: List[List[String]] = subHyperRelations.map(hyperRelation => patternToFlatSuperTypes(middleNodeTraitPatterns, hyperRelation).map(_.name))
         if(flatSuperTypes.isEmpty) Nil
         else if(flatSuperTypes.size == 1) flatSuperTypes.head
         else flatSuperTypes.reduce(_ intersect _)
@@ -157,7 +160,11 @@ class SchemaContext[C <: whitebox.Context](val context: C) {
           NodeTraitPattern("traitB", Nil, Nil),
           NodeTraitPattern("traitC", Nil, Nil)
         ),
-        Nil,
+        List(
+          NodeTraitPattern("traitA", Nil, Nil),
+          NodeTraitPattern("traitB", Nil, Nil),
+          NodeTraitPattern("traitC", Nil, Nil)
+        ),
         List(
           NodePattern("nodeC", List("traitA"), Nil),
           NodePattern("nodeD", List("traitA"), Nil)
@@ -180,6 +187,15 @@ class SchemaContext[C <: whitebox.Context](val context: C) {
 
       def traitCanHaveOwnFactory(hierarchyPatterns: List[NamePattern with SuperTypesPattern with StatementsPattern], currentTrait: NamePattern with SuperTypesPattern): Boolean = {
         val children = patternToFlatSubTypes(hierarchyPatterns, currentTrait)
+        // if we currently are at NodeTrait, we need to check whether one of its
+        // children is a HyperRelation. If that is the case, a factory cannot be
+        // generated, as the HyperRelation additionally needs Start-/EndNode in
+        // its local method.
+        val isNodeTrait = currentTrait.isInstanceOf[NodeTraitPattern]
+        val hasHyperRelationChild = children.exists(_.isInstanceOf[HyperRelationPattern])
+        if (isNodeTrait && hasHyperRelationChild)
+          return false
+
         val statements = children.flatMap(_.statements)
         statements.find {
           case q"val $x:Option[$propertyType]" => false

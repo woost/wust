@@ -124,8 +124,8 @@ object Database {
     Discourse(db.queryGraph(Query(query, params)))
   }
 
-  def connectNodes[START <: SchemaNode, RELATION <: SchemaAbstractRelation[START, END], END <: SchemaNode](discourse: Discourse, start: START, factory: ContentRelationFactory[START, RELATION, END], end: END): (START, END) = {
-    discourse.add(factory.local(start, end))
+  def connectNodes[START <: SchemaNode, RELATION <: SchemaAbstractRelation[START, END], END <: SchemaNode](discourse: Discourse, start: START, factory: SchemaAbstractRelationFactory[START, RELATION, END], end: END): (START, END) = {
+    // discourse.add(factory.local(start, end))
     db.persistChanges(discourse.graph)
     (start, end)
   }

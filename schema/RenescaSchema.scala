@@ -80,7 +80,7 @@ package object schema {
     }
   }
 
-  sealed trait SchemaItem
+  trait SchemaItem
 
   trait SchemaNode extends SchemaItem with SchemaNodeFilter {
     def label = node.labels.head
@@ -93,7 +93,7 @@ package object schema {
     def getStringProperty(key: String) = node.properties(key).asInstanceOf[StringPropertyValue]
   }
 
-  sealed trait SchemaAbstractRelation[+STARTNODE <: SchemaNode, +ENDNODE <: SchemaNode] extends SchemaItem {
+  trait SchemaAbstractRelation[+STARTNODE <: SchemaNode, +ENDNODE <: SchemaNode] extends SchemaItem {
     def startNode: STARTNODE
     def endNode: ENDNODE
   }
@@ -129,13 +129,13 @@ package object schema {
     //    protected def local: T = create(Node.local(List(label)))
   }
 
-  trait SchemaAbstractRelationFactory[STARTNODE <: SchemaNode, RELATION <: SchemaAbstractRelation[STARTNODE, ENDNODE] with SchemaItem, ENDNODE <: SchemaNode] {
+  trait SchemaAbstractRelationFactory[+STARTNODE <: SchemaNode, +RELATION <: SchemaAbstractRelation[STARTNODE, ENDNODE] with SchemaItem, +ENDNODE <: SchemaNode] {
     // def local(startNode: STARTNODE, endNode: ENDNODE): RELATION
     def startNodeFactory: SchemaNodeFactory[STARTNODE]
     def endNodeFactory: SchemaNodeFactory[ENDNODE]
   }
 
-  trait SchemaRelationFactory[STARTNODE <: SchemaNode, RELATION <: SchemaRelation[STARTNODE, ENDNODE], ENDNODE <: SchemaNode] extends SchemaAbstractRelationFactory[STARTNODE, RELATION, ENDNODE] {
+  trait SchemaRelationFactory[+STARTNODE <: SchemaNode, +RELATION <: SchemaRelation[STARTNODE, ENDNODE], +ENDNODE <: SchemaNode] extends SchemaAbstractRelationFactory[STARTNODE, RELATION, ENDNODE] {
     def relationType: RelationType
     def create(relation: Relation): RELATION
     // def local(startNode: STARTNODE, endNode: ENDNODE): RELATION = {
