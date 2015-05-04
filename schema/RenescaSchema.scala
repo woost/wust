@@ -6,6 +6,7 @@ package object schema {
   import renesca.parameter.StringPropertyValue
   import renesca.parameter.implicits._
 
+  //TODO: rename STARTNODE -> START
   type SchemaAbstractRelationFactoryStartEnd[START <: SchemaNode, END <: SchemaNode] = SchemaAbstractRelationFactory[START, _ <: SchemaAbstractRelation[START, END], END]
   type SchemaAbstractRelationFactoryNode[NODE <: SchemaNode] = SchemaAbstractRelationFactory[_ <: NODE, _ <: SchemaAbstractRelation[_, _], _ <: NODE]
   type SchemaAbstractRelationFactoryAny = SchemaAbstractRelationFactory[_ <: SchemaNode, _ <: SchemaAbstractRelation[_, _], _ <: SchemaNode]

@@ -118,8 +118,18 @@ class PatternContext[C <: whitebox.Context](val context: C) {
     }
 
     case class RelationTrait(pattern: RelationTraitPattern, flatStatements: List[Tree], hasOwnFactory: Boolean) extends Name with SuperTypesPattern with StatementsPattern {
+      if(pattern.superTypes.size > 1)
+        context.abort(NoPosition, "Currently RelationTraits are restricted to only extend one trait")
+
       def superTypes = pattern.superTypes
       def statements = pattern.statements
+
+      def name_type = TypeName(name)
+      def name_term = TermName(name)
+      def name_label = nameToLabel(name)
+      def name_plural = nameToPlural(name)
+      def name_plural_term = TermName(name_plural)
+      def superTypes_type = superTypes.map(TypeName(_))
     }
 
 
@@ -145,9 +155,9 @@ class PatternContext[C <: whitebox.Context](val context: C) {
     }
     case class RelationPattern(name: String, startNode: String, endNode: String, superTypes: List[String], statements: List[Tree]) extends NamePattern with StartEndNodePattern with SuperTypesPattern with StatementsPattern
 
-    case class Relation(pattern: RelationPattern, flatStatements:List[Tree]) extends Name with StartEndNodePattern with SuperTypesPattern with StatementsPattern {
+    case class Relation(pattern: RelationPattern, flatStatements: List[Tree]) extends Name with StartEndNodePattern with SuperTypesPattern with StatementsPattern {
       if(superTypes.size > 1)
-        context.abort(NoPosition, "Currently relations are restricted to only extend one trait")
+        context.abort(NoPosition, "Currently Relations are restricted to only extend one trait")
 
       def startNode = pattern.startNode
       def endNode = pattern.endNode
@@ -173,9 +183,9 @@ class PatternContext[C <: whitebox.Context](val context: C) {
     }
     case class HyperRelationPattern(name: String, startNode: String, endNode: String, superTypes: List[String], statements: List[Tree]) extends NamePattern with SuperTypesPattern with StartEndNodePattern with StatementsPattern
 
-    case class HyperRelation(pattern: HyperRelationPattern, superTypesNode: List[String], superTypesRelation: List[String]) extends NamePattern with SuperTypesPattern with StartEndNodePattern with StatementsPattern {
-      if(superTypesNode.size > 1 || superTypesRelation.size > 1)
-        context.abort(NoPosition, "Currently relations are restricted to only extend one trait")
+    case class HyperRelation(pattern: HyperRelationPattern, superNodeTypes: List[String], superRelationTypes: List[String]) extends NamePattern with SuperTypesPattern with StartEndNodePattern with StatementsPattern {
+      if(superNodeTypes.size > 1 || superRelationTypes.size > 1)
+        context.abort(NoPosition, "Currently HyperRelations are restricted to only extend one trait")
 
       def name = pattern.name
       def startNode = pattern.startNode
@@ -213,7 +223,7 @@ class PatternContext[C <: whitebox.Context](val context: C) {
                      flatStatements: List[Tree]
                      ) extends NamePattern with SuperTypesPattern {
       if(superTypes.size > 1)
-        context.abort(NoPosition, "Currently nodes are restricted to only extend one trait")
+        context.abort(NoPosition, "Currently Nodes are restricted to only extend one trait")
 
       def name_type = TypeName(name)
       def name_term = TermName(name)
@@ -240,6 +250,8 @@ class PatternContext[C <: whitebox.Context](val context: C) {
                          flatStatements: List[Tree],
                          hasOwnFactory: Boolean
                           ) extends NamePattern with SuperTypesPattern {
+      if(superTypes.size > 1)
+        context.abort(NoPosition, "Currently NodeTraits are restricted to only extend one trait")
       def name_type = TypeName(name)
       def name_term = TermName(name)
       def name_label = nameToLabel(name)

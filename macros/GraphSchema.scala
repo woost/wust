@@ -126,22 +126,18 @@ object GraphSchemaMacro {
           def relationTraitFactories(schema: Schema): List[Tree] = schema.relationTraits.filter(_.hasOwnFactory).map { relationTrait => import relationTrait._
             val localWithParams = createLocalFactoryMethod(flatStatements, q"relation.relation", { (localParams, propertyAssignments) =>
               val startEndlocalParams = List(List(q"val startNode:START", q"val endNode:END") ::: localParams.head)
-              q"""
-              def local (...$startEndlocalParams): RELATION = {
-              val relation = create(Relation.local(startNode.node, endNode.node, relationType))
-              ..$propertyAssignments
-              relation
-              }"""
+              q""" def local (...$startEndlocalParams): RELATION """
             })
             val factoryName = TypeName(traitFactoryName(name))
             q"""
-           trait $factoryName[START <: SchemaNode, RELATION <: SchemaRelation[START,END], END] extends SchemaRelationFactory[START,RELATION,END] {
+           trait $factoryName[START <: SchemaNode, RELATION <: SchemaRelation[START,END], END <: SchemaNode] extends SchemaAbstractRelationFactory[START,RELATION,END] {
              $localWithParams
            }
            """
           }
 
           def nodeFactories(schema: Schema): List[Tree] = schema.nodes.map { node => import node._
+            //TODO: remove if?
             val localWithParams = if(superTypesFlatStatementsCount != flatStatements.size) //TODO: DRY machen, gibts auch in relationTraitfactories
                                     createLocalFactoryMethod(flatStatements, q"node.node", { (localParams, propertyAssignments) =>
                                       q"""
@@ -154,12 +150,13 @@ object GraphSchemaMacro {
                                   else
                                     q""
 
-            val superFactory = superTypes.headOption match {
-              case Some(superType) => TypeName(traitFactoryName(superType))
-              case None            => TypeName("SchemaNodeFactory")
-            }
+            val superFactory = TypeName(superTypes.headOption match {
+              case Some(superType) => traitFactoryName(superType)
+              case None            => "SchemaNodeFactory"
+            })
+            // Extending superFactory is enough, because SchemaNodeFactory is pulled in every case.
+            // This works because SchemaNodeFactory does not get any generics.
             q"""
-
            object $name_term extends $superFactory[$name_type] {
              def create(node: Node) = new $name_type(node)
              val label = Label($name_label)
@@ -195,14 +192,19 @@ object GraphSchemaMacro {
             val localWithParams = createLocalFactoryMethod(flatStatements, q"relation.relation", { (localParams, propertyAssignments) => //TODO: DRY
               val startEndlocalParams = List(List(q"val startNode:$startNode_type", q"val endNode:$endNode_type") ::: localParams.head)
               q"""
-              def local (...$startEndlocalParams): $name_type = {
+              def local(...$startEndlocalParams): $name_type = {
               val relation = create(Relation.local(startNode.node, endNode.node, relationType))
               ..$propertyAssignments
               relation
               }"""
             })
+            val superRelationFactory: TypeName = superTypes.headOption match {
+              case Some(superType) => TypeName(traitFactoryName(superType))
+              case None            => TypeName(s"SchemaAbstractRelationFactory[$startNode_type, $name_type, $endNode_type]")
+            }
             q"""
-           object $name_term extends SchemaRelationFactory[$startNode_type, $name_type, $endNode_type] {
+           object $name_term extends SchemaRelationFactory[$startNode_type, $name_type, $endNode_type]
+            with $superRelationFactory {
                def startNodeFactory = $startNode_term
                def endNodeFactory = $endNode_term
                def relationType = RelationType($name_label)
@@ -226,10 +228,13 @@ object GraphSchemaMacro {
 
 
           def hyperRelationFactories(schema: Schema): List[Tree] = schema.hyperRelations.map { hyperRelation => import hyperRelation._
-            //TODO: local method based on properties (like NodeFactory)
+            val superRelationFactory = superRelationTypes.headOption match {
+              case Some(superType) => tq"${ traitFactoryName(superType) }"
+              case None            => tq"SchemaAbstractRelationFactory[$startNode_type, $name_type, $endNode_type]"
+            }
             q"""
            object $name_term extends SchemaHyperRelationFactory[$startNode_type, $startRelation_type, $name_type, $endRelation_type, $endNode_type]
-             with SchemaAbstractRelationFactory[$startNode_type, $name_type, $endNode_type] {
+             with $superRelationFactory {
 
              override def label = Label($name_label)
              override def startRelationType = RelationType($startRelation_label)
@@ -265,6 +270,11 @@ object GraphSchemaMacro {
           }.flatten
 
           def nodeSuperTraits(schema: Schema): List[Tree] = schema.nodeTraits.map { nodeTrait => import nodeTrait._
+            val traitBody = statements.flatMap(generatePropertyAccessors(_))
+            q""" trait $name_type extends ..$superTypes_type { ..$traitBody } """
+          }
+
+          def relationSuperTraits(schema: Schema): List[Tree] = schema.relationTraits.map { relationTrait => import relationTrait._
             val traitBody = statements.flatMap(generatePropertyAccessors(_))
             q""" trait $name_type extends ..$superTypes_type { ..$traitBody } """
           }
@@ -322,6 +332,7 @@ object GraphSchemaMacro {
               RelationPattern.unapply(statement).isDefined ||
               HyperRelationPattern.unapply(statement).isDefined ||
               NodeTraitPattern.unapply(statement).isDefined ||
+              RelationTraitPattern.unapply(statement).isDefined ||
               GroupPattern.unapply(statement).isDefined
           }
 
@@ -346,6 +357,8 @@ object GraphSchemaMacro {
              ..${ hyperRelationClasses(schema) }
 
              ..${ nodeSuperTraits(schema) }
+             ..${ relationSuperTraits(schema) }
+
              ..${ groupFactories(schema) }
              ..${ groupClasses(schema) }
 
@@ -359,6 +372,7 @@ object GraphSchemaMacro {
         Helpers.crashOnAsserted()
         val code = Code.schema(Schema(schemaPattern))
         code
-    })
+    }
+    )
   }
 }
