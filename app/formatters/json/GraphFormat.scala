@@ -29,12 +29,14 @@ object GraphFormat {
   implicit object ContentNodeFormat extends Format[UuidNode] {
     def reads(json: JsValue) = ???
 
+    //TODO: different formatter for /graph and /problems|goals|ideas
     def writes(node: UuidNode) = JsObject(Seq(
       ("id", JsString(node.uuid)),
       ("label", JsString(node.label))
     ) ++ (node match {
         case n: ContentNode => Seq(
           ("title", JsString(n.title)),
+          ("description", JsString(n.description.getOrElse(""))),
           ("hyperEdge", JsBoolean(false))
         )
         case _ => Seq(
@@ -59,7 +61,7 @@ object GraphFormat {
   implicit object NodeAddFormat extends Format[NodeAddRequest] {
     def reads(json: JsValue) = json match {
       case JsObject(_) => {
-        JsSuccess(NodeAddRequest((json \ "title").as[String]))
+        JsSuccess(NodeAddRequest((json \ "title").as[String], (json \ "description").as[Option[String]]))
       }
       case otherwise   => JsError()
     }

@@ -12,8 +12,7 @@ angular.module("wust.components").directive("focusView", function($state, $rootS
             $scope.removeFocused = _.wrap($scope.node, removeFocused);
             $scope.updateFocused = _.wrap($scope.node, updateFocused);
 
-            // register for events for the current node, as well as all
-            // connected lists
+            // register for events for the current node, as well as all connected lists
             let unsubscribe = getUnsubscribePromise();
             unsubscribe.then($scope.node.$subscribeToLiveEvent(m => $scope.$apply(_.partial(onNodeChange, $scope.node, m))));
             _.each(_.compact([$scope.left, $scope.right, $scope.bottom, $scope.top]), list => {

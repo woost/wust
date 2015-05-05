@@ -30,7 +30,7 @@ trait ContentNodes[NodeType <: ContentNode] extends ResourceRouter with Silhouet
         val nodeAdd = request.body.asJson.get.as[NodeAddRequest]
 
         val discourse = Discourse.empty
-        val contentNode = nodeSchema.factory.local(nodeAdd.title)
+        val contentNode = nodeSchema.factory.local(nodeAdd.title, description = nodeAdd.description)
         discourse.add(contentNode)
         db.persistChanges(discourse.graph)
 
@@ -65,6 +65,7 @@ trait ContentNodes[NodeType <: ContentNode] extends ResourceRouter with Silhouet
     discourse.contentNodes.headOption match {
       case Some(node) => {
         node.title = nodeAdd.title
+        node.description = nodeAdd.description
         db.persistChanges(discourse.graph)
         Broadcaster.broadcastEdit(nodeSchema.path, node)
         Ok(Json.toJson(node))
