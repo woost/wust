@@ -54,7 +54,7 @@ trait ContentNodes[NodeType <: ContentNode] extends ResourceRouter with Silhouet
   def show(uuid: String) = Action {
     val discourse = nodeDiscourseGraph(nodeSchema.factory, uuid)
     discourse.graph.nodes.headOption match {
-      case Some(node) => Ok(Json.toJson(nodeSchema.factory.create(node)))
+      case Some(node) => Ok(Json.toJson(nodeSchema.factory.wrap(node)))
       case None       => BadRequest(s"Node with label ${ nodeSchema.factory.label } and uuid $uuid not found.")
     }
   }

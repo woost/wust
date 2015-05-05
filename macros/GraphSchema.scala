@@ -119,10 +119,10 @@ object GraphSchemaMacro {
             // This works because NodeFactory does not get any generics.
             q"""
            object $name_term extends $superFactory[$name_type] {
-             def create(node: raw.Node) = new $name_type(node)
+             def wrap(node: raw.Node) = new $name_type(node)
              val label = raw.Label($name_label)
              def local (...${ parameterList.toParamCode }):$name_type = {
-              val node = create(raw.Node.local(List(label)))
+              val node = wrap(raw.Node.local(List(label)))
               ..${ parameterList.toAssignmentCode(q"node.node") }
               node
              }
@@ -165,12 +165,12 @@ object GraphSchemaMacro {
                def startNodeFactory = $startNode_term
                def endNodeFactory = $endNode_term
                def relationType = raw.RelationType($name_label)
-               def create(relation: raw.Relation) = $name_term(
-                 $startNode_term.create(relation.startNode),
+               def wrap(relation: raw.Relation) = $name_term(
+                 $startNode_term.wrap(relation.startNode),
                  relation,
-                 $endNode_term.create(relation.endNode))
+                 $endNode_term.wrap(relation.endNode))
               def local (...${ List(List(q"val startNode:$startNode_type", q"val endNode:$endNode_type") ::: parameterList.toParamCode.head) }):$name_type = {
-                val relation = create(raw.Relation.local(startNode.node, endNode.node, relationType))
+                val relation = wrap(raw.Relation.local(startNode.node, endNode.node, relationType))
                 ..${ parameterList.toAssignmentCode(q"relation.relation") }
                 relation
               }
@@ -208,14 +208,14 @@ object GraphSchemaMacro {
              override def factory = $name_term
              override def endNodeFactory = $endNode_term
 
-             override def create(node: raw.Node) = new $name_type(node)
-             override def startRelationCreate(relation: raw.Relation) = $startRelation_term(startNodeFactory.create(relation.startNode), relation, factory.create(relation.endNode))
-             override def endRelationCreate(relation: raw.Relation) = $endRelation_term(factory.create(relation.startNode), relation, endNodeFactory.create(relation.endNode))
+             override def wrap(node: raw.Node) = new $name_type(node)
+             override def startRelationWrap(relation: raw.Relation) = $startRelation_term(startNodeFactory.wrap(relation.startNode), relation, factory.wrap(relation.endNode))
+             override def endRelationWrap(relation: raw.Relation) = $endRelation_term(factory.wrap(relation.startNode), relation, endNodeFactory.wrap(relation.endNode))
 
              def local (...${ List(List(q"val startNode:$startNode_type", q"val endNode:$endNode_type") ::: parameterList.toParamCode.head) }):$name_type = {
-              val middleNode = create(raw.Node.local(List(label)))
+              val middleNode = wrap(raw.Node.local(List(label)))
               ..${ parameterList.toAssignmentCode(q"middleNode.node") }
-              create(startRelationLocal(startNode, middleNode).relation, middleNode.node, endRelationLocal(middleNode, endNode).relation)
+              wrap(startRelationLocal(startNode, middleNode).relation, middleNode.node, endRelationLocal(middleNode, endNode).relation)
              }
              ${ forwardLocalMethodStartEnd(parameterList, traitFactoryParameterList, tq"$name_type", tq"$startNode_type", tq"$endNode_type") }
            }
