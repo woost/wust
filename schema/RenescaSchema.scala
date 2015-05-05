@@ -126,11 +126,9 @@ package object schema {
     def label: raw.Label
     //TODO: rename to wrap
     def create(node: raw.Node): T
-    //    protected def local: T = create(Node.local(List(label)))
   }
 
   trait AbstractRelationFactory[+STARTNODE <: Node, +RELATION <: AbstractRelation[STARTNODE, ENDNODE] with Item, +ENDNODE <: Node] {
-    // def local(startNode: STARTNODE, endNode: ENDNODE): RELATION
     def startNodeFactory: NodeFactory[STARTNODE]
     def endNodeFactory: NodeFactory[ENDNODE]
   }
@@ -138,9 +136,6 @@ package object schema {
   trait RelationFactory[+STARTNODE <: Node, +RELATION <: Relation[STARTNODE, ENDNODE], +ENDNODE <: Node] extends AbstractRelationFactory[STARTNODE, RELATION, ENDNODE] {
     def relationType: raw.RelationType
     def create(relation: raw.Relation): RELATION
-    // def local(startNode: STARTNODE, endNode: ENDNODE): RELATION = {
-    //   create(raw.Relation.local(startNode.node, endNode.node, relationType))
-    // }
   }
 
   trait HyperRelationFactory[
@@ -171,10 +166,5 @@ package object schema {
     def endRelationLocal(middleNode: HYPERRELATION, endNode: ENDNODE): ENDRELATION = {
       endRelationCreate(raw.Relation.local(middleNode.node, endNode.node, endRelationType))
     }
-
-    // def local(startNode: STARTNODE, endNode: ENDNODE): HYPERRELATION = {
-    //   val middleNode = super[SchemaNodeFactory].local
-    //   create(startRelationLocal(startNode, middleNode).relation, middleNode.node, endRelationLocal(middleNode, endNode).relation)
-    // }
   }
 }
