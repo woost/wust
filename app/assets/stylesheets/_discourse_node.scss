@@ -73,11 +73,11 @@ $discourse_conargument_color: #ff6d6f;
 }
 
 .discourse_proargument {
-    @include discourse_node($discourse_proargument_color);
+    @include discourse_node($discourse_proargument_color, "");
 }
 
 .discourse_conargument {
-    @include discourse_node($discourse_conargument_color);
+    @include discourse_node($discourse_conargument_color, "");
 }
 
 .discourse_idea_list {
