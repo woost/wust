@@ -1,25 +1,19 @@
 package formatters.json
 
-import collection.mutable
+import model.WustSchema._
 import modules.requests._
 import play.api.libs.json._
-import renesca.graph.Graph
-import renesca.graph._
-import renesca.parameter.implicits._
-import renesca.parameter.PropertyKey._
-import renesca.parameter.StringPropertyValue
-import model._
-import model.WustSchema._
+import renesca.graph.{Label, RelationType}
 import renesca.schema._
 
 object GraphFormat {
   implicit def LabelToString(label: Label): String = label.name
   implicit def RelationTypeToString(relationType: RelationType): String = relationType.name
 
-  implicit object DiscourseRelationFormat extends Format[SchemaRelation[UuidNode, UuidNode]] {
+  implicit object DiscourseRelationFormat extends Format[Relation[UuidNode, UuidNode]] {
     def reads(json: JsValue) = ???
 
-    def writes(relation: SchemaRelation[UuidNode, UuidNode]) = JsObject(Seq(
+    def writes(relation: Relation[UuidNode, UuidNode]) = JsObject(Seq(
       ("startId", JsString(relation.startNode.uuid)),
       ("label", JsString(relation.relationType)),
       ("endId", JsString(relation.endNode.uuid))
@@ -34,16 +28,16 @@ object GraphFormat {
       ("id", JsString(node.uuid)),
       ("label", JsString(node.label))
     ) ++ (node match {
-        case n: ContentNode => Seq(
-          ("title", JsString(n.title)),
-          ("description", JsString(n.description.getOrElse(""))),
-          ("hyperEdge", JsBoolean(false))
-        )
-        case _ => Seq(
-          ("hyperEdge", JsBoolean(true))
-        )
-      }
-    ))
+      case n: ContentNode => Seq(
+        ("title", JsString(n.title)),
+        ("description", JsString(n.description.getOrElse(""))),
+        ("hyperEdge", JsBoolean(false))
+      )
+      case _              => Seq(
+        ("hyperEdge", JsBoolean(true))
+      )
+    }
+      ))
   }
 
   implicit object DiscourseFormat extends Format[Discourse] {
@@ -53,7 +47,7 @@ object GraphFormat {
       JsObject(Seq(
         //TODO: this is really ugly!
         ("nodes", Json.toJson(discourseGraph.uuidNodes ++ discourseGraph.uuidNodeHyperRelations)),
-        ("edges", Json.toJson(discourseGraph.uuidNodeRelations ++ discourseGraph.uuidNodeHyperRelations.flatMap(r => List(r.startRelation.asInstanceOf[SchemaRelation[UuidNode, UuidNode]], r.endRelation.asInstanceOf[SchemaRelation[UuidNode, UuidNode]]))))
+        ("edges", Json.toJson(discourseGraph.uuidNodeRelations ++ discourseGraph.uuidNodeHyperRelations.flatMap(r => List(r.startRelation.asInstanceOf[Relation[UuidNode, UuidNode]], r.endRelation.asInstanceOf[Relation[UuidNode, UuidNode]]))))
       ))
     }
   }
@@ -90,25 +84,25 @@ object GraphFormat {
 
   implicit def nodeSchemaWrites[NODE <: ContentNode] = new Writes[NodeSchema[NODE]] {
     // TODO: duplicate code
-    implicit def simpleConnectSchemaWrites[SCHEMANODE <: SchemaNode] = new Writes[Map[String,SimpleConnectSchema[SCHEMANODE]]] {
-      def writes(schemas: Map[String,SimpleConnectSchema[SCHEMANODE]]) = JsObject(schemas.map {
-        case (k,v) => (k, JsObject(Seq(
+    implicit def simpleConnectSchemaWrites[SCHEMANODE <: Node] = new Writes[Map[String, SimpleConnectSchema[SCHEMANODE]]] {
+      def writes(schemas: Map[String, SimpleConnectSchema[SCHEMANODE]]) = JsObject(schemas.map {
+        case (k, v) => (k, JsObject(Seq(
           ("cardinality", JsString(v.cardinality))
         )))
       }.toList
       )
     }
 
-    implicit def connectSchemaWrites[SCHEMANODE <: SchemaNode] = new Writes[Map[String,ConnectSchema[SCHEMANODE]]] {
-      def writes(schemas: Map[String,ConnectSchema[SCHEMANODE]]) = JsObject(schemas.map {
-        case (k, v: SimpleConnectSchema[SCHEMANODE]) => (k, JsObject(Seq(
+    implicit def connectSchemaWrites[SCHEMANODE <: Node] = new Writes[Map[String, ConnectSchema[SCHEMANODE]]] {
+      def writes(schemas: Map[String, ConnectSchema[SCHEMANODE]]) = JsObject(schemas.map {
+        case (k, v: SimpleConnectSchema[SCHEMANODE])           => (k, JsObject(Seq(
           ("cardinality", JsString(v.cardinality))
         )))
-        case (k, v @ StartHyperConnectSchema(_,connectSchemas)) => (k, JsObject(Seq(
+        case (k, v@StartHyperConnectSchema(_, connectSchemas)) => (k, JsObject(Seq(
           ("cardinality", JsString(v.cardinality)),
           ("subs", Json.toJson(connectSchemas))
         )))
-        case (k, v @ EndHyperConnectSchema(_,connectSchemas)) => (k, JsObject(Seq(
+        case (k, v@EndHyperConnectSchema(_, connectSchemas))   => (k, JsObject(Seq(
           ("cardinality", JsString(v.cardinality)),
           ("subs", Json.toJson(connectSchemas))
         )))

@@ -68,7 +68,7 @@ object GraphSchemaMacro {
           def nodeTraitFactories(schema: Schema): List[Tree] = schema.nodeTraits.filter(_.hasOwnFactory).map { nodeTrait => import nodeTrait._
             val factoryName = TypeName(traitFactoryName(name))
             q"""
-           trait $factoryName[NODE <: SchemaNode] extends SchemaNodeFactory[NODE] {
+           trait $factoryName[NODE <: Node] extends NodeFactory[NODE] {
               def local (...${ parameterList.toParamCode }): NODE
            }
            """
@@ -79,7 +79,7 @@ object GraphSchemaMacro {
             val startEndlocalParams = List(List(q"val startNode:START", q"val endNode:END") ::: parameterList.toParamCode.head)
             val factoryName = TypeName(traitFactoryName(name))
             q"""
-           trait $factoryName[START <: SchemaNode, +RELATION <: SchemaAbstractRelation[START,END], END <: SchemaNode] extends SchemaAbstractRelationFactory[START,RELATION,END] {
+           trait $factoryName[START <: Node, +RELATION <: AbstractRelation[START,END], END <: Node] extends AbstractRelationFactory[START,RELATION,END] {
               def local (...$startEndlocalParams): RELATION
            }
            """
@@ -112,11 +112,11 @@ object GraphSchemaMacro {
           def nodeFactories(schema: Schema): List[Tree] = schema.nodes.map { node => import node._
             val superFactory = TypeName(superTypes.headOption match {
               case Some(superType) => s"${ traitFactoryName(superType) }"
-              case None            => s"SchemaNodeFactory"
+              case None            => s"NodeFactory"
             })
 
-            // Extending superFactory is enough, because SchemaNodeFactory is pulled in every case.
-            // This works because SchemaNodeFactory does not get any generics.
+            // Extending superFactory is enough, because NodeFactory is pulled in every case.
+            // This works because NodeFactory does not get any generics.
             q"""
            object $name_term extends $superFactory[$name_type] {
              def create(node: raw.Node) = new $name_type(node)
@@ -143,7 +143,7 @@ object GraphSchemaMacro {
             }
 
             val nodeBody = statements.map(generateIndirectNeighbourAccessors(schema, _)).flatMap(generatePropertyAccessors(_))
-            val superTyesWithDefault = if(superTypes.isEmpty) List(TypeName("SchemaNode")) else superTypes_type
+            val superTyesWithDefault = if(superTypes.isEmpty) List(TypeName("Node")) else superTypes_type
 
             q"""
            case class $name_type(node: raw.Node) extends ..$superTyesWithDefault {
@@ -157,10 +157,10 @@ object GraphSchemaMacro {
           def relationFactories(schema: Schema): List[Tree] = schema.relations.map { relation => import relation._
             val superRelationFactory = TypeName(superTypes.headOption match {
               case Some(superType) => s"${ traitFactoryName(superType) }"
-              case None            => s"SchemaAbstractRelationFactory"
+              case None            => s"AbstractRelationFactory"
             })
             q"""
-           object $name_term extends SchemaRelationFactory[$startNode_type, $name_type, $endNode_type]
+           object $name_term extends RelationFactory[$startNode_type, $name_type, $endNode_type]
             with $superRelationFactory[$startNode_type, $name_type, $endNode_type] {
                def startNodeFactory = $startNode_term
                def endNodeFactory = $endNode_term
@@ -180,7 +180,7 @@ object GraphSchemaMacro {
           }
 
           def relationClasses(schema: Schema): List[Tree] = schema.relations.map { relation => import relation._
-            val superTypesWithDefault = "SchemaRelation" :: superTypes
+            val superTypesWithDefault = "Relation" :: superTypes
             val superTypesWithDefaultGenerics = superTypesWithDefault.map(TypeName(_)).map(superType => tq"$superType[$startNode_type,$endNode_type]")
             q"""
            case class $name_type(startNode: $startNode_type, relation: raw.Relation, endNode: $endNode_type)
@@ -194,10 +194,10 @@ object GraphSchemaMacro {
           def hyperRelationFactories(schema: Schema): List[Tree] = schema.hyperRelations.map { hyperRelation => import hyperRelation._
             val superRelationFactory = TypeName(superRelationTypes.headOption match {
               case Some(superType) => s"${ traitFactoryName(superType) }"
-              case None            => s"SchemaAbstractRelationFactory"
+              case None            => s"AbstractRelationFactory"
             })
             q"""
-           object $name_term extends SchemaHyperRelationFactory[$startNode_type, $startRelation_type, $name_type, $endRelation_type, $endNode_type]
+           object $name_term extends HyperRelationFactory[$startNode_type, $startRelation_type, $name_type, $endRelation_type, $endNode_type]
              with $superRelationFactory[$startNode_type, $name_type, $endNode_type] {
 
              override def label = raw.Label($name_label)
@@ -228,30 +228,30 @@ object GraphSchemaMacro {
             val superRelationTypesGenerics = superRelationTypes.map(TypeName(_)).map(superType => tq"$superType[$startNode_type,$endNode_type]")
             List( q"""
            case class $name_type(node: raw.Node)
-              extends SchemaHyperRelation[$startNode_type, $startRelation_type, $name_type, $endRelation_type, $endNode_type]
+              extends HyperRelation[$startNode_type, $startRelation_type, $name_type, $endRelation_type, $endNode_type]
               with ..${ superRelationTypesGenerics ::: superNodeTypes.map(t => tq"${ TypeName(t) }") } {
              ..$statements
            }
            """, q"""
            case class $startRelation_type(startNode: $startNode_type, relation: raw.Relation, endNode: $name_type)
-             extends SchemaRelation[$startNode_type, $name_type]
+             extends Relation[$startNode_type, $name_type]
            """, q"""
            case class $endRelation_type(startNode: $name_type, relation: raw.Relation, endNode: $endNode_type)
-             extends SchemaRelation[$name_type, $endNode_type]
+             extends Relation[$name_type, $endNode_type]
            """)
           }.flatten
 
           def nodeSuperTraits(schema: Schema): List[Tree] = schema.nodeTraits.map { nodeTrait => import nodeTrait._
-            val superTypesWithDefault = (if(superTypes.isEmpty) List("SchemaNode") else superTypes).map(TypeName(_))
+            val superTypesWithDefault = (if(superTypes.isEmpty) List("Node") else superTypes).map(TypeName(_))
             val traitBody = statements.flatMap(generatePropertyAccessors(_))
             q""" trait $name_type extends ..$superTypesWithDefault { ..$traitBody } """
           }
 
           def relationSuperTraits(schema: Schema): List[Tree] = schema.relationTraits.map { relationTrait => import relationTrait._
-            val superTypesWithDefault = if(superTypes.isEmpty) List("SchemaAbstractRelation") else superTypes
+            val superTypesWithDefault = if(superTypes.isEmpty) List("AbstractRelation") else superTypes
             val superTypesWithDefaultGenerics = superTypesWithDefault.map(TypeName(_)).map(superType => tq"$superType[START,END]")
             val traitBody = statements.flatMap(generatePropertyAccessors(_))
-            q""" trait $name_type[+START <: SchemaNode,+END <: SchemaNode] extends ..$superTypesWithDefaultGenerics { ..$traitBody } """
+            q""" trait $name_type[+START <: Node,+END <: Node] extends ..$superTypesWithDefaultGenerics { ..$traitBody } """
           }
 
           def groupFactories(schema: Schema): List[Tree] = schema.groups.map { group => import group._
@@ -272,22 +272,22 @@ object GraphSchemaMacro {
               q"def $name_plural_term:Set[$name_type] = ${ allOf(subNodes) }"
             }
             val relationTraitSets = nodeTraits.map { nodeTrait => import nodeTrait._
-              q"def ${ TermName(nameToPlural(name + "Relation")) }:Set[_ <: SchemaRelation[$name_type, $name_type]] = ${ allOf(subRelations) }"
+              q"def ${ TermName(nameToPlural(name + "Relation")) }:Set[_ <: Relation[$name_type, $name_type]] = ${ allOf(subRelations) }"
             }
             val hyperRelationTraitSets = nodeTraits.map { nodeTrait => import nodeTrait._
               val hyperNodeRelationTraits_type = commonHyperNodeRelationTraits_type.map(t => tq"$t[$name_type, $name_type]")
-              q"""def ${ TermName(nameToPlural(name + "HyperRelation")) } :Set[SchemaHyperRelation[
+              q"""def ${ TermName(nameToPlural(name + "HyperRelation")) } :Set[HyperRelation[
                   $name_type,
-                  _ <: SchemaRelation[$name_type, _],
-                  _ <: SchemaHyperRelation[$name_type, _, _, _, $name_type] with ..$commonHyperNodeNodeTraits_type with ..$hyperNodeRelationTraits_type,
-                  _ <: SchemaRelation[_, $name_type],
+                  _ <: Relation[$name_type, _],
+                  _ <: HyperRelation[$name_type, _, _, _, $name_type] with ..$commonHyperNodeNodeTraits_type with ..$hyperNodeRelationTraits_type,
+                  _ <: Relation[_, $name_type],
                   $name_type]
                   with ..$commonHyperNodeNodeTraits_type with ..$hyperNodeRelationTraits_type]
               = ${ allOf(subHyperRelations) }"""
             }
 
             q"""
-           case class $name_type(graph: raw.Graph) extends SchemaGraph {
+           case class $name_type(graph: raw.Graph) extends Graph {
              ..$nodeSets
              ..$relationSets
              ..$hyperRelationSets
@@ -296,9 +296,9 @@ object GraphSchemaMacro {
              ..$relationTraitSets
              ..$hyperRelationTraitSets
 
-             def nodes: Set[SchemaNode] = ${ allOf(nodes) }
-             def relations: Set[_ <: SchemaRelation[_,_]] = ${ allOf(relations) }
-             def hyperRelations: Set[_ <: SchemaHyperRelation[_,_,_,_,_]] = ${ allOf(hyperRelations) }
+             def nodes: Set[Node] = ${ allOf(nodes) }
+             def relations: Set[_ <: Relation[_,_]] = ${ allOf(relations) }
+             def hyperRelations: Set[_ <: HyperRelation[_,_,_,_,_]] = ${ allOf(hyperRelations) }
            }
            """
           }
