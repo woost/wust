@@ -33,7 +33,6 @@ class SchemaContext[C <: whitebox.Context](val context: C) {
         val nodes = nodeTraitToNodes(nodeTraitPatterns, selectedNodePatterns ::: hyperRelationPatterns, nodeTraitPattern)
         new NodeTrait(
           nodeTraitPattern,
-          superTypes = nodeTraitPattern.superTypes,
           subNodes = nodes,
           subRelations = nodeNamesToRelations(nodes, relationPatterns).map(_.name),
           subHyperRelations = nodeNamesToRelations(nodes, hyperRelationPatterns).map(_.name),

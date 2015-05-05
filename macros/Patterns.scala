@@ -184,7 +184,6 @@ class PatternContext[C <: whitebox.Context](val context: C) {
 
     case class NodeTrait(
                          pattern: NodeTraitPattern,
-                         override val superTypes: List[String],
                          subNodes: List[String],
                          subRelations: List[String],
                          subHyperRelations: List[String],
