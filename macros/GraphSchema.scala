@@ -119,10 +119,10 @@ object GraphSchemaMacro {
             // This works because SchemaNodeFactory does not get any generics.
             q"""
            object $name_term extends $superFactory[$name_type] {
-             def create(node: Node) = new $name_type(node)
-             val label = Label($name_label)
+             def create(node: raw.Node) = new $name_type(node)
+             val label = raw.Label($name_label)
              def local (...${ parameterList.toParamCode }):$name_type = {
-              val node = create(Node.local(List(label)))
+              val node = create(raw.Node.local(List(label)))
               ..${ parameterList.toAssignmentCode(q"node.node") }
               node
              }
@@ -146,7 +146,7 @@ object GraphSchemaMacro {
             val superTyesWithDefault = if(superTypes.isEmpty) List(TypeName("SchemaNode")) else superTypes_type
 
             q"""
-           case class $name_type(node: Node) extends ..$superTyesWithDefault {
+           case class $name_type(node: raw.Node) extends ..$superTyesWithDefault {
              ..$directNeighbours
              ..$directRevNeighbours
              ..$nodeBody
@@ -164,13 +164,13 @@ object GraphSchemaMacro {
             with $superRelationFactory[$startNode_type, $name_type, $endNode_type] {
                def startNodeFactory = $startNode_term
                def endNodeFactory = $endNode_term
-               def relationType = RelationType($name_label)
-               def create(relation: Relation) = $name_term(
+               def relationType = raw.RelationType($name_label)
+               def create(relation: raw.Relation) = $name_term(
                  $startNode_term.create(relation.startNode),
                  relation,
                  $endNode_term.create(relation.endNode))
               def local (...${ List(List(q"val startNode:$startNode_type", q"val endNode:$endNode_type") ::: parameterList.toParamCode.head) }):$name_type = {
-                val relation = create(Relation.local(startNode.node, endNode.node, relationType))
+                val relation = create(raw.Relation.local(startNode.node, endNode.node, relationType))
                 ..${ parameterList.toAssignmentCode(q"relation.relation") }
                 relation
               }
@@ -183,7 +183,7 @@ object GraphSchemaMacro {
             val superTypesWithDefault = "SchemaRelation" :: superTypes
             val superTypesWithDefaultGenerics = superTypesWithDefault.map(TypeName(_)).map(superType => tq"$superType[$startNode_type,$endNode_type]")
             q"""
-           case class $name_type(startNode: $startNode_type, relation: Relation, endNode: $endNode_type)
+           case class $name_type(startNode: $startNode_type, relation: raw.Relation, endNode: $endNode_type)
              extends ..$superTypesWithDefaultGenerics {
              ..$statements
            }
@@ -200,20 +200,20 @@ object GraphSchemaMacro {
            object $name_term extends SchemaHyperRelationFactory[$startNode_type, $startRelation_type, $name_type, $endRelation_type, $endNode_type]
              with $superRelationFactory[$startNode_type, $name_type, $endNode_type] {
 
-             override def label = Label($name_label)
-             override def startRelationType = RelationType($startRelation_label)
-             override def endRelationType = RelationType($endRelation_label)
+             override def label = raw.Label($name_label)
+             override def startRelationType = raw.RelationType($startRelation_label)
+             override def endRelationType = raw.RelationType($endRelation_label)
 
              override def startNodeFactory = $startNode_term
              override def factory = $name_term
              override def endNodeFactory = $endNode_term
 
-             override def create(node: Node) = new $name_type(node)
-             override def startRelationCreate(relation: Relation) = $startRelation_term(startNodeFactory.create(relation.startNode), relation, factory.create(relation.endNode))
-             override def endRelationCreate(relation: Relation) = $endRelation_term(factory.create(relation.startNode), relation, endNodeFactory.create(relation.endNode))
+             override def create(node: raw.Node) = new $name_type(node)
+             override def startRelationCreate(relation: raw.Relation) = $startRelation_term(startNodeFactory.create(relation.startNode), relation, factory.create(relation.endNode))
+             override def endRelationCreate(relation: raw.Relation) = $endRelation_term(factory.create(relation.startNode), relation, endNodeFactory.create(relation.endNode))
 
              def local (...${ List(List(q"val startNode:$startNode_type", q"val endNode:$endNode_type") ::: parameterList.toParamCode.head) }):$name_type = {
-              val middleNode = create(Node.local(List(label)))
+              val middleNode = create(raw.Node.local(List(label)))
               ..${ parameterList.toAssignmentCode(q"middleNode.node") }
               create(startRelationLocal(startNode, middleNode).relation, middleNode.node, endRelationLocal(middleNode, endNode).relation)
              }
@@ -227,16 +227,16 @@ object GraphSchemaMacro {
             //TODO: property accessors
             val superRelationTypesGenerics = superRelationTypes.map(TypeName(_)).map(superType => tq"$superType[$startNode_type,$endNode_type]")
             List( q"""
-           case class $name_type(node:Node)
+           case class $name_type(node: raw.Node)
               extends SchemaHyperRelation[$startNode_type, $startRelation_type, $name_type, $endRelation_type, $endNode_type]
               with ..${ superRelationTypesGenerics ::: superNodeTypes.map(t => tq"${ TypeName(t) }") } {
              ..$statements
            }
            """, q"""
-           case class $startRelation_type(startNode: $startNode_type, relation: Relation, endNode: $name_type)
+           case class $startRelation_type(startNode: $startNode_type, relation: raw.Relation, endNode: $name_type)
              extends SchemaRelation[$startNode_type, $name_type]
            """, q"""
-           case class $endRelation_type(startNode: $name_type, relation: Relation, endNode: $endNode_type)
+           case class $endRelation_type(startNode: $name_type, relation: raw.Relation, endNode: $endNode_type)
              extends SchemaRelation[$name_type, $endNode_type]
            """)
           }.flatten
@@ -255,7 +255,7 @@ object GraphSchemaMacro {
           }
 
           def groupFactories(schema: Schema): List[Tree] = schema.groups.map { group => import group._
-            q""" object $name_term {def empty = new $name_type(Graph.empty) } """
+            q""" object $name_term {def empty = new $name_type(raw.Graph.empty) } """
           }
 
           def groupClasses(schema: Schema): List[Tree] = schema.groups.map { group => import group._
@@ -287,7 +287,7 @@ object GraphSchemaMacro {
             }
 
             q"""
-           case class $name_type(graph: Graph) extends SchemaGraph {
+           case class $name_type(graph: raw.Graph) extends SchemaGraph {
              ..$nodeSets
              ..$relationSets
              ..$hyperRelationSets
@@ -317,7 +317,7 @@ object GraphSchemaMacro {
             import schema.{name_term, superTypes_type}
             q"""
            object $name_term extends ..$superTypes_type {
-             import renesca.graph.{Graph,Label,RelationType,Node,Relation}
+             import renesca.{graph => raw}
              import renesca.schema._
              import renesca.parameter.StringPropertyValue
              import renesca.parameter.implicits._
