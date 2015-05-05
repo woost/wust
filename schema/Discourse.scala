@@ -1,6 +1,6 @@
 package model
 
-import renesca.schema._
+import renesca.schema.macros
 
 @macros.GraphSchema
 object WustSchema {

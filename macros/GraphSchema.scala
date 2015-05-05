@@ -69,7 +69,7 @@ object GraphSchemaMacro {
             val factoryName = TypeName(traitFactoryName(name))
             q"""
            trait $factoryName[NODE <: SchemaNode] extends SchemaNodeFactory[NODE] {
-              def local (...${parameterList.toParamCode}): NODE
+              def local (...${ parameterList.toParamCode }): NODE
            }
            """
           }
@@ -86,32 +86,32 @@ object GraphSchemaMacro {
           }
 
           def forwardLocalMethod(parameterList: ParameterList, traitFactoryParameterList: Option[ParameterList], typeName: Tree) = {
-          if (traitFactoryParameterList.isDefined
-            && parameterList.parameters.size > traitFactoryParameterList.get.parameters.size) {
+            if(traitFactoryParameterList.isDefined
+              && parameterList.parameters.size > traitFactoryParameterList.get.parameters.size) {
               val parentParameterList = traitFactoryParameterList.get
               val parentCaller = parameterList.supplementMissingParametersOf(parentParameterList)
-              q""" def local (...${parentParameterList.toParamCode}): $typeName = local(..$parentCaller) """
+              q""" def local (...${ parentParameterList.toParamCode }): $typeName = local(..$parentCaller) """
             } else
-              q""
+                q""
           }
 
           // TODO: duplicate code
           def forwardLocalMethodStartEnd(parameterList: ParameterList, traitFactoryParameterList: Option[ParameterList], typeName: Tree, startNodeType: Tree, endNodeType: Tree) = {
-          if (traitFactoryParameterList.isDefined
-            && parameterList.parameters.size > traitFactoryParameterList.get.parameters.size) {
+            if(traitFactoryParameterList.isDefined
+              && parameterList.parameters.size > traitFactoryParameterList.get.parameters.size) {
               val parentParameterList = traitFactoryParameterList.get
               val parentCaller = parameterList.supplementMissingParametersOf(parentParameterList)
               val localParameters: List[List[Tree]] = List(List(q"val startNode:$startNodeType", q"val endNode:$endNodeType") ::: parentParameterList.toParamCode.head)
-              q""" def local (...$localParameters): $typeName = local(..${List(q"startNode", q"endNode") ::: parentCaller}) """
+              q""" def local (...$localParameters): $typeName = local(..${ List(q"startNode", q"endNode") ::: parentCaller }) """
             } else
-              q""
+                q""
           }
 
           //TODO: what happens with name clashes?
           // @Node trait traitA { val name: String }; @Node trait traitB extends traitA { val name: String }
           def nodeFactories(schema: Schema): List[Tree] = schema.nodes.map { node => import node._
             val superFactory = TypeName(superTypes.headOption match {
-              case Some(superType) => s"${traitFactoryName(superType)}"
+              case Some(superType) => s"${ traitFactoryName(superType) }"
               case None            => s"SchemaNodeFactory"
             })
 
@@ -121,12 +121,12 @@ object GraphSchemaMacro {
            object $name_term extends $superFactory[$name_type] {
              def create(node: Node) = new $name_type(node)
              val label = Label($name_label)
-             def local (...${parameterList.toParamCode}):$name_type = {
+             def local (...${ parameterList.toParamCode }):$name_type = {
               val node = create(Node.local(List(label)))
-              ..${parameterList.toAssignmentCode(q"node.node")}
+              ..${ parameterList.toAssignmentCode(q"node.node") }
               node
              }
-             ${forwardLocalMethod(parameterList, traitFactoryParameterList, tq"$name_type")}
+             ${ forwardLocalMethod(parameterList, traitFactoryParameterList, tq"$name_type") }
            }
            """
           }
@@ -156,7 +156,7 @@ object GraphSchemaMacro {
 
           def relationFactories(schema: Schema): List[Tree] = schema.relations.map { relation => import relation._
             val superRelationFactory = TypeName(superTypes.headOption match {
-              case Some(superType) => s"${traitFactoryName(superType)}"
+              case Some(superType) => s"${ traitFactoryName(superType) }"
               case None            => s"SchemaAbstractRelationFactory"
             })
             q"""
@@ -169,12 +169,12 @@ object GraphSchemaMacro {
                  $startNode_term.create(relation.startNode),
                  relation,
                  $endNode_term.create(relation.endNode))
-              def local (...${List(List(q"val startNode:$startNode_type", q"val endNode:$endNode_type") ::: parameterList.toParamCode.head)}):$name_type = {
+              def local (...${ List(List(q"val startNode:$startNode_type", q"val endNode:$endNode_type") ::: parameterList.toParamCode.head) }):$name_type = {
                 val relation = create(Relation.local(startNode.node, endNode.node, relationType))
-                ..${parameterList.toAssignmentCode(q"relation.relation")}
+                ..${ parameterList.toAssignmentCode(q"relation.relation") }
                 relation
               }
-              ${forwardLocalMethod(parameterList, traitFactoryParameterList, tq"$name_type")}
+              ${ forwardLocalMethod(parameterList, traitFactoryParameterList, tq"$name_type") }
            }
            """
           }
@@ -193,7 +193,7 @@ object GraphSchemaMacro {
 
           def hyperRelationFactories(schema: Schema): List[Tree] = schema.hyperRelations.map { hyperRelation => import hyperRelation._
             val superRelationFactory = TypeName(superRelationTypes.headOption match {
-              case Some(superType) => s"${traitFactoryName(superType)}"
+              case Some(superType) => s"${ traitFactoryName(superType) }"
               case None            => s"SchemaAbstractRelationFactory"
             })
             q"""
@@ -212,12 +212,12 @@ object GraphSchemaMacro {
              override def startRelationCreate(relation: Relation) = $startRelation_term(startNodeFactory.create(relation.startNode), relation, factory.create(relation.endNode))
              override def endRelationCreate(relation: Relation) = $endRelation_term(factory.create(relation.startNode), relation, endNodeFactory.create(relation.endNode))
 
-             def local (...${List(List(q"val startNode:$startNode_type", q"val endNode:$endNode_type") ::: parameterList.toParamCode.head)}):$name_type = {
+             def local (...${ List(List(q"val startNode:$startNode_type", q"val endNode:$endNode_type") ::: parameterList.toParamCode.head) }):$name_type = {
               val middleNode = create(Node.local(List(label)))
-              ..${parameterList.toAssignmentCode(q"middleNode.node")}
+              ..${ parameterList.toAssignmentCode(q"middleNode.node") }
               create(startRelationLocal(startNode, middleNode).relation, middleNode.node, endRelationLocal(middleNode, endNode).relation)
              }
-             ${forwardLocalMethodStartEnd(parameterList, traitFactoryParameterList, tq"$name_type", tq"$startNode_type", tq"$endNode_type")}
+             ${ forwardLocalMethodStartEnd(parameterList, traitFactoryParameterList, tq"$name_type", tq"$startNode_type", tq"$endNode_type") }
            }
            """
           }
@@ -229,7 +229,7 @@ object GraphSchemaMacro {
             List( q"""
            case class $name_type(node:Node)
               extends SchemaHyperRelation[$startNode_type, $startRelation_type, $name_type, $endRelation_type, $endNode_type]
-              with ..${superRelationTypesGenerics ::: superNodeTypes.map(t => tq"${TypeName(t)}")} {
+              with ..${ superRelationTypesGenerics ::: superNodeTypes.map(t => tq"${ TypeName(t) }") } {
              ..$statements
            }
            """, q"""
@@ -318,6 +318,7 @@ object GraphSchemaMacro {
             q"""
            object $name_term extends ..$superTypes_type {
              import renesca.graph.{Graph,Label,RelationType,Node,Relation}
+             import renesca.schema._
              import renesca.parameter.StringPropertyValue
              import renesca.parameter.implicits._
 

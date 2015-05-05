@@ -2,7 +2,7 @@ package renesca
 
 package object schema {
 
-  import renesca.graph._
+  import renesca.{graph => raw}
   import renesca.parameter.StringPropertyValue
   import renesca.parameter.implicits._
 
@@ -12,9 +12,9 @@ package object schema {
   type SchemaAbstractRelationFactoryAny = SchemaAbstractRelationFactory[_ <: SchemaNode, _ <: SchemaAbstractRelation[_, _], _ <: SchemaNode]
 
   trait SchemaNodeFilter {
-    def graph: Graph
+    def graph: raw.Graph
 
-    def filterNodes[T <: SchemaNode](nodes: Set[Node], nodeFactory: SchemaNodeFactory[T]): Set[T] = {
+    def filterNodes[T <: SchemaNode](nodes: Set[raw.Node], nodeFactory: SchemaNodeFactory[T]): Set[T] = {
       nodes.filter(_.labels.contains(nodeFactory.label)).map { node =>
         val schemaNode = nodeFactory.create(node)
         schemaNode.graph = graph
@@ -23,7 +23,7 @@ package object schema {
     }
 
     def filterRelations[STARTNODE <: SchemaNode, RELATION <: SchemaRelation[STARTNODE, ENDNODE], ENDNODE <: SchemaNode]
-    (relations: Set[Relation], relationFactory: SchemaRelationFactory[STARTNODE, RELATION, ENDNODE]): Set[RELATION] = {
+    (relations: Set[raw.Relation], relationFactory: SchemaRelationFactory[STARTNODE, RELATION, ENDNODE]): Set[RELATION] = {
       relations.filter(_.relationType == relationFactory.relationType).map(relationFactory.create)
     }
 
@@ -33,7 +33,7 @@ package object schema {
     HYPERRELATION <: SchemaHyperRelation[STARTNODE, STARTRELATION, HYPERRELATION, ENDRELATION, ENDNODE],
     ENDRELATION <: SchemaRelation[HYPERRELATION, ENDNODE],
     ENDNODE <: SchemaNode]
-    (nodes: Set[Node], relations: Set[Relation],
+    (nodes: Set[raw.Node], relations: Set[raw.Relation],
      hyperRelationFactory: SchemaHyperRelationFactory[STARTNODE, STARTRELATION, HYPERRELATION, ENDRELATION, ENDNODE])
     : Set[HYPERRELATION] = {
       nodes.filter(_.labels.contains(hyperRelationFactory.label)).map { node =>
@@ -84,8 +84,8 @@ package object schema {
 
   trait SchemaNode extends SchemaItem with SchemaNodeFilter {
     def label = node.labels.head
-    def node: Node
-    implicit var graph: Graph = null
+    def node: raw.Node
+    implicit var graph: raw.Graph = null
 
     def neighboursAs[T <: SchemaNode](nodeFactory: SchemaNodeFactory[T]) = filterNodes(node.neighbours, nodeFactory)
     def successorsAs[T <: SchemaNode](nodeFactory: SchemaNodeFactory[T]) = filterNodes(node.successors, nodeFactory)
@@ -99,8 +99,8 @@ package object schema {
   }
 
   trait SchemaRelation[+STARTNODE <: SchemaNode, +ENDNODE <: SchemaNode] extends SchemaAbstractRelation[STARTNODE, ENDNODE] {
-    def relation: Relation
-    def relationType: RelationType = relation.relationType
+    def relation: raw.Relation
+    def relationType: raw.RelationType = relation.relationType
   }
 
 
@@ -123,9 +123,9 @@ package object schema {
 
 
   trait SchemaNodeFactory[+T <: SchemaNode] {
-    def label: Label
+    def label: raw.Label
     //TODO: rename to wrap
-    def create(node: Node): T
+    def create(node: raw.Node): T
     //    protected def local: T = create(Node.local(List(label)))
   }
 
@@ -136,10 +136,10 @@ package object schema {
   }
 
   trait SchemaRelationFactory[+STARTNODE <: SchemaNode, +RELATION <: SchemaRelation[STARTNODE, ENDNODE], +ENDNODE <: SchemaNode] extends SchemaAbstractRelationFactory[STARTNODE, RELATION, ENDNODE] {
-    def relationType: RelationType
-    def create(relation: Relation): RELATION
+    def relationType: raw.RelationType
+    def create(relation: raw.Relation): RELATION
     // def local(startNode: STARTNODE, endNode: ENDNODE): RELATION = {
-    //   create(Relation.local(startNode.node, endNode.node, relationType))
+    //   create(raw.Relation.local(startNode.node, endNode.node, relationType))
     // }
   }
 
@@ -150,14 +150,14 @@ package object schema {
   ENDRELATION <: SchemaRelation[HYPERRELATION, ENDNODE],
   ENDNODE <: SchemaNode] extends SchemaNodeFactory[HYPERRELATION] with SchemaAbstractRelationFactory[STARTNODE, HYPERRELATION, ENDNODE] {
 
-    def startRelationType: RelationType
-    def endRelationType: RelationType
+    def startRelationType: raw.RelationType
+    def endRelationType: raw.RelationType
 
     def factory: SchemaNodeFactory[HYPERRELATION]
 
-    def startRelationCreate(relation: Relation): STARTRELATION
-    def endRelationCreate(relation: Relation): ENDRELATION
-    def create(startRelation: Relation, middleNode: Node, endRelation: Relation): HYPERRELATION = {
+    def startRelationCreate(relation: raw.Relation): STARTRELATION
+    def endRelationCreate(relation: raw.Relation): ENDRELATION
+    def create(startRelation: raw.Relation, middleNode: raw.Node, endRelation: raw.Relation): HYPERRELATION = {
       val hyperRelation = create(middleNode)
       hyperRelation._startRelation = startRelationCreate(startRelation)
       hyperRelation._endRelation = endRelationCreate(endRelation)
@@ -165,11 +165,11 @@ package object schema {
     }
 
     def startRelationLocal(startNode: STARTNODE, middleNode: HYPERRELATION): STARTRELATION = {
-      startRelationCreate(Relation.local(startNode.node, middleNode.node, startRelationType))
+      startRelationCreate(raw.Relation.local(startNode.node, middleNode.node, startRelationType))
     }
 
     def endRelationLocal(middleNode: HYPERRELATION, endNode: ENDNODE): ENDRELATION = {
-      endRelationCreate(Relation.local(middleNode.node, endNode.node, endRelationType))
+      endRelationCreate(raw.Relation.local(middleNode.node, endNode.node, endRelationType))
     }
 
     // def local(startNode: STARTNODE, endNode: ENDNODE): HYPERRELATION = {
