@@ -192,6 +192,9 @@ class PatternContext[C <: whitebox.Context](val context: C) {
                          flatStatements: List[Tree],
                          hasOwnFactory: Boolean
                           ) extends Name with SuperTypes with Statements with HasOwnFactory {
+      if(pattern.superTypes.size > 1)
+        context.abort(NoPosition, "Currently NodeTraits are restricted to only extend one trait")
+
       def commonHyperNodeNodeTraits_type = commonHyperNodeNodeTraits.map(TypeName(_))
       def commonHyperNodeRelationTraits_type = commonHyperNodeRelationTraits.map(TypeName(_))
 
@@ -238,7 +241,7 @@ class PatternContext[C <: whitebox.Context](val context: C) {
                      traitFactoryParameterList: Option[ParameterList]
                      ) extends Name with SuperTypes with Statements {
       if(superTypes.size > 1)
-        context.abort(NoPosition, "Currently nodes are restricted to only extend one trait")
+        context.abort(NoPosition, "Currently Nodes are restricted to only extend one trait")
 
       val parameterList = ParameterList.create(flatStatements)
       def neighbours_terms = neighbours.map { case (relation, endNode) =>
