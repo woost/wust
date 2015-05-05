@@ -124,25 +124,25 @@ object Database {
     Discourse(db.queryGraph(Query(query, params)))
   }
 
-  def connectNodes[START <: SchemaNode, RELATION <: SchemaAbstractRelation[START, END], END <: SchemaNode](discourse: Discourse, start: START, factory: SchemaAbstractRelationFactory[START, RELATION, END], end: END): (START, END) = {
-    // discourse.add(factory.local(start, end))
+  def connectNodes[START <: SchemaNode, RELATION <: ContentRelation[START, END], END <: SchemaNode](discourse: Discourse, start: START, factory: ContentRelationFactory[START, RELATION, END], end: END): (START, END) = {
+    discourse.add(factory.local(start, end))
     db.persistChanges(discourse.graph)
     (start, end)
   }
 
-  def connectNodes[START <: UuidNode, RELATION <: SchemaAbstractRelation[START, END], END <: UuidNode](startUuid: String, factory: SchemaAbstractRelationFactory[START, RELATION, END], endUuid: String): (START, END) = {
+  def connectNodes[START <: UuidNode, RELATION <: ContentRelation[START, END], END <: UuidNode](startUuid: String, factory: ContentRelationFactory[START, RELATION, END], endUuid: String): (START, END) = {
     val (discourse, (start, end)) = discourseNodes(factory.startNodeFactory, startUuid, factory.endNodeFactory, endUuid)
     connectNodes(discourse, start, factory, end)
   }
 
-  def startHyperConnectNodes[START <: UuidNode, RELATION <: SchemaAbstractRelation[START, END] with SchemaNode, END <: UuidNode, NESTEDRELATION <: SchemaAbstractRelation[RELATION, NESTEDEND], NESTEDEND <: UuidNode](startUuid: String, relFactory: SchemaAbstractRelationFactory[START, RELATION, END], endUuid: String, nestedRelFactory: SchemaAbstractRelationFactory[RELATION, NESTEDRELATION, NESTEDEND], nestedEndUuid: String) = {
+  def startHyperConnectNodes[START <: UuidNode, RELATION <: ContentRelation[START, END] with SchemaNode, END <: UuidNode, NESTEDRELATION <: ContentRelation[RELATION, NESTEDEND], NESTEDEND <: UuidNode](startUuid: String, relFactory: ContentRelationFactory[START, RELATION, END], endUuid: String, nestedRelFactory: ContentRelationFactory[RELATION, NESTEDRELATION, NESTEDEND], nestedEndUuid: String) = {
     val discourse = relationDiscourseGraphWithUuid(startUuid, relFactory, endUuid, nestedRelFactory.endNodeFactory, nestedEndUuid)
     val nested = nodeWithUuid[NESTEDEND](discourse, nestedEndUuid)
     val middle = discourse.contentNodeHyperRelations.head.asInstanceOf[RELATION]
     connectNodes(discourse, middle, nestedRelFactory, nested)
   }
 
-  def endHyperConnectNodes[NESTEDSTART <: UuidNode, NESTEDRELATION <: SchemaAbstractRelation[NESTEDSTART, RELATION], START <: UuidNode, RELATION <: SchemaAbstractRelation[START, END] with SchemaNode, END <: UuidNode](nestedStartUuid: String, nestedRelFactory: SchemaAbstractRelationFactory[NESTEDSTART, NESTEDRELATION, RELATION], startUuid: String, relFactory: SchemaAbstractRelationFactory[START, RELATION, END], endUuid: String) = {
+  def endHyperConnectNodes[NESTEDSTART <: UuidNode, NESTEDRELATION <: ContentRelation[NESTEDSTART, RELATION], START <: UuidNode, RELATION <: ContentRelation[START, END] with SchemaNode, END <: UuidNode](nestedStartUuid: String, nestedRelFactory: ContentRelationFactory[NESTEDSTART, NESTEDRELATION, RELATION], startUuid: String, relFactory: ContentRelationFactory[START, RELATION, END], endUuid: String) = {
     val discourse = relationDiscourseGraphWithUuid(startUuid, relFactory, endUuid, nestedRelFactory.startNodeFactory, nestedStartUuid)
     val nested = nodeWithUuid[NESTEDSTART](discourse, nestedStartUuid)
     val middle = discourse.contentNodeHyperRelations.head.asInstanceOf[RELATION]

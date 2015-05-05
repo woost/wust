@@ -78,6 +78,7 @@ object GraphFormat {
     def writes(connect: ConnectRequest) = ???
   }
 
+  //TODO: move into different file --- FROM HERE
   implicit def apiDefinitionWrites = new Writes[ApiDefinition] {
     def writes(apiDefinition: ApiDefinition) = JsObject(Seq(
       ("restRoot", JsString(apiDefinition.restRoot)),

@@ -33,8 +33,8 @@ object WustSchema {
   @HyperRelation class Solves(startNode: Idea, endNode: Problem) extends ContentRelation with UuidNode
   @HyperRelation class Achieves(startNode: Idea, endNode: Goal) extends ContentRelation with UuidNode
 
-  @Relation class SupportsSolution(startNode: ProArgument, endNode: Solves)
-  @Relation class OpposesSolution(startNode: ConArgument, endNode: Solves)
-  @Relation class SupportsAchievement(startNode: ProArgument, endNode: Achieves)
-  @Relation class OpposesAchievement(startNode: ConArgument, endNode: Achieves)
+  @Relation class SupportsSolution(startNode: ProArgument, endNode: Solves) extends ContentRelation
+  @Relation class OpposesSolution(startNode: ConArgument, endNode: Solves) extends ContentRelation
+  @Relation class SupportsAchievement(startNode: ProArgument, endNode: Achieves) extends ContentRelation
+  @Relation class OpposesAchievement(startNode: ConArgument, endNode: Achieves) extends ContentRelation
 }

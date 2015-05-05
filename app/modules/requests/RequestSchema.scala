@@ -20,12 +20,12 @@ sealed trait ConnectSchema[NODE <: SchemaNode] {
 sealed trait SimpleConnectSchema[NODE <: SchemaNode] extends ConnectSchema[NODE]
 sealed trait HyperConnectSchema[NODE <: ContentNode] extends ConnectSchema[NODE]
 
-case class StartConnectSchema[START <: SchemaNode, RELATION <: SchemaAbstractRelation[START,END], END <: ContentNode](factory: SchemaAbstractRelationFactory[START,RELATION,END]) extends SimpleConnectSchema[START]
-case class EndConnectSchema[START <: ContentNode, RELATION <: SchemaAbstractRelation[START,END], END <: SchemaNode](factory: SchemaAbstractRelationFactory[START,RELATION,END]) extends SimpleConnectSchema[END]
+case class StartConnectSchema[START <: SchemaNode, RELATION <: ContentRelation[START,END], END <: ContentNode](factory: ContentRelationFactory[START,RELATION,END]) extends SimpleConnectSchema[START]
+case class EndConnectSchema[START <: ContentNode, RELATION <: ContentRelation[START,END], END <: SchemaNode](factory: ContentRelationFactory[START,RELATION,END]) extends SimpleConnectSchema[END]
 
-// TODO: should have type signature with SchemaHyperRelation instead of SchemaAbstractRelation, but then type inference of the factory does not work in pattern matching. for now assure hyperconnection with SchemaNode
-case class StartHyperConnectSchema[START <: ContentNode, RELATION <: SchemaAbstractRelation[START,END] with SchemaNode, END <: ContentNode](override val factory: SchemaAbstractRelationFactory[START,RELATION,END] with SchemaNodeFactory[RELATION], override val connectSchemas: Map[String,SimpleConnectSchema[RELATION]]) extends HyperConnectSchema[START] with NodeSchemaBase[RELATION]
-case class EndHyperConnectSchema[START <: ContentNode, RELATION <: SchemaAbstractRelation[START,END] with SchemaNode, END <: ContentNode](override val factory: SchemaAbstractRelationFactory[START,RELATION,END] with SchemaNodeFactory[RELATION], override val connectSchemas: Map[String,SimpleConnectSchema[RELATION]]) extends HyperConnectSchema[END] with NodeSchemaBase[RELATION]
+// TODO: should have type signature with SchemaHyperRelation instead of ContentRelation, but then type inference of the factory does not work in pattern matching. for now assure hyperconnection with SchemaNode
+case class StartHyperConnectSchema[START <: ContentNode, RELATION <: ContentRelation[START,END] with SchemaNode, END <: ContentNode](override val factory: ContentRelationFactory[START,RELATION,END] with SchemaNodeFactory[RELATION], override val connectSchemas: Map[String,SimpleConnectSchema[RELATION]]) extends HyperConnectSchema[START] with NodeSchemaBase[RELATION]
+case class EndHyperConnectSchema[START <: ContentNode, RELATION <: ContentRelation[START,END] with SchemaNode, END <: ContentNode](override val factory: ContentRelationFactory[START,RELATION,END] with SchemaNodeFactory[RELATION], override val connectSchemas: Map[String,SimpleConnectSchema[RELATION]]) extends HyperConnectSchema[END] with NodeSchemaBase[RELATION]
 
 object StartConnection {
   def unapply[START <: SchemaNode](schema: ConnectSchema[START]) = schema match {
