@@ -9,6 +9,7 @@ object WustSchema {
 
 
   @Node trait UuidNode {
+    //TODO: annotation for hidden defaults?
     val uuid: String = java.util.UUID.randomUUID.toString
   }
   @Node trait ContentNode extends UuidNode {
