@@ -16,7 +16,10 @@ function Schema($provide, LiveProvider, restmodProvider) {
         });
 
         _.each(schema.models, model => {
-            $provide.factory(model.name, (restmod, Live) => {
+            $provide.factory(model.name, ApiFactory);
+
+            ApiFactory.$inject = ["restmod", "Live"];
+            function ApiFactory(restmod, Live) {
                 return restmod.model(model.path).mix(_(model.subs).map((sub, path) => {
                     return {
                         [path]: {
@@ -42,7 +45,7 @@ function Schema($provide, LiveProvider, restmodProvider) {
                         }
                     }
                 }));
-            });
+            }
         });
 
         function subscribe(liveService, handler, nested = "") {
