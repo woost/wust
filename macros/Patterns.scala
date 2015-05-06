@@ -10,6 +10,11 @@ class PatternContext[C <: whitebox.Context](val context: C) {
   import context.universe._
 
   object Patterns {
+    implicit def typeNameToString(tn: TypeName): String = tn.toString
+    implicit def termNameToString(tn: TermName): String = tn.toString
+    implicit def treeToString(tn: Tree): String = tn.toString
+    implicit def treeListToStringList(tnl: List[Tree]): List[String] = tnl.map(_.toString)
+
     case class Parameter(name: Tree, typeName: Tree, optional: Boolean, default: Option[Tree], mutable: Boolean) {
       def canEqual(other: Any): Boolean = other.isInstanceOf[Parameter]
       override def equals(other: Any): Boolean = other match {
@@ -138,7 +143,7 @@ class PatternContext[C <: whitebox.Context](val context: C) {
     object SchemaPattern {
       def unapply(tree: Tree): Option[SchemaPattern] = condOpt(tree) {
         case q""" object $name extends ..$superTypes { ..$statements } """ =>
-          SchemaPattern(name.toString, superTypes.map(_.toString), statements)
+          SchemaPattern(name, superTypes, statements)
       }
     }
 
@@ -152,12 +157,12 @@ class PatternContext[C <: whitebox.Context](val context: C) {
           case Apply(Select(New(Ident(TypeName("Group"))), termNames.CONSTRUCTOR), Nil) => true
           case _                                                                        => false
         }.get =>
-          GroupPattern(name.toString, superTypes.map { _.toString }, groupNodes.map { _.toString })
+          GroupPattern(name, superTypes, groupNodes)
         case q""" $mods trait $name extends ..$superTypes""" if mods.annotations.collectFirst {
           case Apply(Select(New(Ident(TypeName("Group"))), termNames.CONSTRUCTOR), Nil) => true
           case _                                                                        => false
         }.get =>
-          GroupPattern(name.toString, superTypes.map { _.toString }, Nil)
+          GroupPattern(name, superTypes, Nil)
       }
     }
 
@@ -178,7 +183,7 @@ class PatternContext[C <: whitebox.Context](val context: C) {
           case Apply(Select(New(Ident(TypeName("Node"))), termNames.CONSTRUCTOR), Nil) => true
           case _                                                                       => false
         }.get =>
-          NodeTraitPattern(name.toString, superTypes.map { _.toString }, statements)
+          NodeTraitPattern(name, superTypes, statements)
       }
     }
 
@@ -209,7 +214,7 @@ class PatternContext[C <: whitebox.Context](val context: C) {
           case Apply(Select(New(Ident(TypeName("Relation"))), termNames.CONSTRUCTOR), Nil) => true
           case _                                                                           => false
         }.get =>
-          RelationTraitPattern(name.toString, superTypes.map { _.toString }, statements)
+          RelationTraitPattern(name, superTypes, statements)
       }
     }
 
@@ -225,11 +230,10 @@ class PatternContext[C <: whitebox.Context](val context: C) {
 
       val parameterList = ParameterList.create(flatStatements)
     }
-
     object NodePattern {
       def unapply(tree: Tree): Option[NodePattern] = condOpt(tree) {
         case q"""@Node class $name extends ..${superTypes} { ..$statements }""" =>
-          NodePattern(name.toString, superTypes.map{_.toString}, statements)
+          NodePattern(name, superTypes, statements)
       }
     }
 
@@ -257,7 +261,7 @@ class PatternContext[C <: whitebox.Context](val context: C) {
     object RelationPattern {
       def unapply(tree: Tree): Option[RelationPattern] = condOpt(tree) {
         case q"""@Relation class $name (startNode:$startNode, endNode:$endNode) extends ..$superTypes {..$statements}""" =>
-          RelationPattern(name.toString, startNode.toString, endNode.toString, superTypes.map { _.toString }, statements)
+          RelationPattern(name, startNode, endNode, superTypes, statements)
       }
     }
 
@@ -277,7 +281,7 @@ class PatternContext[C <: whitebox.Context](val context: C) {
     object HyperRelationPattern {
       def unapply(tree: Tree): Option[HyperRelationPattern] = condOpt(tree) {
         case q"""@HyperRelation class $name (startNode:$startNode, endNode:$endNode) extends ..$superTypes {..$statements}""" =>
-          HyperRelationPattern(name.toString, startNode.toString, endNode.toString, superTypes.map { _.toString }, statements)
+          HyperRelationPattern(name, startNode, endNode, superTypes, statements)
       }
     }
 
