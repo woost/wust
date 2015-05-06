@@ -1,4 +1,8 @@
-angular.module("wust.api").provider("Schema", function($provide, LiveProvider, restmodProvider) {
+angular.module("wust.api").provider("Schema", Schema);
+
+Schema.$inject = ["$provide", "LiveProvider", "restmodProvider"];
+
+function Schema($provide, LiveProvider, restmodProvider) {
     this.setup = setup;
     this.$get = _.constant({});
 
@@ -47,4 +51,4 @@ angular.module("wust.api").provider("Schema", function($provide, LiveProvider, r
             return liveService.subscribe(url, handler);
         }
     }
-});
+}

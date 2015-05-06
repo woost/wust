@@ -1,4 +1,8 @@
-angular.module("wust.api").service("Auth", function($rootScope, $window, restmod, jwtHelper, store) {
+angular.module("wust.api").service("Auth", Auth);
+
+Auth.$inject = ["$rootScope", "$window", "restmod", "jwtHelper", "store"];
+
+function Auth($rootScope, $window, restmod, jwtHelper, store) {
     let authStore = store.getNamespacedStore("auth");
     let userKey = "currentUser";
     let service = {
@@ -52,4 +56,4 @@ angular.module("wust.api").service("Auth", function($rootScope, $window, restmod
     function logoutLocally() {
         authStore.remove(userKey);
     }
-});
+}

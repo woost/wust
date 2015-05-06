@@ -1,4 +1,8 @@
-angular.module("wust").config(function() {
+angular.module("wust").config(HumaneConfig);
+
+HumaneConfig.$inject = [];
+
+function HumaneConfig() {
     humane.error = humane.spawn({
         addnCls: "humane-libnotify-error",
         timeout: 0,
@@ -8,4 +12,4 @@ angular.module("wust").config(function() {
     humane.success = humane.spawn({
         timeout: 700
     });
-});
+}

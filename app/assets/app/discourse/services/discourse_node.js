@@ -1,10 +1,15 @@
-angular.module("wust.discourse").provider("DiscourseNode", function() {
+angular.module("wust.discourse").provider("DiscourseNode", DiscourseNode);
+
+DiscourseNode.$inject = [];
+
+function DiscourseNode() {
     let discourseMap = {};
     this.setLabel = _.wrap("label", set);
     this.setCss = _.wrap("css", set);
     this.setState = _.wrap("state", set);
     this.$get = get;
 
+    get.$inject = ["$state"];
     function get($state) {
         _.mapValues(discourseMap, node => _.merge(node, {
             getState: id => node.state ? `${node.state}({id: "${id}"})` : ".",
@@ -27,4 +32,4 @@ angular.module("wust.discourse").provider("DiscourseNode", function() {
         discourseMap[name][property] = value;
         return value;
     }
-});
+}

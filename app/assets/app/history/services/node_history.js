@@ -1,4 +1,8 @@
-angular.module("wust.history").service("NodeHistory", function(DiscourseNode) {
+angular.module("wust.history").service("NodeHistory", NodeHistory);
+
+NodeHistory.$inject = ["DiscourseNode"];
+
+function NodeHistory(DiscourseNode) {
     let maximum = 8;
     let visited = [];
     this.visited = visited;
@@ -19,4 +23,4 @@ angular.module("wust.history").service("NodeHistory", function(DiscourseNode) {
         visited.push(obj);
         visited.splice(0, visited.length - maximum);
     }
-});
+}

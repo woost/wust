@@ -1,4 +1,8 @@
-angular.module("wust.components").controller("GraphsCtrl", function($scope, $filter, Graph, DiscourseNode) {
+angular.module("wust.components").controller("GraphsCtrl", GraphsCtrl);
+
+GraphsCtrl.$inject = ["$scope", "$filter", "Graph", "DiscourseNode"];
+
+function GraphsCtrl($scope, $filter, Graph, DiscourseNode) {
     $scope.onClick = onClick;
     $scope.search = {
         title: ""
@@ -24,4 +28,4 @@ angular.module("wust.components").controller("GraphsCtrl", function($scope, $fil
     function onClick(d) {
         DiscourseNode.get(d.label).gotoState(d.id);
     }
-});
+}

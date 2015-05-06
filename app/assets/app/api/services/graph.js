@@ -1,4 +1,8 @@
-angular.module("wust.api").factory("Graph", function(restmod) {
+angular.module("wust.api").factory("Graph", Graph);
+
+Graph.$inject = ["restmod"];
+
+function Graph(restmod) {
     return restmod.model().mix({
         nodes: {
             decode: function(nodes) {
@@ -24,4 +28,4 @@ angular.module("wust.api").factory("Graph", function(restmod) {
             }
         }
     }).single("/graph");
-});
+}

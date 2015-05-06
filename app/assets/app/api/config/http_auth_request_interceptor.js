@@ -1,4 +1,8 @@
-angular.module("wust.api").config(function Config($httpProvider, jwtInterceptorProvider) {
+angular.module("wust.api").config(HttpAuthConfig);
+
+HttpAuthConfig.$inject = ["$httpProvider", "jwtInterceptorProvider"];
+
+function HttpAuthConfig($httpProvider, jwtInterceptorProvider) {
     jwtInterceptorProvider.authHeader = "X-Auth-Token";
     jwtInterceptorProvider.authPrefix = "";
     jwtInterceptorProvider.tokenGetter = (config, Auth) => {
@@ -11,4 +15,4 @@ angular.module("wust.api").config(function Config($httpProvider, jwtInterceptorP
     };
 
     $httpProvider.interceptors.push("jwtInterceptor");
-});
+}

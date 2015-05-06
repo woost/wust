@@ -1,4 +1,8 @@
-angular.module("wust.live").provider("Live", function() {
+angular.module("wust.live").provider("Live", Live);
+
+Live.$inject = [];
+
+function Live() {
     let request = {
         //TODO: decide on atmosphere client configuration
         contentType: "application/json",
@@ -15,6 +19,7 @@ angular.module("wust.live").provider("Live", function() {
 
     this.$get = get;
 
+    get.$inject = [];
     function get() {
         function subscribe(url, handler) {
             let newRequest = _.merge({
@@ -42,4 +47,4 @@ angular.module("wust.live").provider("Live", function() {
             subscribe
         };
     }
-});
+}

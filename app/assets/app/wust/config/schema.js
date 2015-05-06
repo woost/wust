@@ -1,4 +1,8 @@
-angular.module("wust").config(function(SchemaProvider, DiscourseNodeProvider, DiscourseNodeListProvider) {
+angular.module("wust").config(SchemaConfig);
+
+SchemaConfig.$inject = ["SchemaProvider", "DiscourseNodeProvider", "DiscourseNodeListProvider"];
+
+function SchemaConfig(SchemaProvider, DiscourseNodeProvider, DiscourseNodeListProvider) {
     let schema = window.globals.schema;
 
     _.each(schema.models, model => {
@@ -8,4 +12,4 @@ angular.module("wust").config(function(SchemaProvider, DiscourseNodeProvider, Di
     });
 
     SchemaProvider.setup(schema);
-});
+}

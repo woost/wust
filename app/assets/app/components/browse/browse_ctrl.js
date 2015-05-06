@@ -1,4 +1,8 @@
-angular.module("wust.components").controller("BrowseCtrl", function($scope, $state, Problem, Goal, Idea, DiscourseNode) {
+angular.module("wust.components").controller("BrowseCtrl", BrowseCtrl);
+
+BrowseCtrl.$inject = ["$scope", "$state", "Problem", "Goal", "Idea", "DiscourseNode"];
+
+function BrowseCtrl($scope, $state, Problem, Goal, Idea, DiscourseNode) {
     let problems = {
         active: true,
         newTitle: "What is your problem?",
@@ -47,4 +51,4 @@ angular.module("wust.components").controller("BrowseCtrl", function($scope, $sta
     function setNodes(slide) {
         slide.nodes = slide.service.$search();
     }
-});
+}

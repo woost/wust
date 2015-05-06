@@ -1,4 +1,8 @@
-angular.module("wust.discourse").provider("DiscourseNodeList", function() {
+angular.module("wust.discourse").provider("DiscourseNodeList", DiscourseNodeList);
+
+DiscourseNodeList.$inject = [];
+
+function DiscourseNodeList() {
     let nodeListDefs = {};
     this.setList = setList;
     this.$get = get;
@@ -7,6 +11,7 @@ angular.module("wust.discourse").provider("DiscourseNodeList", function() {
         nodeListDefs[modelName] = modelPath;
     }
 
+    get.$inject = ["$injector", "$rootScope", "DiscourseNode", "Search"];
     function get($injector, $rootScope, DiscourseNode, Search) {
         class NodeModel {
             constructor(service, connService, nodeInfo, title) {
@@ -153,4 +158,4 @@ angular.module("wust.discourse").provider("DiscourseNodeList", function() {
             return new NodeList($injector.get(k), connService, DiscourseNode[k], title);
         });
     }
-});
+}

@@ -1,4 +1,8 @@
-angular.module("wust.discourse").directive("discourseNodeList", function() {
+angular.module("wust.discourse").directive("discourseNodeList", discourseNodeList);
+
+discourseNodeList.$inject = [];
+
+function discourseNodeList() {
     return {
         restrict: "A",
         require: "ngModel",
@@ -7,4 +11,4 @@ angular.module("wust.discourse").directive("discourseNodeList", function() {
             nodeModel: "=",
         }
     };
-});
+}

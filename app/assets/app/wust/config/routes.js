@@ -1,4 +1,8 @@
-angular.module("wust").config(function($stateProvider, $urlRouterProvider, $locationProvider, DiscourseNodeProvider) {
+angular.module("wust").config(RoutesConfig);
+
+RoutesConfig.$inject = ["$stateProvider", "$urlRouterProvider", "$locationProvider", "DiscourseNodeProvider"];
+
+function RoutesConfig($stateProvider, $urlRouterProvider, $locationProvider, DiscourseNodeProvider) {
     const templateBase = "assets/app/components";
     $stateProvider.state("page", {
         url: "/",
@@ -61,4 +65,4 @@ angular.module("wust").config(function($stateProvider, $urlRouterProvider, $loca
     $urlRouterProvider.otherwise("/browse");
 
     $locationProvider.html5Mode(true);
-});
+}

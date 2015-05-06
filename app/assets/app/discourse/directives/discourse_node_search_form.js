@@ -1,4 +1,8 @@
-angular.module("wust.discourse").directive("discourseNodeSearchForm", function(DiscourseNode) {
+angular.module("wust.discourse").directive("discourseNodeSearchForm", discourseNodeSearchForm);
+
+discourseNodeSearchForm.$inject = ["DiscourseNode"];
+
+function discourseNodeSearchForm(DiscourseNode) {
     return {
         restrict: "A",
         require: "ngModel",
@@ -24,4 +28,4 @@ angular.module("wust.discourse").directive("discourseNodeSearchForm", function(D
             }
         }
     };
-});
+}

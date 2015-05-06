@@ -1,4 +1,8 @@
-angular.module("wust.graph").directive("d3Graph", function($window) {
+angular.module("wust.graph").directive("d3Graph", d3Graph);
+
+d3Graph.$inject = ["$window"];
+
+function d3Graph($window) {
     return {
         restrict: "A",
         scope: {
@@ -340,4 +344,4 @@ angular.module("wust.graph").directive("d3Graph", function($window) {
             });
         }
     };
-});
+}

@@ -1,4 +1,8 @@
-angular.module("wust.components").controller("IdeasCtrl", function($scope, $stateParams, Idea, DiscourseNode, DiscourseNodeList) {
+angular.module("wust.components").controller("IdeasCtrl", IdeasCtrl);
+
+IdeasCtrl.$inject = ["$scope", "$stateParams", "Idea", "DiscourseNode", "DiscourseNodeList"];
+
+function IdeasCtrl($scope, $stateParams, Idea, DiscourseNode, DiscourseNodeList) {
     $scope.nodeInfo = DiscourseNode.Idea;
     $scope.node = Idea.$find($stateParams.id);
     $scope.top = DiscourseNodeList.Goal($scope.node.goals)
@@ -8,4 +12,4 @@ angular.module("wust.components").controller("IdeasCtrl", function($scope, $stat
         .nested(DiscourseNodeList.ProArgument, "pros")
         .nested(DiscourseNodeList.ConArgument, "cons");
     $scope.bottom = DiscourseNodeList.Idea($scope.node.ideas);
-});
+}

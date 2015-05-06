@@ -1,3 +1,7 @@
-angular.module("wust.components").controller("UserListsCtrl", function($scope, User) {
+angular.module("wust.components").controller("UserListsCtrl", UserListsCtrl);
+
+UserListsCtrl.$inject = ["$scope", "User"];
+
+function UserListsCtrl($scope, User) {
     $scope.users = User.$search();
-});
+}
