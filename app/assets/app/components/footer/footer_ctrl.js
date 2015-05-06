@@ -1,7 +1,8 @@
 angular.module("wust.components").controller("FooterCtrl", FooterCtrl);
 
-FooterCtrl.$inject = ["$scope", "NodeHistory"];
+FooterCtrl.$inject = ["NodeHistory"];
 
-function FooterCtrl($scope, NodeHistory) {
-    $scope.visited = NodeHistory.visited;
+function FooterCtrl(NodeHistory) {
+    let vm = this;
+    vm.visited = NodeHistory.visited;
 }

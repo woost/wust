@@ -39,9 +39,15 @@ cd $component_plural
 
 controller_def=$(
 cat << EOF
-angular.module("wust.components").controller("$controller_name", function(\$scope) {
+angular.module("wust.components").controller("$controller_name", $controller_name);
+
+${controller_name}.\$inject = [];
+
+function $controller_name() {
+    let vm = this;
+
     
-});
+}
 EOF
 )
 echo "$controller_def" > $controller_file
@@ -75,6 +81,6 @@ cat << EOF
         parent: "page",
         url: "${component_plural}",
         templateUrl: \`\${templateBase}/${component_plural}/${component}.html\`,
-        controller: "$controller_name"
+        controller: "$controller_name as vm"
 })
 EOF

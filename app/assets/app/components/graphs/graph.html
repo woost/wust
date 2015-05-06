@@ -1,6 +1,6 @@
 <div id="graph_component">
     <div id="filter_input">
-        <input type="text" class="form-control" ng-model="search.title" placeholder="filter">
+        <input type="text" class="form-control" ng-model="vm.search.title" placeholder="filter">
     </div>
-    <div d3-graph graph="graph" on-click="onClick" class="graph_network"></div>
+    <div d3-graph graph="vm.graph" on-click="vm.onClick" class="graph_network"></div>
 </div>

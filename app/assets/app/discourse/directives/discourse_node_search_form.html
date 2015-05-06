@@ -1,13 +1,13 @@
-<form ng-submit='onSubmit({nodes: lastSearchResult})'>
+<form ng-submit='vm.onSubmit({nodes: vm.lastSearchResult})'>
     <div class="input-group">
         <div class="input-group">
-            <input type="text" class="form-control" ng-model='ngModel.title' size="10"
-                   typeahead="node for node in getNodes($viewValue)" typeahead-on-select="onSelect({item: $item})"
-                   typeahead-input-formatter="formatLabel()" typeahead-template-url="discourse_node_search_item.html"
+            <input type="text" class="form-control" ng-model='vm.ngModel.title' size="10"
+                   typeahead="node for node in vm.getNodes($viewValue)" typeahead-on-select="vm.onSelect({item: $item})"
+                   typeahead-input-formatter="vm.formatLabel()" typeahead-template-url="discourse_node_search_item.html"
                    required>
             <span class="input-group-btn">
                 <button class="btn btn-default" type="submit">
-                    <i ng-class='iconClass'></i>
+                    <i ng-class='vm.iconClass'></i>
                 </button>
             </span>
         </div>

@@ -3,25 +3,27 @@ angular.module("wust.components").controller("GraphsCtrl", GraphsCtrl);
 GraphsCtrl.$inject = ["$scope", "$filter", "Graph", "DiscourseNode"];
 
 function GraphsCtrl($scope, $filter, Graph, DiscourseNode) {
-    $scope.onClick = onClick;
-    $scope.search = {
+    let vm = this;
+
+    vm.onClick = onClick;
+    vm.search = {
         title: ""
     };
 
-    $scope.graph = {};
+    vm.graph = {};
     Graph.$fetch().$then(createGraph);
 
-    $scope.$watch("search.title", filter);
+    $scope.$watch("vm.search.title", filter);
 
     function createGraph(graph) {
         graph.nodes = graph.nodes.map(node => _.merge(node, {
             css: node.hyperEdge ? "" : `node ${DiscourseNode.get(node.label).css}`
         }));
-        $scope.graph = graph;
+        vm.graph = graph;
     }
 
     function filter() {
-        let filtered = $filter("fuzzyFilter")(_.filter($scope.graph.nodes, { hyperEdge: false}), $scope.search);
+        let filtered = $filter("fuzzyFilter")(_.filter(vm.graph.nodes, { hyperEdge: false }), vm.search);
         $scope.$broadcast("d3graph_filter", filtered);
     }
 

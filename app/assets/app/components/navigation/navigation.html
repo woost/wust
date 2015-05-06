@@ -21,17 +21,17 @@
                 </li>
             </ul>
 
-            <div discourse-node-search-form ng-model='searchTyped' on-select="onSelect(item)" on-submit="onSubmit(nodes)" search-nodes='searchNodes(term)' icon-class="fa fa-search" class="navbar-form navbar-left" role="search"></div>
+            <div discourse-node-search-form ng-model='vm.searchTyped' on-select="vm.onSelect(item)" on-submit="vm.onSubmit(nodes)" search-nodes='vm.searchNodes(term)' icon-class="fa fa-search" class="navbar-form navbar-left" role="search"></div>
 
-            <form ng-hide="loggedIn()" name="signForm" ng-submit="authenticate(registerUser)" class="navbar-form navbar-right">
-                <input class="form-control" name="username" type="text" ng-model='newUser.identifier' placeholder="Username" required>
-                <input class="form-control" name="password" type="password" ng-model='newUser.password' placeholder="Password" required>
+            <form ng-hide="vm.loggedIn()" name="signForm" ng-submit="vm.authenticate(registerUser)" class="navbar-form navbar-right">
+                <input class="form-control" name="username" type="text" ng-model='vm.newUser.identifier' placeholder="Username" required>
+                <input class="form-control" name="password" type="password" ng-model='vm.newUser.password' placeholder="Password" required>
                 <input type="submit" value="Login" ng-click="registerUser = false" class="btn btn-primary" ng-disabled="signForm.$invalid">
                 <input type="submit" value="Register" ng-click="registerUser = true" class="btn btn-primary" ng-disabled="signForm.$invalid">
             </form>
 
-            <form ng-show="loggedIn()" ng-submit="logout()" class="navbar-form navbar-right">
-                <span style="padding-right: 10px"><i class="fa fa-user"></i> {{getUsername()}}</span>
+            <form ng-show="vm.loggedIn()" ng-submit="vm.logout()" class="navbar-form navbar-right">
+                <span style="padding-right: 10px"><i class="fa fa-user"></i> {{vm.getUsername()}}</span>
                 <input type="submit" value="Logout" class="btn btn-primary">
             </form>
         </div>

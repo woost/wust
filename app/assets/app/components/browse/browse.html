@@ -1,6 +1,6 @@
 <div id="browse_component">
-    <div carousel set-ng-animate='false' on-carousel-change="onSlideChanged(nextSlide, direction)" id="carousel" interval="0">
-        <div slide ng-repeat="slide in slides" active="slide.active">
+    <div carousel set-ng-animate='false' on-carousel-change="vm.onSlideChanged(nextSlide, direction)" id="carousel" interval="0">
+        <div slide ng-repeat="slide in vm.slides" active="slide.active">
             <div id="slide_stripe" ng-class="slide.info.css"></div>
             <div id="create_new">
                 <h2 ng-bind="slide.newTitle"></h2>

@@ -7,24 +7,28 @@ function focusView($state, $rootScope, $q, NodeHistory) {
         restrict: "A",
         replace: false,
         scope: true,
-        link: function($scope) {
-            $scope.node.$then(data => {
-                NodeHistory.add(data);
-            });
-
-            // callbacks for removing/updating the focused node
-            $scope.removeFocused = _.wrap($scope.node, removeFocused);
-            $scope.updateFocused = _.wrap($scope.node, updateFocused);
-
-            // register for events for the current node, as well as all connected lists
-            let unsubscribe = getUnsubscribePromise();
-            unsubscribe.then($scope.node.$subscribeToLiveEvent(m => $scope.$apply(_.partial(onNodeChange, $scope.node, m))));
-            _.each(_.compact([$scope.left, $scope.right, $scope.bottom, $scope.top]), list => {
-                unsubscribe.then(list.subscribe());
-            });
-
-        }
+        link: link
     };
+
+    function link($scope) {
+        let vm = $scope.vm;
+
+        vm.node.$then(data => {
+            NodeHistory.add(data);
+        });
+
+        // callbacks for removing/updating the focused node
+        vm.removeFocused = _.wrap(vm.node, removeFocused);
+        vm.updateFocused = _.wrap(vm.node, updateFocused);
+
+        // register for events for the current node, as well as all connected lists
+        let unsubscribe = getUnsubscribePromise();
+        unsubscribe.then(vm.node.$subscribeToLiveEvent(m => vm.$apply(_.partial(onNodeChange, vm.node, m))));
+        _.each(_.compact([vm.left, vm.right, vm.bottom, vm.top]), list => {
+            unsubscribe.then(list.subscribe());
+        });
+
+    }
 
     function getUnsubscribePromise() {
         let unsubscribe = $q.defer();

@@ -1,26 +1,26 @@
 <div focus-view id="focus_view_component">
-    <div ng-if='left' id="left_view">
-        <div discourse-node-list node-model='left.model' class="discourse_node_list_vertical"></div>
+    <div ng-if='vm.left' id="left_view">
+        <div discourse-node-list node-model='vm.left.model' class="discourse_node_list_vertical"></div>
     </div>
     <div id="focus_view_center">
-        <div ng-if='top' id="top_view">
-            <div discourse-node-list node-model='top.model' class="discourse_node_list_horizontal"></div>
+        <div ng-if='vm.top' id="top_view">
+            <div discourse-node-list node-model='vm.top.model' class="discourse_node_list_horizontal"></div>
         </div>
         <div id="node_view">
             <h2>Focus:</h2>
-            <div class="panel panel-default" ng-class="nodeInfo.css">
+            <div class="panel panel-default" ng-class="vm.nodeInfo.css">
                 <div class="panel-heading">
-                    <h3 class="panel-title" editable-textarea="node.title" e-rows="7" e-cols="40" onaftersave="updateFocused()" style="display:inline;" ng-bind="node.title"></h3>
-                    <button class="pull-right btn btn-xs btn-danger" ng-click="removeFocused()"><i class="fa fa-trash-o"></i></button>
+                    <h3 class="panel-title" editable-textarea="vm.node.title" e-rows="7" e-cols="40" onaftersave="vm.updateFocused()" style="display:inline;" ng-bind="vm.node.title"></h3>
+                    <button class="pull-right btn btn-xs btn-danger" ng-click="vm.removeFocused()"><i class="fa fa-trash-o"></i></button>
                 </div>
-                <div class="panel-body" editable-textarea="node.description" e-rows="7" e-cols="40" onaftersave="updateFocused()" ng-bind="node.description"></div>
+                <div class="panel-body" editable-textarea="vm.node.description" e-rows="7" e-cols="40" onaftersave="vm.updateFocused()" ng-bind="vm.node.description"></div>
             </div>
         </div>
-        <div ng-if="bottom" id="bottom_view">
-            <div discourse-node-list node-model='bottom.model' class="discourse_node_list_horizontal"></div>
+        <div ng-if="vm.bottom" id="bottom_view">
+            <div discourse-node-list node-model='vm.bottom.model' class="discourse_node_list_horizontal"></div>
         </div>
     </div>
-    <div ng-if="right" id="right_view">
-        <div discourse-node-list node-model='right.model' class="discourse_node_list_vertical"></div>
+    <div ng-if="vm.right" id="right_view">
+        <div discourse-node-list node-model='vm.right.model' class="discourse_node_list_vertical"></div>
     </div>
 </div>

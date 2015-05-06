@@ -1,30 +1,32 @@
 angular.module("wust.components").controller("NavigationCtrl", NavigationCtrl);
 
-NavigationCtrl.$inject = ["$scope", "Auth", "Search", "DiscourseNode"];
+NavigationCtrl.$inject = ["Auth", "Search", "DiscourseNode"];
 
-function NavigationCtrl($scope, Auth, Search, DiscourseNode) {
-    $scope.searchTyped = {
+function NavigationCtrl(Auth, Search, DiscourseNode) {
+    let vm = this;
+
+    vm.searchTyped = {
         title: ""
     };
 
-    $scope.newUser = {
+    vm.newUser = {
         identifier: "",
         password: ""
     };
 
-    $scope.searchNodes = searchNodes;
-    $scope.onSelect = onSelect;
-    $scope.onSubmit = onSubmit;
-    $scope.authenticate = authenticate;
-    $scope.getUsername = Auth.getUsername.bind(Auth);
-    $scope.loggedIn = Auth.loggedIn.bind(Auth);
-    $scope.logout = Auth.logout.bind(Auth);
+    vm.searchNodes = searchNodes;
+    vm.onSelect = onSelect;
+    vm.onSubmit = onSubmit;
+    vm.authenticate = authenticate;
+    vm.getUsername = Auth.getUsername.bind(Auth);
+    vm.loggedIn = Auth.loggedIn.bind(Auth);
+    vm.logout = Auth.logout.bind(Auth);
 
     function authenticate(register) {
         let func = register ? Auth.register : Auth.login;
-        func.bind(Auth, angular.copy($scope.newUser))();
-        $scope.newUser.identifier = "";
-        $scope.newUser.password = "";
+        func.bind(Auth, angular.copy(vm.newUser))();
+        vm.newUser.identifier = "";
+        vm.newUser.password = "";
     }
 
     // provides a promise of the searchresults for the auto completion
@@ -45,7 +47,7 @@ function NavigationCtrl($scope, Auth, Search, DiscourseNode) {
     // focus the selected node
     function onSelect(item) {
         focusNode(item);
-        $scope.searchTyped.title = "";
+        vm.searchTyped.title = "";
     }
 
     // route to the node's page

@@ -33,8 +33,7 @@ function DiscourseNodeList() {
                     node.nestedNodeLists = _.map(this.nestedNodeLists, nodeList => nodeList.create(node[nodeList.servicePath]));
                 });
 
-                // defines the styling information for the DiscourseNodeList
-                // directive
+                // defines the styling information for the DiscourseNodeList directive
                 this.style = {
                     templateUrl: "show_discourse_node_list.html",
                     listCss: `${nodeInfo.css}_list`

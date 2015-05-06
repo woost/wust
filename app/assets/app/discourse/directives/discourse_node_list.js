@@ -9,6 +9,13 @@ function discourseNodeList() {
         templateUrl: "assets/app/discourse/directives/discourse_node_list.html",
         scope: {
             nodeModel: "=",
-        }
+        },
+        controller: discourseNodeListCtrl,
+        controllerAs: "vm",
+        bindToController: true
     };
 }
+
+discourseNodeListCtrl.$inject = [];
+
+function discourseNodeListCtrl() {}

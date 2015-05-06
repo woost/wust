@@ -1,8 +1,8 @@
 angular.module("wust.discourse").directive("discourseNodeSearchForm", discourseNodeSearchForm);
 
-discourseNodeSearchForm.$inject = ["DiscourseNode"];
+discourseNodeSearchForm.$inject = [];
 
-function discourseNodeSearchForm(DiscourseNode) {
+function discourseNodeSearchForm() {
     return {
         restrict: "A",
         require: "ngModel",
@@ -13,19 +13,28 @@ function discourseNodeSearchForm(DiscourseNode) {
             onSelect: "&",
             searchNodes: "&"
         },
-        link: function($scope, element, attrs) {
-            $scope.getNodes = getNodes;
-            $scope.iconClass = attrs.iconClass;
-            $scope.formatLabel = _.constant("");
-            $scope.lastSearchResult = [];
-
-            function getNodes(term) {
-                return $scope.searchNodes({term: term}).$then(response => {
-                    $scope.lastSearchResult = _.map(response, item => _.merge(item, {
-                        css: DiscourseNode.get(item.label).css
-                    }));
-                }).$asPromise();
-            }
-        }
+        controller: discourseNodeSearchCtrl,
+        controllerAs: "vm",
+        bindToController: true
     };
+
+}
+
+discourseNodeSearchCtrl.$inject = ["$attrs", "DiscourseNode"];
+
+function discourseNodeSearchCtrl(attrs, DiscourseNode) {
+    let vm = this;
+
+    vm.getNodes = getNodes;
+    vm.iconClass = attrs.iconClass;
+    vm.formatLabel = _.constant("");
+    vm.lastSearchResult = [];
+
+    function getNodes(term) {
+        return vm.searchNodes({term: term}).$then(response => {
+            vm.lastSearchResult = _.map(response, item => _.merge(item, {
+                css: DiscourseNode.get(item.label).css
+            }));
+        }).$asPromise();
+    }
 }

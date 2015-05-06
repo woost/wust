@@ -7,8 +7,10 @@ setNgAnimate.$inject = ["$animate"];
 
 function setNgAnimate($animate) {
     return {
-        link: function ($scope, $element, $attrs) {
-            $scope.$watch(() => $scope.$eval($attrs.setNgAnimate, $scope), val => $animate.enabled(!!val, $element));
-        }
+        link: link
     };
+
+    function link($scope, $element, $attrs) {
+        $scope.$watch(() => $scope.$eval($attrs.setNgAnimate, $scope), val => $animate.enabled(!!val, $element));
+    }
 }
