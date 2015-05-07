@@ -21,24 +21,24 @@ lazy val wust = (project in file(".")).settings(
     "com.github.renesca" %% "renesca" % "0.1.3",
     // scalajs
     "com.vmunier" %% "play-scalajs-scripts" % "0.1.0",
-    // "org.webjars" %% "webjars-play" % "2.3.0-2",
     // angular
     "org.webjars" % "angularjs" % "1.3.15",
     "org.webjars.bower" % "angular-ui-router" % "0.2.13",
-    "org.webjars.bower" % "angular-bootstrap" % "0.12.1",
+    "org.webjars.bower" % "angular-bootstrap" % "0.13.0",
     "org.webjars.bower" % "angular-native-dragdrop" % "1.1.0",
     "org.webjars.bower" % "angular-restmod" % "1.1.8",
+    "org.webjars.bower" % "angular-xeditable" % "0.1.9",
+    // styles and fonts
+    "org.webjars" % "animate.css" % "3.2.5",
+    "org.webjars.bower" % "bootstrap-css-only" % "3.3.4",
+    "org.webjars" % "font-awesome" % "4.3.0-1",
     // js auth
     "org.webjars.bower" % "angular-jwt" % "0.0.7",
     "org.webjars.bower" % "a0-angular-storage" % "0.0.9",
     // basic js libraries
     "org.webjars.bower" % "lodash" % "3.6.0",
-    "org.webjars" % "font-awesome" % "4.3.0-1",
-    "org.webjars.bower" % "bootstrap" % "3.3.4",
     "org.webjars.bower" % "d3" % "3.5.5",
     "org.webjars.bower" % "humane-js" % "3.2.2",
-    "org.webjars.bower" % "angular-xeditable" % "0.1.9",
-    "org.webjars" % "animate.css" % "3.2.5",
     // authentication / authorization
     "com.mohiva" %% "play-silhouette" % "2.0",
     "com.typesafe.play.plugins" %% "play-plugins-mailer" % "2.3.0",

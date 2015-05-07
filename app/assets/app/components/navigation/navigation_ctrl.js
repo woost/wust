@@ -5,6 +5,8 @@ NavigationCtrl.$inject = ["Auth", "Search", "DiscourseNode"];
 function NavigationCtrl(Auth, Search, DiscourseNode) {
     let vm = this;
 
+    vm.navbarCollapsed = true;
+
     vm.searchTyped = {
         title: ""
     };
