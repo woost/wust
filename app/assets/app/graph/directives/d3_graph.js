@@ -122,6 +122,9 @@ function d3Graph($window) {
             // register tick function
             force.on("tick", tick);
 
+            // let the simulation converge
+            while (force.alpha() > 0) force.tick();
+
             // filter on event
             scope.$on("d3graph_filter", filter);
 
