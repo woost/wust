@@ -209,7 +209,7 @@ function d3Graph($window) {
                     //TODO: WORKAROUND
                     // why is rect.width == 0 for all hyperedge-nodes?
                     rect = {
-                        width: rect.width || 50,
+                        width: rect.width || 70,
                         height: rect.height
                     };
                     curr.setAttribute("width", rect.width);
