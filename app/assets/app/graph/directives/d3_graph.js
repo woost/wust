@@ -140,8 +140,8 @@ function d3Graph($window) {
                 }
 
                 graph.nodes = _.map(graph.nodes, node => {
-                    let marked = node.hyperEdge || _(filteredIds).includes(node.id);
-                    let visible = !node.hyperEdge && marked || _(ids).includes(node.id);
+                    let marked = _(filteredIds).includes(node.id);
+                    let visible = marked || _(ids).includes(node.id);
                     return _.merge(node, {
                         visible: visible,
                         marked: marked
@@ -163,7 +163,7 @@ function d3Graph($window) {
                 // set node visibility
                 _.each(graph.nodes, (node, i) => {
                     let fo = nodeFo[0][i];
-                    fo.style.opacity = node.marked ? 1.0 : 0.5;
+                    fo.style.opacity = (node.marked || node.hyperEdge) ? 1.0 : 0.5;
                     fo.style.visibility = node.visible ? "visible" : "hidden";
                 });
 
