@@ -155,7 +155,7 @@ function d3Graph($window) {
                 });
 
                 setVisibility();
-                focusMarkedNodes();
+                focusMarkedNodes(event === undefined ? 0 : 750);
             }
 
             // reset visibility of nodes after filtering
@@ -178,7 +178,7 @@ function d3Graph($window) {
             }
 
             // focus the marked nodes and scale zoom accordingly
-            function focusMarkedNodes() {
+            function focusMarkedNodes(duration = 750) {
                 let marked = _.select(graph.nodes, {
                     marked: true
                 });
@@ -198,7 +198,7 @@ function d3Graph($window) {
                 }
 
                 let translate = [width / 2 - center[0] * scale, height / 2 - center[1] * scale];
-                svg.transition().duration(750).call(zoom.translate(translate).scale(scale).event);
+                svg.transition().duration(duration).call(zoom.translate(translate).scale(scale).event);
             }
 
             // we need to set the height and weight of the foreignobject
