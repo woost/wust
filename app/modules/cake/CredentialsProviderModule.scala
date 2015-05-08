@@ -1,15 +1,9 @@
 package modules.cake
 
-import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
 import com.mohiva.play.silhouette.api.services.AuthInfoService
 import com.mohiva.play.silhouette.api.util.PasswordHasher
+import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
 
-/**
- * Provides the credentials provider.
- *
- * @param authInfoService The auth info service implemenetation.
- * @param passwordHasher The default password hasher implementation.
- */
 trait CredentialsProviderModule {
 
   def authInfoService: AuthInfoService

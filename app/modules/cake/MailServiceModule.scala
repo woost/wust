@@ -1,14 +1,10 @@
 package modules.cake
 
-import play.api.mvc.RequestHeader
-import play.api.i18n.Lang
-import services._
 import model.users._
+import play.api.i18n.Lang
+import play.api.mvc.RequestHeader
+import services._
 
-/**
- * Provides the mail service.
- *
- */
 trait MailServiceModule {
 
   class SimpleMailService extends MailService[User] {

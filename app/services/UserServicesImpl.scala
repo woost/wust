@@ -1,23 +1,16 @@
 package services
 
-import java.util.UUID
-import play.api.libs.json._
-import play.api.libs.concurrent.Execution.Implicits._
 import com.mohiva.play.silhouette.api.LoginInfo
 import com.mohiva.play.silhouette.api.services.AuthInfo
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
-import scala.concurrent.Future
-import scala.collection.mutable
-
-import security.models.SignUp
 import model.users._
+import play.api.libs.concurrent.Execution.Implicits._
+import play.api.libs.json._
+import security.models.SignUp
 
-/**
- * BASIC IMPLEMENTATION
- * Handles actions to users.
- *
- * @param userDAO The user DAO implementation.
- */
+import scala.collection.mutable
+import scala.concurrent.Future
+
 class UserServiceInMemory extends UserService {
 
   /**
@@ -25,10 +18,9 @@ class UserServiceInMemory extends UserService {
    *
    * @param loginInfo The information about login
    * @param signUp The information about User
-   * @param avatarUrl string with url to avatar image
    * @param json all json with signup information
    */
-  def create(loginInfo: LoginInfo, signUp: SignUp, avatarUrl: Option[String] = None, json: JsValue = JsNull): Future[User] = {
+  def create(loginInfo: LoginInfo, signUp: SignUp, json: JsValue = JsNull): Future[User] = {
     val fullName = signUp.fullName.getOrElse(signUp.firstName.getOrElse("None") + " " + signUp.lastName.getOrElse("None"))
     val info = BaseInfo(
       firstName = signUp.firstName,
@@ -39,14 +31,12 @@ class UserServiceInMemory extends UserService {
       loginInfo = loginInfo,
       email = Some(signUp.identifier),
       username = None,
-      avatarUrl = avatarUrl,
       info = info)
     Future.successful {
       User(
         loginInfo = loginInfo,
         email = Some(signUp.identifier),
         username = None,
-        avatarUrl = avatarUrl,
         info = info)
     }
   }
@@ -60,8 +50,8 @@ class UserServiceInMemory extends UserService {
   def retrieve(loginInfo: LoginInfo): Future[Option[User]] = {
     play.Logger.debug {
       s"""UserServiceImpl.retrieve ----------
-      		------------------ loginInfo: ${loginInfo}
-      		------------------ DB: ${UserServiceImpl.users}"""
+      		------------------ loginInfo: ${ loginInfo }
+      		------------------ DB: ${ UserServiceImpl.users }"""
     }
     Future.successful {
       UserServiceImpl.users.find {
@@ -79,7 +69,7 @@ class UserServiceInMemory extends UserService {
   def save(user: User) = {
     play.Logger.debug {
       s"""UserServiceImpl.save ----------
-      		------------------ user: ${user}"""
+      		------------------ user: ${ user }"""
     }
     UserServiceImpl.users += (user.loginInfo.toString -> user)
     Future.successful(user)
@@ -96,7 +86,7 @@ class UserServiceInMemory extends UserService {
   def save[A <: AuthInfo](profile: CommonSocialProfile) = {
     play.Logger.debug {
       s"""UserServiceImpl.save ----------
-        	------------------ profile: ${profile}"""
+        	------------------ profile: ${ profile }"""
     }
     retrieve(profile.loginInfo).flatMap {
       case Some(user) => // Update user with profile
@@ -105,10 +95,10 @@ class UserServiceInMemory extends UserService {
           lastName = profile.lastName,
           fullName = profile.fullName,
           gender = None),
-          email = profile.email,
-          avatarUrl = profile.avatarURL)
+          email = profile.email
+        )
         save(u)
-      case None => // Insert a new user
+      case None       => // Insert a new user
         val u = User(
           loginInfo = profile.loginInfo,
           username = None,
@@ -117,8 +107,8 @@ class UserServiceInMemory extends UserService {
             lastName = profile.lastName,
             fullName = profile.fullName,
             gender = None),
-          email = profile.email,
-          avatarUrl = profile.avatarURL)
+          email = profile.email
+        )
         save(u)
     }
   }
@@ -133,9 +123,9 @@ class UserServiceInMemory extends UserService {
   def link[A <: AuthInfo](user: User, profile: CommonSocialProfile): Future[User] = {
     play.Logger.debug {
       s"""UserServiceImpl.link ----------
-      		------------------ user: ${user}
-      		------------------ profile: ${profile}
-      		------------------ DB: ${UserServiceImpl.users}"""
+      		------------------ user: ${ user }
+      		------------------ profile: ${ profile }
+      		------------------ DB: ${ UserServiceImpl.users }"""
     }
     val s = user.socials.getOrElse(Seq())
     val u = user.copy(socials = Some(s :+ profile.loginInfo))

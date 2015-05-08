@@ -1,22 +1,11 @@
 package modules.cake
 
-package modules.cake
-
+import com.mohiva.play.silhouette.api.services.AuthenticatorService
+import com.mohiva.play.silhouette.api.util.{Clock, IDGenerator}
+import com.mohiva.play.silhouette.impl.authenticators._
 import play.api.Play
 import play.api.Play.current
-/** mohiva module import */
-import com.mohiva.play.silhouette.impl.authenticators._
-import com.mohiva.play.silhouette.api.services.AuthenticatorService
-import com.mohiva.play.silhouette.api.util.CacheLayer
-import com.mohiva.play.silhouette.api.util.Clock
-import com.mohiva.play.silhouette.api.util.IDGenerator
 
-/**
- * Provides the Header authenticator service.
- *
- * @param cacheLayer The cache layer implementation.
- * @param idGenerator The ID generator used to create the authenticator ID.
- */
 trait HeaderAuthenticatorServiceModule {
 
   def idGenerator: IDGenerator

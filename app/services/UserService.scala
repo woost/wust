@@ -1,13 +1,13 @@
 package services
 
-import scala.concurrent.Future
-import play.api.libs.json.{JsValue, JsNull}
 import com.mohiva.play.silhouette.api.LoginInfo
-import com.mohiva.play.silhouette.api.services.{ AuthInfo, IdentityService }
+import com.mohiva.play.silhouette.api.services.{AuthInfo, IdentityService}
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
-
-import security.models.SignUp
 import model.users.User
+import play.api.libs.json.{JsNull, JsValue}
+import security.models.SignUp
+
+import scala.concurrent.Future
 
 /**
  * Handles actions to users.
@@ -19,10 +19,9 @@ trait UserService extends IdentityService[User] {
    *
    * @param loginInfo The information about login
    * @param signUp The information about User
-   * @param avatarUrl string with url to avatar image
    * @param json all json with signup information
    */
-  def create(loginInfo: LoginInfo, signUp: SignUp, avatarUrl: Option[String] = None, json: JsValue = JsNull): Future[User]
+  def create(loginInfo: LoginInfo, signUp: SignUp, json: JsValue = JsNull): Future[User]
 
   /**
    * Saves a user.
