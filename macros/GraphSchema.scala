@@ -64,23 +64,26 @@ object GraphSchemaMacro {
             case otherStatement                          => otherStatement
           }
 
-          //TODO: extend supertraits factory?
-          def nodeTraitFactories(schema: Schema): List[Tree] = schema.nodeTraits.filter(_.hasOwnFactory).map { nodeTrait => import nodeTrait._
+          def nodeTraitFactories(schema: Schema): List[Tree] = schema.nodeTraits.map { nodeTrait => import nodeTrait._
             val factoryName = TypeName(traitFactoryName(name))
+            val localInterface = if(hasOwnFactory) q"def local (...${ parameterList.toParamCode }): NODE" else q""
+            val superTypeFactories = superTypes.map(traitFactoryName).map(TypeName(_)).map(fact => tq"$fact[NODE]")
             q"""
-           trait $factoryName[NODE <: Node] extends NodeFactory[NODE] {
-              def local (...${ parameterList.toParamCode }): NODE
+           trait $factoryName[NODE <: Node] extends NodeFactory[NODE] with ..$superTypeFactories {
+            $localInterface
            }
            """
           }
 
-          //TODO: extend supertraits factory?
-          def relationTraitFactories(schema: Schema): List[Tree] = schema.relationTraits.filter(_.hasOwnFactory).map { relationTrait => import relationTrait._
+          def relationTraitFactories(schema: Schema): List[Tree] = schema.relationTraits.map { relationTrait => import relationTrait._
             val startEndlocalParams = List(List(q"val startNode:START", q"val endNode:END") ::: parameterList.toParamCode.head)
             val factoryName = TypeName(traitFactoryName(name))
+            val localInterface = if(hasOwnFactory) q" def local (...$startEndlocalParams): RELATION " else q""
+            val superTypeFactories = superTypes.map(traitFactoryName).map(TypeName(_)).map(fact => tq"$fact[START,RELATION,END]")
             q"""
-           trait $factoryName[START <: Node, +RELATION <: AbstractRelation[START,END], END <: Node] extends AbstractRelationFactory[START,RELATION,END] {
-              def local (...$startEndlocalParams): RELATION
+           trait $factoryName[START <: Node, +RELATION <: AbstractRelation[START,END], END <: Node] extends AbstractRelationFactory[START,RELATION,END]
+            with ..$superTypeFactories {
+            $localInterface
            }
            """
           }

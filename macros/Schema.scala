@@ -21,16 +21,17 @@ class SchemaContext[C <: whitebox.Context](val context: C) {
 
       import Schema._
 
-      def apply(
+     def apply(
                  nodeTraitPattern: NodeTraitPattern,
                  nodeTraitPatterns: List[NodeTraitPattern],
                  relationTraitPatterns: List[RelationTraitPattern],
                  selectedNodePatterns: List[NodePattern],
+                 selectedHyperRelationPatterns: List[HyperRelationPattern],
                  relationPatterns: List[RelationPattern],
                  hyperRelationPatterns: List[HyperRelationPattern],
                  hasOwnFactory: Boolean
                  ) = {
-        val nodes = nodeTraitToNodes(nodeTraitPatterns, selectedNodePatterns ::: hyperRelationPatterns, nodeTraitPattern)
+        val nodes = nodeTraitToNodes(nodeTraitPatterns, selectedNodePatterns ::: selectedHyperRelationPatterns, nodeTraitPattern)
         new NodeTrait(
           nodeTraitPattern,
           subNodes = nodes,
@@ -55,7 +56,7 @@ class SchemaContext[C <: whitebox.Context](val context: C) {
         val groupPatterns: List[GroupPattern] = schemaPattern.statements.collect { case GroupPattern(groupPattern) => groupPattern }
 
         val nodeTraits = nodeTraitPatterns.map(nodeTraitPattern =>
-          NodeTrait(nodeTraitPattern, nodeTraitPatterns, relationTraitPatterns, nodePatterns, relationPatterns, hyperRelationPatterns, traitCanHaveOwnFactory(nodePatterns ::: hyperRelationPatterns ::: relationTraitPatterns ::: nodeTraitPatterns, nodeTraitPattern)))
+          NodeTrait(nodeTraitPattern, nodeTraitPatterns, relationTraitPatterns, nodePatterns, hyperRelationPatterns, relationPatterns, hyperRelationPatterns, traitCanHaveOwnFactory(nodePatterns ::: hyperRelationPatterns ::: relationTraitPatterns ::: nodeTraitPatterns, nodeTraitPattern)))
         val nodes = nodePatterns.map { nodePattern => {
           import nodePattern._
           Node(nodePattern, neighbours(nodePattern, relationPatterns), rev_neighbours(nodePattern, relationPatterns),
@@ -66,15 +67,16 @@ class SchemaContext[C <: whitebox.Context](val context: C) {
           RelationTrait(relationTraitPattern,
             flatSuperStatements(relationTraitPatterns, relationTraitPattern),
             traitCanHaveOwnFactory(relationPatterns ::: hyperRelationPatterns ::: nodeTraitPatterns ::: relationTraitPatterns, relationTraitPattern))) //TODO: why nodeTraitPatterns
-        val groups = groupPatterns.map(groupPattern =>
+        val groups = groupPatterns.map{groupPattern =>
+            val groupedElements = groupToNodes(groupPatterns, groupPattern)
             Group(groupPattern,
               nodes = groupToNodes(groupPatterns, groupPattern),
               relations = groupToRelations(groupPatterns, hyperRelationPatterns, relationPatterns, groupPattern),
               hyperRelations = groupToRelations(groupPatterns, hyperRelationPatterns, hyperRelationPatterns, groupPattern),
               nodeTraits = nodeTraitPatterns.map(nodeTraitPattern =>
-                NodeTrait(nodeTraitPattern, nodeTraitPatterns, relationTraitPatterns, groupToNodes(groupPatterns, groupPattern).map(nameToPattern(nodePatterns, _)), relationPatterns, hyperRelationPatterns, false))
+                NodeTrait(nodeTraitPattern, nodeTraitPatterns, relationTraitPatterns, groupedElements.filter(g => nodePatterns.exists(_.name == g)).map(nameToPattern(nodePatterns, _)), groupedElements.filter(g => hyperRelationPatterns.exists(_.name == g)).map(nameToPattern(hyperRelationPatterns, _)), relationPatterns, hyperRelationPatterns, false))
             )
-          )
+          }
         val hyperRelations = hyperRelationPatterns.map(hyperRelationPattern => HyperRelation(hyperRelationPattern, filterSuperTypes(nodeTraitPatterns, hyperRelationPattern), filterSuperTypes(relationTraitPatterns, hyperRelationPattern), flatSuperStatements(nodeTraitPatterns ::: relationTraitPatterns, hyperRelationPattern), findSuperFactoryParameterList(nodeTraitPatterns ::: relationTraitPatterns, hyperRelationPattern, relationTraits)))
         val relations = relationPatterns.map(relationPattern => Relation(relationPattern, flatSuperStatements(relationTraitPatterns, relationPattern), findSuperFactoryParameterList(relationTraitPatterns, relationPattern, relationTraits)))
         Schema(schemaPattern, nodes, relations, hyperRelations, nodeTraits, relationTraits, groups, statements)
