@@ -17,7 +17,6 @@ object UserFormats {
     implicit val reader = (
       (__ \ "id").read[String] ~
         (__ \ "loginInfo").read[LoginInfo] ~
-        (__ \ "socials").readNullable(Reads.seq[LoginInfo]) ~
         (__ \ "email").readNullable(Reads.email) ~
         (__ \ "username").readNullable[String] ~
         (__ \ "info").read[BaseInfo] ~

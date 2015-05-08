@@ -12,14 +12,9 @@ import model.authorizations._
 case class User(
                  id: String = UUID.randomUUID.toString,
                  loginInfo: LoginInfo,
-                 socials: Option[Seq[LoginInfo]] = None,
                  email: Option[String],
                  username: Option[String],
                  info: BaseInfo,
                  roles: Set[Role] = Set(SimpleUser)) extends Identity {
-
-}
-
-object User {
 
 }

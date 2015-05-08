@@ -9,13 +9,9 @@ import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.json._
 import play.api.mvc._
 import security.models._
-import utils.responses.rest._
 
 import scala.concurrent.Future
 
-/**
- * This controller manage registration of an user
- */
 class SignUpController extends Silhouette[User, JWTAuthenticator]
 with HeaderEnvironmentModule {
 
@@ -61,11 +57,11 @@ with HeaderEnvironmentModule {
             result
           }
         case Some(u) => /* user already exists! */
-          Future.successful(Conflict(Json.toJson(Bad(message = "user already exists"))))
+          Future.successful(Conflict("user already exists"))
       }
     }.recoverTotal {
       case error =>
-        Future.successful(BadRequest(Json.toJson(Bad(message = JsError.toFlatJson(error)))))
+        Future.successful(BadRequest(error.toString))
     }
   }
 
