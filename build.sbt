@@ -21,7 +21,7 @@ lazy val wust = (project in file(".")).settings(
     // "com.vmunier" %% "play-scalajs-scripts" % "0.1.0",
     // angular
     "org.webjars" % "angularjs" % "1.3.15",
-    "org.webjars.bower" % "angular-ui-router" % "0.2.13",
+    "org.webjars.bower" % "angular-ui-router" % "0.2.14",
     "org.webjars.bower" % "angular-bootstrap" % "0.13.0",
     "org.webjars.bower" % "angular-native-dragdrop" % "1.1.0",
     "org.webjars.bower" % "angular-restmod" % "1.1.8",
@@ -34,7 +34,7 @@ lazy val wust = (project in file(".")).settings(
     "org.webjars.bower" % "angular-jwt" % "0.0.7",
     "org.webjars.bower" % "a0-angular-storage" % "0.0.9",
     // basic js libraries
-    "org.webjars.bower" % "lodash" % "3.6.0",
+    "org.webjars.bower" % "lodash" % "3.8.0",
     "org.webjars.bower" % "d3" % "3.5.5",
     "org.webjars.bower" % "humane-js" % "3.2.2",
     // authentication / authorization

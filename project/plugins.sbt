@@ -5,7 +5,7 @@ resolvers += Resolver.sonatypeRepo("releases")
 resolvers += Resolver.url("GitHub repository", url("http://shaggyyeti.github.io/releases"))(Resolver.ivyStylePatterns)
 
   // The Play plugin
-  addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.3.8")
+  addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.3.9")
 
 
   // Scala.js
