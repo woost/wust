@@ -1,8 +1,8 @@
-package security.formatters.json
+package formatters.json
 
-import play.api.libs.json._
-import play.api.libs.functional.syntax._
 import com.mohiva.play.silhouette.api.util.Credentials
+import play.api.libs.functional.syntax._
+import play.api.libs.json._
 
 /**
  * Contain all format for com.mohiva.play.silhouette.api.providers.Credentials type

@@ -74,9 +74,10 @@ trait Generators extends Context with Patterns {
 
       val nodeTraits = nodeTraitPatterns.map(nodeTraitPattern =>
         NodeTrait(nodeTraitPattern, nodeTraitPatterns, relationTraitPatterns, nodePatterns, hyperRelationPatterns, relationPatterns, hyperRelationPatterns))
-      val nodes = nodePatterns.map { nodePattern => {
+      val nodes = nodePatterns.map { rawNodePattern => {
+        val nodePattern = rawNodePattern.copy(_superTypes = rawNodePattern.superTypes.filter(nodeTraits.map(_.name) contains _))
         import nodePattern._
-        Node(nodePattern, neighbours(nodePattern, relationPatterns), rev_neighbours(nodePattern, relationPatterns),
+        Node(nodePattern, superTypes, rawNodePattern.superTypes.filterNot(nodeTraits.map(_.name) contains _), neighbours(nodePattern, relationPatterns), rev_neighbours(nodePattern, relationPatterns),
           flatSuperStatements(nodeTraitPatterns, nodePattern), findSuperFactoryParameterList(nodeTraitPatterns, nodePattern, nodeTraits))
       }
       }
@@ -307,6 +308,8 @@ trait Generators extends Context with Patterns {
 
   case class Node(
                    pattern: NodePattern,
+                   override val superTypes: List[String], // only nodeTraits
+                   otherSuperTypes: List[String],
                    neighbours: List[(String, String)],
                    rev_neighbours: List[(String, String)],
                    flatStatements: List[Tree],

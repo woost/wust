@@ -9,6 +9,7 @@ package object schema {
   type AbstractRelationFactoryStartEnd[START <: Node, END <: Node] = AbstractRelationFactory[START, _ <: AbstractRelation[START, END], END]
   type AbstractRelationFactoryNode[NODE <: Node] = AbstractRelationFactory[_ <: NODE, _ <: AbstractRelation[_, _], _ <: NODE]
   type AbstractRelationFactoryAny = AbstractRelationFactory[_ <: Node, _ <: AbstractRelation[_, _], _ <: Node]
+  //TODO: implicits from Graph to raw.Graph
 
   trait NodeFilter {
     def graph: raw.Graph
@@ -63,8 +64,8 @@ package object schema {
       filterHyperRelations(graph.nodes.toSet, graph.relations.toSet, hyperRelationFactory)
     }
 
-    def add(schemaItem: Item) {
-      schemaItem match {
+    def add(schemaItems: Item*) {
+      schemaItems.foreach {
         case hyperRelation: HyperRelation[_, _, _, _, _] =>
           graph.nodes += hyperRelation.node
           graph.relations += hyperRelation.startRelation.relation

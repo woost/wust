@@ -1,9 +1,6 @@
 package formatters.json
 
-import com.mohiva.play.silhouette.api.LoginInfo
-import model.authorizations._
-import model.users._
-import play.api.libs.functional.syntax._
+import model.WustSchema.User
 import play.api.libs.json._
 
 /**
@@ -12,21 +9,11 @@ import play.api.libs.json._
 object UserFormats {
 
   object RestFormat extends Format[User] {
-    implicit val baseInfoFormat = BaseInfoFormats.restFormat
-
-    implicit val reader = (
-      (__ \ "id").read[String] ~
-        (__ \ "loginInfo").read[LoginInfo] ~
-        (__ \ "email").readNullable(Reads.email) ~
-        (__ \ "username").readNullable[String] ~
-        (__ \ "info").read[BaseInfo] ~
-        (__ \ "roles").readNullable(Reads.set[String]).map { case Some(r) => r.map(Role.apply) case None => Set[Role](SimpleUser) })(User.apply _)
-
-    def reads(user: JsValue) = JsSuccess(user.as[User])
+    def reads(user: JsValue) = ???
 
     def writes(user: User) = JsObject(Seq(
-      ("info", Json.toJson(user.info)),
-      ("id", JsString(user.id))
+      ("email", JsString(user.email.getOrElse(""))),
+      ("id", JsString(user.uuid))
     ))
   }
 }

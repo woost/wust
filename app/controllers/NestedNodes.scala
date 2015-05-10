@@ -1,24 +1,12 @@
 package controllers
 
-import com.mohiva.play.silhouette.api.Silhouette
-import com.mohiva.play.silhouette.impl.authenticators.JWTAuthenticator
-import model.WustSchema._
-import model.authorizations._
-import model.users.User
-import modules.cake.HeaderEnvironmentModule
 import formatters.json.GraphFormat._
+import model.WustSchema._
 import modules.db.Database._
+import modules.live.Broadcaster
 import modules.requests._
 import play.api.libs.json._
 import play.api.mvc.Action
-import play.api.mvc.Controller
-import renesca._
-import renesca.schema._
-import renesca.graph.RelationType
-import renesca.parameter.implicits._
-import model.WustSchema._
-import model._
-import modules.live.Broadcaster
 
 trait NestedNodes[NodeType <: ContentNode] extends NestedResourceRouter with ContentNodes[NodeType] {
   def nodeSchema: NodeSchema[NodeType]

@@ -118,15 +118,16 @@ trait Code extends Context with Generators {
     }
 
     val nodeBody = statements.map(generateIndirectNeighbourAccessors(schema, _)).flatMap(generatePropertyAccessors(_))
-    val superTyesWithDefault = if(superTypes.isEmpty) List(TypeName("Node")) else superTypes_type
+    val superNodeTraitTypesWithDefault = if(superTypes.isEmpty) List(TypeName("Node")) else superTypes_type
+    val otherSuperTypes_type = otherSuperTypes.map(TypeName(_))
 
     q"""
-           case class $name_type(node: raw.Node) extends ..$superTyesWithDefault {
-             ..$directNeighbours
-             ..$directRevNeighbours
-             ..$nodeBody
-           }
-           """
+    case class $name_type(node: raw.Node) extends ..$superNodeTraitTypesWithDefault with ..$otherSuperTypes_type {
+        ..$directNeighbours
+        ..$directRevNeighbours
+        ..$nodeBody
+      }
+    """
   }
 
   def relationFactories(schema: Schema): List[Tree] = schema.relations.map { relation => import relation._

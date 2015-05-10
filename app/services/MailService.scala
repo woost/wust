@@ -1,15 +1,16 @@
 package services
 
-import play.api.libs.concurrent.Akka
-import play.api.Play.current
-import play.api.mvc.RequestHeader
-import play.api.i18n.Lang
-import play.twirl.api.{Txt, Html}
-import com.typesafe.plugin._
-import scala.concurrent.duration._
-import play.api.libs.concurrent.Execution.Implicits._
-import akka.actor._
 import com.mohiva.play.silhouette.api._
+import com.typesafe.plugin._
+import model.WustSchema.User
+import play.api.Play.current
+import play.api.i18n.Lang
+import play.api.libs.concurrent.Akka
+import play.api.libs.concurrent.Execution.Implicits._
+import play.api.mvc.RequestHeader
+import play.twirl.api.{Html, Txt}
+
+import scala.concurrent.duration._
 
 trait MailService[I <: Identity] {
 
@@ -42,3 +43,14 @@ trait MailService[I <: Identity] {
   }
 
 }
+
+class SimpleMailService extends MailService[User] {
+
+  def sendWelcomeEmail(user: User)(implicit request: RequestHeader, lang: Lang) = {
+    val html = views.html.auth.mails.welcomeEmail(user)(request, lang)
+    val txtAndHtml = (None, Some(html))
+    sendEmail("Welcome!!!!", user.email.get, txtAndHtml)
+  }
+
+}
+

@@ -1,17 +1,39 @@
 package model
 
+import com.mohiva.play.silhouette.api.services.AuthInfo
 import renesca.schema.macros
+import com.mohiva.play.silhouette.api.Identity
 
 @macros.GraphSchema
 object WustSchema {
   //TODO: Type aliases for several HyperRelation combinations
   @Group trait Discourse {List(Problem, Idea, Goal, ProArgument, ConArgument) }
-
+  @Group trait Auth {List(User, LoginInfo, PasswordInfo) }
 
   @Node trait UuidNode {
     //TODO: annotation for hidden defaults?
     val uuid: String = java.util.UUID.randomUUID.toString
   }
+
+  // TODO: custom local methods for NodeFactory
+  @Node class User extends UuidNode with Identity {
+    var email: Option[String]
+  }
+
+  @Node class LoginInfo {
+    val providerID: String
+    val providerKey: String
+  }
+
+  @Node class PasswordInfo {
+    val hasher: String
+    val password: String
+    val salt: Option[String]
+  }
+
+  @Relation class HasLogin(startNode: User, endNode: LoginInfo)
+  @Relation class HasPassword(startNode: LoginInfo, endNode: PasswordInfo)
+
   @Node trait ContentNode extends UuidNode {
     var title: String
     var description: Option[String]

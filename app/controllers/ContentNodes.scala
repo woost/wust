@@ -2,23 +2,15 @@ package controllers
 
 import com.mohiva.play.silhouette.api.Silhouette
 import com.mohiva.play.silhouette.impl.authenticators.JWTAuthenticator
-import model.WustSchema._
-import model.authorizations._
-import model.users.User
-import modules.cake.HeaderEnvironmentModule
 import formatters.json.GraphFormat._
+import model.WustSchema._
+import model.auth._
+import modules.auth.HeaderEnvironmentModule
+import modules.db.Database._
+import modules.live.Broadcaster
 import modules.requests._
 import play.api.libs.json._
 import play.api.mvc.Action
-import play.api.mvc.Controller
-import renesca._
-import renesca.schema._
-import renesca.graph.RelationType
-import renesca.parameter.implicits._
-import modules.db.Database._
-import model.WustSchema._
-import model._
-import modules.live.Broadcaster
 
 trait ContentNodes[NodeType <: ContentNode] extends ResourceRouter with Silhouette[User, JWTAuthenticator] with HeaderEnvironmentModule {
   //TODO: use transactions instead of db
