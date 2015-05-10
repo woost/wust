@@ -9,9 +9,9 @@ resolvers += Resolver.url("GitHub repository", url("http://shaggyyeti.github.io/
 
 
   // Scala.js
-  addSbtPlugin("com.vmunier" % "sbt-play-scalajs" % "0.2.3")
+  // addSbtPlugin("com.vmunier" % "sbt-play-scalajs" % "0.2.3")
 
-  addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.0")
+  // addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.0")
 
 
   // web plugins

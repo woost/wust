@@ -18,7 +18,7 @@ lazy val wust = (project in file(".")).settings(
     cache,
     ws,
     // scalajs
-    "com.vmunier" %% "play-scalajs-scripts" % "0.1.0",
+    // "com.vmunier" %% "play-scalajs-scripts" % "0.1.0",
     // angular
     "org.webjars" % "angularjs" % "1.3.15",
     "org.webjars.bower" % "angular-ui-router" % "0.2.13",
@@ -58,13 +58,13 @@ lazy val wust = (project in file(".")).settings(
   dependsOn(schema).
   aggregate(macros, schema)
 
-lazy val scalajs = (project in file("scalajs")).
-  settings(
-    scalaVersion := scalaV,
-    persistLauncher := true, // launch main class on website load
-    persistLauncher in Test := false,
-    scalacOptions ++= scalacOpts
-  ).enablePlugins(ScalaJSPlugin, ScalaJSPlay)
+// lazy val scalajs = (project in file("scalajs")).
+//   settings(
+//     scalaVersion := scalaV,
+//     persistLauncher := true, // launch main class on website load
+//     persistLauncher in Test := false,
+//     scalacOptions ++= scalacOpts
+//   ).enablePlugins(ScalaJSPlugin, ScalaJSPlay)
 
 lazy val schema = (project in file("schema")).
   settings(
