@@ -2,6 +2,7 @@ package controllers
 
 import com.mohiva.play.silhouette.api.Silhouette
 import com.mohiva.play.silhouette.impl.authenticators.JWTAuthenticator
+import controllers.router.ResourceRouter
 import formatters.json.GraphFormat._
 import model.WustSchema._
 import model.auth._

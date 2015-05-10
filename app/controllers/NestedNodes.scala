@@ -1,5 +1,6 @@
 package controllers
 
+import controllers.router.NestedResourceRouter
 import formatters.json.GraphFormat._
 import model.WustSchema._
 import modules.db.Database._

@@ -2,6 +2,7 @@ package controllers
 
 import com.mohiva.play.silhouette.api.LoginInfo
 import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
+import controllers.router.{ResourceRouter, DefaultResourceController}
 import modules.auth.HeaderEnvironmentModule
 import play.api.libs.json._
 import play.api.mvc.Action

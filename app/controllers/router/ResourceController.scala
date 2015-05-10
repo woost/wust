@@ -1,12 +1,11 @@
 // https://gist.github.com/jroper/5533633
 
-package controllers
+package controllers.router
 
 import play.api.mvc._
 import play.core.Router
+
 import scala.runtime.AbstractPartialFunction
-import scala.reflect.ClassTag
-import play.api.Play
 
 trait ResourceController extends Controller {
 
