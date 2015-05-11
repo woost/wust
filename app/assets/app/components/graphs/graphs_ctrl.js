@@ -17,7 +17,7 @@ function GraphsCtrl($scope, $filter, Graph, DiscourseNode) {
 
     function createGraph(graph) {
         graph.nodes = graph.nodes.map(node => _.merge(node, {
-            css: node.hyperEdge ? "" : `node ${DiscourseNode.get(node.label).css}`
+            css: node.hyperEdge ? "relation_label" : `node ${DiscourseNode.get(node.label).css}`
         }));
         vm.graph = graph;
     }

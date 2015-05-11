@@ -92,7 +92,7 @@ function d3Graph($window) {
 
             let linktextHtml = linktextFo.append("xhtml:span")
                 // .style("text-shadow", "white -1px 0px, white 0px 1px, white 1px 0px, white 0px -1px")
-                .style("background", "white")
+                .attr("class","relation_label")
                 .html(d => connectsHyperEdge(d) ? "" : d.label);
 
             let linktextRects = setForeignObjectDimensions(linktextFo, linktextHtml);

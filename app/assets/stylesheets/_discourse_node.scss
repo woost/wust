@@ -56,28 +56,24 @@ $discourse_conargument_color: #ff6d6f;
     }
 }
 
-.yo {
-    fill: yellow;
-}
-
 .discourse_goal {
-    @include discourse_node($discourse_goal_color, "");
+    @include discourse_node($discourse_goal_color, ""); //navigation arrow
 }
 
 .discourse_problem {
-    @include discourse_node($discourse_problem_color, "");
+    @include discourse_node($discourse_problem_color, ""); // flask
 }
 
 .discourse_idea {
-    @include discourse_node($discourse_idea_color, "");
+    @include discourse_node($discourse_idea_color, ""); // light bulb
 }
 
 .discourse_proargument {
-    @include discourse_node($discourse_proargument_color, "");
+    @include discourse_node($discourse_proargument_color, ""); // thumbsup
 }
 
 .discourse_conargument {
-    @include discourse_node($discourse_conargument_color, "");
+    @include discourse_node($discourse_conargument_color, ""); // thumbsdown
 }
 
 .discourse_idea_list {
