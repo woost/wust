@@ -1,8 +1,8 @@
 # Login/SignUp
 # TODO: should be moved to the user resource as post, patch, delete
-POST   /auth/signin               controllers.security.CredentialsAuthController.authenticate
-POST   /auth/signup               controllers.security.SignUpController.signUp
-GET    /auth/signout              controllers.security.SignUpController.signOut
+POST   /auth/signin               controllers.auth.CredentialsAuthController.authenticate
+POST   /auth/signup               controllers.auth.SignUpController.signUp
+GET    /auth/signout              controllers.auth.SignUpController.signOut
 
 -> /goals controllers.Goals
 -> /problems controllers.Problems
