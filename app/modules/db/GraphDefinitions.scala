@@ -60,21 +60,10 @@ package object db {
     def toQuery = s"($name: `${factory.label}`)"
   }
 
-  case class HyperNodeDefinition[START <: UuidNode, RELATION <: ContentRelation[START,END] with Node, END <: UuidNode](
-    startDefinition: UuidNodeDefinition[START],
-    factory: ContentRelationFactory[START, RELATION, END] with NodeFactory[RELATION],
-    endDefinition: UuidNodeDefinition[END]) extends FixedNodeDefinition[RELATION] {
-    private val relationDefinition = RelationDefinition(startDefinition, factory, endDefinition)
-
-    val name = relationDefinition.name
-    def parameterMap = relationDefinition.parameterMap
-    def toQuery = relationDefinition.toQuery
-  }
-
-  case class RelationDefinition[START <: Node, RELATION <: ContentRelation[START,END], END <: Node, +STARTDEF <: NodeDefinition[START], +ENDDEF <: NodeDefinition[END]](
-    startDefinition: STARTDEF,
-    factory: ContentRelationFactory[START, RELATION, END],
-    endDefinition: ENDDEF) extends GraphDefinition with DefinitionDefaults {
+  trait RelationDefinitionBase[START <: Node, RELATION <: ContentRelation[START,END], END <: Node, +STARTDEF <: NodeDefinition[START], +ENDDEF <: NodeDefinition[END]] extends GraphDefinition with DefinitionDefaults {
+    val startDefinition: STARTDEF
+    val factory: ContentRelationFactory[START, RELATION, END]
+    val endDefinition: ENDDEF
 
     val startRelationName = randomVariable
     val endRelationName = randomVariable
@@ -99,4 +88,14 @@ package object db {
       s"$preMatcher$startNode-$relationMatcher->$endNode"
     }
   }
+
+  case class HyperNodeDefinition[START <: UuidNode, RELATION <: ContentRelation[START,END] with Node, END <: UuidNode](
+    startDefinition: UuidNodeDefinition[START],
+    factory: ContentRelationFactory[START, RELATION, END] with NodeFactory[RELATION],
+    endDefinition: UuidNodeDefinition[END]) extends FixedNodeDefinition[RELATION] with RelationDefinitionBase[START,RELATION,END,UuidNodeDefinition[START], UuidNodeDefinition[END]]
+
+  case class RelationDefinition[START <: Node, RELATION <: ContentRelation[START,END], END <: Node, +STARTDEF <: NodeDefinition[START], +ENDDEF <: NodeDefinition[END]](
+    startDefinition: STARTDEF,
+    factory: ContentRelationFactory[START, RELATION, END],
+    endDefinition: ENDDEF) extends RelationDefinitionBase[START,RELATION,END,STARTDEF,ENDDEF]
 }
