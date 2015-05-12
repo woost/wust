@@ -28,11 +28,6 @@ package object db {
 
   trait GraphDefinition {
     def toQuery: String
-    val name: String
-    def parameterMap: ParameterMap
-  }
-
-  trait DefinitionDefaults {
     final val name = randomVariable
     def parameterMap: ParameterMap = Map.empty
   }
@@ -46,7 +41,7 @@ package object db {
   case class UuidNodeDefinition[+NODE <: UuidNode](
      factory: NodeFactory[NODE],
      uuid: String
-     ) extends FixedNodeDefinition[NODE] with DefinitionDefaults {
+     ) extends FixedNodeDefinition[NODE] {
 
     val uuidVariable = randomVariable
 
@@ -55,22 +50,19 @@ package object db {
   }
 
   case class LabelNodeDefinition[+NODE <: Node](
-    factory: NodeFactory[NODE]) extends NodeDefinition[NODE] with DefinitionDefaults {
+    factory: NodeFactory[NODE]) extends NodeDefinition[NODE] {
 
     def toQuery = s"($name: `${factory.label}`)"
   }
 
-  trait RelationDefinitionBase[START <: Node, RELATION <: ContentRelation[START,END], END <: Node, +STARTDEF <: NodeDefinition[START], +ENDDEF <: NodeDefinition[END]] extends GraphDefinition with DefinitionDefaults {
+  trait RelationDefinitionBase[START <: Node, RELATION <: ContentRelation[START,END], END <: Node, +STARTDEF <: NodeDefinition[START], +ENDDEF <: NodeDefinition[END]] extends GraphDefinition {
     val startDefinition: STARTDEF
     val factory: ContentRelationFactory[START, RELATION, END]
     val endDefinition: ENDDEF
 
-    val startRelationName = randomVariable
-    val endRelationName = randomVariable
-
     private def relationMatcher = factory match {
       case r: RelationFactory[_, RELATION, _]            => s"[$name :`${ r.relationType }`]"
-      case r: HyperRelationFactory[_, _, RELATION, _, _] => s"[$startRelationName: `${ r.startRelationType }`]->($name :`${ r.label }`)-[$endRelationName: `${ r.endRelationType }`]"
+      case r: HyperRelationFactory[_, _, RELATION, _, _] => s"[`${ r.startRelationType }`]->($name :`${ r.label }`)-[`${ r.endRelationType }`]"
     }
 
     private def nodeMatcher(nodeDefinition: NodeDefinition[_]) = nodeDefinition match {
