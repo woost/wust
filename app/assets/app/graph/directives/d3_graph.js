@@ -55,13 +55,13 @@ function d3Graph($window) {
 
             svg.append("svg:defs").append("svg:marker")
                 .attr("id", "arrow")
-                .attr("viewBox", "0 -5 10 10")
-                .attr("refX", 6)
-                .attr("markerWidth", 15)
-                .attr("markerHeight", 15)
+                .attr("viewBox", "0 -3 10 6")
+                .attr("refX", 10)
+                .attr("markerWidth", 10)
+                .attr("markerHeight", 6)
                 .attr("orient", "auto")
                 .append("svg:path")
-                .attr("d", "M0,-3L10,0L0,3")
+                .attr("d", "M 0,-3 L 10,-0.5 L 10,0.5 L0,3")
                 .attr("fill", "#999");
 
             // container with enabled pointer events
@@ -78,10 +78,7 @@ function d3Graph($window) {
             let link = container.selectAll(".svglink")
                 .data(graph.edges).enter()
                 .append("line")
-                .attr("class", "svglink")
-                .style("stroke-width", 1)
-                .style("stroke", "#999")
-                .style("marker-end", "url(graph#arrow)"); //TODO: don't hardcode: "graph#..." - url depends on current location from UI-router
+                .attr("class", "svglink");
 
             let linktextSvg = container.selectAll("g.linklabelholder")
                 .data(graph.edges).enter()

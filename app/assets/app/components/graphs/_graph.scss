@@ -11,7 +11,12 @@
     }
     .svglink {
         fill: none;
-        stroke: #666;
+        stroke: #999;
+        stroke-width: 1;
+        //TODO: don't hardcode: "graph#..." - url depends on current location from UI-router
+        marker-end: url(graph#arrow);
+        stroke-linecap: round;
+
     }
     .relation_label {
         background: white;
