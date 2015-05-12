@@ -236,21 +236,26 @@ function d3Graph($window) {
                 });
 
                 link.each( function(d) {
-                    let nodeRect = nodeRects[d.target.index];
+                    let sourceNodeRect = nodeRects[d.source.index];
+                    let targetNodeRect = nodeRects[d.target.index];
 
                     let linkLine = {
                         start: {x: d.source.x, y: d.source.y},
                         end:   {x: d.target.x, y: d.target.y}
                     };
 
-                    let rectIntersection = lineRectIntersection(linkLine,
-                            _.merge(nodeRect,{x: d.target.x - nodeRect.width/2, y: d.target.y - nodeRect.height/2}));
+                    let sourceIntersection = lineRectIntersection(linkLine,
+                            _.merge(sourceNodeRect,{x: d.source.x - sourceNodeRect.width/2, y: d.source.y - sourceNodeRect.height/2}));
+
+                    let targetIntersection = lineRectIntersection(linkLine,
+                            _.merge(targetNodeRect,{x: d.target.x - targetNodeRect.width/2, y: d.target.y - targetNodeRect.height/2}));
+
 
                     d3.select(this).attr({
-                        x1: d.source.x,
-                        y1: d.source.y,
-                        x2: rectIntersection ? rectIntersection.x : d.target.x,
-                        y2: rectIntersection ? rectIntersection.y : d.target.y
+                        x1: sourceIntersection ? sourceIntersection.x : d.source.x,
+                        y1: sourceIntersection ? sourceIntersection.y : d.source.y,
+                        x2: targetIntersection ? targetIntersection.x : d.target.x,
+                        y2: targetIntersection ? targetIntersection.y : d.target.y
                     });
 
                 }
