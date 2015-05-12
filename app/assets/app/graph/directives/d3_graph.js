@@ -232,11 +232,32 @@ function d3Graph($window) {
             // tick function, called in each step in the force calculation,
             // maps elements to positions
             function tick() {
-                link
-                    .attr("x1", d => d.source.x)
-                    .attr("y1", d => d.source.y)
-                    .attr("x2", d => d.target.x)
-                    .attr("y2", d => d.target.y);
+                node.attr("transform", d => {
+                    // center the node
+                    let rect = nodeRects[d.index];
+                    return "translate(" + (d.x - rect.width / 2) + "," + (d.y - rect.height / 2) + ")";
+                });
+
+                link.each( function(d) {
+                    let nodeRect = nodeRects[d.target.index];
+
+                    let linkLine = {
+                        start: {x: d.source.x, y: d.source.y},
+                        end:   {x: d.target.x, y: d.target.y}
+                    };
+
+                    let rectIntersection = lineRectIntersection(linkLine,
+                            _.merge(nodeRect,{x: d.target.x - nodeRect.width/2, y: d.target.y - nodeRect.height/2}));
+
+                    d3.select(this).attr({
+                        x1: d.source.x,
+                        y1: d.source.y,
+                        x2: rectIntersection ? rectIntersection.x : d.target.x,
+                        y2: rectIntersection ? rectIntersection.y : d.target.y
+                    });
+
+                }
+                );
 
                 linktextSvg.attr("transform", d => {
                     // center the linktext
@@ -244,11 +265,6 @@ function d3Graph($window) {
                     return "translate(" + (((d.source.x + d.target.x) / 2) - rect.width / 2) + "," + (((d.source.y + d.target.y) / 2) - rect.height / 2) + ")";
                 });
 
-                node.attr("transform", d => {
-                    // center the node
-                    let rect = nodeRects[d.index];
-                    return "translate(" + (d.x - rect.width / 2) + "," + (d.y - rect.height / 2) + ")";
-                });
             }
 
             // zoom into graph
@@ -337,14 +353,72 @@ function d3Graph($window) {
                     let source = graph.nodes[edge.source].id;
                     let target = graph.nodes[edge.target].id;
                     return {
-                        [source]: [target],
-                        [target]: [source]
+                        [source]: [target], [target]: [source]
                     };
                 }).reduce(_.partialRight(_.merge, (a, b) => {
                     return a ? a.concat(b) : b;
                 }, _)) || {};
             }
 
+            function lineIntersection(line1, line2) {
+                // if the lines intersect, the result contains the x and y of the intersection (treating the lines as infinite) and booleans for whether line segment 1 or line segment 2 contain the point
+                // from: http://jsfiddle.net/justin_c_rounds/Gd2S2
+                var denominator, a, b, numerator1, numerator2, result = {
+                    x: null,
+                    y: null,
+                    onLine1: false,
+                    onLine2: false
+                };
+                denominator = ((line2.end.y - line2.start.y) * (line1.end.x - line1.start.x)) - ((line2.end.x - line2.start.x) * (line1.end.y - line1.start.y));
+                if (denominator === 0) {
+                    return result;
+                }
+                a = line1.start.y - line2.start.y;
+                b = line1.start.x - line2.start.x;
+                numerator1 = ((line2.end.x - line2.start.x) * a) - ((line2.end.y - line2.start.y) * b);
+                numerator2 = ((line1.end.x - line1.start.x) * a) - ((line1.end.y - line1.start.y) * b);
+                a = numerator1 / denominator;
+                b = numerator2 / denominator;
+
+                // if we cast these lines infinitely in both directions, they intersect here:
+                result.x = line1.start.x + (a * (line1.end.x - line1.start.x));
+                result.y = line1.start.y + (a * (line1.end.y - line1.start.y));
+                /*
+                        // it is worth noting that this should be the same as:
+                        x = line2StartX + (b * (line2EndX - line2StartX));
+                        y = line2StartX + (b * (line2EndY - line2StartY));
+                        */
+                // if line1 is a segment and line2 is infinite, they intersect if:
+                if (a > 0 && a < 1) {
+                    result.onLine1 = true;
+                }
+                // if line2 is a segment and line1 is infinite, they intersect if:
+                if (b > 0 && b < 1) {
+                    result.onLine2 = true;
+                }
+                // if line1 and line2 are segments, they intersect if both of the above are true
+                return result;
+            }
+
+            function lineRectIntersection(line, rect) {
+                let corners = {
+                    x0y0: {x: rect.x             , y: rect.y},
+                    x1y0: {x: rect.x + rect.width, y: rect.y},
+                    x0y1: {x: rect.x             , y: rect.y + rect.height},
+                    x1y1: {x: rect.x + rect.width, y: rect.y + rect.height}
+                };
+
+                let rectLines = [
+                {start: corners.x0y0, end: corners.x1y0},
+                {start: corners.x0y0, end: corners.x0y1},
+                {start: corners.x1y1, end: corners.x1y0},
+                {start: corners.x1y1, end: corners.x0y1}
+                ];
+
+                let intersections = _.map(rectLines,rectLine => lineIntersection(line, rectLine));
+                let rectIntersection = _.find(intersections, x => x.onLine1 === true && x.onLine2 === true);
+                return rectIntersection;
+            }
         });
     }
 }
