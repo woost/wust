@@ -24,7 +24,8 @@ trait ContentNodes[NodeType <: ContentNode] extends ResourceRouter with Silhouet
 
         val discourse = Discourse.empty
         val contentNode = nodeSchema.factory.local(nodeAdd.title, description = nodeAdd.description)
-        discourse.add(contentNode)
+        val contribution = Contributes.local(user, contentNode)
+        discourse.add(contentNode, contribution)
         db.persistChanges(discourse.graph)
 
         // TODO: HTTP status Created
@@ -52,18 +53,24 @@ trait ContentNodes[NodeType <: ContentNode] extends ResourceRouter with Silhouet
     }
   }
 
-  def update(uuid: String) = Action(parse.json) { request =>
-    val nodeAdd = request.body.as[NodeAddRequest]
-    val discourse = nodeDiscourseGraph(nodeSchema.factory, uuid)
-    discourse.contentNodes.headOption match {
-      case Some(node) => {
-        node.title = nodeAdd.title
-        node.description = nodeAdd.description
-        db.persistChanges(discourse.graph)
-        Broadcaster.broadcastEdit(nodeSchema.path, node)
-        Ok(Json.toJson(node))
-      }
-      case None       => BadRequest(s"Node with uuid $uuid not found.")
+  def update(uuid: String) = UserAwareAction { request =>
+    request.identity match {
+      case Some(user) =>
+        val nodeAdd = request.body.asJson.get.as[NodeAddRequest]
+        val discourse = nodeDiscourseGraph(nodeSchema.factory, uuid)
+        discourse.contentNodes.headOption match {
+          case Some(node) => {
+            node.title = nodeAdd.title
+            node.description = nodeAdd.description
+            val contribution = Contributes.local(user, node)
+            discourse.add(contribution)
+            db.persistChanges(discourse.graph)
+            Broadcaster.broadcastEdit(nodeSchema.path, node)
+            Ok(Json.toJson(node))
+          }
+          case None       => BadRequest(s"Node with uuid $uuid not found.")
+        }
+      case None => Unauthorized("Only users who are logged in can create Nodes")
     }
   }
 
