@@ -1,3 +1,5 @@
+$link_color: #666;
+
 #graph_component {
     overflow: hidden;
     height: 100%;
@@ -9,14 +11,16 @@
         width: 30%;
         position: absolute;
     }
-    .svglink {
+    line.svglink {
         fill: none;
-        stroke: #999;
+        stroke: $link_color;
         stroke-width: 1;
         //TODO: don't hardcode: "graph#..." - url depends on current location from UI-router
         marker-end: url(graph#arrow);
         stroke-linecap: round;
-
+    }
+    marker path.svglink {
+        fill: $link_color;
     }
     .relation_label {
         background: white;

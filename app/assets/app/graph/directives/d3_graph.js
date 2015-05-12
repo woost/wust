@@ -62,7 +62,7 @@ function d3Graph($window) {
                 .attr("orient", "auto")
                 .append("svg:path")
                 .attr("d", "M 0,-3 L 10,-0.5 L 10,0.5 L0,3")
-                .attr("fill", "#999");
+                .attr("class", "svglink");
 
             // container with enabled pointer events
             let container = svg.append("g")
