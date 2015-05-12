@@ -121,16 +121,12 @@ package object schema {
     def endNode = endRelation.endNode
   }
 
-
   trait NodeFactory[+T <: Node] {
     def label: raw.Label
     def wrap(node: raw.Node): T
   }
 
-  trait AbstractRelationFactory[+START <: Node, +RELATION <: AbstractRelation[START, END] with Item, +END <: Node] {
-    def startNodeFactory: NodeFactory[START]
-    def endNodeFactory: NodeFactory[END]
-  }
+  trait AbstractRelationFactory[+START <: Node, +RELATION <: AbstractRelation[START, END] with Item, +END <: Node]
 
   trait RelationFactory[+START <: Node, +RELATION <: Relation[START, END], +END <: Node] extends AbstractRelationFactory[START, RELATION, END] {
     def relationType: raw.RelationType
@@ -138,32 +134,15 @@ package object schema {
   }
 
   trait HyperRelationFactory[
-  START <: Node,
+  +START <: Node,
   STARTRELATION <: Relation[START, HYPERRELATION],
   HYPERRELATION <: HyperRelation[START, STARTRELATION, HYPERRELATION, ENDRELATION, END],
   ENDRELATION <: Relation[HYPERRELATION, END],
-  END <: Node] extends NodeFactory[HYPERRELATION] with AbstractRelationFactory[START, HYPERRELATION, END] {
+  +END <: Node] extends NodeFactory[HYPERRELATION] with AbstractRelationFactory[START, HYPERRELATION, END] {
 
     def startRelationType: raw.RelationType
     def endRelationType: raw.RelationType
 
-    def factory: NodeFactory[HYPERRELATION]
-
-    def startRelationWrap(relation: raw.Relation): STARTRELATION
-    def endRelationWrap(relation: raw.Relation): ENDRELATION
-    def wrap(startRelation: raw.Relation, middleNode: raw.Node, endRelation: raw.Relation): HYPERRELATION = {
-      val hyperRelation = wrap(middleNode)
-      hyperRelation._startRelation = startRelationWrap(startRelation)
-      hyperRelation._endRelation = endRelationWrap(endRelation)
-      hyperRelation
-    }
-
-    def startRelationLocal(startNode: START, middleNode: HYPERRELATION): STARTRELATION = {
-      startRelationWrap(raw.Relation.local(startNode.node, middleNode.node, startRelationType))
-    }
-
-    def endRelationLocal(middleNode: HYPERRELATION, endNode: END): ENDRELATION = {
-      endRelationWrap(raw.Relation.local(middleNode.node, endNode.node, endRelationType))
-    }
+    def wrap(startRelation: raw.Relation, middleNode: raw.Node, endRelation: raw.Relation): HYPERRELATION
   }
 }

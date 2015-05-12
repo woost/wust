@@ -6,14 +6,14 @@ import model.WustSchema._
 
 object Ideas extends NestedNodes[Idea] {
   override def nodeSchema = NodeSchema(routePath, Idea, Map(
-    "goals" -> StartHyperConnectSchema(Achieves, Map(
-      "pros" -> EndConnectSchema(SupportsAchievement),
-      "cons" -> EndConnectSchema(OpposesAchievement)
+    ("goals" ,StartHyperConnectSchema(Achieves, Goal, Map(
+      ("pros" , EndConnectSchema(SupportsAchievement, ProArgument)),
+      ("cons" , EndConnectSchema(OpposesAchievement, ConArgument))
+    ))),
+    "problems" -> StartHyperConnectSchema(Solves, Problem, Map(
+      "pros" -> EndConnectSchema(SupportsSolution, ProArgument),
+      "cons" -> EndConnectSchema(OpposesSolution, ConArgument)
     )),
-    "problems" -> StartHyperConnectSchema(Solves, Map(
-      "pros" -> EndConnectSchema(SupportsSolution),
-      "cons" -> EndConnectSchema(OpposesSolution)
-    )),
-    "ideas" -> EndConnectSchema(SubIdea)
+    "ideas" -> EndConnectSchema(SubIdea, Idea)
   ))
 }

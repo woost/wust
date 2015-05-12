@@ -4,6 +4,7 @@ import controllers.router.NestedResourceRouter
 import formatters.json.GraphFormat._
 import model.WustSchema._
 import modules.db.Database._
+import modules.db._
 import modules.live.Broadcaster
 import modules.requests._
 import play.api.libs.json._
@@ -14,22 +15,34 @@ trait NestedNodes[NodeType <: ContentNode] extends NestedResourceRouter with Con
 
   // TODO: proper response on wrong path
   def showMembers(path: String, uuid: String) = Action {
+    val baseNode = UuidNodeDefinition(nodeSchema.factory, uuid)
     nodeSchema.connectSchemas(path) match {
-      case StartConnection(factory) => Ok(Json.toJson(connectedNodesDiscourseGraph(uuid, factory).contentNodes))
-      case EndConnection(factory) => Ok(Json.toJson(connectedNodesDiscourseGraph(factory, uuid).contentNodes))
+      //TODO: code dup
+      case StartConnectSchema(factory,nodeFactory) => Ok(Json.toJson(startConnectedNodesDiscourseGraph(RelationDefinition(baseNode, factory, LabelNodeDefinition(nodeFactory))).contentNodes))
+      case StartHyperConnectSchema(factory,nodeFactory,_) => Ok(Json.toJson(startConnectedNodesDiscourseGraph(RelationDefinition(baseNode, factory, LabelNodeDefinition(nodeFactory))).contentNodes))
+      case EndConnectSchema(factory,nodeFactory) => Ok(Json.toJson(endConnectedNodesDiscourseGraph(RelationDefinition(LabelNodeDefinition(nodeFactory), factory, baseNode)).contentNodes))
+      case EndHyperConnectSchema(factory,nodeFactory,_) => Ok(Json.toJson(endConnectedNodesDiscourseGraph(RelationDefinition(LabelNodeDefinition(nodeFactory), factory, baseNode)).contentNodes))
     }
   }
 
   def showNestedMembers(path: String, nestedPath: String, uuid: String, otherUuid: String) = Action {
-    nodeSchema.connectSchemas(path) match {
-      case StartHyperConnectSchema(outerFactory,connectSchemas) => connectSchemas(nestedPath) match {
-        case StartConnectSchema(factory) => Ok(Json.toJson(hyperConnectedNodesDiscourseGraph(uuid, outerFactory, otherUuid, factory).contentNodes))
-        case EndConnectSchema(factory) => Ok(Json.toJson(hyperConnectedNodesDiscourseGraph(factory, uuid, outerFactory, otherUuid).contentNodes))
-      }
-      case EndHyperConnectSchema(outerFactory,connectSchemas) => connectSchemas(nestedPath) match {
-        case StartConnectSchema(factory) => Ok(Json.toJson(hyperConnectedNodesDiscourseGraph(otherUuid, outerFactory, uuid, factory).contentNodes))
-        case EndConnectSchema(factory) => Ok(Json.toJson(hyperConnectedNodesDiscourseGraph(factory, otherUuid, outerFactory, uuid).contentNodes))
-      }
+    val connectSchema = nodeSchema.connectSchemas(path)
+    val baseNode = UuidNodeDefinition(nodeSchema.factory, uuid)
+    connectSchema match {
+      case StartHyperConnectSchema(outerFactory,nodeFactory,connectSchemas) =>
+        val otherNode = UuidNodeDefinition(nodeFactory, otherUuid)
+        val hyperRel = HyperNodeDefinition(baseNode, outerFactory, otherNode)
+        connectSchemas(nestedPath) match {
+          case StartConnectSchema(factory, nodeFactory) => Ok(Json.toJson(startConnectedNodesDiscourseGraph(RelationDefinition(hyperRel, factory, LabelNodeDefinition(nodeFactory))).contentNodes))
+          case EndConnectSchema(factory, nodeFactory) => Ok(Json.toJson(endConnectedNodesDiscourseGraph(RelationDefinition(LabelNodeDefinition(nodeFactory), factory, hyperRel)).contentNodes))
+        }
+      case EndHyperConnectSchema(outerFactory,nodeFactory,connectSchemas) =>
+        val otherNode = UuidNodeDefinition(nodeFactory, otherUuid)
+        val hyperRel = HyperNodeDefinition(otherNode, outerFactory, baseNode)
+        connectSchemas(nestedPath) match {
+          case StartConnectSchema(factory, nodeFactory) => Ok(Json.toJson(startConnectedNodesDiscourseGraph(RelationDefinition(hyperRel, factory, LabelNodeDefinition(nodeFactory))).contentNodes))
+          case EndConnectSchema(factory, nodeFactory) => Ok(Json.toJson(endConnectedNodesDiscourseGraph(RelationDefinition(LabelNodeDefinition(nodeFactory), factory, hyperRel)).contentNodes))
+        }
       case _ => BadRequest(s"Not a nested path '$path'")
     }
   }
@@ -37,14 +50,31 @@ trait NestedNodes[NodeType <: ContentNode] extends NestedResourceRouter with Con
   def connectMember(path: String, uuid: String) = Action(parse.json) { request =>
     val connect = request.body.as[ConnectRequest]
 
-    nodeSchema.connectSchemas(path) match {
-      case StartConnection(factory) => {
-        val (start,end) = connectNodes(uuid, factory, connect.uuid)
+    val connectSchema = nodeSchema.connectSchemas(path)
+    val baseNode = UuidNodeDefinition(nodeSchema.factory, uuid)
+    connectSchema match {
+        //TODO: code dup
+      case StartConnectSchema(factory,nodeFactory) => {
+        val otherNode = UuidNodeDefinition(nodeFactory, connect.uuid)
+        val (start,end) = connectNodes(RelationDefinition(baseNode, factory, otherNode))
         Broadcaster.broadcastConnect(start, factory, end)
         Ok(Json.toJson(end))
       }
-      case EndConnection(factory) => {
-        val (start,end) = connectNodes(connect.uuid, factory, uuid)
+      case StartHyperConnectSchema(factory,nodeFactory,_) => {
+        val otherNode = UuidNodeDefinition(nodeFactory, connect.uuid)
+        val (start,end) = connectNodes(RelationDefinition(baseNode, factory, otherNode))
+        Broadcaster.broadcastConnect(start, factory, end)
+        Ok(Json.toJson(end))
+      }
+      case EndConnectSchema(factory,nodeFactory) => {
+        val otherNode = UuidNodeDefinition(nodeFactory, connect.uuid)
+        val (start,end) = connectNodes(RelationDefinition(otherNode, factory, baseNode))
+        Broadcaster.broadcastConnect(start, factory, end)
+        Ok(Json.toJson(start))
+      }
+      case EndHyperConnectSchema(factory,nodeFactory,_) => {
+        val otherNode = UuidNodeDefinition(nodeFactory, connect.uuid)
+        val (start,end) = connectNodes(RelationDefinition(otherNode, factory, baseNode))
         Broadcaster.broadcastConnect(start, factory, end)
         Ok(Json.toJson(start))
       }
@@ -54,43 +84,70 @@ trait NestedNodes[NodeType <: ContentNode] extends NestedResourceRouter with Con
   def connectNestedMember(path: String, nestedPath: String, uuid: String, otherUuid: String) = Action(parse.json) { request =>
     val connect = request.body.as[ConnectRequest]
 
-    nodeSchema.connectSchemas(path) match {
-      case StartHyperConnectSchema(outerFactory,connectSchemas) => connectSchemas(nestedPath) match {
-        case StartConnectSchema(factory) => {
-          val (start, end) = startHyperConnectNodes(uuid, outerFactory, otherUuid, factory, connect.uuid)
-          Broadcaster.broadcastHyperConnect(uuid, outerFactory, otherUuid, factory, end)
-          Ok(Json.toJson(end))
+    val connectSchema = nodeSchema.connectSchemas(path)
+    val baseNode = UuidNodeDefinition(nodeSchema.factory, uuid)
+    connectSchema match {
+      case StartHyperConnectSchema(outerFactory,nodeFactory,connectSchemas) =>
+        val otherNode = UuidNodeDefinition(nodeFactory, otherUuid)
+        val nestedConnectSchema = connectSchemas(nestedPath)
+        val hyperRel = HyperNodeDefinition(baseNode, outerFactory, otherNode)
+        nestedConnectSchema match {
+          case StartConnectSchema(factory,nodeFactory) =>
+            val nestedNode = UuidNodeDefinition(nodeFactory, connect.uuid)
+            val (start, end) = startHyperConnectNodes(RelationDefinition(hyperRel, factory, nestedNode))
+            Broadcaster.broadcastHyperConnect(uuid, outerFactory, otherUuid, factory, end)
+            Ok(Json.toJson(end))
+          case EndConnectSchema(factory,nodeFactory) =>
+            val nestedNode = UuidNodeDefinition(nodeFactory, connect.uuid)
+            val (start, end) = endHyperConnectNodes(RelationDefinition(nestedNode, factory, hyperRel))
+            Broadcaster.broadcastHyperConnect(uuid, outerFactory, otherUuid, factory, start)
+            Ok(Json.toJson(start))
         }
-        case EndConnectSchema(factory) => {
-          val (start, end) = endHyperConnectNodes(connect.uuid, factory, uuid, outerFactory, otherUuid)
-          Broadcaster.broadcastHyperConnect(uuid, outerFactory, otherUuid, factory, start)
-          Ok(Json.toJson(start))
+      case EndHyperConnectSchema(outerFactory,nodeFactory,connectSchemas) =>
+        val otherNode = UuidNodeDefinition(nodeFactory, otherUuid)
+        val nestedConnectSchema = connectSchemas(nestedPath)
+        val hyperRel = HyperNodeDefinition(otherNode, outerFactory, baseNode)
+        nestedConnectSchema match {
+          case StartConnectSchema(factory,nodeFactory) => {
+            val nestedNode = UuidNodeDefinition(nodeFactory, connect.uuid)
+            val (start, end) = startHyperConnectNodes(RelationDefinition(hyperRel, factory, nestedNode))
+            Broadcaster.broadcastHyperConnect(otherUuid, outerFactory, uuid, factory, end)
+            Ok(Json.toJson(end))
+          }
+          case EndConnectSchema(factory,nodeFactory) => {
+            val nestedNode = UuidNodeDefinition(nodeFactory, connect.uuid)
+            val (start, end) = endHyperConnectNodes(RelationDefinition(nestedNode, factory, hyperRel))
+            Broadcaster.broadcastHyperConnect(otherUuid, outerFactory, uuid, factory, start)
+            Ok(Json.toJson(start))
+          }
         }
-      }
-      case EndHyperConnectSchema(outerFactory,connectSchemas) => connectSchemas(nestedPath) match {
-        case StartConnectSchema(factory) => {
-          val (start, end) = startHyperConnectNodes(otherUuid, outerFactory, uuid, factory, connect.uuid)
-          Broadcaster.broadcastHyperConnect(otherUuid, outerFactory, uuid, factory, end)
-          Ok(Json.toJson(end))
-        }
-        case EndConnectSchema(factory) => {
-          val (start, end) = endHyperConnectNodes(connect.uuid, factory, otherUuid, outerFactory, uuid)
-          Broadcaster.broadcastHyperConnect(otherUuid, outerFactory, uuid, factory, start)
-          Ok(Json.toJson(start))
-        }
-      }
       case _ => BadRequest(s"Not a nested path '$path'")
     }
   }
 
   def disconnectMember(path: String, uuid: String, otherUuid: String) = Action {
-    nodeSchema.connectSchemas(path) match {
-      case StartConnection(factory) => {
-        disconnectNodes(uuid, factory, otherUuid)
+    val connectSchema = nodeSchema.connectSchemas(path)
+    val baseNode = UuidNodeDefinition(nodeSchema.factory, uuid)
+    connectSchema match {
+      //TODO: code dup
+      case StartConnectSchema(factory,nodeFactory) => {
+        val otherNode = UuidNodeDefinition(nodeFactory, otherUuid)
+        disconnectNodes(RelationDefinition(baseNode, factory, otherNode))
         Broadcaster.broadcastDisconnect(uuid, factory, otherUuid)
       }
-      case EndConnection(factory) => {
-        disconnectNodes(otherUuid, factory, uuid)
+      case StartHyperConnectSchema(factory,nodeFactory,_) => {
+        val otherNode = UuidNodeDefinition(nodeFactory, otherUuid)
+        disconnectNodes(RelationDefinition(baseNode, factory, otherNode))
+        Broadcaster.broadcastDisconnect(uuid, factory, otherUuid)
+      }
+      case EndConnectSchema(factory,nodeFactory) => {
+        val otherNode = UuidNodeDefinition(nodeFactory, otherUuid)
+        disconnectNodes(RelationDefinition(otherNode, factory, baseNode))
+        Broadcaster.broadcastDisconnect(otherUuid, factory, uuid)
+      }
+      case EndHyperConnectSchema(factory,nodeFactory,_) => {
+        val otherNode = UuidNodeDefinition(nodeFactory, otherUuid)
+        disconnectNodes(RelationDefinition(otherNode, factory, baseNode))
         Broadcaster.broadcastDisconnect(otherUuid, factory, uuid)
       }
     }
@@ -99,31 +156,45 @@ trait NestedNodes[NodeType <: ContentNode] extends NestedResourceRouter with Con
   }
 
   def disconnectNestedMember(path: String, nestedPath: String, uuid: String, otherUuid: String, nestedUuid: String) = Action {
-    nodeSchema.connectSchemas(path) match {
-      case StartHyperConnectSchema(outerFactory,connectSchemas) => connectSchemas(nestedPath) match {
-        case StartConnectSchema(factory) => {
-          startHyperDisconnectNodes(uuid, outerFactory, otherUuid, factory, nestedUuid)
-          Broadcaster.broadcastHyperDisconnect(uuid, outerFactory, otherUuid, factory, nestedUuid)
-          Ok(JsObject(Seq()))
+    val connectSchema = nodeSchema.connectSchemas(path)
+    val baseNode = UuidNodeDefinition(nodeSchema.factory, uuid)
+    connectSchema match {
+      case StartHyperConnectSchema(outerFactory,nodeFactory,connectSchemas) =>
+        val otherNode = UuidNodeDefinition(nodeFactory, otherUuid)
+        val nestedConnectSchema = connectSchemas(nestedPath)
+        val hyperRel = HyperNodeDefinition(baseNode, outerFactory, otherNode)
+        nestedConnectSchema match {
+          case StartConnectSchema(factory,nodeFactory) => {
+            val nestedNode = UuidNodeDefinition(nodeFactory, nestedUuid)
+            disconnectNodes(RelationDefinition(hyperRel, factory, nestedNode))
+            Broadcaster.broadcastHyperDisconnect(uuid, outerFactory, otherUuid, factory, nestedUuid)
+            Ok(JsObject(Seq()))
+          }
+          case EndConnectSchema(factory,nodeFactory) => {
+            val nestedNode = UuidNodeDefinition(nodeFactory, nestedUuid)
+            disconnectNodes(RelationDefinition(nestedNode, factory, hyperRel))
+            Broadcaster.broadcastHyperDisconnect(uuid, outerFactory, otherUuid, factory, nestedUuid)
+            Ok(JsObject(Seq()))
+          }
         }
-        case EndConnectSchema(factory) => {
-          endHyperDisconnectNodes(nestedUuid, factory, uuid, outerFactory, otherUuid)
-          Broadcaster.broadcastHyperDisconnect(uuid, outerFactory, otherUuid, factory, nestedUuid)
-          Ok(JsObject(Seq()))
+      case EndHyperConnectSchema(outerFactory,nodeFactory,connectSchemas) =>
+        val otherNode = UuidNodeDefinition(nodeFactory, otherUuid)
+        val nestedConnectSchema = connectSchemas(nestedPath)
+        val hyperRel = HyperNodeDefinition(otherNode, outerFactory, baseNode)
+        nestedConnectSchema match {
+          case StartConnectSchema(factory,nodeFactory) => {
+            val nestedNode = UuidNodeDefinition(nodeFactory, nestedUuid)
+            disconnectNodes(RelationDefinition(hyperRel, factory, nestedNode))
+            Broadcaster.broadcastHyperDisconnect(otherUuid, outerFactory, uuid, factory, nestedUuid)
+            Ok(JsObject(Seq()))
+          }
+          case EndConnectSchema(factory,nodeFactory) => {
+            val nestedNode = UuidNodeDefinition(nodeFactory, nestedUuid)
+            disconnectNodes(RelationDefinition(nestedNode, factory, hyperRel))
+            Broadcaster.broadcastHyperDisconnect(otherUuid, outerFactory, uuid, factory, nestedUuid)
+            Ok(JsObject(Seq()))
+          }
         }
-      }
-      case EndHyperConnectSchema(outerFactory,connectSchemas) => connectSchemas(nestedPath) match {
-        case StartConnectSchema(factory) => {
-          startHyperDisconnectNodes(otherUuid, outerFactory, uuid, factory, nestedUuid)
-          Broadcaster.broadcastHyperDisconnect(otherUuid, outerFactory, uuid, factory, nestedUuid)
-          Ok(JsObject(Seq()))
-        }
-        case EndConnectSchema(factory) => {
-          endHyperDisconnectNodes(nestedUuid, factory, otherUuid, outerFactory, uuid)
-          Broadcaster.broadcastHyperDisconnect(otherUuid, outerFactory, uuid, factory, nestedUuid)
-          Ok(JsObject(Seq()))
-        }
-      }
       case _ => BadRequest(s"Not a nested path '$path'")
     }
   }

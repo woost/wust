@@ -138,8 +138,6 @@ trait Code extends Context with Generators {
     q"""
            object $name_term extends RelationFactory[$startNode_type, $name_type, $endNode_type]
             with $superRelationFactory[$startNode_type, $name_type, $endNode_type] {
-               def startNodeFactory = $startNode_term
-               def endNodeFactory = $endNode_term
                def relationType = raw.RelationType($name_label)
                def wrap(relation: raw.Relation) = $name_term(
                  $startNode_term.wrap(relation.startNode),
@@ -180,18 +178,31 @@ trait Code extends Context with Generators {
              override def startRelationType = raw.RelationType($startRelation_label)
              override def endRelationType = raw.RelationType($endRelation_label)
 
-             override def startNodeFactory = $startNode_term
-             override def factory = $name_term
-             override def endNodeFactory = $endNode_term
-
              override def wrap(node: raw.Node) = new $name_type(node)
-             override def startRelationWrap(relation: raw.Relation) = $startRelation_term(startNodeFactory.wrap(relation.startNode), relation, factory.wrap(relation.endNode))
-             override def endRelationWrap(relation: raw.Relation) = $endRelation_term(factory.wrap(relation.startNode), relation, endNodeFactory.wrap(relation.endNode))
+
+             override def wrap(startRelation: raw.Relation, middleNode: raw.Node, endRelation: raw.Relation) = {
+               val hyperRelation = wrap(middleNode)
+               hyperRelation._startRelation = $startRelation_term(
+                  $startNode_term.wrap(startRelation.startNode),
+                  startRelation,
+                  hyperRelation
+                )
+                hyperRelation._endRelation = $endRelation_term(
+                  hyperRelation,
+                  endRelation,
+                  $endNode_term.wrap(endRelation.endNode)
+                )
+                hyperRelation
+             }
 
              def local (...${ List(List(q"val startNode:$startNode_type", q"val endNode:$endNode_type") ::: parameterList.toParamCode.head) }):$name_type = {
-              val middleNode = wrap(raw.Node.local(List(label)))
-              ..${ parameterList.toAssignmentCode(q"middleNode.node") }
-              wrap(startRelationLocal(startNode, middleNode).relation, middleNode.node, endRelationLocal(middleNode, endNode).relation)
+                val middleNode = raw.Node.local(List(label))
+                ..${ parameterList.toAssignmentCode(q"middleNode") }
+                wrap(
+                  raw.Relation.local(startNode.node, middleNode, startRelationType),
+                  middleNode,
+                  raw.Relation.local(middleNode, endNode.node, endRelationType)
+                )
              }
              ${ forwardLocalMethodStartEnd(parameterList, traitFactoryParameterList, tq"$name_type", tq"$startNode_type", tq"$endNode_type") }
            }

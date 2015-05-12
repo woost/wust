@@ -98,11 +98,11 @@ object GraphFormat {
         case (k, v: SimpleConnectSchema[SCHEMANODE])           => (k, JsObject(Seq(
           ("cardinality", JsString(v.cardinality))
         )))
-        case (k, v@StartHyperConnectSchema(_, connectSchemas)) => (k, JsObject(Seq(
+        case (k, v@StartHyperConnectSchema(_, _, connectSchemas)) => (k, JsObject(Seq(
           ("cardinality", JsString(v.cardinality)),
           ("subs", Json.toJson(connectSchemas))
         )))
-        case (k, v@EndHyperConnectSchema(_, connectSchemas))   => (k, JsObject(Seq(
+        case (k, v@EndHyperConnectSchema(_, _, connectSchemas))   => (k, JsObject(Seq(
           ("cardinality", JsString(v.cardinality)),
           ("subs", Json.toJson(connectSchemas))
         )))
