@@ -92,7 +92,10 @@ trait Generators extends Context with Patterns {
             relations = groupToRelations(groupPatterns, hyperRelationPatterns, relationPatterns, groupPattern),
             hyperRelations = groupToRelations(groupPatterns, hyperRelationPatterns, hyperRelationPatterns, groupPattern),
             nodeTraits = nodeTraitPatterns.map(nodeTraitPattern =>
-              NodeTrait(nodeTraitPattern, nodeTraitPatterns, relationTraitPatterns, groupedElements.filter(g => nodePatterns.exists(_.name == g)).map(nameToPattern(nodePatterns, _)), groupedElements.filter(g => hyperRelationPatterns.exists(_.name == g)).map(nameToPattern(hyperRelationPatterns, _)), relationPatterns, hyperRelationPatterns))
+              NodeTrait(nodeTraitPattern, nodeTraitPatterns, relationTraitPatterns,
+                selectedNodePatterns = groupedElements.filter(g => nodePatterns.exists(_.name == g)).map(nameToPattern(nodePatterns, _)),
+                selectedHyperRelationPatterns = (nodeNamesToRelations(groupedElements, hyperRelationPatterns) ::: groupedElements.filter(g => hyperRelationPatterns.exists(_.name == g)).map(nameToPattern(hyperRelationPatterns, _))).distinct,
+                relationPatterns, hyperRelationPatterns))
           )
         }
       val hyperRelations = hyperRelationPatterns.map(hyperRelationPattern => HyperRelation(hyperRelationPattern, filterSuperTypes(nodeTraitPatterns, hyperRelationPattern), filterSuperTypes(relationTraitPatterns, hyperRelationPattern), flatSuperStatements(nodeTraitPatterns ::: relationTraitPatterns, hyperRelationPattern), findSuperFactoryParameterList(nodeTraitPatterns ::: relationTraitPatterns, hyperRelationPattern, relationTraits)))
@@ -198,7 +201,9 @@ trait Generators extends Context with Patterns {
       NodeTraitPattern("traitA", Nil, Nil)
     ).toSet, List("traitB", "traitC").toSet)
 
-    def groupToNodes(groupPatterns: List[GroupPattern], groupPattern: GroupPattern): List[String] = (groupPattern :: patternToFlatSubTypes(groupPatterns, groupPattern)).flatMap(_.nodes)
+    def groupToNodes(groupPatterns: List[GroupPattern], groupPattern: GroupPattern): List[String] = {
+      (groupPattern :: patternToFlatSubTypes(groupPatterns, groupPattern)).flatMap(_.nodes)
+    }
     assertX(groupToNodes(List(
       GroupPattern("groupA", Nil, List("nodeA", "nodeB")),
       GroupPattern("groupB", List("groupA"), List("nodeC", "nodeD"))
