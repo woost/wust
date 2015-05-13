@@ -1,23 +1,27 @@
 package controllers
 
-import com.mohiva.play.silhouette.api.LoginInfo
-import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
-import controllers.router.{ResourceRouter, DefaultResourceController}
-import modules.auth.HeaderEnvironmentModule
+import controllers.nodes.{ReadableNodes, Nodes}
+import controllers.router.{NestedResourceRouter, ResourceRouter, DefaultNestedResourceController, DefaultResourceController}
+import model.WustSchema._
+import modules.db.{StartAnyRelation, StartRelationRead, NodeRead}
+import modules.requests.{StartConnectSchema, NodeSchema}
 import play.api.libs.json._
 import play.api.mvc.Action
-import play.api.mvc.Controller
-
-import services.UserServiceDB
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
-object Users extends ResourceRouter with DefaultResourceController with HeaderEnvironmentModule {
+object Users extends ReadableNodes[User] {
   implicit val restFormat = formatters.json.UserFormats.RestFormat
 
+  lazy val nodeSchema = NodeSchema(routePath, new NodeRead(User), Map(
+    "goals"  -> StartConnectSchema(new StartRelationRead(Contributes, Goal)),
+    "problems"  -> StartConnectSchema(new StartRelationRead(Contributes, Problem)),
+    "ideas"  -> StartConnectSchema(new StartRelationRead(Contributes, Idea)),
+    "all"  -> StartConnectSchema(new StartAnyRelation(Contributes))
+  ))
+
   override def show(id: String) = Action {
-    //TODO: not viable
     Await.result(userService.retrieve(id), Duration(5, SECONDS)) match {
       case Some(user) => Ok(Json.toJson(user))
       case None       => BadRequest(s"User with id '$id' not found.")

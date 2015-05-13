@@ -11,6 +11,15 @@ trait NestedResourceController {
   def disconnectNestedMember(path: String, nestedPath: String, uuid: String, otherUuid: String, nestedUuid: String): EssentialAction
 }
 
+trait DefaultNestedResourceController extends DefaultResourceController {
+  def showMembers(path: String, uuid: String): EssentialAction = ???
+  def showNestedMembers(path: String, nestedPath: String, uuid: String, otherUuid: String): EssentialAction = ???
+  def connectMember(path: String, uuid: String): EssentialAction = ???
+  def connectNestedMember(path: String, nestedPath: String, uuid: String, otherUuid: String): EssentialAction = ???
+  def disconnectMember(path: String, uuid: String, otherUuid: String): EssentialAction = ???
+  def disconnectNestedMember(path: String, nestedPath: String, uuid: String, otherUuid: String, nestedUuid: String): EssentialAction = ???
+}
+
 trait NestedResourceRouter extends ResourceRouter with NestedResourceController {
   protected val IdWithPath = (pathElement * 2).r
   protected val IdWithPathAndId = (pathElement * 3).r

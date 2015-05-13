@@ -1,18 +1,19 @@
 package controllers
 
-import modules.requests._
-import renesca._
+import controllers.nodes.Nodes
+import controllers.router.NestedResourceRouter
 import model.WustSchema._
+import modules.db.{ContentNodeAccess, EndContentRelationAccess, StartContentRelationAccess}
+import modules.requests._
 
-object Problems extends NestedNodes[Problem] {
-  override def nodeSchema = NodeSchema(routePath, Problem, Map(
-    "goals" -> StartConnectSchema(Prevents, Goal),
-    "causes" -> EndConnectSchema(Causes, Problem),
-    "consequences" -> StartConnectSchema(Causes, Problem),
-    "ideas" -> EndHyperConnectSchema(Solves, Idea, Map(
-      "pros" -> EndConnectSchema(SupportsSolution, ProArgument),
-      "cons" -> EndConnectSchema(OpposesSolution, ConArgument)
+object Problems extends Nodes[Problem] {
+  lazy val nodeSchema = NodeSchema(routePath, new ContentNodeAccess(Problem), Map(
+    "goals" -> StartConnectSchema(new StartContentRelationAccess(Prevents, Goal)),
+    "causes" -> StartConnectSchema(new StartContentRelationAccess(Causes, Problem)),
+    "consequences" -> EndConnectSchema(new EndContentRelationAccess(Causes, Problem)),
+    "ideas" -> EndHyperConnectSchema(Solves, new EndContentRelationAccess(Solves, Idea), Map(
+      "pros" -> EndConnectSchema(new EndContentRelationAccess(SupportsSolution, ProArgument)),
+      "cons" -> EndConnectSchema(new EndContentRelationAccess(OpposesSolution, ConArgument))
     ))
   ))
 }
-

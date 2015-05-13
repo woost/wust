@@ -1,13 +1,13 @@
 package controllers
 
 import formatters.json.GraphFormat._
+import model.WustSchema._
 import modules.db.Database._
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
 import renesca.Query
 import renesca.graph.Label
 import renesca.parameter.implicits._
-import model.WustSchema._
 
 import scala.util.Try
 

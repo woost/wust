@@ -1,15 +1,9 @@
 package controllers
 
-import play.api.libs.json._
-import play.api.mvc.Action
-import play.api.mvc.Controller
-
-import renesca._
-import renesca.graph._
-import renesca.parameter.implicits._
 import formatters.json.GraphFormat._
 import modules.db.Database._
-import model._
+import play.api.libs.json._
+import play.api.mvc.{Action, Controller}
 
 object Graphs extends Controller {
   def show() = Action {

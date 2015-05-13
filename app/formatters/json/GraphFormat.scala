@@ -84,8 +84,8 @@ object GraphFormat {
 
   implicit def nodeSchemaWrites[NODE <: ContentNode] = new Writes[NodeSchema[NODE]] {
     // TODO: duplicate code
-    implicit def simpleConnectSchemaWrites[SCHEMANODE <: Node] = new Writes[Map[String, SimpleConnectSchema[SCHEMANODE]]] {
-      def writes(schemas: Map[String, SimpleConnectSchema[SCHEMANODE]]) = JsObject(schemas.map {
+    implicit def simpleConnectSchemaWrites[SCHEMANODE <: UuidNode] = new Writes[Map[String, PlainConnectSchema[SCHEMANODE]]] {
+      def writes(schemas: Map[String, PlainConnectSchema[SCHEMANODE]]) = JsObject(schemas.map {
         case (k, v) => (k, JsObject(Seq(
           ("cardinality", JsString(v.cardinality))
         )))
@@ -93,9 +93,9 @@ object GraphFormat {
       )
     }
 
-    implicit def connectSchemaWrites[SCHEMANODE <: Node] = new Writes[Map[String, ConnectSchema[SCHEMANODE]]] {
+    implicit def connectSchemaWrites[SCHEMANODE <: UuidNode] = new Writes[Map[String, ConnectSchema[SCHEMANODE]]] {
       def writes(schemas: Map[String, ConnectSchema[SCHEMANODE]]) = JsObject(schemas.map {
-        case (k, v: SimpleConnectSchema[SCHEMANODE])           => (k, JsObject(Seq(
+        case (k, v: PlainConnectSchema[SCHEMANODE])           => (k, JsObject(Seq(
           ("cardinality", JsString(v.cardinality))
         )))
         case (k, v@StartHyperConnectSchema(_, _, connectSchemas)) => (k, JsObject(Seq(
@@ -111,9 +111,9 @@ object GraphFormat {
     }
 
     def writes(schema: NodeSchema[NODE]) = JsObject(Seq(
-      ("label", JsString(schema.factory.label)),
+      ("label", JsString(schema.op.factory.label)),
       ("path", JsString(schema.path)),
-      ("name", JsString(schema.name)),
+      ("name", JsString(schema.op.name)),
       ("subs", Json.toJson(schema.connectSchemas))
     ))
   }

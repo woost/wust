@@ -1,54 +1,74 @@
 package modules.requests
 
-import modules.db.RelationDefinition
-import renesca.schema._
 import model.WustSchema._
+import modules.db._
+import renesca.schema._
 
 case class ApiDefinition(restRoot: String, websocketRoot: String)
 
-trait NodeSchemaBase[NODE <: Node] {
-  val factory: NodeFactory[NODE]
-  val name = factory.getClass.getSimpleName.dropRight(1)
-  def connectSchemas: Map[String, ConnectSchema[NODE]]
+trait NodeSchemaBase[+NODE <: UuidNode] {
+  val connectSchemas: Map[String, ConnectSchema[NODE]]
 }
 
-case class NodeSchema[NODE <: ContentNode](path: String, factory: ContentNodeFactory[NODE], connectSchemas: Map[String,ConnectSchema[NODE]]) extends NodeSchemaBase[NODE]
+case class NodeSchema[
+  NODE <: UuidNode
+](path: String, op: NodeAccess[NODE], connectSchemas: Map[String, ConnectSchema[NODE] with ConnectSchemaAccess[NODE]]) extends NodeSchemaBase[NODE]
 
 sealed trait ConnectSchema[+NODE <: Node] {
   val cardinality = "hasMany"
 }
 
-sealed trait SimpleConnectSchema[+NODE <: Node] extends ConnectSchema[NODE]
+sealed trait ConnectSchemaAccess[NODE <: UuidNode] {
+  val op: RelationAccess[NODE]
+}
 
-sealed trait HyperConnectSchema[+NODE <: ContentNode] extends ConnectSchema[NODE]
+sealed trait PlainConnectSchema[NODE <: UuidNode] extends ConnectSchema[NODE] with ConnectSchemaAccess[NODE]
+sealed trait HyperConnectSchema[NODE <: UuidNode] extends ConnectSchema[NODE] with ConnectSchemaAccess[NODE]
 
-case class StartConnectSchema[START <: Node, RELATION <: ContentRelation[START,END], END <: ContentNode](factory: ContentRelationFactory[START,RELATION,END], nodeFactory: NodeFactory[END]) extends SimpleConnectSchema[START]
-case class EndConnectSchema[START <: ContentNode, RELATION <: ContentRelation[START,END], END <: Node](factory: ContentRelationFactory[START,RELATION,END], nodeFactory: NodeFactory[START]) extends SimpleConnectSchema[END]
+case class StartConnectSchema[
+  START <: UuidNode,
+  RELATION <: AbstractRelation[START, END],
+  END <: UuidNode
+](op: StartRelationAccess[START,RELATION,END]) extends PlainConnectSchema[START]
 
-// TODO: should have type signature with SchemaHyperRelation instead of ContentRelation, but then type inference of the factory does not work in pattern matching. for now assure hyperconnection with SchemaNode
-case class StartHyperConnectSchema[START <: ContentNode, RELATION <: ContentRelation[START,END] with Node, END <: ContentNode](factory: ContentRelationFactory[START,RELATION,END] with NodeFactory[RELATION], nodeFactory: NodeFactory[END], connectSchemas: Map[String,SimpleConnectSchema[RELATION]]) extends HyperConnectSchema[START] with NodeSchemaBase[RELATION]
-case class EndHyperConnectSchema[START <: ContentNode, RELATION <: ContentRelation[START,END] with Node, END <: ContentNode](factory: ContentRelationFactory[START,RELATION,END] with NodeFactory[RELATION], nodeFactory: NodeFactory[START], connectSchemas: Map[String,SimpleConnectSchema[RELATION]]) extends HyperConnectSchema[END] with NodeSchemaBase[RELATION]
+case class EndConnectSchema[
+  START <: UuidNode,
+  RELATION <: AbstractRelation[START, END],
+  END <: UuidNode
+](op: EndRelationAccess[START,RELATION,END]) extends PlainConnectSchema[END]
+
+case class StartHyperConnectSchema[
+  START <: UuidNode,
+  RELATION <: AbstractRelation[START, END] with UuidNode,
+  END <: UuidNode
+](factory: AbstractRelationFactory[START,RELATION,END] with NodeFactory[RELATION], op: StartRelationAccess[START,RELATION,END], connectSchemas: Map[String, PlainConnectSchema[RELATION]]) extends NodeSchemaBase[RELATION] with HyperConnectSchema[START] {
+  def toNodeDefinition(baseDef: UuidNodeDefinition[START], uuid: String) = {
+    HyperNodeDefinition(baseDef, factory, op.toNodeDefinition(uuid))
+  }
+}
+
+case class EndHyperConnectSchema[
+  START <: UuidNode,
+  RELATION <: AbstractRelation[START, END] with UuidNode,
+  END <: UuidNode
+](factory: AbstractRelationFactory[START,RELATION,END] with NodeFactory[RELATION], op: EndRelationAccess[START,RELATION,END], connectSchemas: Map[String, PlainConnectSchema[RELATION]]) extends NodeSchemaBase[RELATION] with HyperConnectSchema[END] {
+  def toNodeDefinition(baseDef: UuidNodeDefinition[END], uuid: String) = {
+    HyperNodeDefinition(op.toNodeDefinition(uuid), factory, baseDef)
+  }
+}
 
 object StartConnection {
-  def unapply[NODE <: ContentNode](schema: ConnectSchema[Node]) = schema match {
-    case StartConnectSchema(factory,_) => Some(factory)
-    case StartHyperConnectSchema(factory,_,_) => Some(factory)
-    case _ => None
+  def unapply[NODE <: Node](schema: ConnectSchema[NODE]) = schema match {
+    case StartConnectSchema(op)                => Some(op)
+    case StartHyperConnectSchema(_,op,_)       => Some(op)
+    case _                                     => None
   }
 }
 
 object EndConnection {
-  def unapply[NODE <: ContentNode](schema: ConnectSchema[NODE]) = schema match {
-    case EndConnectSchema(factory,_) => Some(factory)
-    case EndHyperConnectSchema(factory,_,_) => Some(factory)
-    case _ => None
-  }
-}
-
-object HyperConnection {
-  def unapply[NODE <: ContentNode](schema: ConnectSchema[NODE]) = schema match {
-    case StartHyperConnectSchema(_,_,connectSchemas) => Some(connectSchemas)
-    case EndHyperConnectSchema(_,_,connectSchemas) => Some(connectSchemas)
-    case _ => None
+  def unapply[NODE <: Node](schema: ConnectSchema[NODE]) = schema match {
+    case EndConnectSchema(op)                  => Some(op)
+    case EndHyperConnectSchema(_,op,_)         => Some(op)
+    case _                                     => None
   }
 }

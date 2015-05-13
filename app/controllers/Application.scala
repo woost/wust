@@ -1,10 +1,9 @@
 package controllers
 
-import play.api.mvc._
-import play.api.libs.json._
-import modules.requests._
 import formatters.json.GraphFormat._
-import model.WustSchema._
+import modules.requests._
+import play.api.libs.json._
+import play.api.mvc._
 
 object Application extends Controller {
   //TODO create embedding type RequestSchema(ApiDefinition, Seq[NodeSchema])

@@ -1,19 +1,23 @@
 package controllers
 
-import modules.requests._
-import renesca._
+import controllers.nodes.Nodes
+import controllers.router.NestedResourceRouter
 import model.WustSchema._
+import modules.db.{ContentNodeAccess, EndContentRelationAccess, StartContentRelationAccess}
+import modules.requests._
 
-object Ideas extends NestedNodes[Idea] {
-  override def nodeSchema = NodeSchema(routePath, Idea, Map(
-    ("goals" ,StartHyperConnectSchema(Achieves, Goal, Map(
-      ("pros" , EndConnectSchema(SupportsAchievement, ProArgument)),
-      ("cons" , EndConnectSchema(OpposesAchievement, ConArgument))
-    ))),
-    "problems" -> StartHyperConnectSchema(Solves, Problem, Map(
-      "pros" -> EndConnectSchema(SupportsSolution, ProArgument),
-      "cons" -> EndConnectSchema(OpposesSolution, ConArgument)
-    )),
-    "ideas" -> EndConnectSchema(SubIdea, Idea)
-  ))
+object Ideas extends Nodes[Idea] {
+  lazy val nodeSchema = NodeSchema(routePath, new ContentNodeAccess(Idea),
+    Map(
+      "goals" -> StartHyperConnectSchema(Achieves, new StartContentRelationAccess(Achieves, Goal), Map(
+        "pros" -> EndConnectSchema(new EndContentRelationAccess(SupportsAchievement, ProArgument)),
+        "cons" -> EndConnectSchema(new EndContentRelationAccess(OpposesAchievement, ConArgument))
+      )),
+      "problems" -> StartHyperConnectSchema(Solves, new StartContentRelationAccess(Solves, Problem), Map(
+        "pros" -> EndConnectSchema(new EndContentRelationAccess(SupportsSolution, ProArgument)),
+        "cons" -> EndConnectSchema(new EndContentRelationAccess(OpposesSolution, ConArgument))
+      )),
+      "ideas" -> EndConnectSchema(new EndContentRelationAccess(SubIdea, Idea))
+    )
+  )
 }
