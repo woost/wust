@@ -1,17 +1,16 @@
 package controllers
 
-import controllers.nodes.{ReadableNodes, Nodes}
-import controllers.router.{NestedResourceRouter, ResourceRouter, DefaultNestedResourceController, DefaultResourceController}
+import controllers.nodes.Nodes
 import model.WustSchema._
-import modules.db.{StartAnyRelation, StartRelationRead, NodeRead}
-import modules.requests.{StartConnectSchema, NodeSchema}
+import modules.db.access.{NodeRead, StartAnyRelation, StartRelationRead}
+import modules.requests.{NodeSchema, StartConnectSchema}
 import play.api.libs.json._
 import play.api.mvc.Action
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
-object Users extends ReadableNodes[User] {
+object Users extends Nodes[User] {
   implicit val restFormat = formatters.json.UserFormats.RestFormat
 
   lazy val nodeSchema = NodeSchema(routePath, new NodeRead(User), Map(

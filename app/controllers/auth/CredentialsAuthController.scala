@@ -2,11 +2,11 @@ package controllers.auth
 
 import com.mohiva.play.silhouette.api.exceptions.AuthenticatorException
 import com.mohiva.play.silhouette.api.util.Credentials
-import com.mohiva.play.silhouette.api.{Silhouette, LoginInfo => SLoginInfo, _}
+import com.mohiva.play.silhouette.api.{LoginInfo => SLoginInfo, Silhouette, _}
 import com.mohiva.play.silhouette.impl.authenticators.JWTAuthenticator
 import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
 import formatters.json.CredentialFormat
-import model.WustSchema.{LoginInfo, User}
+import model.WustSchema.User
 import model.auth.Token
 import modules.auth.HeaderEnvironmentModule
 import play.api.libs.concurrent.Execution.Implicits._

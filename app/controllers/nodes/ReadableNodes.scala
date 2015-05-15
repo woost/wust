@@ -1,46 +1,48 @@
 package controllers.nodes
 
+import formatters.json.GraphFormat._
 import model.WustSchema._
-import modules.db.{HyperNodeDefinition, UuidNodeDefinition}
 import modules.requests._
+import modules.requests.types.AccessibleConnectSchema
+import play.api.libs.json.Json
 import play.api.mvc.Action
 
 trait ReadableNodes[NODE <: UuidNode] extends NodesBase {
   //TODO: use transactions instead of db
-  def nodeSchema: NodeSchema[NODE]
+  protected val nodeSchema: NodeSchema[NODE]
+
+  private def jsonNode(node: UuidNode) = Ok(Json.toJson(node))
+  private def jsonNodes(nodes: Iterable[_ <: UuidNode]) = Ok(Json.toJson(nodes))
 
   override def show(uuid: String) = Action {
-    val nodeOpt = nodeSchema.op.read(uuid)
-    jsonNode(nodeOpt)
+    getResult(nodeSchema.op.read(uuid), jsonNode)
   }
 
   override def index() = Action {
-    val nodeOpt = nodeSchema.op.read
-    jsonNodes(nodeOpt)
+    getResult(nodeSchema.op.read, jsonNodes)
   }
 
   // TODO: proper response on wrong path
   override def showMembers(path: String, uuid: String) = Action {
     val baseNode = nodeSchema.op.toNodeDefinition(uuid)
-    val connectSchema = nodeSchema.connectSchemas(path)
-    val nodeOpt = connectSchema.op.read(baseNode)
-    jsonNodes(nodeOpt)
+    getSchema(nodeSchema.connectSchemas, path, (connectSchema: AccessibleConnectSchema[NODE]) => {
+      getResult(connectSchema.op.read(baseNode), jsonNodes)
+    })
   }
 
   override def showNestedMembers(path: String, nestedPath: String, uuid: String, otherUuid: String) = Action {
-    val connectSchema = nodeSchema.connectSchemas(path)
     val baseNode = nodeSchema.op.toNodeDefinition(uuid)
-    val nodeOpt = connectSchema match {
-      case c@StartHyperConnectSchema(outerFactory,op,connectSchemas) =>
+    val connectSchema = nodeSchema.connectSchemas(path)
+    connectSchema match {
+      case c@StartHyperConnectSchema(_,_,connectSchemas) =>
         val hyperRel = c.toNodeDefinition(baseNode, otherUuid)
         val nestedConnectSchema = connectSchemas(nestedPath)
-        nestedConnectSchema.op.read(hyperRel)
-      case c@EndHyperConnectSchema(outerFactory,op,connectSchemas) =>
+        getResult(nestedConnectSchema.op.read(hyperRel), jsonNodes)
+      case c@EndHyperConnectSchema(_,_,connectSchemas) =>
         val hyperRel = c.toNodeDefinition(baseNode, otherUuid)
         val nestedConnectSchema = connectSchemas(nestedPath)
-        nestedConnectSchema.op.read(hyperRel)
-      case _ => None
+        getResult(nestedConnectSchema.op.read(hyperRel), jsonNodes)
+      case _ => NotFound("No path")
     }
-    jsonNodes(nodeOpt)
   }
 }

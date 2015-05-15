@@ -1,10 +1,10 @@
 package controllers.auth
 
-import com.mohiva.play.silhouette.api.{Silhouette, _}
 import com.mohiva.play.silhouette.api.util.{PasswordInfo => SPasswordInfo}
+import com.mohiva.play.silhouette.api.{Silhouette, _}
 import com.mohiva.play.silhouette.impl.authenticators.JWTAuthenticator
 import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
-import model.WustSchema.{PasswordInfo, User}
+import model.WustSchema.User
 import model.auth.{SignUp, Token}
 import modules.auth.HeaderEnvironmentModule
 import play.api.libs.concurrent.Execution.Implicits._

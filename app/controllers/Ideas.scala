@@ -1,9 +1,8 @@
 package controllers
 
 import controllers.nodes.Nodes
-import controllers.router.NestedResourceRouter
 import model.WustSchema._
-import modules.db.{ContentNodeAccess, EndContentRelationAccess, StartContentRelationAccess}
+import modules.db.access.{ContentNodeAccess, EndContentRelationAccess, StartContentRelationAccess}
 import modules.requests._
 
 object Ideas extends Nodes[Idea] {

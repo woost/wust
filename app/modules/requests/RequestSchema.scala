@@ -2,7 +2,12 @@ package modules.requests
 
 import model.WustSchema._
 import modules.db._
+import modules.db.access.{EndRelationAccess, StartRelationAccess, RelationAccess, NodeAccess}
 import renesca.schema._
+
+package object types {
+  type AccessibleConnectSchema[NODE <: UuidNode] = ConnectSchema[NODE] with ConnectSchemaAccess[NODE]
+}
 
 case class ApiDefinition(restRoot: String, websocketRoot: String)
 
@@ -69,6 +74,14 @@ object EndConnection {
   def unapply[NODE <: Node](schema: ConnectSchema[NODE]) = schema match {
     case EndConnectSchema(op)                  => Some(op)
     case EndHyperConnectSchema(_,op,_)         => Some(op)
+    case _                                     => None
+  }
+}
+
+object HyperConnection {
+  def unapply[NODE <: Node](schema: ConnectSchema[NODE]) = schema match {
+    case StartHyperConnectSchema(_,_,schemas)  => Some(schemas)
+    case EndHyperConnectSchema(_,_,schemas)    => Some(schemas)
     case _                                     => None
   }
 }
