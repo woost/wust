@@ -96,7 +96,8 @@ val scalacOpts = Seq(
   "-explaintypes",
   "-feature",
   "-Yinline", "-Yinline-warnings",
-  "-language:_"
+  "-language:_",
+  "-Xlint:_"
   //,"-Xdisable-assertions", "-optimize"
 )
 
