@@ -140,8 +140,11 @@ object Database {
   }
 
   def disconnectNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinition: NodeRelationDefinition[START,RELATION,END]) {
-    val query = s"match ${relationDefinition.toQuery} delete ${relationDefinition.name}"
+    val query = s"match ${relationDefinition.toQuery} return ${relationDefinition.name}"
     val params = relationDefinition.parameterMap
-    db.query(Query(query, params))
+    val graph = db.queryGraph(Query(query, params))
+    graph.nodes.clear()
+    graph.relations.clear()
+    db.persistChanges(graph)
   }
 }
