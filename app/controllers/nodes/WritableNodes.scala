@@ -19,7 +19,7 @@ trait WritableNodes[NODE <: UuidNode] extends NodesBase {
       case Some(user) =>
         val nodeAdd = request.body.asJson.get
         // TODO: HTTP status Created
-        getResult(nodeSchema.op.create(user, nodeAdd), jsonNode)
+        getResult(nodeSchema.op.create(user, nodeAdd))(jsonNode)
       case None => unauthorized
     }
   }
@@ -28,7 +28,7 @@ trait WritableNodes[NODE <: UuidNode] extends NodesBase {
     request.identity match {
       case Some(user) =>
         val nodeAdd = request.body.asJson.get
-        getResult(nodeSchema.op.update(uuid, user, nodeAdd), jsonNode)
+        getResult(nodeSchema.op.update(uuid, user, nodeAdd))(jsonNode)
       case None => unauthorized
     }
   }
@@ -36,25 +36,25 @@ trait WritableNodes[NODE <: UuidNode] extends NodesBase {
   override def connectMember(path: String, uuid: String) = Action(parse.json) { request =>
     val connect = request.body
     val baseNode = nodeSchema.op.toNodeDefinition(uuid)
-    getSchema(nodeSchema.connectSchemas, path, (connectSchema: AccessibleConnectSchema[NODE]) => {
-      getResult(connectSchema.op.create(baseNode, connect), jsonNode)
+    getSchema(nodeSchema.connectSchemas, path)(connectSchema => {
+      getResult(connectSchema.op.create(baseNode, connect))(jsonNode)
     })
   }
 
   override def connectNestedMember(path: String, nestedPath: String, uuid: String, otherUuid: String) = Action(parse.json) { request =>
     val connect = request.body
     val baseNode = nodeSchema.op.toNodeDefinition(uuid)
-    val connectSchema = nodeSchema.connectSchemas(path)
-    connectSchema match {
-      case c@StartHyperConnectSchema(_,_,connectSchemas) =>
+    getHyperSchema(nodeSchema.connectSchemas, path)({
+      case c@StartHyperConnectSchema(_,_,connectSchemas)  =>
         val hyperRel = c.toNodeDefinition(baseNode, otherUuid)
-        val nestedConnectSchema = connectSchemas(nestedPath)
-        getResult(nestedConnectSchema.op.createHyper(hyperRel, connect), jsonNode)
-      case c@EndHyperConnectSchema(_,_,connectSchemas) =>
+        getSchema(connectSchemas, nestedPath)(schema =>
+          getResult(schema.op.createHyper(hyperRel, connect))(jsonNode)
+        )
+      case c@EndHyperConnectSchema(_, _, connectSchemas) =>
         val hyperRel = c.toNodeDefinition(baseNode, otherUuid)
-        val nestedConnectSchema = connectSchemas(nestedPath)
-        getResult(nestedConnectSchema.op.createHyper(hyperRel, connect), jsonNode)
-      case _ => NotFound("No path")
-    }
+        getSchema(connectSchemas, nestedPath)(schema =>
+          getResult(schema.op.createHyper(hyperRel, connect))(jsonNode)
+        )
+    })
   }
 }

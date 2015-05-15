@@ -19,29 +19,29 @@ trait DeletableNodes[NODE <: UuidNode] extends NodesBase {
   // TODO: leaks hyperedges
   // TODO: broadcast
   override def destroy(uuid: String) = SecuredAction(WithRole(God)) { request =>
-      getResult(nodeSchema.op.delete(uuid), deleteResult)
+      getResult(nodeSchema.op.delete(uuid))(deleteResult)
   }
 
   override def disconnectMember(path: String, uuid: String, otherUuid: String) = Action {
     val baseNode = nodeSchema.op.toNodeDefinition(uuid)
-    getSchema(nodeSchema.connectSchemas, path, (connectSchema: AccessibleConnectSchema[NODE]) => {
-      getResult(connectSchema.op.delete(baseNode, otherUuid), deleteResult)
+    getSchema(nodeSchema.connectSchemas, path)(connectSchema => {
+      getResult(connectSchema.op.delete(baseNode, otherUuid))(deleteResult)
     })
   }
 
   override def disconnectNestedMember(path: String, nestedPath: String, uuid: String, otherUuid: String, nestedUuid: String) = Action {
     val baseNode = nodeSchema.op.toNodeDefinition(uuid)
-    val connectSchema = nodeSchema.connectSchemas(path)
-    connectSchema match {
+    getHyperSchema(nodeSchema.connectSchemas, path)({
       case c@StartHyperConnectSchema(_,_,connectSchemas) =>
         val hyperRel = c.toNodeDefinition(baseNode, otherUuid)
-        val nestedConnectSchema = connectSchemas(nestedPath)
-        getResult(nestedConnectSchema.op.delete(hyperRel, nestedUuid), deleteResult)
+        getSchema(connectSchemas, nestedPath)(schema =>
+          getResult(schema.op.delete(hyperRel, nestedUuid))(deleteResult)
+        )
       case c@EndHyperConnectSchema(_,_,connectSchemas) =>
         val hyperRel = c.toNodeDefinition(baseNode, otherUuid)
-        val nestedConnectSchema = connectSchemas(nestedPath)
-        getResult(nestedConnectSchema.op.delete(hyperRel, nestedUuid), deleteResult)
-      case _ => NotFound("No path")
-    }
+        getSchema(connectSchemas, nestedPath)(schema =>
+          getResult(schema.op.delete(hyperRel, nestedUuid))(deleteResult)
+        )
+    })
   }
 }
