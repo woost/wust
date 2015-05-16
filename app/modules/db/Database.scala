@@ -22,7 +22,7 @@ object Database {
   private def nodesWithType[NODE <: Node](nodes: Set[Node]) = nodes.map(_.asInstanceOf[NODE])
 
   private def discourseGraphWithReturn(returns: String, definitions: GraphDefinition*): Discourse = {
-    if(definitions.isEmpty)
+    if(definitions.isEmpty || returns.isEmpty)
       return Discourse.empty
 
     val matcher = definitions.map(_.toQuery).mkString(",")
@@ -142,8 +142,10 @@ object Database {
 
   def disconnectNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinition: NodeRelationDefinition[START,RELATION,END]) {
     val discourse = itemDiscourseGraph(relationDefinition)
-    discourse.graph.nodes.clear()
-    discourse.graph.relations.clear()
+    if (discourse.relations.isEmpty && discourse.hyperRelations.size == 1)
+      discourse.graph.nodes -= discourse.hyperRelations.head.node
+    else
+      discourse.graph.relations.clear()
     db.persistChanges(discourse.graph)
   }
 }
