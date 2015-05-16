@@ -12,7 +12,7 @@ import play.api.mvc.Result
 trait NodesBase extends NestedResourceRouter with DefaultNestedResourceController with Silhouette[User, JWTAuthenticator] with HeaderEnvironmentModule {
   protected def pathNotFound = NotFound("No defined path")
 
-  protected def getSchema[NODE <: UuidNode](schemas: Map[String,_ <: AccessibleConnectSchema[NODE]], path: String)(handler: ConnectSchema[NODE] with AccessibleConnectSchema[NODE] => Result) = {
+  protected def getSchema[NODE <: UuidNode](schemas: Map[String,_ <: AccessibleConnectSchema[NODE]], path: String)(handler: AccessibleConnectSchema[NODE] => Result) = {
     schemas.get(path) match {
       case Some(schema) => handler(schema)
       case None         => pathNotFound

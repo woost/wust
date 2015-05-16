@@ -21,7 +21,7 @@ package object types {
 
 }
 
-trait GraphDefinition {
+sealed trait GraphDefinition {
   def toQuery: String
   final val name = randomVariable
   def parameterMap: ParameterMap = Map.empty
@@ -29,13 +29,13 @@ trait GraphDefinition {
   protected def randomVariable = "V" + java.util.UUID.randomUUID.toString.replace("-", "")
 }
 
-trait NodeDefinition[+NODE <: Node] extends GraphDefinition
+sealed trait NodeDefinition[+NODE <: Node] extends GraphDefinition
 
-trait FixedNodeDefinition[+NODE <: Node] extends NodeDefinition[NODE]
+sealed trait FixedNodeDefinition[+NODE <: Node] extends NodeDefinition[NODE]
 
-trait HyperNodeDefinitionBase[+NODE <: Node] extends FixedNodeDefinition[NODE]
+sealed trait HyperNodeDefinitionBase[+NODE <: Node] extends FixedNodeDefinition[NODE]
 
-trait UuidNodeDefinitionBase extends GraphDefinition {
+sealed trait UuidNodeDefinitionBase extends GraphDefinition {
   val uuid: String
   val uuidVariable = randomVariable
   override def parameterMap = Map(uuidVariable -> uuid)
@@ -65,7 +65,7 @@ case class AnyNodeDefinition[+NODE <: Node]() extends NodeDefinition[NODE] {
   override def toQuery: String = s"($name)"
 }
 
-trait RelationDefinitionBase[
+sealed trait RelationDefinitionBase[
   START <: Node,
   RELATION <: AbstractRelation[START,END],
   END <: Node,

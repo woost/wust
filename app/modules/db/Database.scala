@@ -21,27 +21,23 @@ object Database {
   }
   private def nodesWithType[NODE <: Node](nodes: Set[Node]) = nodes.map(_.asInstanceOf[NODE])
 
-  def wholeDiscourseGraph: Discourse = Discourse(db.queryGraph("match (n) optional match (n)-[r]-() return n,r"))
-
-  def discourseGraph(definitions: GraphDefinition*): Discourse = {
+  private def discourseGraphWithReturn(returns: String, definitions: GraphDefinition*): Discourse = {
     if(definitions.isEmpty)
       return Discourse.empty
 
     val matcher = definitions.map(_.toQuery).mkString(",")
-    val query = s"match $matcher return *"
+    val query = s"match $matcher return $returns"
     val params = definitions.map(_.parameterMap).reduce(_ ++ _)
     Discourse(db.queryGraph(Query(query, params)))
   }
 
-  def nodeDiscourseGraph[START <: Node, END <: Node](definitions: NodeDefinition[START]*): Discourse = {
-    if(definitions.isEmpty)
-      return Discourse.empty
+  def discourseGraph(definitions: GraphDefinition*): Discourse = {
+    discourseGraphWithReturn("*", definitions: _*)
+  }
 
-    val matcher = definitions.map(_.toQuery).mkString(",")
+  def itemDiscourseGraph[NODE <: Node](definitions: GraphDefinition*): Discourse = {
     val returns = definitions.map(_.name).mkString(",")
-    val query = s"match $matcher return $returns"
-    val params = definitions.map(_.parameterMap).reduce(_ ++ _)
-    Discourse(db.queryGraph(Query(query, params)))
+    discourseGraphWithReturn(returns, definitions: _*)
   }
 
   def nodeDiscourseGraph[NODE <: UuidNode](factory: NodeFactory[NODE], uuids: String*): Discourse = {
@@ -62,8 +58,13 @@ object Database {
   }
 
   def discourseNodes[START <: UuidNode, END <: UuidNode](startDefinition: UuidNodeDefinition[START], endDefinition: UuidNodeDefinition[END]): (Discourse, (Option[START], Option[END])) = {
-    val discourse = nodeDiscourseGraph(startDefinition, endDefinition)
+    val discourse = itemDiscourseGraph(startDefinition, endDefinition)
     (discourse, (nodeWithUuid[START](discourse, startDefinition.uuid), nodeWithUuid[END](discourse, endDefinition.uuid)))
+  }
+
+  def discourseNodes[NODE <: UuidNode](definitions: UuidNodeDefinition[NODE]*): (Discourse, Seq[NODE]) = {
+    val discourse = itemDiscourseGraph(definitions: _*)
+    (discourse, definitions.map(d => nodeWithUuid[NODE](discourse, d.uuid)).flatten)
   }
 
   def startConnectedDiscourseGraph[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinition: StartFixedNodeRelationDefinition[START, RELATION, END]): Discourse = {
@@ -109,7 +110,7 @@ object Database {
   }
 
   def gatherHyperNodesConnector[BASE <: Node, OTHER <: UuidNode](baseDef: HyperNodeDefinitionBase[BASE], otherDef: UuidNodeDefinition[OTHER]): (Discourse, Option[(BASE,OTHER)]) = {
-    val discourse = nodeDiscourseGraph(baseDef, otherDef)
+    val discourse = itemDiscourseGraph(baseDef, otherDef)
     val nodeOpt = nodeWithUuid[OTHER](discourse, otherDef.uuid)
     if (nodeOpt.isEmpty)
       return (discourse, None)
@@ -140,11 +141,9 @@ object Database {
   }
 
   def disconnectNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinition: NodeRelationDefinition[START,RELATION,END]) {
-    val query = s"match ${relationDefinition.toQuery} return ${relationDefinition.name}"
-    val params = relationDefinition.parameterMap
-    val graph = db.queryGraph(Query(query, params))
-    graph.nodes.clear()
-    graph.relations.clear()
-    db.persistChanges(graph)
+    val discourse = itemDiscourseGraph(relationDefinition)
+    discourse.graph.nodes.clear()
+    discourse.graph.relations.clear()
+    db.persistChanges(discourse.graph)
   }
 }
