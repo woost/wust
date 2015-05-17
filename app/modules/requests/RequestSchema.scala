@@ -2,7 +2,8 @@ package modules.requests
 
 import model.WustSchema._
 import modules.db._
-import modules.db.access.{EndRelationAccess, StartRelationAccess, RelationAccess, NodeAccess}
+import modules.db.access._
+import modules.requests.types.AccessibleConnectSchema
 import renesca.schema._
 
 package object types {
@@ -17,18 +18,23 @@ trait NodeSchemaBase[+NODE <: UuidNode] {
 
 case class NodeSchema[
   NODE <: UuidNode
-](path: String, op: NodeAccess[NODE], connectSchemas: Map[String, ConnectSchema[NODE] with ConnectSchemaAccess[NODE]]) extends NodeSchemaBase[NODE]
+](path: String, op: NodeAccess[NODE], connectSchemas: Map[String, AccessibleConnectSchema[NODE]]) extends NodeSchemaBase[NODE] {
+  def toNodeDefinition(uuid: String) = FactoryUuidNodeDefinition(op.factory, uuid)
+}
 
 sealed trait ConnectSchema[+NODE <: Node] {
   val cardinality = "hasMany"
 }
 
-sealed trait ConnectSchemaAccess[NODE <: UuidNode] {
-  val op: RelationAccess[NODE]
+sealed trait ConnectSchemaAccess[BASE <: UuidNode] {
+  val op: RelationAccess[BASE]
 }
 
-sealed trait PlainConnectSchema[NODE <: UuidNode] extends ConnectSchema[NODE] with ConnectSchemaAccess[NODE]
-sealed trait HyperConnectSchema[NODE <: UuidNode] extends ConnectSchema[NODE] with ConnectSchemaAccess[NODE]
+sealed trait PlainConnectSchema[BASE <: UuidNode] extends ConnectSchema[BASE] with ConnectSchemaAccess[BASE]
+sealed trait HyperConnectSchema[BASE <: UuidNode, OTHER <: UuidNode] extends ConnectSchema[BASE] with ConnectSchemaAccess[BASE] {
+  val connectSchemas: Map[String, PlainConnectSchema[_ <: UuidNode]]
+  val op: CombinedRelationAccess[BASE,OTHER]
+}
 
 case class StartConnectSchema[
   START <: UuidNode,
@@ -46,7 +52,7 @@ case class StartHyperConnectSchema[
   START <: UuidNode,
   RELATION <: AbstractRelation[START, END] with UuidNode,
   END <: UuidNode
-](factory: AbstractRelationFactory[START,RELATION,END] with NodeFactory[RELATION], op: StartRelationAccess[START,RELATION,END], connectSchemas: Map[String, PlainConnectSchema[RELATION]]) extends NodeSchemaBase[RELATION] with HyperConnectSchema[START] {
+](factory: AbstractRelationFactory[START,RELATION,END] with NodeFactory[RELATION], op: StartRelationAccess[START,RELATION,END], connectSchemas: Map[String, PlainConnectSchema[RELATION]]) extends NodeSchemaBase[RELATION] with HyperConnectSchema[START,END] {
   def toNodeDefinition(baseDef: UuidNodeDefinition[START], uuid: String) = {
     HyperNodeDefinition(baseDef, factory, op.toNodeDefinition(uuid))
   }
@@ -56,7 +62,7 @@ case class EndHyperConnectSchema[
   START <: UuidNode,
   RELATION <: AbstractRelation[START, END] with UuidNode,
   END <: UuidNode
-](factory: AbstractRelationFactory[START,RELATION,END] with NodeFactory[RELATION], op: EndRelationAccess[START,RELATION,END], connectSchemas: Map[String, PlainConnectSchema[RELATION]]) extends NodeSchemaBase[RELATION] with HyperConnectSchema[END] {
+](factory: AbstractRelationFactory[START,RELATION,END] with NodeFactory[RELATION], op: EndRelationAccess[START,RELATION,END], connectSchemas: Map[String, PlainConnectSchema[RELATION]]) extends NodeSchemaBase[RELATION] with HyperConnectSchema[END,START] {
   def toNodeDefinition(baseDef: UuidNodeDefinition[END], uuid: String) = {
     HyperNodeDefinition(op.toNodeDefinition(uuid), factory, baseDef)
   }

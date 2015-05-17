@@ -1,12 +1,7 @@
 package modules.live
 
-import javax.inject.Inject
-import play.api.libs.json._
-import play.api.libs.json.Reads._
-import play.api.libs.functional.syntax._
-import org.atmosphere.config.managed.{Encoder, Decoder}
-import org.atmosphere.config.service.{Disconnect, Ready, ManagedService, Message}
-import org.atmosphere.cpr.{AtmosphereResourceEvent, AtmosphereResource}
+import org.atmosphere.config.service.{ManagedService, Message, Ready}
+import org.atmosphere.cpr.AtmosphereResource
 
 
 @ManagedService(path = "/live/v1/{page:.*}")

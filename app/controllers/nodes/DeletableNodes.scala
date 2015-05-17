@@ -3,7 +3,6 @@ package controllers.nodes
 import model.WustSchema._
 import model.auth.{God, WithRole}
 import modules.requests._
-import modules.requests.types.AccessibleConnectSchema
 import play.api.libs.json._
 import play.api.mvc.Action
 
@@ -23,24 +22,24 @@ trait DeletableNodes[NODE <: UuidNode] extends NodesBase {
   }
 
   override def disconnectMember(path: String, uuid: String, otherUuid: String) = Action {
-    val baseNode = nodeSchema.op.toNodeDefinition(uuid)
+    val baseNode = nodeSchema.toNodeDefinition(uuid)
     getSchema(nodeSchema.connectSchemas, path)(connectSchema => {
       getResult(connectSchema.op.delete(baseNode, otherUuid))(deleteResult)
     })
   }
 
   override def disconnectNestedMember(path: String, nestedPath: String, uuid: String, otherUuid: String, nestedUuid: String) = Action {
-    val baseNode = nodeSchema.op.toNodeDefinition(uuid)
+    val baseNode = nodeSchema.toNodeDefinition(uuid)
     getHyperSchema(nodeSchema.connectSchemas, path)({
-      case c@StartHyperConnectSchema(_,_,connectSchemas) =>
+      case c@StartHyperConnectSchema(factory,op,connectSchemas) =>
         val hyperRel = c.toNodeDefinition(baseNode, otherUuid)
         getSchema(connectSchemas, nestedPath)(schema =>
-          getResult(schema.op.delete(hyperRel, nestedUuid))(deleteResult)
+          getResult(schema.op.deleteHyper(hyperRel, nestedUuid))(deleteResult)
         )
-      case c@EndHyperConnectSchema(_,_,connectSchemas) =>
+      case c@EndHyperConnectSchema(factory,op,connectSchemas) =>
         val hyperRel = c.toNodeDefinition(baseNode, otherUuid)
         getSchema(connectSchemas, nestedPath)(schema =>
-          getResult(schema.op.delete(hyperRel, nestedUuid))(deleteResult)
+          getResult(schema.op.deleteHyper(hyperRel, nestedUuid))(deleteResult)
         )
     })
   }

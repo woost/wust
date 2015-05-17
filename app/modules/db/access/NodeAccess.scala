@@ -15,8 +15,6 @@ trait NodeAccess[NODE <: UuidNode] {
   def create(user: User, json: JsValue): Either[NODE, String] = Right("No create access on Node")
   def update(uuid: String, user: User, nodeAdd: JsValue): Either[NODE,String] = Right("No update access on Node")
   def delete(uuid: String): Either[Boolean,String] = Right("No delete access on Node")
-
-  def toNodeDefinition(uuid: String) = UuidNodeDefinition(factory, uuid)
 }
 
 class NodeRead[NODE <: UuidNode](val factory: NodeFactory[NODE]) extends NodeAccess[NODE] {
@@ -34,7 +32,7 @@ class NodeRead[NODE <: UuidNode](val factory: NodeFactory[NODE]) extends NodeAcc
 
 class NodeReadDelete[NODE <: UuidNode](factory: NodeFactory[NODE]) extends NodeRead(factory) {
   override def delete(uuid: String) = {
-    deleteNodes(UuidNodeDefinition(factory, uuid))
+    deleteNodes(FactoryUuidNodeDefinition(factory, uuid))
     Left(true)
   }
 }

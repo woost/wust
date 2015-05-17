@@ -67,24 +67,24 @@ object Database {
     (discourse, definitions.map(d => nodeWithUuid[NODE](discourse, d.uuid)).flatten)
   }
 
-  def startConnectedDiscourseGraph[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinition: StartFixedNodeRelationDefinition[START, RELATION, END]): Discourse = {
+  def startConnectedDiscourseGraph[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinition: NodeAndFixedRelationDefinition[START, RELATION, END]): Discourse = {
     val query = s"match ${ relationDefinition.toQuery } return ${ relationDefinition.endDefinition.name }"
     val params = relationDefinition.parameterMap
     Discourse(db.queryGraph(Query(query, params)))
   }
 
-  def startConnectedDiscourseNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinition: StartFixedNodeRelationDefinition[START, RELATION, END]): (Discourse, Set[END]) = {
+  def startConnectedDiscourseNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinition: NodeAndFixedRelationDefinition[START, RELATION, END]): (Discourse, Set[END]) = {
     val discourse = startConnectedDiscourseGraph(relationDefinition)
     (discourse, nodesWithType[END](discourse.nodes))
   }
 
-  def endConnectedDiscourseGraph[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinition: EndFixedNodeRelationDefinition[START, RELATION, END]): Discourse = {
+  def endConnectedDiscourseGraph[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinition: FixedAndNodeRelationDefinition[START, RELATION, END]): Discourse = {
     val query = s"match ${ relationDefinition.toQuery } return ${ relationDefinition.startDefinition.name }"
     val params = relationDefinition.parameterMap
     Discourse(db.queryGraph(Query(query, params)))
   }
 
-  def endConnectedDiscourseNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinition: EndFixedNodeRelationDefinition[START, RELATION, END]): (Discourse, Set[START]) = {
+  def endConnectedDiscourseNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinition: FixedAndNodeRelationDefinition[START, RELATION, END]): (Discourse, Set[START]) = {
     val discourse = endConnectedDiscourseGraph(relationDefinition)
     (discourse, nodesWithType[START](discourse.nodes))
   }
@@ -101,7 +101,7 @@ object Database {
     (start, end)
   }
 
-  def connectUuidNodes[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](relationDefinition: UuidNodeRelationDefinition[START,RELATION,END] with ContentRelationDefinition[START,RELATION,END]): Option[(START,END)] = { import relationDefinition._
+  def connectUuidNodes[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](relationDefinition: UuidRelationDefinition[START,RELATION,END] with ContentRelationDefinition[START,RELATION,END]): Option[(START,END)] = { import relationDefinition._
     val (discourse, (startOpt,endOpt)) = discourseNodes(startDefinition, endDefinition)
     if (startOpt.isEmpty || endOpt.isEmpty)
       None
@@ -124,7 +124,7 @@ object Database {
     (discourse, Some(middle,node))
   }
 
-  def startConnectHyperNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: UuidNode](relationDefinition: HyperUuidNodeRelationDefinition[START,RELATION,END] with ContentRelationDefinition[START,RELATION,END]): Option[(START,END)] = { import relationDefinition._
+  def startConnectHyperNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: UuidNode](relationDefinition: HyperAndUuidRelationDefinition[START,RELATION,END] with ContentRelationDefinition[START,RELATION,END]): Option[(START,END)] = { import relationDefinition._
     val (discourse, nodesOpt) = gatherHyperNodesConnector(startDefinition, endDefinition)
     if (nodesOpt.isEmpty)
       None
@@ -132,7 +132,7 @@ object Database {
       Some(connectNodes(discourse, nodesOpt.get._1, factory, nodesOpt.get._2))
   }
 
-  def endConnectHyperNodes[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinition: UuidHyperNodeRelationDefinition[START,RELATION,END] with ContentRelationDefinition[START,RELATION,END]): Option[(START,END)] = { import relationDefinition._
+  def endConnectHyperNodes[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinition: UuidAndHyperRelationDefinition[START,RELATION,END] with ContentRelationDefinition[START,RELATION,END]): Option[(START,END)] = { import relationDefinition._
     val (discourse, nodesOpt) = gatherHyperNodesConnector(endDefinition, startDefinition)
     if (nodesOpt.isEmpty)
       None
@@ -140,7 +140,7 @@ object Database {
       Some(connectNodes(discourse, nodesOpt.get._2, factory, nodesOpt.get._1))
   }
 
-  def disconnectNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinition: NodeRelationDefinition[START,RELATION,END]) {
+  def disconnectNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinition: FixedRelationDefinition[START,RELATION,END]) {
     val discourse = itemDiscourseGraph(relationDefinition)
     if (discourse.relations.isEmpty && discourse.hyperRelations.size == 1)
       discourse.graph.nodes -= discourse.hyperRelations.head.node
