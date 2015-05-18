@@ -7,7 +7,7 @@ import com.mohiva.play.silhouette.api.Identity
 @macros.GraphSchema
 object WustSchema {
   //TODO: Type aliases for several HyperRelation combinations
-  @Group trait Discourse {List(Problem, Idea, Goal, ProArgument, ConArgument) }
+@Group trait Discourse {List(User, Problem, Idea, Goal, ProArgument, ConArgument) }
   @Group trait Auth {List(User, LoginInfo, PasswordInfo) }
 
   @Node trait UuidNode {
@@ -60,4 +60,6 @@ object WustSchema {
   @Relation class OpposesSolution(startNode: ConArgument, endNode: Solves) extends ContentRelation
   @Relation class SupportsAchievement(startNode: ProArgument, endNode: Achieves) extends ContentRelation
   @Relation class OpposesAchievement(startNode: ConArgument, endNode: Achieves) extends ContentRelation
+
+  @Relation class Contributes(startNode: User, endNode: ContentNode)
 }
