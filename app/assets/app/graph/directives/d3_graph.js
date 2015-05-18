@@ -158,7 +158,7 @@ function d3Graph($window) {
                 // set node visibility
                 _.each(graph.nodes, (node, i) => {
                     let fo = nodeFo[0][i];
-                    fo.style.opacity = (node.marked || node.hyperEdge) ? 1.0 : 0.5;
+                    fo.style.opacity = (node.marked || node.hyperEdge) ? 1.0 : 0.3;
                     fo.style.visibility = node.visible ? "visible" : "hidden";
                 });
 
