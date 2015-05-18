@@ -15,6 +15,9 @@ package object types {
   type UuidRelationDefinition[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode] = RelationDefinitionBase[START, RELATION, END, _ <: UuidNodeDefinition[START], _ <: UuidNodeDefinition[END], _]
   type UuidAndNodeRelationDefinition[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _ <: UuidNodeDefinition[START], _ <: NodeDefinition[END], _]
   type NodeAndUuidRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: UuidNode] = RelationDefinitionBase[START, RELATION, END, _ <: NodeDefinition[START], _ <: UuidNodeDefinition[END], _]
+  type FactoryRelationDefinition[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode] = RelationDefinitionBase[START, RELATION, END, _ <: FactoryNodeDefinition[START], _ <: FactoryNodeDefinition[END], _]
+  type FactoryAndNodeRelationDefinition[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _ <: FactoryNodeDefinition[START], _ <: NodeDefinition[END], _]
+  type NodeAndFactoryRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: UuidNode] = RelationDefinitionBase[START, RELATION, END, _ <: NodeDefinition[START], _ <: FactoryNodeDefinition[END], _]
   type FactoryUuidRelationDefinition[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode] = RelationDefinitionBase[START, RELATION, END, _ <: FactoryUuidNodeDefinition[START], _ <: FactoryUuidNodeDefinition[END], _]
   type FactoryUuidAndNodeRelationDefinition[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _ <: FactoryUuidNodeDefinition[START], _ <: NodeDefinition[END], _]
   type NodeAndFactoryUuidRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: UuidNode] = RelationDefinitionBase[START, RELATION, END, _ <: NodeDefinition[START], _ <: FactoryUuidNodeDefinition[END], _]
@@ -38,6 +41,10 @@ sealed trait GraphDefinition {
 
 sealed trait NodeDefinition[+NODE <: Node] extends GraphDefinition
 
+sealed trait FactoryNodeDefinition[+NODE <: Node] extends NodeDefinition[NODE] {
+  val factory: NodeFactory[NODE]
+}
+
 sealed trait FixedNodeDefinition[+NODE <: Node] extends NodeDefinition[NODE]
 
 sealed trait HyperNodeDefinitionBase[+NODE <: Node] extends FixedNodeDefinition[NODE]
@@ -51,9 +58,15 @@ sealed trait UuidNodeDefinition[+NODE <: UuidNode] extends FixedNodeDefinition[N
 case class FactoryUuidNodeDefinition[+NODE <: UuidNode](
   factory: NodeFactory[NODE],
   uuid: String
-) extends UuidNodeDefinition[NODE] {
+) extends UuidNodeDefinition[NODE] with FactoryNodeDefinition[NODE] {
 
   def toQuery = s"($name: `${factory.label}` {uuid: {$uuidVariable}})"
+}
+
+case class ConcreteFactoryNodeDefinition[+NODE <: UuidNode](
+  factory: NodeFactory[NODE]
+  ) extends FactoryNodeDefinition[NODE] {
+  def toQuery = s"($name: `${factory.label}`)"
 }
 
 case class ConcreteNodeDefinition[+NODE <: UuidNode](

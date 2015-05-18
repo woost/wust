@@ -26,7 +26,6 @@ object Broadcaster {
   private def connectionDistributor[START <: UuidNode, END <: UuidNode](startHandler: (String, String) => Unit, startFactory: NodeFactory[START], factory: AbstractRelationFactory[START,_,END], endFactory: NodeFactory[END], endHandler: (String, String) => Unit) {
     Application.nodeSchemas.foreach(nodeSchema => {
       nodeSchema.connectSchemas.foreach {
-        //TODO: check for same nodefactory
         case (k, StartConnection(op)) if op.acceptsUpdateFrom(factory, Some(endFactory))  =>
           startHandler(nodeSchema.path, k)
         case (k, EndConnection(op)) if op.acceptsUpdateFrom(factory, Some(startFactory))  =>
@@ -68,7 +67,7 @@ object Broadcaster {
     })
   }
 
-  def broadcastConnect[START <: UuidNode, RELATION <: AbstractRelation[START,END], END <: UuidNode](start: START, relationDefinition: FactoryUuidRelationDefinition[START,RELATION,END], end: END): Unit = { import relationDefinition._
+  def broadcastConnect[START <: UuidNode, RELATION <: AbstractRelation[START,END], END <: UuidNode](start: START, relationDefinition: FactoryRelationDefinition[START,RELATION,END], end: END): Unit = { import relationDefinition._
     connectionDistributor(
       (apiname, path) => broadcast(s"$apiname/${ start.uuid }/$path", jsonChange("connect", Json.toJson(end))),
       startDefinition.factory,
@@ -108,11 +107,11 @@ object Broadcaster {
     )
   }
 
-  def broadcastStartHyperConnect[START <: Node, RELATION <: AbstractRelation[START,END], END <: UuidNode](relationDefinition: UuidHyperAndNodeRelationDefinition[START,RELATION,END] with NodeAndFactoryUuidRelationDefinition[START,RELATION,END], nestedNode: END): Unit = { import relationDefinition._
+  def broadcastStartHyperConnect[START <: Node, RELATION <: AbstractRelation[START,END], END <: UuidNode](relationDefinition: UuidHyperAndNodeRelationDefinition[START,RELATION,END] with NodeAndFactoryRelationDefinition[START,RELATION,END], nestedNode: END): Unit = { import relationDefinition._
     broadcastHyperConnect(startDefinition, factory, nestedNode, endDefinition.factory)
   }
 
-  def broadcastEndHyperConnect[START <: UuidNode, RELATION <: AbstractRelation[START,END], END <: Node](relationDefinition: NodeAndUuidHyperRelationDefinition[START,RELATION,END] with FactoryUuidAndNodeRelationDefinition[START,RELATION,END], nestedNode: START): Unit = { import relationDefinition._
+  def broadcastEndHyperConnect[START <: UuidNode, RELATION <: AbstractRelation[START,END], END <: Node](relationDefinition: NodeAndUuidHyperRelationDefinition[START,RELATION,END] with FactoryAndNodeRelationDefinition[START,RELATION,END], nestedNode: START): Unit = { import relationDefinition._
     broadcastHyperConnect(endDefinition, factory, nestedNode, startDefinition.factory)
   }
 

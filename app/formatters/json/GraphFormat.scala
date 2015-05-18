@@ -82,7 +82,7 @@ object GraphFormat {
     ))
   }
 
-  implicit def nodeSchemaWrites[NODE <: ContentNode] = new Writes[NodeSchema[NODE]] {
+  implicit def nodeSchemaWrites[NODE <: UuidNode] = new Writes[NodeSchema[NODE]] {
     // TODO: duplicate code
     implicit def simpleConnectSchemaWrites[SCHEMANODE <: UuidNode] = new Writes[Map[String, PlainConnectSchema[SCHEMANODE]]] {
       def writes(schemas: Map[String, PlainConnectSchema[SCHEMANODE]]) = JsObject(schemas.map {

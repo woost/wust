@@ -2,6 +2,7 @@ package modules.db.access
 
 import formatters.json.GraphFormat._
 import model.WustSchema._
+import modules.db.{ConcreteFactoryNodeDefinition, RelationDefinition, ConcreteNodeDefinition}
 import modules.db.Database._
 import modules.live.Broadcaster
 import modules.requests.NodeAddRequest
@@ -15,6 +16,7 @@ class ContentNodeAccess[NODE <: ContentNode](override val factory: ContentNodeFa
     val contribution = Contributes.local(user, node)
     discourse.add(node, contribution)
     db.persistChanges(discourse.graph)
+    Broadcaster.broadcastConnect(user, RelationDefinition(ConcreteFactoryNodeDefinition(User), Contributes, ConcreteFactoryNodeDefinition(factory)), node)
     Left(node)
   }
 
@@ -30,6 +32,7 @@ class ContentNodeAccess[NODE <: ContentNode](override val factory: ContentNodeFa
     val contribution = Contributes.local(user, node)
     discourse.add(contribution)
     db.persistChanges(discourse.graph)
+    Broadcaster.broadcastConnect(user, RelationDefinition(ConcreteFactoryNodeDefinition(User), Contributes, ConcreteFactoryNodeDefinition(factory)), node)
     Broadcaster.broadcastEdit(factory, node)
     Left(node)
   }
