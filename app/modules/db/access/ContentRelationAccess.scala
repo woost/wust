@@ -4,7 +4,7 @@ import formatters.json.GraphFormat._
 import model.WustSchema._
 import modules.db.Database._
 import modules.db.types.UuidHyperNodeDefinitionBase
-import modules.db.{FactoryUuidNodeDefinition, HyperNodeDefinitionBase, RelationDefinition, UuidNodeDefinition}
+import modules.db.{FactoryUuidNodeDefinition, RelationDefinition}
 import modules.live.Broadcaster
 import modules.requests.ConnectRequest
 import play.api.libs.json.JsValue
@@ -21,13 +21,14 @@ class StartContentRelationAccess[
 
   private def fail(uuid: String) = Right(s"Cannot connect Nodes with uuid '$uuid' at StartContentRelation")
 
-  override def create(baseDef: UuidNodeDefinition[START], json: JsValue) = {
+  override def create(baseDef: FactoryUuidNodeDefinition[START], json: JsValue) = {
     val connect = json.as[ConnectRequest]
     val otherNode = FactoryUuidNodeDefinition(nodeFactory, connect.uuid)
-    val resultOpt = connectUuidNodes(RelationDefinition(baseDef, factory, otherNode))
+    val relationDefinition = RelationDefinition(baseDef, factory, otherNode)
+    val resultOpt = connectUuidNodes(relationDefinition)
     resultOpt match {
       case Some((start,end)) => {
-        Broadcaster.broadcastConnect(start, factory, end)
+        Broadcaster.broadcastConnect(start, relationDefinition, end)
         Left(end)
       }
       case None              => fail(connect.uuid)
@@ -60,13 +61,14 @@ class EndContentRelationAccess [
 
   private def fail(uuid: String) = Right(s"Cannot connect Nodes with uuid '$uuid' at EndContentRelation")
 
-  override def create(baseDef: UuidNodeDefinition[END], json: JsValue) = {
+  override def create(baseDef: FactoryUuidNodeDefinition[END], json: JsValue) = {
     val connect = json.as[ConnectRequest]
     val otherNode = FactoryUuidNodeDefinition(nodeFactory, connect.uuid)
-    val resultOpt = connectUuidNodes(RelationDefinition(otherNode, factory, baseDef))
+    val relationDefinition = RelationDefinition(otherNode, factory, baseDef)
+    val resultOpt = connectUuidNodes(relationDefinition)
     resultOpt match {
       case Some((start,end)) => {
-        Broadcaster.broadcastConnect(start, factory, end)
+        Broadcaster.broadcastConnect(start, relationDefinition, end)
         Left(start)
       }
       case None              => fail(connect.uuid)

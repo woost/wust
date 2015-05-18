@@ -7,7 +7,6 @@ import renesca.schema._
 
 package object types {
 
-  type UuidHyperNodeDefinition[START <: UuidNode, RELATION <: AbstractRelation[START,END] with Node, END <: UuidNode] = HyperNodeDefinition[START,RELATION,END, _ <: UuidNodeDefinition[START], _ <: UuidNodeDefinition[END]]
   type UuidHyperNodeDefinitionBase[NODE <: Node] = HyperNodeDefinition[_,_,_, _ <: UuidNodeDefinition[_], _ <: UuidNodeDefinition[_]] with HyperNodeDefinitionBase[NODE]
 
   type ContentRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _, _, _ <: ContentRelationFactory[START, RELATION, END]]
@@ -16,11 +15,14 @@ package object types {
   type UuidRelationDefinition[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode] = RelationDefinitionBase[START, RELATION, END, _ <: UuidNodeDefinition[START], _ <: UuidNodeDefinition[END], _]
   type UuidAndNodeRelationDefinition[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _ <: UuidNodeDefinition[START], _ <: NodeDefinition[END], _]
   type NodeAndUuidRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: UuidNode] = RelationDefinitionBase[START, RELATION, END, _ <: NodeDefinition[START], _ <: UuidNodeDefinition[END], _]
+  type FactoryUuidRelationDefinition[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode] = RelationDefinitionBase[START, RELATION, END, _ <: FactoryUuidNodeDefinition[START], _ <: FactoryUuidNodeDefinition[END], _]
+  type FactoryUuidAndNodeRelationDefinition[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _ <: FactoryUuidNodeDefinition[START], _ <: NodeDefinition[END], _]
+  type NodeAndFactoryUuidRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: UuidNode] = RelationDefinitionBase[START, RELATION, END, _ <: NodeDefinition[START], _ <: FactoryUuidNodeDefinition[END], _]
   type FixedRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _ <: FixedNodeDefinition[START], _ <: FixedNodeDefinition[END], _]
   type NodeAndFixedRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _ <: FixedNodeDefinition[START], _ <: NodeDefinition[END], _]
   type FixedAndNodeRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _ <: NodeDefinition[START], _ <: FixedNodeDefinition[END], _]
-  type HyperAndUuidRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: UuidNode] = RelationDefinitionBase[START, RELATION, END, _ <: HyperNodeDefinitionBase[START], _ <: UuidNodeDefinition[END], _]
-  type UuidAndHyperRelationDefinition[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _ <: UuidNodeDefinition[START], _ <: HyperNodeDefinitionBase[END], _]
+  type HyperAndNodeRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _ <: HyperNodeDefinitionBase[START], _ <: NodeDefinition[END], _]
+  type NodeAndHyperRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _ <: NodeDefinition[START], _ <: HyperNodeDefinitionBase[END], _]
   type UuidHyperAndNodeRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _ <: UuidHyperNodeDefinitionBase[START], _ <: NodeDefinition[END], _]
   type NodeAndUuidHyperRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _ <: NodeDefinition[START], _ <: UuidHyperNodeDefinitionBase[END], _]
 
