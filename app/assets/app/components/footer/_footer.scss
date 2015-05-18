@@ -5,8 +5,8 @@
     bottom: 0;
     height: 30px;
     width: 100%;
-    background-color: #3b444b;
-    color: white;
+    background-color: $nav_background;
+    color: $nav_fontcolor;
     .node {
         padding: auto;
     }

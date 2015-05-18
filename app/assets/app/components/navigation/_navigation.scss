@@ -1,20 +1,20 @@
 nav {
-    color: white;
+    color: $nav_fontcolor;
     .nav {
         a:link, a:hover, a:visited, a.active {
-            color: white !important;
+            color: $nav_fontcolor !important;
         }
         a:hover, a:visited {
-            background-color: seagreen !important;
+            background-color: #00915C !important;
         }
         a.active {
-            background-color: #005ca3 !important;
+            background-color: #0078C6 !important;
         }
     }
 }
 
 #navigation {
-    background-color: #3b444b;
+    background-color: $nav_background;
     border-width: 0px;
     ul.nav li.dropdown:hover > ul.dropdown-menu {
         display: block;
