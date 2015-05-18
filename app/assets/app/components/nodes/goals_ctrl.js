@@ -7,9 +7,9 @@ function GoalsCtrl($stateParams, Goal, DiscourseNode, DiscourseNodeList) {
 
     vm.nodeInfo = DiscourseNode.Goal;
     vm.node = Goal.$find($stateParams.id);
-    vm.top = DiscourseNodeList.Goal(vm.node.goals);
-    vm.left =  DiscourseNodeList.Problem(vm.node.problems);
-    vm.bottom = DiscourseNodeList.Idea(vm.node.ideas)
-        .nested(DiscourseNodeList.ProArgument, "pros")
-        .nested(DiscourseNodeList.ConArgument, "cons");
+    vm.top = DiscourseNodeList.write.Goal(vm.node.goals);
+    vm.left =  DiscourseNodeList.write.Problem(vm.node.problems);
+    vm.bottom = DiscourseNodeList.write.Idea(vm.node.ideas)
+        .nested(DiscourseNodeList.write.ProArgument, "pros")
+        .nested(DiscourseNodeList.write.ConArgument, "cons");
 }

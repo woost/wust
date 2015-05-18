@@ -17,7 +17,7 @@ object Users extends Nodes[User] {
     "goals"  -> StartConnectSchema(new StartRelationRead(Contributes, Goal)),
     "problems"  -> StartConnectSchema(new StartRelationRead(Contributes, Problem)),
     "ideas"  -> StartConnectSchema(new StartRelationRead(Contributes, Idea)),
-    "all"  -> StartConnectSchema(new StartAnyRelation(Contributes))
+    "contributes"  -> StartConnectSchema(new StartAnyRelation(Contributes))
   ))
 
   override def show(id: String) = Action {

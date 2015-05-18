@@ -14,66 +14,21 @@ function DiscourseNodeList() {
     get.$inject = ["$injector", "$rootScope", "DiscourseNode", "Search"];
     function get($injector, $rootScope, DiscourseNode, Search) {
         class NodeModel {
-            constructor(service, connService, nodeInfo, title) {
-                this.resetNew = () => {
-                    this.new = service.$build({
-                        title: ""
-                    });
+            constructor(connService, title, listCss, templateUrl) {
+                this.style = {
+                    listCss,
+                    templateUrl
                 };
 
+                this.isNested = false;
                 this.title = title;
-                this.resetNew();
-                this.waiting = [];
-                this.info = nodeInfo;
                 this.nestedNodeLists = [];
                 this.list = connService.$search();
+                this.waiting = [];
 
                 // will create nested NodeLists for each added node
                 this.list.$on("after-add", (node) => {
                     node.nestedNodeLists = _.map(this.nestedNodeLists, nodeList => nodeList.create(node[nodeList.servicePath]));
-                });
-
-                // defines the styling information for the DiscourseNodeList directive
-                this.style = {
-                    templateUrl: "show_discourse_node_list.html",
-                    listCss: `${nodeInfo.css}_list`
-                };
-
-                // this binds all this methods to this, which is needed here,
-                // because all methods will be called as callbacks (not called
-                // on the object)
-                _.bindAll(this);
-            }
-
-            create() {
-                this.new.$save().$then(data => {
-                    humane.success("Created new node");
-                    this.add(data);
-                    this.resetNew();
-                });
-            }
-
-            remove(elem) {
-                elem.$destroy().$then(() => {
-                    humane.success("Disconnected node");
-                });
-            }
-
-            add(elem) {
-                if (this.exists(elem))
-                    return;
-
-                this.waiting.push(elem);
-                this.list.$create(_.pick(elem, "id")).$then(data => {
-                    _.remove(this.waiting, elem);
-                    humane.success("Connected node");
-                });
-            }
-
-            search(title) {
-                return Search.$search({
-                    label: this.info.label,
-                    title: title
                 });
             }
 
@@ -85,11 +40,8 @@ function DiscourseNodeList() {
                 return _.any(this.list, search) || _.any(this.waiting, search);
             }
 
-            isNested() {
-                return _.any(this.nestedNodeLists);
-            }
-
             nested(nodeListCreate, servicePath, title) {
+                this.isNested = true;
                 this.nestedNodeLists.push({
                     servicePath,
                     create: service => nodeListCreate(service, title)
@@ -123,9 +75,91 @@ function DiscourseNodeList() {
             }
         }
 
-        class NodeList {
+        class ReadNodeModel extends NodeModel {
+            constructor(connService, title, listCss) {
+                super(connService, title, listCss, "read_discourse_node_list.html");
+            }
+        }
+
+        class TypedReadNodeModel extends ReadNodeModel {
+            constructor(connService, nodeInfo, title) {
+                super(connService, title);
+                this.info = nodeInfo;
+            }
+
+            getCss() {
+                return this.info.css;
+            }
+
+            getState(node) {
+                return this.info.getState(node.id);
+            }
+        }
+
+        class AnyReadNodeModel extends ReadNodeModel {
+            constructor(connService, title) {
+                super(connService, title);
+            }
+
+            getCss(node) {
+                return DiscourseNode.get(node.label).css;
+            }
+
+            getState(node) {
+                return DiscourseNode.get(node.label).getState(node.id);
+            }
+        }
+
+        class WriteNodeModel extends NodeModel {
             constructor(service, connService, nodeInfo, title) {
-                this.model = new NodeModel(service, connService, nodeInfo, title);
+                super(connService, title, `${nodeInfo.css}_list`, "show_discourse_node_list.html");
+
+                this.info = nodeInfo;
+                this.resetNew = () => {
+                    this.new = service.$build({
+                        title: ""
+                    });
+                };
+
+                this.resetNew();
+            }
+
+            create() {
+                this.new.$save().$then(data => {
+                    humane.success("Created new node");
+                    this.add(data);
+                    this.resetNew();
+                });
+            }
+
+            remove(elem) {
+                elem.$destroy().$then(() => {
+                    humane.success("Disconnected node");
+                });
+            }
+
+            add(elem) {
+                if (this.exists(elem))
+                    return;
+
+                this.waiting.push(elem);
+                this.list.$create(_.pick(elem, "id")).$then(data => {
+                    _.remove(this.waiting, elem);
+                    humane.success("Connected node");
+                });
+            }
+
+            search(title) {
+                return Search.$search({
+                    label: this.info.label,
+                    title: title
+                });
+            }
+        }
+
+        class NodeList {
+            constructor(nodeModel) {
+                this.model = nodeModel;
             }
 
             addNode(elem) {
@@ -153,8 +187,14 @@ function DiscourseNodeList() {
             }
         }
 
-        return _.mapValues(nodeListDefs, (v, k) => (connService, title = _.capitalize(v)) => {
-            return new NodeList($injector.get(k), connService, DiscourseNode[k], title);
-        });
+        return {
+            write: _.mapValues(nodeListDefs, (v, k) => (connService, title = _.capitalize(v)) => {
+                return new NodeList(new WriteNodeModel($injector.get(k), connService, DiscourseNode[k], title));
+            }),
+            read: _.mapValues(nodeListDefs, (v, k) => (connService, title = _.capitalize(v)) => {
+                return new NodeList(new TypedReadNodeModel(connService, DiscourseNode[k], title));
+            }),
+            Any: (connService, title) => new NodeList(new AnyReadNodeModel(connService, title))
+        };
     }
 }

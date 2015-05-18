@@ -105,3 +105,17 @@ $discourse_conargument_color: #ff6d6f;
         background-color: $discourse_conargument_color;
     }
 }
+
+.discourse_node_list_horizontal {
+    .discourse_node_list {
+        padding: 6px;
+        @include display-flex(flex);
+        @include flex-wrap(wrap);
+        @include justify-content(center);
+    }
+}
+.discourse_node_list_vertical {
+    .discourse_node_list {
+        padding: 6px;
+    }
+}

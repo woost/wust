@@ -1,30 +1,49 @@
 <div class="discourse_node_list_container">
     <h2>{{vm.nodeModel.title}}:</h2>
-    <div ui-on-Drop="vm.nodeModel.add($data)" ng-class='vm.nodeModel.style.listCss' class='discourse_node_list' drop-channel="{{vm.nodeModel.info.label}}">
-        <div ng-repeat='node in vm.nodeModel.list | orderBy:"title"'>
-            <div ng-include="vm.nodeModel.style.templateUrl"></div>
-        </div>
-        <div discourse-node-search-form ng-model='vm.nodeModel.new' on-submit='vm.nodeModel.create()' on-select="vm.nodeModel.add(item)" search-nodes='vm.nodeModel.search(term)' icon-class="fa fa-plus" class="discourse_node_search_form"></div>
-    </div>
+    <div ng-include="vm.nodeModel.style.templateUrl"></div>
 </div>
 
 <script type="text/ng-template" id="show_discourse_node_list.html">
-    <div ng-if="!vm.nodeModel.isNested()" class="btn-group" role="group" style="padding:3px">
-        <a ng-class="vm.nodeModel.info.css" class="btn" ui-sref="{{vm.nodeModel.info.getState(node.id)}}">{{node.title}}</a>
-        <button class='btn btn-default' ng-click='vm.nodeModel.remove(node)'><i class='fa fa-minus text-default'></i></button>
-    </div>
-    <div ng-if="vm.nodeModel.isNested()" class="panel panel-default" ng-class="vm.nodeModel.info.css">
-        <a ui-sref="{{vm.nodeModel.info.getState(node.id)}}">
-            <div class="panel-heading">
-                <h3 class="panel-title">{{node.title}}</h3>
-
+    <div ui-on-Drop="vm.nodeModel.add($data)" ng-class='vm.nodeModel.style.listCss' class='discourse_node_list' drop-channel="{{vm.nodeModel.info.label}}">
+        <div ng-repeat='node in vm.nodeModel.list | orderBy:"title"'>
+            <div ng-if="!vm.nodeModel.isNested" class="btn-group" role="group" style="padding:3px">
+                <a ng-class="vm.nodeModel.info.css" class="btn" ui-sref="{{vm.nodeModel.info.getState(node.id)}}">{{node.title}}</a>
+                <button class='btn btn-default' ng-click='vm.nodeModel.remove(node)'><i class='fa fa-minus text-default'></i></button>
             </div>
-        </a>
-        <div class="panel-body">
-            <div ng-repeat="nested in node.nestedNodeLists" discourse-node-list node-model='nested.model'></div>
-            <button class='btn btn-default btn-xs pull-right' ng-click='vm.nodeModel.remove(node)'>
-                <i class='fa fa-minus'></i>
-            </button>
+            <div ng-if="vm.nodeModel.isNested" class="panel panel-default" ng-class="vm.nodeModel.info.css">
+                <a ui-sref="{{vm.nodeModel.info.getState(node.id)}}">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">{{node.title}}</h3>
+                    </div>
+                </a>
+                <div class="panel-body">
+                    <div ng-repeat="nested in node.nestedNodeLists" discourse-node-list node-model='nested.model'></div>
+                    <button class='btn btn-default btn-xs pull-right' ng-click='vm.nodeModel.remove(node)'>
+                        <i class='fa fa-minus'></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div discourse-node-search-form ng-model='vm.nodeModel.new' on-submit='vm.nodeModel.create()' on-select="vm.nodeModel.add(item)" search-nodes='vm.nodeModel.search(term)' icon-class="fa fa-plus" class="discourse_node_search_form"></div>
+    </div>
+</script>
+
+<script type="text/ng-template" id="read_discourse_node_list.html">
+    <div class='discourse_node_list'>
+        <div ng-repeat='node in vm.nodeModel.list | orderBy:"title"'>
+            <div ng-if="!vm.nodeModel.isNested" class="btn-group" role="group" style="padding:3px">
+                <a ng-class="vm.nodeModel.getCss(node)" class="btn" ui-sref="{{vm.nodeModel.getState(node)}}">{{node.title}}</a>
+            </div>
+            <div ng-if="vm.nodeModel.isNested" class="panel panel-default" ng-class="vm.nodeModel.getCss(node)">
+                <a ui-sref="{{vm.nodeModel.getState(node)}}">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">{{node.title}}</h3>
+                    </div>
+                </a>
+                <div class="panel-body">
+                    <div ng-repeat="nested in node.nestedNodeLists" discourse-node-list node-model='nested.model'></div>
+                </div>
+            </div>
         </div>
     </div>
 </script>
