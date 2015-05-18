@@ -28,14 +28,17 @@ object GraphFormat {
       ("id", JsString(node.uuid)),
       ("label", JsString(node.label))
     ) ++ (node match {
-      case n: ContentNode => Seq(
+      case n: ContentNode                         => Seq(
         ("title", JsString(n.title)),
         ("description", JsString(n.description.getOrElse(""))),
         ("hyperEdge", JsBoolean(false))
       )
-      case _              => Seq(
-        ("hyperEdge", JsBoolean(true))
+      case h: ContentRelation[UuidNode, UuidNode] => Seq(
+        ("hyperEdge", JsBoolean(true)),
+        ("startId", JsString(h.startNode.uuid)),
+        ("endId", JsString(h.endNode.uuid))
       )
+      case _                                      => Nil
     }
       ))
   }
@@ -95,7 +98,7 @@ object GraphFormat {
 
     implicit def connectSchemaWrites[SCHEMANODE <: UuidNode] = new Writes[Map[String, ConnectSchema[SCHEMANODE]]] {
       def writes(schemas: Map[String, ConnectSchema[SCHEMANODE]]) = JsObject(schemas.map {
-        case (k, v: PlainConnectSchema[SCHEMANODE])           => (k, JsObject(Seq(
+        case (k, v: PlainConnectSchema[SCHEMANODE])               => (k, JsObject(Seq(
           ("cardinality", JsString(v.cardinality))
         )))
         case (k, v@StartHyperConnectSchema(_, _, connectSchemas)) => (k, JsObject(Seq(

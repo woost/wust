@@ -228,11 +228,23 @@ function d3Graph($window) {
 
             // tick function, called in each step in the force calculation,
             // maps elements to positions
-            function tick() {
+            function tick(e) {
                 node.attr("transform", d => {
                     // center the node
                     let rect = nodeRects[d.index];
                     return "translate(" + (d.x - rect.width / 2) + "," + (d.y - rect.height / 2) + ")";
+                });
+
+                // push hypernodes towards the center between its start/end node
+                let k = 10*e.alpha;
+                graph.nodes.forEach((o,i) => {
+                    if( o.hyperEdge === true ) {
+                      let start = graph.hyperNeighbours[o.id].start;
+                      let end = graph.hyperNeighbours[o.id].end;
+                      let center = {x: (start.x+end.x)/2, y: (start.y+end.y)/2};
+                        o.x += (center.x-o.x)*k;
+                        o.y += (center.y-o.y)*k;
+                    }
                 });
 
                 link.each( function(d) {
@@ -360,6 +372,14 @@ function d3Graph($window) {
                 }).reduce(_.partialRight(_.merge, (a, b) => {
                     return a ? a.concat(b) : b;
                 }, _)) || {};
+
+                let idToNode = _.indexBy(graph.nodes, "id");
+                let hyperNodes = _.filter(graph.nodes, node => node.hyperEdge === true);
+                graph.hyperNeighbours = _.indexBy(_.map(hyperNodes, node => {return {
+                        id:node.id,
+                        start:idToNode[node.startId],
+                        end:idToNode[node.endId]
+                    };}), "id");
             }
 
             function lineIntersection(line1, line2) {
