@@ -23,8 +23,7 @@ class StartContentRelationAccess[
 
   override def create(baseDef: FactoryUuidNodeDefinition[START], json: JsValue) = {
     val connect = json.as[ConnectRequest]
-    val otherNode = FactoryUuidNodeDefinition(nodeFactory, connect.uuid)
-    val relationDefinition = RelationDefinition(baseDef, factory, otherNode)
+    val relationDefinition = RelationDefinition(baseDef, factory, toNodeDefinition(connect.uuid))
     val resultOpt = connectUuidNodes(relationDefinition)
     resultOpt match {
       case Some((start,end)) => {
@@ -37,8 +36,7 @@ class StartContentRelationAccess[
 
   override def createHyper(baseDef: UuidHyperNodeDefinitionBase[START with AbstractRelation[_,_]], json: JsValue) = {
     val connect = json.as[ConnectRequest]
-    val otherNode = FactoryUuidNodeDefinition(nodeFactory, connect.uuid)
-    val relationDefinition = RelationDefinition(baseDef, factory, otherNode)
+    val relationDefinition = RelationDefinition(baseDef, factory, toNodeDefinition(connect.uuid))
     val resultOpt = startConnectHyperNodes(relationDefinition)
     resultOpt match {
       case Some((_,end)) => {
@@ -63,8 +61,7 @@ class EndContentRelationAccess [
 
   override def create(baseDef: FactoryUuidNodeDefinition[END], json: JsValue) = {
     val connect = json.as[ConnectRequest]
-    val otherNode = FactoryUuidNodeDefinition(nodeFactory, connect.uuid)
-    val relationDefinition = RelationDefinition(otherNode, factory, baseDef)
+    val relationDefinition = RelationDefinition(toNodeDefinition(connect.uuid), factory, baseDef)
     val resultOpt = connectUuidNodes(relationDefinition)
     resultOpt match {
       case Some((start,end)) => {
@@ -77,8 +74,7 @@ class EndContentRelationAccess [
 
   override def createHyper(baseDef: UuidHyperNodeDefinitionBase[END with AbstractRelation[_,_]], json: JsValue) = {
     val connect = json.as[ConnectRequest]
-    val otherNode = FactoryUuidNodeDefinition(nodeFactory, connect.uuid)
-    val relationDefinition = RelationDefinition(otherNode, factory, baseDef)
+    val relationDefinition = RelationDefinition(toNodeDefinition(connect.uuid), factory, baseDef)
     val resultOpt = endConnectHyperNodes(relationDefinition)
     resultOpt match {
       case Some((start,_)) => {

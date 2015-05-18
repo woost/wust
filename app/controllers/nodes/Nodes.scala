@@ -5,24 +5,23 @@ import com.mohiva.play.silhouette.impl.authenticators.JWTAuthenticator
 import controllers.router.{DefaultNestedResourceController, NestedResourceRouter}
 import model.WustSchema.{User, UuidNode}
 import modules.auth.HeaderEnvironmentModule
-import modules.requests.HyperConnectSchema
-import modules.requests.types.AccessibleConnectSchema
+import modules.requests.{ConnectSchema, HyperConnectSchema}
 import play.api.mvc.Result
 
 trait NodesBase extends NestedResourceRouter with DefaultNestedResourceController with Silhouette[User, JWTAuthenticator] with HeaderEnvironmentModule {
   protected def pathNotFound = NotFound("No defined path")
 
-  protected def getSchema[NODE <: UuidNode](schemas: Map[String,_ <: AccessibleConnectSchema[NODE]], path: String)(handler: AccessibleConnectSchema[NODE] => Result) = {
+  protected def getSchema[NODE <: UuidNode](schemas: Map[String,_ <: ConnectSchema[NODE]], path: String)(handler: ConnectSchema[NODE] => Result) = {
     schemas.get(path) match {
       case Some(schema) => handler(schema)
       case None         => pathNotFound
     }
   }
 
-  protected def getHyperSchema[NODE <: UuidNode](schemas: Map[String,_ <: AccessibleConnectSchema[NODE]], path: String)(handler: HyperConnectSchema[NODE,_] => Result) = {
+  protected def getHyperSchema[NODE <: UuidNode](schemas: Map[String,_ <: ConnectSchema[NODE]], path: String)(handler: HyperConnectSchema[NODE] => Result) = {
     schemas.get(path) match {
       case Some(schema) => schema match {
-        case c: HyperConnectSchema[NODE,_] => handler(c)
+        case c: HyperConnectSchema[NODE] => handler(c)
         case _ => pathNotFound
       }
       case None         => pathNotFound

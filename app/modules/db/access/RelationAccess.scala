@@ -8,25 +8,17 @@ import modules.live.Broadcaster
 import play.api.libs.json.JsValue
 import renesca.schema._
 
-trait RelationAccess[NODE <: UuidNode] {
-  def read(baseDef: FixedNodeDefinition[NODE]): Either[Set[_ <: UuidNode],String]
+trait RelationAccess[NODE <: UuidNode,OTHER <: UuidNode] {
+  def read(baseDef: FixedNodeDefinition[NODE]): Either[Set[OTHER],String] = Right("No read access on Relation")
   def delete(baseDef: FactoryUuidNodeDefinition[NODE], uuid: String): Either[Boolean,String] = Right("No delete access on Relation")
   def deleteHyper(baseDef: UuidHyperNodeDefinitionBase[NODE with AbstractRelation[_,_]], uuid: String): Either[Boolean, String] = Right("No delete access on HyperRelation")
-  def create(baseDef: FactoryUuidNodeDefinition[NODE], json: JsValue): Either[_ <: UuidNode,String]
-  def createHyper(baseDef: UuidHyperNodeDefinitionBase[NODE with AbstractRelation[_,_]], json: JsValue): Either[_ <: UuidNode,String]
+  def create(baseDef: FactoryUuidNodeDefinition[NODE], json: JsValue): Either[OTHER,String] = Right("No create access on Relation")
+  def createHyper(baseDef: UuidHyperNodeDefinitionBase[NODE with AbstractRelation[_,_]], json: JsValue): Either[OTHER,String] = Right("No create access on HyperRelation")
+
+  def toNodeDefinition: NodeDefinition[OTHER]
+  def toNodeDefinition(uuid: String): UuidNodeDefinition[OTHER]
 
   def acceptsUpdateFrom(factory: AbstractRelationFactory[_,_,_], nodeFactory: Option[NodeFactory[_]]): Boolean
-}
-
-trait OppositeRelationAccess[NODE <: UuidNode] {
-  def toNodeDefinition: NodeDefinition[NODE]
-  def toNodeDefinition(uuid: String): UuidNodeDefinition[NODE]
-}
-
-trait CombinedRelationAccess[BASE <: UuidNode, OTHER <: UuidNode] extends RelationAccess[BASE] with OppositeRelationAccess[OTHER] {
-  def read(baseDef: FixedNodeDefinition[BASE]): Either[Set[OTHER],String] = Right("No read access on Relation")
-  def create(baseDef: FactoryUuidNodeDefinition[BASE], json: JsValue): Either[OTHER,String] = Right("No create access on Relation")
-  def createHyper(baseDef: UuidHyperNodeDefinitionBase[BASE with AbstractRelation[_,_]], json: JsValue): Either[OTHER,String] = Right("No create access on HyperRelation")
 }
 
 trait RelationUpdateAcceptor {
@@ -64,13 +56,13 @@ trait StartRelationAccess[
   START <: UuidNode,
   RELATION <: AbstractRelation[START,END],
   END <: UuidNode
-] extends CombinedRelationAccess[START,END] with DirectedRelationAccess[START,RELATION,END]
+] extends RelationAccess[START,END] with DirectedRelationAccess[START,RELATION,END]
 
 trait EndRelationAccess[
   START <: UuidNode,
   RELATION <: AbstractRelation[START,END],
   END <: UuidNode
-] extends CombinedRelationAccess[END,START] with DirectedRelationAccess[START,RELATION,END]
+] extends RelationAccess[END,START] with DirectedRelationAccess[START,RELATION,END]
 
 class StartAnyRelation[
   START <: UuidNode,
