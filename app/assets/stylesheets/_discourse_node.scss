@@ -7,9 +7,10 @@ $discourse_proargument_color: #9AFF78;
 $discourse_conargument_color: #ff6d6f;
 $font_color: black;
 
-@mixin discourse_node($bgcolor, $icon: "") {
+@mixin discourse_node($color, $icon: "") {
+    $bgcolor: lighten(desaturate($color, 0),10);
     $bordercolor: desaturate(darken($bgcolor, 34), 43);
-    $bgcolor-highlight: lighten($bgcolor, 13);
+    $bgcolor-highlight: lighten(saturate($bgcolor,10), 10);
     &.node {
         display: inline-block;
         background-color: $bgcolor;
