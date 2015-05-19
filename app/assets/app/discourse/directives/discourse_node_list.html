@@ -3,7 +3,7 @@
     <div ng-include="vm.nodeModel.style.templateUrl"></div>
 </div>
 
-<script type="text/ng-template" id="show_discourse_node_list.html">
+<script type="text/ng-template" id="write_discourse_node_list.html">
     <div ui-on-Drop="vm.nodeModel.add($data)" ng-class='vm.nodeModel.style.listCss' class='discourse_node_list' drop-channel="{{vm.nodeModel.info.label}}">
         <div ng-repeat='node in vm.nodeModel.list | orderBy:"title"'>
             <div ng-if="!vm.nodeModel.isNested" class="btn-group" role="group" style="padding:3px">

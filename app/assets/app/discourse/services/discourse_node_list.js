@@ -112,7 +112,7 @@ function DiscourseNodeList() {
 
         class WriteNodeModel extends NodeModel {
             constructor(service, connService, nodeInfo, title) {
-                super(connService, title, `${nodeInfo.css}_list`, "show_discourse_node_list.html");
+                super(connService, title, `${nodeInfo.css}_list`, "write_discourse_node_list.html");
 
                 this.info = nodeInfo;
                 this.resetNew = () => {
