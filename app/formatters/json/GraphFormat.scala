@@ -30,7 +30,10 @@ object GraphFormat {
     ) ++ (node match {
       case n: ContentNode                         => Seq(
         ("title", JsString(n.title)),
-        ("description", JsString(n.description.getOrElse(""))),
+        ("hyperEdge", JsBoolean(false))
+      )
+      case u: User                                => Seq(
+        ("title", JsString(u.email.getOrElse(""))),
         ("hyperEdge", JsBoolean(false))
       )
       case h: ContentRelation[UuidNode, UuidNode] => Seq(
@@ -38,7 +41,10 @@ object GraphFormat {
         ("startId", JsString(h.startNode.uuid)),
         ("endId", JsString(h.endNode.uuid))
       )
-      case _                                      => Nil
+      case n                                      => Seq(
+        ("title", JsString("")),
+        ("hyperEdge", JsBoolean(false))
+      )
     }
       ))
   }

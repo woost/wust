@@ -5,6 +5,7 @@ $discourse_problem_color: #ffdc6d;
 $discourse_idea_color: #6db5ff;
 $discourse_proargument_color: #9AFF78;
 $discourse_conargument_color: #ff6d6f;
+$discourse_user_color: #FFFFFF;
 $font_color: black;
 
 @mixin discourse_node($color, $icon: "") {
@@ -78,6 +79,10 @@ $font_color: black;
     @include discourse_node($discourse_conargument_color, ""); // thumbsdown
 }
 
+.discourse_user {
+    @include discourse_node($discourse_user_color, ""); // user
+}
+
 .discourse_idea_list {
     &.on-drag-enter {
         background-color: $discourse_idea_color;
@@ -105,6 +110,12 @@ $font_color: black;
 .discourse_conargument_list {
     &.on-drag-enter {
         background-color: $discourse_conargument_color;
+    }
+}
+
+.discourse_user_list {
+    &.on-drag-enter {
+        background-color: $discourse_user_color;
     }
 }
 

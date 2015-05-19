@@ -40,7 +40,7 @@ function RoutesConfig($stateProvider, $urlRouterProvider, $locationProvider, Dis
         url: "users",
         templateUrl: `${templateBase}/users/list.html`,
         controller: "UserListsCtrl as vm",
-    }).state("user", {
+    }).state(DiscourseNodeProvider.setState("User", "user"), {
         parent: "page",
         url: "users/:id",
         templateUrl: `${templateBase}/users/detail.html`,
