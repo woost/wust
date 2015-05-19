@@ -6,20 +6,26 @@ import com.mohiva.play.silhouette.api.Identity
 
 @macros.GraphSchema
 object WustSchema {
-  //TODO: Type aliases for several HyperRelation combinations
-@Group trait Discourse {List(User, Problem, Idea, Goal, ProArgument, ConArgument, Untyped) }
+  // TODO: Type aliases for several HyperRelation combinations
+  // TODO: custom local methods for NodeFactory
+  // TODO: annotation for hidden defaults?
+
+@Group trait Discourse {List(User, UserGroup, Problem, Idea, Goal, ProArgument, ConArgument, Untyped) }
   @Group trait Auth {List(User, LoginInfo, PasswordInfo) }
 
   @Node trait UuidNode {
-    //TODO: annotation for hidden defaults?
     val uuid: String = java.util.UUID.randomUUID.toString
   }
 
-  // TODO: custom local methods for NodeFactory
+  @Node class UserGroup extends UuidNode {
+    var name: String
+  }
   @Node class User extends UuidNode with Identity {
     var name: String
     var email: Option[String]
   }
+
+  @Relation class MemberOf(startNode: User, endNode: UserGroup)
 
   @Node class LoginInfo {
     val providerID: String

@@ -66,6 +66,11 @@ lazy val wust = (project in file(".")).settings(
 //     scalacOptions ++= scalacOpts
 //   ).enablePlugins(ScalaJSPlugin, ScalaJSPlay)
 
+lazy val seed = (project in file("seed")).settings(
+  scalaVersion := scalaV,
+  scalacOptions ++= scalacOpts
+).dependsOn(wust)
+
 val scalacOpts = Seq(
   "-encoding", "UTF-8",
   "-unchecked",
