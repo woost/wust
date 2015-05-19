@@ -24,7 +24,6 @@ function DiscourseNodeList() {
                 this.title = title;
                 this.nestedNodeLists = [];
                 this.list = connService.$search();
-                this.waiting = [];
 
                 // will create nested NodeLists for each added node
                 this.list.$on("after-add", (node) => {
@@ -33,11 +32,24 @@ function DiscourseNodeList() {
             }
 
             exists(elem) {
-                let search = {
+                return _.any(this.list, {
                     id: elem.id
-                };
+                });
+            }
 
-                return _.any(this.list, search) || _.any(this.waiting, search);
+            removeLocally(id) {
+                let elem = _.find(this.list, {
+                    id: id
+                });
+
+                this.list.$remove(elem);
+            }
+
+            addLocally(elem) {
+                if (this.exists(elem))
+                    return;
+
+                this.list.$buildRaw(elem).$reveal();
             }
 
             nested(nodeListCreate, servicePath, title) {
@@ -48,14 +60,14 @@ function DiscourseNodeList() {
                 });
             }
 
-            subscribe(unsubscribe, nodeList) {
+            subscribe(unsubscribe) {
                 let onConnectionChange = (list, message) => $rootScope.$apply(() => {
                     switch (message.type) {
                         case "connect":
-                            list.addNode(message.data);
+                            list.addLocally(message.data);
                             break;
                         case "disconnect":
-                            list.removeNode(message.data.id);
+                            list.removeLocally(message.data.id);
                             break;
                         default:
                     }
@@ -64,12 +76,12 @@ function DiscourseNodeList() {
                 let unsubscribeFuncs = _.map(this.nestedNodeLists, (list, i) => this.list.$subscribeToLiveEvent(m => {
                     let node = _.find(this.list, {id: m.reference});
                     if (node !== undefined) {
-                        let list = node.nestedNodeLists[i];
-                        onConnectionChange(list, m);
+                        let nestedList = node.nestedNodeLists[i];
+                        onConnectionChange(nestedList.model, m);
                     }
                 }, `/${list.servicePath}`));
 
-                unsubscribeFuncs.push(this.list.$subscribeToLiveEvent(m => onConnectionChange(nodeList, m)));
+                unsubscribeFuncs.push(this.list.$subscribeToLiveEvent(m => onConnectionChange(this, m)));
 
                 let unsubscribeFunc = () => _.each(unsubscribeFuncs, func => func());
                 if (unsubscribe) {
@@ -91,7 +103,7 @@ function DiscourseNodeList() {
 
         class TypedReadNodeModel extends ReadNodeModel {
             constructor(connService, nodeInfo, title) {
-                super(connService, title);
+                super(connService, title, `${nodeInfo.css}_read_list`);
                 this.info = nodeInfo;
             }
 
@@ -106,7 +118,7 @@ function DiscourseNodeList() {
 
         class AnyReadNodeModel extends ReadNodeModel {
             constructor(connService, title) {
-                super(connService, title);
+                super(connService, title, "any_read_list");
             }
 
             getCss(node) {
@@ -150,11 +162,9 @@ function DiscourseNodeList() {
                 if (this.exists(elem))
                     return;
 
-                this.waiting.push(elem);
-                this.list.$create(_.pick(elem, "id")).$then(data => {
-                    _.remove(this.waiting, elem);
+                this.list.$create(_.pick(elem, "id")).$reveal().$then(data => {
                     humane.success("Connected node");
-                });
+                }).$promise.catch(() => this.removeLocally(elem.id));
             }
 
             search(title) {
@@ -170,28 +180,13 @@ function DiscourseNodeList() {
                 this.model = nodeModel;
             }
 
-            addNode(elem) {
-                if (this.model.exists(elem))
-                    return;
-
-                this.model.list.$buildRaw(elem).$reveal();
-            }
-
-            removeNode(id) {
-                let elem = _.find(this.model.list, {
-                    id: id
-                });
-
-                this.model.list.$remove(elem);
-            }
-
             nested(nodeListCreate, servicePath, title) {
                 this.model.nested(nodeListCreate, servicePath, title);
                 return this;
             }
 
             subscribe(unsubscribe = true) {
-                return this.model.subscribe(unsubscribe, this);
+                return this.model.subscribe(unsubscribe);
             }
         }
 

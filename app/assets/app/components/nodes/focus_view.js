@@ -13,38 +13,18 @@ function focusView($state, $rootScope, $q, NodeHistory) {
     function link($scope) {
         let vm = $scope.vm;
 
-        vm.node.$then(data => {
+        vm.node.model.$then(data => {
             NodeHistory.add(data);
         });
 
         // callbacks for removing/updating the focused node
-        vm.removeFocused = _.wrap(vm.node, removeFocused);
-        vm.updateFocused = _.wrap(vm.node, updateFocused);
+        vm.removeFocused = _.wrap(vm.node.model, removeFocused);
+        vm.updateFocused = _.wrap(vm.node.model, updateFocused);
 
         // register for events for the current node, as well as all connected lists
-        let unsubscribe = getUnsubscribePromise();
-        unsubscribe.then(vm.node.$subscribeToLiveEvent(m => $scope.$apply(_.partial(onNodeChange, vm.node, m))));
+        vm.node.subscribe();
         _.each(_.compact([vm.left, vm.right, vm.bottom, vm.top]), list => list.subscribe());
 
-    }
-
-    function getUnsubscribePromise() {
-        let unsubscribe = $q.defer();
-        let deregisterEvent = $rootScope.$on("$stateChangeSuccess", () => {
-            unsubscribe.resolve();
-            deregisterEvent();
-        });
-
-        return unsubscribe.promise;
-    }
-
-    function onNodeChange(node, message) {
-        switch (message.type) {
-            case "edit":
-                _.assign(node, message.data);
-                break;
-            default:
-        }
     }
 
     function removeFocused(node) {

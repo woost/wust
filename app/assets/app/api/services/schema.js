@@ -32,7 +32,7 @@ function Schema($provide, LiveProvider, restmodProvider) {
                             }, _(sub.subs).map((sub, path) => {
                                 return {
                                     [path]: {
-                                        [sub.cardinality]: restmod.model().mix()
+                                        [sub.cardinality]: restmod.model()
                                     }
                                 };
                             }).reduce(_.merge)))
@@ -50,7 +50,6 @@ function Schema($provide, LiveProvider, restmodProvider) {
 
         function subscribe(liveService, handler, nested = "") {
             let url = this.$url().slice(schema.api.restRoot.length + 1) + nested;
-
             return liveService.subscribe(url, handler);
         }
     }

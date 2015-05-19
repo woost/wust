@@ -10,10 +10,10 @@
             <h2>Focus:</h2>
             <div class="panel panel-default" ng-class="vm.nodeInfo.css">
                 <div class="panel-heading">
-                    <h3 class="panel-title" editable-textarea="vm.node.title" e-rows="7" e-cols="40" onaftersave="vm.updateFocused()" style="display:inline;" ng-bind="vm.node.title"></h3>
+                    <h3 class="panel-title" editable-textarea="vm.node.model.title" e-rows="7" e-cols="40" onaftersave="vm.updateFocused()" style="display:inline;" ng-bind="vm.node.model.title"></h3>
                     <button class="pull-right btn btn-xs btn-danger" ng-click="vm.removeFocused()"><i class="fa fa-trash-o"></i></button>
                 </div>
-                <div class="panel-body" editable-textarea="vm.node.description" e-rows="7" e-cols="40" onaftersave="vm.updateFocused()" ng-bind="vm.node.description"></div>
+                <div class="panel-body" editable-textarea="vm.node.model.description" e-rows="7" e-cols="40" onaftersave="vm.updateFocused()" ng-bind="vm.node.model.description"></div>
             </div>
         </div>
         <div ng-if="vm.bottom" id="bottom_view">
