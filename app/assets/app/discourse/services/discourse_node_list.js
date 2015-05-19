@@ -48,7 +48,7 @@ function DiscourseNodeList() {
                 });
             }
 
-            subscribe(nodeList) {
+            subscribe(unsubscribe, nodeList) {
                 let onConnectionChange = (list, message) => $rootScope.$apply(() => {
                     switch (message.type) {
                         case "connect":
@@ -71,7 +71,15 @@ function DiscourseNodeList() {
 
                 unsubscribeFuncs.push(this.list.$subscribeToLiveEvent(m => onConnectionChange(nodeList, m)));
 
-                return () => _.each(unsubscribeFuncs, func => func());
+                let unsubscribeFunc = () => _.each(unsubscribeFuncs, func => func());
+                if (unsubscribe) {
+                    let deregisterEvent = $rootScope.$on("$stateChangeSuccess", () => {
+                        unsubscribeFunc();
+                        deregisterEvent();
+                    });
+                }
+
+                return unsubscribeFunc;
             }
         }
 
@@ -182,8 +190,8 @@ function DiscourseNodeList() {
                 return this;
             }
 
-            subscribe() {
-                return this.model.subscribe(this);
+            subscribe(unsubscribe = true) {
+                return this.model.subscribe(unsubscribe, this);
             }
         }
 

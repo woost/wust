@@ -24,9 +24,7 @@ function focusView($state, $rootScope, $q, NodeHistory) {
         // register for events for the current node, as well as all connected lists
         let unsubscribe = getUnsubscribePromise();
         unsubscribe.then(vm.node.$subscribeToLiveEvent(m => $scope.$apply(_.partial(onNodeChange, vm.node, m))));
-        _.each(_.compact([vm.left, vm.right, vm.bottom, vm.top]), list => {
-            unsubscribe.then(list.subscribe());
-        });
+        _.each(_.compact([vm.left, vm.right, vm.bottom, vm.top]), list => list.subscribe());
 
     }
 

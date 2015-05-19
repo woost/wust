@@ -8,9 +8,5 @@ function UserDetailsCtrl($rootScope, $stateParams, User, DiscourseNodeList) {
     vm.user = User.$find($stateParams.id);
 
     vm.contributions = DiscourseNodeList.Any(vm.user.contributes, "Contributions");
-    let unsubscribe = vm.contributions.subscribe();
-    let deregisterEvent = $rootScope.$on("$stateChangeSuccess", () => {
-        unsubscribe();
-        deregisterEvent();
-    });
+    vm.contributions.subscribe();
 }
