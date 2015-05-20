@@ -35,10 +35,9 @@ function focusView($state, $rootScope, $q, NodeHistory) {
         });
     }
 
-    //TODO: xeditable element should not be updated if server request fails (not authorized)
     function updateFocused(node) {
-        node.$save().$then(() => {
+        return node.$save().$then(() => {
             humane.success("Updated node");
-        });
+        }).$promise;
     }
 }
