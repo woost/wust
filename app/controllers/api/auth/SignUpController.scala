@@ -1,4 +1,4 @@
-package controllers.auth
+package controllers.api.auth
 
 import com.mohiva.play.silhouette.api.util.{PasswordInfo => SPasswordInfo}
 import com.mohiva.play.silhouette.api.{Silhouette, _}

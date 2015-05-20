@@ -1,4 +1,4 @@
-package controllers.auth
+package controllers.api.auth
 
 import com.mohiva.play.silhouette.api.exceptions.AuthenticatorException
 import com.mohiva.play.silhouette.api.util.Credentials

@@ -1,5 +1,6 @@
 package controllers
 
+import controllers.api._
 import formatters.json.ApiSchemaFormat._
 import modules.requests._
 import play.api.libs.json._

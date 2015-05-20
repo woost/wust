@@ -1,17 +1,18 @@
 # Login/SignUp
 # TODO: should be moved to the user resource as post, patch, delete
-POST   /auth/signin               controllers.auth.CredentialsAuthController.authenticate
-POST   /auth/signup               controllers.auth.SignUpController.signUp
-GET    /auth/signout              controllers.auth.SignUpController.signOut
+POST   /auth/signin               controllers.api.auth.CredentialsAuthController.authenticate
+POST   /auth/signup               controllers.api.auth.SignUpController.signUp
+GET    /auth/signout              controllers.api.auth.SignUpController.signOut
 
--> /goals controllers.Goals
--> /problems controllers.Problems
--> /ideas controllers.Ideas
--> /pros controllers.ProArguments
--> /cons controllers.ConArguments
+-> /untypeds controllers.api.Untypeds
+-> /goals controllers.api.Goals
+-> /problems controllers.api.Problems
+-> /ideas controllers.api.Ideas
+-> /pros controllers.api.ProArguments
+-> /cons controllers.api.ConArguments
 
--> /users controllers.Users
+-> /users controllers.api.Users
 
-GET /graph controllers.Graphs.show
+GET /graph controllers.api.Graphs.show
 
-GET /search controllers.Search.index(label: Option[String], title: Option[String])
+GET /search controllers.api.Search.index(label: Option[String], title: Option[String])

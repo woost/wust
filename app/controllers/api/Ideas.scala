@@ -1,6 +1,6 @@
-package controllers
+package controllers.api
 
-import controllers.nodes.Nodes
+import controllers.api.nodes.Nodes
 import model.WustSchema._
 import modules.db.access.{ContentNodeAccess, EndContentRelationAccess, StartContentRelationAccess}
 import modules.requests._

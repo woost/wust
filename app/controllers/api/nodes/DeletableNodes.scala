@@ -1,4 +1,4 @@
-package controllers.nodes
+package controllers.api.nodes
 
 import model.WustSchema._
 import model.auth.{God, WithRole}

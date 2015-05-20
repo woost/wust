@@ -1,8 +1,8 @@
-package controllers.nodes
+package controllers.api.nodes
 
 import com.mohiva.play.silhouette.api.Silhouette
 import com.mohiva.play.silhouette.impl.authenticators.JWTAuthenticator
-import controllers.router.{DefaultNestedResourceController, NestedResourceRouter}
+import controllers.api.router.{DefaultNestedResourceController, NestedResourceRouter}
 import model.WustSchema.{User, UuidNode}
 import modules.auth.HeaderEnvironmentModule
 import modules.requests.{NodeSchema, ConnectSchema, HyperConnectSchema}

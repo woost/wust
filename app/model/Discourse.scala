@@ -42,11 +42,14 @@ object WustSchema {
   @Relation trait ContentRelation
 
   //TODO: generate indirect neighbour-accessors based on hyperrelations
+  @Node class Untyped extends ContentNode
   @Node class Goal extends ContentNode
   @Node class Problem extends ContentNode
   @Node class Idea extends ContentNode
   @Node class ProArgument extends ContentNode
   @Node class ConArgument extends ContentNode
+
+  @Relation class Refers(startNode: ContentNode, endNode: ContentNode) extends ContentRelation
 
   @Relation class SubIdea(startNode: Idea, endNode: Idea) extends ContentRelation
   @Relation class SubGoal(startNode: Goal, endNode: Goal) extends ContentRelation

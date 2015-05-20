@@ -1,4 +1,4 @@
-package controllers.router
+package controllers.api.router
 
 import play.api.mvc._
 

@@ -1,6 +1,6 @@
 // https://gist.github.com/jroper/5533633
 
-package controllers.router
+package controllers.api.router
 
 import play.api.mvc._
 import play.core.Router

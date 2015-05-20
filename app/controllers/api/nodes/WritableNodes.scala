@@ -1,4 +1,4 @@
-package controllers.nodes
+package controllers.api.nodes
 
 import formatters.json.DiscourseNodeFormat._
 import model.WustSchema._

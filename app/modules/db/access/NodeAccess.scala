@@ -11,7 +11,7 @@ trait NodeAccess[NODE <: UuidNode] {
   val factory: NodeFactory[NODE]
   val name = factory.getClass.getSimpleName.dropRight(1)
 
-  def read: Either[Set[NODE],String] = Right("No read access on Node collection")
+  def read: Either[Iterable[NODE],String] = Right("No read access on Node collection")
   def read(uuid: String): Either[NODE, String] = Right("No read access on Node")
   def create(user: User, json: JsValue): Either[NODE, String] = Right("No create access on Node")
   def update(uuid: String, user: User, nodeAdd: JsValue): Either[NODE,String] = Right("No update access on Node")
