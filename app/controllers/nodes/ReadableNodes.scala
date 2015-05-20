@@ -17,7 +17,7 @@ trait ReadableNodes[NODE <: UuidNode] extends NodesBase {
     getResult(nodeSchema.op.read(uuid))(jsonNode)
   }
 
-  override def index() = Action {
+  override def index = Action {
     getResult(nodeSchema.op.read)(jsonNodes)
   }
 
