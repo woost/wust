@@ -130,6 +130,6 @@ trait ResourceRouter extends Router.Routes with ResourceController {
 
   def prefix = path
 
-  // TODO
+  // TODO: documentation
   def documentation = Seq()
 }

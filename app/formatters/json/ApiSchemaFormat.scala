@@ -16,29 +16,27 @@ object ApiSchemaFormat {
   implicit def nodeSchemaWrites[NODE <: UuidNode] = new Writes[NodeSchema[NODE]] {
     // TODO: duplicate code
     implicit def simpleConnectSchemaWrites[SCHEMANODE <: UuidNode] = new Writes[Map[String, PlainConnectSchema[SCHEMANODE]]] {
-      def writes(schemas: Map[String, PlainConnectSchema[SCHEMANODE]]) = JsObject(schemas.map {
-        case (k, v) => (k, JsObject(Seq(
+      def writes(schemas: Map[String, PlainConnectSchema[SCHEMANODE]]) = JsObject(schemas.mapValues {
+        case v => JsObject(Seq(
           ("cardinality", JsString(v.cardinality))
-        )))
-      }.toList
-      )
+        ))
+      }.toList)
     }
 
     implicit def connectSchemaWrites[SCHEMANODE <: UuidNode] = new Writes[Map[String, ConnectSchema[SCHEMANODE]]] {
-      def writes(schemas: Map[String, ConnectSchema[SCHEMANODE]]) = JsObject(schemas.map {
-        case (k, v: PlainConnectSchema[SCHEMANODE])               => (k, JsObject(Seq(
+      def writes(schemas: Map[String, ConnectSchema[SCHEMANODE]]) = JsObject(schemas.mapValues {
+        case v: PlainConnectSchema[SCHEMANODE]               => JsObject(Seq(
           ("cardinality", JsString(v.cardinality))
-        )))
-        case (k, v@StartHyperConnectSchema(_, _, connectSchemas)) => (k, JsObject(Seq(
+        ))
+        case v@StartHyperConnectSchema(_, _, connectSchemas) => JsObject(Seq(
           ("cardinality", JsString(v.cardinality)),
           ("subs", Json.toJson(connectSchemas))
-        )))
-        case (k, v@EndHyperConnectSchema(_, _, connectSchemas))   => (k, JsObject(Seq(
+        ))
+        case v@EndHyperConnectSchema(_, _, connectSchemas)   => JsObject(Seq(
           ("cardinality", JsString(v.cardinality)),
           ("subs", Json.toJson(connectSchemas))
-        )))
-      }.toList
-      )
+        ))
+      }.toList)
     }
 
     def writes(schema: NodeSchema[NODE]) = JsObject(Seq(

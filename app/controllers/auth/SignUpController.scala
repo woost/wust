@@ -19,7 +19,7 @@ with HeaderEnvironmentModule {
   implicit val restFormat = formatters.json.UserFormats.RestFormat
   implicit val signUpFormat = Json.format[SignUp]
 
-  //TODO: check for existing username
+  //TODO: check for existing username with database constraints
   def signUp = Action.async(parse.json) { implicit request =>
     request.body.validate[SignUp].map { signUp =>
       val loginInfo = LoginInfo(CredentialsProvider.ID, signUp.identifier)
