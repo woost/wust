@@ -48,7 +48,8 @@ object GraphFormat {
     def writes(discourseGraph: Discourse) = {
       JsObject(Seq(
         //TODO: this is really ugly!
-        ("nodes", Json.toJson(discourseGraph.uuidNodes ++ discourseGraph.uuidNodeHyperRelations)),
+        //TODO: right now this returns more edges than needed. (User --> ContentNode), but there is no User
+        ("nodes", Json.toJson(discourseGraph.contentNodes ++ discourseGraph.contentNodeHyperRelations)),
         ("edges", Json.toJson(discourseGraph.uuidNodeRelations ++ discourseGraph.uuidNodeHyperRelations.flatMap(r => List(r.startRelation.asInstanceOf[Relation[UuidNode, UuidNode]], r.endRelation.asInstanceOf[Relation[UuidNode, UuidNode]]))))
       ))
     }
