@@ -4,6 +4,14 @@ Graph.$inject = ["restmod"];
 
 function Graph(restmod) {
     return restmod.model().mix({
+        nodes: {
+            decode: function(nodes) {
+                //TODO: why does chaining not work?p
+                //_(nodes).select(n => n.hyperEdge).each(n => n.title = n.label.toLowerCase());
+                _.each(_.select(nodes, n => n.hyperEdge), n => n.title = n.label.toLowerCase());
+                return nodes;
+            }
+        },
         edges: {
             decode: function(edges) {
                 // TODO: not efficient
@@ -16,7 +24,8 @@ function Graph(restmod) {
                         target: _.findIndex(this.nodes, {
                             id: edge.endId
                         }),
-                        label: edge.label.toLowerCase()
+                        title: edge.label.toLowerCase(),
+                        label: edge.label
                     };
                 });
             }
