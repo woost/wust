@@ -83,7 +83,14 @@ function d3Graph($window) {
             let link = container.selectAll(".svglink")
                 .data(graph.edges).enter()
                 .append("line")
-                .attr("class", "svglink");
+                .each(function(link) {
+                    // if link is startRelation of a Hypernode
+                    if( link.target.hyperEdge && link.target.startId === link.source.id ) {
+                        d3.select(this).attr("class", "svglink");
+                    } else {
+                        d3.select(this).attr("class", "svglink arrow");
+                    }
+                });
 
             let linktextSvg = container.selectAll("g.linklabelholder")
                 .data(graph.edges).enter()

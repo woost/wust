@@ -16,8 +16,10 @@ $link_color: #666;
         stroke: $link_color;
         stroke-width: 1;
         //TODO: don't hardcode: "graph#..." - url depends on current location from UI-router
-        marker-end: url(graph#arrow);
         stroke-linecap: round;
+    }
+    line.svglink.arrow {
+        marker-end: url(graph#arrow);
     }
     marker path.svglink {
         fill: $link_color;
