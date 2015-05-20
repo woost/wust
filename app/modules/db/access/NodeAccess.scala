@@ -3,6 +3,7 @@ package modules.db.access
 import model.WustSchema._
 import modules.db.Database._
 import modules.db._
+import modules.live.Broadcaster
 import play.api.libs.json.JsValue
 import renesca.schema._
 
@@ -33,6 +34,7 @@ class NodeRead[NODE <: UuidNode](val factory: NodeFactory[NODE]) extends NodeAcc
 class NodeReadDelete[NODE <: UuidNode](factory: NodeFactory[NODE]) extends NodeRead(factory) {
   override def delete(uuid: String) = {
     deleteNodes(FactoryUuidNodeDefinition(factory, uuid))
+    Broadcaster.broadcastDelete(factory, uuid)
     Left(true)
   }
 }

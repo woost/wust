@@ -7,7 +7,6 @@ import play.api.libs.json._
 import play.api.mvc.Action
 
 trait DeletableNodes[NODE <: UuidNode] extends NodesBase {
-  // TODO: use transactions instead of db
   protected val nodeSchema: NodeSchema[NODE]
 
   private def deleteResult(deleted: Boolean) = if (deleted)
@@ -15,8 +14,6 @@ trait DeletableNodes[NODE <: UuidNode] extends NodesBase {
     else
       BadRequest("Cannot delete Node")
 
-  // TODO: leaks hyperedges
-  // TODO: broadcast
   override def destroy(uuid: String) = SecuredAction(WithRole(God)) { request =>
       getResult(nodeSchema.op.delete(uuid))(deleteResult)
   }

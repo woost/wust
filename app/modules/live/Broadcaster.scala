@@ -22,7 +22,7 @@ object Broadcaster {
 
   private def broadcast(path: String, data: JsValue): Unit = {
     val broadcaster = atmosphere.framework.metaBroadcaster
-    println(s"${ Application.apiDefinition.websocketRoot }/$path")
+    println(s"Broadcast to -> ${ Application.apiDefinition.websocketRoot }/$path")
     broadcaster.broadcastTo(s"${ Application.apiDefinition.websocketRoot }/$path", data)
   }
 
@@ -63,11 +63,29 @@ object Broadcaster {
     })
   }
 
+  def broadcastCreate[NODE <: UuidNode](factory: NodeFactory[NODE], node: NODE): Unit = {
+    Future {
+      Application.nodeSchemas.filter(_.op.factory == factory).foreach(nodeSchema => {
+        broadcast(s"${nodeSchema.path}", jsonChange("create", Json.toJson(node)))
+      })
+    }
+  }
+
   def broadcastEdit[NODE <: UuidNode](factory: NodeFactory[NODE], node: NODE): Unit = {
     Future {
       //TODO: broadcast to neighbors
       Application.nodeSchemas.filter(_.op.factory == factory).foreach(nodeSchema => {
-        broadcast(s"${ nodeSchema.path }/${ node.uuid }", jsonChange("edit", Json.toJson(node)))
+        broadcast(s"${nodeSchema.path}/${node.uuid}", jsonChange("edit", Json.toJson(node)))
+      })
+    }
+  }
+
+  def broadcastDelete[NODE <: UuidNode](factory: NodeFactory[NODE], uuid: String): Unit = {
+    Future {
+      //TODO: broadcast to neighbors
+      //TODO: should this broadcast on /nodes/:id or /nodes with id as payload?
+      Application.nodeSchemas.filter(_.op.factory == factory).foreach(nodeSchema => {
+        broadcast(s"${nodeSchema.path}", jsonChange("delete", Json.toJson(JsObject(Seq(("id", JsString(uuid)))))))
       })
     }
   }

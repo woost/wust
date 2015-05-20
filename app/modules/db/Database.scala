@@ -89,6 +89,7 @@ object Database {
     nodesWithType[START](discourse.nodes)
   }
 
+  // TODO: leaks hyperedges
   def deleteNodes[NODE <: UuidNode](definitions: NodeDefinition[NODE]*) {
     val discourse = discourseGraph(definitions: _*)
     discourse.graph.nodes.clear()

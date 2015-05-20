@@ -16,6 +16,7 @@ class ContentNodeAccess[NODE <: ContentNode](override val factory: ContentNodeFa
     val contribution = Contributes.local(user, node)
     discourse.add(node, contribution)
     db.persistChanges(discourse.graph)
+    Broadcaster.broadcastCreate(factory, node)
     Broadcaster.broadcastConnect(user, RelationDefinition(ConcreteFactoryNodeDefinition(User), Contributes, ConcreteFactoryNodeDefinition(factory)), node)
     Left(node)
   }
@@ -32,8 +33,8 @@ class ContentNodeAccess[NODE <: ContentNode](override val factory: ContentNodeFa
     val contribution = Contributes.local(user, node)
     discourse.add(contribution)
     db.persistChanges(discourse.graph)
-    Broadcaster.broadcastConnect(user, RelationDefinition(ConcreteFactoryNodeDefinition(User), Contributes, ConcreteFactoryNodeDefinition(factory)), node)
     Broadcaster.broadcastEdit(factory, node)
+    Broadcaster.broadcastConnect(user, RelationDefinition(ConcreteFactoryNodeDefinition(User), Contributes, ConcreteFactoryNodeDefinition(factory)), node)
     Left(node)
   }
 }

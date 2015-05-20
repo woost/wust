@@ -7,7 +7,6 @@ import play.api.libs.json.Json
 import play.api.mvc.Action
 
 trait ReadableNodes[NODE <: UuidNode] extends NodesBase {
-  //TODO: use transactions instead of db
   protected val nodeSchema: NodeSchema[NODE]
 
   private def jsonNode(node: UuidNode) = Ok(Json.toJson(node))
@@ -21,7 +20,6 @@ trait ReadableNodes[NODE <: UuidNode] extends NodesBase {
     getResult(nodeSchema.op.read)(jsonNodes)
   }
 
-  // TODO: proper response on wrong path
   override def showMembers(path: String, uuid: String) = Action {
     val baseNode = nodeSchema.toNodeDefinition(uuid)
     getSchema(nodeSchema.connectSchemas, path)(connectSchema => {
