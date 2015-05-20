@@ -93,7 +93,7 @@ function d3Graph($window) {
 
             let linktextHtml = linktextFo.append("xhtml:span")
                 // .style("text-shadow", "white -1px 0px, white 0px 1px, white 1px 0px, white 0px -1px")
-                .attr("class","relation_label")
+                .attr("class", "relation_label")
                 .html(d => connectsHyperEdge(d) ? "" : d.title);
 
             let linktextRects = setForeignObjectDimensions(linktextFo, linktextHtml);
@@ -118,19 +118,49 @@ function d3Graph($window) {
 
             let nodeRects = setForeignObjectDimensions(nodeFo, nodeHtml);
 
+            // control whether tick function should draw
+            let drawOnTick = false;
+            svg.style("visibility", "hidden");
+
             // register tick function
             force.on("tick", tick);
 
-            // let the simulation converge
-            var ia = 0;
-            while (force.alpha() > 0) {force.tick(); ia++;}
-            console.log("needed " + ia + " ticks to converge.");
+            window.requestAnimationFrame(converge);
 
             // filter on event
             scope.$on("d3graph_filter", filter);
 
-            // filter once with all nodes
-            filter(undefined, graph.nodes);
+            // let the simulation converge
+            let ia = 0;
+            let startTime = Date.now();
+
+            function converge() {
+                // keep a constant frame rate
+                while ((startTime + 300) > Date.now()) {
+                    force.tick();
+                    ia++;
+                }
+
+                if (force.alpha() > 0) {
+                    window.requestAnimationFrame(converge);
+                } else {
+                    console.log("needed " + ia + " ticks to converge.");
+                    drawOnTick = true;
+
+                    // focusMarkedNodes needs visible/marked nodes and edges
+                    _.each(graph.nodes, n => {
+                        n.marked = true;
+                        n.visible = true;
+                    });
+                    _.each(graph.edges, e => {
+                        e.visible = true;
+                    });
+
+                    focusMarkedNodes(0);
+                    drawGraph();
+                    svg.style("visibility", "visible");
+                }
+            }
 
             // filter the graph
             function filter(event, filtered) {
@@ -144,22 +174,23 @@ function d3Graph($window) {
                     let marked = _(filteredIds).includes(node.id);
                     let visible = marked || _(ids).includes(node.id);
                     return _.merge(node, {
-                        visible: visible,
-                        marked: marked
+                        visible,
+                        marked
                     });
                 });
                 graph.edges = _.map(graph.edges, edge => {
                     let visible = _(ids).includes(edge.source.id) && _(ids).includes(edge.target.id);
                     return _.merge(edge, {
-                        visible: visible
+                        visible
                     });
                 });
 
                 setVisibility();
-                focusMarkedNodes(event === undefined ? 0 : 750);
+                focusMarkedNodes();
             }
 
             // reset visibility of nodes after filtering
+            // TODO: set opacity of edges
             function setVisibility() {
                 // set node visibility
                 _.each(graph.nodes, (node, i) => {
@@ -179,7 +210,7 @@ function d3Graph($window) {
             }
 
             // focus the marked nodes and scale zoom accordingly
-            function focusMarkedNodes(duration = 750) {
+            function focusMarkedNodes(duration = 500) {
                 let marked = _.select(graph.nodes, {
                     marked: true
                 });
@@ -199,7 +230,12 @@ function d3Graph($window) {
                 }
 
                 let translate = [width / 2 - center[0] * scale, height / 2 - center[1] * scale];
-                svg.transition().duration(duration).call(zoom.translate(translate).scale(scale).event);
+
+                // skip animation if duration is zero
+                if (duration > 0)
+                    svg.transition().duration(duration).call(zoom.translate(translate).scale(scale).event);
+                else
+                    applyZoom(translate, scale);
             }
 
             // we need to set the height and weight of the foreignobject
@@ -235,28 +271,37 @@ function d3Graph($window) {
             // tick function, called in each step in the force calculation,
             // maps elements to positions
             function tick(e) {
+                // push hypernodes towards the center between its start/end node
+                let k = 10 * e.alpha;
+                graph.nodes.forEach((o, i) => {
+                    if (o.hyperEdge === true) {
+                        let neighbours = graph.hyperNeighbours[o.id];
+                        let start = neighbours.start;
+                        let end = neighbours.end;
+                        let center = {
+                            x: (start.x + end.x) / 2,
+                            y: (start.y + end.y) / 2
+                        };
+                        o.x += (center.x - o.x) * k;
+                        o.y += (center.y - o.y) * k;
+                    }
+                });
+
+                if (drawOnTick) {
+                    drawGraph();
+                }
+            }
+
+            function drawGraph() {
+                // clamp every edge line to the intersections with its incident node rectangles
+                link.each(function(link) {
+                    d3.select(this).attr(clampEdgeLine(link));
+                });
+
                 node.attr("transform", d => {
                     // center the node
                     let rect = nodeRects[d.index];
                     return "translate(" + (d.x - rect.width / 2) + "," + (d.y - rect.height / 2) + ")";
-                });
-
-                // push hypernodes towards the center between its start/end node
-                let k = 10*e.alpha;
-                graph.nodes.forEach((o,i) => {
-                    if( o.hyperEdge === true ) {
-                      let neighbours = graph.hyperNeighbours[o.id];
-                      let start = neighbours.start;
-                      let end = neighbours.end;
-                      let center = {x: (start.x+end.x)/2, y: (start.y+end.y)/2};
-                        o.x += (center.x-o.x)*k;
-                        o.y += (center.y-o.y)*k;
-                    }
-                });
-
-                // clamp every edge line to the intersections with its incident node rectangles
-                link.each( function(link) {
-                    d3.select(this).attr(clampEdgeLine(link));
                 });
 
                 linktextSvg.attr("transform", d => {
@@ -264,12 +309,15 @@ function d3Graph($window) {
                     let rect = linktextRects[d.index];
                     return "translate(" + (((d.source.x + d.target.x) / 2) - rect.width / 2) + "," + (((d.source.y + d.target.y) / 2) - rect.height / 2) + ")";
                 });
-
             }
 
             // zoom into graph
             function zoomed() {
-                container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+                applyZoom(d3.event.translate, d3.event.scale);
+            }
+
+            function applyZoom(translate, scale) {
+                container.attr("transform", "translate(" + translate + ")scale(" + scale + ")");
             }
 
             // unfix the position of a given node
@@ -314,6 +362,7 @@ function d3Graph($window) {
                 // check whether there was a substantial mouse movement. if
                 // not, we will interpret this as a click event after the
                 // mouse button is released (see clicked handler).
+                // TODO: weight by current zoom level!
                 let diff = Math.abs(d.x - d3.event.x) + Math.abs(d.y - d3.event.y);
                 isDragging = isDragging || (diff > 1);
 
@@ -353,7 +402,8 @@ function d3Graph($window) {
                     let source = graph.nodes[edge.source].id;
                     let target = graph.nodes[edge.target].id;
                     return {
-                        [source]: [target], [target]: [source]
+                        [source]: [target],
+                        [target]: [source]
                     };
                 }).reduce(_.partialRight(_.merge, (a, b) => {
                     return a ? a.concat(b) : b;
@@ -362,11 +412,13 @@ function d3Graph($window) {
                 let idToNode = _.indexBy(graph.nodes, "id");
                 let hyperNodes = _.filter(graph.nodes, node => node.hyperEdge === true);
                 //TODO: Map from node index to other node indices, to avoid string lookups
-                graph.hyperNeighbours = _.indexBy(_.map(hyperNodes, node => {return {
-                        id:node.id,
-                        start:idToNode[node.startId],
-                        end:idToNode[node.endId]
-                    };}), "id");
+                graph.hyperNeighbours = _.indexBy(_.map(hyperNodes, node => {
+                    return {
+                        id: node.id,
+                        start: idToNode[node.startId],
+                        end: idToNode[node.endId]
+                    };
+                }), "id");
             }
 
             function lineIntersection(line1, line2) {
@@ -411,20 +463,39 @@ function d3Graph($window) {
 
             function lineRectIntersection(line, rect) {
                 let corners = {
-                    x0y0: {x: rect.x             , y: rect.y},
-                    x1y0: {x: rect.x + rect.width, y: rect.y},
-                    x0y1: {x: rect.x             , y: rect.y + rect.height},
-                    x1y1: {x: rect.x + rect.width, y: rect.y + rect.height}
+                    x0y0: {
+                        x: rect.x,
+                        y: rect.y
+                    },
+                    x1y0: {
+                        x: rect.x + rect.width,
+                        y: rect.y
+                    },
+                    x0y1: {
+                        x: rect.x,
+                        y: rect.y + rect.height
+                    },
+                    x1y1: {
+                        x: rect.x + rect.width,
+                        y: rect.y + rect.height
+                    }
                 };
 
-                let rectLines = [
-                {start: corners.x0y0, end: corners.x1y0},
-                {start: corners.x0y0, end: corners.x0y1},
-                {start: corners.x1y1, end: corners.x1y0},
-                {start: corners.x1y1, end: corners.x0y1}
-                ];
+                let rectLines = [{
+                    start: corners.x0y0,
+                    end: corners.x1y0
+                }, {
+                    start: corners.x0y0,
+                    end: corners.x0y1
+                }, {
+                    start: corners.x1y1,
+                    end: corners.x1y0
+                }, {
+                    start: corners.x1y1,
+                    end: corners.x0y1
+                }];
 
-                let intersections = _.map(rectLines,rectLine => lineIntersection(line, rectLine));
+                let intersections = _.map(rectLines, rectLine => lineIntersection(line, rectLine));
                 let rectIntersection = _.find(intersections, x => x.onLine1 === true && x.onLine2 === true);
                 return rectIntersection;
             }
@@ -434,15 +505,27 @@ function d3Graph($window) {
                 let targetNodeRect = nodeRects[edge.target.index];
 
                 let linkLine = {
-                    start: {x: edge.source.x, y: edge.source.y},
-                    end:   {x: edge.target.x, y: edge.target.y}
+                    start: {
+                        x: edge.source.x,
+                        y: edge.source.y
+                    },
+                    end: {
+                        x: edge.target.x,
+                        y: edge.target.y
+                    }
                 };
 
                 let sourceIntersection = lineRectIntersection(linkLine,
-                        _.merge(sourceNodeRect,{x: edge.source.x - sourceNodeRect.width/2, y: edge.source.y - sourceNodeRect.height/2}));
+                    _.merge(sourceNodeRect, {
+                        x: edge.source.x - sourceNodeRect.width / 2,
+                        y: edge.source.y - sourceNodeRect.height / 2
+                    }));
 
                 let targetIntersection = lineRectIntersection(linkLine,
-                        _.merge(targetNodeRect,{x: edge.target.x - targetNodeRect.width/2, y: edge.target.y - targetNodeRect.height/2}));
+                    _.merge(targetNodeRect, {
+                        x: edge.target.x - targetNodeRect.width / 2,
+                        y: edge.target.y - targetNodeRect.height / 2
+                    }));
 
                 return {
                     x1: sourceIntersection === undefined ? edge.source.x : sourceIntersection.x,
