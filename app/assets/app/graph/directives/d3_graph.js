@@ -247,31 +247,10 @@ function d3Graph($window) {
                     }
                 });
 
-                link.each( function(d) {
-                    let sourceNodeRect = nodeRects[d.source.index];
-                    let targetNodeRect = nodeRects[d.target.index];
-
-                    let linkLine = {
-                        start: {x: d.source.x, y: d.source.y},
-                        end:   {x: d.target.x, y: d.target.y}
-                    };
-
-                    let sourceIntersection = lineRectIntersection(linkLine,
-                            _.merge(sourceNodeRect,{x: d.source.x - sourceNodeRect.width/2, y: d.source.y - sourceNodeRect.height/2}));
-
-                    let targetIntersection = lineRectIntersection(linkLine,
-                            _.merge(targetNodeRect,{x: d.target.x - targetNodeRect.width/2, y: d.target.y - targetNodeRect.height/2}));
-
-
-                    d3.select(this).attr({
-                        x1: sourceIntersection ? sourceIntersection.x : d.source.x,
-                        y1: sourceIntersection ? sourceIntersection.y : d.source.y,
-                        x2: targetIntersection ? targetIntersection.x : d.target.x,
-                        y2: targetIntersection ? targetIntersection.y : d.target.y
-                    });
-
-                }
-                );
+                // clamp every edge line to the intersections with its incident node rectangles
+                link.each( function(link) {
+                    d3.select(this).attr(clampEdgeLine(link));
+                });
 
                 linktextSvg.attr("transform", d => {
                     // center the linktext
@@ -441,6 +420,30 @@ function d3Graph($window) {
                 let rectIntersection = _.find(intersections, x => x.onLine1 === true && x.onLine2 === true);
                 return rectIntersection;
             }
+
+            function clampEdgeLine(edge) {
+                let sourceNodeRect = nodeRects[edge.source.index];
+                let targetNodeRect = nodeRects[edge.target.index];
+
+                let linkLine = {
+                    start: {x: edge.source.x, y: edge.source.y},
+                    end:   {x: edge.target.x, y: edge.target.y}
+                };
+
+                let sourceIntersection = lineRectIntersection(linkLine,
+                        _.merge(sourceNodeRect,{x: edge.source.x - sourceNodeRect.width/2, y: edge.source.y - sourceNodeRect.height/2}));
+
+                let targetIntersection = lineRectIntersection(linkLine,
+                        _.merge(targetNodeRect,{x: edge.target.x - targetNodeRect.width/2, y: edge.target.y - targetNodeRect.height/2}));
+
+                return {
+                    x1: sourceIntersection === undefined ? edge.source.x : sourceIntersection.x,
+                    y1: sourceIntersection === undefined ? edge.source.y : sourceIntersection.y,
+                    x2: targetIntersection === undefined ? edge.target.x : targetIntersection.x,
+                    y2: targetIntersection === undefined ? edge.target.y : targetIntersection.y
+                };
+            }
+
         });
     }
 }
