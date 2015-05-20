@@ -10,6 +10,9 @@ import org.atmosphere.play.AtmosphereCoordinator.{instance => atmosphere}
 import play.api.libs.json._
 import renesca.schema._
 
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
+
 object Broadcaster {
   private def jsonChange(changeType: String, data: JsValue, reference: String = "") = JsObject(Seq(
     ("type", JsString(changeType)),
@@ -36,7 +39,7 @@ object Broadcaster {
   }
 
   private def optionalFactory(definition: UuidNodeDefinition[_]) = definition match {
-    case FactoryUuidNodeDefinition(factory, uuid) => Some(factory)
+    case FactoryUuidNodeDefinition(factory, _) => Some(factory)
     case _ => None
   }
 
@@ -61,50 +64,60 @@ object Broadcaster {
   }
 
   def broadcastEdit[NODE <: UuidNode](factory: NodeFactory[NODE], node: NODE): Unit = {
-    //TODO: broadcast to neighbors
-    Application.nodeSchemas.filter(_.op.factory == factory).foreach(nodeSchema => {
-      broadcast(s"${nodeSchema.path}/${ node.uuid }", jsonChange("edit", Json.toJson(node)))
-    })
+    Future {
+      //TODO: broadcast to neighbors
+      Application.nodeSchemas.filter(_.op.factory == factory).foreach(nodeSchema => {
+        broadcast(s"${ nodeSchema.path }/${ node.uuid }", jsonChange("edit", Json.toJson(node)))
+      })
+    }
   }
 
   def broadcastConnect[START <: UuidNode, RELATION <: AbstractRelation[START,END], END <: UuidNode](start: START, relationDefinition: FactoryRelationDefinition[START,RELATION,END], end: END): Unit = { import relationDefinition._
-    connectionDistributor(
-      (apiname, path) => broadcast(s"$apiname/${ start.uuid }/$path", jsonChange("connect", Json.toJson(end))),
-      startDefinition.factory,
-      factory,
-      endDefinition.factory,
-      (apiname, path) => broadcast(s"$apiname/${ end.uuid }/$path", jsonChange("connect", Json.toJson(start)))
-    )
+    Future {
+      connectionDistributor(
+        (apiname, path) => broadcast(s"$apiname/${ start.uuid }/$path", jsonChange("connect", Json.toJson(end))),
+        startDefinition.factory,
+        factory,
+        endDefinition.factory,
+        (apiname, path) => broadcast(s"$apiname/${ end.uuid }/$path", jsonChange("connect", Json.toJson(start)))
+      )
+    }
   }
 
-    def broadcastDisconnect[START <: UuidNode, RELATION <: AbstractRelation[START,END], END <: UuidNode](relationDefinition: FactoryUuidRelationDefinition[START, RELATION, END]): Unit = { import relationDefinition._
-    connectionDistributor(
-      (apiname, path) => broadcast(s"$apiname/${ startDefinition.uuid }/$path", jsonChange("disconnect", JsObject(Seq(("id", JsString(endDefinition.uuid)))))),
-      startDefinition.factory,
-      factory,
-      endDefinition.factory,
-      (apiname, path) => broadcast(s"$apiname/${ endDefinition.uuid }/$path", jsonChange("disconnect", JsObject(Seq(("id", JsString(startDefinition.uuid))))))
-    )
+  def broadcastDisconnect[START <: UuidNode, RELATION <: AbstractRelation[START,END], END <: UuidNode](relationDefinition: FactoryUuidRelationDefinition[START, RELATION, END]): Unit = { import relationDefinition._
+    Future {
+      connectionDistributor(
+        (apiname, path) => broadcast(s"$apiname/${ startDefinition.uuid }/$path", jsonChange("disconnect", JsObject(Seq(("id", JsString(endDefinition.uuid)))))),
+        startDefinition.factory,
+        factory,
+        endDefinition.factory,
+        (apiname, path) => broadcast(s"$apiname/${ endDefinition.uuid }/$path", jsonChange("disconnect", JsObject(Seq(("id", JsString(startDefinition.uuid))))))
+      )
+    }
   }
 
   private def broadcastHyperConnect[NODE <: UuidNode](definition: UuidHyperNodeDefinitionBase[_], factory: AbstractRelationFactory[_,_,_], nestedNode: NODE, nestedFactory: NodeFactory[NODE]): Unit = {
-    hyperConnectionDistributor(
-      (apiname, path, nestedPath) => broadcast(s"$apiname/${definition.startDefinition.uuid}/$path/$nestedPath", jsonChange("connect", Json.toJson(nestedNode), definition.endDefinition.uuid)),
-      definition,
-      factory,
-      nestedFactory,
-      (apiname, path, nestedPath) => broadcast(s"$apiname/${definition.endDefinition.uuid}/$path/$nestedPath", jsonChange("connect", Json.toJson(nestedNode), definition.startDefinition.uuid))
-    )
+    Future {
+      hyperConnectionDistributor(
+        (apiname, path, nestedPath) => broadcast(s"$apiname/${definition.startDefinition.uuid}/$path/$nestedPath", jsonChange("connect", Json.toJson(nestedNode), definition.endDefinition.uuid)),
+        definition,
+        factory,
+        nestedFactory,
+        (apiname, path, nestedPath) => broadcast(s"$apiname/${definition.endDefinition.uuid}/$path/$nestedPath", jsonChange("connect", Json.toJson(nestedNode), definition.startDefinition.uuid))
+      )
+    }
   }
 
   private def broadcastHyperDisconnect[NODE <: UuidNode](definition: UuidHyperNodeDefinitionBase[_], factory: AbstractRelationFactory[_,_,_], nestedDefinition: UuidNodeDefinition[NODE], nestedFactory: NodeFactory[NODE]): Unit = {
-    hyperConnectionDistributor(
-      (apiname, path, nestedPath) => broadcast(s"$apiname/${definition.startDefinition.uuid}/$path/$nestedPath", jsonChange("disconnect", JsObject(Seq(("id", JsString(nestedDefinition.uuid)))), definition.endDefinition.uuid)),
-      definition,
-      factory,
-      nestedFactory,
-      (apiname, path, nestedPath) => broadcast(s"$apiname/${definition.endDefinition.uuid}/$path/$nestedPath", jsonChange("disconnect", JsObject(Seq(("id", JsString(nestedDefinition.uuid)))), definition.startDefinition.uuid))
-    )
+    Future {
+      hyperConnectionDistributor(
+        (apiname, path, nestedPath) => broadcast(s"$apiname/${ definition.startDefinition.uuid }/$path/$nestedPath", jsonChange("disconnect", JsObject(Seq(("id", JsString(nestedDefinition.uuid)))), definition.endDefinition.uuid)),
+        definition,
+        factory,
+        nestedFactory,
+        (apiname, path, nestedPath) => broadcast(s"$apiname/${ definition.endDefinition.uuid }/$path/$nestedPath", jsonChange("disconnect", JsObject(Seq(("id", JsString(nestedDefinition.uuid)))), definition.startDefinition.uuid))
+      )
+    }
   }
 
   def broadcastStartHyperConnect[START <: Node, RELATION <: AbstractRelation[START,END], END <: UuidNode](relationDefinition: UuidHyperAndNodeRelationDefinition[START,RELATION,END] with NodeAndFactoryRelationDefinition[START,RELATION,END], nestedNode: END): Unit = { import relationDefinition._
