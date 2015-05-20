@@ -4,7 +4,7 @@ import controllers.Application
 import formatters.json.GraphFormat._
 import model.WustSchema._
 import modules.db.types._
-import modules.db.{FactoryUuidNodeDefinition, UuidNodeDefinition}
+import modules.db.{NodeDefinition, RelationDefinition, FactoryUuidNodeDefinition, UuidNodeDefinition}
 import modules.requests._
 import org.atmosphere.play.AtmosphereCoordinator.{instance => atmosphere}
 import play.api.libs.json._
@@ -26,34 +26,36 @@ object Broadcaster {
     broadcaster.broadcastTo(s"${ Application.apiDefinition.websocketRoot }/$path", data)
   }
 
-  private def connectionDistributor[START <: UuidNode, END <: UuidNode](startHandler: (String, String) => Unit, startFactory: NodeFactory[START], factory: AbstractRelationFactory[START,_,END], endFactory: NodeFactory[END], endHandler: (String, String) => Unit) {
+  private def optionalFactory(definition: NodeDefinition[_]) = definition match {
+    case FactoryUuidNodeDefinition(factory, _) => Some(factory)
+    case _ => None
+  }
+
+  private def connectionDistributor[START <: UuidNode, END <: UuidNode](startHandler: (String, String) => Unit, definition: NodeRelationDefinition[START,_,END], endHandler: (String, String) => Unit) { import definition._
+    val startFactory = optionalFactory(startDefinition)
+    val endFactory = optionalFactory(endDefinition)
     Application.nodeSchemas.foreach(nodeSchema => {
       nodeSchema.connectSchemas.foreach {
-        case (k, StartConnection(op)) if op.acceptsUpdateFrom(factory, Some(endFactory))  =>
+        case (k, StartConnection(op)) if op.acceptsUpdateFrom(factory, endFactory)  =>
           startHandler(nodeSchema.path, k)
-        case (k, EndConnection(op)) if op.acceptsUpdateFrom(factory, Some(startFactory))  =>
+        case (k, EndConnection(op)) if op.acceptsUpdateFrom(factory, startFactory)  =>
           endHandler(nodeSchema.path, k)
         case _                                                                      =>
       }
     })
   }
 
-  private def optionalFactory(definition: UuidNodeDefinition[_]) = definition match {
-    case FactoryUuidNodeDefinition(factory, _) => Some(factory)
-    case _ => None
-  }
-
-  private def hyperConnectionDistributor(startHandler: (String, String, String) => Unit, definition: UuidHyperNodeDefinitionBase[_], nestedRelFactory: AbstractRelationFactory[_, _, _], nestedFactory: NodeFactory[_], endHandler: (String, String, String) => Unit): Unit = {
-    val startFactory = optionalFactory(definition.startDefinition)
-    val endFactory = optionalFactory(definition.endDefinition)
+  private def hyperConnectionDistributor(startHandler: (String, String, String) => Unit, definition: UuidHyperNodeDefinitionBase[_], nestedRelFactory: AbstractRelationFactory[_, _, _], nestedFactory: NodeFactory[_], endHandler: (String, String, String) => Unit): Unit = { import definition._
+    val startFactory = optionalFactory(startDefinition)
+    val endFactory = optionalFactory(endDefinition)
     Application.nodeSchemas.foreach(nodeSchema => {
       nodeSchema.connectSchemas.foreach {
-        case (ok, StartHyperConnectSchema(f,op,connectSchemas)) if op.acceptsUpdateFrom(definition.factory, endFactory) => connectSchemas.foreach {
+        case (ok, StartHyperConnectSchema(f,op,connectSchemas)) if op.acceptsUpdateFrom(factory, endFactory) => connectSchemas.foreach {
           case (k, v) if v.op.acceptsUpdateFrom(nestedRelFactory, Some(nestedFactory)) =>
             startHandler(nodeSchema.path, ok, k)
           case _                                                                 =>
         }
-        case (ok, EndHyperConnectSchema(f,op,connectSchemas)) if op.acceptsUpdateFrom(definition.factory, startFactory) => connectSchemas.foreach {
+        case (ok, EndHyperConnectSchema(f,op,connectSchemas)) if op.acceptsUpdateFrom(factory, startFactory) => connectSchemas.foreach {
           case (k, v) if v.op.acceptsUpdateFrom(nestedRelFactory, Some(nestedFactory)) =>
             endHandler(nodeSchema.path, ok, k)
           case _                                                                 =>
@@ -65,7 +67,7 @@ object Broadcaster {
 
   def broadcastCreate[NODE <: UuidNode](factory: NodeFactory[NODE], node: NODE): Unit = {
     Future {
-      Application.nodeSchemas.filter(_.op.factory == factory).foreach(nodeSchema => {
+      Application.nodeSchemas.filter(_.op.acceptsUpdateFrom(factory)).foreach(nodeSchema => {
         broadcast(s"${nodeSchema.path}", jsonChange("create", Json.toJson(node)))
       })
     }
@@ -74,7 +76,7 @@ object Broadcaster {
   def broadcastEdit[NODE <: UuidNode](factory: NodeFactory[NODE], node: NODE): Unit = {
     Future {
       //TODO: broadcast to neighbors
-      Application.nodeSchemas.filter(_.op.factory == factory).foreach(nodeSchema => {
+      Application.nodeSchemas.filter(_.op.acceptsUpdateFrom(factory)).foreach(nodeSchema => {
         broadcast(s"${nodeSchema.path}/${node.uuid}", jsonChange("edit", Json.toJson(node)))
       })
     }
@@ -84,31 +86,27 @@ object Broadcaster {
     Future {
       //TODO: broadcast to neighbors
       //TODO: should this broadcast on /nodes/:id or /nodes with id as payload?
-      Application.nodeSchemas.filter(_.op.factory == factory).foreach(nodeSchema => {
+      Application.nodeSchemas.filter(_.op.acceptsUpdateFrom(factory)).foreach(nodeSchema => {
         broadcast(s"${nodeSchema.path}", jsonChange("delete", Json.toJson(JsObject(Seq(("id", JsString(uuid)))))))
       })
     }
   }
 
-  def broadcastConnect[START <: UuidNode, RELATION <: AbstractRelation[START,END], END <: UuidNode](start: START, relationDefinition: FactoryRelationDefinition[START,RELATION,END], end: END): Unit = { import relationDefinition._
+  def broadcastConnect[START <: UuidNode, RELATION <: AbstractRelation[START,END], END <: UuidNode](start: START, relationDefinition: NodeRelationDefinition[START,RELATION,END], end: END) { import relationDefinition._
     Future {
       connectionDistributor(
         (apiname, path) => broadcast(s"$apiname/${ start.uuid }/$path", jsonChange("connect", Json.toJson(end))),
-        startDefinition.factory,
-        factory,
-        endDefinition.factory,
+        relationDefinition,
         (apiname, path) => broadcast(s"$apiname/${ end.uuid }/$path", jsonChange("connect", Json.toJson(start)))
       )
     }
   }
 
-  def broadcastDisconnect[START <: UuidNode, RELATION <: AbstractRelation[START,END], END <: UuidNode](relationDefinition: FactoryUuidRelationDefinition[START, RELATION, END]): Unit = { import relationDefinition._
+  def broadcastDisconnect[START <: UuidNode, RELATION <: AbstractRelation[START,END], END <: UuidNode](relationDefinition: UuidRelationDefinition[START, RELATION, END]): Unit = { import relationDefinition._
     Future {
       connectionDistributor(
         (apiname, path) => broadcast(s"$apiname/${ startDefinition.uuid }/$path", jsonChange("disconnect", JsObject(Seq(("id", JsString(endDefinition.uuid)))))),
-        startDefinition.factory,
-        factory,
-        endDefinition.factory,
+        relationDefinition,
         (apiname, path) => broadcast(s"$apiname/${ endDefinition.uuid }/$path", jsonChange("disconnect", JsObject(Seq(("id", JsString(startDefinition.uuid))))))
       )
     }

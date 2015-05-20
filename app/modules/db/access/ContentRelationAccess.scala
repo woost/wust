@@ -4,7 +4,7 @@ import formatters.json.RequestFormat._
 import model.WustSchema._
 import modules.db.Database._
 import modules.db.types.UuidHyperNodeDefinitionBase
-import modules.db.{FactoryUuidNodeDefinition, RelationDefinition}
+import modules.db.{UuidNodeDefinition, FactoryUuidNodeDefinition, RelationDefinition}
 import modules.live.Broadcaster
 import modules.requests.ConnectRequest
 import play.api.libs.json.JsValue
@@ -21,7 +21,7 @@ class StartContentRelationAccess[
 
   private def fail(uuid: String) = Right(s"Cannot connect Nodes with uuid '$uuid' at StartContentRelation")
 
-  override def create(baseDef: FactoryUuidNodeDefinition[START], json: JsValue) = {
+  override def create(baseDef: UuidNodeDefinition[START], json: JsValue) = {
     val connect = json.as[ConnectRequest]
     val relationDefinition = RelationDefinition(baseDef, factory, toNodeDefinition(connect.uuid))
     val resultOpt = connectUuidNodes(relationDefinition)
@@ -59,7 +59,7 @@ class EndContentRelationAccess [
 
   private def fail(uuid: String) = Right(s"Cannot connect Nodes with uuid '$uuid' at EndContentRelation")
 
-  override def create(baseDef: FactoryUuidNodeDefinition[END], json: JsValue) = {
+  override def create(baseDef: UuidNodeDefinition[END], json: JsValue) = {
     val connect = json.as[ConnectRequest]
     val relationDefinition = RelationDefinition(toNodeDefinition(connect.uuid), factory, baseDef)
     val resultOpt = connectUuidNodes(relationDefinition)

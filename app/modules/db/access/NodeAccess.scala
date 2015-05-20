@@ -8,17 +8,52 @@ import play.api.libs.json.JsValue
 import renesca.schema._
 
 trait NodeAccess[NODE <: UuidNode] {
-  val factory: NodeFactory[NODE]
-  val name = factory.getClass.getSimpleName.dropRight(1)
+  val name: String
+  val label: String
+
+  def acceptsUpdateFrom(factory: NodeFactory[_]): Boolean
 
   def read: Either[Iterable[NODE],String] = Right("No read access on Node collection")
   def read(uuid: String): Either[NODE, String] = Right("No read access on Node")
   def create(user: User, json: JsValue): Either[NODE, String] = Right("No create access on Node")
   def update(uuid: String, user: User, nodeAdd: JsValue): Either[NODE,String] = Right("No update access on Node")
   def delete(uuid: String): Either[Boolean,String] = Right("No delete access on Node")
+
+  def toNodeDefinition(uuid: String): UuidNodeDefinition[NODE]
 }
 
-class NodeRead[NODE <: UuidNode](val factory: NodeFactory[NODE]) extends NodeAccess[NODE] {
+class AnyContentNode() extends NodeAccess[ContentNode] {
+  val name = "ContentNode"
+  val label = ""
+
+  def acceptsUpdateFrom(factory: NodeFactory[_]) = true
+
+  def toNodeDefinition = AnyNodeDefinition()
+  def toNodeDefinition(uuid: String) = AnyUuidNodeDefinition(uuid)
+
+  override def read = {
+    Left(discourseGraph(toNodeDefinition).contentNodes)
+  }
+
+  override def read(uuid: String) = {
+    discourseGraph(toNodeDefinition(uuid)).contentNodes.headOption match {
+      case Some(node) => Left(node)
+      case None       => Right(s"Cannot find node with uuid '$uuid'")
+    }
+  }
+}
+
+trait NodeAccessWithFactory[NODE <: UuidNode] extends NodeAccess[NODE] {
+  val factory: NodeFactory[NODE]
+  val name = factory.getClass.getSimpleName.dropRight(1)
+  val label = factory.label.name
+
+  def acceptsUpdateFrom(factory: NodeFactory[_]) = this.factory == factory
+
+  def toNodeDefinition(uuid: String) = FactoryUuidNodeDefinition(factory, uuid)
+}
+
+class NodeRead[NODE <: UuidNode](val factory: NodeFactory[NODE]) extends NodeAccessWithFactory[NODE] {
   override def read = {
     Left(discourseNodes(factory)._2.toSet)
   }

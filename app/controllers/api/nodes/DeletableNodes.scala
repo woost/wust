@@ -19,14 +19,14 @@ trait DeletableNodes[NODE <: UuidNode] extends NodesBase {
   }
 
   override def disconnectMember(path: String, uuid: String, otherUuid: String) = Action {
-    val baseNode = nodeSchema.toNodeDefinition(uuid)
+    val baseNode = nodeSchema.op.toNodeDefinition(uuid)
     getSchema(nodeSchema.connectSchemas, path)(connectSchema => {
       getResult(connectSchema.op.delete(baseNode, otherUuid))(deleteResult)
     })
   }
 
   override def disconnectNestedMember(path: String, nestedPath: String, uuid: String, otherUuid: String, nestedUuid: String) = Action {
-    val baseNode = nodeSchema.toNodeDefinition(uuid)
+    val baseNode = nodeSchema.op.toNodeDefinition(uuid)
     getHyperSchema(nodeSchema.connectSchemas, path)({
       case c@StartHyperConnectSchema(factory,op,connectSchemas) =>
         val hyperRel = c.toNodeDefinition(baseNode, otherUuid)

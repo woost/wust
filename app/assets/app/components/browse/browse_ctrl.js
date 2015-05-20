@@ -1,8 +1,8 @@
 angular.module("wust.components").controller("BrowseCtrl", BrowseCtrl);
 
-BrowseCtrl.$inject = ["$scope", "$state", "Problem", "Goal", "Idea", "DiscourseNode"];
+BrowseCtrl.$inject = ["$scope", "$state", "Problem", "Goal", "Idea", "Untyped", "DiscourseNode"];
 
-function BrowseCtrl($scope, $state, Problem, Goal, Idea, DiscourseNode) {
+function BrowseCtrl($scope, $state, Problem, Goal, Idea, Untyped, DiscourseNode) {
     let vm = this;
 
     let problems = {
@@ -36,8 +36,18 @@ function BrowseCtrl($scope, $state, Problem, Goal, Idea, DiscourseNode) {
             title: ""
         })
     };
+    let plains = {
+        newTitle: "What is your Plain?",
+        listTitle: "Existing plains:",
+        info: DiscourseNode.Untyped,
+        service: Untyped,
+        addNode: addNode,
+        newNode: Untyped.$build({
+            title: ""
+        })
+    };
 
-    vm.slides = [problems, goals, ideas];
+    vm.slides = [problems, goals, ideas, plains];
 
     $scope.$watch(() => _.find(vm.slides, "active"), active => setNodes(active));
 

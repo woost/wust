@@ -21,14 +21,14 @@ trait ReadableNodes[NODE <: UuidNode] extends NodesBase {
   }
 
   override def showMembers(path: String, uuid: String) = Action {
-    val baseNode = nodeSchema.toNodeDefinition(uuid)
+    val baseNode = nodeSchema.op.toNodeDefinition(uuid)
     getSchema(nodeSchema.connectSchemas, path)(connectSchema => {
       getResult(connectSchema.op.read(baseNode))(jsonNodes)
     })
   }
 
   override def showNestedMembers(path: String, nestedPath: String, uuid: String, otherUuid: String) = Action {
-    val baseNode = nodeSchema.toNodeDefinition(uuid)
+    val baseNode = nodeSchema.op.toNodeDefinition(uuid)
     getHyperSchema(nodeSchema.connectSchemas, path)({
       case c@StartHyperConnectSchema(_,_,connectSchemas) =>
         val hyperRel = c.toNodeDefinition(baseNode, otherUuid)

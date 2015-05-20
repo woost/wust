@@ -5,6 +5,7 @@ $discourse_problem_color: #ffdc6d;
 $discourse_idea_color: #6db5ff;
 $discourse_proargument_color: #9AFF78;
 $discourse_conargument_color: #ff6d6f;
+$discourse_untyped_color: #D8D8D8;
 $discourse_user_color: #FFFFFF;
 $font_color: black;
 
@@ -79,6 +80,10 @@ $font_color: black;
     @include discourse_node($discourse_conargument_color, ""); // thumbsdown
 }
 
+.discourse_untyped {
+    @include discourse_node($discourse_untyped_color, ""); // comment
+}
+
 .discourse_user {
     @include discourse_node($discourse_user_color, ""); // user
 }
@@ -110,6 +115,12 @@ $font_color: black;
 .discourse_conargument_list {
     .node_model_list.on-drag-enter {
         background-color: $discourse_conargument_color;
+    }
+}
+
+.discourse_untyped_list {
+    .node_model_list.on-drag-enter {
+        background-color: $discourse_untyped_color;
     }
 }
 

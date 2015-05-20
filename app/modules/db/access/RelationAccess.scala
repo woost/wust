@@ -10,9 +10,9 @@ import renesca.schema._
 
 trait RelationAccess[NODE <: UuidNode,OTHER <: UuidNode] {
   def read(baseDef: FixedNodeDefinition[NODE]): Either[Set[OTHER],String] = Right("No read access on Relation")
-  def delete(baseDef: FactoryUuidNodeDefinition[NODE], uuid: String): Either[Boolean,String] = Right("No delete access on Relation")
+  def delete(baseDef: UuidNodeDefinition[NODE], uuid: String): Either[Boolean,String] = Right("No delete access on Relation")
   def deleteHyper(baseDef: UuidHyperNodeDefinitionBase[NODE with AbstractRelation[_,_]], uuid: String): Either[Boolean, String] = Right("No delete access on HyperRelation")
-  def create(baseDef: FactoryUuidNodeDefinition[NODE], json: JsValue): Either[OTHER,String] = Right("No create access on Relation")
+  def create(baseDef: UuidNodeDefinition[NODE], json: JsValue): Either[OTHER,String] = Right("No create access on Relation")
   def createHyper(baseDef: UuidHyperNodeDefinitionBase[NODE with AbstractRelation[_,_]], json: JsValue): Either[OTHER,String] = Right("No create access on HyperRelation")
 
   def toNodeDefinition: NodeDefinition[OTHER]
@@ -122,7 +122,7 @@ class StartRelationReadDelete[
   nodeFactory: NodeFactory[END]
 ) extends StartRelationRead(factory, nodeFactory) {
 
-  override def delete(baseDef: FactoryUuidNodeDefinition[START], uuid:String) = {
+  override def delete(baseDef: UuidNodeDefinition[START], uuid:String) = {
     val relationDefinition = RelationDefinition(baseDef, factory, toNodeDefinition(uuid))
     disconnectNodes(relationDefinition)
     Broadcaster.broadcastDisconnect(relationDefinition)
@@ -163,7 +163,7 @@ class EndRelationReadDelete[
    nodeFactory: NodeFactory[START]
 ) extends EndRelationRead(factory, nodeFactory) {
 
-  override def delete(baseDef: FactoryUuidNodeDefinition[END], uuid:String) = {
+  override def delete(baseDef: UuidNodeDefinition[END], uuid:String) = {
     val relationDefinition = RelationDefinition(toNodeDefinition(uuid), factory, baseDef)
     disconnectNodes(relationDefinition)
     Broadcaster.broadcastDisconnect(relationDefinition)

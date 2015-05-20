@@ -45,6 +45,11 @@ function RoutesConfig($stateProvider, $urlRouterProvider, $locationProvider, Dis
         url: "users/:id",
         templateUrl: `${templateBase}/users/detail.html`,
         controller: "UserDetailsCtrl as vm",
+    }).state(DiscourseNodeProvider.setState("Untyped", "plain"), {
+        parent: "page",
+        url: "plains/:id",
+        templateUrl: `${templateBase}/nodes/focus_view.html`,
+        controller: "UntypedsCtrl as vm",
     }).state(DiscourseNodeProvider.setState("Goal", "goals"), {
         parent: "page",
         url: "goals/:id",
