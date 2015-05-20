@@ -4,6 +4,7 @@ package controllers.router
 
 import play.api.mvc._
 import play.core.Router
+import common.Helpers.compose
 
 import scala.runtime.AbstractPartialFunction
 
@@ -98,9 +99,6 @@ trait ResourceRouter extends Router.Routes with ResourceController {
 
   //TODO should be used in NestedResourceRouter?
   protected def withId(id: String, action: String => EssentialAction)(implicit idBindable: PathBindable[String]) = idBindable.bind("id", id).fold(badRequest, action)
-
-  // TODO helper method
-  protected def compose[A,B,C](f: PartialFunction[A, B], g: PartialFunction[B, C]) : PartialFunction[A, C] = Function.unlift(f.lift(_).flatMap(g.lift))
 
   private val mapRequestToAction: PartialFunction[(String,String),EssentialAction] = {
     case ("GET", MaybeSlash()) => index

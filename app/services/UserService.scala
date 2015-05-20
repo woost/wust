@@ -18,7 +18,6 @@ trait UserService extends IdentityService[User] {
 }
 
 class UserServiceDB extends UserService {
-  //TODO: move to central helper class
   implicit def sloginInfoToLoginInfo(li: SLoginInfo) = LoginInfo.local(li.providerID, li.providerKey)
 
   def create(sLoginInfo: SLoginInfo, signUp: SignUp, json: JsValue = JsNull): Future[User] = {
