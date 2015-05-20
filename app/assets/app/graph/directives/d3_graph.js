@@ -30,11 +30,15 @@ function d3Graph($window) {
 
             // force configuration
             let force = d3.layout.force()
-                .friction(0.90)
-                // .gravity(0.05)
-                .charge(-1000)
-                .linkDistance(d => connectsHyperEdge(d) ? 60 : 120)
-                .size([width, height]);
+                .size([width, height])
+                .linkStrength(3) // rigidity
+                .friction(0.9)
+                // .linkDistance(120) // weak geometric constraint. Pushes nodes to achieve this distance
+                .linkDistance(d => connectsHyperEdge(d) ? 120 : 200)
+                .charge(-1500)
+                .gravity(0.1)
+                .theta(0.8)
+                .alpha(0.1);
 
             // remove any previous svg
             d3.select("svg").remove();
@@ -118,7 +122,9 @@ function d3Graph($window) {
             force.on("tick", tick);
 
             // let the simulation converge
-            while (force.alpha() > 0) force.tick();
+            var ia = 0;
+            while (force.alpha() > 0) {force.tick(); ia++;}
+            console.log("needed " + ia + " ticks to converge.");
 
             // filter on event
             scope.$on("d3graph_filter", filter);
@@ -355,6 +361,7 @@ function d3Graph($window) {
 
                 let idToNode = _.indexBy(graph.nodes, "id");
                 let hyperNodes = _.filter(graph.nodes, node => node.hyperEdge === true);
+                //TODO: Map from node index to other node indices, to avoid string lookups
                 graph.hyperNeighbours = _.indexBy(_.map(hyperNodes, node => {return {
                         id:node.id,
                         start:idToNode[node.startId],
