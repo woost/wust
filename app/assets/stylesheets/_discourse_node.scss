@@ -84,45 +84,49 @@ $font_color: black;
 }
 
 .discourse_idea_list {
-    .drop_node.on-drag-enter {
+    .node_model_list.on-drag-enter {
         background-color: $discourse_idea_color;
     }
 }
 
 .discourse_problem_list {
-    .drop_node.on-drag-enter {
+    .node_model_list.on-drag-enter {
         background-color: $discourse_problem_color;
     }
 }
 
 .discourse_goal_list {
-    .drop_node.on-drag-enter {
+    .node_model_list.on-drag-enter {
         background-color: $discourse_goal_color;
     }
 }
 
 .discourse_proargument_list {
-    .drop_node.on-drag-enter {
+    .node_model_list.on-drag-enter {
         background-color: $discourse_proargument_color;
     }
 }
 
 .discourse_conargument_list {
-    .drop_node.on-drag-enter {
+    .node_model_list.on-drag-enter {
         background-color: $discourse_conargument_color;
     }
 }
 
 .discourse_node_list_horizontal {
     .discourse_node_list {
-        padding: 6px;
-        @include display-flex(flex);
-        @include flex-wrap(wrap);
-        @include justify-content(center);
+        .node_model_list {
+            padding: 6px;
+            @include display-flex(flex);
+            @include flex-wrap(wrap);
+            @include justify-content(center);
+        }
     }
 }
 .discourse_node_list_vertical {
     .discourse_node_list {
-        padding: 6px;
+        .node_model_list {
+            padding: 6px;
+        }
     }
 }
