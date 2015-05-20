@@ -239,8 +239,9 @@ function d3Graph($window) {
                 let k = 10*e.alpha;
                 graph.nodes.forEach((o,i) => {
                     if( o.hyperEdge === true ) {
-                      let start = graph.hyperNeighbours[o.id].start;
-                      let end = graph.hyperNeighbours[o.id].end;
+                      let neighbours = graph.hyperNeighbours[o.id];
+                      let start = neighbours.start;
+                      let end = neighbours.end;
                       let center = {x: (start.x+end.x)/2, y: (start.y+end.y)/2};
                         o.x += (center.x-o.x)*k;
                         o.y += (center.y-o.y)*k;
