@@ -19,15 +19,4 @@ object Users extends Nodes[User] {
     "ideas"  -> StartConnectSchema(new StartRelationRead(Contributes, Idea)),
     "contributes"  -> StartConnectSchema(new StartAnyRelation(Contributes))
   ))
-
-  override def show(id: String) = Action {
-    Await.result(userService.retrieve(id), Duration(5, SECONDS)) match {
-      case Some(user) => Ok(Json.toJson(user))
-      case None       => BadRequest(s"User with id '$id' not found.")
-    }
-  }
-
-  override def index() = Action {
-    Ok(Json.toJson(Await.result(userService.retrieve, Duration(5, SECONDS))))
-  }
 }

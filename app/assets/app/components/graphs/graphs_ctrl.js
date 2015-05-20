@@ -23,7 +23,7 @@ function GraphsCtrl($scope, $filter, Graph, DiscourseNode) {
     }
 
     function filter() {
-        let filtered = $filter("fuzzyFilter")(_.filter(vm.graph.nodes, { hyperEdge: false }), vm.search);
+        let filtered = $filter("fuzzyFilter")(_.reject(vm.graph.nodes, { hyperEdge: true }), vm.search);
         $scope.$broadcast("d3graph_filter", filtered);
     }
 

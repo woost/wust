@@ -1,6 +1,6 @@
 package modules.db.access
 
-import formatters.json.GraphFormat._
+import formatters.json.RequestFormat._
 import model.WustSchema._
 import modules.db.{ConcreteFactoryNodeDefinition, RelationDefinition, ConcreteNodeDefinition}
 import modules.db.Database._

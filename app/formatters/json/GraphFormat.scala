@@ -10,7 +10,7 @@ object GraphFormat {
   implicit def LabelToString(label: Label): String = label.name
   implicit def RelationTypeToString(relationType: RelationType): String = relationType.name
 
-  implicit object DiscourseRelationFormat extends Format[Relation[UuidNode, UuidNode]] {
+  implicit object RelationFormat extends Format[Relation[UuidNode, UuidNode]] {
     def reads(json: JsValue) = ???
 
     def writes(relation: Relation[UuidNode, UuidNode]) = JsObject(Seq(
@@ -20,33 +20,26 @@ object GraphFormat {
     ))
   }
 
-  implicit object ContentNodeFormat extends Format[UuidNode] {
+  implicit object NodeFormat extends Format[UuidNode] {
     def reads(json: JsValue) = ???
 
-    //TODO: different formatter for /graph and /problems|goals|ideas
     def writes(node: UuidNode) = JsObject(Seq(
       ("id", JsString(node.uuid)),
       ("label", JsString(node.label))
     ) ++ (node match {
       case n: ContentNode                         => Seq(
-        ("title", JsString(n.title)),
-        ("hyperEdge", JsBoolean(false))
+        ("title", JsString(n.title))
       )
       case u: User                                => Seq(
-        ("title", JsString(u.email.getOrElse(""))),
-        ("hyperEdge", JsBoolean(false))
+        ("title", JsString(u.email.getOrElse("")))
       )
       case h: ContentRelation[UuidNode, UuidNode] => Seq(
         ("hyperEdge", JsBoolean(true)),
         ("startId", JsString(h.startNode.uuid)),
         ("endId", JsString(h.endNode.uuid))
       )
-      case n                                      => Seq(
-        ("title", JsString("")),
-        ("hyperEdge", JsBoolean(false))
-      )
-    }
-      ))
+      case _                                      => Seq.empty
+    }))
   }
 
   implicit object DiscourseFormat extends Format[Discourse] {
@@ -59,71 +52,5 @@ object GraphFormat {
         ("edges", Json.toJson(discourseGraph.uuidNodeRelations ++ discourseGraph.uuidNodeHyperRelations.flatMap(r => List(r.startRelation.asInstanceOf[Relation[UuidNode, UuidNode]], r.endRelation.asInstanceOf[Relation[UuidNode, UuidNode]]))))
       ))
     }
-  }
-
-  implicit object NodeAddFormat extends Format[NodeAddRequest] {
-    def reads(json: JsValue) = json match {
-      case JsObject(_) => {
-        JsSuccess(NodeAddRequest((json \ "title").as[String], (json \ "description").as[Option[String]]))
-      }
-      case otherwise   => JsError()
-    }
-
-    def writes(nodeAdd: NodeAddRequest) = ???
-  }
-
-  implicit object ConnectFormat extends Format[ConnectRequest] {
-    def reads(json: JsValue) = json match {
-      case JsObject(_) => {
-        JsSuccess(ConnectRequest((json \ "id").as[String]))
-      }
-      case otherwise   => JsError()
-    }
-
-    def writes(connect: ConnectRequest) = ???
-  }
-
-  //TODO: move into different file --- FROM HERE
-  implicit def apiDefinitionWrites = new Writes[ApiDefinition] {
-    def writes(apiDefinition: ApiDefinition) = JsObject(Seq(
-      ("restRoot", JsString(apiDefinition.restRoot)),
-      ("websocketRoot", JsString(apiDefinition.websocketRoot))
-    ))
-  }
-
-  implicit def nodeSchemaWrites[NODE <: UuidNode] = new Writes[NodeSchema[NODE]] {
-    // TODO: duplicate code
-    implicit def simpleConnectSchemaWrites[SCHEMANODE <: UuidNode] = new Writes[Map[String, PlainConnectSchema[SCHEMANODE]]] {
-      def writes(schemas: Map[String, PlainConnectSchema[SCHEMANODE]]) = JsObject(schemas.map {
-        case (k, v) => (k, JsObject(Seq(
-          ("cardinality", JsString(v.cardinality))
-        )))
-      }.toList
-      )
-    }
-
-    implicit def connectSchemaWrites[SCHEMANODE <: UuidNode] = new Writes[Map[String, ConnectSchema[SCHEMANODE]]] {
-      def writes(schemas: Map[String, ConnectSchema[SCHEMANODE]]) = JsObject(schemas.map {
-        case (k, v: PlainConnectSchema[SCHEMANODE])               => (k, JsObject(Seq(
-          ("cardinality", JsString(v.cardinality))
-        )))
-        case (k, v@StartHyperConnectSchema(_, _, connectSchemas)) => (k, JsObject(Seq(
-          ("cardinality", JsString(v.cardinality)),
-          ("subs", Json.toJson(connectSchemas))
-        )))
-        case (k, v@EndHyperConnectSchema(_, _, connectSchemas))   => (k, JsObject(Seq(
-          ("cardinality", JsString(v.cardinality)),
-          ("subs", Json.toJson(connectSchemas))
-        )))
-      }.toList
-      )
-    }
-
-    def writes(schema: NodeSchema[NODE]) = JsObject(Seq(
-      ("label", JsString(schema.op.factory.label)),
-      ("path", JsString(schema.path)),
-      ("name", JsString(schema.op.name)),
-      ("subs", Json.toJson(schema.connectSchemas))
-    ))
   }
 }

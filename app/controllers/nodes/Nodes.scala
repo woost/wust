@@ -5,7 +5,7 @@ import com.mohiva.play.silhouette.impl.authenticators.JWTAuthenticator
 import controllers.router.{DefaultNestedResourceController, NestedResourceRouter}
 import model.WustSchema.{User, UuidNode}
 import modules.auth.HeaderEnvironmentModule
-import modules.requests.{ConnectSchema, HyperConnectSchema}
+import modules.requests.{NodeSchema, ConnectSchema, HyperConnectSchema}
 import play.api.mvc.Result
 
 trait NodesBase extends NestedResourceRouter with DefaultNestedResourceController with Silhouette[User, JWTAuthenticator] with HeaderEnvironmentModule {
@@ -36,4 +36,6 @@ trait NodesBase extends NestedResourceRouter with DefaultNestedResourceControlle
   }
 }
 
-trait Nodes[NODE <: UuidNode] extends ReadableNodes[NODE] with DeletableNodes[NODE] with WritableNodes[NODE]
+trait Nodes[NODE <: UuidNode] extends ReadableNodes[NODE] with DeletableNodes[NODE] with WritableNodes[NODE] {
+  val nodeSchema: NodeSchema[NODE]
+}

@@ -121,7 +121,7 @@ object Database {
       return (discourse, None)
 
     val middle = middleOpt.get.asInstanceOf[BASE]
-    (discourse, Some(middle,node))
+    (discourse, Some((middle,node)))
   }
 
   def startConnectHyperNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: UuidNode](relationDefinition: HyperAndNodeRelationDefinition[START,RELATION,END] with NodeAndUuidRelationDefinition[START,RELATION,END] with ContentRelationDefinition[START,RELATION,END]): Option[(START,END)] = { import relationDefinition._
