@@ -25,10 +25,14 @@ function DiscourseNodeList() {
                 this.nestedNodeLists = [];
                 this.list = nodeList;
 
-                // will create nested NodeLists for each added node
-                this.list.$on("after-add", (node) => {
-                    node.nestedNodeLists = _.map(this.nestedNodeLists, list => list.create(node[list.servicePath]));
-                });
+                //TODO: assure that the list is a restmod collection?
+                // same for subscribe...
+                if (this.list.$on !== undefined) {
+                    // will create nested NodeLists for each added node
+                    this.list.$on("after-add", (node) => {
+                        node.nestedNodeLists = _.map(this.nestedNodeLists, list => list.create(node[list.servicePath]));
+                    });
+                }
             }
 
             exists(elem) {
