@@ -67,7 +67,7 @@ function d3Graph($window) {
                 .attr("orient", "auto")
                 .append("svg:path")
                 .attr("d", "M 0,-3 L 10,-0.5 L 10,0.5 L0,3")
-                .attr("class", "svglink");
+                .attr("class", "svglink"); // for the stroke color
 
             // container with enabled pointer events
             let container = svg.append("g")
@@ -80,7 +80,7 @@ function d3Graph($window) {
                 .start();
 
             // create edges in the svg container
-            let link = container.selectAll(".svglink")
+            let link = container.append("g").selectAll()
                 .data(graph.edges).enter()
                 .append("line")
                 .each(function(link) {
@@ -92,14 +92,14 @@ function d3Graph($window) {
                     }
                 });
 
-            let linktextSvg = container.selectAll("g.linklabelholder")
+            let linktextSvg = container.append("g").selectAll()
                 .data(graph.edges).enter()
                 .append("g");
 
             let linktextFo = linktextSvg.append("foreignObject")
                 .style("text-align", "center");
 
-            let linktextHtml = linktextFo.append("xhtml:span")
+            let linktextHtml = linktextFo.append("xhtml:div")
                 // .style("text-shadow", "white -1px 0px, white 0px 1px, white 1px 0px, white 0px -1px")
                 .attr("class", "relation_label")
                 .html(d => connectsHyperEdge(d) ? "" : d.title);
@@ -107,8 +107,7 @@ function d3Graph($window) {
             let linktextRects = setForeignObjectDimensions(linktextFo, linktextHtml);
 
             // create nodes in the svg container
-            let node = container.append("g")
-                .selectAll(".svgnode")
+            let node = container.append("g").selectAll()
                 .data(graph.nodes).enter()
                 .append("g")
                 .call(drag)
@@ -118,7 +117,7 @@ function d3Graph($window) {
                 .style("text-align", "center");
 
             let nodeHtml = nodeFo.append("xhtml:div")
-                .style("max-width", "150px")
+                .style("max-width", "150px") // to produce line breaks
                 .style("cursor", d => d.hyperEdge ? "cursor" : "move")
                 .attr("class", d => d.css)
                 .html(d => d.title);
@@ -250,12 +249,6 @@ function d3Graph($window) {
             function setForeignObjectDimensions(fo, html) {
                 return _.map(fo[0], (curr, i) => {
                     let rect = html[0][i].getBoundingClientRect();
-                    //TODO: WORKAROUND
-                    // why is rect.width == 0 for all hyperedge-nodes?
-                    rect = {
-                        width: rect.width || 70,
-                        height: rect.height
-                    };
                     curr.setAttribute("width", rect.width);
                     curr.setAttribute("height", rect.height);
                     return _.pick(rect, ["width", "height"]);

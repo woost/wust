@@ -25,6 +25,13 @@ $link_color: #666;
         fill: $link_color;
     }
     .relation_label {
-        background: white;
+        // font-size: 9px;
+        background-color: white;
+        display: inline-block;
+        border: 1px solid $link_color;
+        color: $link_color;
+        border-radius: 4px;
+        padding: 0px 3px;
+        // line-height: 16px;
     }
 }

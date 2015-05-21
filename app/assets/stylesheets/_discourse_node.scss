@@ -22,12 +22,6 @@ $font_color: black;
         color: $font-color;
         text-decoration: none;
     }
-    &.svgnode {
-        fill: $bgcolor;
-        stroke: $bordercolor;
-        stroke-width: 1;
-        stroke-linejoin: round;
-    }
     @at-root a:hover#{&}, &.btn:hover, &.panel a:hover .panel-heading {
         background-color: $bgcolor-highlight;
         color: $font-color;
