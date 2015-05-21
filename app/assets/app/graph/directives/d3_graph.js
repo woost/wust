@@ -47,6 +47,7 @@ function d3Graph($window) {
             let zoom = d3.behavior.zoom().scaleExtent([0.1, 10]).on("zoom", zoomed);
             let drag = force.drag()
                 .on("dragstart", ignoreHyperEdge(dragstarted))
+                .on("dragend", ignoreHyperEdge(dragended))
                 .on("drag", ignoreHyperEdge(dragged));
 
             // construct svg
@@ -104,7 +105,6 @@ function d3Graph($window) {
                 .data(graph.nodes).enter()
                 .append("g")
                 .call(drag)
-                .on("click", ignoreHyperEdge(clicked))
                 .on("dblclick", ignoreHyperEdge(onDoubleClick));
 
             let nodeFo = node.append("foreignObject")
@@ -338,7 +338,8 @@ function d3Graph($window) {
             // keep track whether the node is currently being dragged
             let isDragging = false;
 
-            function clicked(d) {
+            // we use dragend instead of click event, because it is emitted on mobile phones as well as on pcs
+            function dragended(d) {
                 if (isDragging) {
                     // if we were dragging before, the node should be fixed
                     setFixedPosition(d);
@@ -361,7 +362,7 @@ function d3Graph($window) {
             function dragged(d) {
                 // check whether there was a substantial mouse movement. if
                 // not, we will interpret this as a click event after the
-                // mouse button is released (see clicked handler).
+                // mouse button is released (see dragended handler).
                 // TODO: weight by current zoom level!
                 let diff = Math.abs(d.x - d3.event.x) + Math.abs(d.y - d3.event.y);
                 isDragging = isDragging || (diff > 1);
