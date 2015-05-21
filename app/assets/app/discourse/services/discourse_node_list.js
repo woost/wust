@@ -14,7 +14,7 @@ function DiscourseNodeList() {
     get.$inject = ["$injector", "$rootScope", "DiscourseNode", "Search"];
     function get($injector, $rootScope, DiscourseNode, Search) {
         class NodeModel {
-            constructor(connService, title, listCss, templateUrl) {
+            constructor(nodeList, title, listCss, templateUrl) {
                 this.style = {
                     listCss,
                     templateUrl
@@ -23,11 +23,11 @@ function DiscourseNodeList() {
                 this.isNested = false;
                 this.title = title;
                 this.nestedNodeLists = [];
-                this.list = connService.$search();
+                this.list = nodeList;
 
                 // will create nested NodeLists for each added node
                 this.list.$on("after-add", (node) => {
-                    node.nestedNodeLists = _.map(this.nestedNodeLists, nodeList => nodeList.create(node[nodeList.servicePath]));
+                    node.nestedNodeLists = _.map(this.nestedNodeLists, list => list.create(node[list.servicePath]));
                 });
             }
 
@@ -56,7 +56,7 @@ function DiscourseNodeList() {
                 this.isNested = true;
                 this.nestedNodeLists.push({
                     servicePath,
-                    create: service => nodeListCreate(service, title)
+                    create: service => nodeListCreate(service.$search(), title)
                 });
             }
 
@@ -96,14 +96,14 @@ function DiscourseNodeList() {
         }
 
         class ReadNodeModel extends NodeModel {
-            constructor(connService, title, listCss) {
-                super(connService, title, listCss, "read_discourse_node_list.html");
+            constructor(nodeList, title, listCss) {
+                super(nodeList, title, listCss, "read_discourse_node_list.html");
             }
         }
 
         class TypedReadNodeModel extends ReadNodeModel {
-            constructor(connService, nodeInfo, title) {
-                super(connService, title, `${nodeInfo.css}_read_list`);
+            constructor(nodeList, nodeInfo, title) {
+                super(nodeList, title, `${nodeInfo.css}_read_list`);
                 this.info = nodeInfo;
             }
 
@@ -117,8 +117,8 @@ function DiscourseNodeList() {
         }
 
         class AnyReadNodeModel extends ReadNodeModel {
-            constructor(connService, title) {
-                super(connService, title, "any_read_list");
+            constructor(nodeList, title) {
+                super(nodeList, title, "any_read_list");
             }
 
             getCss(node) {
@@ -131,8 +131,8 @@ function DiscourseNodeList() {
         }
 
         class WriteNodeModel extends NodeModel {
-            constructor(service, connService, nodeInfo, title) {
-                super(connService, title, `${nodeInfo.css}_list`, "write_discourse_node_list.html");
+            constructor(service, nodeList, nodeInfo, title) {
+                super(nodeList, title, `${nodeInfo.css}_list`, "write_discourse_node_list.html");
 
                 this.info = nodeInfo;
                 this.resetNew = () => {
@@ -191,13 +191,13 @@ function DiscourseNodeList() {
         }
 
         return {
-            write: _.mapValues(nodeListDefs, (v, k) => (connService, title = _.capitalize(v)) => {
-                return new NodeList(new WriteNodeModel($injector.get(k), connService, DiscourseNode[k], title));
+            write: _.mapValues(nodeListDefs, (v, k) => (nodeList, title = _.capitalize(v)) => {
+                return new NodeList(new WriteNodeModel($injector.get(k), nodeList, DiscourseNode[k], title));
             }),
-            read: _.mapValues(nodeListDefs, (v, k) => (connService, title = _.capitalize(v)) => {
-                return new NodeList(new TypedReadNodeModel(connService, DiscourseNode[k], title));
+            read: _.mapValues(nodeListDefs, (v, k) => (nodeList, title = _.capitalize(v)) => {
+                return new NodeList(new TypedReadNodeModel(nodeList, DiscourseNode[k], title));
             }),
-            Any: (connService, title) => new NodeList(new AnyReadNodeModel(connService, title))
+            Any: (nodeList, title) => new NodeList(new AnyReadNodeModel(nodeList, title))
         };
     }
 }

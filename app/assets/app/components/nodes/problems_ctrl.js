@@ -8,10 +8,10 @@ function ProblemsCtrl($stateParams, Problem, DiscourseNode, DiscourseNodeList, D
     vm.nodeInfo = DiscourseNode.Problem;
     let node = Problem.$find($stateParams.id);
     vm.node = DiscourseNodeCrate(node);
-    vm.top = DiscourseNodeList.write.Goal(node.goals);
-    vm.left = DiscourseNodeList.write.Problem(node.causes, "Causes");
-    vm.right = DiscourseNodeList.write.Problem(node.consequences, "Consequences");
-    vm.bottom = DiscourseNodeList.write.Idea(node.ideas)
+    vm.top = DiscourseNodeList.write.Goal(node.goals.$search());
+    vm.left = DiscourseNodeList.write.Problem(node.causes.$search(), "Causes");
+    vm.right = DiscourseNodeList.write.Problem(node.consequences.$search(), "Consequences");
+    vm.bottom = DiscourseNodeList.write.Idea(node.ideas.$search())
         .nested(DiscourseNodeList.write.ProArgument, "pros")
         .nested(DiscourseNodeList.write.ConArgument, "cons");
 }

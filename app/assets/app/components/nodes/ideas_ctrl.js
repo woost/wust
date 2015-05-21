@@ -8,11 +8,11 @@ function IdeasCtrl($stateParams, Idea, DiscourseNode, DiscourseNodeList, Discour
     vm.nodeInfo = DiscourseNode.Idea;
     let node = Idea.$find($stateParams.id);
     vm.node = DiscourseNodeCrate(node);
-    vm.top = DiscourseNodeList.write.Goal(node.goals)
+    vm.top = DiscourseNodeList.write.Goal(node.goals.$search())
         .nested(DiscourseNodeList.write.ProArgument, "pros")
         .nested(DiscourseNodeList.write.ConArgument, "cons");
-    vm.left = DiscourseNodeList.write.Problem(node.problems)
+    vm.left = DiscourseNodeList.write.Problem(node.problems.$search())
         .nested(DiscourseNodeList.write.ProArgument, "pros")
         .nested(DiscourseNodeList.write.ConArgument, "cons");
-    vm.bottom = DiscourseNodeList.write.Idea(node.ideas);
+    vm.bottom = DiscourseNodeList.write.Idea(node.ideas.$search());
 }
