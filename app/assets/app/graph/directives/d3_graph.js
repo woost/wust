@@ -80,7 +80,8 @@ function d3Graph($window) {
                 .start();
 
             // create edges in the svg container
-            let link = container.append("g").selectAll()
+            let link = container.append("g").attr("id","group_links")
+                .selectAll()
                 .data(graph.edges).enter()
                 .append("path")
                 .each(function(link) {
@@ -92,7 +93,8 @@ function d3Graph($window) {
                     }
                 });
 
-            let linktextSvg = container.append("g").selectAll()
+            let linktextSvg = container.append("g").attr("id","group_link_labels")
+                .selectAll()
                 .data(graph.edges).enter()
                 .append("g");
 
@@ -107,8 +109,9 @@ function d3Graph($window) {
             let linktextRects = setForeignObjectDimensions(linktextFo, linktextHtml);
 
             // create nodes in the svg container
-            let node = container.append("g").selectAll()
                 .data(graph.nodes).enter()
+            let node = container.append("g").attr("id","group_hypernodes-then-nodes")
+                .selectAll()
                 .append("g")
                 .call(drag)
                 .on("dblclick", ignoreHyperEdge(onDoubleClick));
