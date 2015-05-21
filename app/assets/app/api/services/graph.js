@@ -14,7 +14,7 @@ function Graph(restmod) {
             decode: function(edges) {
                 let thisModel = this;
                 function validateEdge(edge) {
-                    if( edge.source === -1 || edge.target === -1 ) {
+                    if( edge.source === undefined || edge.target === undefined ) {
                         let source = thisModel.nodes[edge.source];
                         let target = thisModel.nodes[edge.target];
                         let slabel = source === undefined ? "undefined" : source.label;
@@ -25,16 +25,16 @@ function Graph(restmod) {
                         return edge;
                     }
                 }
-                // TODO: not efficient
                 // we need to reference nodes via their index in the nodes array, because d3 is weird.
+                let nodeMap = _(this.nodes).map((n,i) => {
+                    return {
+                        [n.id]: i
+                    };
+                }).reduce(_.merge);
                 return _(edges).map(edge => {
                     return validateEdge({
-                        source: _.findIndex(this.nodes, {
-                            id: edge.startId
-                        }),
-                        target: _.findIndex(this.nodes, {
-                            id: edge.endId
-                        }),
+                        source: nodeMap[edge.startId],
+                        target: nodeMap[edge.endId],
                         title: edge.label.toLowerCase(),
                         label: edge.label
                     });
