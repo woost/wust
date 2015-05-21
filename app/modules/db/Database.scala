@@ -149,4 +149,10 @@ object Database {
       discourse.graph.relations.clear()
     db.persistChanges(discourse.graph)
   }
+
+  def connectedComponent(node: UuidNodeDefinition[_]): Discourse = {
+    val query = s"match ${node.toQuery}<-[r: REFERS|SUBIDEA|SUBGOAL|ACHIEVESTOGOAL|IDEATOACHIEVES|PREVENTS|CAUSES|SOLVESTOPROBLEM|IDEATOSOLVES|SUPPORTSACHIEVEMENT|OPPOSESACHIEVEMENT|SUPPORTSSOLUTION|OPPOSESSOLUTION *0..10]-(p) return r,p"
+    val params = node.parameterMap
+    Discourse(db.queryGraph(Query(query, params)))
+  }
 }
