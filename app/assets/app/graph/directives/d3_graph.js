@@ -82,7 +82,7 @@ function d3Graph($window) {
             // create edges in the svg container
             let link = container.append("g").selectAll()
                 .data(graph.edges).enter()
-                .append("line")
+                .append("path")
                 .each(function(link) {
                     // if link is startRelation of a Hypernode
                     if( link.target.hyperEdge && link.target.startId === link.source.id ) {
@@ -295,7 +295,18 @@ function d3Graph($window) {
             function drawGraph() {
                 // clamp every edge line to the intersections with its incident node rectangles
                 link.each(function(link) {
-                    d3.select(this).attr(clampEdgeLine(link));
+                    if( link.source.id === link.target.id ) { // self loop
+                        let rect = linktextRects[link.index];
+                        d3.select(this).attr("d", `
+                                M ${link.source.x} ${link.source.y - rect.height/2}
+                                m -20, 0
+                                c -80,-80   120,-80   40,0
+                                `);
+                    } else {
+                        const line = clampEdgeLine(link);
+                        const pathAttr = `M ${line.x1} ${line.y1} L ${line.x2} ${line.y2}`;
+                        d3.select(this).attr("d", pathAttr);
+                    }
                 });
 
                 node.attr("transform", d => {
@@ -307,7 +318,12 @@ function d3Graph($window) {
                 linktextSvg.attr("transform", d => {
                     // center the linktext
                     let rect = linktextRects[d.index];
-                    return "translate(" + (((d.source.x + d.target.x) / 2) - rect.width / 2) + "," + (((d.source.y + d.target.y) / 2) - rect.height / 2) + ")";
+                    if( d.source.id === d.target.id ) { // self loop
+                        return "translate(" + (d.source.x - rect.width/2) + "," + (d.source.y - rect.height/2 - 70) + ")";
+                    } else {
+                        return "translate(" + (((d.source.x + d.target.x) / 2) - rect.width / 2) + "," + (((d.source.y + d.target.y) / 2) - rect.height / 2) + ")";
+                    }
+
                 });
             }
 
