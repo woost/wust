@@ -109,9 +109,11 @@ function d3Graph($window) {
             let linktextRects = setForeignObjectDimensions(linktextFo, linktextHtml);
 
             // create nodes in the svg container
-                .data(graph.nodes).enter()
             let node = container.append("g").attr("id","group_hypernodes-then-nodes")
                 .selectAll()
+                // sorting the nodes by hyperEdge puts normal nodes after hypernodes.
+                // This ensures that normal nodes are always drawn on top of hypernodes.
+                .data(_.sortBy(graph.nodes, node => node.hyperEdge)).enter()
                 .append("g")
                 .call(drag)
                 .on("dblclick", ignoreHyperEdge(onDoubleClick));
