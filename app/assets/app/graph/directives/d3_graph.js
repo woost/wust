@@ -35,7 +35,7 @@ function d3Graph($window) {
                 .friction(0.9)
                 // .linkDistance(120) // weak geometric constraint. Pushes nodes to achieve this distance
                 .linkDistance(d => connectsHyperEdge(d) ? 120 : 200)
-                .charge(-1500)
+                .charge(d => d.hyperEdge ? -1500 : -1500)
                 .gravity(0.1)
                 .theta(0.8)
                 .alpha(0.1);
