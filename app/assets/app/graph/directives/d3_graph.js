@@ -111,9 +111,7 @@ function d3Graph($window) {
             // create nodes in the svg container
             let node = container.append("g").attr("id","group_hypernodes-then-nodes")
                 .selectAll()
-                // sorting the nodes by hyperEdge puts normal nodes after hypernodes.
-                // This ensures that normal nodes are always drawn on top of hypernodes.
-                .data(_.sortBy(graph.nodes, node => node.hyperEdge)).enter()
+                .data(graph.nodes).enter()
                 .append("g")
                 .call(drag)
                 .on("dblclick", ignoreHyperEdge(onDoubleClick));
