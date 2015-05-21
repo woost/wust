@@ -8,5 +8,6 @@ function UntypedsCtrl($stateParams, Untyped, DiscourseNode, DiscourseNodeList, D
     vm.nodeInfo = DiscourseNode.Untypeds;
     let node = Untyped.$find($stateParams.id);
     vm.node = DiscourseNodeCrate(node);
-    vm.bottom = DiscourseNodeList.write.Untyped(node.refers);
+    vm.top = DiscourseNodeList.write.Untyped(node.prays);
+    vm.bottom = DiscourseNodeList.write.Untyped(node.responds);
 }
