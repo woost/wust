@@ -1,9 +1,9 @@
 # Login/SignUp
-# TODO: should be moved to the user resource as post, patch, delete
 POST   /auth/signin               controllers.api.auth.CredentialsAuthController.authenticate
 POST   /auth/signup               controllers.api.auth.SignUpController.signUp
 GET    /auth/signout              controllers.api.auth.SignUpController.signOut
 
+# discourse node api
 -> /contentnodes controllers.api.ContentNodes
 -> /untypeds controllers.api.Untypeds
 -> /goals controllers.api.Goals

@@ -26,7 +26,6 @@ class PasswordInfoDAO extends DelegableAuthInfoDAO[SPasswordInfo] {
         Database.db.persistChanges(auth.graph)
         sPasswordInfo
       }
-      //TODO: failed future?
       case None => throw new Exception(s"Cannot find LoginInfo: ${sLoginInfo}")
     }
   }
