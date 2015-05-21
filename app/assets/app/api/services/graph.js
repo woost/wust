@@ -6,9 +6,7 @@ function Graph(restmod) {
     return restmod.model().mix({
         nodes: {
             decode: function(nodes) {
-                //TODO: why does chaining not work?p
-                //_(nodes).select(n => n.hyperEdge).each(n => n.title = n.label.toLowerCase());
-                _.each(_.select(nodes, n => n.hyperEdge), n => n.title = n.label.toLowerCase());
+                _(nodes).select(n => n.hyperEdge).each(n => n.title = n.label.toLowerCase()).value();
                 return nodes;
             }
         },
