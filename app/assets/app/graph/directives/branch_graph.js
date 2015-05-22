@@ -86,9 +86,37 @@ function branchGraph() {
                 return [elem.offsetWidth, elem.offsetHeight];
             }
 
+            function positionNodePredecessors(startX, startY, predecessorMap, visited, node) {
+                let predecessors = predecessorMap[node.id] || [];
+                visited.push(node);
+                node.x = startX;
+                node.y = startY;
+                if (predecessors.length > 1) {
+                    _.each(predecessors, p => {
+                        startX += 50;
+                        startY += 50;
+                        positionNodePredecessors(startX, startY, predecessorMap, visited, p);
+                    });
+                }
+                else if (predecessors.length === 1) {
+                    positionNodePredecessors(startX, startY + 50, predecessorMap, visited, predecessors[0]);
+                }
+            }
+
             function preprocessGraph(graph) {
-                _.each(graph.nodes, node => node.x = _.random(width));
-                _.each(graph.nodes, node => node.y = _.random(height));
+                let predecessorMap = _(graph.edges).map(edge => {
+                    let source = graph.nodes[edge.source];
+                    let target = graph.nodes[edge.target];
+                    return {
+                        [target.id]: [source]
+                    };
+                }).reduce(_.partialRight(_.merge, (a, b) => {
+                    return a ? a.concat(b) : b;
+                }, _)) || {};
+
+                positionNodePredecessors(20, 20, predecessorMap, [], _.find(graph.nodes, {
+                    id: graph.rootId
+                }));
             }
 
         });
