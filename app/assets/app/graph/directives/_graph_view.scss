@@ -1,5 +1,3 @@
-$link_color: #666;
-
 .graph_view_component {
     overflow: hidden;
     height: 100%;
@@ -14,23 +12,12 @@ $link_color: #666;
     line, path {
         &.svglink {
             fill: none;
-            stroke: $link_color;
+            stroke: $graph_link_color;
             stroke-width: 1;
             stroke-linecap: round;
         }
     }
     marker path.svglink {
-        fill: $link_color;
-    }
-    .relation_label {
-        // font-size: 9px;
-        // line-height: 16px;
-        background-color: white;
-        display: inline-block;
-        border: 1px solid $link_color;
-        color: $link_color;
-        border-radius: 4px;
-        padding: 0px 3px;
-
+        fill: $graph_link_color;
     }
 }

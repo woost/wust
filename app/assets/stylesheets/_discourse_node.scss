@@ -45,6 +45,17 @@
     }
 }
 
+.relation_label {
+    // font-size: 9px;
+    // line-height: 16px;
+    background-color: white;
+    display: inline-block;
+    border: 1px solid $graph_link_color;
+    color: $graph_link_color;
+    border-radius: 4px;
+    padding: 0px 3px;
+}
+
 .discourse_goal {
     @include discourse_node($discourse_goal_color, ""); //navigation arrow
 }

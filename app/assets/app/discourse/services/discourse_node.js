@@ -11,18 +11,28 @@ function DiscourseNode() {
 
     get.$inject = ["$state"];
     function get($state) {
-        _.mapValues(discourseMap, node => _.merge(node, {
-            getState: id => node.state ? `${node.state}({id: "${id}"})` : ".",
-            gotoState: id => { if (node.state) $state.go(node.state, {id: id}); }
-        }));
+        let stateHelper = (node) => {
+            return {
+                // check wether a state is defined. If it isn't stay on the current page.
+                getState: id => node.state ? `${node.state}({id: "${id}"})` : ".",
+                gotoState: id => { if (node.state) $state.go(node.state, {id: id}); }
+            };
+        };
+        _.mapValues(discourseMap, node => _.merge(node, stateHelper(node)));
         let mappings = _(_.values(discourseMap)).map(node => {
             return {
                 [node.label]: node
             };
         }).reduce(_.merge);
 
+        let defaultNode = {
+            css: "relation_label"
+        };
+
+        let defaultNodeWithState = _.merge(defaultNode, stateHelper(defaultNode));
+
         return _.merge(discourseMap, {
-            get: _.propertyOf(mappings)
+            get: (label) => mappings[label] || defaultNodeWithState
         });
     }
 
