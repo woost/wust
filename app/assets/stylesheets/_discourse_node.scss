@@ -1,14 +1,5 @@
 @import "compass/css3/flexbox";
 
-$discourse_goal_color: #6DFFCA;
-$discourse_problem_color: #ffdc6d;
-$discourse_idea_color: #6db5ff;
-$discourse_proargument_color: #9AFF78;
-$discourse_conargument_color: #ff6d6f;
-$discourse_untyped_color: #D8D8D8;
-$discourse_user_color: #FFFFFF;
-$font_color: black;
-
 @mixin discourse_node($color, $icon: "") {
     $bgcolor: lighten(desaturate($color, 0),10);
     $bordercolor: desaturate(darken($bgcolor, 34), 43);
@@ -19,18 +10,18 @@ $font_color: black;
         border: 1px solid $bordercolor;
         border-radius: 4px;
         padding: 0px 15px 0px 12px;
-        color: $font-color;
+        color: $discourse_node_font_color;
         text-decoration: none;
     }
     @at-root a:hover#{&}, &.btn:hover, &.panel a:hover .panel-heading {
         background-color: $bgcolor-highlight;
-        color: $font-color;
+        color: $discourse_node_font_color;
         text-decoration: none;
     }
     &.btn {
         background-color: $bgcolor;
         border: 1px solid $bordercolor;
-        color: $font-color;
+        color: $discourse_node_font_color;
     }
     &.panel {
         border-color: $bordercolor;
@@ -38,7 +29,7 @@ $font_color: black;
             background-color: $bgcolor;
             border-color: $bordercolor;
             h3 {
-                color: $font-color;
+                color: $discourse_node_font_color;
                 text-align: left;
             }
         }
