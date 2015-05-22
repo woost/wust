@@ -65,5 +65,7 @@ object WustSchema {
   @Relation class SupportsAchievement(startNode: ProArgument, endNode: Achieves) extends ContentRelation
   @Relation class OpposesAchievement(startNode: ConArgument, endNode: Achieves) extends ContentRelation
 
-  @Relation class Contributes(startNode: User, endNode: ContentNode)
+  @Relation class Contributes(startNode: User, endNode: ContentNode) {
+    val createdAt: Long = System.currentTimeMillis
+  }
 }
