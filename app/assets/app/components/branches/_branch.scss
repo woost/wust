@@ -3,6 +3,14 @@
 #branch_component {
     padding: 25px;
     height: 100%;
+    line, path {
+        &.svglink {
+            fill: none;
+            stroke: $graph_link_color;
+            stroke-width: 1;
+            stroke-linecap: round;
+        }
+    }
     .branch_view {
         height: 100%;
         .graph_network {
