@@ -5,29 +5,5 @@ GraphsCtrl.$inject = ["$scope", "$filter", "Graph", "DiscourseNode"];
 function GraphsCtrl($scope, $filter, Graph, DiscourseNode) {
     let vm = this;
 
-    vm.onClick = onClick;
-    vm.search = {
-        title: ""
-    };
-
-    vm.graph = {};
-    Graph.$fetch().$then(createGraph);
-
-    $scope.$watch("vm.search.title", filter);
-
-    function createGraph(graph) {
-        graph.nodes = graph.nodes.map(node => _.merge(node, {
-            css: node.hyperEdge ? "relation_label" : `node ${DiscourseNode.get(node.label).css}`
-        }));
-        vm.graph = graph;
-    }
-
-    function filter() {
-        let filtered = $filter("fuzzyFilter")(_.reject(vm.graph.nodes, { hyperEdge: true }), vm.search);
-        $scope.$broadcast("d3graph_filter", filtered);
-    }
-
-    function onClick(d) {
-        DiscourseNode.get(d.label).gotoState(d.id);
-    }
+    vm.graph = Graph.$fetch();
 }

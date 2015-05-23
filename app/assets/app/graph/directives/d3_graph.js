@@ -16,10 +16,7 @@ function d3Graph($window) {
         let onDoubleClick = scope.onClick() || _.noop;
 
         // watch for changes in the ngModel
-        scope.$watch("graph", graph => {
-            if (graph.nodes === undefined)
-                return;
-
+        scope.graph.$then(graph => {
             preprocessGraph(graph);
 
             // get dimensions
@@ -84,6 +81,7 @@ function d3Graph($window) {
                 .selectAll()
                 .data(graph.edges).enter()
                 .append("path")
+                .style("marker-end", "url(" + window.location.href + "#arrow)")
                 .each(function(link) {
                     // if link is startRelation of a Hypernode
                     if( link.target.hyperEdge && link.target.startId === link.source.id ) {

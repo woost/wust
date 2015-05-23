@@ -1,0 +1,36 @@
+$link_color: #666;
+
+.graph_view_component {
+    overflow: hidden;
+    height: 100%;
+    position: relative;
+    .graph_network {
+        height: 100%;
+    }
+    #filter_input {
+        width: 30%;
+        position: absolute;
+    }
+    line, path {
+        &.svglink {
+            fill: none;
+            stroke: $link_color;
+            stroke-width: 1;
+            stroke-linecap: round;
+        }
+    }
+    marker path.svglink {
+        fill: $link_color;
+    }
+    .relation_label {
+        // font-size: 9px;
+        // line-height: 16px;
+        background-color: white;
+        display: inline-block;
+        border: 1px solid $link_color;
+        color: $link_color;
+        border-radius: 4px;
+        padding: 0px 3px;
+
+    }
+}
