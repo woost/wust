@@ -39,6 +39,7 @@ trait RelationAndNodeUpdateAcceptor {
   // It is probably not desirable to POST/DELETE on something like: problems/:id/ANY/:id/pros
   // It is already impossible to write/delete on ConnectSchemas with AnyRelationAccess, maybe also forbid writable child
   // connectschemas within HyperConnectSchema with AnyRelationAccess? regard: other than for events, this is well-defined.
+  // the same now holds for nodeschemas, as they also accepts AnyNodeSchemas, which does not implicate a concrete path.
   def acceptsUpdateFrom(factory: AbstractRelationFactory[_,_,_], nodeFactory: Option[NodeFactory[_]]): Boolean = {
     this.factory == factory && (nodeFactory.isDefined && this.nodeFactory == nodeFactory.get)
   }
