@@ -23,6 +23,7 @@ function focusView($state, $rootScope, $q, NodeHistory) {
         });
 
         // register for events for the current node, as well as all connected lists
+        // so we assume to get vm.node and vm.left/right/bottom/top as DiscourceNodeCrate and DiscourseNodeLists
         vm.node.subscribe();
         _.each(_.compact([vm.left, vm.right, vm.bottom, vm.top]), list => list.subscribe());
 
