@@ -5,10 +5,7 @@ BranchesCtrl.$inject = ["ConnectedComponents", "$stateParams", "DiscourseNodeLis
 function BranchesCtrl(ConnectedComponents, $stateParams, DiscourseNodeList) {
     let vm = this;
 
-    vm.component = {};
-    ConnectedComponents.$find($stateParams.id).$then(data => {
-        vm.component = data;
-        vm.component.rootId = $stateParams.id;
+    vm.component = ConnectedComponents.$find($stateParams.id).$then(data => {
         vm.nodeList = DiscourseNodeList.Any(data.nodes, "Nodes");
     });
 }

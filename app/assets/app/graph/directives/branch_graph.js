@@ -13,10 +13,7 @@ function branchGraph() {
 
     function link(scope, element) {
         // watch for changes in the ngModel
-        scope.$watch("graph", graph => {
-            if (graph.nodes === undefined)
-                return;
-
+        scope.graph.$then(graph => {
             // get dimensions
             let [width, height] = getElementDimensions(element[0]);
 
