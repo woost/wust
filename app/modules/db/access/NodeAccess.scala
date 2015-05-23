@@ -5,11 +5,12 @@ import modules.db.Database._
 import modules.db._
 import modules.live.Broadcaster
 import play.api.libs.json.JsValue
+import renesca.graph.Label
 import renesca.schema._
 
 trait NodeAccess[NODE <: UuidNode] {
   val name: String
-  val label: String
+  val label: Option[Label]
 
   def acceptsUpdateFrom(factory: NodeFactory[_]): Boolean
 
@@ -24,7 +25,7 @@ trait NodeAccess[NODE <: UuidNode] {
 
 class AnyContentNode() extends NodeAccess[ContentNode] {
   val name = "ContentNode"
-  val label = ""
+  val label = None
 
   def acceptsUpdateFrom(factory: NodeFactory[_]) = true
 
@@ -46,7 +47,7 @@ class AnyContentNode() extends NodeAccess[ContentNode] {
 trait NodeAccessWithFactory[NODE <: UuidNode] extends NodeAccess[NODE] {
   val factory: NodeFactory[NODE]
   val name = factory.getClass.getSimpleName.dropRight(1)
-  val label = factory.label.name
+  val label = Some(factory.label)
 
   def acceptsUpdateFrom(factory: NodeFactory[_]) = this.factory == factory
 
