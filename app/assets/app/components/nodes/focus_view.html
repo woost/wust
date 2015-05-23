@@ -8,13 +8,8 @@
         </div>
         <div id="node_view">
             <h2>Focus:</h2>
-            <div class="panel panel-default" ng-class="vm.nodeInfo.css">
-                <div class="panel-heading">
-                    <h3 class="panel-title" editable-textarea="vm.node.model.title" blur="ignore" e-rows="7" e-cols="40" onbeforesave="vm.updateFocused('title', $data)" style="display:inline;" ng-bind="vm.node.model.title"></h3>
-                    <button class="pull-right btn btn-xs btn-danger" ng-click="vm.removeFocused()"><i class="fa fa-trash-o"></i></button>
-                </div>
-                <div class="panel-body" editable-textarea="vm.node.model.description" blur="ignore" e-rows="7" e-cols="40" onbeforesave="vm.updateFocused('description', $data)" ng-bind="vm.node.model.description"></div>
-            </div>
+            <a ui-sref="columns({id: vm.node.model.id})">columns</a>
+            <div discourse-node-crate node="vm.node" node-info="vm.nodeInfo"></div>
         </div>
         <div ng-if="vm.bottom" id="bottom_view">
             <div discourse-node-list node-model='vm.bottom.model' class="discourse_node_list_horizontal"></div>
