@@ -1,8 +1,8 @@
 angular.module("wust.components").controller("UserDetailsCtrl", UserDetailsCtrl);
 
-UserDetailsCtrl.$inject = ["$rootScope", "$stateParams", "User", "DiscourseNodeList"];
+UserDetailsCtrl.$inject = ["$stateParams", "User", "DiscourseNodeList"];
 
-function UserDetailsCtrl($rootScope, $stateParams, User, DiscourseNodeList) {
+function UserDetailsCtrl($stateParams, User, DiscourseNodeList) {
     let vm = this;
 
     vm.user = User.$find($stateParams.id);
