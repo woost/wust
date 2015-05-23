@@ -1,14 +1,14 @@
 #!/bin/bash
 
-if [ $# -lt 1 ]; then
-    echo "Usage: `basename $0` <component>"
+if [ $# -lt 2 ]; then
+    echo "Usage: `basename $0` <component> <plural>"
     exit -1
 fi
 
 ##################################################
 
 component=$1
-component_plural="${component}s"
+component_plural=$2
 
 controller_name="${component_plural^}Ctrl"
 controller_file="${component_plural}_ctrl.js"
@@ -79,7 +79,7 @@ echo -e "${bold}Routes${normal}"
 cat << EOF
 .state("${component_plural}", {
         parent: "page",
-        url: "${component_plural}",
+        url: "/${component_plural}",
         templateUrl: \`\${templateBase}/${component_plural}/${component}.html\`,
         controller: "$controller_name as vm"
 })
