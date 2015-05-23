@@ -8,8 +8,8 @@ import modules.live.Broadcaster
 import play.api.libs.json.JsValue
 import renesca.schema._
 
-trait RelationAccess[NODE <: UuidNode,OTHER <: UuidNode] {
-  def read(baseDef: FixedNodeDefinition[NODE]): Either[Set[OTHER],String] = Right("No read access on Relation")
+trait RelationAccess[-NODE <: UuidNode,+OTHER <: UuidNode] {
+  def read(baseDef: FixedNodeDefinition[NODE]): Either[Iterable[OTHER],String] = Right("No read access on Relation")
   def delete(baseDef: UuidNodeDefinition[NODE], uuid: String): Either[Boolean,String] = Right("No delete access on Relation")
   def deleteHyper(baseDef: UuidHyperNodeDefinitionBase[NODE with AbstractRelation[_,_]], uuid: String): Either[Boolean, String] = Right("No delete access on HyperRelation")
   def create(baseDef: UuidNodeDefinition[NODE], json: JsValue): Either[OTHER,String] = Right("No create access on Relation")

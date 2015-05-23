@@ -15,7 +15,7 @@ case class NodeSchema[
   NODE <: UuidNode
 ](path: String, op: NodeAccess[_ <: NODE], connectSchemas: Map[String, ConnectSchema[NODE]]) extends NodeSchemaBase[NODE]
 
-sealed trait ConnectSchema[NODE <: UuidNode] {
+sealed trait ConnectSchema[-NODE <: UuidNode] {
   val cardinality = "hasMany"
   val op: RelationAccess[NODE,_ <: UuidNode]
 }
