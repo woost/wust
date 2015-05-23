@@ -13,7 +13,7 @@ trait NodeSchemaBase[NODE <: UuidNode] {
 
 case class NodeSchema[
   NODE <: UuidNode
-](path: String, op: NodeAccess[_ <: NODE], connectSchemas: Map[String, ConnectSchema[NODE]]) extends NodeSchemaBase[NODE]
+](path: String, op: NodeAccess[NODE], connectSchemas: Map[String, ConnectSchema[NODE]]) extends NodeSchemaBase[NODE]
 
 sealed trait ConnectSchema[-NODE <: UuidNode] {
   val cardinality = "hasMany"
