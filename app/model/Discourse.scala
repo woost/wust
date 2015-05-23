@@ -17,6 +17,7 @@ object WustSchema {
 
   // TODO: custom local methods for NodeFactory
   @Node class User extends UuidNode with Identity {
+    var name: String
     var email: Option[String]
   }
 

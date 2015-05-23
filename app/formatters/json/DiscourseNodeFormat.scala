@@ -12,15 +12,16 @@ object DiscourseNodeFormat {
     def reads(json: JsValue) = ???
 
     def writes(node: UuidNode) = JsObject(Seq(
-      ("id", JsString(node.uuid)),
-      ("label", JsString(node.label))
+      ("id", JsString(node.uuid))
     ) ++ (node match {
       case n: ContentNode => Seq(
+        ("label", JsString(n.label)),
         ("title", JsString(n.title)),
         ("description", JsString(n.description.getOrElse("")))
       )
       case u: User        => Seq(
-        ("name", JsString(u.email.getOrElse("")))
+        ("name", JsString(u.name)),
+        ("email", JsString(u.email.getOrElse("")))
       )
       case _              => Seq.empty
     }))

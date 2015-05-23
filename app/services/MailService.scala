@@ -46,7 +46,10 @@ trait MailService[I <: Identity] {
 
 class SimpleMailService extends MailService[User] {
 
-  def sendWelcomeEmail(user: User)(implicit request: RequestHeader, lang: Lang) = {
+  def sendWelcomeEmail(user: User)(implicit request: RequestHeader, lang: Lang) {
+    if (user.email.isEmpty)
+      return
+
     val html = views.html.auth.mails.welcomeEmail(user)(request, lang)
     val txtAndHtml = (None, Some(html))
     sendEmail("Welcome!!!!", user.email.get, txtAndHtml)

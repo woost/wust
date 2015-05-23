@@ -31,7 +31,7 @@ object GraphFormat {
         ("title", JsString(n.title))
       )
       case u: User                                => Seq(
-        ("title", JsString(u.email.getOrElse("")))
+        ("title", JsString(u.name))
       )
       case h: ContentRelation[UuidNode, UuidNode] => Seq(
         ("hyperEdge", JsBoolean(true)),
