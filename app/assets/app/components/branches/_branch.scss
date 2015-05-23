@@ -3,6 +3,7 @@
 #branch_component {
     padding: 25px;
     height: 100%;
+    width: 100%;
     line, path {
         &.svglink {
             fill: none;
@@ -11,9 +12,16 @@
             stroke-linecap: round;
         }
     }
+
+    @include display-flex(flex);
+    @include flex-wrap(wrap);
+    width: 100%;
     .branch_view {
+        @include display-flex(flex);
+        @include flex-wrap(wrap);
         height: 100%;
-        .graph_network {
+        width: 70%;
+        .branch_graph {
             padding: 10px;
             height: 100%;
             width: 20%;
@@ -21,7 +29,10 @@
         .discourse_node_list {
             padding: 10px;
         }
-        @include display-flex(flex);
-        @include flex-wrap(wrap);
+    }
+    .network_graph {
+        padding: 10px;
+        height: 100%;
+        width: 30%;
     }
 }

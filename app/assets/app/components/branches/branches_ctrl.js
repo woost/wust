@@ -8,4 +8,6 @@ function BranchesCtrl(ConnectedComponents, $stateParams, DiscourseNodeList) {
     vm.component = ConnectedComponents.$find($stateParams.id).$then(data => {
         vm.nodeList = DiscourseNodeList.Any(data.nodes, "Nodes");
     });
+
+    vm.rootId = $stateParams.id;
 }

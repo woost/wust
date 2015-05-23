@@ -16,7 +16,8 @@ function d3Graph($window) {
         let onDoubleClick = scope.onClick() || _.noop;
 
         // watch for changes in the ngModel
-        scope.graph.$then(graph => {
+        scope.graph.$then(data => {
+            let graph = angular.copy(data);
             preprocessGraph(graph);
 
             // get dimensions
@@ -36,9 +37,6 @@ function d3Graph($window) {
                 .gravity(0.1)
                 .theta(0.8)
                 .alpha(0.1);
-
-            // remove any previous svg
-            d3.select("svg").remove();
 
             // define events
             let zoom = d3.behavior.zoom().scaleExtent([0.1, 10]).on("zoom", zoomed);

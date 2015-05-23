@@ -34,6 +34,11 @@ function RoutesConfig($stateProvider, $urlRouterProvider, $locationProvider, Dis
         url: "/graph",
         templateUrl: `${templateBase}/graphs/graph.html`,
         controller: "GraphsCtrl as vm",
+    }).state("branches", {
+        parent: "page",
+        url: "/branches/:id",
+        templateUrl: `${templateBase}/branches/branch.html`,
+        controller: "BranchesCtrl as vm"
     }).state("users", {
         abstract: true,
         parent: "page",
@@ -47,11 +52,6 @@ function RoutesConfig($stateProvider, $urlRouterProvider, $locationProvider, Dis
         url: "/details/:id",
         templateUrl: `${templateBase}/users/detail.html`,
         controller: "UserDetailsCtrl as vm",
-    }).state("branches", {
-        parent: "page",
-        url: "branches/:id",
-        templateUrl: `${templateBase}/branches/branch.html`,
-        controller: "BranchesCtrl as vm"
     }).state(DiscourseNodeProvider.setState("Untyped", "plain"), {
         parent: "page",
         url: "/plains/:id",

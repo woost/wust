@@ -6,21 +6,19 @@ function branchGraph() {
     return {
         restrict: "A",
         scope: {
-            graph: "="
+            graph: "=",
+            rootId: "="
         },
         link: link
     };
 
     function link(scope, element) {
         // watch for changes in the ngModel
-        scope.graph.$then(graph => {
-            // get dimensions
+        scope.graph.$then(data => {
             let [width, height] = getElementDimensions(element[0]);
 
+            let graph = angular.copy(data);
             preprocessGraph(graph);
-
-            // remove any previous svg
-            d3.select("svg").remove();
 
             // construct svg
             let svg = d3.select(element[0])
@@ -84,6 +82,9 @@ function branchGraph() {
             }
 
             function positionNodePredecessors(startX, startY, predecessorMap, visited, node) {
+                if (_.contains(visited, node))
+                    return;
+
                 let predecessors = predecessorMap[node.id] || [];
                 visited.push(node);
                 node.x = startX;
@@ -112,7 +113,7 @@ function branchGraph() {
                 }, _)) || {};
 
                 positionNodePredecessors(20, 20, predecessorMap, [], _.find(graph.nodes, {
-                    id: graph.rootId
+                    id: scope.rootId
                 }));
             }
 
