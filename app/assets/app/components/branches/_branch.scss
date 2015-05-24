@@ -15,7 +15,6 @@
 
     @include display-flex(flex);
     @include flex-wrap(wrap);
-    width: 100%;
     .branch_view {
         @include display-flex(flex);
         @include flex-wrap(wrap);
