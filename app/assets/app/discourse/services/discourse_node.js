@@ -9,16 +9,15 @@ function DiscourseNode() {
     this.setState = _.wrap("state", set);
     this.$get = get;
 
-    get.$inject = ["$state"];
-    function get($state) {
-        let stateHelper = (node) => {
-            return {
-                // check wether a state is defined. If it isn't stay on the current page.
-                getState: id => node.state ? `${node.state}({id: "${id}"})` : ".",
-                gotoState: id => { if (node.state) $state.go(node.state, {id: id}); }
-            };
-        };
-        _.mapValues(discourseMap, node => _.merge(node, stateHelper(node)));
+    get.$inject = ["$state", "$injector"];
+    function get($state, $injector) {
+        _.mapValues(discourseMap, node => _.merge(node, {
+            // check wether a state is defined. If it isn't stay on the current page.
+            getState: id => node.state ? `${node.state}({id: "${id}"})` : ".",
+            gotoState: id => { if (node.state) $state.go(node.state, {id: id}); },
+            service: $injector.get(node.name)
+        }));
+
         let mappings = _(_.values(discourseMap)).map(node => {
             return {
                 [node.label]: node
@@ -26,18 +25,18 @@ function DiscourseNode() {
         }).reduce(_.merge);
 
         let defaultNode = {
-            css: "relation_label"
+            css: "relation_label",
+            getState: () => ".",
+            gotoState: _.noop
         };
 
-        let defaultNodeWithState = _.merge(defaultNode, stateHelper(defaultNode));
-
         return _.merge(discourseMap, {
-            get: (label) => mappings[label] || defaultNodeWithState
+            get: (label) => mappings[label] || defaultNode
         });
     }
 
     function set(property, name, value) {
-        discourseMap[name] = discourseMap[name] || {};
+        discourseMap[name] = discourseMap[name] || { name: name };
 
         discourseMap[name][property] = value;
         return value;

@@ -19,6 +19,9 @@ function discourseNodeCrate($state, NodeHistory) {
         scope.node.$then(data => {
             NodeHistory.add(data);
         });
+        scope.$watch("node", data => {
+            NodeHistory.add(data);
+        });
 
         // callbacks for removing/updating the focused node
         scope.removeFocused = removeFocused;

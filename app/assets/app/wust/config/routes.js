@@ -39,6 +39,11 @@ function RoutesConfig($stateProvider, $urlRouterProvider, $locationProvider, Dis
         url: "/branches/:id",
         templateUrl: `${templateBase}/branches/branch.html`,
         controller: "BranchesCtrl as vm"
+    }).state("columns", {
+        parent: "page",
+        url: "/columns/:id",
+        templateUrl: `${templateBase}/columns/column.html`,
+        controller: "ColumnsCtrl as vm"
     }).state("users", {
         abstract: true,
         parent: "page",

@@ -9,6 +9,7 @@
         <div id="node_view">
             <h2>Focus:</h2>
             <a ui-sref="branches({id: vm.node.model.id})">brunch</a>
+            <a ui-sref="columns({id: vm.node.model.id})">columns</a>
             <div discourse-node-crate node="vm.node.model" node-info="vm.nodeInfo"></div>
         </div>
         <div ng-if="vm.bottom" id="bottom_view">

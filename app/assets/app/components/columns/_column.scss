@@ -1,0 +1,18 @@
+@import "compass/css3/flexbox";
+
+#column_component {
+    @include display-flex(flex);
+    @include flex-direction(column);
+    padding: 20px;
+    .column_view {
+        @include display-flex(flex);
+        @include justify-content(space-between);
+        .column {
+            width: 30%;
+        }
+    }
+    .node_details {
+        width: 50%;
+        margin: 30px auto;
+    }
+}

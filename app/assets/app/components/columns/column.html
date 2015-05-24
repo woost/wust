@@ -1,0 +1,19 @@
+<div id="column_component">
+    <div ng-if="vm.focus.element" discourse-node-crate node="vm.focus.element.node.model" node-info="vm.focus.element.info" class="node_details"></div>
+    <button class='btn btn-default' ng-click='vm.goBack()' ng-disabled='vm.hasNoHistory()'><i class='fa fa-step-backward'></i></button>
+    <div class="column_view">
+        <div accordion class="column list-group" close-others="false">
+            <div accordion-group ng-repeat="value in vm.parent.lists" heading="{{value.heading}}" is-open="true" is-disabled="false">
+                <div discourse-node-list node-model="value.list.model"></div>
+            </div>
+        </div>
+        <div accordion class="column list-group" close-others="false">
+            <div accordion-group ng-repeat="value in vm.focus.lists" heading="{{value.heading}}" is-open="true" is-disabled="false">
+                <div discourse-node-list node-model="value.list.model"></div>
+            </div>
+        </div>
+        <div class="column">
+            <div ng-if="vm.selected.node" discourse-node-crate node="vm.selected.node.model" node-info="vm.selected.info" class="node_details"></div>
+        </div>
+    </div>
+</div>
