@@ -55,9 +55,11 @@ function branchGraph(DiscourseNode) {
                 .attr("cx", d => {d.x = border + (1 + d.xShift) * (radius + 2*border + 2); return d.x;})
                 .attr("cy", d => {d.y = border + radius + d.line * 50; return d.y;})
                 .attr("r", radius)
-                .attr("class", d => "branch_node " + DiscourseNode.get(d.label).css)
+                .attr("class", d => d.hyperEdge ? "relation_label" : "branch_node " + DiscourseNode.get(d.label).css)
                 .style("stroke", d => branchColor(d.branch))
-                .style("stroke-width", border);
+                .style("stroke-width", border)
+                .style("stroke-dasharray", d => d.hyperEdge ? "4 3" : "");
+
 
             // create edges in the svg
             let link = linksvg

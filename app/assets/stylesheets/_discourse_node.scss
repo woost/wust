@@ -52,7 +52,8 @@
 .relation_label {
     // font-size: 9px;
     // line-height: 16px;
-    background-color: white;
+    background-color: $graph_link_label_bg;
+    fill: $graph_link_label_bg;
     display: inline-block;
     border: 1px solid $graph_link_color;
     color: $graph_link_color;
