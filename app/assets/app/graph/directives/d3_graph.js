@@ -54,7 +54,7 @@ function d3Graph($window) {
                 .on("dblclick.zoom", null);
 
             svg.append("svg:defs").append("svg:marker")
-                .attr("id", "arrow")
+                .attr("id", "graph_arrow")
                 .attr("viewBox", "0 -3 10 6")
                 .attr("refX", 10)
                 .attr("markerWidth", 10)
@@ -79,13 +79,13 @@ function d3Graph($window) {
                 .selectAll()
                 .data(graph.edges).enter()
                 .append("path")
-                .style("marker-end", "url(" + window.location.href + "#arrow)")
+                .style("marker-end", "url(" + window.location.href + "#graph_arrow)")
                 .each(function(link) {
                     // if link is startRelation of a Hypernode
                     if( link.target.hyperEdge && link.target.startId === link.source.id ) {
                         d3.select(this).attr("class", "svglink");
                     } else {
-                        d3.select(this).attr("class", "svglink arrow");
+                        d3.select(this).attr("class", "svglink graph_arrow");
                     }
                 });
 

@@ -1,8 +1,8 @@
 angular.module("wust.graph").directive("branchGraph", branchGraph);
 
-branchGraph.$inject = [];
+branchGraph.$inject = ["DiscourseNode"];
 
-function branchGraph() {
+function branchGraph(DiscourseNode) {
     return {
         restrict: "A",
         scope: {
@@ -28,52 +28,64 @@ function branchGraph() {
                 .on("dblclick.zoom", null);
 
             svg.append("svg:defs").append("svg:marker")
-                .attr("id", "arrow")
+                .attr("id", "branch_arrow")
                 .attr("viewBox", "0 -3 10 6")
                 .attr("refX", 10)
                 .attr("markerWidth", 10)
                 .attr("markerHeight", 6)
                 .attr("orient", "auto")
                 .append("svg:path")
-                .attr("d", "M 0,-3 L 10,-0.5 L 10,0.5 L0,3")
-                .attr("class", "svglink"); // for the stroke color
+                .attr("d", "M 0,-3 L 10,-0.5 L 10,0.5 L0,3");
+
+            let radius = 10;
+            let border = 3;
+            function branchColor(branch) {return d3.scale.category10().range()[branch % 10];}
+
+            let linksvg = svg.append("g").attr("id","group_links")
+                .selectAll()
+                .data(graph.edges).enter()
+                .append("path");
+                // .style("marker-end", "url(" + window.location.href + "#branch_arrow)")
 
             // create nodes in the svg
             let node = svg.append("g").attr("id","group_hypernodes-then-nodes")
                 .selectAll()
                 .data(graph.nodes).enter()
                 .append("circle")
-                .attr("cx", d => {d.x = 10 + d.xShift * 10; return d.x;})
-                .attr("cy", d => {d.y = 10 + d.line * 50; return d.y;})
-                .attr("r", 10)
-                // .style("fill", d => d.newBranch !== undefined ? "#FFBC33" : "#464646");
-                .style("fill", d => d3.scale.category20().range()[d.branch % 20]);
+                .attr("cx", d => {d.x = border + (1 + d.xShift) * (radius + 2*border + 2); return d.x;})
+                .attr("cy", d => {d.y = border + radius + d.line * 50; return d.y;})
+                .attr("r", radius)
+                .attr("class", d => "branch_node " + DiscourseNode.get(d.label).css)
+                .style("stroke", d => branchColor(d.branch))
+                .style("stroke-width", border);
 
             // create edges in the svg
-            let link = svg.append("g").attr("id","group_links")
-                .selectAll()
-                .data(graph.edges).enter()
-                .append("path")
-                .style("marker-end", "url(" + window.location.href + "#arrow)")
+            let link = linksvg
                 .each(function(link) {
+                    let thisLink = d3.select(this);
                     // if link is startRelation of a Hypernode
                     if( link.target.hyperEdge && link.target.startId === link.source.id ) {
-                        d3.select(this).attr("class", "svglink");
+                        thisLink.attr("class", "svglink");
                     } else {
-                        d3.select(this).attr("class", "svglink arrow");
+                        thisLink.attr("class", "svglink branch_arrow");
                     }
+
+                    thisLink.style("stroke-width", border);
+                    thisLink.style("stroke", branchColor(graph.nodes[link.source].branch));
                 })
             .attr("d",(link) => {
-                return link.source === link.target ?  // self loop
+                let s = graph.nodes[link.source];
+                let t = graph.nodes[link.target];
+                return link.source === link.target ?  // if self loop
                     `
-                    M ${graph.nodes[link.source].x} ${graph.nodes[link.source].y}
+                    M ${s.x} ${s.y}
                     m -20, 0
                     c -80,-80   120,-80   40,0
                     `
-                 :
+                 : // else connect two nodes
                     `
-                    M ${graph.nodes[link.source].x} ${graph.nodes[link.source].y}
-                    L ${graph.nodes[link.target].x} ${graph.nodes[link.target].y}
+                    M ${s.x} ${s.y}
+                    L ${t.x} ${t.y}
                     `;
             });
 
@@ -82,10 +94,10 @@ function branchGraph() {
                 return [elem.offsetWidth, elem.offsetHeight];
             }
 
-            function freeShift(branches) {
+            function freeShift(branches, maxWidth) {
                 let usedShifts = _(branches).reject(b => (b.newBranch === undefined) || b.xShift === undefined).map(b => b.xShift).uniq().value();
                 let freeShift = 0;
-                while( freeShift < 1000 ) {
+                while( freeShift < maxWidth ) {
                     if(!_.contains(usedShifts, freeShift))
                         break;
                     freeShift++;
@@ -93,7 +105,7 @@ function branchGraph() {
                 return freeShift;
             }
 
-            function positionNodePredecessors(branches, predecessorMap, showFirstOfAllBranches = false, line = 0, nextBranchId = 0) {
+            function positionNodePredecessors(branches, predecessorMap, showFirstOfAllBranches = false, maxWidth = 6, line = 0, nextBranchId = 0) {
                 if(branches.length === 0) return;
 
                 let nextBranch = _.min(branches, b => b.newBranch);
@@ -121,12 +133,12 @@ function branchGraph() {
                         p.newBranch = line; // to know which branch to take next
                         if( i > 0) { // only for tail
                             p.branch = nextBranchId++;
-                            p.xShift = freeShift(branches.concat(predecessors));
+                            p.xShift = freeShift(branches.concat(predecessors), maxWidth);
                         }
                     });
                 }
 
-                positionNodePredecessors(predecessors.concat(_.without(branches, current)), predecessorMap, showFirstOfAllBranches, line + 1, nextBranchId);
+                positionNodePredecessors(predecessors.concat(_.without(branches, current)), predecessorMap, showFirstOfAllBranches, maxWidth, line + 1, nextBranchId);
             }
 
             function preprocessGraph(graph) {
@@ -141,7 +153,7 @@ function branchGraph() {
                 }, _)) || {};
 
                 let rootNode = _.find(graph.nodes, { id: scope.rootId });
-                positionNodePredecessors([rootNode], predecessorMap, true);
+                positionNodePredecessors([rootNode], predecessorMap, true, 6);
             }
 
         });

@@ -1,9 +1,9 @@
 @import "compass/css3/flexbox";
 
 @mixin discourse_node($color, $icon: "") {
-    $bgcolor: lighten(desaturate($color, 0),10);
+    $bgcolor: lighten(desaturate($color, 0), 10);
     $bordercolor: desaturate(darken($bgcolor, 34), 43);
-    $bgcolor-highlight: lighten(saturate($bgcolor,10), 10);
+    $bgcolor-highlight: lighten(saturate($bgcolor, 10), 10);
     &.node {
         display: inline-block;
         background-color: $bgcolor;
@@ -42,6 +42,10 @@
             content: $icon;
             padding-right: 9px;
         }
+    }
+    // branch graph
+    &.branch_node {
+        fill: $bgcolor;
     }
 }
 
