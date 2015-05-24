@@ -74,20 +74,34 @@ function branchGraph(DiscourseNode) {
                     thisLink.style("stroke", branchColor(graph.nodes[link.source].branch));
                 })
             .attr("d",(link) => {
-                let s = graph.nodes[link.source]; // bottom
-                let t = graph.nodes[link.target]; // top
+                let a = graph.nodes[link.target]; // top
+                let b = graph.nodes[link.source]; // bottom
+                let r = 50;
+                function sgn(x) {return x > 0 ? 1 : -1; }
+                function abs(x) {return Math.abs(x); }
                 return link.source === link.target ?  // if self loop
                     `
-                    M ${s.x} ${s.y}
+                    M ${a.x} ${a.y}
                     m -20, 0
                     c -80,-80   120,-80   40,0
                     `
                  : // else connect two nodes
                     // starts at lower node
-                    `
-                    M ${s.x} ${s.y}
-                    C ${s.x} ${t.y}  ${s.x} ${t.y}  ${t.x} ${t.y}
-                    `;
+                    // L ${s.x} ${t.y +50}
+                    ( a.x === b.x ) ? // if nodes are on a vertical line
+                        `
+                        M ${a.x} ${a.y}
+                        L ${b.x} ${b.y}
+                        `
+                    : // else draw a curve
+                        `
+                        M ${a.x} ${a.y}
+                        L ${abs(a.x-b.x) < r ? a.x : b.x - r*sgn(b.x-a.x)} ${a.y}
+                        C ${b.x} ${a.y}  ${b.x} ${a.y}  ${b.x} ${a.y+r}
+                        L ${b.x} ${b.y}
+                        `
+                    ;
+
             });
 
             // get the dimensions of a html element
@@ -109,9 +123,9 @@ function branchGraph(DiscourseNode) {
             function positionNodePredecessors(branches, predecessorMap, showFirstOfAllBranches = false, maxWidth = 6, line = 0, nextBranchId = 0) {
                 if(branches.length === 0) return;
 
-                let nextBranch = _.min(branches, b => b.newBranch);
+                let minNewBranch = _.min(branches, b => b.newBranch);
                 let current = showFirstOfAllBranches ?
-                    (nextBranch === Infinity ? _.first(branches) : nextBranch)
+                    (minNewBranch === Infinity ? _.first(branches) : minNewBranch)
                     : _.first(branches);
 
                 if(current.branch === undefined)
@@ -154,7 +168,7 @@ function branchGraph(DiscourseNode) {
                 }, _)) || {};
 
                 let rootNode = _.find(graph.nodes, { id: scope.rootId });
-                positionNodePredecessors([rootNode], predecessorMap, true, 6);
+                positionNodePredecessors([rootNode], predecessorMap, true, 100);
             }
 
         });
