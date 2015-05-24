@@ -74,8 +74,8 @@ function branchGraph(DiscourseNode) {
                     thisLink.style("stroke", branchColor(graph.nodes[link.source].branch));
                 })
             .attr("d",(link) => {
-                let s = graph.nodes[link.source];
-                let t = graph.nodes[link.target];
+                let s = graph.nodes[link.source]; // bottom
+                let t = graph.nodes[link.target]; // top
                 return link.source === link.target ?  // if self loop
                     `
                     M ${s.x} ${s.y}
@@ -83,9 +83,10 @@ function branchGraph(DiscourseNode) {
                     c -80,-80   120,-80   40,0
                     `
                  : // else connect two nodes
+                    // starts at lower node
                     `
                     M ${s.x} ${s.y}
-                    L ${t.x} ${t.y}
+                    C ${s.x} ${t.y}  ${s.x} ${t.y}  ${t.x} ${t.y}
                     `;
             });
 
