@@ -1,9 +1,9 @@
 <div id="discourse_node_crate_component">
     <div class="panel panel-default" ng-class="nodeInfo.css">
         <div class="panel-heading">
-            <h3 class="panel-title" editable-textarea="node.model.title" blur="ignore" e-rows="7" e-cols="40" onbeforesave="updateFocused('title', $data)" style="display:inline;" ng-bind="node.model.title"></h3>
+            <h3 class="panel-title" editable-textarea="node.title" blur="ignore" e-rows="7" e-cols="40" onbeforesave="updateFocused('title', $data)" style="display:inline;" ng-bind="node.title"></h3>
             <button class="pull-right btn btn-xs btn-danger" ng-click="removeFocused()"><i class="fa fa-trash-o"></i></button>
         </div>
-        <div class="panel-body" editable-textarea="node.model.description" blur="ignore" e-rows="7" e-cols="40" onbeforesave="updateFocused('description', $data)" ng-bind="node.model.description"></div>
+        <div class="panel-body" editable-textarea="node.description" blur="ignore" e-rows="7" e-cols="40" onbeforesave="updateFocused('description', $data)" ng-bind="node.description"></div>
     </div>
 </div>

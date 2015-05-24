@@ -16,7 +16,7 @@ function discourseNodeCrate($state, NodeHistory) {
 
     function link(scope) {
         // we are viewing details about a node, so add it to the nodehistory
-        scope.node.model.$then(data => {
+        scope.node.$then(data => {
             NodeHistory.add(data);
         });
 
@@ -25,15 +25,15 @@ function discourseNodeCrate($state, NodeHistory) {
         scope.updateFocused = updateFocused;
 
         function removeFocused() {
-            scope.node.model.$destroy().$then(() => {
-                NodeHistory.remove(scope.node.model.id);
+            scope.node.$destroy().$then(() => {
+                NodeHistory.remove(scope.node.id);
                 humane.success("Removed node");
                 $state.go("browse");
             });
         }
 
         function updateFocused(field, data) {
-            let node = angular.copy(scope.node.model).$extend({
+            let node = angular.copy(scope.node).$extend({
                 [field]: data
             });
             return node.$save().$then(() => {
