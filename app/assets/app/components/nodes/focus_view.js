@@ -13,7 +13,8 @@ function focusView($state, $rootScope, $q, NodeHistory) {
     function link(scope) {
         let vm = scope.vm;
 
-        // register for events of all connected lists
+        // register for events of all connected lists and the node itself
+        vm.node.subscribe();
         _.each(_.compact([vm.left, vm.right, vm.bottom, vm.top]), list => list.subscribe());
     }
 }

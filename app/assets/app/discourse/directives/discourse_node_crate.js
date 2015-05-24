@@ -15,9 +15,6 @@ function discourseNodeCrate($state, NodeHistory) {
     };
 
     function link(scope) {
-        // register for node events
-        scope.node.subscribe();
-
         // we are viewing details about a node, so add it to the nodehistory
         scope.node.model.$then(data => {
             NodeHistory.add(data);
