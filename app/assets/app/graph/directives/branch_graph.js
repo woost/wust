@@ -74,6 +74,7 @@ function branchGraph(DiscourseNode) {
 
                     thisLink.style("stroke-width", border);
                     thisLink.style("stroke", branchColor(graph.nodes[link.source].branch));
+                    // thisLink.style("stroke-dasharray", d => graph.nodes[link.source].newBranch !== undefined ? ""+(3+graph.nodes[link.source].newBranch/3)+" 5 5 5" : "");
                 })
             .attr("d",(link) => {
                 let a = graph.nodes[link.target]; // top
@@ -153,18 +154,15 @@ function branchGraph(DiscourseNode) {
             function positionNodePredecessors(branches, predecessorMap, showFirstOfAllBranches = false, maxWidth = 6, line = 0, nextBranchId = 0) {
                 if(branches.length === 0) return;
 
-                let defaultBranch = _.find(branches, b => b.active === true) || _.last(branches);
-                // let minNewBranch = _.min(branches, b => b.newBranch);
-                // let current = showFirstOfAllBranches ?
-                //     (minNewBranch === Infinity ? defaultBranch : minNewBranch)
-                //     : defaultBranch;
-                let current = defaultBranch;
+                let defaultBranch = _.last(branches);
+                let minNewBranch = _.min(branches, b => b.newBranch);
+                let current = showFirstOfAllBranches ?
+                    (minNewBranch === Infinity ? defaultBranch : minNewBranch)
+                    : defaultBranch;
 
                 current.branch = current.branch !== undefined ? current.branch : nextBranchId++; // can be 0
                 current.xShift = current.xShift || 0;
                 current.line = line;
-                current.active = true;
-                console.log(current.xShift, current, branches);
 
                 let predecessors = predecessorMap[current.id] || [];
 
@@ -173,14 +171,12 @@ function branchGraph(DiscourseNode) {
 
                 if(predecessors.length > 0) {
                     let first = _.first(predecessors);
-                    first.active = true;
-                    current.active = false;
-                    first.branch = current.branch;
+                    first.branch = predecessors.length === 1 ? current.branch : nextBranchId++;
                     first.xShift = current.xShift;
                 }
                 if(predecessors.length > 1) {
                     _.each(predecessors, (p,i) => {
-                        p.newBranch = line + (1-i/predecessors.length); // to know which branch to take next
+                            p.newBranch = line + (1-i/predecessors.length); // to know which branch to take next
                         if( i > 0) { // only for tail
                             p.branch = nextBranchId++;
                             p.xShift = findFreeShift(current.xShift, branches.concat(predecessors), maxWidth);
@@ -203,7 +199,7 @@ function branchGraph(DiscourseNode) {
                 }, _)) || {};
 
                 let rootNode = _.find(graph.nodes, { id: scope.rootId });
-                positionNodePredecessors([rootNode], predecessorMap, false, 100);
+                positionNodePredecessors([rootNode], predecessorMap, true, 100);
             }
 
         });
