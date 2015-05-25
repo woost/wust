@@ -9,11 +9,11 @@
     <div class="drop_node node_model_list" ui-on-Drop="vm.nodeModel.add($data)" drop-channel="{{vm.nodeModel.info.label}}">
         <div ng-repeat='node in vm.nodeModel.list'>
             <div ng-if="!vm.nodeModel.isNested" class="btn-group" role="group" style="padding:3px">
-                <span ng-class="vm.nodeModel.info.css" class="btn" ng-click="vm.nodeModel.onClick(node)">{{node.title}}</span>
+                <span ng-class="vm.nodeModel.info.css" class="btn" ng-mouseover="vm.nodeModel.onHover(node)" ng-click="vm.nodeModel.onClick(node)">{{node.title}}</span>
                 <button class='btn btn-default' ng-click='vm.nodeModel.remove(node)'><i class='fa fa-minus text-default'></i></button>
             </div>
             <div ng-if="vm.nodeModel.isNested" class="panel panel-default" ng-class="vm.nodeModel.info.css">
-                <span ng-click="vm.nodeModel.onClick(node)">
+                <span ng-mouseover="vm.nodeModel.onHover(node)" ng-click="vm.nodeModel.onClick(node)">
                     <div class="panel-heading">
                         <h3 class="panel-title">{{node.title}}</h3>
                     </div>
@@ -34,10 +34,10 @@
     <div class="node_model_list">
         <div ng-repeat='node in vm.nodeModel.list'>
             <div ng-if="!vm.nodeModel.isNested" class="btn-group" role="group" style="padding:3px">
-                <span ng-class="vm.nodeModel.getCss(node)" class="btn" ng-click="vm.nodeModel.onClick(node)">{{node.title}}</span>
+                <span ng-class="vm.nodeModel.getCss(node)" class="btn" ng-mouseover="vm.nodeModel.onHover(node)" ng-click="vm.nodeModel.onClick(node)">{{node.title}}</span>
             </div>
             <div ng-if="vm.nodeModel.isNested" class="panel panel-default" ng-class="vm.nodeModel.getCss(node)">
-                <span ng-click="vm.nodeModel.onClick(node)">
+                <span ng-mouseover="vm.nodeModel.onHover(node)" ng-click="vm.nodeModel.onClick(node)">
                     <div class="panel-heading">
                         <h3 class="panel-title">{{node.title}}</h3>
                     </div>

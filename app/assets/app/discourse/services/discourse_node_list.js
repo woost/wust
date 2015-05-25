@@ -99,18 +99,20 @@ function DiscourseNodeList() {
             }
         }
 
-        function NodeInfoActions(nodeInfo, onClick) {
+        function NodeInfoActions(nodeInfo, mouseHandler) {
             return {
                 info: nodeInfo,
                 getCss: () => nodeInfo.css,
-                onClick: onClick || (node => nodeInfo.gotoState(node.id))
+                onClick: mouseHandler.click || (node => nodeInfo.gotoState(node.id)),
+                onHover: mouseHandler.hover || _.noop
             };
         }
 
-        function NodeActions(onClick) {
+        function NodeActions(mouseHandler) {
             return {
                 getCss: node => DiscourseNode.get(node.label).css,
-                onClick: onClick || (node => DiscourseNode.get(node.label).gotoState(node.id))
+                onClick: mouseHandler.click || (node => DiscourseNode.get(node.label).gotoState(node.id)),
+                onHover: mouseHandler.hover || _.noop
             };
         }
 
@@ -121,23 +123,23 @@ function DiscourseNodeList() {
         }
 
         class TypedReadNodeModel extends ReadNodeModel {
-            constructor(nodeList, nodeInfo, title, onClick) {
+            constructor(nodeList, nodeInfo, title, mouseHandler) {
                 super(nodeList, title, `${nodeInfo.css}_read_list`);
-                _.assign(this, NodeInfoActions(nodeInfo, onClick));
+                _.assign(this, NodeInfoActions(nodeInfo, mouseHandler));
             }
         }
 
         class AnyReadNodeModel extends ReadNodeModel {
-            constructor(nodeList, title, onClick) {
+            constructor(nodeList, title, mouseHandler) {
                 super(nodeList, title, "any_read_list");
-                _.assign(this, NodeActions(onClick));
+                _.assign(this, NodeActions(mouseHandler));
             }
         }
 
         class WriteNodeModel extends NodeModel {
-            constructor(service, nodeList, nodeInfo, title, onClick) {
+            constructor(service, nodeList, nodeInfo, title, mouseHandler) {
                 super(nodeList, title, `${nodeInfo.css}_list`, "write_discourse_node_list.html");
-                _.assign(this, NodeInfoActions(nodeInfo, onClick));
+                _.assign(this, NodeInfoActions(nodeInfo, mouseHandler));
 
                 this.resetNew = () => {
                     this.new = service.$build({
@@ -195,13 +197,13 @@ function DiscourseNodeList() {
         }
 
         return {
-            write: _.mapValues(nodeListDefs, (v, k) => (nodeList, title = _.capitalize(v), onClick = undefined) => {
-                return new NodeList(new WriteNodeModel($injector.get(k), nodeList, DiscourseNode[k], title, onClick));
+            write: _.mapValues(nodeListDefs, (v, k) => (nodeList, title = _.capitalize(v), mouseHandler = {}) => {
+                return new NodeList(new WriteNodeModel($injector.get(k), nodeList, DiscourseNode[k], title, mouseHandler));
             }),
-            read: _.mapValues(nodeListDefs, (v, k) => (nodeList, title = _.capitalize(v), onClick = undefined) => {
-                return new NodeList(new TypedReadNodeModel(nodeList, DiscourseNode[k], title, onClick));
+            read: _.mapValues(nodeListDefs, (v, k) => (nodeList, title = _.capitalize(v), mouseHandler = {}) => {
+                return new NodeList(new TypedReadNodeModel(nodeList, DiscourseNode[k], title, mouseHandler));
             }),
-            Any: (nodeList, title, onClick) => new NodeList(new AnyReadNodeModel(nodeList, title, onClick))
+            Any: (nodeList, title, mouseHandler = {}) => new NodeList(new AnyReadNodeModel(nodeList, title, mouseHandler))
         };
     }
 }
