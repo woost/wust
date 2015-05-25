@@ -38,7 +38,7 @@ function discourseNodeCrate($state, NodeHistory) {
             });
             return node.$save().$then(() => {
                 humane.success("Updated node");
-            }).$promise;
+            }).$asPromise();
         }
     }
 }

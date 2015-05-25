@@ -170,7 +170,7 @@ function DiscourseNodeList() {
 
                 this.list.$create(_.pick(elem, "id")).$reveal().$then(data => {
                     humane.success("Connected node");
-                }).$promise.catch(() => this.removeLocally(elem.id));
+                }, () => this.removeLocally(elem.id));
             }
 
             search(title) {

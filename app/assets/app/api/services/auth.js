@@ -50,7 +50,7 @@ function Auth($rootScope, $window, restmod, jwtHelper, store) {
         service.signout.$fetch().$then(response => {
             logoutLocally();
             humane.success("Logged out");
-        }).$promise.catch(logoutLocally);
+        }, logoutLocally);
     }
 
     function logoutLocally() {
