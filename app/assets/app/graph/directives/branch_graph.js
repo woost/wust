@@ -96,6 +96,14 @@ function branchGraph(DiscourseNode) {
                         L ${b.x} ${b.y}
                         `
                     : // else draw a curve
+                        // quadratic bezier
+                        // `
+                        // M ${a.x} ${a.y}
+                        // L ${abs(a.x-b.x) < r ? a.x : b.x - r*sgn(b.x-a.x)} ${a.y}
+                        // Q ${b.x} ${a.y}  ${b.x} ${a.y+r}
+                        // L ${b.x} ${b.y}
+                        // `
+                        // cubic bezier
                         `
                         M ${a.x} ${a.y}
                         L ${abs(a.x-b.x) < r ? a.x : b.x - r*sgn(b.x-a.x)} ${a.y}
@@ -111,29 +119,52 @@ function branchGraph(DiscourseNode) {
                 return [elem.offsetWidth, elem.offsetHeight];
             }
 
-            function freeShift(branches, maxWidth) {
-                let usedShifts = _(branches).reject(b => (b.newBranch === undefined) || b.xShift === undefined).map(b => b.xShift).uniq().value();
-                let freeShift = 0;
-                while( freeShift < maxWidth ) {
-                    if(!_.contains(usedShifts, freeShift))
+            function findFreeShift(start, branches, maxWidth) {
+                let usedShifts = _(branches).reject(b => b.xShift === undefined).map(b => b.xShift).uniq().value();
+                let maxShift = _.max(usedShifts);
+                function free(shift) {return !_.contains(usedShifts, shift);}
+                let shiftL, shiftR;
+
+                let shift = start-1;
+                while( shift > 0 ) {
+                    if(free(shift)) {
+                        shiftL = shift;
                         break;
-                    freeShift++;
+                    }
+                    shift--;
                 }
-                return freeShift;
+
+                shift = start+1;
+                while( shift < maxWidth ) {
+                    if(free(shift)) {
+                        shiftR = shift;
+                        break;
+                    }
+                    shift++;
+                }
+                if(shiftL !== undefined && shiftR !== undefined) {
+                    if( shiftR <= maxShift )
+                        return (start - shiftL) > (shiftR - start) ? shiftR : shiftL;
+                    else return shiftL;
+                }
+                else return shiftR || shiftL || maxWidth;
             }
 
             function positionNodePredecessors(branches, predecessorMap, showFirstOfAllBranches = false, maxWidth = 6, line = 0, nextBranchId = 0) {
                 if(branches.length === 0) return;
 
-                let minNewBranch = _.min(branches, b => b.newBranch);
-                let current = showFirstOfAllBranches ?
-                    (minNewBranch === Infinity ? _.first(branches) : minNewBranch)
-                    : _.first(branches);
+                let defaultBranch = _.find(branches, b => b.active === true) || _.last(branches);
+                // let minNewBranch = _.min(branches, b => b.newBranch);
+                // let current = showFirstOfAllBranches ?
+                //     (minNewBranch === Infinity ? defaultBranch : minNewBranch)
+                //     : defaultBranch;
+                let current = defaultBranch;
 
-                if(current.branch === undefined)
-                    current.branch = nextBranchId++;
+                current.branch = current.branch !== undefined ? current.branch : nextBranchId++; // can be 0
                 current.xShift = current.xShift || 0;
                 current.line = line;
+                current.active = true;
+                console.log(current.xShift, current, branches);
 
                 let predecessors = predecessorMap[current.id] || [];
 
@@ -142,20 +173,22 @@ function branchGraph(DiscourseNode) {
 
                 if(predecessors.length > 0) {
                     let first = _.first(predecessors);
+                    first.active = true;
+                    current.active = false;
                     first.branch = current.branch;
                     first.xShift = current.xShift;
                 }
                 if(predecessors.length > 1) {
                     _.each(predecessors, (p,i) => {
-                        p.newBranch = line; // to know which branch to take next
+                        p.newBranch = line + (1-i/predecessors.length); // to know which branch to take next
                         if( i > 0) { // only for tail
                             p.branch = nextBranchId++;
-                            p.xShift = freeShift(branches.concat(predecessors), maxWidth);
+                            p.xShift = findFreeShift(current.xShift, branches.concat(predecessors), maxWidth);
                         }
                     });
                 }
-
-                positionNodePredecessors(predecessors.concat(_.without(branches, current)), predecessorMap, showFirstOfAllBranches, maxWidth, line + 1, nextBranchId);
+                let nextBranches = _.without(branches, current).concat(predecessors);
+                positionNodePredecessors(nextBranches, predecessorMap, showFirstOfAllBranches, maxWidth, line + 1, nextBranchId);
             }
 
             function preprocessGraph(graph) {
@@ -170,7 +203,7 @@ function branchGraph(DiscourseNode) {
                 }, _)) || {};
 
                 let rootNode = _.find(graph.nodes, { id: scope.rootId });
-                positionNodePredecessors([rootNode], predecessorMap, true, 100);
+                positionNodePredecessors([rootNode], predecessorMap, false, 100);
             }
 
         });
