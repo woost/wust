@@ -59,6 +59,12 @@
     color: $graph_link_color;
     border-radius: 4px;
     padding: 0px 3px;
+
+    .discourse_node_list & {
+        padding: 5px 15px 0px 12px;
+        display: block;
+        height: 34px;
+    }
 }
 
 .discourse_goal {

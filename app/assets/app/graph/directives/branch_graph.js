@@ -18,7 +18,7 @@ function branchGraph(DiscourseNode) {
         scope.graph.$then(data => {
             let [width, height] = getElementDimensions(element[0]);
 
-            let graph = angular.copy(data);
+            let graph = data; //TODO: was angular.copy(data). Publish graph more elegantly
             preprocessGraph(graph);
 
             // construct svg
@@ -40,6 +40,8 @@ function branchGraph(DiscourseNode) {
 
             let radius = 10;
             let border = 3;
+            let verticalDistance = 40;
+            let paddingTop = 10;
             function branchColor(branch) {return d3.scale.category10().range()[branch % 10];}
 
             let linksvg = svg.append("g").attr("id","group_links")
@@ -54,7 +56,7 @@ function branchGraph(DiscourseNode) {
                 .data(graph.nodes).enter()
                 .append("circle")
                 .attr("cx", d => {d.x = border + (1 + d.xShift) * (radius + 2*border + 2); return d.x;})
-                .attr("cy", d => {d.y = border + radius + d.line * 50; return d.y;})
+                .attr("cy", d => {d.y = paddingTop + border + radius + d.line * verticalDistance; return d.y;})
                 .attr("r", radius)
                 .attr("class", d => d.hyperEdge ? "relation_label" : "branch_node " + DiscourseNode.get(d.label).css)
                 .style("stroke", d => branchColor(d.branch))
