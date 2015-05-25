@@ -14,10 +14,9 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object Broadcaster {
-  private def jsonChange(changeType: String, data: JsValue, reference: String = "") = JsObject(Seq(
+  private def jsonChange(changeType: String, data: JsValue) = JsObject(Seq(
     ("type", JsString(changeType)),
-    ("data", data),
-    ("reference", JsString(reference))
+    ("data", data)
   ))
 
   private def broadcast(path: String, data: JsValue): Unit = {
@@ -115,11 +114,11 @@ object Broadcaster {
   private def broadcastHyperConnect[NODE <: UuidNode](definition: UuidHyperNodeDefinitionBase[_], factory: AbstractRelationFactory[_,_,_], nestedNode: NODE, nestedFactory: NodeFactory[NODE]): Unit = {
     Future {
       hyperConnectionDistributor(
-        (apiname, path, nestedPath) => broadcast(s"$apiname/${definition.startDefinition.uuid}/$path/$nestedPath", jsonChange("connect", Json.toJson(nestedNode), definition.endDefinition.uuid)),
+        (apiname, path, nestedPath) => broadcast(s"$apiname/${definition.startDefinition.uuid}/$path/${definition.endDefinition.uuid}/$nestedPath", jsonChange("connect", Json.toJson(nestedNode))),
         definition,
         factory,
         nestedFactory,
-        (apiname, path, nestedPath) => broadcast(s"$apiname/${definition.endDefinition.uuid}/$path/$nestedPath", jsonChange("connect", Json.toJson(nestedNode), definition.startDefinition.uuid))
+        (apiname, path, nestedPath) => broadcast(s"$apiname/${definition.endDefinition.uuid}/$path/${definition.startDefinition.uuid}/$nestedPath", jsonChange("connect", Json.toJson(nestedNode)))
       )
     }
   }
@@ -127,11 +126,11 @@ object Broadcaster {
   private def broadcastHyperDisconnect[NODE <: UuidNode](definition: UuidHyperNodeDefinitionBase[_], factory: AbstractRelationFactory[_,_,_], nestedDefinition: UuidNodeDefinition[NODE], nestedFactory: NodeFactory[NODE]): Unit = {
     Future {
       hyperConnectionDistributor(
-        (apiname, path, nestedPath) => broadcast(s"$apiname/${ definition.startDefinition.uuid }/$path/$nestedPath", jsonChange("disconnect", JsObject(Seq(("id", JsString(nestedDefinition.uuid)))), definition.endDefinition.uuid)),
+        (apiname, path, nestedPath) => broadcast(s"$apiname/${ definition.startDefinition.uuid }/$path/${definition.endDefinition.uuid}/$nestedPath", jsonChange("disconnect", JsObject(Seq(("id", JsString(nestedDefinition.uuid)))))),
         definition,
         factory,
         nestedFactory,
-        (apiname, path, nestedPath) => broadcast(s"$apiname/${ definition.endDefinition.uuid }/$path/$nestedPath", jsonChange("disconnect", JsObject(Seq(("id", JsString(nestedDefinition.uuid)))), definition.startDefinition.uuid))
+        (apiname, path, nestedPath) => broadcast(s"$apiname/${ definition.endDefinition.uuid }/$path/${definition.startDefinition.uuid}/$nestedPath", jsonChange("disconnect", JsObject(Seq(("id", JsString(nestedDefinition.uuid))))))
       )
     }
   }

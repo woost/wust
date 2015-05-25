@@ -11,19 +11,20 @@ function Schema($provide, LiveProvider, restmodProvider) {
 
         restmodProvider.rebase({
             $config: {
-                urlPrefix: schema.api.restRoot
+                urlPrefix: schema.api.restRoot,
             }
         });
 
         _.each(schema.models, model => {
             $provide.factory(model.name, ApiFactory);
 
-            ApiFactory.$inject = ["restmod", "Live"];
-            function ApiFactory(restmod, Live) {
-                return restmod.model(model.path).mix(_(model.subs).map((sub, path) => {
+            ApiFactory.$inject = ["restmod", "Live", "CacheModel"];
+
+            function ApiFactory(restmod, Live, CacheModel) {
+                return restmod.model(model.path).mix(CacheModel, _(model.subs).map((sub, path) => {
                     return {
                         [path]: {
-                            [sub.cardinality]: restmod.model().mix(_.merge({
+                            [sub.cardinality]: restmod.model().mix(CacheModel, _.merge({
                                 $extend: {
                                     Collection: {
                                         $subscribeToLiveEvent: _.partial(subscribe, Live)
@@ -32,7 +33,13 @@ function Schema($provide, LiveProvider, restmodProvider) {
                             }, _(sub.subs).map((sub, path) => {
                                 return {
                                     [path]: {
-                                        [sub.cardinality]: restmod.model()
+                                        [sub.cardinality]: restmod.model().mix(CacheModel, _.merge({
+                                            $extend: {
+                                                Collection: {
+                                                    $subscribeToLiveEvent: _.partial(subscribe, Live)
+                                                }
+                                            }
+                                        }))
                                     }
                                 };
                             }).reduce(_.merge)))
@@ -48,8 +55,8 @@ function Schema($provide, LiveProvider, restmodProvider) {
             }
         });
 
-        function subscribe(liveService, handler, nested = "") {
-            let url = this.$url().slice(schema.api.restRoot.length + 1) + nested;
+        function subscribe(liveService, handler) {
+            let url = this.$url().slice(schema.api.restRoot.length + 1);
             return liveService.subscribe(url, handler);
         }
     }

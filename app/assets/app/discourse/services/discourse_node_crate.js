@@ -9,15 +9,15 @@ function DiscourseNodeCrate($rootScope) {
         }
 
         subscribe(unsubscribe = true) {
-            let unsubscribeFunc = this.model.$subscribeToLiveEvent(m => onNodeChange(this.model, m));
-            if (unsubscribe) {
-                let deregisterEvent = $rootScope.$on("$stateChangeSuccess", () => {
-                    unsubscribeFunc();
-                    deregisterEvent();
-                });
-            }
+            // let unsubscribeFunc = this.model.$subscribeToLiveEvent(m => onNodeChange(this.model, m));
+            // if (unsubscribe) {
+            //     let deregisterEvent = $rootScope.$on("$stateChangeSuccess", () => {
+            //         unsubscribeFunc();
+            //         deregisterEvent();
+            //     });
+            // }
 
-            return unsubscribeFunc;
+            // return unsubscribeFunc;
         }
     }
 

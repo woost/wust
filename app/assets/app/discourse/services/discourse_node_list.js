@@ -65,37 +65,37 @@ function DiscourseNodeList() {
             }
 
             subscribe(unsubscribe) {
-                let onConnectionChange = (list, message) => $rootScope.$apply(() => {
-                    switch (message.type) {
-                        case "connect":
-                            list.addLocally(message.data);
-                            break;
-                        case "disconnect":
-                            list.removeLocally(message.data.id);
-                            break;
-                        default:
-                    }
-                });
+                // let onConnectionChange = (list, message) => $rootScope.$apply(() => {
+                //     switch (message.type) {
+                //         case "connect":
+                //             list.addLocally(message.data);
+                //             break;
+                //         case "disconnect":
+                //             list.removeLocally(message.data.id);
+                //             break;
+                //         default:
+                //     }
+                // });
 
-                let unsubscribeFuncs = _.map(this.nestedNodeLists, (list, i) => this.list.$subscribeToLiveEvent(m => {
-                    let node = _.find(this.list, {id: m.reference});
-                    if (node !== undefined) {
-                        let nestedList = node.nestedNodeLists[i];
-                        onConnectionChange(nestedList.model, m);
-                    }
-                }, `/${list.servicePath}`));
+                // let unsubscribeFuncs = _.map(this.nestedNodeLists, (list, i) => this.list.$subscribeToLiveEvent(m => {
+                //     let node = _.find(this.list, {id: m.reference});
+                //     if (node !== undefined) {
+                //         let nestedList = node.nestedNodeLists[i];
+                //         onConnectionChange(nestedList.model, m);
+                //     }
+                // }, `/${list.servicePath}`));
 
-                unsubscribeFuncs.push(this.list.$subscribeToLiveEvent(m => onConnectionChange(this, m)));
+                // unsubscribeFuncs.push(this.list.$subscribeToLiveEvent(m => onConnectionChange(this, m)));
 
-                let unsubscribeFunc = () => _.each(unsubscribeFuncs, func => func());
-                if (unsubscribe) {
-                    let deregisterEvent = $rootScope.$on("$stateChangeSuccess", () => {
-                        unsubscribeFunc();
-                        deregisterEvent();
-                    });
-                }
+                // let unsubscribeFunc = () => _.each(unsubscribeFuncs, func => func());
+                // if (unsubscribe) {
+                //     let deregisterEvent = $rootScope.$on("$stateChangeSuccess", () => {
+                //         unsubscribeFunc();
+                //         deregisterEvent();
+                //     });
+                // }
 
-                return unsubscribeFunc;
+                // return unsubscribeFunc;
             }
         }
 
