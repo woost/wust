@@ -10,4 +10,6 @@ function BranchesCtrl(ConnectedComponents, $stateParams, DiscourseNodeList) {
     });
 
     vm.rootId = $stateParams.id;
+
+    vm.onGraphDraw = () => console.log("DRAW");
 }

@@ -7,7 +7,8 @@ function branchGraph(DiscourseNode) {
         restrict: "A",
         scope: {
             graph: "=",
-            rootId: "="
+            rootId: "=",
+            onDraw: "&"
         },
         link: link
     };
@@ -200,6 +201,8 @@ function branchGraph(DiscourseNode) {
 
                 let rootNode = _.find(graph.nodes, { id: scope.rootId });
                 positionNodePredecessors([rootNode], predecessorMap, true, 100);
+
+                scope.onDraw();
             }
 
         });
