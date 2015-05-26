@@ -6,19 +6,21 @@ function CacheModel() {
     this.$get = get;
     this.setCache = setCache;
 
-    let defaultCache = {};
-    let cache = {
-        set: (k,v) => defaultCache[k] = v,
-        get: _.propertyOf(defaultCache)
+    let cacheServiceName;
+    let store = {};
+    let defaultCache = {
+        set: (k,v) => store[k] = v,
+        get: _.propertyOf(store)
     };
 
-    function setCache(get, set) {
-        cache.get = get;
-        cache.set = set;
+    function setCache(serviceName) {
+        cacheServiceName = serviceName;
     }
 
-    get.$inject = ["restmod", "$rootScope"];
-    function get(restmod, $rootScope) {
+    get.$inject = ["restmod", "$injector"];
+    function get(restmod, $injector) {
+        let cacheService = cacheServiceName ? $injector.get(cacheServiceName) : defaultCache;
+
         return {
             $extend: {
                 Model: {
@@ -36,63 +38,13 @@ function CacheModel() {
         };
 
         function cachedResponse(url, args) {
-            let cached = cache.get(url);
+            let cached = cacheService.get(url);
             if (cached === undefined) {
                 cached = this.$super.apply(this, args);
-                subscribe(cached);
-                cache.set(url, cached);
+                cacheService.set(url, cached);
             }
 
             return cached;
-        }
-
-        function subscribe(response) {
-            if (response.$subscribeToLiveEvent === undefined)
-                return;
-
-            response.$subscribeToLiveEvent(_.partial(_.isArray(response) ? collectionCallback : modelCallback, response));
-        }
-
-        function collectionCallback(list, message) {
-            $rootScope.$apply(() => {
-                switch (message.type) {
-                    case "connect":
-                        addLocally(list, message.data);
-                        break;
-                    case "disconnect":
-                        removeLocally(list, message.data.id);
-                        break;
-                    default:
-                }
-            });
-        }
-
-        function removeLocally(list, id) {
-            let elem = _.find(list, {
-                id: id
-            });
-
-            list.$remove(elem);
-        }
-
-        function addLocally(list, elem) {
-            if (_.any(list, {
-                id: elem.id
-            }))
-                return;
-
-            list.$buildRaw(elem).$reveal();
-        }
-
-        function modelCallback(node, message) {
-            $rootScope.$apply(() => {
-                switch (message.type) {
-                    case "edit":
-                        _.assign(node, message.data);
-                        break;
-                    default:
-                }
-            });
         }
     }
 }
