@@ -1,8 +1,8 @@
 angular.module("wust.discourse").directive("discourseNodeCrate", discourseNodeCrate);
 
-discourseNodeCrate.$inject = ["$state", "NodeHistory"];
+discourseNodeCrate.$inject = [];
 
-function discourseNodeCrate($state, NodeHistory) {
+function discourseNodeCrate() {
     return {
         restrict: "A",
         replace: false,
@@ -11,37 +11,40 @@ function discourseNodeCrate($state, NodeHistory) {
             node: "=",
             nodeInfo: "="
         },
-        link: link
+        controller: discourseNodeCrateCtrl,
+        controllerAs: "vm",
+        bindToController: true
     };
+}
 
-    function link(scope) {
-        // we are viewing details about a node, so add it to the nodehistory
-        scope.node.$then(data => {
-            NodeHistory.add(data);
+discourseNodeCrateCtrl.$inject = ["$scope", "$state", "NodeHistory"];
+
+function discourseNodeCrateCtrl($scope, $state, NodeHistory) {
+    let vm = this;
+
+    // we are viewing details about a node, so add it to the nodehistory
+    vm.node.$then(data => {
+        NodeHistory.add(data);
+    });
+
+    // callbacks for removing/updating the focused node
+    vm.removeFocused = removeFocused;
+    vm.updateFocused = updateFocused;
+
+    function removeFocused() {
+        vm.node.$destroy().$then(() => {
+            NodeHistory.remove(vm.node.id);
+            humane.success("Removed node");
+            $state.go("browse");
         });
-        scope.$watch("node", data => {
-            NodeHistory.add(data);
+    }
+
+    function updateFocused(field, data) {
+        let node = angular.copy(vm.node).$extend({
+            [field]: data
         });
-
-        // callbacks for removing/updating the focused node
-        scope.removeFocused = removeFocused;
-        scope.updateFocused = updateFocused;
-
-        function removeFocused() {
-            scope.node.$destroy().$then(() => {
-                NodeHistory.remove(scope.node.id);
-                humane.success("Removed node");
-                $state.go("browse");
-            });
-        }
-
-        function updateFocused(field, data) {
-            let node = angular.copy(scope.node).$extend({
-                [field]: data
-            });
-            return node.$save().$then(() => {
-                humane.success("Updated node");
-            }).$asPromise();
-        }
+        return node.$save().$then(() => {
+            humane.success("Updated node");
+        }).$asPromise();
     }
 }
