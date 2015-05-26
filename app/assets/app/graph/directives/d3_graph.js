@@ -1,8 +1,8 @@
 angular.module("wust.graph").directive("d3Graph", d3Graph);
 
-d3Graph.$inject = ["$window"];
+d3Graph.$inject = ["$window", "DiscourseNode"];
 
-function d3Graph($window) {
+function d3Graph($window, DiscourseNode) {
     return {
         restrict: "A",
         scope: {
@@ -269,18 +269,36 @@ function d3Graph($window) {
             // maps elements to positions
             function tick(e) {
                 // push hypernodes towards the center between its start/end node
-                let k = 10 * e.alpha;
-                graph.nodes.forEach((o, i) => {
-                    if (o.hyperEdge === true) {
-                        let neighbours = graph.hyperNeighbours[o.id];
+                let hyperEdgePull = 10 * e.alpha;
+                let nodePull = 50 * e.alpha;
+                graph.nodes.forEach(node => {
+                    if (node.hyperEdge === true) {
+                        let neighbours = graph.hyperNeighbours[node.id];
                         let start = neighbours.start;
                         let end = neighbours.end;
                         let center = {
                             x: (start.x + end.x) / 2,
                             y: (start.y + end.y) / 2
                         };
-                        o.x += (center.x - o.x) * k;
-                        o.y += (center.y - o.y) * k;
+                        node.x += (center.x - node.x) * hyperEdgePull;
+                        node.y += (center.y - node.y) * hyperEdgePull;
+                    } else {
+                        switch(node.label) {
+                            case DiscourseNode.Goal.label:
+                                node.y += -1*nodePull;
+                                break;
+                            case DiscourseNode.Idea.label:
+                                node.y += 1*nodePull;
+                                break;
+                            case DiscourseNode.ProArgument.label:
+                                // node.y += 1*nodePull;
+                                node.x += 1*nodePull;
+                                break;
+                            case DiscourseNode.ConArgument.label:
+                                // node.y += 1*nodePull;
+                                node.x += -1*nodePull;
+                                break;
+                        }
                     }
                 });
 
