@@ -79,13 +79,11 @@ function d3Graph($window) {
                 .selectAll()
                 .data(graph.edges).enter()
                 .append("path")
-                .style("marker-end", "url(" + window.location.href + "#graph_arrow)")
+                .attr("class", "svglink")
                 .each(function(link) {
                     // if link is startRelation of a Hypernode
-                    if( link.target.hyperEdge && link.target.startId === link.source.id ) {
-                        d3.select(this).attr("class", "svglink");
-                    } else {
-                        d3.select(this).attr("class", "svglink graph_arrow");
+                    if( !(link.target.hyperEdge && link.target.startId === link.source.id) ) {
+                        d3.select(this).style("marker-end", "url(" + window.location.href + "#graph_arrow)");
                     }
                 });
 
