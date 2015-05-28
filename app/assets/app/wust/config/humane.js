@@ -10,6 +10,7 @@ function HumaneConfig() {
     });
 
     humane.success = humane.spawn({
+        addnCls: "humane-libnotify-info",
         timeout: 700
     });
 }
