@@ -123,71 +123,65 @@ function branchGraph(DiscourseNode) {
                 return [elem.offsetWidth, elem.offsetHeight];
             }
 
-            function findFreeShift(start, branches, maxWidth) {
-                let usedShifts = _(branches).reject(b => b.xShift === undefined).map(b => b.xShift).uniq().value();
-                let maxShift = _.max(usedShifts);
-                function free(shift) {return !_.contains(usedShifts, shift);}
+            function findFreeShift(parentY, parentX, maxYShifts, maxWidth) {
+                function free(x) {return maxYShifts[x] === undefined ? true : parentY >= maxYShifts[x];}
+                let maxShift = maxYShifts.length - 1;
                 let shiftL, shiftR;
 
-                let shift = start-1;
-                while( shift > 0 ) {
-                    if(free(shift)) {
-                        shiftL = shift;
+                let x = parentX-1;
+                while( x > 0 ) {
+                    if(free(x)) {
+                        shiftL = x;
                         break;
                     }
-                    shift--;
+                    x--;
                 }
 
-                shift = start+1;
-                while( shift < maxWidth ) {
-                    if(free(shift)) {
-                        shiftR = shift;
+                x = parentX;
+                while( x < maxWidth ) {
+                    if(free(x)) {
+                        shiftR = x;
                         break;
                     }
-                    shift++;
+                    x++;
                 }
                 if(shiftL !== undefined && shiftR !== undefined) {
                     if( shiftR <= maxShift )
-                        return (start - shiftL) > (shiftR - start) ? shiftR : shiftL;
+                        return (parentX - shiftL) > (shiftR - parentX) ? shiftR : shiftL;
                     else return shiftL;
+                } else {
+                    if(shiftR !== undefined) return shiftR;
+                    else if(shiftL !== undefined) return shiftL;
+                    else return maxWidth;
                 }
-                else return shiftR || shiftL || maxWidth;
             }
 
-            function positionNodePredecessors(branches, predecessorMap, showFirstOfAllBranches = false, maxWidth = 6, line = 0, nextBranchId = 0) {
+            function positionNodePredecessors(branches, predecessorMap, maxWidth = 6, maxYShifts = [], nextLine = 0, nextBranchId = 0) {
                 if(branches.length === 0) return;
 
-                let defaultBranch = _.last(branches);
-                let minNewBranch = _.min(branches, b => b.newBranch);
-                let current = showFirstOfAllBranches ?
-                    (minNewBranch === Infinity ? defaultBranch : minNewBranch)
-                    : defaultBranch;
+                let current = _.first(branches);
 
                 current.branch = current.branch !== undefined ? current.branch : nextBranchId++; // can be 0
+                current.line = current.line !== undefined ? current.line : nextLine++; // can be 0
                 current.xShift = current.xShift || 0;
-                current.line = line;
 
                 let predecessors = predecessorMap[current.id] || [];
+                let isLine = predecessors.length === 1;
 
                 // decide, which branch to take first
-                // predecessors = _.sortBy(predecessors, p => ...));
+                // predecessors = _.sortBy(predecessors, p => p.title);
 
-                if(predecessors.length > 0) {
-                    let first = _.first(predecessors);
-                    first.branch = predecessors.length === 1 ? current.branch : nextBranchId++;
-                    first.xShift = current.xShift;
-                }
-                if(predecessors.length > 1) {
+                if(predecessors.length > 0) { // more than one child
                     _.each(predecessors, (p,i) => {
-                            p.newBranch = line + (1-i/predecessors.length); // to know which branch to take next
-                        if( i > 0) { // only for tail
-                            p.branch = nextBranchId++;
-                            p.xShift = findFreeShift(current.xShift, branches.concat(predecessors), maxWidth);
-                        }
+                        p.branch = isLine ? current.branch : nextBranchId++; // TODO: not in loop
+                        p.line = nextLine++;
+                        p.xShift = findFreeShift(current.line, current.xShift, maxYShifts, maxWidth);
+                        maxYShifts[p.xShift] = p.line;
                     });
                 }
-                let nextBranches = _.without(branches, current).concat(predecessors);
-                positionNodePredecessors(nextBranches, predecessorMap, showFirstOfAllBranches, maxWidth, line + 1, nextBranchId);
+
+                let nextBranches = predecessors.concat(_.without(branches, current));
+                positionNodePredecessors(nextBranches, predecessorMap, maxWidth, maxYShifts, nextLine, nextBranchId);
             }
 
             function preprocessGraph(graph) {
@@ -202,7 +196,7 @@ function branchGraph(DiscourseNode) {
                 }, _)) || {};
 
                 let rootNode = _.find(graph.nodes, { id: scope.rootId });
-                positionNodePredecessors([rootNode], predecessorMap, true, 100);
+                positionNodePredecessors([rootNode], predecessorMap, 100);
 
                 scope.onDraw();
             }
