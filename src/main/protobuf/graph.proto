@@ -1,0 +1,40 @@
+message Graph {
+    repeated Node nodes = 1;
+    repeated Relation relations = 2;
+}
+
+message Node {
+    required UUID id = 1;
+    required string label = 2; // TODO: enum
+    required string title = 3;
+
+    optional string description = 4;
+
+    required bool hyperEdge = 10 [default = false]; //TODO: optional HyperEdge with startId/endId
+    optional UUID startId = 11;
+    optional UUID endId = 12;
+}
+
+message Relation {
+    required Label label = 1; //TODO: enum
+    required UUID startId = 1;
+    required UUID endId = 2;
+}
+
+message UUID {
+    required string uuid = 1;
+}
+
+/* enum Label { */
+/*     required string name = 1; */
+/*     /1* PROBLEM = 1; *1/ */
+/*     /1* IDEA = 2; *1/ */
+/*     /1* GOAL = 3; *1/ */
+/*     /1* PROARGUMENT = 4; *1/ */
+/*     /1* CONARGUMENT = 5; *1/ */
+
+/*     /1* UNTYPED = 15; *1/ */
+/* } */
+
+
+
