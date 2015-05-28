@@ -2,7 +2,7 @@
 GET / controllers.Application.index(any = "none")
 
 # Map static resources from the /public folder to the /assets URL path
-GET /assets/*file controllers.Assets.at(path="/public", file)
+GET /assets/*file controllers.Assets.versioned(path="/public", file:Asset)
 
 # Map api routes
 -> /api/v1 api.Routes
