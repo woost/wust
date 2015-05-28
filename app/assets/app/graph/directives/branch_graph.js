@@ -16,10 +16,22 @@ function branchGraph(DiscourseNode) {
     function link(scope, element) {
         // watch for changes in the ngModel
         scope.graph.$then(data => {
-            let [width, height] = getElementDimensions(element[0]);
 
             let graph = data; //TODO: was angular.copy(data). Publish graph more elegantly
-            preprocessGraph(graph);
+            preprocessGraph(graph); // assigns node positions in .line and .xShift
+
+            let radius = 10;
+            let border = 3;
+            let verticalDistance = 40;
+            let horizontalDistance = radius + 2*border + 2;
+            let paddingLeft = border + radius;
+            let paddingTop = border + radius;
+            let paddingBottom = border + radius;
+            let paddingRight = border + radius;
+            function branchColor(branch) {return d3.scale.category10().range()[branch % 10];}
+
+            let width = paddingLeft + _.max(graph.nodes, n => n.xShift).xShift*horizontalDistance + paddingRight;
+            let height = paddingTop + _.max(graph.nodes, n => n.line).line*verticalDistance + paddingBottom;
 
             // construct svg
             let svg = d3.select(element[0])
@@ -38,11 +50,6 @@ function branchGraph(DiscourseNode) {
                 .append("svg:path")
                 .attr("d", "M 0,-3 L 10,-0.5 L 10,0.5 L0,3");
 
-            let radius = 10;
-            let border = 3;
-            let verticalDistance = 40;
-            let paddingTop = 10;
-            function branchColor(branch) {return d3.scale.category10().range()[branch % 10];}
 
             let linksvg = svg.append("g").attr("id","group_links")
                 .selectAll()
@@ -55,8 +62,8 @@ function branchGraph(DiscourseNode) {
                 .selectAll()
                 .data(graph.nodes).enter()
                 .append("circle")
-                .attr("cx", d => {d.x = border + (1 + d.xShift) * (radius + 2*border + 2); return d.x;})
-                .attr("cy", d => {d.y = paddingTop + border + radius + d.line * verticalDistance; return d.y;})
+                .attr("cx", d => {d.x = paddingLeft + d.xShift * horizontalDistance; return d.x;})
+                .attr("cy", d => {d.y = paddingTop + d.line * verticalDistance; return d.y;})
                 .attr("r", radius)
                 .attr("class", d => d.hyperEdge ? "relation_label" : "branch_node " + DiscourseNode.get(d.label).css)
                 .style("stroke", d => branchColor(d.branch))
