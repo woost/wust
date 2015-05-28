@@ -1,5 +1,3 @@
-import sbt.Project.projectToRef
-
 name := "wust"
 
 val scalaV = "2.11.6"
@@ -55,6 +53,11 @@ lazy val wust = (project in file(".")).settings(
   // use compass with sbt-sass
   sassOptions in Assets ++= Seq("--compass", "-r", "compass", "-r", "sass-globbing", "--update", "./app/assets:./target/web/public/main"),
   // scalaJSProjects := Seq(scalajs),
+  pipelineStages := Seq(/*closure, */ cssCompress, digest, gzip),
+  excludeFilter in gzip := (excludeFilter in gzip).value || new SimpleFileFilter(file => new File(file.getAbsolutePath + ".gz").exists), // do not compress assets for which a gzipped version already exists
+  // includeFilter in closure := (includeFilter in closure).value && new SimpleFileFilter(f => f.getName.contains("main.js") ),
+  // Closure.flags := Seq("--language_in=ECMASCRIPT5"),
+  includeFilter in cssCompress := (includeFilter in cssCompress).value && new SimpleFileFilter(f => f.getName.contains("app")),
   scalacOptions ++= scalacOpts
 ).
   enablePlugins(PlayScala, SbtWeb)
