@@ -20,8 +20,8 @@ sealed trait ConnectSchema[-NODE <: UuidNode] {
   val op: RelationAccess[NODE,_ <: UuidNode]
 }
 
-sealed trait PlainConnectSchema[BASE <: UuidNode] extends ConnectSchema[BASE]
-sealed trait HyperConnectSchema[BASE <: UuidNode] extends ConnectSchema[BASE]
+sealed trait PlainConnectSchema[-BASE <: UuidNode] extends ConnectSchema[BASE]
+sealed trait HyperConnectSchema[-BASE <: UuidNode] extends ConnectSchema[BASE]
 
 case class StartConnectSchema[
   START <: UuidNode,

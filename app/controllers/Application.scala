@@ -9,7 +9,7 @@ import play.api.mvc._
 object Application extends Controller {
   //TODO create embedding type RequestSchema(ApiDefinition, Seq[NodeSchema])
   val apiDefinition = ApiDefinition("/api/v1", "/live/v1");
-  val nodeSchemas = Seq(Goals, Problems, Ideas, ProArguments, ConArguments, Users, Untypeds, ContentNodes).map(_.nodeSchema)
+  val nodeSchemas = Seq(Posts, Users).map(_.nodeSchema)
 
   def index(any: String) = Action {
     Ok(views.html.index(JsObject(Seq(

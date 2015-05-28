@@ -10,7 +10,7 @@ object WustSchema {
   // TODO: custom local methods for NodeFactory
   // TODO: annotation for hidden defaults?
 
-@Group trait Discourse {List(User, UserGroup, Problem, Idea, Goal, ProArgument, ConArgument, Untyped) }
+  @Group trait Discourse {List(User, UserGroup, Post, Tag, Scope) }
   @Group trait Auth {List(User, LoginInfo, PasswordInfo) }
 
   @Node trait UuidNode {
@@ -46,30 +46,26 @@ object WustSchema {
     var description: Option[String]
   }
 
+  @Node trait Categorizes extends UuidNode
+
+  @Node class Tag extends ContentNode
+  @Node class Post extends ContentNode
+  @Node class Scope extends ContentNode
+
   @Relation trait ContentRelation
 
-  //TODO: generate indirect neighbour-accessors based on hyperrelations
-  @Node class Untyped extends ContentNode
-  @Node class Goal extends ContentNode
-  @Node class Problem extends ContentNode
-  @Node class Idea extends ContentNode
-  @Node class ProArgument extends ContentNode
-  @Node class ConArgument extends ContentNode
+  @HyperRelation class CategorizesScope(startNode: Tag, endNode: Scope) extends Categorizes with ContentRelation
+  @HyperRelation class CategorizesPost(startNode: Tag, endNode: Post) extends Categorizes with ContentRelation
+  @HyperRelation class CategorizesConnects(startNode: Tag, endNode: Connects) extends Categorizes with ContentRelation
 
-  @Relation class Refers(startNode: ContentNode, endNode: ContentNode) extends ContentRelation
+  @Relation class TaggingAction(startNode: User, endNode: Categorizes)
 
-  @Relation class SubIdea(startNode: Idea, endNode: Idea) extends ContentRelation
-  @Relation class SubGoal(startNode: Goal, endNode: Goal) extends ContentRelation
-  @Relation class Causes(startNode: Problem, endNode: Problem) extends ContentRelation
+  @Relation class Belongs(startNode: Post, endNode: Scope)
 
-  @Relation class Prevents(startNode: Problem, endNode: Goal) extends ContentRelation
-  @HyperRelation class Solves(startNode: Idea, endNode: Problem) extends ContentRelation with UuidNode
-  @HyperRelation class Achieves(startNode: Idea, endNode: Goal) extends ContentRelation with UuidNode
+  //TODO: restrict to Posts and Connects itself
+  @HyperRelation class Connects(startNode: UuidNode, endNode: UuidNode) extends UuidNode with ContentRelation
 
-  @Relation class SupportsSolution(startNode: ProArgument, endNode: Solves) extends ContentRelation
-  @Relation class OpposesSolution(startNode: ConArgument, endNode: Solves) extends ContentRelation
-  @Relation class SupportsAchievement(startNode: ProArgument, endNode: Achieves) extends ContentRelation
-  @Relation class OpposesAchievement(startNode: ConArgument, endNode: Achieves) extends ContentRelation
+  @HyperRelation class Inherits(startNode: ContentNode, endNode: ContentNode) extends UuidNode with ContentRelation
 
   @Relation class Contributes(startNode: User, endNode: ContentNode) {
     val createdAt: Long = System.currentTimeMillis

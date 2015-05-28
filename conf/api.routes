@@ -4,13 +4,7 @@ POST   /auth/signup               controllers.api.auth.SignUpController.signUp
 GET    /auth/signout              controllers.api.auth.SignUpController.signOut
 
 # discourse node api
--> /contentnodes controllers.api.ContentNodes
--> /untypeds controllers.api.Untypeds
--> /goals controllers.api.Goals
--> /problems controllers.api.Problems
--> /ideas controllers.api.Ideas
--> /pros controllers.api.ProArguments
--> /cons controllers.api.ConArguments
+-> /posts controllers.api.Posts
 
 -> /users controllers.api.Users
 
