@@ -1,8 +1,8 @@
 package model
 
-import com.mohiva.play.silhouette.api.services.AuthInfo
-import renesca.schema.macros
 import com.mohiva.play.silhouette.api.Identity
+import common.Helpers
+import renesca.schema.macros
 
 @macros.GraphSchema
 object WustSchema {
@@ -14,7 +14,7 @@ object WustSchema {
   @Group trait Auth {List(User, LoginInfo, PasswordInfo) }
 
   @Node trait UuidNode {
-    val uuid: String = java.util.UUID.randomUUID.toString
+    val uuid: String = Helpers.uuidBase64
   }
 
   @Node class UserGroup extends UuidNode {

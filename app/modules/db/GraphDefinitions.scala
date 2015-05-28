@@ -1,5 +1,6 @@
 package modules.db
 
+import common.Helpers
 import model.WustSchema.{ContentRelationFactory, UuidNode}
 import renesca.parameter.ParameterMap
 import renesca.parameter.implicits._
@@ -7,7 +8,7 @@ import renesca.schema._
 
 package object types {
 
-  type UuidHyperNodeDefinitionBase[NODE <: Node] = HyperNodeDefinition[_,_,_, _ <: UuidNodeDefinition[_], _ <: UuidNodeDefinition[_]] with HyperNodeDefinitionBase[NODE]
+  type UuidHyperNodeDefinitionBase[NODE <: Node] = HyperNodeDefinition[_, _, _, _ <: UuidNodeDefinition[_], _ <: UuidNodeDefinition[_]] with HyperNodeDefinitionBase[NODE]
 
   type ContentRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _, _, _ <: ContentRelationFactory[START, RELATION, END]]
 
@@ -36,7 +37,7 @@ sealed trait GraphDefinition {
   final val name = randomVariable
   def parameterMap: ParameterMap = Map.empty
 
-  protected def randomVariable = "V" + java.util.UUID.randomUUID.toString.replace("-", "")
+  protected def randomVariable = "V" + Helpers.uuidBase64.replace("-", "") // "-" is not allowed as variable identifier
 }
 
 sealed trait NodeDefinition[+NODE <: Node] extends GraphDefinition
@@ -58,28 +59,28 @@ sealed trait UuidNodeDefinition[+NODE <: UuidNode] extends FixedNodeDefinition[N
 case class FactoryUuidNodeDefinition[+NODE <: UuidNode](
   factory: NodeFactory[NODE],
   uuid: String
-) extends UuidNodeDefinition[NODE] with FactoryNodeDefinition[NODE] {
+  ) extends UuidNodeDefinition[NODE] with FactoryNodeDefinition[NODE] {
 
-  def toQuery = s"($name: `${factory.label}` {uuid: {$uuidVariable}})"
+  def toQuery = s"($name: `${ factory.label }` {uuid: {$uuidVariable}})"
 }
 
 case class ConcreteFactoryNodeDefinition[+NODE <: UuidNode](
   factory: NodeFactory[NODE]
   ) extends FactoryNodeDefinition[NODE] {
-  def toQuery = s"($name: `${factory.label}`)"
+  def toQuery = s"($name: `${ factory.label }`)"
 }
 
 case class ConcreteNodeDefinition[+NODE <: UuidNode](
   node: NODE
-) extends UuidNodeDefinition[NODE] {
+  ) extends UuidNodeDefinition[NODE] {
   val uuid = node.uuid
 
-  def toQuery = s"($name: `${node.label}` {uuid: {$uuidVariable}})"
+  def toQuery = s"($name: `${ node.label }` {uuid: {$uuidVariable}})"
 }
 
 case class AnyUuidNodeDefinition[+NODE <: UuidNode](
   uuid: String
-) extends UuidNodeDefinition[NODE] {
+  ) extends UuidNodeDefinition[NODE] {
 
   def toQuery = s"($name {uuid: {$uuidVariable}})"
 }
@@ -87,7 +88,7 @@ case class AnyUuidNodeDefinition[+NODE <: UuidNode](
 case class LabelNodeDefinition[+NODE <: Node](
   factory: NodeFactory[NODE]) extends NodeDefinition[NODE] {
 
-  def toQuery = s"($name: `${factory.label}`)"
+  def toQuery = s"($name: `${ factory.label }`)"
 }
 
 case class AnyNodeDefinition[+NODE <: Node]() extends NodeDefinition[NODE] {
@@ -95,15 +96,15 @@ case class AnyNodeDefinition[+NODE <: Node]() extends NodeDefinition[NODE] {
 }
 
 sealed trait RelationDefinitionBase[
-  START <: Node,
-  RELATION <: AbstractRelation[START,END],
-  END <: Node,
-  +STARTDEF <: NodeDefinition[START],
-  +ENDDEF <: NodeDefinition[END],
-  +FACTORY <: AbstractRelationFactory[_ <: Node,_ <: AbstractRelation[_,_], _ <: Node]
+START <: Node,
+RELATION <: AbstractRelation[START, END],
+END <: Node,
++STARTDEF <: NodeDefinition[START],
++ENDDEF <: NodeDefinition[END],
++FACTORY <: AbstractRelationFactory[_ <: Node, _ <: AbstractRelation[_, _], _ <: Node]
 ] extends GraphDefinition {
   val startDefinition: STARTDEF
-  val factory: AbstractRelationFactory[START,RELATION,END] with FACTORY
+  val factory: AbstractRelationFactory[START, RELATION, END] with FACTORY
   val endDefinition: ENDDEF
 
   private def relationMatcher = factory match {
@@ -112,8 +113,8 @@ sealed trait RelationDefinitionBase[
   }
 
   private def nodeMatcher(nodeDefinition: NodeDefinition[_]) = nodeDefinition match {
-    case r: HyperNodeDefinition[_,_,_,_,_] => (Some(r.toQuery), s"(${r.name})")
-    case r => (None, r.toQuery)
+    case r: HyperNodeDefinition[_, _, _, _, _] => (Some(r.toQuery), s"(${ r.name })")
+    case r                                     => (None, r.toQuery)
   }
 
   override def parameterMap = startDefinition.parameterMap ++ endDefinition.parameterMap
@@ -128,25 +129,25 @@ sealed trait RelationDefinitionBase[
 }
 
 case class HyperNodeDefinition[
-  START <: UuidNode,
-  RELATION <: AbstractRelation[START,END] with Node,
-  END <: UuidNode,
-  STARTDEF <: FixedNodeDefinition[START],
-  ENDDEF <: FixedNodeDefinition[END]
+START <: UuidNode,
+RELATION <: AbstractRelation[START, END] with Node,
+END <: UuidNode,
+STARTDEF <: FixedNodeDefinition[START],
+ENDDEF <: FixedNodeDefinition[END]
 ](
   startDefinition: STARTDEF,
   factory: AbstractRelationFactory[START, RELATION, END] with NodeFactory[RELATION],
-  endDefinition: ENDDEF) extends HyperNodeDefinitionBase[RELATION] with RelationDefinitionBase[START,RELATION,END,STARTDEF,ENDDEF,AbstractRelationFactory[START,RELATION,END]]
+  endDefinition: ENDDEF) extends HyperNodeDefinitionBase[RELATION] with RelationDefinitionBase[START, RELATION, END, STARTDEF, ENDDEF, AbstractRelationFactory[START, RELATION, END]]
 
 case class RelationDefinition[
-  START <: Node,
-  RELATION <: AbstractRelation[START,END],
-  END <: Node,
-  STARTDEF <: NodeDefinition[START],
-  ENDDEF <: NodeDefinition[END],
-  FACTORY <: AbstractRelationFactory[_ <: Node, _ <: AbstractRelation[_ <: Node, _ <: Node], _ <: Node]
+START <: Node,
+RELATION <: AbstractRelation[START, END],
+END <: Node,
+STARTDEF <: NodeDefinition[START],
+ENDDEF <: NodeDefinition[END],
+FACTORY <: AbstractRelationFactory[_ <: Node, _ <: AbstractRelation[_ <: Node, _ <: Node], _ <: Node]
 ](
   startDefinition: STARTDEF,
-  factory: AbstractRelationFactory[START,RELATION,END] with FACTORY,
-  endDefinition: ENDDEF) extends RelationDefinitionBase[START,RELATION,END,STARTDEF,ENDDEF,AbstractRelationFactory[START,RELATION,END] with FACTORY]
+  factory: AbstractRelationFactory[START, RELATION, END] with FACTORY,
+  endDefinition: ENDDEF) extends RelationDefinitionBase[START, RELATION, END, STARTDEF, ENDDEF, AbstractRelationFactory[START, RELATION, END] with FACTORY]
 
