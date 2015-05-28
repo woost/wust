@@ -1,22 +1,40 @@
-angular.module("wust.api").service("CacheService", CacheService);
+angular.module("wust.api").factory("CacheService", CacheService);
 
 CacheService.$inject = ["$rootScope"];
 
 function CacheService($rootScope) {
-    this.get = getCache;
-    this.set = setCache;
+    class Cache {
+        constructor() {
+            this.cache = {};
+        }
 
-    //TODO: use local storage
-    let cache = {};
+        get(key) {
+            return this.cache[key];
+        }
 
-    function getCache(key) {
-        return cache[key];
+        put(key, value) {
+            this.cache[key] = value;
+            value.$then(subscribe);
+        }
     }
 
-    function setCache(key, value) {
-        cache[key] = value;
-        subscribe(value);
+    class CacheScope {
+        constructor() {
+            this.cache = {};
+        }
+
+        get(key) {
+            let cached = this.cache[key];
+            if (cached === undefined) {
+                cached = new Cache();
+                this.cache[key] = cached;
+            }
+
+            return cached;
+        }
     }
+
+    return new Cache();
 
     function subscribe(response) {
         if (response.$subscribeToLiveEvent === undefined)
