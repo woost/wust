@@ -14,6 +14,8 @@ function branchGraph(DiscourseNode) {
     };
 
     function link(scope, element) {
+        let onDraw = scope.onDraw || _.noop;
+
         // watch for changes in the ngModel
         scope.graph.$then(data => {
 
@@ -205,7 +207,7 @@ function branchGraph(DiscourseNode) {
                 let rootNode = _.find(graph.nodes, { id: scope.rootId });
                 positionNodePredecessors([rootNode], predecessorMap, 100);
 
-                scope.onDraw();
+                onDraw();
             }
 
         });

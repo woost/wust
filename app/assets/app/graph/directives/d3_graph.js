@@ -8,12 +8,14 @@ function d3Graph($window, DiscourseNode) {
         scope: {
             graph: "=",
             onClick: "&",
+            onDraw: "&"
         },
         link: link
     };
 
     function link(scope, element) {
-        let onDoubleClick = scope.onClick() || _.noop;
+        let onDoubleClick = scope.onClick || _.noop;
+        let onDraw = scope.onDraw || _.noop;
 
         // watch for changes in the ngModel
         scope.graph.$then(data => {
@@ -162,6 +164,8 @@ function d3Graph($window, DiscourseNode) {
                     focusMarkedNodes(0);
                     drawGraph();
                     svg.style("visibility", "visible");
+
+                    onDraw();
                 }
             }
 

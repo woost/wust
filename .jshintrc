@@ -75,6 +75,7 @@
         "angular",
         "atmosphere",
         "d3",
-        "humane"
+        "humane",
+        "Lodium"
     ]
 }

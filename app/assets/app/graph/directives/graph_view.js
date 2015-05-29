@@ -20,6 +20,8 @@ graphViewCtrl.$inject = ["$scope", "DiscourseNode", "$filter"];
 function graphViewCtrl($scope, DiscourseNode, $filter) {
     let vm = this;
 
+    vm.graphLoading = true;
+    vm.onDraw = onDraw;
     vm.onClick = onClick;
     vm.search = {
         title: ""
@@ -42,5 +44,9 @@ function graphViewCtrl($scope, DiscourseNode, $filter) {
 
     function onClick(d) {
         DiscourseNode.get(d.label).gotoState(d.id);
+    }
+
+    function onDraw() {
+        $scope.$apply(() => vm.graphLoading = false);
     }
 }
