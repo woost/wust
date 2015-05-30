@@ -1,15 +1,9 @@
 @import "compass/css3/flexbox";
 
-$split-button-size: 16px;
-
 #dashboard_component {
-    padding: 50px;
     height: 100%;
     position: relative;
     #posts_view {
-        #create_new {
-            width: 30%;
-        }
         #list_existing {
             margin: 0 auto;
             width: 70%;
@@ -23,21 +17,5 @@ $split-button-size: 16px;
         }
     }
     .widget {
-    }
-    .ui-splitbar {
-        background: #f8f8f8;
-    }
-    .ui-layout-column > .ui-splitbar {
-        width: $split-button-size !important;
-    }
-    .ui-layout-row > .ui-splitbar {
-        height: $split-button-size !important;
-    }
-    .glyphicon-chevron-left,
-    .glyphicon-chevron-right,
-    .glyphicon-chevron-up,
-    .glyphicon-chevron-down {
-        font-size: $split-button-size;
-        color: #aaa;
     }
 }

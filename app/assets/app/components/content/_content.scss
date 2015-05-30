@@ -1,0 +1,52 @@
+#content {
+    height: inherit;
+    #scratchpad_toggle {
+        position: fixed;
+        left: 0px;
+        bottom: 100px;
+        width: 50%;
+    }
+    #content_view {
+        height: inherit;
+        position: relative;
+        #scratchpad {
+            height: inherit;
+            #create_new {
+                max-width: 300px;
+            }
+            &.ng-hide-add {
+                -webkit-animation: fadeOutLeft 1s;
+                -moz-animation: fadeOutLeft 1s;
+                -ms-animation: fadeOutLeft 1s;
+                -o-animation: fadeOutLeft 1s;
+                animation: fadeOutLeft 1s;
+            }
+            &.ng-hide-remove {
+                -webkit-animation: fadeInLeft 1s;
+                -moz-animation: fadeInLeft 1s;
+                -ms-animation: fadeInLeft 1s;
+                -o-animation: fadeInLeft 1s;
+                animation: fadeInLeft 1s;
+            }
+        }
+        & > .ng-scope {
+            height: 100%;
+        }
+        .ui-splitbar {
+            background: #f8f8f8;
+        }
+        .ui-layout-container {
+            height: inherit;
+            #page_view {
+                height: inherit;
+            }
+        }
+        .glyphicon-chevron-left,
+        .glyphicon-chevron-right,
+        .glyphicon-chevron-up,
+        .glyphicon-chevron-down {
+            font-size: 16px;
+            color: #aaa;
+        }
+    }
+}

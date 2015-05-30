@@ -1,0 +1,23 @@
+<div id="content">
+    <div ui-layout="{flow: 'column', dividerSize: 16}" id="content_view">
+        <div ui-layout-container ng-show="vm.scratchpad.visible" id="scratchpad">
+            <h2>Wust your Post:</h2>
+            <form ng-submit="vm.adder.addNode()" id="create_new" class="center-block">
+                <div class="input-group">
+                    <input type="text" class="form-control" ng-model="vm.adder.newNode.title" required>
+                    <span class="input-group-btn">
+                        <button type="submit" class="btn btn-success"><i class="fa fa-plus"></i> </button>
+                    </span>
+                </div>
+            </form>
+        </div>
+
+        <div ui-layout-container>
+            <div id="page_view" ui-view></div>
+        </div>
+    </div>
+
+    <div id="scratchpad_toggle">
+        <button class='btn btn-default' ng-click='vm.scratchpad.visible = !vm.scratchpad.visible'><i class='fa fa-pencil-square-o'></i></button>
+    </div>
+</div>

@@ -2,27 +2,17 @@
     <div>
         <div ui-layout>
             <div ui-layout-container id="posts_view" class="widget">
-                <h2 ng-bind="vm.slide.listTitle"></h2>
+                <h2>Existing Posts</h2>
                 <div id="list_existing">
-                    <div ng-repeat="node in vm.slide.nodes | fuzzyFilter:vm.slide.newNode">
-                        <a ui-sref="{{vm.slide.info.getState(node.id)}}" ng-class="vm.slide.info.css" class="node">{{node.title}}</a>
+                    <div ng-repeat="node in vm.stream.nodes">
+                        <a ui-sref="{{vm.stream.info.getState(node.id)}}" ng-class="vm.stream.info.css" class="node">{{node.title}}</a>
                     </div>
                 </div>
             </div>
 
             <div ui-layout-container>
                 <div ui-layout="{flow : 'column'}" >
-                    <div ui-layout-container class="widget">
-                        <h2 ng-bind="vm.slide.newTitle"></h2>
-                        <form ng-submit="vm.slide.addNode()">
-                            <div class="input-group">
-                                <input type="text" class="form-control" ng-model="vm.slide.newNode.title" required>
-                                <span class="input-group-btn">
-                                    <button type="submit" class="btn btn-success"><i class="fa fa-plus"></i> </button>
-                                </span>
-                            </div>
-                        </form>
-                    </div>
+                    <div ui-layout-container class="widget"></div>
                     <div ui-layout-container class="widget"></div>
                     <div ui-layout-container class="widget"></div>
                 </div>

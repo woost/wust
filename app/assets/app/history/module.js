@@ -1,3 +1,1 @@
-angular.module("wust.history", [
-    "wust.discourse"
-]);
+angular.module("wust.history", []);

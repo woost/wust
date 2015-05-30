@@ -12,7 +12,8 @@ function RoutesConfig($stateProvider, $urlRouterProvider, $locationProvider, Dis
                 controller: "NavigationCtrl as vm",
             },
             "content": {
-                template: "<div ui-view></div>",
+                templateUrl: `${templateBase}/content/content.html`,
+                controller: "ContentCtrl as vm",
             },
             "footer": {
                 templateUrl: `${templateBase}/footer/footer.html`,

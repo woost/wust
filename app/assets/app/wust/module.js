@@ -5,5 +5,6 @@ angular.module("wust", [
     "ui.router",
     "wust.api",
     "wust.discourse",
+    "wust.scratchpad",
     "wust.components"
 ]);
