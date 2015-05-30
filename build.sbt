@@ -28,7 +28,7 @@ lazy val wust = (project in file(".")).settings(
     "org.webjars" % "animate.css" % "3.2.5",
     "org.webjars.bower" % "bootstrap-css-only" % "3.3.4",
     "org.webjars" % "font-awesome" % "4.3.0-1",
-    "org.webjars.bower" % "lodium" % "0.1.1",
+    "org.webjars.bower" % "lodium" % "0.1.2",
     // js auth
     "org.webjars.bower" % "angular-jwt" % "0.0.7",
     "org.webjars.bower" % "a0-angular-storage" % "0.0.9",
