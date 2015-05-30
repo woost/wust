@@ -10,7 +10,7 @@ object WustSchema {
   // TODO: custom local methods for NodeFactory
   // TODO: annotation for hidden defaults?
 
-  @Group trait Discourse {List(User, UserGroup, Post, Tag, Scope) }
+  @Group trait Discourse {List(User, UserGroup, Post, Tag, Scope, Connects, Inherits) }
   @Group trait Auth {List(User, LoginInfo, PasswordInfo) }
 
   @Node trait UuidNode {
@@ -41,10 +41,11 @@ object WustSchema {
   @Relation class HasLogin(startNode: User, endNode: LoginInfo)
   @Relation class HasPassword(startNode: LoginInfo, endNode: PasswordInfo)
 
-  @Node trait ContentNode extends UuidNode {
+  @Node trait ContentNode extends PostLike {
     var title: String
     var description: Option[String]
   }
+  @Node trait PostLike extends UuidNode
 
   @Node trait Categorizes extends UuidNode
 
@@ -63,9 +64,9 @@ object WustSchema {
   @Relation class Belongs(startNode: Post, endNode: Scope)
 
   //TODO: restrict to Posts and Connects itself
-  @HyperRelation class Connects(startNode: UuidNode, endNode: UuidNode) extends UuidNode with ContentRelation
+  @HyperRelation class Connects(startNode: PostLike, endNode: PostLike) extends PostLike with ContentRelation
 
-  @HyperRelation class Inherits(startNode: ContentNode, endNode: ContentNode) extends UuidNode with ContentRelation
+  @HyperRelation class Inherits(startNode: ContentNode, endNode: ContentNode) extends PostLike with ContentRelation
 
   @Relation class Contributes(startNode: User, endNode: ContentNode) {
     val createdAt: Long = System.currentTimeMillis
