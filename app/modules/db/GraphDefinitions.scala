@@ -109,7 +109,7 @@ END <: Node,
 
   private def relationMatcher = factory match {
     case r: RelationFactory[_, RELATION, _]            => s"[$name :`${ r.relationType }`]"
-    case r: HyperRelationFactory[_, _, RELATION, _, _] => s"[`${ r.startRelationType }`]->($name :`${ r.label }`)-[`${ r.endRelationType }`]"
+    case r: HyperRelationFactory[_, _, RELATION, _, _] => s"[:`${ r.startRelationType }`]->($name :`${ r.label }`)-[:`${ r.endRelationType }`]"
   }
 
   private def nodeMatcher(nodeDefinition: NodeDefinition[_]) = nodeDefinition match {
@@ -128,6 +128,8 @@ END <: Node,
   }
 }
 
+// TODO: allow hypernodedefinitions with unfixed nodedefinitions as start and end node.
+// -> should be enforced with a typealias FixedHyperNodeDefinition
 case class HyperNodeDefinition[
 START <: UuidNode,
 RELATION <: AbstractRelation[START, END] with Node,
