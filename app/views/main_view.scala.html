@@ -1,6 +1,13 @@
 <div id="navigation_view" ui-view="navigation"></div>
 <main role="main">
-    <div route-loading-indicator></div>
-    <div id="main_view" ng-if='!isRouteLoading' ui-view="content"></div>
+    <div id="main_layout_view" ui-layout="{flow : 'column', dividerSize: 16}" >
+        <div ui-layout-container>
+            <div id="scratchpad_view" class="route_animation" ui-view="scratchpad"></div>
+        </div>
+        <div ui-layout-container>
+            <div route-loading-indicator></div>
+            <div id="main_view" class="route_animation" ng-show='!isRouteLoading' ui-view="content"></div>
+        </div>
+    </div>
 </main>
 <div id="footer_view" ui-view="footer"></div>

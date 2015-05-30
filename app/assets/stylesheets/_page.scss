@@ -18,12 +18,20 @@ html, body {
     min-width: 600px;
     height: 100%;
     main {
-        padding: 50px 0px 30px 0px;
         height: inherit;
-        #main_view {
-            overflow: auto;
+        padding: 50px 0px 30px 0px;
+        #main_layout_view {
             height: inherit;
-            & > .ng-enter {
+            position: relative;
+            & > .ui_layout_container {
+            }
+            #main_view, #scratchpad_view {
+                height: 100%;
+                & > .ng-scope {
+                    height: inherit;
+                }
+            }
+            .route_animation > .ng-enter {
                 $time: 0.5s;
                 -webkit-animation: fadeIn $time;
                 -moz-animation: fadeIn $time;
@@ -34,14 +42,11 @@ html, body {
                 // @import "compass/css3/animation";
                 // @include animation(fadeIn, 5.5s);
             }
-            & > .ng-scope {
-                height: inherit;
-            }
         }
     }
     #noscriptmsg {
         margin: 20px auto;
-        width: 40%;
+        width: 300px;
         background-color: seagreen;
         color: white;
         text-align: center;

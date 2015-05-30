@@ -11,9 +11,12 @@ function RoutesConfig($stateProvider, $urlRouterProvider, $locationProvider, Dis
                 templateUrl: `${templateBase}/navigation/navigation.html`,
                 controller: "NavigationCtrl as vm",
             },
+            "scratchpad": {
+                templateUrl: `${templateBase}/scratchpad/scratchpad.html`,
+                controller: "ScratchpadCtrl as vm",
+            },
             "content": {
-                templateUrl: `${templateBase}/content/content.html`,
-                controller: "ContentCtrl as vm",
+                template: "<div ui-view></div>",
             },
             "footer": {
                 templateUrl: `${templateBase}/footer/footer.html`,
