@@ -49,7 +49,7 @@ function Schema($provide, LiveProvider, restmodProvider) {
         });
 
         function subscribe(liveService, handler, nested = "") {
-            let url = this.$url().slice(schema.api.restRoot.length + 1) + "/" + _.kebabCase(nested);
+            let url = this.$url().slice(schema.api.restRoot.length + 1) + (nested ? "/" + _.kebabCase(nested) : "");
             return liveService.subscribe(url, handler);
         }
     }

@@ -24,11 +24,7 @@ function Live() {
         function subscribe(url, handler) {
             let newRequest = _.merge({
                 url: location.origin + `${baseUrl}/${url}`,
-                onMessage: response => {
-                    let json = JSON.parse(response.responseBody);
-                    console.log(json);
-                    handler(json);
-                },
+                onMessage,
                 onOpen: response => {
                     console.log("Atmosphere connected on " + url + " (" + response.transport + ")");
                 }
@@ -37,10 +33,23 @@ function Live() {
             console.log("subscribing to " + url);
             atmosphere.subscribe(newRequest);
 
-            return () => {
+            return unsubscribe;
+
+            function unsubscribe() {
                 console.log("unsubscribing " + url);
                 atmosphere.unsubscribe(newRequest);
-            };
+            }
+
+            function onMessage(response) {
+                try {
+                    var json = JSON.parse(response.responseBody);
+                    console.log("incoming message", json);
+                    handler(json);
+                } catch(e) {
+                    console.warn(`illegal message received from atmosphere, will unsubscribe '${url}' now`, response, e);
+                    unsubscribe();
+                }
+            }
         }
 
         return {
