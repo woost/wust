@@ -42,8 +42,8 @@ function graphViewCtrl($scope, DiscourseNode, $filter) {
         $scope.$broadcast("d3graph_filter", filtered);
     }
 
-    function onClick(d) {
-        DiscourseNode.get(d.label).gotoState(d.id);
+    function onClick(node) {
+        DiscourseNode.get(node.label).gotoState(node.id);
     }
 
     function onDraw() {

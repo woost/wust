@@ -110,7 +110,7 @@ function d3Graph($window, DiscourseNode) {
                 .data(graph.nodes).enter()
                 .append("g")
                 .call(drag)
-                .on("dblclick", ignoreHyperEdge(onDoubleClick));
+                .on("dblclick", ignoreHyperEdge(node => onDoubleClick({ node })));
 
             let nodeFo = node.append("foreignObject")
                 .style("text-align", "center");
