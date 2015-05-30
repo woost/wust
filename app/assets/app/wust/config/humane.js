@@ -5,7 +5,7 @@ HumaneConfig.$inject = [];
 function HumaneConfig() {
     humane.error = humane.spawn({
         addnCls: "humane-libnotify-error",
-        timeout: 0,
+        timeout: 10000,
         clickToClose: true
     });
 
