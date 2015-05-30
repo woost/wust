@@ -1,5 +1,6 @@
 <div id="navigation_view" ui-view="navigation"></div>
 <main role="main">
-    <div id="main_view" ui-view="content"></div>
+    <div route-loading-indicator></div>
+    <div id="main_view" ng-if='!isRouteLoading' ui-view="content"></div>
 </main>
 <div id="footer_view" ui-view="footer"></div>
