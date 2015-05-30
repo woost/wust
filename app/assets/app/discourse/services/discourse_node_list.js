@@ -3,6 +3,10 @@ angular.module("wust.discourse").provider("DiscourseNodeList", DiscourseNodeList
 DiscourseNodeList.$inject = [];
 
 function DiscourseNodeList() {
+    //TODO: move title out of discourse_node_list, should be individually set by the caller
+    //TODO: input list or input service?
+    //TODO: should handle event subscriptions?
+    //TODO: take complete collection with nested nodes?
     let nodeListDefs = {};
     this.setList = setList;
     this.$get = get;
@@ -83,7 +87,7 @@ function DiscourseNodeList() {
                         let nestedList = node.nestedNodeLists[i];
                         onConnectionChange(nestedList.model, m);
                     }
-                }, `/${list.servicePath}`));
+                }, list.servicePath));
 
                 unsubscribeFuncs.push(this.list.$subscribeToLiveEvent(m => onConnectionChange(this, m)));
 

@@ -1,13 +1,9 @@
 @import "compass/css3/flexbox";
 
-#browse_component {
-    height: inherit;
+#dashboard_component {
     text-align: center;
-    #carousel {
-        min-height: 100%;
-        #slide_stripe {
-            margin: 5px;
-        }
+    #posts_view {
+        padding: 50px;
         #create_new {
             margin-left: auto;
             margin-right: auto;

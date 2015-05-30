@@ -87,8 +87,8 @@
     @include discourse_node($discourse_conargument_color, ""); // thumbsdown
 }
 
-.discourse_untyped {
-    @include discourse_node($discourse_untyped_color, ""); // comment
+.discourse_post {
+    @include discourse_node($discourse_post_color, ""); // comment
 }
 
 .discourse_user {
@@ -125,9 +125,9 @@
     }
 }
 
-.discourse_untyped_list {
+.discourse_post_list {
     .node_model_list.on-drag-enter {
-        background-color: $discourse_untyped_color;
+        background-color: $discourse_post_color;
     }
 }
 

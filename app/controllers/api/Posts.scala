@@ -9,13 +9,13 @@ import renesca.schema.{AbstractRelationFactory, NodeFactory, AbstractRelation}
 object Posts extends Nodes[Post] {
   lazy val nodeSchema = NodeSchema(routePath, new ContentNodeAccess(Post),
     Map(
-      "connectsTo" -> StartHyperConnectSchema(Connects, new StartContentRelationAccess(Connects, Post), Map(
-        "connectsTo" -> StartConnectSchema(new StartContentRelationAccess(Connects, Post)),
-        "connectsFrom" -> EndConnectSchema(new EndContentRelationAccess(Connects, Post))
+      "connects-to" -> StartHyperConnectSchema(Connects, new StartContentRelationAccess(Connects, Post), Map(
+        "connects-to" -> StartConnectSchema(new StartContentRelationAccess(Connects, Post)),
+        "connects-from" -> EndConnectSchema(new EndContentRelationAccess(Connects, Post))
       )),
-      "connectsFrom" -> EndHyperConnectSchema(Connects, new EndContentRelationAccess(Connects, Post), Map(
-        "connectsTo" -> StartConnectSchema(new StartContentRelationAccess(Connects, Post)),
-        "connectsFrom" -> EndConnectSchema(new EndContentRelationAccess(Connects, Post))
+      "connects-from" -> EndHyperConnectSchema(Connects, new EndContentRelationAccess(Connects, Post), Map(
+        "connects-to" -> StartConnectSchema(new StartContentRelationAccess(Connects, Post)),
+        "connects-from" -> EndConnectSchema(new EndContentRelationAccess(Connects, Post))
       ))
     )
   )

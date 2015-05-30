@@ -22,7 +22,7 @@ function Schema($provide, LiveProvider, restmodProvider) {
             function ApiFactory(restmod, Live) {
                 return restmod.model(model.path).mix(_(model.subs).map((sub, path) => {
                     return {
-                        [path]: {
+                        [_.camelCase(path)]: {
                             [sub.cardinality]: restmod.model().mix(_.merge({
                                 $extend: {
                                     Collection: {
@@ -31,7 +31,7 @@ function Schema($provide, LiveProvider, restmodProvider) {
                                 }
                             }, _(sub.subs).map((sub, path) => {
                                 return {
-                                    [path]: {
+                                    [_.camelCase(path)]: {
                                         [sub.cardinality]: restmod.model()
                                     }
                                 };
@@ -49,7 +49,7 @@ function Schema($provide, LiveProvider, restmodProvider) {
         });
 
         function subscribe(liveService, handler, nested = "") {
-            let url = this.$url().slice(schema.api.restRoot.length + 1) + nested;
+            let url = this.$url().slice(schema.api.restRoot.length + 1) + "/" + _.kebabCase(nested);
             return liveService.subscribe(url, handler);
         }
     }

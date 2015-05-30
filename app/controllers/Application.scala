@@ -11,10 +11,13 @@ object Application extends Controller {
   val apiDefinition = ApiDefinition("/api/v1", "/live/v1");
   val nodeSchemas = Seq(Posts, Users).map(_.nodeSchema)
 
+  private val apiDefinitionJson = Json.toJson(apiDefinition);
+  private val nodeSchemasJson = Json.toJson(JsArray(nodeSchemas.map(Json.toJson(_))));
+
   def index(any: String) = Action {
     Ok(views.html.index(JsObject(Seq(
-      ("api", Json.toJson(apiDefinition)),
-      ("models", JsArray(nodeSchemas.map(Json.toJson(_))))
+      ("api", apiDefinitionJson),
+      ("models", nodeSchemasJson)
     ))))
   }
 }

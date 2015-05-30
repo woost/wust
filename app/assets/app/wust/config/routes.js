@@ -19,11 +19,11 @@ function RoutesConfig($stateProvider, $urlRouterProvider, $locationProvider, Dis
                 controller: "FooterCtrl as vm",
             }
         }
-    }).state("browse", {
+    }).state("dashboard", {
         parent: "page",
-        url: "/browse",
-        templateUrl: `${templateBase}/browse/browse.html`,
-        controller: "BrowseCtrl as vm",
+        url: "/dashboard",
+        templateUrl: `${templateBase}/dashboard/dashboard.html`,
+        controller: "DashboardCtrl as vm",
     }).state("vote", {
         parent: "page",
         url: "/vote",
@@ -57,29 +57,14 @@ function RoutesConfig($stateProvider, $urlRouterProvider, $locationProvider, Dis
         url: "/details/:id",
         templateUrl: `${templateBase}/users/detail.html`,
         controller: "UserDetailsCtrl as vm",
-    }).state(DiscourseNodeProvider.setState("Untyped", "plain"), {
+    }).state(DiscourseNodeProvider.setState("Post", "posts"), {
         parent: "page",
-        url: "/plains/:id",
+        url: "/posts/:id",
         templateUrl: `${templateBase}/nodes/focus_view.html`,
-        controller: "UntypedsCtrl as vm",
-    }).state(DiscourseNodeProvider.setState("Goal", "goals"), {
-        parent: "page",
-        url: "/goals/:id",
-        templateUrl: `${templateBase}/nodes/focus_view.html`,
-        controller: "GoalsCtrl as vm",
-    }).state(DiscourseNodeProvider.setState("Problem", "problems"), {
-        parent: "page",
-        url: "/problems/:id",
-        templateUrl: `${templateBase}/nodes/focus_view.html`,
-        controller: "ProblemsCtrl as vm",
-    }).state(DiscourseNodeProvider.setState("Idea", "ideas"), {
-        parent: "page",
-        url: "/ideas/:id",
-        templateUrl: `${templateBase}/nodes/focus_view.html`,
-        controller: "IdeasCtrl as vm",
+        controller: "PostsCtrl as vm",
     });
 
-    $urlRouterProvider.otherwise("/browse");
+    $urlRouterProvider.otherwise("/dashboard");
 
     $locationProvider.html5Mode(true);
 }

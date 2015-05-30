@@ -286,23 +286,23 @@ function d3Graph($window, DiscourseNode) {
                         };
                         node.x += (center.x - node.x) * hyperEdgePull;
                         node.y += (center.y - node.y) * hyperEdgePull;
-                    } else {
-                        switch(node.label) {
-                            case DiscourseNode.Goal.label:
-                                node.y += -1*nodePull;
-                                break;
-                            case DiscourseNode.Idea.label:
-                                node.y += 1*nodePull;
-                                break;
-                            case DiscourseNode.ProArgument.label:
-                                // node.y += 1*nodePull;
-                                node.x += 1*nodePull;
-                                break;
-                            case DiscourseNode.ConArgument.label:
-                                // node.y += 1*nodePull;
-                                node.x += -1*nodePull;
-                                break;
-                        }
+                    //} else {
+                        // switch(node.label) {
+                        //     case DiscourseNode.Goal.label:
+                        //         node.y += -1*nodePull;
+                        //         break;
+                        //     case DiscourseNode.Idea.label:
+                        //         node.y += 1*nodePull;
+                        //         break;
+                        //     case DiscourseNode.ProArgument.label:
+                        //         // node.y += 1*nodePull;
+                        //         node.x += 1*nodePull;
+                        //         break;
+                        //     case DiscourseNode.ConArgument.label:
+                        //         // node.y += 1*nodePull;
+                        //         node.x += -1*nodePull;
+                        //         break;
+                        // }
                     }
                 });
 
