@@ -32,14 +32,14 @@ object SeedReddit extends Task {
         val id = (post \ "data" \ "id").as[String]
         val title = (post \ "data" \ "title").as[String]
         val content = (post \ "data" \ "selftext").as[String]
-        val headPost = Untyped.local(title, description = Some(content))
+        val headPost = Post.local(title, description = Some(content))
         println(s"thread: $title")
         discourse.add(headPost)
 
         val comments = getJson(s"http://www.reddit.com/r/$subreddit/comments/$id.json").as[List[JsValue]].apply(1)
           addCommentsDeep(comments, headPost)
 
-        def addCommentsDeep(comments:JsValue, parent:Untyped) {
+        def addCommentsDeep(comments:JsValue, parent:Post) {
           if((comments \ "kind").as[String] != "Listing") return;
           println(comments)
           (comments \ "data" \ "children") match {
@@ -47,9 +47,9 @@ object SeedReddit extends Task {
               val body = (comment \ "data" \ "body").as[String]
               val title = body.take(100) + (if(body.size > 100) "..." else "")
 
-              val commentNode = Untyped.local(title, description = Some(body))
+              val commentNode = Post.local(title, description = Some(body))
               println(s" reply: $title")
-              discourse.add(commentNode, Refers.local(commentNode, parent))
+              discourse.add(commentNode, Connects.local(commentNode, parent))
 
               val replies = (comment \ "data" \ "replies") match {
                 case JsString("") =>
