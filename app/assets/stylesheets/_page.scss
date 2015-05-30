@@ -24,12 +24,13 @@ html, body {
             overflow: auto;
             height: inherit;
             & > .ng-enter {
-                -webkit-animation: fadeIn 0.5s;
-                -moz-animation: fadeIn 0.5s;
-                -ms-animation: fadeIn 0.5s;
-                -o-animation: fadeIn 0.5s;
-                animation: fadeIn 0.5s;
-                // why is it not working with compass?
+                $time: 0.5s;
+                -webkit-animation: fadeIn $time;
+                -moz-animation: fadeIn $time;
+                -ms-animation: fadeIn $time;
+                -o-animation: fadeIn $time;
+                animation: fadeIn $time;
+                // TODO: why is it not working with compass?
                 // @import "compass/css3/animation";
                 // @include animation(fadeIn, 5.5s);
             }
