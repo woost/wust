@@ -1,4 +1,4 @@
-angular.module("wust").factory("httpErrorResponseInterceptor", httpErrorResponseInterceptor).config(HttpErrorConfig);
+angular.module("wust.api").factory("httpErrorResponseInterceptor", httpErrorResponseInterceptor).config(HttpErrorConfig);
 
 httpErrorResponseInterceptor.$inject = ["$q"];
 
@@ -8,6 +8,7 @@ function httpErrorResponseInterceptor($q) {
             return responseData;
         },
         responseError: function error(response) {
+            console.log(response);
             humane.error(`Server says:<br/>${response.status} - ${JSON.stringify(response.data)}`);
             return $q.reject(response);
         }
