@@ -117,7 +117,7 @@ object Database {
       return (discourse, None)
 
     val node = nodeOpt.get
-    val middleOpt = discourse.uuidNodeHyperRelations.filterNot(_ == node).headOption
+    val middleOpt = discourse.hyperRelations.filterNot(_ == node).headOption
     if (middleOpt.isEmpty)
       return (discourse, None)
 
