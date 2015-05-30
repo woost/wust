@@ -1,19 +1,9 @@
 <div id="dashboard_component">
-    <div ui-layout="{flow : 'row', dividerSize: 16}" >
-        <div ui-layout-container id="posts_view" class="widget">
-            <h2>Existing Posts</h2>
-            <div id="list_existing">
-                <div ng-repeat="node in vm.stream.nodes">
-                    <a ui-sref="{{vm.stream.info.getState(node.id)}}" ng-class="vm.stream.info.css" class="node">{{node.title}}</a>
-                </div>
-            </div>
-        </div>
-
-        <div ui-layout-container>
-            <div ui-layout="{flow : 'column', dividerSize: 16}" >
-                <div ui-layout-container class="widget"></div>
-                <div ui-layout-container class="widget"></div>
-                <div ui-layout-container class="widget"></div>
+    <div id="posts_view" class="widget">
+        <h2>Existing Posts</h2>
+        <div id="list_existing">
+            <div ng-repeat="node in vm.stream.nodes">
+                <a ui-sref="{{vm.stream.info.getState(node.id)}}" ng-class="vm.stream.info.css" class="node">{{node.title}}</a>
             </div>
         </div>
     </div>
