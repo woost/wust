@@ -1,7 +1,0 @@
-<div id="footer">
-    <i class="fa fa-clock-o"></i>
-
-    <a ng-repeat="item in vm.visited" ui-draggable="true" drag="item.node" drag-channel="{{item.node.label}}" class="node" style="margin-left:3px" ui-sref="{{item.info.getState(item.node.id)}}" ng-class="item.info.css">
-        {{item.node.title | limitTo: 10}}<span ng-show="item.node.title.length > 10">...</span>
-    </a>
-</div>

@@ -13,8 +13,8 @@ function DiscourseNode() {
     function get($state, $injector) {
         _.mapValues(discourseMap, node => _.merge(node, {
             // check wether a state is defined. If it isn't stay on the current page.
-            getState: id => node.state ? `${node.state}({id: "${id}"})` : ".",
-            gotoState: id => { if (node.state) $state.go(node.state, {id: id}); },
+            getState: id => node.state && (id !== undefined) ? `${node.state}({id: "${id}"})` : undefined,
+            gotoState: id => { if (node.state && (id !== undefined)) $state.go(node.state, {id: id}); },
             service: $injector.get(node.name)
         }));
 

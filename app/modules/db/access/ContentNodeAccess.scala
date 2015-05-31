@@ -12,7 +12,7 @@ class ContentNodeAccess[NODE <: ContentNode](override val factory: ContentNodeFa
   override def create(user: User, json: JsValue) = {
     val nodeAdd = json.as[NodeAddRequest]
     val discourse = Discourse.empty
-    val node = factory.local(nodeAdd.title, description = nodeAdd.description)
+    val node = factory.local(title = nodeAdd.title, description = nodeAdd.description)
     val contribution = Contributes.local(user, node)
     discourse.add(node, contribution)
     db.persistChanges(discourse.graph)

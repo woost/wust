@@ -19,10 +19,13 @@ nav {
     ul.nav li.dropdown:hover > ul.dropdown-menu {
         display: block;
     }
+    #node_search_header {
+        width: 200px;
+    }
 }
 
 // threshold for responsiv navbar
-@media (max-width: 960px) {
+@media (max-width: 1024px) {
     .navbar-header {
         float: none;
     }

@@ -42,8 +42,8 @@ object WustSchema {
   @Relation class HasPassword(startNode: LoginInfo, endNode: PasswordInfo)
 
   @Node trait ContentNode extends PostLike {
-    var title: String
-    var description: Option[String]
+    var title: Option[String]
+    var description: String
   }
   @Node trait PostLike extends UuidNode
 

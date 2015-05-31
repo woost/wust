@@ -6,7 +6,7 @@
 </div>
 
 <script type="text/ng-template" id="write_discourse_node_list.html">
-    <div class="drop_node node_model_list" ui-on-Drop="vm.nodeModel.add($data)" drop-channel="{{vm.nodeModel.info.label}}">
+    <div class="drop_post_container drop_node node_model_list" ui-on-Drop="vm.nodeModel.add($data)" drop-channel="{{vm.nodeModel.info.label}}">
         <div ng-repeat='node in vm.nodeModel.list'>
             <div ng-if="!vm.nodeModel.isNested" class="btn-group" role="group" style="padding:3px">
                 <span ng-class="vm.nodeModel.info.css" class="btn" ng-mouseover="vm.nodeModel.onHover(node)" ng-click="vm.nodeModel.onClick(node)">{{node.title}}</span>
@@ -34,11 +34,11 @@
     <div class="node_model_list">
         <div ng-repeat='node in vm.nodeModel.list'>
             <div ng-if="!vm.nodeModel.isNested" class="btn-group" role="group" style="padding:3px">
-                <span ng-class="vm.nodeModel.getCss(node)" class="btn" ng-mouseover="vm.nodeModel.onHover(node)" ng-click="vm.nodeModel.onClick(node)">{{node.title}}</span>
+                <button ui-draggable="true" drag="node.$encode()" drag-channel="{{node.label}}" ng-class="vm.nodeModel.getCss(node)" class="btn" ng-mouseover="vm.nodeModel.onHover(node)" ng-click="vm.nodeModel.onClick(node)">{{node.title}}</button>
             </div>
             <div ng-if="vm.nodeModel.isNested" class="panel panel-default" ng-class="vm.nodeModel.getCss(node)">
                 <span ng-mouseover="vm.nodeModel.onHover(node)" ng-click="vm.nodeModel.onClick(node)">
-                    <div class="panel-heading">
+                    <div ui-draggable="true" drag="node.$encode()" drag-channel="{{node.label}}" class="panel-heading">
                         <h3 class="panel-title">{{node.title}}</h3>
                     </div>
                 </span>

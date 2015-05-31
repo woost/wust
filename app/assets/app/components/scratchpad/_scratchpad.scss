@@ -1,12 +1,18 @@
 #scratchpad_component {
     height: 100%;
-    #create_new {
-        max-width: 300px;
+    #node_add, #title_edit {
+        padding: 10px;
+        .input-group {
+            max-width: 300px;
+        }
+    }
+    #edit_list, #history_list {
+        padding: 10px;
     }
     .ace_editor {
-        margin: 5px;
-        height: 70%;
-        min-width: 200px;
-        min-height: 200px;
+        margin: 10px;
+        height: 50%;
+        min-width: 100px;
+        min-height: 100px;
     }
 }

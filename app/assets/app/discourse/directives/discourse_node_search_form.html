@@ -1,7 +1,7 @@
-<form ng-submit='vm.onSubmit({nodes: vm.lastSearchResult})'>
+<form ng-submit='vm.onSubmit({items: vm.lastSearchResult})'>
     <div class="input-group">
         <div class="input-group">
-            <input type="text" class="form-control" ng-model='vm.ngModel.title' size="10"
+            <input type="text" class="form-control" ng-model='vm.ngModel.title'
                    typeahead="node for node in vm.getNodes($viewValue)" typeahead-on-select="vm.onSelect({item: $item})"
                    typeahead-input-formatter="vm.formatLabel()" typeahead-template-url="discourse_node_search_item.html"
                    required>

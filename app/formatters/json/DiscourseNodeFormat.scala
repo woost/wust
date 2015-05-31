@@ -16,8 +16,8 @@ object DiscourseNodeFormat {
     ) ++ (node match {
       case n: ContentNode => Seq(
         ("label", JsString(n.label)),
-        ("title", JsString(n.title)),
-        ("description", JsString(n.description.getOrElse("")))
+        ("title", JsString(n.title.getOrElse(""))),
+        ("description", JsString(n.description))
       )
       case u: User        => Seq(
         ("name", JsString(u.name)),

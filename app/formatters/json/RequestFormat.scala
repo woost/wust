@@ -7,7 +7,7 @@ object RequestFormat {
   implicit object NodeAddFormat extends Format[NodeAddRequest] {
     def reads(json: JsValue) = json match {
       case JsObject(_) => {
-        JsSuccess(NodeAddRequest((json \ "title").as[String], (json \ "description").as[Option[String]]))
+        JsSuccess(NodeAddRequest((json \ "description").as[String], (json \ "title").as[Option[String]]))
       }
       case otherwise   => JsError()
     }

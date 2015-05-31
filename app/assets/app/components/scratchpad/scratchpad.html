@@ -1,12 +1,42 @@
 <div id="scratchpad_component">
+    <button ng-click="vm.editNew()" type="submit" class="btn pull-left"><i class="fa fa-file-o"></i> </button>
     <h2>Wust your Post:</h2>
-    <div ui-ace="vm.aceOptions" ng-model="vm.newNode.description"></div>
-    <form ng-submit="vm.addNode()" id="create_new" class="center-block">
-        <div class="input-group">
-            <input type="text" class="form-control" ng-model="vm.newNode.title" placeholder="{{vm.newNode.description | trim:true:20}}">
+
+    <div ui-ace="vm.ace.options" ng-model="vm.ace.description"></div>
+
+    <div id="title_edit">
+        <label>TL,DR:</label>
+        <div class="input-group pull-right">
+            <input type="text" class="form-control" ng-model="vm.ace.title" placeholder="{{vm.ace.description | trim:true:15}}">
             <span class="input-group-btn">
-                <button type="submit" class="btn btn-success"><i class="fa fa-plus"></i> </button>
+                <button ng-click="vm.saveNode()" class="btn btn-primary"><i class="fa fa-floppy-o"></i> </button>
             </span>
         </div>
-    </form>
+    </div>
+
+    <div id="node_add">
+        <hr noshade size="1">
+        <label>Edit existing:</label>
+        <div class="input-group pull-right">
+            <div discourse-node-search-form ng-model='vm.searchTyped' on-select="vm.editExisting(item)" on-submit="vm.editExisting(items)" search-nodes='vm.searchNodes(term)' icon-class="fa fa-search"></div>
+        </div>
+    </div>
+
+    <div id="edit_list" class="discourse_post_list">
+        <hr noshade size="1">
+        <div class="drop_post_container" drop-channel="{{vm.nodeInfo.label}}" ui-on-Drop="vm.editExisting($data)">
+            <label>Currently edited:</label>
+            <div ng-repeat="node in vm.editStack">
+                <button ng-click="vm.removeEdited(node)" class="btn btn-danger btn-xs"><i class="fa fa-minus"></i> </button>
+                <button ng-click="vm.editExisting(node)" class="btn btn-success btn-xs"><i class="fa fa-pencil"></i> </button>
+                <a ui-sref="{{vm.nodeInfo.getState(node.id)}}" class="node" style="margin-left:3px" ng-class="vm.nodeInfo.css">{{node.title || (node.description | trim:true:15)}}</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="history_list">
+        <hr noshade size="1">
+        <label>Last visited:</label>
+        <a ng-repeat="visited in vm.visitedNodes" ui-draggable="true" drag="visited.node.$encode()" drag-channel="{{visited.node.label}}" class="node" style="margin-left:3px" ui-sref="{{visited.info.getState(visited.node.id)}}" ng-class="visited.info.css">{{visited.node.title || (visited.node.description | trim:true:15)}}</a>
+    </div>
 </div>

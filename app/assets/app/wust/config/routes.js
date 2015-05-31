@@ -17,10 +17,6 @@ function RoutesConfig($stateProvider, $urlRouterProvider, $locationProvider, Dis
             },
             "content": {
                 template: "<div ui-view></div>",
-            },
-            "footer": {
-                templateUrl: `${templateBase}/footer/footer.html`,
-                controller: "FooterCtrl as vm",
             }
         }
     }).state("dashboard", {

@@ -28,7 +28,7 @@ object GraphFormat {
       ("label", JsString(node.label))
     ) ++ (node match {
       case n: ContentNode                         => Seq(
-        ("title", JsString(n.title))
+        ("title", JsString(n.title.getOrElse("")))
       )
       case u: User                                => Seq(
         ("title", JsString(u.name))

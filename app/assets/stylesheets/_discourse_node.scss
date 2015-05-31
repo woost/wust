@@ -96,38 +96,47 @@
 }
 
 .discourse_idea_list {
-    .node_model_list.on-drag-enter {
+    .drop_post_container.on-drag-enter {
         background-color: $discourse_idea_color;
     }
 }
 
 .discourse_problem_list {
-    .node_model_list.on-drag-enter {
+    .drop_post_container.on-drag-enter {
         background-color: $discourse_problem_color;
     }
 }
 
 .discourse_goal_list {
-    .node_model_list.on-drag-enter {
+    .drop_post_container.on-drag-enter {
         background-color: $discourse_goal_color;
     }
 }
 
 .discourse_proargument_list {
-    .node_model_list.on-drag-enter {
+    .drop_post_container.on-drag-enter {
         background-color: $discourse_proargument_color;
     }
 }
 
 .discourse_conargument_list {
-    .node_model_list.on-drag-enter {
+    .drop_post_container.on-drag-enter {
         background-color: $discourse_conargument_color;
     }
 }
 
 .discourse_post_list {
-    .node_model_list.on-drag-enter {
+    .drop_post_container.on-drag-enter {
         background-color: $discourse_post_color;
+    }
+}
+
+.drop_post_container {
+    &.on-drag-hover:after {
+        content: 'Drop';
+        display: block;
+        color: seagreen;
+        font-size: large;
     }
 }
 
