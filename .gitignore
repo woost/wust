@@ -13,5 +13,6 @@ dist
 /.project
 /RUNNING_PID
 /.settings
+/magic
 
 .sass-cache
