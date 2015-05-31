@@ -1,26 +1,44 @@
 angular.module("wust.history").service("NodeHistory", NodeHistory);
 
-NodeHistory.$inject = ["DiscourseNode"];
+NodeHistory.$inject = ["Post", "DiscourseNode", "store"];
 
-function NodeHistory(DiscourseNode) {
+function NodeHistory(Post, DiscourseNode, store) {
+    let historyStore = store.getNamespacedStore("history");
     let maximum = 8;
-    let visited = [];
-    this.visited = visited;
+    let self = this;
+
+    this.visited = [];
+    _.each(historyStore.get("visited"), restoreNode);
     this.add = add;
     this.remove = remove;
 
-    function remove(id) {
-        _.remove(visited, item => id === item.node.id);
+    function restoreNode(id) {
+        Post.$find(id).$then(node => addNode(node));
     }
 
-    function add(node) {
-        let obj = {
+    function storeVisited() {
+        historyStore.set("visited", _.map(self.visited, n => n.node.id));
+    }
+
+    function remove(id) {
+        _.remove(self.visited, item => id === item.node.id);
+        storeVisited();
+    }
+
+    function addNode(node, info) {
+        _.remove(self.visited, n => node.id === n.node.id);
+        self.visited.push({
             node,
             info: DiscourseNode.get(node.label)
-        };
+        });
 
-        remove(node.id);
-        visited.push(obj);
-        visited.splice(0, visited.length - maximum);
+        self.visited.splice(0, self.visited.length - maximum);
+    }
+
+    function add(promise) {
+        promise.$then(node => {
+            addNode(node);
+            storeVisited();
+        });
     }
 }

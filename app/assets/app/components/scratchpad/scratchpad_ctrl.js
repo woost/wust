@@ -12,6 +12,7 @@ function ScratchpadCtrl(Search, NodeHistory, EditStack, DiscourseNode) {
             mode: "markdown",
             require: ["ace/ext/language_tools"],
             onLoad: onEditorLoad,
+            onBlur: EditStack.onChange,
             advanced: {
                 printMarginColumn: false,
                 enableSnippets: true,

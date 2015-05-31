@@ -16,12 +16,7 @@ function discourseNodeCrate($state, NodeHistory, EditStack) {
 
     function link(scope) {
         // we are viewing details about a node, so add it to the nodehistory
-        scope.node.$then(data => {
-            NodeHistory.add(data);
-        });
-        scope.$watch("node", data => {
-            NodeHistory.add(data);
-        });
+        NodeHistory.add(scope.node);
 
         // callbacks for removing/updating the focused node
         scope.removeFocused = removeFocused;

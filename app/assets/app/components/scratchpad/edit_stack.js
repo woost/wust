@@ -1,99 +1,120 @@
 angular.module("wust.components").service("EditStack", EditStack);
 
-EditStack.$inject = ["Post", "DiscourseNode", "NodeHistory"];
+EditStack.$inject = ["Post", "DiscourseNode", "NodeHistory", "store"];
 
-function EditStack(Post, DiscourseNode, NodeHistory) {
+function EditStack(Post, DiscourseNode, NodeHistory, store) {
+    let editStore = store.getNamespacedStore("edit");
     let self = this;
 
-    let editNode = null;
 
-    self.session = {
+    this.session = editStore.get("session") || {
+        index: -1,
         title: "",
         description: ""
     };
 
-    self.stack = [];
+    this.stack = editStore.get("stack") || [];
 
-    self.saveNode = saveNode;
-    self.editExisting = editExisting;
-    self.editNew = editNew;
-    self.removeEdited = removeEdited;
+    this.saveNode = saveNode;
+    this.editExisting = editExisting;
+    this.editNew = editNew;
+    this.removeEdited = removeEdited;
+    this.onChange = onChange;
 
-    function buildNewPost() {
-        return Post.$build({
-            title: self.session.title,
-            description: self.session.description
-        });
+    function onChange() {
+        editStore.set("session", self.session);
+    }
+
+    function pushStack(node) {
+        self.stack.push(node);
+        editStore.set("stack", self.stack);
+    }
+
+    function removeStack(node) {
+        if (self.stack[self.session.index] === node) {
+            editNew();
+        }
+
+        _.remove(self.stack, node);
+        editStore.set("stack", self.stack);
+    }
+
+    function setSession(node) {
+        if (node) {
+            let index = findExistingIndex(node);
+            if (index === -1) {
+                index = self.stack.length;
+                pushStack(node);
+            }
+
+            self.session = {
+                index,
+                title: node.title,
+                description: node.description
+            };
+        } else {
+            self.session = {
+                index: -1,
+                title: "",
+                description: ""
+            };
+        }
+        onChange();
     }
 
     function switchEdit(node) {
-        if (!editNode && (self.session.title === "") && (self.session.description === "")) {
-            if (!node)
-                return;
-        } else {
-            if (!editNode) {
-                editNode = buildNewPost();
-                self.stack.push(editNode);
-            }
-
-            editNode.title = self.session.title;
-            editNode.description = self.session.description;
+        if (self.session.index >= 0) {
+            self.stack[self.session.index].title = self.session.title;
+            self.stack[self.session.index].description = self.session.description;
+            editStore.set("stack", self.stack);
+        } else if ((self.session.title !== "") || (self.session.description !== "")) {
+            pushStack(_.pick(self.session, "title", "description"));
         }
 
-        editNode = node;
-        self.session.title = node ? node.title : "";
-        self.session.description = node ? node.description : "";
+        setSession(node);
+    }
+
+    function findExistingIndex(node) {
+        return _.findIndex(self.stack, (node.id === undefined) ? node : {
+            id: node.id
+        });
     }
 
     function editNew() {
         switchEdit();
     }
 
-    function editExisting(nodes) {
+    function editExisting(maybeNodes) {
         //TODO: we get an array if multiple nodes were in completion and enter was pressed
-        let node = _.isArray(nodes) ? nodes[0] : nodes;
-        let existing = _.find(self.stack, (node.id !== undefined) ? {
-            id: node.id
-        } : node);
-        if (existing) {
-            switchEdit(existing);
-        } else {
-            //TODO: translation between models, should be the same?
-            node = Post.$collection().$buildRaw(node).$reveal();
-            switchEdit(node);
-            self.stack.push(node);
-            if (node.id !== undefined) {
-                NodeHistory.add(node);
-            }
+        let node = _.isArray(maybeNodes) ? maybeNodes[0] : maybeNodes;
+        //TODO: might be a restmod resource
+        if (node.$then !== undefined) {
+            NodeHistory.add(node);
         }
 
+        node = _.pick(node, "id", "title", "description");
+        let existingIndex = findExistingIndex(node);
+        switchEdit(node);
     }
 
     function removeEdited(node) {
-        if (editNode === node) {
-            switchEdit();
+        if (this.stack[self.session.index] === node) {
+            editNew();
         }
 
-        _.remove(self.stack, node);
+        removeStack(node);
     }
 
     function saveNode() {
-        let node = editNode;
-        if (node) {
-            node.title = self.session.title;
-            node.description = self.session.description;
-        } else {
-            node = buildNewPost();
-        }
+        let node = self.stack[self.session.index] || {};
+        node.title = self.session.title;
+        node.description = self.session.description;
 
-        node.$update().$then(data => {
+        Post.$buildRaw(node).$update().$then(data => {
             humane.success("Added new node");
             DiscourseNode.Post.gotoState(data.id);
-            _.remove(self.stack, node);
-            editNode = null;
-            self.session.title = "";
-            self.session.description = "";
-            switchEdit();
+            removeStack(node);
+            editNew();
         });
     }
 
