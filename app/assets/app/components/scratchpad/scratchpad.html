@@ -1,8 +1,9 @@
-<div id="scratchpad_view">
+<div id="scratchpad_component">
     <h2>Wust your Post:</h2>
-    <form ng-submit="vm.adder.addNode()" id="create_new" class="center-block">
+    <div ui-ace="vm.aceOptions" ng-model="vm.newNode.description"></div>
+    <form ng-submit="vm.addNode()" id="create_new" class="center-block">
         <div class="input-group">
-            <input type="text" class="form-control" ng-model="vm.adder.newNode.title" required>
+            <input type="text" class="form-control" ng-model="vm.newNode.title" placeholder="{{vm.newNode.description | trim:true:20}}">
             <span class="input-group-btn">
                 <button type="submit" class="btn btn-success"><i class="fa fa-plus"></i> </button>
             </span>

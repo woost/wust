@@ -23,7 +23,7 @@ html, body {
         #main_layout_view {
             height: inherit;
             position: relative;
-            #main_view {
+            #main_view, #scratchpad_view {
                 height: 100%;
                 & > .ng-scope {
                     height: inherit;

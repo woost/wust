@@ -25,6 +25,7 @@ lazy val wust = (project in file(".")).settings(
     "org.webjars.bower" % "angular-restmod" % "1.1.8",
     "org.webjars.bower" % "angular-xeditable" % "0.1.9",
     "org.webjars.npm" % "angular-ui-layout" % "1.0.5-requirejs",
+    //"org.webjars.bower" % "angular-ui-ace" % "0.2.3", // cannot resolve ace-builds through bower...
     // styles and fonts
     "org.webjars" % "animate.css" % "3.2.5",
     "org.webjars.bower" % "bootstrap-css-only" % "3.3.4",

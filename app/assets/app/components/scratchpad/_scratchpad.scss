@@ -1,7 +1,12 @@
 #scratchpad_component {
-    #scratchpad {
-        #create_new {
-            max-width: 300px;
-        }
+    height: 100%;
+    #create_new {
+        max-width: 300px;
+    }
+    .ace_editor {
+        margin: 5px;
+        height: 70%;
+        min-width: 200px;
+        min-height: 200px;
     }
 }
