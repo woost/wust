@@ -24,8 +24,8 @@
             <div discourse-node-search-form ng-model='vm.searchTyped' on-select="vm.onSelect(item)" on-submit="vm.onSubmit(nodes)" search-nodes='vm.searchNodes(term)' icon-class="fa fa-search" class="navbar-form navbar-left" role="search"></div>
 
             <form ng-hide="vm.loggedIn()" name="signForm" ng-submit="vm.authenticate(registerUser)" class="navbar-form navbar-right">
-                <input class="form-control" name="username" type="text" ng-model='vm.newUser.identifier' placeholder="Username" required>
-                <input class="form-control" name="password" type="password" ng-model='vm.newUser.password' placeholder="Password" required>
+                <input class="form-control" size="10" name="username" type="text" ng-model='vm.newUser.identifier' placeholder="Username" required>
+                <input class="form-control" size="10" name="password" type="password" ng-model='vm.newUser.password' placeholder="Password" required>
                 <input type="submit" value="Login" ng-click="registerUser = false" class="btn btn-primary" ng-disabled="signForm.$invalid">
                 <input type="submit" value="Register" ng-click="registerUser = true" class="btn btn-primary" ng-disabled="signForm.$invalid">
             </form>

@@ -19,6 +19,8 @@ function ScratchpadCtrl(Post, DiscourseNode) {
         }
     };
 
+    vm.nodeStack = [];
+
     vm.addNode = addNode;
     vm.newNode = newNode();
 
@@ -27,17 +29,17 @@ function ScratchpadCtrl(Post, DiscourseNode) {
     }
 
     function newNode() {
-        return Post.$build({
+        vm.nodeStack.push(Post.$build({
             title: "",
             description: ""
-        });
+        }));
     }
 
-    function addNode() {
-        vm.newNode.$save().$then(data => {
+    function addNode(node) {
+        node.$save().$then(data => {
             humane.success("Added new node");
             DiscourseNode.Post.gotoState(data.id);
-            vm.newNode = newNode();
+            _.remove(vm.nodeStack, node);
         });
     }
 }

@@ -21,6 +21,36 @@ nav {
     }
 }
 
+// threshold for responsiv navbar
+@media (max-width: 960px) {
+    .navbar-header {
+        float: none;
+    }
+    .navbar-toggle {
+        display: block;
+    }
+    .navbar-collapse {
+        border-top: 1px solid transparent;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+    .navbar-collapse.collapse {
+        display: none !important;
+    }
+    .navbar-collapse.collapse.in {
+        display: block !important;
+    }
+    .navbar-nav {
+        float: none !important;
+    }
+    .navbar-nav > li {
+        float: none;
+    }
+    .navbar-nav > li > a {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+}
+
 // display dropdown menu in collapsed navbar above page
 // http://stackoverflow.com/questions/20199308/bootstrap-3-nav-dropdown
 .navbar-collapse.in {
