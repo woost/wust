@@ -7,6 +7,6 @@ function UserDetailsCtrl($stateParams, User, DiscourseNodeList) {
 
     vm.user = User.$find($stateParams.id);
 
-    vm.contributions = DiscourseNodeList.Any(vm.user.contributes.$search(), "Contributions");
+    vm.contributions = DiscourseNodeList.read(vm.user.contributes.$search(), "Contributions");
     vm.contributions.subscribe();
 }

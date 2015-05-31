@@ -8,10 +8,10 @@ function PostsCtrl($stateParams, Post, DiscourseNode, DiscourseNodeList, Discour
     vm.nodeInfo = DiscourseNode.Post;
     let node = Post.$find($stateParams.id);
     vm.node = DiscourseNodeCrate(node);
-    vm.top = DiscourseNodeList.read.Post(node.connectsFrom.$search(), "From")
-        .nested(DiscourseNodeList.read.Post, "connectsFrom", "From")
-        .nested(DiscourseNodeList.read.Post, "connectsTo", "To");
-    vm.bottom = DiscourseNodeList.read.Post(node.connectsTo.$search(), "To")
-        .nested(DiscourseNodeList.read.Post, "connectsFrom", "From")
-        .nested(DiscourseNodeList.read.Post, "connectsTo", "To");
+    vm.top = DiscourseNodeList.write.Post(node.connectsFrom.$search(), "From")
+        .nested(DiscourseNodeList.write.Post, "connectsFrom", "From")
+        .nested(DiscourseNodeList.write.Post, "connectsTo", "To");
+    vm.bottom = DiscourseNodeList.write.Post(node.connectsTo.$search(), "To")
+        .nested(DiscourseNodeList.write.Post, "connectsFrom", "From")
+        .nested(DiscourseNodeList.write.Post, "connectsTo", "To");
 }

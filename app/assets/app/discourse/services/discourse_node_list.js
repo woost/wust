@@ -15,19 +15,35 @@ function DiscourseNodeList() {
         nodeListDefs[modelName] = modelPath;
     }
 
-    get.$inject = ["$injector", "$rootScope", "DiscourseNode", "Search"];
-    function get($injector, $rootScope, DiscourseNode, Search) {
-        class NodeModel {
-            constructor(nodeList, title, listCss, templateUrl) {
-                this.style = {
-                    listCss,
-                    templateUrl
-                };
+    get.$inject = ["$injector", "$rootScope", "DiscourseNode"];
+    function get($injector, $rootScope, DiscourseNode) {
+        function NodeInfoActions(nodeInfo, mouseHandler) {
+            return {
+                writable: true,
+                getLabel: () => nodeInfo.label,
+                getCss: () => nodeInfo.css,
+                onClick: mouseHandler.click || (node => nodeInfo.gotoState(node.id)),
+                onHover: mouseHandler.hover || _.noop
+            };
+        }
 
-                this.isNested = false;
-                this.title = title;
-                this.nestedNodeLists = [];
+        function NodeActions(mouseHandler) {
+            return {
+                writable: false,
+                getCss: node => DiscourseNode.get(node.label).css,
+                onClick: mouseHandler.click || (node => DiscourseNode.get(node.label).gotoState(node.id)),
+                onHover: mouseHandler.hover || _.noop
+            };
+        }
+
+
+        class NodeModel {
+            constructor(nodeList, title, listCss) {
                 this.list = nodeList;
+                this.title = title;
+                this.listCss = listCss;
+                this.isNested = false;
+                this.nestedNodeLists = [];
 
                 //TODO: assure that the list is a restmod collection?
                 // same for subscribe...
@@ -36,6 +52,8 @@ function DiscourseNodeList() {
                     this.list.$on("after-add", (node) => {
                         node.nestedNodeLists = _.map(this.nestedNodeLists, list => list.create(node[list.servicePath]));
                     });
+                } else {
+                    console.warn("showing non-restmod collection");
                 }
             }
 
@@ -69,6 +87,11 @@ function DiscourseNodeList() {
             }
 
             subscribe(unsubscribe) {
+                if (this.list.$subscribeToLiveEvent === undefined) {
+                    console.warn("Cannot subscribe non-schema collection");
+                    return _.noop;
+                }
+
                 let onConnectionChange = (list, message) => $rootScope.$apply(() => {
                     switch (message.type) {
                         case "connect":
@@ -103,63 +126,10 @@ function DiscourseNodeList() {
             }
         }
 
-        function NodeInfoActions(nodeInfo, mouseHandler) {
-            return {
-                info: nodeInfo,
-                getCss: () => nodeInfo.css,
-                onClick: mouseHandler.click || (node => nodeInfo.gotoState(node.id)),
-                onHover: mouseHandler.hover || _.noop
-            };
-        }
-
-        function NodeActions(mouseHandler) {
-            return {
-                getCss: node => DiscourseNode.get(node.label).css,
-                onClick: mouseHandler.click || (node => DiscourseNode.get(node.label).gotoState(node.id)),
-                onHover: mouseHandler.hover || _.noop
-            };
-        }
-
-        class ReadNodeModel extends NodeModel {
-            constructor(nodeList, title, listCss) {
-                super(nodeList, title, listCss, "read_discourse_node_list.html");
-            }
-        }
-
-        class TypedReadNodeModel extends ReadNodeModel {
-            constructor(nodeList, nodeInfo, title, mouseHandler) {
-                super(nodeList, title, `${nodeInfo.css}_read_list`);
-                _.assign(this, NodeInfoActions(nodeInfo, mouseHandler));
-            }
-        }
-
-        class AnyReadNodeModel extends ReadNodeModel {
-            constructor(nodeList, title, mouseHandler) {
-                super(nodeList, title, "any_read_list");
-                _.assign(this, NodeActions(mouseHandler));
-            }
-        }
-
         class WriteNodeModel extends NodeModel {
-            constructor(service, nodeList, nodeInfo, title, mouseHandler) {
-                super(nodeList, title, `${nodeInfo.css}_list`, "write_discourse_node_list.html");
+            constructor(nodeList, title, mouseHandler, nodeInfo) {
+                super(nodeList, title, `${nodeInfo.css}_list`);
                 _.assign(this, NodeInfoActions(nodeInfo, mouseHandler));
-
-                this.resetNew = () => {
-                    this.new = service.$build({
-                        title: ""
-                    });
-                };
-
-                this.resetNew();
-            }
-
-            create() {
-                this.new.$save().$then(data => {
-                    humane.success("Created new node");
-                    this.add(data);
-                    this.resetNew();
-                });
             }
 
             remove(elem) {
@@ -172,16 +142,16 @@ function DiscourseNodeList() {
                 if (this.exists(elem))
                     return;
 
-                this.list.$create(_.pick(elem, "id")).$reveal().$then(data => {
+                this.list.$create(_.pick(elem, "id")).$then(data => {
                     humane.success("Connected node");
-                }, () => this.removeLocally(elem.id));
-            }
-
-            search(title) {
-                return Search.$search({
-                    label: this.info.label,
-                    title: title
                 });
+            }
+        }
+
+        class ReadNodeModel extends NodeModel {
+            constructor(nodeList, title, mouseHandler) {
+                super(nodeList, title, "read_node_list");
+                _.assign(this, NodeActions(mouseHandler));
             }
         }
 
@@ -202,12 +172,9 @@ function DiscourseNodeList() {
 
         return {
             write: _.mapValues(nodeListDefs, (v, k) => (nodeList, title = _.capitalize(v), mouseHandler = {}) => {
-                return new NodeList(new WriteNodeModel($injector.get(k), nodeList, DiscourseNode[k], title, mouseHandler));
+                return new NodeList(new WriteNodeModel(nodeList, title, mouseHandler, DiscourseNode[k]));
             }),
-            read: _.mapValues(nodeListDefs, (v, k) => (nodeList, title = _.capitalize(v), mouseHandler = {}) => {
-                return new NodeList(new TypedReadNodeModel(nodeList, DiscourseNode[k], title, mouseHandler));
-            }),
-            Any: (nodeList, title, mouseHandler = {}) => new NodeList(new AnyReadNodeModel(nodeList, title, mouseHandler))
+            read: (nodeList, title, mouseHandler = {}) => new NodeList(new ReadNodeModel(nodeList, title, mouseHandler))
         };
     }
 }

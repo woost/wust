@@ -1,40 +1,18 @@
 <div class="discourse_node_list_container">
-    <h2 ng-if="vm.nodeModel.title">{{vm.nodeModel.title}}</h2>
-    <div class='discourse_node_list' ng-class='vm.nodeModel.style.listCss'>
-        <div ng-include="vm.nodeModel.style.templateUrl"></div>
+    <div class='discourse_node_list' ng-class='vm.nodeModel.listCss'>
+        <h2 ng-if="!vm.nodeModel.writable">{{vm.nodeModel.title}}</h2>
+        <h2 ng-if="vm.nodeModel.writable" class="drop_post_container" ui-on-Drop="vm.nodeModel.add($data)" drop-channel="{{vm.nodeModel.getLabel()}}">{{vm.nodeModel.title}}</h2>
+
+        <div ng-include="'show_discourse_node_list.html'"></div>
     </div>
 </div>
 
-<script type="text/ng-template" id="write_discourse_node_list.html">
-    <div class="drop_post_container drop_node node_model_list" ui-on-Drop="vm.nodeModel.add($data)" drop-channel="{{vm.nodeModel.info.label}}">
-        <div ng-repeat='node in vm.nodeModel.list'>
-            <div ng-if="!vm.nodeModel.isNested" class="btn-group" role="group" style="padding:3px">
-                <span ng-class="vm.nodeModel.info.css" class="btn" ng-mouseover="vm.nodeModel.onHover(node)" ng-click="vm.nodeModel.onClick(node)">{{node.title}}</span>
-                <button class='btn btn-default' ng-click='vm.nodeModel.remove(node)'><i class='fa fa-minus text-default'></i></button>
-            </div>
-            <div ng-if="vm.nodeModel.isNested" class="panel panel-default" ng-class="vm.nodeModel.info.css">
-                <span ng-mouseover="vm.nodeModel.onHover(node)" ng-click="vm.nodeModel.onClick(node)">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">{{node.title}}</h3>
-                    </div>
-                </span>
-                <div class="panel-body">
-                    <div ng-repeat="nested in node.nestedNodeLists" discourse-node-list node-model='nested.model'></div>
-                    <button class='btn btn-default btn-xs pull-right' ng-click='vm.nodeModel.remove(node)'>
-                        <i class='fa fa-minus'></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div discourse-node-search-form ng-model='vm.nodeModel.new' on-submit='vm.nodeModel.create()' on-select="vm.nodeModel.add(item)" search-nodes='vm.nodeModel.search(term)' icon-class="fa fa-plus" class="discourse_node_search_form"></div>
-    </div>
-</script>
-
-<script type="text/ng-template" id="read_discourse_node_list.html">
+<script type="text/ng-template" id="show_discourse_node_list.html">
     <div class="node_model_list">
         <div ng-repeat='node in vm.nodeModel.list'>
             <div ng-if="!vm.nodeModel.isNested" class="btn-group" role="group" style="padding:3px">
                 <button ui-draggable="true" drag="node.$encode()" drag-channel="{{node.label}}" ng-class="vm.nodeModel.getCss(node)" class="btn" ng-mouseover="vm.nodeModel.onHover(node)" ng-click="vm.nodeModel.onClick(node)">{{node.title}}</button>
+                <button ng-if="vm.nodeModel.writable" class='btn btn-default' ng-click='vm.nodeModel.remove(node)'><i class='fa fa-minus text-default'></i></button>
             </div>
             <div ng-if="vm.nodeModel.isNested" class="panel panel-default" ng-class="vm.nodeModel.getCss(node)">
                 <span ng-mouseover="vm.nodeModel.onHover(node)" ng-click="vm.nodeModel.onClick(node)">
@@ -44,6 +22,7 @@
                 </span>
                 <div class="panel-body">
                     <div ng-repeat="nested in node.nestedNodeLists" discourse-node-list node-model='nested.model'></div>
+                    <button class='btn btn-default btn-xs pull-right' ng-click='vm.nodeModel.remove(node)'><i class='fa fa-minus'></i> </button>
                 </div>
             </div>
         </div>

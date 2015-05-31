@@ -75,9 +75,6 @@ function ScratchpadCtrl(Post, DiscourseNode, NodeHistory, Search) {
         let existing = _.find(vm.editStack, (node.id !== undefined) ? {
             id: node.id
         } : node);
-        if (node.id !== undefined) {
-            NodeHistory.add(node);
-        }
         if (existing) {
             switchEdit(existing);
         } else {
@@ -85,6 +82,9 @@ function ScratchpadCtrl(Post, DiscourseNode, NodeHistory, Search) {
             node = Post.$collection().$buildRaw(node).$reveal();
             switchEdit(node);
             vm.editStack.push(node);
+            if (node.id !== undefined) {
+                NodeHistory.add(node);
+            }
         }
 
     }
