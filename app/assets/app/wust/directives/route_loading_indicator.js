@@ -5,7 +5,7 @@ routeLoadingIndicator.$inject = ["$rootScope"];
 function routeLoadingIndicator($rootScope) {
     return {
         restrict: "A",
-        template: "<div class='route_loading_indicator'></div>",
+        template: "<div class='loading_indicator'></div>",
         replace: true,
         link: function(scope, elem, attrs) {
             let lodium = new Lodium(elem[0]);

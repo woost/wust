@@ -12,21 +12,28 @@ h2 {
 }
 
 html, body {
+    margin: 0px;
     font-family: 'Droid Sans', Helvetica, Arial, sans-serif;
     font-size: 14px;
-    margin: 0px;
     min-width: 600px;
     height: 100%;
     main {
         height: inherit;
         padding: 50px 0px 30px 0px;
-        #main_layout_view {
+        #main_view {
             height: inherit;
             position: relative;
-            #main_view, #scratchpad_view {
-                height: 100%;
-                & > .ng-scope {
+            .ui-layout-container {
+                height: inherit;
+                #content_view, #scratchpad_view {
                     height: inherit;
+                    & > .ng-scope {
+                        height: inherit;
+                        overflow: auto;
+                        & > .ng-scope {
+                            overflow: auto;
+                        }
+                    }
                 }
             }
             .route_animation > .ng-enter {
@@ -39,6 +46,7 @@ html, body {
                 // TODO: why is it not working with compass?
                 // @import "compass/css3/animation";
                 // @include animation(fadeIn, 5.5s);
+           
             }
         }
     }

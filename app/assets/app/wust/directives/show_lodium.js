@@ -5,6 +5,7 @@ showLodium.$inject = [];
 function showLodium() {
     return {
         restrict: "EA",
+        template: "<div class='loading_indicator'></div>",
         scope: {
             enabled: "="
         },
