@@ -1,13 +1,13 @@
 <div id="scratchpad_component">
-    <button ng-click="vm.editNew()" type="submit" class="btn pull-left"><i class="fa fa-file-o"></i> </button>
+    <button ng-click="vm.editStack.editNew()" type="submit" class="btn pull-left"><i class="fa fa-file-o"></i> </button>
     <h2>Wust your Post:</h2>
 
-    <div ui-ace="vm.ace.options" ng-model="vm.ace.description"></div>
+    <div ui-ace="vm.ace.options" ng-model="vm.editStack.session.description"></div>
 
     <div id="title_edit">
         <label>TL,DR:</label>
         <div class="input-group pull-right">
-            <input type="text" class="form-control" ng-model="vm.ace.title" placeholder="{{vm.ace.description | trim:true:15}}">
+            <input type="text" class="form-control" ng-model="vm.editStack.session.title" placeholder="{{vm.editStack.session.description | trim:true:15}}">
             <span class="input-group-btn">
                 <button ng-click="vm.saveNode()" class="btn btn-primary"><i class="fa fa-floppy-o"></i> </button>
             </span>
@@ -18,17 +18,17 @@
         <hr noshade size="1">
         <label>Edit existing:</label>
         <div class="input-group pull-right">
-            <div discourse-node-search-form ng-model='vm.searchTyped' on-select="vm.editExisting(item)" on-submit="vm.editExisting(items)" search-nodes='vm.searchNodes(term)' icon-class="fa fa-search"></div>
+            <div discourse-node-search-form ng-model='vm.searchTyped' on-select="vm.editStack.editExisting(item)" on-submit="vm.editStack.editExisting(items)" search-nodes='vm.searchNodes(term)' icon-class="fa fa-search"></div>
         </div>
     </div>
 
     <div id="edit_list" class="discourse_post_list">
         <hr noshade size="1">
-        <div class="drop_post_container" drop-channel="{{vm.nodeInfo.label}}" ui-on-Drop="vm.editExisting($data)">
+        <div class="drop_post_container" drop-channel="{{vm.nodeInfo.label}}" ui-on-Drop="vm.editStack.editExisting($data)">
             <label>Currently edited:</label>
-            <div ng-repeat="node in vm.editStack">
-                <button ng-click="vm.removeEdited(node)" class="btn btn-danger btn-xs"><i class="fa fa-minus"></i> </button>
-                <button ng-click="vm.editExisting(node)" class="btn btn-success btn-xs"><i class="fa fa-pencil"></i> </button>
+            <div ng-repeat="node in vm.editStack.stack">
+                <button ng-click="vm.editStack.removeEdited(node)" class="btn btn-danger btn-xs"><i class="fa fa-minus"></i> </button>
+                <button ng-click="vm.editStack.editExisting(node)" class="btn btn-success btn-xs"><i class="fa fa-pencil"></i> </button>
                 <a ui-sref="{{vm.nodeInfo.getState(node.id)}}" class="node" style="margin-left:3px" ng-class="vm.nodeInfo.css">{{node.title || (node.description | trim:true:15)}}</a>
             </div>
         </div>

@@ -1,8 +1,8 @@
 angular.module("wust.discourse").directive("discourseNodeCrate", discourseNodeCrate);
 
-discourseNodeCrate.$inject = ["$state", "NodeHistory"];
+discourseNodeCrate.$inject = ["$state", "NodeHistory", "EditStack"];
 
-function discourseNodeCrate($state, NodeHistory) {
+function discourseNodeCrate($state, NodeHistory, EditStack) {
     return {
         restrict: "A",
         replace: false,
@@ -35,13 +35,8 @@ function discourseNodeCrate($state, NodeHistory) {
             });
         }
 
-        function updateFocused(field, data) {
-            let node = angular.copy(scope.node).$extend({
-                [field]: data
-            });
-            return node.$save().$then(() => {
-                humane.success("Updated node");
-            }).$asPromise();
+        function updateFocused() {
+            EditStack.editExisting(scope.node);
         }
     }
 }
