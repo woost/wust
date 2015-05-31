@@ -33,7 +33,7 @@ object GraphFormat {
       case u: User                                => Seq(
         ("title", JsString(u.name))
       )
-      case h: HyperRelation[PostLike, _, _, _, PostLike] => 
+      case h: HyperRelation[PostLike @unchecked, _, _, _, PostLike @unchecked] => 
         Seq(
         ("hyperEdge", JsBoolean(true)),
         ("startId", JsString(h.startNode.uuid)),
