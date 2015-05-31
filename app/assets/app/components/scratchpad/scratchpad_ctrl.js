@@ -12,6 +12,7 @@ function ScratchpadCtrl(Post, DiscourseNode) {
         require: ["ace/ext/language_tools"],
         onLoad,
         advanced: {
+            printMarginColumn: false,
             enableSnippets: true,
             enableBasicAutocompletion: true,
             enableLiveAutocompletion: true
