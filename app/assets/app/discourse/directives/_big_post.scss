@@ -1,0 +1,14 @@
+@import "compass/css3/flexbox";
+
+.big_post_directive {
+    .panel-body {
+        @include display-flex(flex);
+        @include flex-direction(row);
+        .post_description {
+            width: 70%;
+        }
+        .taglist {
+            width: 30%;
+        }
+    }
+}

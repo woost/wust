@@ -29,7 +29,7 @@
             <div ng-repeat="node in vm.edit.stack">
                 <button ng-click="vm.edit.removeEdited(node)" class="btn btn-danger btn-xs"><i class="fa fa-minus"></i> </button>
                 <button ng-click="vm.edit.editExisting(node)" class="btn btn-success btn-xs"><i class="fa fa-pencil"></i> </button>
-                <a ui-sref="{{vm.nodeInfo.getState(node.id)}}" class="node" style="margin-left:3px" ng-class="vm.nodeInfo.css">{{node.title || (node.description | trim:true:15)}}</a>
+                <span small-post node="node" node-info="vm.nodeInfo"></span>
             </div>
         </div>
     </div>
@@ -37,6 +37,6 @@
     <div id="history_list">
         <hr noshade size="1">
         <label>Last visited:</label>
-        <a ng-repeat="visited in vm.visitedNodes" ui-draggable="true" drag="visited.node.$encode()" drag-channel="{{visited.node.label}}" class="node" style="margin-left:3px" ui-sref="{{visited.info.getState(visited.node.id)}}" ng-class="visited.info.css">{{visited.node.title || (visited.node.description | trim:true:15)}}</a>
+        <span ng-repeat="visited in vm.visitedNodes" small-post node="visited.node" node-info="visited.info"></span>
     </div>
 </div>

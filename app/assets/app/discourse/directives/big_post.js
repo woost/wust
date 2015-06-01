@@ -1,12 +1,12 @@
-angular.module("wust.discourse").directive("discourseNodeCrate", discourseNodeCrate);
+angular.module("wust.discourse").directive("bigPost", bigPost);
 
-discourseNodeCrate.$inject = ["$state", "NodeHistory", "EditService"];
+bigPost.$inject = ["$state", "NodeHistory", "EditService"];
 
-function discourseNodeCrate($state, NodeHistory, EditService) {
+function bigPost($state, NodeHistory, EditService) {
     return {
         restrict: "A",
         replace: false,
-        templateUrl: "assets/app/discourse/directives/discourse_node_crate.html",
+        templateUrl: "assets/app/discourse/directives/big_post.html",
         scope: {
             node: "=",
             nodeInfo: "="
