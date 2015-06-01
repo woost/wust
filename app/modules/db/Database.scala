@@ -151,7 +151,7 @@ object Database {
   }
 
   def connectedComponent(node: UuidNodeDefinition[_]): Discourse = {
-    val query = s"match ${node.toQuery}<-[r: REFERS|SUBIDEA|SUBGOAL|ACHIEVESTOGOAL|IDEATOACHIEVES|PREVENTS|CAUSES|SOLVESTOPROBLEM|IDEATOSOLVES|SUPPORTSACHIEVEMENT|OPPOSESACHIEVEMENT|SUPPORTSSOLUTION|OPPOSESSOLUTION *0..10]-(p) return r,p"
+    val query = s"match (n:POST)-[:POSTLIKETOCONNECTS|CONNECTSTOPOSTLIKE *]-(:CONNECTS)-[:POSTLIKETOCONNECTS|CONNECTSTOPOSTLIKE *]-${node.toQuery} match (n)-[r1:POSTLIKETOCONNECTS]->(m:CONNECTS)-[r2:CONNECTSTOPOSTLIKE]->(:POST) return distinct n,m,r1,r2"
     val params = node.parameterMap
     Discourse(db.queryGraph(Query(query, params)))
   }
