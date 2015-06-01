@@ -106,14 +106,14 @@ function EditService(Post, NodeHistory, store) {
     }
 
     function saveNode() {
-        let node = self.stack[self.session.index] || {};
+        let oldNode = self.stack[self.session.index];
+        let node = oldNode || {};
         node.title = self.session.title;
         node.description = self.session.description;
 
         Post.$buildRaw(node).$update().$then(data => {
             humane.success("Added new node");
-            removeStack(node);
-            editNew();
+            removeStack(oldNode);
         });
     }
 
