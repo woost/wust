@@ -1,8 +1,8 @@
-angular.module("wust.components").service("EditStack", EditStack);
+angular.module("wust.components").service("EditService", EditService);
 
-EditStack.$inject = ["Post", "DiscourseNode", "NodeHistory", "store"];
+EditService.$inject = ["Post", "NodeHistory", "store"];
 
-function EditStack(Post, DiscourseNode, NodeHistory, store) {
+function EditService(Post, NodeHistory, store) {
     let editStore = store.getNamespacedStore("edit");
     let self = this;
 
@@ -112,7 +112,6 @@ function EditStack(Post, DiscourseNode, NodeHistory, store) {
 
         Post.$buildRaw(node).$update().$then(data => {
             humane.success("Added new node");
-            DiscourseNode.Post.gotoState(data.id);
             removeStack(node);
             editNew();
         });

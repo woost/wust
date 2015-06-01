@@ -1,8 +1,8 @@
 angular.module("wust.discourse").directive("discourseNodeCrate", discourseNodeCrate);
 
-discourseNodeCrate.$inject = ["$state", "NodeHistory", "EditStack"];
+discourseNodeCrate.$inject = ["$state", "NodeHistory", "EditService"];
 
-function discourseNodeCrate($state, NodeHistory, EditStack) {
+function discourseNodeCrate($state, NodeHistory, EditService) {
     return {
         restrict: "A",
         replace: false,
@@ -31,7 +31,7 @@ function discourseNodeCrate($state, NodeHistory, EditStack) {
         }
 
         function updateFocused() {
-            EditStack.editExisting(scope.node);
+            EditService.editExisting(scope.node);
         }
     }
 }

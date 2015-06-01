@@ -1,8 +1,8 @@
 angular.module("wust.components").controller("ScratchpadCtrl", ScratchpadCtrl);
 
-ScratchpadCtrl.$inject = ["Search", "NodeHistory", "EditStack", "DiscourseNode"];
+ScratchpadCtrl.$inject = ["Search", "NodeHistory", "EditService", "DiscourseNode"];
 
-function ScratchpadCtrl(Search, NodeHistory, EditStack, DiscourseNode) {
+function ScratchpadCtrl(Search, NodeHistory, EditService, DiscourseNode) {
     let vm = this;
 
     vm.ace = {
@@ -12,7 +12,7 @@ function ScratchpadCtrl(Search, NodeHistory, EditStack, DiscourseNode) {
             mode: "markdown",
             require: ["ace/ext/language_tools"],
             onLoad: onEditorLoad,
-            onBlur: EditStack.onChange,
+            onBlur: EditService.onChange,
             advanced: {
                 printMarginColumn: false,
                 enableSnippets: true,
@@ -24,7 +24,7 @@ function ScratchpadCtrl(Search, NodeHistory, EditStack, DiscourseNode) {
 
     vm.visitedNodes = NodeHistory.visited;
     vm.searchNodes = searchNodes;
-    vm.editStack = EditStack;
+    vm.edit = EditService;
     vm.nodeInfo = DiscourseNode.Post;
 
     function onEditorLoad(editor) {
