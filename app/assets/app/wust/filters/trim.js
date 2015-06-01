@@ -1,4 +1,4 @@
-angular.module("wust.filter").filter("trim", trim);
+angular.module("wust").filter("trim", trim);
 
 trim.$inject = ["$filter"];
 

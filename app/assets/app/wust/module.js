@@ -1,9 +1,12 @@
 angular.module("wust", [
+    "ui.bootstrap",
+    "ang-drag-drop",
     "ngAnimate",
     "ui.layout",
     "ui.router",
-    "ui.ace",
+    "wust.services",
     "wust.api",
     "wust.discourse",
-    "wust.components"
+    "wust.graph",
+    "wust.components",
 ]);

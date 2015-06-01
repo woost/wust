@@ -1,4 +1,4 @@
-angular.module("wust.filter").filter("fuzzyFilter", fuzzyFilter);
+angular.module("wust").filter("fuzzyFilter", fuzzyFilter);
 
 fuzzyFilter.$inject = ["$filter"];
 

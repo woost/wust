@@ -3,5 +3,5 @@ angular.module("wust.api", [
     "angular-jwt",
     "ngCookies",
     "angular-storage",
-    "wust.live"
+    "wust.services"
 ]);

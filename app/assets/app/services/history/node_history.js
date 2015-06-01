@@ -1,4 +1,4 @@
-angular.module("wust.history").service("NodeHistory", NodeHistory);
+angular.module("wust.services").service("NodeHistory", NodeHistory);
 
 NodeHistory.$inject = ["Post", "DiscourseNode", "store"];
 

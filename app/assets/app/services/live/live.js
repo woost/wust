@@ -1,4 +1,4 @@
-angular.module("wust.live").provider("Live", Live);
+angular.module("wust.services").provider("Live", Live);
 
 Live.$inject = [];
 

@@ -1,4 +1,4 @@
-angular.module("wust.components").service("EditService", EditService);
+angular.module("wust.services").service("EditService", EditService);
 
 EditService.$inject = ["Post", "NodeHistory", "store"];
 
