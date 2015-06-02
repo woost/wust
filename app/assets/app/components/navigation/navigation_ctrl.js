@@ -1,8 +1,8 @@
 angular.module("wust.components").controller("NavigationCtrl", NavigationCtrl);
 
-NavigationCtrl.$inject = ["Auth", "Search", "DiscourseNode"];
+NavigationCtrl.$inject = ["Auth", "SearchService"];
 
-function NavigationCtrl(Auth, Search, DiscourseNode) {
+function NavigationCtrl(Auth, SearchService) {
     let vm = this;
 
     vm.navbarCollapsed = true;
@@ -16,13 +16,12 @@ function NavigationCtrl(Auth, Search, DiscourseNode) {
         password: ""
     };
 
-    vm.searchNodes = searchNodes;
-    vm.onSelect = onSelect;
-    vm.onSubmit = onSubmit;
+    vm.onSearchBoxChange = onSearchBoxChange;
     vm.authenticate = authenticate;
     vm.getUsername = Auth.getUsername.bind(Auth);
     vm.loggedIn = Auth.loggedIn.bind(Auth);
     vm.logout = Auth.logout.bind(Auth);
+    vm.search = SearchService.search;
 
     function authenticate(register) {
         let func = register ? Auth.register : Auth.login;
@@ -31,29 +30,12 @@ function NavigationCtrl(Auth, Search, DiscourseNode) {
         vm.newUser.password = "";
     }
 
-    // provides a promise of the searchresults for the auto completion
-    function searchNodes(title) {
-        return Search.$search({title: title});
-    }
-
-    // focus the first node of the search results
-    function onSubmit(nodes) {
-        if (_.isEmpty(nodes)) {
-            humane.error("Nothing found");
-            return;
+    function onSearchBoxChange() {
+        if( SearchService.search.query === "" )
+            SearchService.search.resultsVisible = false;
+        else {
+            SearchService.triggerSearch();
+            SearchService.search.resultsVisible = true;
         }
-
-        focusNode(nodes[0]);
-    }
-
-    // focus the selected node
-    function onSelect(item) {
-        focusNode(item);
-        vm.searchTyped.title = "";
-    }
-
-    // route to the node's page
-    function focusNode(node) {
-        DiscourseNode.get(node.label).gotoState(node.id);
     }
 }

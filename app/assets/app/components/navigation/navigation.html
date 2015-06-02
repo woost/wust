@@ -21,7 +21,16 @@
                 </li>
             </ul>
 
-            <div discourse-node-search-form ng-model='vm.searchTyped' on-select="vm.onSelect(item)" on-submit="vm.onSubmit(items)" search-nodes='vm.searchNodes(term)' icon-class="fa fa-search" class="navbar-form navbar-left" id="node_search_header" role="search"></div>
+            <form id="node_search_form" class="navbar-form navbar-left" ng-submit='vim.onSearchBoxChange()'>
+                <div class="input-group">
+                    <input type="text" class="form-control" ng-model="vm.search.query" ng-change='vm.onSearchBoxChange()'>
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" type="submit">
+                            <i class='fa fa-search'></i>
+                        </button>
+                    </span>
+                </div>
+            </form>
 
             <form ng-hide="vm.loggedIn()" name="signForm" ng-submit="vm.authenticate(registerUser)" class="navbar-form navbar-right">
                 <input class="form-control" size="10" name="username" type="text" ng-model='vm.newUser.identifier' placeholder="Username" required>

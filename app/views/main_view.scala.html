@@ -1,12 +1,13 @@
 <div id="navigation_view" ui-view="navigation"></div>
 <main role="main">
-    <div id="main_view" ui-layout="{flow : 'column', dividerSize: 16}" >
+    <div id="main_view" ui-layout="{flow : 'column', dividerSize: 16}">
         <div ui-layout-container size="20%">
             <div id="scratchpad_view" class="route_animation" ui-view="scratchpad"></div>
         </div>
         <div ui-layout-container>
+            <div id="search_view" ui-view="search"></div>
             <div route-loading-indicator></div>
-            <div id="content_view" class="route_animation" ng-show='!isRouteLoading' ui-view="content"></div>
+            <div id="content_view" class="route_animation" ng-hide='isRouteLoading' ui-view="content"></div>
         </div>
     </div>
 </main>

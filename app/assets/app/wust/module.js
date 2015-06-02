@@ -1,6 +1,5 @@
 angular.module("wust", [
     "ui.bootstrap",
-    "ang-drag-drop",
     "ngAnimate",
     "ui.layout",
     "ui.router",
@@ -8,5 +7,5 @@ angular.module("wust", [
     "wust.api",
     "wust.discourse",
     "wust.graph",
-    "wust.components",
+    "wust.components"
 ]);

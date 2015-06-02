@@ -30,23 +30,11 @@ html, body {
                     & > .ng-scope {
                         height: inherit;
                         overflow: auto;
-                        & > .ng-scope {
-                            overflow: auto;
-                        }
                     }
                 }
             }
             .route_animation > .ng-enter {
-                $time: 0.5s;
-                -webkit-animation: fadeIn $time;
-                -moz-animation: fadeIn $time;
-                -ms-animation: fadeIn $time;
-                -o-animation: fadeIn $time;
-                animation: fadeIn $time;
-                // TODO: why is it not working with compass?
-                // @import "compass/css3/animation";
-                // @include animation(fadeIn, 5.5s);
-           
+                @include animation(fadeIn 0.5s);
             }
         }
     }
