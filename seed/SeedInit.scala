@@ -18,9 +18,13 @@ trait Task extends App {
 object SeedInit extends Task {
   println("Seeding Database")
   val discourse = Discourse.empty
-  println("creating UserGroup: everyone")
-  discourse.add(UserGroup.local("everyone"))
-  db.persistChanges(discourse.graph)
 
+
+  db.query("CREATE INDEX ON :POST(uuid)")
+
+  discourse.add(UserGroup.local("everyone"))
+
+
+  db.persistChanges(discourse.graph)
   db.restService.actorSystem.shutdown()
 }
