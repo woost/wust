@@ -1,20 +1,22 @@
 nav {
-    color: $nav_fontcolor;
+    color: $nav_normal_color;
     .nav {
         a:link, a:hover, a:visited, a.active {
-            color: $nav_fontcolor !important;
+            color: $nav_normal_color !important;
         }
-        a:hover, a:visited {
-            background-color: #00915C !important;
+        a:hover {
+            color: $nav_hover_color !important;
+            background-color: $nav_hover_background !important;
         }
         a.active {
-            background-color: #0078C6 !important;
+            color: $nav_active_color !important;
+            background-color: $nav_active_background !important;
         }
     }
 }
 
 #navigation {
-    background-color: $nav_background;
+    background-color: $nav_normal_background;
     border-width: 0px;
     ul.nav li.dropdown:hover > ul.dropdown-menu {
         display: block;
