@@ -19,20 +19,20 @@ object SeedReddit extends Task {
   val ws = new play.api.libs.ws.ning.NingWSClient(builder.build())
   def getJson(url: String):JsValue = Await.result(ws.url(url).get(), 10.seconds).json
 
-  val subreddit = "gifs"
-  val limit = 2
+  val subreddit = "gue"
+  val limit = 20
   println(s"importing comments from subreddit /r/$subreddit")
   val discourse = Discourse.empty
 
   try {
-    val url = s"http://www.reddit.com/r/$subreddit/top.json?limit=$limit"
+    val url = s"http://www.reddit.com/r/$subreddit/top.json?limit=$limit&t=all"
     val response = getJson(url)
     (response \ "data" \ "children") match {
       case JsArray(children) => children.foreach { post =>
         val id = (post \ "data" \ "id").as[String]
         val title = (post \ "data" \ "title").as[String]
         val content = (post \ "data" \ "selftext").as[String]
-        val headPost = Post.local(title, description = Some(content))
+        val headPost = Post.local(title = Some(title), description = content)
         println(s"thread: $title")
         discourse.add(headPost)
 
@@ -47,7 +47,7 @@ object SeedReddit extends Task {
               val body = (comment \ "data" \ "body").as[String]
               val title = body.take(100) + (if(body.size > 100) "..." else "")
 
-              val commentNode = Post.local(title, description = Some(body))
+              val commentNode = Post.local(title = Some(title), description = body)
               println(s" reply: $title")
               discourse.add(commentNode, Connects.local(commentNode, parent))
 
