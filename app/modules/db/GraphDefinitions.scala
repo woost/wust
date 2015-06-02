@@ -52,7 +52,7 @@ sealed trait HyperNodeDefinitionBase[+NODE <: Node] extends FixedNodeDefinition[
 
 sealed trait UuidNodeDefinition[+NODE <: UuidNode] extends FixedNodeDefinition[NODE] {
   val uuid: String
-  val uuidVariable = randomVariable
+  val uuidVariable = randomVariable //TODO: rename
   override def parameterMap = Map(uuidVariable -> uuid)
 }
 
