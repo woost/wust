@@ -247,8 +247,7 @@ function branchGraph(DiscourseNode) {
                     return a ? a.concat(b) : b;
                 }, _)) || {};
 
-                //  || neighbourMap[node.id].length > 2
-                _.each(graph.nodes, (node) => node._hidden = node.hyperEdge);
+                _.each(graph.nodes, (node) => node._hidden = node.hyperEdge && neighbourMap[node.id].length <= 2);
 
                 let rootNode = _.find(graph.nodes, { id: scope.rootId });
                 positionNodePredecessors([rootNode], predecessorMap, 100);
