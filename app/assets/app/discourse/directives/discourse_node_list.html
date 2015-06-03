@@ -9,7 +9,7 @@
 
 <script type="text/ng-template" id="show_discourse_node_list.html">
     <div class="node_model_list">
-        <div ng-repeat='node in vm.nodeModel.list | conditionalOrderBy:vm.nodeModel.orderProperty'>
+        <div ng-repeat='node in vm.nodeModel.list | hideHidden | conditionalOrderBy:vm.nodeModel.orderProperty'>
             <div ng-if="!vm.nodeModel.isNested" class="btn-group" role="group" style="padding:3px">
                 <button ui-draggable="true" drag="node.$encode()" drag-channel="{{node.label}}" ng-class="vm.nodeModel.getCss(node)" class="btn" ng-mouseover="vm.nodeModel.onHover(node)" ng-click="vm.nodeModel.onClick(node)">{{node.title}}</button>
                 <button ng-if="vm.nodeModel.writable" class='btn btn-default' ng-click='vm.nodeModel.remove(node)'><i class='fa fa-minus text-default'></i></button>

@@ -20,6 +20,9 @@ function branchGraph(DiscourseNode) {
         scope.graph.$then(data => {
 
             let graph = data; //TODO: was angular.copy(data). Publish graph more elegantly
+            let neighbourMap;
+            let predecessorMap;
+            let successorMap;
             preprocessGraph(graph); // assigns node positions in .line and .xShift
 
             let radius = 10;
@@ -53,16 +56,25 @@ function branchGraph(DiscourseNode) {
                 .attr("d", "M 0,-3 L 10,-0.5 L 10,0.5 L0,3");
 
 
+            let edgesWithSquashedHyperEdges = _(graph.edges).map((edge) => {
+                // point startHyperEdges to the hypernode target
+                // then remove endHyperEdges
+                let target = graph.nodes[edge.target];
+                if( target._hidden )
+                    edge.target = graph.nodes.indexOf(successorMap[target.id][0]);
+                return edge;
+            }).reject((edge) => graph.nodes[edge.source]._hidden).value();
+
             let linksvg = svg.append("g").attr("id","group_links")
                 .selectAll()
-                .data(graph.edges).enter()
+                .data(edgesWithSquashedHyperEdges).enter()
                 .append("path");
                 // .style("marker-end", "url(" + window.location.href + "#branch_arrow)")
 
             // create nodes in the svg
             let node = svg.append("g").attr("id","group_hypernodes-then-nodes")
                 .selectAll()
-                .data(graph.nodes).enter()
+                .data(_.reject(graph.nodes,"_hidden")).enter()
                 .append("circle")
                 .attr("cx", d => {d.x = paddingLeft + d.xShift * horizontalDistance; return d.x;})
                 .attr("cy", d => {d.y = paddingTop + d.line * verticalDistance; return d.y;})
@@ -168,33 +180,43 @@ function branchGraph(DiscourseNode) {
             function positionNodePredecessors(branches, predecessorMap, maxWidth = 6, maxYShifts = [], nextLine = 0, nextBranchId = 0) {
                 if(branches.length === 0) return;
 
-                let current = _.first(branches);
-
-                current.branch = current.branch !== undefined ? current.branch : nextBranchId++; // can be 0
-                current.line = current.line !== undefined ? current.line : nextLine++; // can be 0
-                current.xShift = current.xShift || 0;
+                let current = branches[0];
+                if(current.positioned) return; // found a circle
+                current.positioned = true;
 
                 let predecessors = predecessorMap[current.id] || [];
-                let isLine = predecessors.length === 1;
 
                 // decide, which branch to take first
                 // predecessors = _.sortBy(predecessors, p => p.title);
 
-                if(predecessors.length > 0) { // more than one child
-                    _.each(predecessors, (p,i) => {
-                        p.branch = isLine ? current.branch : nextBranchId++; // TODO: not in loop
-                        p.line = nextLine++;
-                        p.xShift = findFreeShift(current.line, current.xShift, maxYShifts, maxWidth);
-                        maxYShifts[p.xShift] = p.line;
-                    });
+                if(current._hidden) {
+                    // skip hypernodes which look like relations (degree == 2)
+                    let p = predecessors[0];
+                    p.branch = current.branch;
+                    p.line = current.line;
+                    p.xShift = current.xShift;
+                } else {
+                    current.branch = current.branch !== undefined ? current.branch : nextBranchId++; // can be 0
+                    current.line = current.line !== undefined ? current.line : nextLine++; // can be 0
+                    current.xShift = current.xShift || 0;
+
+                    let isLine = predecessors.length === 1;
+                    if(predecessors.length > 0) { // more than one child
+                        _.each(predecessors, (p,i) => {
+                            p.branch = isLine ? current.branch : nextBranchId++; // TODO: not in loop
+                            p.line = nextLine++;
+                            p.xShift = findFreeShift(current.line, current.xShift, maxYShifts, maxWidth);
+                            maxYShifts[p.xShift] = p.line;
+                        });
+                    }
                 }
 
-                let nextBranches = predecessors.concat(_.without(branches, current));
+                let nextBranches = predecessors.concat(_.tail(branches));
                 positionNodePredecessors(nextBranches, predecessorMap, maxWidth, maxYShifts, nextLine, nextBranchId);
             }
 
             function preprocessGraph(graph) {
-                let predecessorMap = _(graph.edges).map(edge => {
+                predecessorMap = _(graph.edges).map(edge => {
                     let source = graph.nodes[edge.source];
                     let target = graph.nodes[edge.target];
                     return {
@@ -203,6 +225,30 @@ function branchGraph(DiscourseNode) {
                 }).reduce(_.partialRight(_.merge, (a, b) => {
                     return a ? a.concat(b) : b;
                 }, _)) || {};
+
+                successorMap = _(graph.edges).map(edge => {
+                    let source = graph.nodes[edge.source];
+                    let target = graph.nodes[edge.target];
+                    return {
+                        [source.id]: [target]
+                    };
+                }).reduce(_.partialRight(_.merge, (a, b) => {
+                    return a ? a.concat(b) : b;
+                }, _)) || {};
+
+                neighbourMap = _(graph.edges).map(edge => {
+                    let source = graph.nodes[edge.source];
+                    let target = graph.nodes[edge.target];
+                    return {
+                        [target.id]: [source],
+                        [source.id]: [target]
+                    };
+                }).reduce(_.partialRight(_.merge, (a, b) => {
+                    return a ? a.concat(b) : b;
+                }, _)) || {};
+
+                //  || neighbourMap[node.id].length > 2
+                _.each(graph.nodes, (node) => node._hidden = node.hyperEdge);
 
                 let rootNode = _.find(graph.nodes, { id: scope.rootId });
                 positionNodePredecessors([rootNode], predecessorMap, 100);
