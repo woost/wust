@@ -1,15 +1,12 @@
-<div focus-view id="focus_view_component">
+<div neighbours-view id="neighbours_component">
     <div ng-if='vm.left' id="left_view">
         <div discourse-node-list node-model='vm.left.model' class="discourse_node_list_vertical"></div>
     </div>
-    <div id="focus_view_center">
+    <div id="center_view">
         <div ng-if='vm.top' id="top_view">
             <div discourse-node-list node-model='vm.top.model' class="discourse_node_list_horizontal"></div>
         </div>
         <div id="node_view">
-            <h2>Focus:</h2>
-            <a ui-sref="branches({id: vm.node.model.id})">brunch</a>
-            <a ui-sref="columns({id: vm.node.model.id})">columns</a>
             <div big-post node="vm.node.model" node-info="vm.nodeInfo"></div>
         </div>
         <div ng-if="vm.bottom" id="bottom_view">

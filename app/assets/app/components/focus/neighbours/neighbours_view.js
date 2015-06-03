@@ -1,8 +1,8 @@
-angular.module("wust.components").directive("focusView", focusView);
+angular.module("wust.components").directive("neighboursView", neighboursView);
 
-focusView.$inject = ["$state", "$rootScope", "$q", "NodeHistory"];
+neighboursView.$inject = ["$state", "$rootScope", "$q", "NodeHistory"];
 
-function focusView($state, $rootScope, $q, NodeHistory) {
+function neighboursView($state, $rootScope, $q, NodeHistory) {
     return {
         restrict: "A",
         replace: false,

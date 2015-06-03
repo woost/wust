@@ -1,6 +1,6 @@
 @import "compass/css3/flexbox";
 
-#column_component {
+#columns_component {
     @include display-flex(flex);
     @include flex-direction(column);
     padding: 20px;

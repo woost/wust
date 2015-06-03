@@ -33,12 +33,10 @@ function NodeHistory(Post, DiscourseNode, store) {
         });
 
         self.visited.splice(0, self.visited.length - maximum);
+        storeVisited();
     }
 
     function add(promise) {
-        promise.$then(node => {
-            addNode(node);
-            storeVisited();
-        });
+        promise.$then(addNode);
     }
 }

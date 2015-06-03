@@ -6,6 +6,7 @@ function graphView() {
     return {
         restrict: "A",
         templateUrl: "assets/app/graph/directives/graph_view.html",
+        replace: true,
         scope: {
             graph: "="
         },

@@ -4,6 +4,10 @@
     position: relative;
     .graph_network {
         height: 100%;
+        svg {
+            height: 100%;
+            width: 100%;
+        }
     }
     #filter_input {
         width: 30%;

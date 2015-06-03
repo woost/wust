@@ -33,21 +33,6 @@ function RoutesConfig($stateProvider, $urlRouterProvider, $locationProvider, Dis
         url: "/vote",
         templateUrl: `${templateBase}/votes/vote.html`,
         controller: "VotesCtrl as vm",
-    }).state("graph", {
-        parent: "page",
-        url: "/graph",
-        templateUrl: `${templateBase}/graphs/graph.html`,
-        controller: "GraphsCtrl as vm",
-    }).state("branches", {
-        parent: "page",
-        url: "/branches/:id",
-        templateUrl: `${templateBase}/branches/branch.html`,
-        controller: "BranchesCtrl as vm"
-    }).state("columns", {
-        parent: "page",
-        url: "/columns/:id",
-        templateUrl: `${templateBase}/columns/column.html`,
-        controller: "ColumnsCtrl as vm"
     }).state("users", {
         abstract: true,
         parent: "page",
@@ -61,11 +46,16 @@ function RoutesConfig($stateProvider, $urlRouterProvider, $locationProvider, Dis
         url: "/details/:id",
         templateUrl: `${templateBase}/users/detail.html`,
         controller: "UserDetailsCtrl as vm",
-    }).state(DiscourseNodeProvider.setState("Post", "posts"), {
+    }).state(DiscourseNodeProvider.setState("Post", "focus"), {
         parent: "page",
-        url: "/posts/:id",
-        templateUrl: `${templateBase}/nodes/focus_view.html`,
-        controller: "PostsCtrl as vm",
+        url: "/focus/:id",
+        templateUrl: `${templateBase}/focus/focus.html`,
+        controller: "FocusCtrl as vm",
+        resolve: {
+            component: ["ConnectedComponents","$stateParams", function(ConnectedComponents, $stateParams) {
+                return ConnectedComponents.$find($stateParams.id).$asPromise();
+            }]
+        }
     });
 
     $urlRouterProvider.otherwise("/dashboard");

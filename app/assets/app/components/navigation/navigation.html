@@ -11,14 +11,10 @@
 
         <div class="collapse navbar-collapse" collapse="vm.navbarCollapsed">
             <ul class="nav navbar-nav navbar-left">
-                <li><a ui-sref="dashboard" ui-sref-active="active"><i class="fa fa-paper-plane"></i> Dashboard</a>
-                </li>
-                <li><a ui-sref="graph" ui-sref-active="active"><i class="fa fa-connectdevelop"></i> Graph</a>
-                </li>
-                <li><a ui-sref="vote" ui-sref-active="active"><i class="fa fa-check-square-o"></i> Vote</a>
-                </li>
-                <li><a ui-sref="users.list" ui-sref-active="active"><i class="fa fa-users"></i> Users</a>
-                </li>
+                <li><a ui-sref="dashboard" ui-sref-active="active"><i class="fa fa-paper-plane"></i> Dashboard</a></li>
+                <li><a ui-sref="focus" ui-sref-active="active"><i class="fa fa-dot-circle-o"></i> Focus</a></li>
+                <li><a ui-sref="vote" ui-sref-active="active"><i class="fa fa-sort"></i> Vote</a></li>
+                <li><a ui-sref="users.list" ui-sref-active="active"><i class="fa fa-users"></i> Users</a></li>
             </ul>
 
             <form id="node_search_form" class="navbar-form navbar-left" ng-submit='vim.onSearchBoxChange()'>

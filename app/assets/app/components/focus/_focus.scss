@@ -1,0 +1,9 @@
+#focus_component {
+    height: 100%;
+    .tabs-left, .nav, .tab-content, .tab-pane {
+        height: inherit;
+    }
+    .tab-pane > div {
+        height: inherit;
+    }
+}

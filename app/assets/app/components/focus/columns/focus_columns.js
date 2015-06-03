@@ -1,8 +1,24 @@
-angular.module("wust.components").controller("ColumnsCtrl", ColumnsCtrl);
+angular.module("wust.components").directive("focusColumns", focusColumns);
 
-ColumnsCtrl.$inject = ["$stateParams", "DiscourseNodeCrate", "DiscourseNode", "DiscourseNodeList", "ContentNode"];
+focusColumns.$inject = [];
 
-function ColumnsCtrl($stateParams, DiscourseNodeCrate, DiscourseNode, DiscourseNodeList, ContentNode) {
+function focusColumns() {
+    return {
+        restrict: "A",
+        templateUrl: "assets/app/components/focus/columns/columns.html",
+        scope: {
+            graph: "=",
+            rootId: "="
+        },
+        controller: ColumnsCtrl,
+        controllerAs: "vm",
+        bindToController: true
+    };
+}
+
+ColumnsCtrl.$inject = ["DiscourseNodeCrate", "DiscourseNode", "DiscourseNodeList", "ContentNode"];
+
+function ColumnsCtrl(DiscourseNodeCrate, DiscourseNode, DiscourseNodeList, ContentNode) {
     let vm = this;
 
     let relationMap = {
@@ -69,7 +85,7 @@ function ColumnsCtrl($stateParams, DiscourseNodeCrate, DiscourseNode, DiscourseN
         }
     }
 
-    ContentNode.$find($stateParams.id).$then(node => {
+    ContentNode.$find(vm.rootId).$then(node => {
         vm.focus = new FocusNode(nodeWithInfo(node));
     });
 
