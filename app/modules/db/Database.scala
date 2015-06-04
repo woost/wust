@@ -150,9 +150,14 @@ object Database {
     db.persistChanges(discourse.graph)
   }
 
-  def connectedComponent(node: UuidNodeDefinition[_]): Discourse = {
-    val query = s"match ${node.toQuery} match (n:POST)-[:POSTLIKETOCONNECTS|CONNECTSTOPOSTLIKE *]-(:CONNECTS)-[:POSTLIKETOCONNECTS|CONNECTSTOPOSTLIKE *]-(${node.name}) match (n)-[r1:POSTLIKETOCONNECTS]->(m:CONNECTS)-[r2:CONNECTSTOPOSTLIKE]->(:POST) return distinct n,m,r1,r2"
-    val params = node.parameterMap
+  def connectedComponent(focusNode: UuidNodeDefinition[_], depth:Int = 10): Discourse = {
+    val query = s"""
+      match ${focusNode.toQuery}
+      match (${focusNode.name})-[:POSTLIKETOCONNECTS|CONNECTSTOPOSTLIKE *0..$depth]-(all:POST)
+      match (all)-[r1:POSTLIKETOCONNECTS]->(:CONNECTS)-[r2:CONNECTSTOPOSTLIKE]->(:POST)
+      return distinct all,r1,r2
+    """
+    val params = focusNode.parameterMap
     Discourse(db.queryGraph(Query(query, params)))
   }
 }
