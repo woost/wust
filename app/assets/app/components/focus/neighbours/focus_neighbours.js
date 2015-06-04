@@ -16,12 +16,11 @@ function focusNeighbours() {
     };
 }
 
-NeighboursCtrl.$inject = ["Post", "DiscourseNode", "DiscourseNodeList", "DiscourseNodeCrate"];
+NeighboursCtrl.$inject = ["Post", "DiscourseNodeList", "DiscourseNodeCrate"];
 
-function NeighboursCtrl(Post, DiscourseNode, DiscourseNodeList, DiscourseNodeCrate) {
+function NeighboursCtrl(Post, DiscourseNodeList, DiscourseNodeCrate) {
     let vm = this;
 
-    vm.nodeInfo = DiscourseNode.Post;
     let node = Post.$find(vm.rootId);
     vm.node = DiscourseNodeCrate(node);
     vm.top = DiscourseNodeList.write.Post(node.connectsFrom.$search(), "From")

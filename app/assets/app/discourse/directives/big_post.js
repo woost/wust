@@ -1,15 +1,14 @@
 angular.module("wust.discourse").directive("bigPost", bigPost);
 
-bigPost.$inject = ["$state", "NodeHistory", "EditService"];
+bigPost.$inject = ["$state", "NodeHistory", "EditService", "DiscourseNode"];
 
-function bigPost($state, NodeHistory, EditService) {
+function bigPost($state, NodeHistory, EditService, DiscourseNode) {
     return {
         restrict: "A",
         replace: false,
         templateUrl: "assets/app/discourse/directives/big_post.html",
         scope: {
-            node: "=",
-            nodeInfo: "="
+            node: "="
         },
         link: link
     };
@@ -17,6 +16,8 @@ function bigPost($state, NodeHistory, EditService) {
     function link(scope) {
         // we are viewing details about a node, so add it to the nodehistory
         NodeHistory.add(scope.node);
+
+        scope.nodeInfo = DiscourseNode.Post;
 
         // callbacks for removing/updating the focused node
         scope.removeFocused = removeFocused;

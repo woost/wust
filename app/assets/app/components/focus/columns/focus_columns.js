@@ -101,6 +101,7 @@ function ColumnsCtrl(DiscourseNodeCrate, DiscourseNode, DiscourseNodeList, Conte
         vm.parent = history.pop();
     }
 
+    //TODO: remove info here
     function nodeWithInfo(data) {
         let info = DiscourseNode.get(data.label);
         let node = DiscourseNodeCrate(info.service.$buildRaw(data));

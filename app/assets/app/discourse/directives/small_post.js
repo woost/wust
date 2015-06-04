@@ -1,19 +1,19 @@
 angular.module("wust.discourse").directive("smallPost", smallPost);
 
-smallPost.$inject = [];
+smallPost.$inject = ["DiscourseNode"];
 
-function smallPost() {
+function smallPost(DiscourseNode) {
     return {
         restrict: "A",
         replace: false,
         templateUrl: "assets/app/discourse/directives/small_post.html",
         scope: {
             node: "=",
-            nodeInfo: "="
         },
         link: link
     };
 
     function link(scope) {
+        scope.nodeInfo = DiscourseNode.Post;
     }
 }

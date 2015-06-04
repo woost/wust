@@ -1,12 +1,11 @@
 angular.module("wust.components").controller("SearchCtrl", SearchCtrl);
 
-SearchCtrl.$inject = ["SearchService", "DiscourseNode", "$rootScope"];
+SearchCtrl.$inject = ["SearchService", "$rootScope"];
 
-function SearchCtrl(SearchService, DiscourseNode, $rootScope) {
+function SearchCtrl(SearchService, $rootScope) {
     let vm = this;
 
     vm.search = SearchService.search;
-    vm.nodeInfo = DiscourseNode.Post;
 
     $rootScope.$on("$stateChangeSuccess", () => {
         vm.search.resultsVisible = false;

@@ -1,5 +1,5 @@
 <div id="columns_component">
-    <div ng-if="vm.focus.element" big-post node="vm.focus.element.node.model" node-info="vm.focus.element.info" class="node_details"></div>
+    <div ng-if="vm.focus.element" big-post node="vm.focus.element.node.model" class="node_details"></div>
     <button class='btn btn-default' ng-click='vm.goBack()' ng-disabled='vm.hasNoHistory()'><i class='fa fa-step-backward'></i></button>
     <div class="column_view">
         <div accordion class="column list-group" close-others="false">
@@ -13,7 +13,7 @@
             </div>
         </div>
         <div class="column">
-            <div ng-if="vm.selected.node" big-post node="vm.selected.node.model" node-info="vm.selected.info" class="node_details"></div>
+            <div ng-if="vm.selected.node" big-post node="vm.selected.node.model" class="node_details"></div>
         </div>
     </div>
 </div>
