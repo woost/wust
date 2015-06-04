@@ -1,8 +1,8 @@
 angular.module("wust.services").service("EditService", EditService);
 
-EditService.$inject = ["Post", "NodeHistory", "store"];
+EditService.$inject = ["Post", "HistoryService", "store"];
 
-function EditService(Post, NodeHistory, store) {
+function EditService(Post, HistoryService, store) {
     let editStore = store.getNamespacedStore("edit");
     let self = this;
 
@@ -89,7 +89,7 @@ function EditService(Post, NodeHistory, store) {
         let node = _.isArray(maybeNodes) ? maybeNodes[0] : maybeNodes;
         //TODO: might be a restmod resource
         if (node.$then !== undefined) {
-            NodeHistory.add(node);
+            HistoryService.add(node);
         }
 
         node = _.pick(node, "id", "title", "description");

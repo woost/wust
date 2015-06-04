@@ -15,5 +15,6 @@ function smallPost(DiscourseNode) {
 
     function link(scope) {
         scope.nodeInfo = DiscourseNode.Post;
+        console.log(scope.nodeInfo);
     }
 }

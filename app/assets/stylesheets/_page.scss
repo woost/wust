@@ -34,7 +34,7 @@ html, body {
                 }
             }
             .route_animation > .ng-enter {
-                @include animation(fadeIn 0.5s);
+                @include animation(fadeIn 0.3s);
             }
         }
     }

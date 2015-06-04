@@ -1,8 +1,8 @@
 angular.module("wust.components").controller("ScratchpadCtrl", ScratchpadCtrl);
 
-ScratchpadCtrl.$inject = ["Search", "NodeHistory", "EditService", "DiscourseNode"];
+ScratchpadCtrl.$inject = ["Search", "HistoryService", "EditService", "DiscourseNode"];
 
-function ScratchpadCtrl(Search, NodeHistory, EditService, DiscourseNode) {
+function ScratchpadCtrl(Search, HistoryService, EditService, DiscourseNode) {
     let vm = this;
 
     vm.ace = {
@@ -22,7 +22,6 @@ function ScratchpadCtrl(Search, NodeHistory, EditService, DiscourseNode) {
         }
     };
 
-    vm.visitedNodes = NodeHistory.visited;
     vm.searchNodes = searchNodes;
     vm.edit = EditService;
     vm.nodeInfo = DiscourseNode.Post;
