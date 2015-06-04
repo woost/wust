@@ -1,0 +1,23 @@
+@import "compass/css3/flexbox";
+
+#sidebar {
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    z-index: 10;
+    @include display-flex(flex);
+    @include flex-direction(rows);
+    #sidebar_toggle {
+    }
+    #sidebar_content {
+        border: 1px solid $sidebar_border;
+        border-radius: 5px;
+        padding: 5px;
+        &.ng-hide-add {
+            @include animation(fadeOutUp 0.2s);
+        }
+        &.ng-hide-remove {
+            @include animation(fadeInDown 0.2s);
+        }
+    }
+}
