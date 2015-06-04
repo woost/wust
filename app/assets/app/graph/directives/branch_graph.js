@@ -247,9 +247,27 @@ function branchGraph(DiscourseNode) {
                     return a ? a.concat(b) : b;
                 }, _)) || {};
 
-                _.each(graph.nodes, (node) => node._hidden = node.hyperEdge && neighbourMap[node.id].length <= 2);
+                console.log("suc: ",successorMap);
+                console.log("pre: ",predecessorMap);
+                function showPredecessors(node) {
+                    console.log("showing " + node.title);
+                    if(node._hidden === false) return;
+                    node._hidden = false;
+
+                    let predecessors = predecessorMap[node.id] || [];
+                    _.each(predecessors, (p) => showPredecessors(p));
+                }
+                function hideSuccessors(node) {
+                    showPredecessors(node);
+                    _.each(graph.nodes, (node) => node._hidden = node._hidden !== false);
+                }
 
                 let rootNode = _.find(graph.nodes, { id: scope.rootId });
+                console.log(graph.nodes);
+                console.log("rootNode:", scope.rootId, rootNode);
+                hideSuccessors(rootNode);
+                _.each(graph.nodes, (node) => node._hidden = node._hidden || (node.hyperEdge && neighbourMap[node.id].length <= 2));
+
                 positionNodePredecessors([rootNode], predecessorMap, 100);
 
                 onDraw();
