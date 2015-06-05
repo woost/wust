@@ -5,7 +5,6 @@ bigPost.$inject = ["$state", "HistoryService", "EditService", "DiscourseNode"];
 function bigPost($state, HistoryService, EditService, DiscourseNode) {
     return {
         restrict: "A",
-        replace: false,
         templateUrl: "assets/app/discourse/directives/big_post.html",
         scope: {
             node: "="

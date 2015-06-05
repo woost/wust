@@ -15,6 +15,17 @@ object RequestFormat {
     def writes(nodeAdd: NodeAddRequest) = ???
   }
 
+  implicit object TaggedNodeAddFormat extends Format[TaggedNodeAddRequest] {
+    def reads(json: JsValue) = json match {
+      case JsObject(_) => {
+        JsSuccess(TaggedNodeAddRequest((json \ "description").as[String], (json \ "title").as[Option[String]], (json \ "addedTags").as[Option[List[String]]].getOrElse(List.empty)))
+      }
+      case otherwise   => JsError()
+    }
+
+    def writes(nodeAdd: TaggedNodeAddRequest) = ???
+  }
+
   implicit object ConnectFormat extends Format[ConnectRequest] {
     def reads(json: JsValue) = json match {
       case JsObject(_) => {

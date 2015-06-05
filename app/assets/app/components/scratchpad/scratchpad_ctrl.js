@@ -23,6 +23,7 @@ function ScratchpadCtrl(Search, HistoryService, EditService, DiscourseNode) {
     };
 
     vm.searchNodes = searchNodes;
+    vm.searchTags = searchTags;
     vm.edit = EditService;
     vm.nodeInfo = DiscourseNode.Post;
 
@@ -32,7 +33,16 @@ function ScratchpadCtrl(Search, HistoryService, EditService, DiscourseNode) {
 
     function searchNodes(title) {
         return Search.$search({
-            title: title
+            title: title,
+            label: DiscourseNode.Post.label
+        });
+    }
+
+    function searchTags(title) {
+        console.log("SD");
+        return Search.$search({
+            title: title,
+            label: DiscourseNode.Tag.label
         });
     }
 }

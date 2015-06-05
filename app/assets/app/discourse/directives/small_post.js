@@ -5,7 +5,6 @@ smallPost.$inject = ["DiscourseNode"];
 function smallPost(DiscourseNode) {
     return {
         restrict: "A",
-        replace: false,
         templateUrl: "assets/app/discourse/directives/small_post.html",
         scope: {
             node: "=",
@@ -15,6 +14,5 @@ function smallPost(DiscourseNode) {
 
     function link(scope) {
         scope.nodeInfo = DiscourseNode.Post;
-        console.log(scope.nodeInfo);
     }
 }

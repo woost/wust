@@ -15,11 +15,27 @@ object Database {
     credentials = Some(spray.http.BasicHttpCredentials("db.neo4j.user".configOrElse("neo4j"), "db.neo4j.pass".configOrElse("neo4j")))
   )
 
-  private def nodeWithUuid[NODE <: UuidNode](discourse: Discourse, uuid: String): Option[NODE] = (discourse.uuidNodes ++ discourse.uuidNodeHyperRelations).find(_.uuid == uuid) match {
+  def nodeWithUuid[NODE <: UuidNode](discourse: Discourse, uuid: String): Option[NODE] = (discourse.uuidNodes ++ discourse.uuidNodeHyperRelations).find(_.uuid == uuid) match {
     case Some(node) => Some(node.asInstanceOf[NODE])
     case None       => None
   }
-  private def nodesWithType[NODE <: Node](nodes: Set[Node]) = nodes.map(_.asInstanceOf[NODE])
+
+  def nodesWithType[NODE <: Node](nodes: Set[Node]) = nodes.map(_.asInstanceOf[NODE])
+
+  def findNodes[NODE <: UuidNode](discourse: Discourse, factory: NodeFactory[NODE], uuids: String*): Seq[NODE] = {
+    if(uuids.isEmpty)
+      nodesWithType[NODE](discourse.nodes).toSeq
+    else
+      uuids.map { uuid => nodeWithUuid[NODE](discourse, uuid) }.flatten
+  }
+
+  def findNodes[START <: UuidNode, END <: UuidNode](discourse: Discourse, startDefinition: UuidNodeDefinition[START], endDefinition: UuidNodeDefinition[END]): (Option[START], Option[END]) = {
+    (nodeWithUuid[START](discourse, startDefinition.uuid), nodeWithUuid[END](discourse, endDefinition.uuid))
+  }
+
+  def findNodes[NODE <: UuidNode](discourse: Discourse, definitions: UuidNodeDefinition[NODE]*): Seq[NODE] = {
+    definitions.map(d => nodeWithUuid[NODE](discourse, d.uuid)).flatten
+  }
 
   private def discourseGraphWithReturn(returns: String, definitions: GraphDefinition*): Discourse = {
     if(definitions.isEmpty || returns.isEmpty)
@@ -51,20 +67,17 @@ object Database {
 
   def discourseNodes[NODE <: UuidNode](factory: NodeFactory[NODE], uuids: String*): (Discourse, Seq[NODE]) = {
     val discourse = nodeDiscourseGraph(factory, uuids: _*)
-    if(uuids.isEmpty)
-      (discourse, nodesWithType[NODE](discourse.nodes).toSeq)
-    else
-      (discourse, uuids.map { uuid => nodeWithUuid[NODE](discourse, uuid) }.flatten)
+    (discourse, findNodes(discourse, factory, uuids: _*))
   }
 
   def discourseNodes[START <: UuidNode, END <: UuidNode](startDefinition: UuidNodeDefinition[START], endDefinition: UuidNodeDefinition[END]): (Discourse, (Option[START], Option[END])) = {
     val discourse = itemDiscourseGraph(startDefinition, endDefinition)
-    (discourse, (nodeWithUuid[START](discourse, startDefinition.uuid), nodeWithUuid[END](discourse, endDefinition.uuid)))
+    (discourse, findNodes(discourse, startDefinition, endDefinition))
   }
 
   def discourseNodes[NODE <: UuidNode](definitions: UuidNodeDefinition[NODE]*): (Discourse, Seq[NODE]) = {
     val discourse = itemDiscourseGraph(definitions: _*)
-    (discourse, definitions.map(d => nodeWithUuid[NODE](discourse, d.uuid)).flatten)
+    (discourse, findNodes(discourse, definitions: _*))
   }
 
   def startConnectedDiscourseGraph[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinition: NodeAndFixedRelationDefinition[START, RELATION, END]): Discourse = {
