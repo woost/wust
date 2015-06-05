@@ -56,7 +56,10 @@ function branchGraph(DiscourseNode) {
                 .attr("d", "M 0,-3 L 10,-0.5 L 10,0.5 L0,3");
 
 
-            let edgesWithSquashedHyperEdges = _(graph.edges).map((edge) => {
+            let edgesWithSquashedHyperEdges = _(graph.edges).reject(
+                    // remove edges between hidden nodes
+                    (edge) => graph.nodes[edge.target]._hidden && graph.nodes[edge.source]._hidden
+                    ).map((edge) => {
                 // point startHyperEdges to the hypernode target
                 // then remove endHyperEdges
                 let target = graph.nodes[edge.target];
@@ -72,7 +75,7 @@ function branchGraph(DiscourseNode) {
                 // .style("marker-end", "url(" + window.location.href + "#branch_arrow)")
 
             // create nodes in the svg
-            let node = svg.append("g").attr("id","group_hypernodes-then-nodes")
+            let node = svg.append("g")
                 .selectAll()
                 .data(_.reject(graph.nodes,"_hidden")).enter()
                 .append("circle")
@@ -247,10 +250,7 @@ function branchGraph(DiscourseNode) {
                     return a ? a.concat(b) : b;
                 }, _)) || {};
 
-                console.log("suc: ",successorMap);
-                console.log("pre: ",predecessorMap);
                 function showPredecessors(node) {
-                    console.log("showing " + node.title);
                     if(node._hidden === false) return;
                     node._hidden = false;
 
@@ -259,12 +259,12 @@ function branchGraph(DiscourseNode) {
                 }
                 function hideSuccessors(node) {
                     showPredecessors(node);
-                    _.each(graph.nodes, (node) => node._hidden = node._hidden !== false);
+                    _.each(graph.nodes, (node) => {
+                        node._hidden = node._hidden !== false;
+                    });
                 }
 
                 let rootNode = _.find(graph.nodes, { id: scope.rootId });
-                console.log(graph.nodes);
-                console.log("rootNode:", scope.rootId, rootNode);
                 hideSuccessors(rootNode);
                 _.each(graph.nodes, (node) => node._hidden = node._hidden || (node.hyperEdge && neighbourMap[node.id].length <= 2));
 
