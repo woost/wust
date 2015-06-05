@@ -154,7 +154,7 @@ object Database {
     val query = s"""
       match ${focusNode.toQuery}
       match (${focusNode.name})-[:POSTLIKETOCONNECTS|CONNECTSTOPOSTLIKE *0..$depth]-(all:POST)
-      match (all)-[r1:POSTLIKETOCONNECTS]->(:CONNECTS)-[r2:CONNECTSTOPOSTLIKE]->(:POST)
+      match (all)-[r1:POSTLIKETOCONNECTS]->(:CONNECTS)-[r2:CONNECTSTOPOSTLIKE]->()
       return distinct all,r1,r2
     """
     val params = focusNode.parameterMap
