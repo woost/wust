@@ -7,7 +7,8 @@ function focusBranches() {
         restrict: "A",
         templateUrl: "assets/app/components/focus/branches/branches.html",
         scope: {
-            graph: "="
+            graph: "=",
+            rootId: "="
         },
         controller: BranchesCtrl,
         controllerAs: "vm",
