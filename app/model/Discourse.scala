@@ -41,15 +41,18 @@ object WustSchema {
   @Relation class HasLogin(startNode: User, endNode: LoginInfo)
   @Relation class HasPassword(startNode: LoginInfo, endNode: PasswordInfo)
 
+  @Node trait PostLike extends UuidNode
+
   @Node trait ContentNode extends PostLike {
     var title: Option[String]
     var description: String
   }
-  @Node trait PostLike extends UuidNode
 
   @Node trait Categorizes extends UuidNode
 
-  @Node class Tag extends ContentNode
+  @Node class Tag extends ContentNode {
+    var isType: Boolean = false
+  }
   @Node class Post extends ContentNode
   @Node class Scope extends ContentNode
 

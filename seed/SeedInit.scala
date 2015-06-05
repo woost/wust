@@ -22,8 +22,12 @@ object SeedInit extends Task {
 
   db.query("CREATE INDEX ON :POST(uuid)")
 
+  discourse.add(Tag.local(title = Some("Problem"), description = "...a problem", isType = true))
+  discourse.add(Tag.local(title = Some("Goal"), description = "...a goal", isType = true))
+  discourse.add(Tag.local(title = Some("Idea"), description = "...an idea", isType = true))
+  discourse.add(Tag.local(title = Some("Pro"), description = "...a pro", isType = true))
+  discourse.add(Tag.local(title = Some("Con"), description = "...a con", isType = true))
   discourse.add(UserGroup.local("everyone"))
-
 
   db.persistChanges(discourse.graph)
   db.restService.actorSystem.shutdown()

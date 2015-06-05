@@ -7,7 +7,7 @@ import renesca.Query
 import renesca.graph.Label
 import renesca.parameter.implicits._
 import model.WustSchema._
-import formatters.json.DiscourseNodeFormat._
+import formatters.json.ApiNodeFormat._
 
 import scala.util.Try
 

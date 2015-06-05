@@ -45,8 +45,8 @@ lazy val wust = (project in file(".")).settings(
     "org.atmosphere" % "atmosphere-play" % "2.1.2",
     "org.webjars.bower" % "atmosphere" % "2.2.7",
     // database
-    "com.github.renesca" %% "renesca" % "0.2.2",
-    "com.github.renesca" %% "renesca-magic" % "0.1.7",
+    "com.github.renesca" %% "renesca" % "0.2.3",
+    "com.github.renesca" %% "renesca-magic" % "0.1.8",
     "commons-codec" % "commons-codec" % "1.10" // for base64 encoding of uuids
   ),
   addCompilerPlugin("org.scalamacros" % "paradise" % paradiseVersion cross CrossVersion.full),

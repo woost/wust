@@ -1,7 +1,7 @@
 package modules.live
 
 import controllers.Application
-import formatters.json.DiscourseNodeFormat._
+import formatters.json.ApiNodeFormat._
 import model.WustSchema._
 import modules.db.types._
 import modules.db.{NodeDefinition, RelationDefinition, FactoryUuidNodeDefinition, UuidNodeDefinition}

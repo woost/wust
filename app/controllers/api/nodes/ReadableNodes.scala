@@ -1,6 +1,6 @@
 package controllers.api.nodes
 
-import formatters.json.DiscourseNodeFormat._
+import formatters.json.ApiNodeFormat._
 import model.WustSchema._
 import modules.requests._
 import play.api.libs.json.Json

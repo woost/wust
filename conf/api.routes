@@ -6,6 +6,8 @@ GET    /auth/signout              controllers.api.auth.SignUpController.signOut
 # discourse node api
 -> /posts controllers.api.Posts
 
+-> /tags controllers.api.Tags
+
 -> /users controllers.api.Users
 
 GET /components/:uuid controllers.api.ConnectedComponents.show(uuid: String)

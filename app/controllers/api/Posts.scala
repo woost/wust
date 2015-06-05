@@ -16,7 +16,8 @@ object Posts extends Nodes[Post] {
       "connects-from" -> EndHyperConnectSchema(Connects, new EndContentRelationAccess(Connects, Post), Map(
         "connects-to" -> StartConnectSchema(new StartContentRelationAccess(Connects, Post)),
         "connects-from" -> EndConnectSchema(new EndContentRelationAccess(Connects, Post))
-      ))
+      )),
+      "tags" -> EndConnectSchema(new EndContentRelationAccess(CategorizesPost, Tag))
     )
   )
 }
