@@ -23,5 +23,6 @@ function BranchesCtrl(DiscourseNodeList) {
 
     vm.graph.$then(data => {
         vm.nodeList = DiscourseNodeList.read(data.nodes);
+        vm.nodeList.model.orderProperty = "line";
     });
 }
