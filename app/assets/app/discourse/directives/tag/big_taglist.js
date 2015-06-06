@@ -9,9 +9,14 @@ function bigTaglist() {
         scope: {
             tags: "="
         },
-        link: link
+        controller: bigTaglistCtrl,
+        controllerAs: "vm",
+        bindToController: true
     };
+}
 
-    function link(scope) {
-    }
+bigTaglistCtrl.$inject = [];
+
+function bigTaglistCtrl($state, HistoryService, EditService, DiscourseNode) {
+    let vm = this;
 }

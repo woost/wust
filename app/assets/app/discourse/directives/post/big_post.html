@@ -1,13 +1,13 @@
 <div class="big_post_directive">
-    <div ui-draggable="true" drag="node.$encode()" drag-channel="{{node.label}}" class="panel panel-default" ng-class="nodeInfo.css">
+    <div ui-draggable="true" drag="vm.node.$encode()" drag-channel="{{vm.node.label}}" class="panel panel-default" ng-class="vm.nodeInfo.css">
         <div class="panel-heading">
-            <a ng-href="{{nodeInfo.getHref(node.id)}}" class="node panel-title">{{node.title || (node.description | trim:true:15)}}</a>
-            <button class="pull-right btn btn-xs btn-danger" ng-click="removeFocused()"><i class="fa fa-trash-o"></i></button>
-            <button class="pull-right btn btn-xs btn-success" ng-click="updateFocused()"><i class="fa fa-pencil"></i></button>
+            <a ng-href="{{vm.nodeInfo.getHref(node.id)}}" class="node panel-title">{{vm.node.title || (vm.node.description | trim:true:15)}}</a>
+            <button class="pull-right btn btn-xs btn-danger" ng-click="vm.removeFocused()"><i class="fa fa-trash-o"></i></button>
+            <button class="pull-right btn btn-xs btn-success" ng-click="vm.updateFocused()"><i class="fa fa-pencil"></i></button>
         </div>
         <div class="panel-body">
-            <div ng-bind="node.description" class="well well-sm post_description" ></div>
-            <div big-taglist tags="node.tags" class="taglist"></div>
+            <div ng-bind="vm.node.description" class="well well-sm post_description" ></div>
+            <div big-taglist tags="vm.node.tags" class="taglist"></div>
         </div>
     </div>
 </div>

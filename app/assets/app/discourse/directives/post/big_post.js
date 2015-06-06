@@ -1,39 +1,45 @@
 angular.module("wust.discourse").directive("bigPost", bigPost);
 
-bigPost.$inject = ["$state", "HistoryService", "EditService", "DiscourseNode"];
+bigPost.$inject = [];
 
-function bigPost($state, HistoryService, EditService, DiscourseNode) {
+function bigPost() {
     return {
         restrict: "A",
         templateUrl: "assets/app/discourse/directives/post/big_post.html",
         scope: {
             node: "="
         },
-        link: link
+        controller: bigPostCtrl,
+        controllerAs: "vm",
+        bindToController: true
     };
+}
 
-    function link(scope) {
-        // we are viewing details about a node, so add it to the nodehistory
-        HistoryService.add(scope.node);
+bigPostCtrl.$inject = ["$state", "HistoryService", "EditService", "DiscourseNode"];
 
-        //TODO: we use ng-href instead of ui-sref because nodeInfo seems to be
-        //filled to late for ui-router to recognize the state
-        scope.nodeInfo = DiscourseNode.Post;
+function bigPostCtrl($state, HistoryService, EditService, DiscourseNode) {
+    let vm = this;
 
-        // callbacks for removing/updating the focused node
-        scope.removeFocused = removeFocused;
-        scope.updateFocused = updateFocused;
+    // we are viewing details about a node, so add it to the nodehistory
+    HistoryService.add(vm.node);
 
-        function removeFocused() {
-            scope.node.$destroy().$then(() => {
-                HistoryService.remove(scope.node.id);
-                humane.success("Removed node");
-                $state.go("browse");
-            });
-        }
+    //TODO: we use ng-href instead of ui-sref because nodeInfo seems to be
+    //filled to late for ui-router to recognize the state
+    vm.nodeInfo = DiscourseNode.Post;
 
-        function updateFocused() {
-            EditService.editExisting(scope.node);
-        }
+    // callbacks for removing/updating the focused node
+    vm.removeFocused = removeFocused;
+    vm.updateFocused = updateFocused;
+
+    function removeFocused() {
+        vm.node.$destroy().$then(() => {
+            HistoryService.remove(vm.node.id);
+            humane.success("Removed node");
+            $state.go("browse");
+        });
+    }
+
+    function updateFocused() {
+        EditService.editExisting(vm.node);
     }
 }
