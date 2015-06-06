@@ -16,6 +16,8 @@ function bigPost($state, HistoryService, EditService, DiscourseNode) {
         // we are viewing details about a node, so add it to the nodehistory
         HistoryService.add(scope.node);
 
+        //TODO: we use ng-href instead of ui-sref because nodeInfo seems to be
+        //filled to late for ui-router to recognize the state
         scope.nodeInfo = DiscourseNode.Post;
 
         // callbacks for removing/updating the focused node

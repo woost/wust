@@ -1,3 +1,4 @@
 <span class="small_post_directive">
-    <a ui-draggable="true" drag="node" drag-channel="{{nodeInfo.label}}" class="node {{nodeInfo.css}}" ui-sref="{{nodeInfo.getState(node.id)}}">{{node.title || (node.description | trim:true:15)}}</a>
+    {{nodeInfo}}
+    <a ng-href="{{nodeInfo.getHref(node.id)}}" ui-draggable="true" drag="node" drag-channel="{{nodeInfo.label}}" class="node {{nodeInfo.css}}">{{node.title || (node.description | trim:true:15)}}</a>
 </span>
