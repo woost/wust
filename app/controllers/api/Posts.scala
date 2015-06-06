@@ -2,7 +2,7 @@ package controllers.api
 
 import controllers.api.nodes.Nodes
 import model.WustSchema._
-import modules.db.access.{PostAccess, ContentNodeAccess, EndContentRelationAccess, StartContentRelationAccess}
+import modules.db.access._
 import modules.requests._
 import renesca.schema.{AbstractRelationFactory, NodeFactory, AbstractRelation}
 
@@ -17,7 +17,7 @@ object Posts extends Nodes[Post] {
         "connects-to" -> StartConnectSchema(new StartContentRelationAccess(Connects, Post)),
         "connects-from" -> EndConnectSchema(new EndContentRelationAccess(Connects, Post))
       )),
-      "tags" -> EndConnectSchema(new EndContentRelationAccess(CategorizesPost, Tag))
+      "tags" -> EndConnectSchema(new EndRelationRead(CategorizesPost, Tag))
     )
   )
 }
