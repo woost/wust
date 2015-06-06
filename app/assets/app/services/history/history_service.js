@@ -7,13 +7,20 @@ function HistoryService(Post, DiscourseNode, store) {
     let maximum = 8;
     let self = this;
 
+    this.activeViewIndex = historyStore.get("activeViewIndex") || 0;
     this.visited = [];
     _.each(historyStore.get("visited"), restoreNode);
     this.add = add;
     this.remove = remove;
+    this.changeActiveView = changeActiveView;
 
     function restoreNode(id) {
         Post.$find(id).$then(node => addNode(node));
+    }
+
+    function changeActiveView(index) {
+        self.activeViewIndex = index;
+        historyStore.set("activeViewIndex", self.activeViewIndex);
     }
 
     function storeVisited() {
