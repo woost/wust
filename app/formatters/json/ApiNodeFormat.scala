@@ -12,7 +12,7 @@ object ApiNodeFormat {
     def reads(json: JsValue) = ???
 
     //TODO: this should be multiple formats...code dup
-    def writes(node: UuidNode) = {println(node);JsObject(Seq(
+    def writes(node: UuidNode) = JsObject(Seq(
       ("id", JsString(node.uuid))
     ) ++ (node match {
       case n: Post => Seq(
@@ -43,6 +43,6 @@ object ApiNodeFormat {
         ("email", JsString(u.email.getOrElse("")))
       )
       case _              => Seq.empty
-    }))}
+    }))
   }
 }
