@@ -1,45 +1,20 @@
 <div id="scratchpad_component">
-    <button ng-click="vm.edit.editNew()" type="submit" class="btn pull-left"><i class="fa fa-file-o"></i> </button>
+    <button ng-click="vm.edit()" type="submit" class="btn pull-left"><i class="fa fa-file-o"></i> </button>
     <h2>Wust your Post:</h2>
-
-    <div ui-ace="vm.ace.options" ng-model="vm.edit.session.description"></div>
-
-    <div id="title_edit">
-        <label>TL,DR:</label>
-        <div class="input-group pull-right">
-            <input type="text" class="form-control" ng-model="vm.edit.session.title" ng-blur="vm.edit.onChange()" placeholder="{{vm.edit.session.description | trim:true:15}}">
-            <span class="input-group-btn">
-                <button ng-click="vm.edit.saveNode()" class="btn btn-primary"><i class="fa fa-floppy-o"></i> </button>
-            </span>
-        </div>
-    </div>
-
-    <div id="node_add">
-        <hr noshade size="1">
-        <label>Tags:</label>
-        <div class="input-group pull-right">
-            <div big-taglist tags="vm.edit.session.tags" class="taglist"></div>
-            <div discourse-node-search-form ng-model='vm.tagTyped' on-select="vm.edit.addTag(item)" on-submit="vm.edit.addTag(items)" search-nodes='vm.searchTags(term)' icon-class="fa fa-search"></div>
-        </div>
-    </div>
 
     <div id="node_add">
         <hr noshade size="1">
         <label>Edit existing:</label>
         <div class="input-group pull-right">
-            <div discourse-node-search-form ng-model='vm.searchTyped' on-select="vm.edit.editExisting(item)" on-submit="vm.edit.editExisting(items)" search-nodes='vm.searchNodes(term)' icon-class="fa fa-search"></div>
+            <div discourse-node-search-form ng-model='vm.searchTyped' on-select="vm.edit(item)" on-submit="vm.edit(items)" search-nodes='vm.searchNodes(term)' icon-class="fa fa-search"></div>
         </div>
     </div>
 
     <div id="edit_list" class="discourse_post_list">
         <hr noshade size="1">
-        <div class="drop_post_container" drop-channel="{{vm.nodeInfo.label}}" ui-on-Drop="vm.edit.editExisting($data)">
+        <div class="drop_post_container" drop-channel="{{vm.nodeInfo.label}}" ui-on-Drop="vm.edit($data)">
             <label>Currently edited:</label>
-            <div ng-repeat="node in vm.edit.stack">
-                <button ng-click="vm.edit.removeEdited(node)" class="btn btn-danger btn-xs"><i class="fa fa-minus"></i> </button>
-                <button ng-click="vm.edit.editExisting(node)" class="btn btn-success btn-xs"><i class="fa fa-pencil"></i> </button>
-                <span small-post node="node"></span>
-            </div>
+            <div ng-repeat="node in vm.editStack" edit-post node="node"></div>
         </div>
     </div>
 </div>

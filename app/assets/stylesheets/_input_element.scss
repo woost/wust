@@ -1,0 +1,10 @@
+.underline-input input[type="text"] {
+  padding: 10px;
+  border: none;
+  border-bottom: solid 2px #c9c9c9;
+  transition: border 0.3s;
+}
+.underline-input input[type="text"]:focus,
+.underline-input input[type="text"].focus {
+  border-bottom: solid 2px #969696;
+}
