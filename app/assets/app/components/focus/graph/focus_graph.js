@@ -7,7 +7,7 @@ function focusGraph() {
         restrict: "A",
         templateUrl: "assets/app/components/focus/graph/graph.html",
         scope: {
-            graph: "=",
+            component: "=",
             rootId: "="
         },
         controller: GraphsCtrl,

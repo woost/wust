@@ -7,7 +7,7 @@ function focusNeighbours() {
         restrict: "A",
         templateUrl: "assets/app/components/focus/neighbours/neighbours.html",
         scope: {
-            graph: "=",
+            component: "=",
             rootId: "="
         },
         controller: NeighboursCtrl,

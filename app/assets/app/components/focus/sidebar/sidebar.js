@@ -6,6 +6,7 @@ function sidebar() {
     return {
         restrict: "A",
         templateUrl: "assets/app/components/focus/sidebar/sidebar.html",
+        scope: true,
         controller: SidebarCtrl,
         controllerAs: "vm",
         bindToController: true

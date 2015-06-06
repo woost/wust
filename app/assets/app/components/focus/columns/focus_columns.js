@@ -7,7 +7,7 @@ function focusColumns() {
         restrict: "A",
         templateUrl: "assets/app/components/focus/columns/columns.html",
         scope: {
-            graph: "=",
+            component: "=",
             rootId: "="
         },
         controller: ColumnsCtrl,
