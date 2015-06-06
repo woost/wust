@@ -1,5 +1,5 @@
 <div class="big_post_directive">
-    <div ui-draggable="true" drag="node" drag-channel="{{node.label}}" class="panel panel-default" ng-class="nodeInfo.css">
+    <div ui-draggable="true" drag="node.$encode()" drag-channel="{{node.label}}" class="panel panel-default" ng-class="nodeInfo.css">
         <div class="panel-heading">
             <a ng-href="{{nodeInfo.getHref(node.id)}}" class="node panel-title">{{node.title || (node.description | trim:true:15)}}</a>
             <button class="pull-right btn btn-xs btn-danger" ng-click="removeFocused()"><i class="fa fa-trash-o"></i></button>

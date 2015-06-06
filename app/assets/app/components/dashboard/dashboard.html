@@ -2,9 +2,7 @@
     <div id="posts_view" class="widget">
         <h2>Existing Posts</h2>
         <div id="list_existing">
-            <div ng-repeat="node in vm.stream.nodes">
-                <a ui-sref="{{vm.stream.info.getState(node.id)}}" ng-class="vm.stream.info.css" class="node">{{node.title}}</a>
-            </div>
+            <div ng-repeat="node in vm.nodes" small-post node="node"></div>
         </div>
     </div>
 </div>
