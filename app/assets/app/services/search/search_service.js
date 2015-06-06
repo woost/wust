@@ -1,8 +1,8 @@
 angular.module("wust.services").service("SearchService", SearchService);
 
-SearchService.$inject = ["Search"];
+SearchService.$inject = ["Search", "DiscourseNode"];
 
-function SearchService(Search) {
+function SearchService(Search, DiscourseNode) {
     this.search = {
         resultsVisible: false,
         query: "",
@@ -12,6 +12,9 @@ function SearchService(Search) {
     this.triggerSearch = triggerSearch;
 
     function triggerSearch() {
-        this.search.results.$refresh({title: this.search.query});
+        this.search.results.$refresh({
+            label: DiscourseNode.Post.label,
+            title: this.search.query
+        });
     }
 }
