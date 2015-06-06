@@ -5,7 +5,7 @@ smallPost.$inject = ["DiscourseNode"];
 function smallPost(DiscourseNode) {
     return {
         restrict: "A",
-        templateUrl: "assets/app/discourse/directives/small_post.html",
+        templateUrl: "assets/app/discourse/directives/post/small_post.html",
         scope: {
             node: "=",
         },
