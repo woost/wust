@@ -1,4 +1,4 @@
 <div ng-show="vm.search.resultsVisible" id="search_component">
-    <button class="btn btn-default pull-right fa fa-close" ng-click="vm.search.resultsVisible = false;"></button>
+    <button class="btn btn-default pull-right fa fa-close" ng-click="vm.closeResults();"></button>
     <div ng-repeat="result in vm.search.results" small-post node="result"></div>
 </div>

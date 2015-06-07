@@ -7,10 +7,6 @@ function NavigationCtrl(Auth, SearchService) {
 
     vm.navbarCollapsed = true;
 
-    vm.searchTyped = {
-        title: ""
-    };
-
     vm.newUser = {
         identifier: "",
         password: ""
@@ -38,4 +34,5 @@ function NavigationCtrl(Auth, SearchService) {
             SearchService.search.resultsVisible = true;
         }
     }
+
 }
