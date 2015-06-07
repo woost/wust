@@ -20,9 +20,13 @@ function branchGraph(DiscourseNode) {
         scope.graph.$then(data => {
 
             let graph = data; //TODO: was angular.copy(data). Publish graph more elegantly
+            // let graph = angular.copy(data);
+
+            // globals which are set in preprocessGraph
             let neighbourMap;
             let predecessorMap;
             let successorMap;
+            let lowestLine = 0;
             preprocessGraph(graph); // assigns node positions in .line and .xShift
 
             let radius = 10;
@@ -36,7 +40,7 @@ function branchGraph(DiscourseNode) {
             function branchColor(branch) {return d3.scale.category10().range()[branch % 10];}
 
             let width = paddingLeft + _.max(graph.nodes, n => n.xShift).xShift*horizontalDistance + paddingRight;
-            let height = paddingTop + _.max(graph.nodes, n => n.line).line*verticalDistance + paddingBottom;
+            let height = paddingTop + (_.max(graph.nodes, n => n.line).line - lowestLine)*verticalDistance + paddingBottom;
 
             // construct svg
             let svg = d3.select(element[0])
@@ -44,17 +48,6 @@ function branchGraph(DiscourseNode) {
                 .attr("width", width)
                 .attr("height", height)
                 .on("dblclick.zoom", null);
-
-            svg.append("svg:defs").append("svg:marker")
-                .attr("id", "branch_arrow")
-                .attr("viewBox", "0 -3 10 6")
-                .attr("refX", 10)
-                .attr("markerWidth", 10)
-                .attr("markerHeight", 6)
-                .attr("orient", "auto")
-                .append("svg:path")
-                .attr("d", "M 0,-3 L 10,-0.5 L 10,0.5 L0,3");
-
 
             let edgesWithSquashedHyperEdges = _(graph.edges).reject(
                     // remove edges between hidden nodes
@@ -74,30 +67,42 @@ function branchGraph(DiscourseNode) {
                 .append("path");
                 // .style("marker-end", "url(" + window.location.href + "#branch_arrow)")
 
+            let focusLineY = paddingTop - (lowestLine + 0.5) * verticalDistance;
+            let focusLine = svg.append("line")
+                .attr("x1", 0)
+                .attr("y1", focusLineY)
+                .attr("x2", width)
+                .attr("y2", focusLineY)
+                .attr("stroke", "#343434")
+                .style("stroke-width", 3)
+                .style("stroke-dasharray", "3 3");
+
             // create nodes in the svg
             let node = svg.append("g")
                 .selectAll()
                 .data(_.reject(graph.nodes,"_hidden")).enter()
                 .append("circle")
                 .attr("cx", d => {d.x = paddingLeft + d.xShift * horizontalDistance; return d.x;})
-                .attr("cy", d => {d.y = paddingTop + d.line * verticalDistance; return d.y;})
+                .attr("cy", d => {d.y = paddingTop + (d.line - lowestLine) * verticalDistance; return d.y;})
                 .attr("r", radius)
                 .attr("class", d => d.hyperEdge ? "relation_label" : "branch_node " + DiscourseNode.get(d.label).css)
-                .style("stroke", d => branchColor(d.branch))
+                .style("stroke", n => n.leaf === true ? "black" : (n.directSuccessor === true ? "#666" : branchColor(n.branch)))
                 .style("stroke-width", border)
                 .style("stroke-dasharray", d => d.hyperEdge ? "4 3" : "");
-
 
             // create edges in the svg
             let link = linksvg
                 .each(function(link) {
+                    let target = graph.nodes[link.target];
+                    let source = graph.nodes[link.source];
                     let thisLink = d3.select(this);
+
                     // if link is startRelation of a Hypernode
-                    if( link.target.hyperEdge && link.target.startId === link.source.id ) {
-                        thisLink.attr("class", "svglink");
-                    } else {
+                    // if( target.hyperEdge && target.startId === source.id ) {
+                    //     thisLink.attr("class", "svglink");
+                    // } else {
                         thisLink.attr("class", "svglink branch_arrow");
-                    }
+                    // }
 
                     thisLink.style("stroke-width", border);
                     thisLink.style("stroke", branchColor(graph.nodes[link.source].branch));
@@ -257,16 +262,64 @@ function branchGraph(DiscourseNode) {
                     let predecessors = predecessorMap[node.id] || [];
                     _.each(predecessors, (p) => showPredecessors(p));
                 }
-                function hideSuccessors(node) {
+                function hideAllSuccessors(node) {
                     showPredecessors(node);
                     _.each(graph.nodes, (node) => {
                         node._hidden = node._hidden !== false;
                     });
                 }
+                function showDirectAndLeafSuccessors(node) {
+                    let direct = [];
+                    let leaf = [];
+
+                    let successors = successorMap[node.id] || [];
+                    _.each(successors, (s) => { // hypernodes
+                        let successors = successorMap[s.id] || [];
+                        _.each(successors, (s) => { // posts
+                            s.directSuccessor = true;
+                            direct.push(s);
+                        });
+                    });
+
+                    function showLeafSuccessorsRec(node) {
+                        //TODO: circle detection
+                        let successors = successorMap[node.id] || [];
+                        if(successors.length === 0) { // node is leaf
+                            node.leaf = true;
+                            leaf.push(node);
+                        } else {
+                            _.each(successors, (s) => showLeafSuccessorsRec(s));
+                        }
+                    }
+                    showLeafSuccessorsRec(node);
+
+                    let xShift = direct.length;
+                    _.each(direct,(s) => {
+                        s.xShift = --xShift;
+                        s._hidden = false;
+                        s.line = --lowestLine;
+                        s.branch = 0; //TODO: different colors per branch
+                    });
+
+                    leaf = _.difference(leaf, direct);
+                    xShift = leaf.length;
+                    _.each(leaf,(s) => {
+                        s.xShift = --xShift;
+                        s._hidden = false;
+                        s.line = --lowestLine;
+                        s.branch = 0; //TODO: different colors per branch
+                    });
+                }
+
+                function hideLonelyHyperNodes() {
+                    _.each(graph.nodes, (node) => node._hidden = node._hidden || (node.hyperEdge && neighbourMap[node.id].length <= 2));
+                }
 
                 let rootNode = _.find(graph.nodes, { id: scope.rootId });
-                hideSuccessors(rootNode);
-                _.each(graph.nodes, (node) => node._hidden = node._hidden || (node.hyperEdge && neighbourMap[node.id].length <= 2));
+
+                hideAllSuccessors(rootNode);
+                showDirectAndLeafSuccessors(rootNode);
+                hideLonelyHyperNodes();
 
                 positionNodePredecessors([rootNode], predecessorMap, 100);
 
