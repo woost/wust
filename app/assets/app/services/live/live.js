@@ -10,8 +10,7 @@ function Live() {
         shared: true,
         transport: "websocket",
         fallbackTransport: "long-polling",
-        onTransportFailure: (errorMsg, request) => console.log("Atmosphere error: " + errorMsg),
-        onClose: response => console.log("Atmosphere disconnected")
+        onTransportFailure: errorMsg => console.log("Atmosphere error: " + errorMsg)
     };
 
     let baseUrl = "";
@@ -23,11 +22,10 @@ function Live() {
     function get() {
         function subscribe(url, handler) {
             let newRequest = _.merge({
-                url: location.origin + `${baseUrl}/${url}`,
+                url: `${location.origin}${baseUrl}/${url}`,
                 onMessage,
-                onOpen: response => {
-                    console.log("Atmosphere connected on " + url + " (" + response.transport + ")");
-                }
+                onOpen: response => console.log(`Atmosphere connected on ${url} (${response.transport})`),
+                onClose: response => console.log(`Atmosphere disconnected on ${url} (${response.transport})`)
             }, request);
 
             console.log("subscribing to " + url);
@@ -46,7 +44,7 @@ function Live() {
                     console.log("incoming message", json);
                     handler(json);
                 } catch(e) {
-                    console.warn(`illegal message received from atmosphere, will unsubscribe '${url}' now`, response, e);
+                    console.warn(`illegal message received from atmosphere, will unsubscribe '${url}' now`, response);
                     unsubscribe();
                 }
             }
