@@ -1,11 +1,15 @@
 #search_component {
-    background: #ddF;
+    background: white;
     position: absolute;
     left: 0px;
     top: 0px;
     width: 100%;
     height: 100%;
+    padding: 30px;
     z-index: 1001;
+    .discourse_post.node {
+        margin: 3px;
+    }
     &.ng-hide-add {
         @include animation(fadeOutUp 0.2s);
         display: block !important;
