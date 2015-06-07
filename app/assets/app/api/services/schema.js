@@ -11,7 +11,14 @@ function Schema($provide, LiveProvider, restmodProvider) {
 
         restmodProvider.rebase({
             $config: {
-                urlPrefix: schema.api.restRoot
+                urlPrefix: schema.api.restRoot,
+                style: "wust",
+                primaryKey: "id"
+            },
+            $extend: {
+                Model: {
+                    encodeUrlName: _.kebabCase
+                }
             }
         });
 
@@ -19,6 +26,7 @@ function Schema($provide, LiveProvider, restmodProvider) {
             $provide.factory(model.name, ApiFactory);
 
             ApiFactory.$inject = ["restmod", "Live"];
+
             function ApiFactory(restmod, Live) {
                 return restmod.model(model.path).mix(_(model.subs).map((sub, path) => {
                     return {
