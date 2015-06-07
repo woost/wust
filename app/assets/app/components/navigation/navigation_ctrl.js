@@ -12,12 +12,15 @@ function NavigationCtrl(Auth, SearchService) {
         password: ""
     };
 
+    let searchTriggerDelay = 300;
+
     vm.onSearchBoxChange = onSearchBoxChange;
     vm.authenticate = authenticate;
     vm.getUsername = Auth.getUsername.bind(Auth);
     vm.loggedIn = Auth.loggedIn.bind(Auth);
     vm.logout = Auth.logout.bind(Auth);
     vm.search = SearchService.search;
+    vm.delayedTriggerSearch = undefined;
 
     function authenticate(register) {
         let func = register ? Auth.register : Auth.login;
@@ -30,7 +33,9 @@ function NavigationCtrl(Auth, SearchService) {
         if( SearchService.search.query === "" )
             SearchService.search.resultsVisible = false;
         else {
-            SearchService.triggerSearch();
+            console.log("change");
+            if( vm.delayedTriggerSearch ) clearTimeout(vm.delayedTriggerSearch);
+            vm.delayedTriggerSearch = setTimeout(() => {console.log("triggerSearch");SearchService.triggerSearch();}, searchTriggerDelay);
             SearchService.search.resultsVisible = true;
         }
     }
