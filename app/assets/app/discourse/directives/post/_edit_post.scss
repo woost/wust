@@ -1,14 +1,14 @@
 @import "compass/css3/flexbox";
 
 .edit_post_directive {
-    .title_edit {
-        .input-group {
-            max-width: 300px;
-        }
+    .edit_title {
+        padding: 10px;
+    }
+    .edit_tags {
+        padding: 10px;
     }
     .ace_editor {
         margin: 10px;
         height: 100px;
-        min-width: 100px;
     }
 }

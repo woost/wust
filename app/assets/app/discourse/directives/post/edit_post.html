@@ -1,18 +1,17 @@
 <div class="edit_post_directive">
     <div ui-draggable="true" drag="vm.node" drag-channel="{{vm.node.label}}" class="panel panel-default" ng-class="vm.nodeInfo.css">
+        <div>
+            <button ng-click="vm.node.remove()" class="btn btn-xs btn-danger"><i class="fa fa-minus"></i></button>
+            <button ng-click="vm.node.save()" class="btn btn-xs btn-success"><i class="fa fa-floppy-o"></i></button>
+        </div>
         <div ui-ace="vm.ace.options" ng-model="vm.node.description"></div>
-        <div class="tilte_edit input-group">
-            <input type="text" class="form-control" ng-model="vm.node.title" ng-blur="vm.node.onChange()" placeholder="TL,DR">
+        <div class="edit_title">
+            <input type="text" class="underline_input" ng-model="vm.node.title" ng-blur="vm.node.onChange()" placeholder="TL,DR">
         </div>
-        <div class="input-group-btn">
-            <button ng-click="vm.node.save()" class="btn btn-primary"><i class="fa fa-floppy-o"></i> </button>
-            <button ng-click="vm.node.remove()" class="btn btn-danger"><i class="fa fa-minus"></i> </button>
-        </div>
-        <div big-taglist tags="vm.node.tags" class="taglist"></div>
-        <div class="tag_edit">
-            <hr noshade size="1">
+        <div class="edit_tags">
             <label>Tags:</label>
-            <div class="input-group pull-right">
+            <div big-taglist tags="vm.node.tags" class="taglist"></div>
+            <div class="input-group">
                 <div discourse-node-search-form ng-model='vm.tagTyped' on-select="vm.node.addTag(item)" on-submit="vm.node.addTag(items)" search-nodes='vm.searchTags(term)' icon-class="fa fa-search"></div>
             </div>
         </div>

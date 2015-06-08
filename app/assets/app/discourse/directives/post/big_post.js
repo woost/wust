@@ -40,6 +40,6 @@ function bigPostCtrl($state, HistoryService, EditService, DiscourseNode) {
     }
 
     function updateFocused() {
-        EditService.editExisting(vm.node);
+        EditService.edit(vm.node);
     }
 }

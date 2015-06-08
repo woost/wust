@@ -6,17 +6,15 @@ function EditService(Post, HistoryService, store) {
     let editStore = store.getNamespacedStore("edit");
     let self = this;
 
-    this.stack = editStore.get("stack") || [];
-
     class Session {
         constructor({
-            id, title, description, tags
+            id, title, description, tags, addedTags
         }) {
             this.id = id;
             this.title = title || "";
             this.description = description || "";
             this.tags = tags || [];
-            this.addedTags = [];
+            this.addedTags = addedTags || [];
         }
 
         save() {
@@ -30,7 +28,7 @@ function EditService(Post, HistoryService, store) {
 
         addTag(maybeTags) {
             let tag = _.isArray(maybeTags) ? maybeTags[0] : maybeTags;
-            if (!tag || !_.any(this.tags, {
+            if (!tag || _.any(this.tags, {
                 id: tag.id
             }))
                 return;
@@ -50,17 +48,21 @@ function EditService(Post, HistoryService, store) {
         }
     }
 
-
+    this.stack = restoreStack();
     this.edit = edit;
+
+    function restoreStack() {
+        return _.map(editStore.get("stack", self.stack) || [], s => new Session(s));
+    }
 
     function storeStack() {
         editStore.set("stack", self.stack);
     }
 
     function assureSessionExists(node) {
-        let existing = _.find(self.stack, {
+        let existing = node.id !== undefined ? _.find(self.stack, {
             id: node.id
-        });
+        }) : undefined;
 
         if (!existing) {
             existing = new Session(node);

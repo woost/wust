@@ -18,14 +18,12 @@ object ApiNodeFormat {
       case n: Post => Seq(
         ("label", JsString(n.label)),
         ("title", JsString(n.title.getOrElse(""))),
-        ("description", JsString(n.description)),
-        ("tags", Json.toJson(n.rev_categorizesPosts))
+        ("description", JsString(n.description))
       )
       case n: Scope => Seq(
         ("label", JsString(n.label)),
         ("title", JsString(n.title.getOrElse(""))),
-        ("description", JsString(n.description)),
-        ("tags", Json.toJson(n.rev_categorizesScopes))
+        ("description", JsString(n.description))
       )
       case n: Tag => Seq(
         ("label", JsString(n.label)),
