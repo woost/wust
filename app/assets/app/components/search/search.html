@@ -1,5 +1,12 @@
 <div ng-show="vm.search.resultsVisible" id="search_component">
-    <button class="btn btn-default pull-right fa fa-close" ng-click="vm.closeResults();"></button>
-    <div ng-repeat="result in vm.search.results" small-post node="result"></div>
-    <div ng-show="vm.search.results.length === 0" class="no_results">No results.</div>
+    <div class="results">
+        <div ng-repeat="result in vm.search.results" small-post node="result"></div>
+    </div>
+    <span ng-show="vm.search.results.length === 0" class="no_results">No results.</span>
+    <div class="search_options">
+        <button class="btn btn-default fa fa-close pull-right" ng-click="vm.closeResults();"></button>
+        <div style="clear:both;"></div>
+
+        <label><input type="checkbox" ng-model="vm.search.searchDescriptions" ng-change="vm.search.triggerSearch()" /> descriptions</label>
+    </div>
 </div>

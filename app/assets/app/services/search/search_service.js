@@ -7,16 +7,15 @@ function SearchService(Search, DiscourseNode) {
         resultsVisible: false,
         query: "",
         results: Search.$collection(),
-        searchDescriptions: false
+        searchDescriptions: false,
+        triggerSearch
     };
 
-    this.triggerSearch = triggerSearch;
-
     function triggerSearch() {
-        this.search.results.$refresh({
+        this.results.$refresh({
             label: DiscourseNode.Post.label,
-            title: this.search.query,
-            searchDescriptions: this.search.searchDescriptions
+            title: this.query,
+            searchDescriptions: this.searchDescriptions
         });
     }
 }

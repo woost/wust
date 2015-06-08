@@ -34,7 +34,7 @@ function NavigationCtrl(Auth, SearchService) {
             SearchService.search.resultsVisible = false;
         else {
             if( vm.delayedTriggerSearch ) clearTimeout(vm.delayedTriggerSearch);
-            vm.delayedTriggerSearch = setTimeout(() => SearchService.triggerSearch(), searchTriggerDelay);
+            vm.delayedTriggerSearch = setTimeout(() => SearchService.search.triggerSearch(), searchTriggerDelay);
             SearchService.search.resultsVisible = true;
         }
     }
