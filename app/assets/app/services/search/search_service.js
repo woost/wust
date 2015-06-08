@@ -6,7 +6,8 @@ function SearchService(Search, DiscourseNode) {
     this.search = {
         resultsVisible: false,
         query: "",
-        results: Search.$collection()
+        results: Search.$collection(),
+        searchDescriptions: false
     };
 
     this.triggerSearch = triggerSearch;
@@ -14,7 +15,8 @@ function SearchService(Search, DiscourseNode) {
     function triggerSearch() {
         this.search.results.$refresh({
             label: DiscourseNode.Post.label,
-            title: this.search.query
+            title: this.search.query,
+            searchDescriptions: this.search.searchDescriptions
         });
     }
 }

@@ -12,7 +12,7 @@ import formatters.json.ApiNodeFormat._
 import scala.util.Try
 
 object Search extends Controller {
-  def index(label: Option[String], title: Option[String]) = Action {
+  def index(label: Option[String], title: Option[String], searchDescriptions:Option[Boolean]) = Action {
     val titleRegex = title match {
       case Some(title) => "(?i).*" + title.replace(" ", ".*") + ".*"
       case None        => ""
@@ -21,11 +21,16 @@ object Search extends Controller {
       case Some(label) => s"n:`${ Label(label) }`"
       case None        => "n"
     }
+    val withDescr = searchDescriptions.getOrElse(false)
 
     // When Neo4j throws an error because the regexp is incorrect, return an empty Discourse instead
     val discourse = Try(
       Discourse(
-        db.queryGraph(Query(s"match ($nodeMatch) where n.title =~ {term} return n limit 15", Map("term" -> titleRegex))))
+        db.queryGraph(Query(s"""
+          match ($nodeMatch)
+          where n.title =~ {term} ${if(withDescr) "or n.description =~ {term}" else ""}
+          return n limit 15""",
+          Map("term" -> titleRegex))))
     ).getOrElse(Discourse.empty)
     Ok(Json.toJson(discourse.contentNodes))
   }
