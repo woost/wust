@@ -19,8 +19,9 @@ function branchGraph(DiscourseNode) {
         // watch for changes in the ngModel
         scope.graph.$then(data => {
 
-            let graph = data; //TODO: was angular.copy(data). Publish graph more elegantly
-            // let graph = angular.copy(data);
+            //TODO: this is a workaround. Copy graph only once in branch view or wrap original graph
+            data.branchData = data.branchData || angular.copy(data);
+            let graph = data.branchData;
 
             // globals which are set in preprocessGraph
             let neighbourMap;

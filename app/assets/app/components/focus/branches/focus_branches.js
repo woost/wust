@@ -22,7 +22,9 @@ function BranchesCtrl(DiscourseNodeList) {
     let vm = this;
 
     vm.component.$then(data => {
-        vm.nodeList = DiscourseNodeList.read(data.nodes);
+        //TODO: this is a workaround. Copy graph only once in branch view or wrap original graph
+        data.branchData = data.branchData || angular.copy(data);
+        vm.nodeList = DiscourseNodeList.read(data.branchData.nodes);
         vm.nodeList.model.orderProperty = "line";
     });
 }
