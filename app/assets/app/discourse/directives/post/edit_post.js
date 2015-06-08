@@ -42,6 +42,7 @@ function editPostCtrl(Search, DiscourseNode) {
 
     function onEditorLoad(editor) {
         editor.setKeyboardHandler("ace/keyboard/vim");
+        editor.$blockScrolling = Infinity;
     }
 
     function searchTags(title) {
