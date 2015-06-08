@@ -14,7 +14,7 @@ import scala.util.Try
 object Search extends Controller {
   def index(label: Option[String], title: Option[String]) = Action {
     val titleRegex = title match {
-      case Some(title) => "(?i).*" + title.replace(" ", ". *") + ".*"
+      case Some(title) => "(?i).*" + title.replace(" ", ".*") + ".*"
       case None        => ""
     }
     val nodeMatch = label match {
