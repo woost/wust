@@ -17,6 +17,8 @@ function editPost(DiscourseNode) {
 
 editPostCtrl.$inject = ["Search", "DiscourseNode"];
 
+// expects scope.node to be a session.
+// used by the scratchpad which retrieves a list of sessions from the EditService.
 function editPostCtrl(Search, DiscourseNode) {
     let vm = this;
 

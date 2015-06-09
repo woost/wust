@@ -8,21 +8,39 @@ function EditService(Post, HistoryService, store) {
 
     class Session {
         constructor({
-            id, title, description, tags, addedTags
+            id, title, description, tags, addedTags, original
         }) {
             this.id = id;
             this.title = title || "";
             this.description = description || "";
-            this.tags = tags || [];
+            this.tags = angular.copy(tags) || [];
             this.addedTags = addedTags || [];
+            this.original = original || {
+                title: this.title,
+                description: this.description
+            };
+        }
+
+        dirtyModel() {
+            let dirtyModel = _.omit(_.pick(this, _.keys(this.original)), (v,k) => this.original[k] === v);
+            if (_.any(this.addedTags))
+                dirtyModel.addedTags = _.map(this.addedTags, t => t.id);
+
+            return dirtyModel;
+        }
+
+        isPristine(dirtyModel = this.dirtyModel()) {
+            return _.isEmpty(dirtyModel);
         }
 
         save() {
-            let node = _.pick(this, "id", "title", "description");
-            node.addedTags = _.map(node.addedTags, t => t.id);
+            let dirtyModel = this.dirtyModel();
+            if (this.isPristine(dirtyModel))
+                return;
 
-            Post.$buildRaw(node).$update().$then(data => {
+            Post.$buildRaw(_.pick(this, "id")).$update(dirtyModel).$then(data => {
                 humane.success("Added new node");
+                this.remove();
             });
         }
 
@@ -59,7 +77,7 @@ function EditService(Post, HistoryService, store) {
         editStore.set("stack", self.stack);
     }
 
-    function assureSessionExists(node) {
+    function assureSessionExists(node = {}) {
         let existing = node.id !== undefined ? _.find(self.stack, {
             id: node.id
         }) : undefined;
@@ -76,7 +94,6 @@ function EditService(Post, HistoryService, store) {
     function edit(maybeNodes) {
         //TODO: we get an array if multiple nodes were in completion and enter was pressed
         let node = _.isArray(maybeNodes) ? maybeNodes[0] : maybeNodes;
-        node = _.pick(node, "id", "title", "description", "tags");
         assureSessionExists(node);
     }
 }

@@ -1,5 +1,8 @@
 #focus_component {
     height: 100%;
+    #root_node_view {
+        padding: 10px;
+    }
     .tabs-left, .nav, .tab-content, .tab-pane {
         height: inherit;
     }

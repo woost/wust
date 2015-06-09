@@ -6,7 +6,7 @@ import modules.db.Database._
 import modules.db.GraphHelper._
 import modules.db._
 import modules.live.Broadcaster
-import modules.requests.{NodeAddRequest, NodeAddRequestBase, TaggedNodeAddRequest}
+import modules.requests._
 import play.api.libs.json.JsValue
 
 class ContentNodeAccess[NODE <: ContentNode](override val factory: ContentNodeFactory[NODE]) extends NodeReadDelete(factory) {
@@ -17,7 +17,7 @@ class ContentNodeAccess[NODE <: ContentNode](override val factory: ContentNodeFa
     node
   }
 
-  protected def editNode(discourse: Discourse, user: User, uuid: String, nodeAdd: NodeAddRequestBase): Either[NODE,String] = {
+  protected def editNode(discourse: Discourse, user: User, uuid: String, nodeAdd: NodeUpdateRequestBase): Either[NODE,String] = {
     val nodeDef = FactoryUuidNodeDefinition(factory, uuid)
     val nodes = findNodes(discourse, nodeDef)
     if (nodes.isEmpty)
@@ -25,7 +25,9 @@ class ContentNodeAccess[NODE <: ContentNode](override val factory: ContentNodeFa
 
     val node = nodes.head
     node.title = nodeAdd.title
-    node.description = nodeAdd.description
+    if (nodeAdd.description.isDefined)
+      node.description = nodeAdd.description.get
+
     val contribution = Contributes.local(user, node)
     discourse.add(contribution)
     Left(node)
@@ -55,7 +57,7 @@ class ContentNodeAccess[NODE <: ContentNode](override val factory: ContentNodeFa
   }
 
   override def update(uuid: String, user: User, json: JsValue): Either[NODE,String] = {
-    val nodeAdd = json.as[NodeAddRequest]
+    val nodeAdd = json.as[NodeUpdateRequest]
     val nodeDef = FactoryUuidNodeDefinition(factory, uuid)
     val discourse = discourseGraph(nodeDef)
     editNode(discourse, user, uuid, nodeAdd) match {
@@ -70,13 +72,12 @@ class ContentNodeAccess[NODE <: ContentNode](override val factory: ContentNodeFa
 
 // can add nested tags
 class PostAccess extends ContentNodeAccess[Post](Post) {
-  private def tagDefGraph(nodeAdd: TaggedNodeAddRequest, nodeDef: Option[NodeDefinition[Post]]): Discourse = {
-    val defs = nodeDef.map(List(_)).getOrElse(List.empty) ++ nodeAdd.addedTags.map(tag => FactoryUuidNodeDefinition(Tag, tag)).toList
-    val discourse = if(defs.isEmpty)
-                      Discourse.empty
-                    else
-                      discourseGraph(defs: _*)
-    discourse
+  private def tagDefGraph(addedTags: Seq[String], nodeDef: Option[NodeDefinition[Post]]): Discourse = {
+    val defs = nodeDef.map(List(_)).getOrElse(List.empty) ++ addedTags.map(tag => FactoryUuidNodeDefinition(Tag, tag)).toList
+    if(defs.isEmpty)
+      Discourse.empty
+    else
+      discourseGraph(defs: _*)
   }
 
   private def handleAddedTags(discourse: Discourse, user: User, node: Post) {
@@ -90,19 +91,18 @@ class PostAccess extends ContentNodeAccess[Post](Post) {
 
   override def create(user: User, json: JsValue): Either[Post,String] = {
     val nodeAdd = json.as[TaggedNodeAddRequest]
-    val discourse = tagDefGraph(nodeAdd, None)
+    val discourse = tagDefGraph(nodeAdd.addedTags, None)
 
     val node = createNode(discourse, user, nodeAdd)
     handleAddedTags(discourse, user, node)
-
     storeCreateNode(discourse, user, node)
 
     Left(node)
   }
 
   override def update(uuid: String, user: User, json: JsValue): Either[Post,String] = {
-    val nodeAdd = json.as[TaggedNodeAddRequest]
-    val discourse = tagDefGraph(nodeAdd, Some(FactoryUuidNodeDefinition(Post, uuid)))
+    val nodeAdd = json.as[TaggedNodeUpdateRequest]
+    val discourse = tagDefGraph(nodeAdd.addedTags, Some(FactoryUuidNodeDefinition(Post, uuid)))
 
     editNode(discourse, user, uuid, nodeAdd) match {
       case Left(node) =>
