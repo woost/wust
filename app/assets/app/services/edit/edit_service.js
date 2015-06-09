@@ -82,12 +82,14 @@ function EditService(Post, HistoryService, store) {
             id: node.id
         }) : undefined;
 
-        if (!existing) {
+        if (existing) {
+            _.remove(self.stack, existing);
+        } else {
             existing = new Session(node);
-            self.stack.push(existing);
-            storeStack();
         }
 
+        self.stack.push(existing);
+        storeStack();
         return existing;
     }
 

@@ -9,7 +9,9 @@ function ZenService() {
     this.hide();
 
     function hide() {
-        this.node = {};
+        this.node = {
+            description: ""
+        };
         this.visible = false;
     }
 

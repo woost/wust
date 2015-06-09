@@ -5,7 +5,7 @@ editPost.$inject = [];
 function editPost() {
     return {
         restrict: "A",
-        templateUrl: "assets/app/discourse/directives/post/edit_post.html",
+        templateUrl: "assets/app/discourse/post/edit_post.html",
         scope: {
             node: "="
         },

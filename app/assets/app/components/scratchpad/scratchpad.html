@@ -2,14 +2,13 @@
     <div id="node_add">
         <label>Edit:</label>
         <button ng-click="vm.edit()" type="submit" class="btn btn-default btn-xs"><i class="fa fa-file-o"></i> </button>
-        <div discourse-node-search-form ng-model='vm.searchTyped' on-select="vm.edit(item)" on-submit="vm.edit(items)" search-nodes='vm.searchNodes(term)' icon-class="fa fa-search"></div>
     </div>
 
     <div id="edit_list" class="discourse_post_list">
         <hr noshade size="1">
         <div class="drop_post_container" drop-channel="{{vm.nodeInfo.label}}" ui-on-Drop="vm.edit($data)">
             <label>Currently edited:</label>
-            <div ng-repeat="node in vm.editStack" edit-post node="node"></div>
+            <div ng-repeat="node in vm.editStack | reverse" edit-post node="node"></div>
         </div>
     </div>
 </div>

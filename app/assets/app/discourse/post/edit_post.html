@@ -14,9 +14,7 @@
         <div class="edit_tags">
             <label>Tags:</label>
             <div big-taglist tags="vm.node.tags" class="taglist"></div>
-            <div class="input-group">
-                <div discourse-node-search-form ng-model='vm.tagTyped' on-select="vm.node.addTag(item)" on-submit="vm.node.addTag(items)" search-nodes='vm.searchTags(term)' icon-class="fa fa-search"></div>
-            </div>
+            <div discourse-node-search-form ng-model='vm.tagTyped' on-select="vm.node.addTag(item)" on-submit="vm.node.addTag(items)" search-nodes='vm.searchTags(term)' icon-class="fa fa-search"></span>
         </div>
     </div>
 </div>

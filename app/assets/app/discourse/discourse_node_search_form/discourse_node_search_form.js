@@ -6,7 +6,7 @@ function discourseNodeSearchForm() {
     return {
         restrict: "A",
         require: "ngModel",
-        templateUrl: "assets/app/discourse/directives/node/discourse_node_search_form.html",
+        templateUrl: "assets/app/discourse/discourse_node_search_form/discourse_node_search_form.html",
         scope: {
             ngModel: "=",
             onSubmit: "&",

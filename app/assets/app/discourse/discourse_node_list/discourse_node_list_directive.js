@@ -5,7 +5,7 @@ discourseNodeList.$inject = [];
 function discourseNodeList() {
     return {
         restrict: "A",
-        templateUrl: "assets/app/discourse/directives/node/discourse_node_list.html",
+        templateUrl: "assets/app/discourse/discourse_node_list/discourse_node_list.html",
         scope: {
             nodeModel: "=",
         },
