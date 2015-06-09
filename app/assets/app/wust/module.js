@@ -3,9 +3,10 @@ angular.module("wust", [
     "ngAnimate",
     "ui.layout",
     "ui.router",
+    "ngSanitize",
     "wust.services",
     "wust.api",
     "wust.discourse",
     "wust.graph",
-    "wust.components"
+    "wust.components",
 ]);

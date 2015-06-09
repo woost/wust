@@ -38,6 +38,8 @@ lazy val wust = (project in file(".")).settings(
     "org.webjars.bower" % "lodash" % "3.8.0",
     "org.webjars.bower" % "d3" % "3.5.5",
     "org.webjars.bower" % "humane-js" % "3.2.2",
+    // markdown parser
+    "org.webjars.bower" % "marked" % "0.3.3",
     // authentication / authorization
     "com.mohiva" %% "play-silhouette" % "2.0",
     "com.typesafe.play.plugins" %% "play-plugins-mailer" % "2.3.1",

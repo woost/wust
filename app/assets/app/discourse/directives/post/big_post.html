@@ -6,7 +6,7 @@
             <button class="pull-right btn btn-xs btn-success" ng-click="vm.updateFocused()"><i class="fa fa-pencil"></i></button>
         </div>
         <div class="panel-body">
-            <div ng-bind="vm.node.description" class="well well-sm post_description" ></div>
+            <div markdown="vm.node.description" class="post_description"></div>
             <div big-taglist tags="vm.node.tags" class="taglist"></div>
         </div>
     </div>

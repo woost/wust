@@ -29,7 +29,7 @@ function editPostCtrl(Search, DiscourseNode) {
             mode: "markdown",
             require: ["ace/ext/language_tools"],
             onLoad: onEditorLoad,
-            onBlur: vm.node.onChange,
+            onBlur: onEditorBlur,
             advanced: {
                 printMarginColumn: false,
                 enableSnippets: true,
@@ -40,6 +40,10 @@ function editPostCtrl(Search, DiscourseNode) {
     };
 
     vm.searchTags = searchTags;
+
+    function onEditorBlur() {
+        vm.node.onChange();
+    }
 
     function onEditorLoad(editor) {
         editor.setKeyboardHandler("ace/keyboard/vim");

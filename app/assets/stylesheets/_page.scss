@@ -15,7 +15,6 @@ html, body {
     margin: 0px;
     font-family: 'Droid Sans', Helvetica, Arial, sans-serif;
     font-size: 14px;
-    min-width: 600px;
     height: 100%;
     main {
         height: inherit;
@@ -25,6 +24,12 @@ html, body {
             position: relative;
             .ui-layout-container {
                 height: inherit;
+                #content_view {
+                    min-width: 600px;
+                }
+                #scratchpad_view {
+                    min-width: 300px;
+                }
                 #content_view, #scratchpad_view {
                     height: inherit;
                     & > .ng-scope {

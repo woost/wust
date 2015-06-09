@@ -76,6 +76,7 @@
         "atmosphere",
         "d3",
         "humane",
-        "Lodium"
+        "Lodium",
+        "marked"
     ]
 }
