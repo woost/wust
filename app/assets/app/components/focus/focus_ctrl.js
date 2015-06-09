@@ -20,7 +20,14 @@ function FocusCtrl($stateParams, HistoryService, component) {
     }
 
     vm.rootId = $stateParams.id;
+    vm.rootNode = _.find(component.nodes, {
+        id: vm.rootId
+    });
+
     vm.component = component;
     vm.tabViews = _.map([0, 1, 2, 3], i => new Tab(i));
     vm.tabViews[HistoryService.activeViewIndex]._active = true;
+
+    // we are viewing details about a node, so add it to the nodehistory
+    HistoryService.add(vm.rootNode);
 }

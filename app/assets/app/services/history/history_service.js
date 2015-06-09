@@ -10,8 +10,8 @@ function HistoryService(Post, DiscourseNode, store) {
     this.activeViewIndex = historyStore.get("activeViewIndex") || 0;
     this.visited = [];
     _.each(historyStore.get("visited"), restoreNode);
-    this.add = add;
-    this.remove = remove;
+    this.add = addNode;
+    this.remove = removeNode;
     this.changeActiveView = changeActiveView;
 
     function restoreNode(id) {
@@ -27,7 +27,7 @@ function HistoryService(Post, DiscourseNode, store) {
         historyStore.set("visited", _.map(self.visited, n => n.id));
     }
 
-    function remove(id) {
+    function removeNode(id) {
         _.remove(self.visited, n => id === n.id);
         storeVisited();
     }
@@ -37,9 +37,5 @@ function HistoryService(Post, DiscourseNode, store) {
         self.visited.push(node);
         self.visited.splice(0, self.visited.length - maximum);
         storeVisited();
-    }
-
-    function add(promise) {
-        promise.$then(addNode);
     }
 }

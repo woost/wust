@@ -20,11 +20,6 @@ bigPostCtrl.$inject = ["$state", "HistoryService", "EditService", "DiscourseNode
 function bigPostCtrl($state, HistoryService, EditService, DiscourseNode) {
     let vm = this;
 
-    // we are viewing details about a node, so add it to the nodehistory
-    HistoryService.add(vm.node);
-
-    //TODO: we use ng-href instead of ui-sref because nodeInfo seems to be
-    //filled to late for ui-router to recognize the state
     vm.nodeInfo = DiscourseNode.Post;
 
     // callbacks for removing/updating the focused node

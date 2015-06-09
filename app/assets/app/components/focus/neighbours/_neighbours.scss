@@ -5,9 +5,6 @@
     @include justify-content(space-between);
     padding: 20px;
     text-align: center;
-    #node_view {
-        padding: 50px;
-    }
     #center_view {
         @include flex-grow(1);
     }
