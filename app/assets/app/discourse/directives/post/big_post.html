@@ -1,7 +1,7 @@
 <div class="big_post_directive">
-    <div ui-draggable="true" drag="vm.node" drag-channel="{{vm.node.label}}" class="panel panel-default" ng-class="vm.nodeInfo.css">
+    <div class="panel panel-default">
         <div class="panel-heading">
-            <a ng-href="{{vm.nodeInfo.getHref(node.id)}}" class="node panel-title">{{vm.node.title || (vm.node.description | trim:true:15)}}</a>
+            <span small-post node="vm.node"></span>
             <button class="pull-right btn btn-xs btn-danger" ng-click="vm.removeFocused()"><i class="fa fa-trash-o"></i></button>
             <button class="pull-right btn btn-xs btn-success" ng-click="vm.updateFocused()"><i class="fa fa-pencil"></i></button>
         </div>

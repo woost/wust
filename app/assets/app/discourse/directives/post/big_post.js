@@ -15,12 +15,10 @@ function bigPost() {
     };
 }
 
-bigPostCtrl.$inject = ["$state", "HistoryService", "EditService", "DiscourseNode"];
+bigPostCtrl.$inject = ["$state", "HistoryService", "EditService"];
 
-function bigPostCtrl($state, HistoryService, EditService, DiscourseNode) {
+function bigPostCtrl($state, HistoryService, EditService) {
     let vm = this;
-
-    vm.nodeInfo = DiscourseNode.Post;
 
     // callbacks for removing/updating the focused node
     vm.removeFocused = removeFocused;

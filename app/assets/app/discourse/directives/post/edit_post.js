@@ -1,8 +1,8 @@
 angular.module("wust.discourse").directive("editPost", editPost);
 
-editPost.$inject = ["DiscourseNode"];
+editPost.$inject = [];
 
-function editPost(DiscourseNode) {
+function editPost() {
     return {
         restrict: "A",
         templateUrl: "assets/app/discourse/directives/post/edit_post.html",
@@ -40,7 +40,6 @@ function editPostCtrl(Search, DiscourseNode) {
     };
 
     vm.searchTags = searchTags;
-    vm.nodeInfo = DiscourseNode.Post;
 
     function onEditorLoad(editor) {
         editor.setKeyboardHandler("ace/keyboard/vim");

@@ -1,8 +1,10 @@
 <div class="edit_post_directive">
-    <div ui-draggable="true" drag="vm.node" drag-channel="{{vm.node.label}}" class="panel panel-default" ng-class="vm.nodeInfo.css">
-        <div>
-            <button ng-click="vm.node.remove()" class="btn btn-xs btn-danger"><i class="fa fa-minus"></i></button>
-            <button ng-click="vm.node.save()" ng-disabled="vm.node.isPristine()" class="btn btn-xs btn-success"><i class="fa fa-floppy-o"></i></button>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i ng-if="vm.node.id === undefined" class="fa fa-asterisk"></i>
+            <span small-post node="vm.node"></span>
+            <button class="pull-right btn btn-xs btn-danger" ng-click="vm.node.remove()"><i class="fa fa-minus"></i></button>
+            <button class="pull-right btn btn-xs btn-success" ng-click="vm.node.save()" ng-disabled="vm.node.isPristine()"><i class="fa fa-floppy-o"></i></button>
         </div>
         <div ui-ace="vm.ace.options" ng-model="vm.node.description"></div>
         <div class="edit_title">
