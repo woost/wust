@@ -27,13 +27,17 @@ object GraphFormat {
       ("id", JsString(node.uuid)),
       ("label", JsString(node.label))
     ) ++ (node match {
-      case n: ContentNode                         => Seq(
-        ("title", JsString(n.title.getOrElse("")))
+      case n: Post                         => Seq(
+        ("title", JsString(n.title.getOrElse(""))),
+        ("description", JsString(n.description)),
+        ("tags", Json.toJson(n.rev_categorizesPosts))
       )
-      case u: User                                => Seq(
-        ("title", JsString(u.name))
+      case n: Tag                         => Seq(
+        ("title", JsString(n.title.getOrElse(""))),
+        ("description", JsString(n.description)),
+        ("isType", JsBoolean(n.isType))
       )
-      case h: HyperRelation[PostLike @unchecked, _, _, _, PostLike @unchecked] => 
+      case h: HyperRelation[PostLike @unchecked, _, _, _, PostLike @unchecked] =>
         Seq(
         ("hyperEdge", JsBoolean(true)),
         ("startId", JsString(h.startNode.uuid)),
@@ -47,12 +51,9 @@ object GraphFormat {
     def reads(json: JsValue) = ???
 
     def writes(discourseGraph: Discourse) = {
-      //TODO: handle empy graphs
       JsObject(Seq(
-        //TODO: this is really ugly!
-        //TODO: right now this returns more edges than needed. (User --> ContentNode), but there is no User
-        ("nodes", Json.toJson(discourseGraph.postLikes)),
-        ("edges", Json.toJson(discourseGraph.postLikeRelations ++ discourseGraph.postLikeHyperRelations.flatMap(r => List(r.startRelation.asInstanceOf[Relation[PostLike, PostLike]], r.endRelation.asInstanceOf[Relation[PostLike, PostLike]]))))
+        ("nodes", Json.toJson(discourseGraph.posts ++ discourseGraph.connects)),
+        ("edges", Json.toJson(discourseGraph.connects.flatMap(r => List(r.startRelation.asInstanceOf[Relation[PostLike, PostLike]], r.endRelation.asInstanceOf[Relation[PostLike, PostLike]]))))
       ))
     }
   }
