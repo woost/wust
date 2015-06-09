@@ -1,11 +1,11 @@
 <div class="edit_post_directive">
     <div class="panel panel-default">
-        <div markdown="vm.node.description"></div>
         <div class="panel-heading">
             <i ng-if="vm.node.id === undefined" class="fa fa-asterisk"></i>
             <span small-post node="vm.node"></span>
             <button class="pull-right btn btn-xs btn-danger" ng-click="vm.node.remove()"><i class="fa fa-minus"></i></button>
             <button class="pull-right btn btn-xs btn-success" ng-click="vm.node.save()" ng-disabled="vm.node.isPristine()"><i class="fa fa-floppy-o"></i></button>
+            <span class="pull-right" toggle-zen node="vm.node"></span>
         </div>
         <div ui-ace="vm.ace.options" ng-model="vm.node.description"></div>
         <div class="edit_title">

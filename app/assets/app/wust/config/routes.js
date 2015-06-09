@@ -15,6 +15,10 @@ function RoutesConfig($stateProvider, $urlRouterProvider, $locationProvider, Dis
                 templateUrl: `${templateBase}/scratchpad/scratchpad.html`,
                 controller: "ScratchpadCtrl as vm",
             },
+            "zen": {
+                templateUrl: `${templateBase}/zen/zen.html`,
+                controller: "ZenCtrl as vm",
+            },
             "search": {
                 templateUrl: `${templateBase}/search/search.html`,
                 controller: "SearchCtrl as vm",
