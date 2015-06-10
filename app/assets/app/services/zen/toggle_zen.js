@@ -1,4 +1,4 @@
-angular.module("wust.discourse").directive("toggleZen", toggleZen);
+angular.module("wust.services").directive("toggleZen", toggleZen);
 
 toggleZen.$inject = ["ZenService"];
 
