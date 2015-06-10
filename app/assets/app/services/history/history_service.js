@@ -15,7 +15,7 @@ function HistoryService(Post, DiscourseNode, store) {
     this.changeActiveView = changeActiveView;
 
     function restoreNode(id) {
-        Post.$find(id).$then(node => addNode(node));
+        Post.$find(id).$then(node => addNode(node.$encode()));
     }
 
     function changeActiveView(index) {
