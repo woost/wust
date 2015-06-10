@@ -15,8 +15,10 @@ function bigTaglist() {
     };
 }
 
-bigTaglistCtrl.$inject = [];
+bigTaglistCtrl.$inject = ["DiscourseNode"];
 
-function bigTaglistCtrl($state, HistoryService, EditService, DiscourseNode) {
+function bigTaglistCtrl(DiscourseNode) {
     let vm = this;
+
+    vm.nodeInfo = DiscourseNode.Tag;
 }

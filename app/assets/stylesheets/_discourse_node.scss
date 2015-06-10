@@ -4,7 +4,7 @@
     $bgcolor: lighten(desaturate($color, 0), 10);
     $bordercolor: desaturate(darken($bgcolor, 34), 43);
     $bgcolor-highlight: lighten(saturate($bgcolor, 10), 10);
-    &.node {
+    &.node, &.discourse_tag {
         display: inline-block;
         background-color: $bgcolor;
         border: 1px solid $bordercolor;
@@ -36,7 +36,7 @@
         margin: 5px;
     }
     // icons
-    &.node, &.panel .panel-heading .node, &.btn {
+    &.node, &.discourse_tag, &.panel .panel-heading .node, &.btn {
         &:before {
             font-family: FontAwesome;
             content: $icon;
@@ -67,24 +67,28 @@
     }
 }
 
-.discourse_goal {
-    @include discourse_node($discourse_goal_color, ""); //navigation arrow
-}
+.discourse_tag {
+    &.tag__none {
+        @include discourse_node(white, ""); //tag
+    }
+    &.tag_Goal {
+        @include discourse_node($discourse_goal_color, ""); //navigation arrow
+    }
+    &.tag_Problem {
+        @include discourse_node($discourse_problem_color, ""); // flask
+    }
 
-.discourse_problem {
-    @include discourse_node($discourse_problem_color, ""); // flask
-}
+    &.tag_Idea {
+        @include discourse_node($discourse_idea_color, ""); // light bulb
+    }
 
-.discourse_idea {
-    @include discourse_node($discourse_idea_color, ""); // light bulb
-}
+    &.tag_Pro {
+        @include discourse_node($discourse_proargument_color, ""); // thumbsup
+    }
 
-.discourse_proargument {
-    @include discourse_node($discourse_proargument_color, ""); // thumbsup
-}
-
-.discourse_conargument {
-    @include discourse_node($discourse_conargument_color, ""); // thumbsdown
+    &.tag_Con {
+        @include discourse_node($discourse_conargument_color, ""); // thumbsdown
+    }
 }
 
 .discourse_post {
@@ -93,36 +97,6 @@
 
 .discourse_user {
     @include discourse_node($discourse_user_color, ""); // user
-}
-
-.discourse_idea_list {
-    .drop_post_container.on-drag-enter {
-        background-color: $discourse_idea_color;
-    }
-}
-
-.discourse_problem_list {
-    .drop_post_container.on-drag-enter {
-        background-color: $discourse_problem_color;
-    }
-}
-
-.discourse_goal_list {
-    .drop_post_container.on-drag-enter {
-        background-color: $discourse_goal_color;
-    }
-}
-
-.discourse_proargument_list {
-    .drop_post_container.on-drag-enter {
-        background-color: $discourse_proargument_color;
-    }
-}
-
-.discourse_conargument_list {
-    .drop_post_container.on-drag-enter {
-        background-color: $discourse_conargument_color;
-    }
 }
 
 .discourse_post_list {
