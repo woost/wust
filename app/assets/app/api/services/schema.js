@@ -1,27 +1,12 @@
 angular.module("wust.api").provider("Schema", Schema);
 
-Schema.$inject = ["$provide", "LiveProvider", "restmodProvider"];
+Schema.$inject = ["$provide"];
 
-function Schema($provide, LiveProvider, restmodProvider) {
+function Schema($provide) {
     this.setup = setup;
     this.$get = _.constant({});
 
     function setup(schema) {
-        LiveProvider.setBaseUrl(schema.api.websocketRoot);
-
-        restmodProvider.rebase({
-            $config: {
-                urlPrefix: schema.api.restRoot,
-                style: "wust",
-                primaryKey: "id"
-            },
-            $extend: {
-                Model: {
-                    encodeUrlName: _.kebabCase
-                }
-            }
-        });
-
         _.each(schema.models, model => {
             $provide.factory(model.name, ApiFactory);
 
