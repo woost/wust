@@ -1,6 +1,6 @@
 package modules.db.access
 
-import model.WustSchema.UuidNode
+import model.WustSchema.{UuidNode,User}
 import modules.db.Database._
 import modules.db._
 import modules.db.types.UuidHyperNodeDefinitionBase
@@ -12,8 +12,8 @@ trait RelationAccess[-NODE <: UuidNode,+OTHER <: UuidNode] {
   def read(baseDef: FixedNodeDefinition[NODE]): Either[Iterable[OTHER],String] = Right("No read access on Relation")
   def delete(baseDef: UuidNodeDefinition[NODE], uuid: String): Either[Boolean,String] = Right("No delete access on Relation")
   def deleteHyper(baseDef: UuidHyperNodeDefinitionBase[NODE with AbstractRelation[_,_]], uuid: String): Either[Boolean, String] = Right("No delete access on HyperRelation")
-  def create(baseDef: UuidNodeDefinition[NODE], json: JsValue): Either[OTHER,String] = Right("No create access on Relation")
-  def createHyper(baseDef: UuidHyperNodeDefinitionBase[NODE with AbstractRelation[_,_]], json: JsValue): Either[OTHER,String] = Right("No create access on HyperRelation")
+  def create(baseDef: UuidNodeDefinition[NODE], user: User, json: JsValue): Either[OTHER,String] = Right("No create access on Relation")
+  def createHyper(baseDef: UuidHyperNodeDefinitionBase[NODE with AbstractRelation[_,_]], user: User, json: JsValue): Either[OTHER,String] = Right("No create access on HyperRelation")
 
   def toNodeDefinition: NodeDefinition[OTHER]
   def toNodeDefinition(uuid: String): UuidNodeDefinition[OTHER]

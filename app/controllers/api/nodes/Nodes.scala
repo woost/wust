@@ -9,6 +9,7 @@ import modules.requests.{NodeSchema, ConnectSchema, HyperConnectSchema}
 import play.api.mvc.Result
 
 trait NodesBase extends NestedResourceRouter with DefaultNestedResourceController with Silhouette[User, JWTAuthenticator] with HeaderEnvironmentModule {
+  protected def unauthorized = Unauthorized("Only logged-in users allowed")
   protected def pathNotFound = NotFound("No defined path")
 
   protected def getSchema[NODE <: UuidNode](schemas: Map[String,_ <: ConnectSchema[NODE]], path: String)(handler: ConnectSchema[NODE] => Result) = {
@@ -32,6 +33,13 @@ trait NodesBase extends NestedResourceRouter with DefaultNestedResourceControlle
     result match {
       case Left(value) => handler(value)
       case Right(msg)  => BadRequest(msg)
+    }
+  }
+
+  protected def getUser(identity: Option[User])(handler: User => Result) = {
+    identity match {
+      case Some(user) => handler(user)
+      case None => unauthorized
     }
   }
 }

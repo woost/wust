@@ -9,7 +9,7 @@ import modules.live.Broadcaster
 import modules.requests._
 import play.api.libs.json.JsValue
 
-class ContentNodeAccess[NODE <: ContentNode](override val factory: ContentNodeFactory[NODE]) extends NodeReadDelete(factory) {
+class ContentNodeWrite[NODE <: ContentNode](override val factory: ContentNodeFactory[NODE]) extends NodeReadDelete(factory) {
   protected def createNode(discourse: Discourse, user: User, nodeAdd: NodeAddRequestBase): NODE = {
     val node = factory.localContentNode(title = nodeAdd.title, description = nodeAdd.description)
     val contribution = Contributes.local(user, node)
@@ -17,23 +17,7 @@ class ContentNodeAccess[NODE <: ContentNode](override val factory: ContentNodeFa
     node
   }
 
-  protected def editNode(discourse: Discourse, user: User, uuid: String, nodeAdd: NodeUpdateRequestBase): Either[NODE,String] = {
-    val nodeDef = FactoryUuidNodeDefinition(factory, uuid)
-    val nodes = findNodes(discourse, nodeDef)
-    if (nodes.isEmpty)
-      return Right(s"Cannot find ContentNode with uuid '$uuid' and label '${factory.label}'")
-
-    val node = nodes.head
-    node.title = nodeAdd.title
-    if (nodeAdd.description.isDefined)
-      node.description = nodeAdd.description.get
-
-    val contribution = Contributes.local(user, node)
-    discourse.add(contribution)
-    Left(node)
-  }
-
-  private def storeNode(discourse: Discourse, user: User, node: NODE): Unit = {
+  protected def storeNode(discourse: Discourse, user: User, node: NODE): Unit = {
     db.persistChanges(discourse.graph)
     Broadcaster.broadcastConnect(user, RelationDefinition(ConcreteFactoryNodeDefinition(User), Contributes, ConcreteFactoryNodeDefinition(factory)), node)
   }
@@ -43,17 +27,44 @@ class ContentNodeAccess[NODE <: ContentNode](override val factory: ContentNodeFa
     Broadcaster.broadcastCreate(factory, node)
   }
 
-  protected def storeEditNode(discourse: Discourse, user: User, node: NODE): Unit = {
-    storeNode(discourse, user, node)
-    Broadcaster.broadcastEdit(factory, node)
-  }
-
   override def create(user: User, json: JsValue): Either[NODE,String] = {
     val nodeAdd = json.as[NodeAddRequest]
     val discourse = Discourse.empty
     val node = createNode(discourse, user, nodeAdd)
     storeCreateNode(discourse, user, node)
     Left(node)
+  }
+}
+
+class ContentNodeAccess[NODE <: ContentNode](override val factory: ContentNodeFactory[NODE]) extends ContentNodeWrite(factory) {
+  protected def editNode(discourse: Discourse, user: User, uuid: String, nodeAdd: NodeUpdateRequestBase): Either[NODE,String] = {
+    val nodeDef = FactoryUuidNodeDefinition(factory, uuid)
+    val nodes = findNodes(discourse, nodeDef)
+    if (nodes.isEmpty)
+      return Right(s"Cannot find ContentNode with uuid '$uuid' and label '${factory.label}'")
+
+    val node = nodes.head
+    if (nodeAdd.title.isDefined) {
+      if (node.title.get.isEmpty())
+        node.title = None;
+      else
+        node.title = nodeAdd.title
+    }
+
+    if (nodeAdd.description.isDefined)
+      node.description = nodeAdd.description.get
+
+    if (nodeAdd.title.isDefined || nodeAdd.description.isDefined) {
+      val contribution = Contributes.local(user, node)
+      discourse.add(contribution)
+    }
+
+    Left(node)
+  }
+
+  protected def storeEditNode(discourse: Discourse, user: User, node: NODE): Unit = {
+    storeNode(discourse, user, node)
+    Broadcaster.broadcastEdit(factory, node)
   }
 
   override def update(uuid: String, user: User, json: JsValue): Either[NODE,String] = {
@@ -89,6 +100,7 @@ class PostAccess extends ContentNodeAccess[Post](Post) {
     })
   }
 
+  //TODO: should create/update be nested?
   override def create(user: User, json: JsValue): Either[Post,String] = {
     val nodeAdd = json.as[TaggedNodeAddRequest]
     val discourse = tagDefGraph(nodeAdd.addedTags, None)

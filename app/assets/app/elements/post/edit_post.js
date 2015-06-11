@@ -15,11 +15,11 @@ function editPost() {
     };
 }
 
-editPostCtrl.$inject = ["Search", "DiscourseNode"];
+editPostCtrl.$inject = ["DiscourseNode"];
 
 // expects scope.node to be a session.
 // used by the scratchpad which retrieves a list of sessions from the EditService.
-function editPostCtrl(Search, DiscourseNode) {
+function editPostCtrl(DiscourseNode) {
     let vm = this;
 
     vm.ace = {
@@ -39,8 +39,6 @@ function editPostCtrl(Search, DiscourseNode) {
         }
     };
 
-    vm.searchTags = searchTags;
-
     function onEditorBlur() {
         vm.node.onChange();
     }
@@ -48,12 +46,5 @@ function editPostCtrl(Search, DiscourseNode) {
     function onEditorLoad(editor) {
         editor.setKeyboardHandler("ace/keyboard/vim");
         editor.$blockScrolling = Infinity;
-    }
-
-    function searchTags(title) {
-        return Search.$search({
-            title: title,
-            label: DiscourseNode.Tag.label
-        });
     }
 }

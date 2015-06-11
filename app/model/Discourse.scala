@@ -50,17 +50,24 @@ object WustSchema {
 
   @Node trait Categorizes extends UuidNode
 
+  @Node trait Penos extends ContentNode
+
   @Node class Tag extends ContentNode {
     var isType: Boolean = false
   }
-  @Node class Post extends ContentNode
+  @Node class Post extends Penos
   @Node class Scope extends ContentNode
 
   @Relation trait ContentRelation
 
+  @Relation trait Votes extends ContentRelation
+
   @HyperRelation class CategorizesScope(startNode: Tag, endNode: Scope) extends Categorizes with ContentRelation
   @HyperRelation class CategorizesPost(startNode: Tag, endNode: Post) extends Categorizes with ContentRelation
   @HyperRelation class CategorizesConnects(startNode: Tag, endNode: Connects) extends Categorizes with ContentRelation
+
+  @Relation class UpVotes(startNode: User, endNode: Categorizes) extends Votes
+  @Relation class DownVotes(startNode: User, endNode: Categorizes) extends Votes
 
   @Relation class TaggingAction(startNode: User, endNode: Categorizes)
 
