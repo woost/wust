@@ -50,12 +50,10 @@ object WustSchema {
 
   @Node trait Categorizes extends UuidNode
 
-  @Node trait Penos extends ContentNode
-
   @Node class Tag extends ContentNode {
     var isType: Boolean = false
   }
-  @Node class Post extends Penos
+  @Node class Post extends ContentNode
   @Node class Scope extends ContentNode
 
   @Relation trait ContentRelation
