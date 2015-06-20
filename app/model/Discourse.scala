@@ -10,23 +10,20 @@ object WustSchema {
   // TODO: custom local methods for NodeFactory
   // TODO: annotation for hidden defaults?
 
-  @Graph trait Discourse {Nodes(User, UserGroup, Post, Tag, Scope) }
-  @Graph trait Auth {Nodes(User, LoginInfo, PasswordInfo) }
-
   @Node trait UuidNode {
     val uuid: String = Helpers.uuidBase64
   }
-
-  @Node class UserGroup extends UuidNode {
-    var name: String
+  @Node trait Timestamp {
+    val timestamp: Long = System.currentTimeMillis
   }
+
+  // Authentification
+  @Graph trait Auth {List(User, LoginInfo, PasswordInfo) }
   @Node class User extends UuidNode with Identity {
     var name: String
     var email: Option[String]
+    var karma: Long = 0
   }
-
-  @Relation class MemberOf(startNode: User, endNode: UserGroup)
-
   @Node class LoginInfo {
     val providerID: String
     val providerKey: String
@@ -37,46 +34,66 @@ object WustSchema {
     val password: String
     val salt: Option[String]
   }
-
   @Relation class HasLogin(startNode: User, endNode: LoginInfo)
   @Relation class HasPassword(startNode: LoginInfo, endNode: PasswordInfo)
+  @Node class UserGroup extends UuidNode {
+    var name: String
+  }
+  @Relation class MemberOf(startNode: User, endNode: UserGroup)
 
-  @Node trait PostLike extends UuidNode
 
-  @Node trait ContentNode extends PostLike {
+  //TODO: rename
+  @Graph trait Discourse {List(User, UserGroup, Post, Tag, Scope, Connects, Inherits) }
+  @Relation trait ContentRelation
+  @Node trait ContentNode {//extends Hidable
     var title: Option[String]
     var description: String
   }
 
-  @Node trait Categorizes extends UuidNode
 
+  // Content
+  @Node trait Connectable extends Taggable with UuidNode
+  @HyperRelation class Connects(startNode: Connectable, endNode: Connectable) extends Connectable with ContentRelation
+  @Node trait Inheritable
+  @HyperRelation class Inherits(startNode: Inheritable, endNode: Inheritable) extends ContentRelation
+  // @Node trait Hidable {
+  //   var visible: Boolean = true
+  // }
+
+  @Node class Post extends ContentNode with Connectable with Inheritable with Taggable
+
+
+  // Actions
+  @Node trait Action extends UuidNode with Timestamp
+  //TODO: store content of action in action
+  @HyperRelation class Created(startNode: User, endNode: ContentNode)
+  @HyperRelation class Updated(startNode: User, endNode: ContentNode)
+  @HyperRelation class Deleted(startNode: User, endNode: ContentNode)
+  @Relation class Reviewed(startNode: User, endNode: Action)
+  //TODO: TaggingAction here? was heisst das hier? worum gehts? steht doch
+  //unten...tagging action
+  //TODO: multidimesional voting?
+
+
+  // Tags
   @Node class Tag extends ContentNode {
     var isType: Boolean = false
   }
-  @Node class Post extends ContentNode
-  @Node class Scope extends ContentNode
+  @Node trait Taggable extends UuidNode
+  @HyperRelation class Categorizes(startNode: Tag, endNode: Taggable) extends ContentRelation
+  @Relation class TaggingAction(startNode: User, endNode: Categorizes) /// HERE
+  @Relation class Votes(startNode: User, endNode: Categorizes)
 
-  @Relation trait ContentRelation
 
-  @Relation trait Votes extends ContentRelation
-
-  @HyperRelation class CategorizesScope(startNode: Tag, endNode: Scope) extends Categorizes with ContentRelation
-  @HyperRelation class CategorizesPost(startNode: Tag, endNode: Post) extends Categorizes with ContentRelation
-  @HyperRelation class CategorizesConnects(startNode: Tag, endNode: Connects) extends Categorizes with ContentRelation
-
-  @Relation class UpVotes(startNode: User, endNode: Categorizes) extends Votes
-  @Relation class DownVotes(startNode: User, endNode: Categorizes) extends Votes
-
-  @Relation class TaggingAction(startNode: User, endNode: Categorizes)
-
-  @Relation class Belongs(startNode: Post, endNode: Scope)
-
-  //TODO: restrict to Posts and Connects itself
-  @HyperRelation class Connects(startNode: PostLike, endNode: PostLike) extends PostLike with ContentRelation
-
-  @HyperRelation class Inherits(startNode: ContentNode, endNode: ContentNode) extends PostLike with ContentRelation
-
-  @Relation class Contributes(startNode: User, endNode: ContentNode) {
-    val createdAt: Long = System.currentTimeMillis
+  // Scopes
+  @Node class Scope extends ContentNode with Inheritable with Taggable {
+    var isPrivate: Boolean = false
   }
+  @Node trait ScopeChild extends UuidNode
+  @Relation class BelongsTo(startNode: ScopeChild, endNode: Scope)
+  @Relation class Owns(startNode: User, endNode: Scope)
+  //TODO: Node trait ownable?
+  @Relation class WriteAccess(startNode: User, endNode: Scope)
+  //TODO: Node trait  writeaccessable?
+
 }
