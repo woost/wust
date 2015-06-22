@@ -11,7 +11,7 @@ import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits._
 
 class PasswordInfoDAO extends DelegableAuthInfoDAO[SPasswordInfo] {
-  implicit def sPasswordInfoToPasswordInfo(pi: SPasswordInfo) = PasswordInfo.local(pi.hasher, pi.password, pi.salt)
+  implicit def sPasswordInfoToPasswordInfo(pi: SPasswordInfo) = PasswordInfo.create(pi.hasher, pi.password, pi.salt)
   implicit def passwordInfoToSPasswordInfo(pi: PasswordInfo) = SPasswordInfo(pi.hasher, pi.password, pi.salt)
 
   def save(sLoginInfo: SLoginInfo, sPasswordInfo: SPasswordInfo): Future[SPasswordInfo] = Future {
@@ -21,7 +21,7 @@ class PasswordInfoDAO extends DelegableAuthInfoDAO[SPasswordInfo] {
     auth.loginInfos.headOption match {
       case Some(loginInfo) => {
         val passwordInfo: PasswordInfo = sPasswordInfo
-        val hasPassword = HasPassword.local(loginInfo, passwordInfo)
+        val hasPassword = HasPassword.create(loginInfo, passwordInfo)
         auth.add(passwordInfo, hasPassword)
         Database.db.persistChanges(auth.graph)
         sPasswordInfo

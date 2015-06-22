@@ -11,8 +11,8 @@ import play.api.libs.json.JsValue
 
 class ContentNodeWrite[NODE <: ContentNode](override val factory: ContentNodeFactory[NODE]) extends NodeReadDelete(factory) {
   protected def createNode(discourse: Discourse, user: User, nodeAdd: NodeAddRequestBase): NODE = {
-    val node = factory.localContentNode(title = nodeAdd.title, description = nodeAdd.description)
-    val contribution = Contributes.local(user, node)
+    val node = factory.createContentNode(title = nodeAdd.title, description = nodeAdd.description)
+    val contribution = Contributes.create(user, node)
     discourse.add(node, contribution)
     node
   }
@@ -55,7 +55,7 @@ class ContentNodeAccess[NODE <: ContentNode](override val factory: ContentNodeFa
       node.description = nodeAdd.description.get
 
     if (nodeAdd.title.isDefined || nodeAdd.description.isDefined) {
-      val contribution = Contributes.local(user, node)
+      val contribution = Contributes.create(user, node)
       discourse.add(contribution)
     }
 
@@ -93,8 +93,8 @@ class PostAccess extends ContentNodeAccess[Post](Post) {
 
   private def handleAddedTags(discourse: Discourse, user: User, node: Post) {
     discourse.tags.foreach(tag => {
-      val categorizes = CategorizesPost.local(tag, node)
-      val action = TaggingAction.local(user, categorizes)
+      val categorizes = CategorizesPost.create(tag, node)
+      val action = TaggingAction.create(user, categorizes)
       discourse.add(categorizes, action)
       //TODO: broadcasts...
     })

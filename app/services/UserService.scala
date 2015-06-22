@@ -18,12 +18,12 @@ trait UserService extends IdentityService[User] {
 }
 
 class UserServiceDB extends UserService {
-  implicit def sloginInfoToLoginInfo(li: SLoginInfo) = LoginInfo.local(li.providerID, li.providerKey)
+  implicit def sloginInfoToLoginInfo(li: SLoginInfo) = LoginInfo.create(li.providerID, li.providerKey)
 
   def create(sLoginInfo: SLoginInfo, signUp: SignUp, json: JsValue = JsNull): Future[User] = {
-    val user = User.local(signUp.identifier)
+    val user = User.create(signUp.identifier)
     val loginInfo: LoginInfo = sLoginInfo
-    val hasLogin = HasLogin.local(user, loginInfo)
+    val hasLogin = HasLogin.create(user, loginInfo)
     val auth = Auth.empty
     auth.add(user, loginInfo, hasLogin)
     Database.db.persistChanges(auth.graph)

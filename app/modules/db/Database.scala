@@ -90,7 +90,7 @@ object Database {
 
   //TODO: unique connections?
   def connectNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](discourse: Discourse, start: START, factory: ContentRelationFactory[START, RELATION, END], end: END): (START, END) = {
-    discourse.add(factory.localContentRelation(start, end))
+    discourse.add(factory.createContentRelation(start, end))
     db.persistChanges(discourse.graph)
     (start, end)
   }
