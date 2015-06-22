@@ -10,8 +10,8 @@ object WustSchema {
   // TODO: custom local methods for NodeFactory
   // TODO: annotation for hidden defaults?
 
-  @Group trait Discourse {List(User, UserGroup, Post, Tag, Scope, Connects, Inherits) }
-  @Group trait Auth {List(User, LoginInfo, PasswordInfo) }
+  @Graph trait Discourse {Nodes(User, UserGroup, Post, Tag, Scope) }
+  @Graph trait Auth {Nodes(User, LoginInfo, PasswordInfo) }
 
   @Node trait UuidNode {
     val uuid: String = Helpers.uuidBase64
