@@ -38,10 +38,16 @@ function EditService(Post, HistoryService, store) {
             if (this.isPristine(dirtyModel))
                 return;
 
-            Post.$buildRaw(_.pick(this, "id")).$update(dirtyModel).$then(data => {
-                humane.success("Added new node");
-                this.remove();
+            let model =_.pick(this, "id");
+            let message = model.id === undefined ? "Added new node" : "Updated now";
+            Post.$buildRaw(model).$update(dirtyModel).$then(data => {
+                humane.success(message);
+                this.apply(data);
             });
+        }
+
+        apply(other) {
+            _.assign(this, other);
         }
 
         addTag(maybeTags) {
