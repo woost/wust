@@ -5,6 +5,7 @@ import model.WustSchema._
 import modules.db.Database
 import play.core.StaticApplication
 import renesca._
+import renesca.parameter.implicits._
 import java.io.File
 
 trait Task extends App {
@@ -22,12 +23,12 @@ object SeedInit extends Task {
 
   db.query("CREATE INDEX ON :POST(uuid)")
 
-  discourse.add(Tag.local(title = Some("Problem"), description = "...a problem", isType = true))
-  discourse.add(Tag.local(title = Some("Goal"), description = "...a goal", isType = true))
-  discourse.add(Tag.local(title = Some("Idea"), description = "...an idea", isType = true))
-  discourse.add(Tag.local(title = Some("Pro"), description = "...a pro", isType = true))
-  discourse.add(Tag.local(title = Some("Con"), description = "...a con", isType = true))
-  discourse.add(UserGroup.local("everyone"))
+  discourse.add(Tag.merge(title = Some("Problem"), description = "...a problem", isType = true, merge = Set("title", "isType")))
+  discourse.add(Tag.merge(title = Some("Goal"), description = "...a goal", isType = true, merge = Set("title", "isType")))
+  discourse.add(Tag.merge(title = Some("Idea"), description = "...a idea", isType = true, merge = Set("title", "isType")))
+  discourse.add(Tag.merge(title = Some("Pro"), description = "...a pro", isType = true, merge = Set("title", "isType")))
+  discourse.add(Tag.merge(title = Some("Con"), description = "...a con", isType = true, merge = Set("title", "isType")))
+  discourse.add(UserGroup.merge(name = "everyone", merge = Set("name")))
 
   db.persistChanges(discourse.graph)
   db.restService.actorSystem.shutdown()

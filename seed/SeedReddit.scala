@@ -32,7 +32,7 @@ object SeedReddit extends Task {
         val id = (post \ "data" \ "id").as[String]
         val title = (post \ "data" \ "title").as[String]
         val content = (post \ "data" \ "selftext").as[String]
-        val headPost = Post.local(title = Some(title), description = content)
+        val headPost = Post.create(title = Some(title), description = content)
         println(s"thread: $title")
         discourse.add(headPost)
 
@@ -47,9 +47,9 @@ object SeedReddit extends Task {
               val body = (comment \ "data" \ "body").as[String]
               val title = body.take(100) + (if(body.size > 100) "..." else "")
 
-              val commentNode = Post.local(title = Some(title), description = body)
+              val commentNode = Post.create(title = Some(title), description = body)
               println(s" reply: $title")
-              discourse.add(commentNode, Connects.local(commentNode, parent))
+              discourse.add(commentNode, Connects.create(commentNode, parent))
 
               val replies = (comment \ "data" \ "replies") match {
                 case JsString("") =>
