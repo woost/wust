@@ -45,7 +45,7 @@ class AnyContentNode() extends NodeAccess[ContentNode] {
 }
 
 trait NodeAccessWithFactory[NODE <: UuidNode] extends NodeAccess[NODE] {
-  val factory: NodeFactory[NODE]
+  val factory: UuidNodeFactory[NODE]
   val name = factory.getClass.getSimpleName.dropRight(1)
   val label = Some(factory.label)
 
@@ -54,7 +54,8 @@ trait NodeAccessWithFactory[NODE <: UuidNode] extends NodeAccess[NODE] {
   def toNodeDefinition(uuid: String) = FactoryUuidNodeDefinition(factory, uuid)
 }
 
-class NodeRead[NODE <: UuidNode](val factory: NodeFactory[NODE]) extends NodeAccessWithFactory[NODE] {
+// TODO: use Node.matches, but we do not know the signature of the factory methods here...
+class NodeRead[NODE <: UuidNode](val factory: UuidNodeFactory[NODE]) extends NodeAccessWithFactory[NODE] {
   override def read = {
     Left(discourseNodes(factory)._2.toSet)
   }
@@ -67,7 +68,7 @@ class NodeRead[NODE <: UuidNode](val factory: NodeFactory[NODE]) extends NodeAcc
   }
 }
 
-class NodeReadDelete[NODE <: UuidNode](factory: NodeFactory[NODE]) extends NodeRead(factory) {
+class NodeReadDelete[NODE <: UuidNode](factory: UuidNodeFactory[NODE]) extends NodeRead(factory) {
   override def delete(uuid: String) = {
     deleteNodes(FactoryUuidNodeDefinition(factory, uuid))
     Broadcaster.broadcastDelete(factory, uuid)
