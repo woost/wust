@@ -7,7 +7,11 @@ function EditService(Post, HistoryService, store) {
     let self = this;
 
     class Session {
-        constructor({
+        constructor(other) {
+            this.apply(other);
+        }
+
+        apply({
             id, title, description, tags, addedTags, original
         }) {
             this.id = id;
@@ -20,6 +24,7 @@ function EditService(Post, HistoryService, store) {
                 description: this.description
             };
         }
+
 
         dirtyModel() {
             let dirtyModel = _.omit(_.pick(this, _.keys(this.original)), (v,k) => this.original[k] === v);
@@ -42,12 +47,8 @@ function EditService(Post, HistoryService, store) {
             let message = model.id === undefined ? "Added new node" : "Updated now";
             Post.$buildRaw(model).$update(dirtyModel).$then(data => {
                 humane.success(message);
-                this.apply(data);
+                //this.apply(data);
             });
-        }
-
-        apply(other) {
-            _.assign(this, other);
         }
 
         addTag(maybeTags) {

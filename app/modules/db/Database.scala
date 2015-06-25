@@ -1,6 +1,7 @@
 package modules.db
 
 import common.ConfigString._
+
 import model.WustSchema._
 import modules.db.GraphHelper._
 import modules.db.types._
