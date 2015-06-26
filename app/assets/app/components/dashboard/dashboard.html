@@ -1,8 +1,13 @@
 <div id="dashboard_component">
     <div id="posts_view" class="widget">
-        <h2>Existing Posts</h2>
-        <div id="list_existing">
-            <div ng-repeat="node in vm.nodes" small-post node="node"></div>
+        <button class="pull-right btn btn-xs btn-default" ng-click="vm.open()"><i class="fa fa-plus"></i></button>
+        <h2>streams</h2>
+        <div class="stream_list">
+            <div class="node_list col-md-4" ng-repeat="stream in vm.streams">
+                <div class="well">
+                    <div ng-repeat="post in stream.posts" small-post node="post"></div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

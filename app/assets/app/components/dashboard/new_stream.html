@@ -1,0 +1,11 @@
+<div class="modal-header">
+    <h3 class="modal-title">select tag:</h3>
+</div>
+<div class="modal-body">
+    <div discourse-node-search-form ng-model='vm.tagTyped' on-select="vm.selectTag(item)" on-submit="vm.selectTag(items)" search-nodes='vm.searchTags(term)' icon-class="fa fa-search"></div>
+    <span ng-repeat="tag in vm.selectedTags" ng-class="vm.nodeInfo.css" class="{{vm.nodeInfo.tagCss(tag)}}" ng-bind="tag.title"></span>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-primary" ng-click="vm.ok(vm.selectedTags)">OK</button>
+    <button class="btn btn-warning" ng-click="vm.cancel()">Cancel</button>
+</div>
