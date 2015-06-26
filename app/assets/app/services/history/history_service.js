@@ -9,7 +9,9 @@ function HistoryService(Post, DiscourseNode, store) {
 
     this.activeViewIndex = historyStore.get("activeViewIndex") || 0;
     this.visited = [];
+    storeVisited();
     _.each(historyStore.get("visited"), restoreNode);
+
     this.add = addNode;
     this.remove = removeNode;
     this.changeActiveView = changeActiveView;
