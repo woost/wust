@@ -47,8 +47,6 @@ lazy val wust = (project in file(".")).settings(
     "org.atmosphere" % "atmosphere-play" % "2.1.2",
     "org.webjars.bower" % "atmosphere" % "2.2.7",
     // database
-    "com.github.renesca" %% "renesca" % "0.3.0",
-    "com.github.renesca" %% "renesca-magic" % "0.3.0",
     "commons-codec" % "commons-codec" % "1.10" // for base64 encoding of uuids
   ),
   addCompilerPlugin("org.scalamacros" % "paradise" % paradiseVersion cross CrossVersion.full),
@@ -65,7 +63,24 @@ lazy val wust = (project in file(".")).settings(
   includeFilter in cssCompress := (includeFilter in cssCompress).value && new SimpleFileFilter(f => f.getName.contains("app")),
   scalacOptions ++= scalacOpts
 ).
-  enablePlugins(PlayScala, SbtWeb)
+  enablePlugins(PlayScala, SbtWeb).
+  dependsOn(schema).
+  aggregate(schema)
+
+lazy val schema = (project in file("schema")).
+  settings(
+    scalaVersion := scalaV,
+    scalacOptions ++= scalacOpts,
+    libraryDependencies ++= Seq(
+      "com.github.renesca" %% "renesca" % "0.3.0",
+      "com.github.renesca" %% "renesca-magic" % "0.3.0",
+      // for external inheritance and default value code
+      "com.mohiva" %% "play-silhouette" % "2.0"
+    ),
+    addCompilerPlugin("org.scalamacros" % "paradise" % paradiseVersion cross CrossVersion.full)
+  )
+
+
 
 // lazy val scalajs = (project in file("scalajs")).
 //   settings(
