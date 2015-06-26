@@ -25,6 +25,8 @@ object GraphFormat {
 
     implicit def tagWrites = new Writes[Tag] {
       def writes(tag: Tag) = JsObject(Seq(
+        ("id", JsString(tag.uuid)),
+        ("label", JsString(tag.label)),
         ("title", JsString(tag.title.getOrElse(""))),
         ("description", JsString(tag.description)),
         ("isType", JsBoolean(tag.isType))

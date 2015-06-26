@@ -98,7 +98,7 @@ object Database {
 
   //TODO: merge with previous
   def connectNodes(discourse: Discourse, start: User, factory: Votes.type, end: Categorizes, weight: Long): (User, Categorizes) = {
-    discourse.add(factory.merge(start, end, weight = weight))
+    discourse.add(factory.merge(start, end, weight = weight, onMatch = Set("weight")))
     db.persistChanges(discourse.graph)
     (start, end)
   }
