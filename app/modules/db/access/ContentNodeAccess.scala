@@ -2,9 +2,7 @@ package modules.db.access
 
 import formatters.json.RequestFormat._
 import model.WustSchema._
-import modules.db.Database._
-import modules.db._
-import modules.live.Broadcaster
+import modules.db.Database.db
 import modules.requests._
 import play.api.libs.json.JsValue
 import renesca.parameter.implicits._
@@ -51,7 +49,7 @@ class ContentNodeAccess[NODE <: ContentNode](override val factory: ContentNodeFa
     val node = factory.matchesContentNode(uuid = Some(uuid), matches = Set("uuid"))
     if(nodeAdd.title.isDefined) {
       if(node.title.get.isEmpty())
-        node.title = None;
+        node.title = None
       else
         node.title = nodeAdd.title
     }
