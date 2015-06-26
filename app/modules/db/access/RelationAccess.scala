@@ -101,6 +101,30 @@ END <: UuidNode
   }
 }
 
+trait StartRelationFactoryAccess[
+START <: UuidNode,
+RELATION <: AbstractRelation[START,END],
+END <: UuidNode
+] extends StartRelationAccess[START,RELATION,END] with RelationAndNodeUpdateAcceptor {
+  val factory: AbstractRelationFactory[START, RELATION, END]
+  val nodeFactory: NodeFactory[END]
+
+  def toNodeDefinition = LabelNodeDefinition(nodeFactory)
+  def toNodeDefinition(uuid: String) = FactoryUuidNodeDefinition(nodeFactory, uuid)
+}
+
+trait EndRelationFactoryAccess[
+START <: UuidNode,
+RELATION <: AbstractRelation[START,END],
+END <: UuidNode
+] extends EndRelationAccess[START,RELATION,END] with RelationAndNodeUpdateAcceptor {
+  val factory: AbstractRelationFactory[START, RELATION, END]
+  val nodeFactory: NodeFactory[START]
+
+  def toNodeDefinition = LabelNodeDefinition(nodeFactory)
+  def toNodeDefinition(uuid: String) = FactoryUuidNodeDefinition(nodeFactory, uuid)
+}
+
 class StartRelationRead[
   START <: UuidNode,
   RELATION <: AbstractRelation[START,END],
@@ -108,17 +132,24 @@ class StartRelationRead[
 ] (
   val factory: AbstractRelationFactory[START, RELATION, END],
   val nodeFactory: NodeFactory[END]
-) extends StartRelationAccess[START,RELATION,END] with RelationAndNodeUpdateAcceptor {
-
-  // TODO: why do we have a nodefactory here?!, it should suffice to have a set
-  // of labels...also we should use renesca matches instead of
-  // nodedefinition/relationsdefinitions
-
-  def toNodeDefinition = LabelNodeDefinition(nodeFactory)
-  def toNodeDefinition(uuid: String) = FactoryUuidNodeDefinition(nodeFactory, uuid)
+) extends StartRelationFactoryAccess[START,RELATION,END] with RelationAndNodeUpdateAcceptor {
 
   override def read(baseDef: FixedNodeDefinition[START]) = {
     Left(startConnectedDiscourseNodes(RelationDefinition(baseDef, factory, toNodeDefinition)))
+  }
+}
+
+class EndRelationRead[
+START <: UuidNode,
+RELATION <: AbstractRelation[START,END],
+END <: UuidNode
+](
+  val factory: AbstractRelationFactory[START, RELATION, END],
+  val nodeFactory: NodeFactory[START]
+  ) extends EndRelationFactoryAccess[START,RELATION,END] with RelationAndNodeUpdateAcceptor {
+
+  override def read(baseDef: FixedNodeDefinition[END]) = {
+    Left(endConnectedDiscourseNodes(RelationDefinition(toNodeDefinition, factory, baseDef)))
   }
 }
 
@@ -143,23 +174,6 @@ class StartRelationReadDelete[
     disconnectNodes(relationDefinition)
     Broadcaster.broadcastStartHyperDisconnect(relationDefinition)
     Left(true)
-  }
-}
-
-class EndRelationRead[
-  START <: UuidNode,
-  RELATION <: AbstractRelation[START,END],
-  END <: UuidNode
-](
-  val factory: AbstractRelationFactory[START, RELATION, END],
-  val nodeFactory: NodeFactory[START]
-) extends EndRelationAccess[START,RELATION,END] with RelationAndNodeUpdateAcceptor {
-
-  def toNodeDefinition = LabelNodeDefinition(nodeFactory)
-  def toNodeDefinition(uuid: String) = FactoryUuidNodeDefinition(nodeFactory, uuid)
-
-  override def read(baseDef: FixedNodeDefinition[END]) = {
-    Left(endConnectedDiscourseNodes(RelationDefinition(toNodeDefinition, factory, baseDef)))
   }
 }
 
