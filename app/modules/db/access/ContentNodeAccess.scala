@@ -12,28 +12,24 @@ import renesca.parameter.implicits._
 class ContentNodeWrite[NODE <: ContentNode](override val factory: ContentNodeFactory[NODE]) extends NodeReadDelete(factory) {
   protected def createNode(discourse: Discourse, user: User, nodeAdd: NodeAddRequestBase): NODE = {
     val node = factory.createContentNode(title = nodeAdd.title, description = nodeAdd.description)
-    val contribution = Contributes.create(user, node)
+    val contribution = Created.create(user, node)
     discourse.add(node, contribution)
     node
   }
 
   protected def storeNode(discourse: Discourse, user: User, node: NODE): Option[String] = {
-    val failure = db.transaction { tx =>
+    db.transaction { tx =>
       tx.persistChanges(discourse)
     }
-
-    if(failure.isEmpty) {
-      Broadcaster.broadcastConnect(user, RelationDefinition(ConcreteFactoryNodeDefinition(User), Contributes, ConcreteFactoryNodeDefinition(factory)), node)
-    }
-
-    failure
   }
 
   protected def storeCreateNode(discourse: Discourse, user: User, node: NODE): Option[String] = {
     val failure = storeNode(discourse, user, node)
-    if(failure.isEmpty) {
-      Broadcaster.broadcastCreate(factory, node)
-    }
+    //TODO: broadcasts
+    // if(failure.isEmpty) {
+      //Broadcaster.broadcastCreate(factory, node)
+      // Broadcaster.broadcastConnect(user, RelationDefinition(ConcreteFactoryNodeDefinition(User), Created, ConcreteFactoryNodeDefinition(factory)), node)
+    // }
 
     failure
   }
@@ -64,7 +60,7 @@ class ContentNodeAccess[NODE <: ContentNode](override val factory: ContentNodeFa
       node.description = nodeAdd.description.get
 
     if(nodeAdd.title.isDefined || nodeAdd.description.isDefined) {
-      val contribution = Contributes.create(user, node)
+      val contribution = Updated.create(user, node)
       discourse.add(contribution)
     }
 
@@ -73,9 +69,11 @@ class ContentNodeAccess[NODE <: ContentNode](override val factory: ContentNodeFa
 
   protected def storeEditNode(discourse: Discourse, user: User, node: NODE): Option[String] = {
     val failure = storeNode(discourse, user, node)
-    if(failure.isEmpty) {
-      Broadcaster.broadcastEdit(factory, node)
-    }
+    // TODO: broadcasts
+    // if(failure.isEmpty) {
+      // Broadcaster.broadcastEdit(factory, node)
+      // Broadcaster.broadcastConnect(user, RelationDefinition(ConcreteFactoryNodeDefinition(User), Created, ConcreteFactoryNodeDefinition(factory)), node)
+    // }
 
     failure
   }
@@ -102,8 +100,8 @@ class PostAccess extends ContentNodeAccess[Post](Post) {
 
   private def handleAddedTags(discourse: Discourse, user: User, node: Post) {
     discourse.tags.foreach(tag => {
-      val categorizes = CategorizesPost.create(tag, node)
-      val action = TaggingAction.create(user, categorizes)
+      val categorizes = Categorizes.merge(tag, node)
+      val action = TaggingAction.merge(user, categorizes)
       discourse.add(categorizes, action)
       //TODO: broadcasts...
     })

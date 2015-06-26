@@ -1,7 +1,7 @@
 package modules.db
 
 import common.Helpers
-import model.WustSchema.{ContentRelationFactory, UuidNode}
+import model.WustSchema.{Votes, ContentRelationFactory, UuidNode}
 import renesca.parameter.ParameterMap
 import renesca.parameter.implicits._
 import renesca.schema._
@@ -10,7 +10,9 @@ package object types {
 
   type UuidHyperNodeDefinitionBase[NODE <: Node] = HyperNodeDefinition[_, _, _, _ <: UuidNodeDefinition[_], _ <: UuidNodeDefinition[_]] with HyperNodeDefinitionBase[NODE]
 
+  // TODO: assure relationdefinition of specific relation type, see database connectNodes methods...
   type ContentRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _, _, _ <: ContentRelationFactory[START, RELATION, END]]
+  type VotesRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _, _, _ <: Votes.type]
 
   type NodeRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _ <: NodeDefinition[START], _ <: NodeDefinition[END], _]
   type UuidRelationDefinition[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode] = RelationDefinitionBase[START, RELATION, END, _ <: UuidNodeDefinition[START], _ <: UuidNodeDefinition[END], _]

@@ -4,8 +4,7 @@ import formatters.json.RequestFormat._
 import model.WustSchema._
 import modules.db.Database._
 import modules.db.types.UuidHyperNodeDefinitionBase
-import modules.db.{UuidNodeDefinition, FactoryUuidNodeDefinition, ConcreteNodeDefinition, RelationDefinition}
-import modules.live.Broadcaster
+import modules.db.{RelationDefinition, UuidNodeDefinition}
 import modules.requests.ConnectRequest
 import play.api.libs.json.JsValue
 import renesca.schema._
@@ -15,13 +14,13 @@ import renesca.schema._
 //      otherwise we'll get race coniditions
 //TODO: track what the user did here
 class StartContentRelationAccess[
-  START <: UuidNode,
-  RELATION <: AbstractRelation[START,END],
-  END <: UuidNode
+START <: UuidNode,
+RELATION <: AbstractRelation[START, END],
+END <: UuidNode
 ](
-  override val factory: ContentRelationFactory[START,RELATION,END],
+  override val factory: ContentRelationFactory[START, RELATION, END],
   override val nodeFactory: NodeFactory[END]
-) extends StartRelationReadDelete(factory, nodeFactory) {
+  ) extends StartRelationReadDelete(factory, nodeFactory) {
 
   private def fail(uuid: String) = Right(s"Cannot connect Nodes with uuid '$uuid' at StartContentRelation")
 
@@ -30,36 +29,36 @@ class StartContentRelationAccess[
     val relationDefinition = RelationDefinition(baseDef, factory, toNodeDefinition(connect.uuid))
     val resultOpt = connectUuidNodes(relationDefinition)
     resultOpt match {
-      case Some((start,end)) => {
-        Broadcaster.broadcastConnect(start, relationDefinition, end)
+      case Some((start, end)) => {
+        //        Broadcaster.broadcastConnect(start, relationDefinition, end)
         Left(end)
       }
-      case None              => fail(connect.uuid)
+      case None               => fail(connect.uuid)
     }
   }
 
-  override def createHyper(baseDef: UuidHyperNodeDefinitionBase[START with AbstractRelation[_,_]], user: User, json: JsValue) = {
+  override def createHyper(baseDef: UuidHyperNodeDefinitionBase[START with AbstractRelation[_, _]], user: User, json: JsValue) = {
     val connect = json.as[ConnectRequest]
     val relationDefinition = RelationDefinition(baseDef, factory, toNodeDefinition(connect.uuid))
     val resultOpt = startConnectHyperNodes(relationDefinition)
     resultOpt match {
-      case Some((_,end)) => {
-        Broadcaster.broadcastStartHyperConnect(relationDefinition, end)
+      case Some((_, end)) => {
+        //        Broadcaster.broadcastStartHyperConnect(relationDefinition, end)
         Left(end)
       }
-      case None              => fail(connect.uuid)
+      case None           => fail(connect.uuid)
     }
   }
 }
 
-class EndContentRelationAccess [
-  START <: UuidNode,
-  RELATION <: AbstractRelation[START,END],
-  END <: UuidNode
+class EndContentRelationAccess[
+START <: UuidNode,
+RELATION <: AbstractRelation[START, END],
+END <: UuidNode
 ](
-  override val factory: ContentRelationFactory[START,RELATION,END],
+  override val factory: ContentRelationFactory[START, RELATION, END],
   override val nodeFactory: NodeFactory[START]
-) extends EndRelationReadDelete(factory, nodeFactory) {
+  ) extends EndRelationReadDelete(factory, nodeFactory) {
 
   private def fail(uuid: String) = Right(s"Cannot connect Nodes with uuid '$uuid' at EndContentRelation")
 
@@ -68,40 +67,24 @@ class EndContentRelationAccess [
     val relationDefinition = RelationDefinition(toNodeDefinition(connect.uuid), factory, baseDef)
     val resultOpt = connectUuidNodes(relationDefinition)
     resultOpt match {
-      case Some((start,end)) => {
-        Broadcaster.broadcastConnect(start, relationDefinition, end)
+      case Some((start, end)) => {
+        //        Broadcaster.broadcastConnect(start, relationDefinition, end)
         Left(start)
       }
-      case None              => fail(connect.uuid)
+      case None               => fail(connect.uuid)
     }
   }
 
-  override def createHyper(baseDef: UuidHyperNodeDefinitionBase[END with AbstractRelation[_,_]], user: User, json: JsValue) = {
+  override def createHyper(baseDef: UuidHyperNodeDefinitionBase[END with AbstractRelation[_, _]], user: User, json: JsValue) = {
     val connect = json.as[ConnectRequest]
     val relationDefinition = RelationDefinition(toNodeDefinition(connect.uuid), factory, baseDef)
     val resultOpt = endConnectHyperNodes(relationDefinition)
     resultOpt match {
-      case Some((start,_)) => {
-        Broadcaster.broadcastEndHyperConnect(relationDefinition, start)
+      case Some((start, _)) => {
+        //        Broadcaster.broadcastEndHyperConnect(relationDefinition, start)
         Left(start)
       }
-      case None              => fail(connect.uuid)
-    }
-  }
-}
-
-class VotesAccess(
-  override val factory: ContentRelationFactory[User,AbstractRelation[User,Categorizes],Categorizes]
-) extends EndRelationRead(factory, User) {
-  override def createHyper(baseDef: UuidHyperNodeDefinitionBase[Categorizes with AbstractRelation[_,_]], user: User, json: JsValue) = {
-    val relationDefinition = RelationDefinition(toNodeDefinition(user.uuid), factory, baseDef)
-    val resultOpt = endConnectHyperNodes(relationDefinition)
-    resultOpt match {
-      case Some((start,_)) => {
-        Broadcaster.broadcastEndHyperConnect(relationDefinition, start)
-        Left(start)
-      }
-      case None              => Right("Cannot vote")
+      case None             => fail(connect.uuid)
     }
   }
 }

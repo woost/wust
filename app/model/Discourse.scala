@@ -18,7 +18,7 @@ object WustSchema {
   }
 
   // Authentification
-  @Graph trait Auth {List(User, LoginInfo, PasswordInfo) }
+  @Graph trait Auth {Nodes(User, LoginInfo, PasswordInfo) }
   @Node class User extends UuidNode with Identity {
     var name: String
     var email: Option[String]
@@ -43,35 +43,33 @@ object WustSchema {
 
 
   //TODO: rename
-  @Graph trait Discourse {List(User, UserGroup, Post, Tag, Scope, Connects, Inherits) }
+  @Graph trait Discourse {Nodes(User, UserGroup, Post, Tag, Scope) }
   @Relation trait ContentRelation
-  @Node trait ContentNode {//extends Hidable
+  // TODO: ContentNode should be general for anything public
+  @Node trait ContentNode extends UuidNode {//extends Hidable
     var title: Option[String]
     var description: String
   }
-
+  // @Node trait Hidable {
+  //   var visible: Boolean = true
+  // }
 
   // Content
   @Node trait Connectable extends Taggable with UuidNode
   @HyperRelation class Connects(startNode: Connectable, endNode: Connectable) extends Connectable with ContentRelation
   @Node trait Inheritable
   @HyperRelation class Inherits(startNode: Inheritable, endNode: Inheritable) extends ContentRelation
-  // @Node trait Hidable {
-  //   var visible: Boolean = true
-  // }
 
-  @Node class Post extends ContentNode with Connectable with Inheritable with Taggable
+  @Node class Post extends ContentNode with Connectable with Inheritable with Taggable with ScopeChild
 
 
-  // Actions
+  // Action
   @Node trait Action extends UuidNode with Timestamp
   //TODO: store content of action in action
   @HyperRelation class Created(startNode: User, endNode: ContentNode)
   @HyperRelation class Updated(startNode: User, endNode: ContentNode)
   @HyperRelation class Deleted(startNode: User, endNode: ContentNode)
   @Relation class Reviewed(startNode: User, endNode: Action)
-  //TODO: TaggingAction here? was heisst das hier? worum gehts? steht doch
-  //unten...tagging action
   //TODO: multidimesional voting?
 
 
@@ -80,20 +78,21 @@ object WustSchema {
     var isType: Boolean = false
   }
   @Node trait Taggable extends UuidNode
-  @HyperRelation class Categorizes(startNode: Tag, endNode: Taggable) extends ContentRelation
-  @Relation class TaggingAction(startNode: User, endNode: Categorizes) /// HERE
-  @Relation class Votes(startNode: User, endNode: Categorizes)
-
+  // TODO: Categorizes should not inherit from uuidnode
+  @HyperRelation class Categorizes(startNode: Tag, endNode: Taggable) extends ContentRelation with UuidNode
+  @Relation class TaggingAction(startNode: User, endNode: Categorizes)
+  @Relation class Votes(startNode: User, endNode: Categorizes) {
+    val weight: Long
+  }
 
   // Scopes
-  @Node class Scope extends ContentNode with Inheritable with Taggable {
-    var isPrivate: Boolean = false
-  }
+  @Node class Scope extends ContentNode with Inheritable with Taggable
+  @Relation class HasReadAccess(startNode: UserGroup, endNode: Scope)
+  @Relation class HasWriteAccess(startNode: UserGroup, endNode: Scope)
+  @Relation class Owns(startNode: UserGroup, endNode: Scope)
+
   @Node trait ScopeChild extends UuidNode
   @Relation class BelongsTo(startNode: ScopeChild, endNode: Scope)
-  @Relation class Owns(startNode: User, endNode: Scope)
-  //TODO: Node trait ownable?
-  @Relation class WriteAccess(startNode: User, endNode: Scope)
-  //TODO: Node trait  writeaccessable?
 
+  //TODO: Node trait ownable?
 }

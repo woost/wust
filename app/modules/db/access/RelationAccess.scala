@@ -65,6 +65,9 @@ trait EndRelationAccess[
   END <: UuidNode
 ] extends RelationAccess[END,START] with DirectedRelationAccess[START,RELATION,END]
 
+// TODO: AnyRelations should be deprecated or should be restrict to some
+// labels...
+@deprecated("Use strict RelationAccess", since = "renesca-0.3.0")
 class StartAnyRelation[
   START <: UuidNode,
   RELATION <: AbstractRelation[START,END],
@@ -81,6 +84,7 @@ class StartAnyRelation[
   }
 }
 
+@deprecated("Use strict RelationAccess", since = "renesca-0.3.0")
 class EndAnyRelation[
 START <: UuidNode,
 RELATION <: AbstractRelation[START,END],
@@ -105,6 +109,10 @@ class StartRelationRead[
   val factory: AbstractRelationFactory[START, RELATION, END],
   val nodeFactory: NodeFactory[END]
 ) extends StartRelationAccess[START,RELATION,END] with RelationAndNodeUpdateAcceptor {
+
+  // TODO: why do we have a nodefactory here?!, it should suffice to have a set
+  // of labels...also we should use renesca matches instead of
+  // nodedefinition/relationsdefinitions
 
   def toNodeDefinition = LabelNodeDefinition(nodeFactory)
   def toNodeDefinition(uuid: String) = FactoryUuidNodeDefinition(nodeFactory, uuid)

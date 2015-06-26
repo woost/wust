@@ -96,6 +96,13 @@ object Database {
     (start, end)
   }
 
+  //TODO: merge with previous
+  def connectNodes(discourse: Discourse, start: User, factory: Votes.type, end: Categorizes, weight: Long): (User, Categorizes) = {
+    discourse.add(factory.merge(start, end, weight = weight))
+    db.persistChanges(discourse.graph)
+    (start, end)
+  }
+
   def connectUuidNodes[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](relationDefinition: UuidRelationDefinition[START,RELATION,END] with ContentRelationDefinition[START,RELATION,END]): Option[(START,END)] = { import relationDefinition._
     val (discourse, (startOpt,endOpt)) = discourseNodes(startDefinition, endDefinition)
     if (startOpt.isEmpty || endOpt.isEmpty)
@@ -133,6 +140,15 @@ object Database {
       None
     else
       Some(connectNodes(discourse, nodesOpt.get._2, factory, nodesOpt.get._1))
+  }
+
+  //TODO: merge with previous methods...
+  def endConnectHyperNodesToVotes(relationDefinition: NodeAndHyperRelationDefinition[User,Votes,Categorizes] with UuidAndNodeRelationDefinition[User,Votes,Categorizes] with VotesRelationDefinition[User,Votes,Categorizes], weight: Long): Option[(User,Categorizes)] = { import relationDefinition._
+    val (discourse, nodesOpt) = gatherHyperNodesConnector(endDefinition, startDefinition)
+    if (nodesOpt.isEmpty)
+      None
+    else
+      Some(connectNodes(discourse, nodesOpt.get._2, factory, nodesOpt.get._1, weight))
   }
 
   def disconnectNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinition: FixedRelationDefinition[START,RELATION,END]) {

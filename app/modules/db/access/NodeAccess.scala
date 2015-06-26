@@ -23,6 +23,7 @@ trait NodeAccess[NODE <: UuidNode] {
   def toNodeDefinition(uuid: String): UuidNodeDefinition[NODE]
 }
 
+@deprecated("Use strict NodeAccess", since = "renesca-0.3.0")
 class AnyContentNode() extends NodeAccess[ContentNode] {
   val name = "ContentNode"
   val label = None
@@ -71,6 +72,9 @@ class NodeRead[NODE <: UuidNode](val factory: UuidNodeFactory[NODE]) extends Nod
 class NodeReadDelete[NODE <: UuidNode](factory: UuidNodeFactory[NODE]) extends NodeRead(factory) {
   override def delete(uuid: String) = {
     deleteNodes(FactoryUuidNodeDefinition(factory, uuid))
+    // TODO: use matches...
+    // TODO: create Deleted action relation
+    //Broadcaster.broadcastConnect(user, RelationDefinition(ConcreteFactoryNodeDefinition(User), Deleted, ConcreteFactoryNodeDefinition(factory)), node)
     Broadcaster.broadcastDelete(factory, uuid)
     Left(true)
   }

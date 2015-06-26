@@ -8,7 +8,7 @@ import modules.requests._
 object Tags extends Nodes[Tag] {
   lazy val nodeSchema = NodeSchema(routePath, new ContentNodeAccess(Tag),
     Map(
-      "posts" -> StartConnectSchema(new StartRelationRead(CategorizesPost, Post))
+      "posts" -> StartConnectSchema(new StartRelationRead(Categorizes, Post))
     )
   )
 }

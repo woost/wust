@@ -13,6 +13,10 @@ import renesca.schema._
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
+// TODO: rewrite!!
+// TODO: do not use nodedef/relationdef, we dont need them anymore, except for
+// seldom cases...
+// TODO: we want graph updates, not list updates (keep list updates anyhow?)
 object Broadcaster {
   private def jsonChange(changeType: String, data: JsValue, reference: String = "") = JsObject(Seq(
     ("type", JsString(changeType)),

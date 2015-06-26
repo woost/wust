@@ -19,7 +19,7 @@ object ApiNodeFormat {
         ("label", JsString(n.label)),
         ("title", JsString(n.title.getOrElse(""))),
         ("description", JsString(n.description)),
-        ("tags", JsArray(n.rev_categorizesPosts.map(t => JsString(t.title.getOrElse(t.description))).toSeq))
+        ("tags", Json.toJson(n.rev_categorizes))
       )
       case n: Scope => Seq(
         ("label", JsString(n.label)),

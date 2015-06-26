@@ -17,9 +17,11 @@ object Posts extends Nodes[Post] {
         "connects-to" -> StartConnectSchema(new StartContentRelationAccess(Connects, Post)),
         "connects-from" -> EndConnectSchema(new EndContentRelationAccess(Connects, Post))
       )),
-      "tags" -> EndHyperConnectSchema(CategorizesPost, new EndRelationRead(CategorizesPost, Tag), Map(
-        "up" -> EndConnectSchema(new VotesAccess(UpVotes)),
-        "down" -> EndConnectSchema(new VotesAccess(DownVotes))
+      "tags" -> EndHyperConnectSchema(Categorizes, new EndRelationRead(Categorizes, Tag), Map(
+      //TODO: this inconsistent: creation only works for up/down votes separately
+      // whereas reading returns any type of vote on both paths up/down
+        "up" -> EndConnectSchema(new VotesAccess(Votes, 1)),
+        "down" -> EndConnectSchema(new VotesAccess(Votes, -1))
       ))
     )
   )
