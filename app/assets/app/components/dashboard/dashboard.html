@@ -5,6 +5,7 @@
         <div class="stream_list">
             <div class="node_list col-md-4" ng-repeat="stream in vm.streams">
                 <div class="well">
+                    <span ng-repeat="tag in stream.tags" ng-class="vm.nodeInfo.css" class="{{vm.nodeInfo.tagCss(tag)}}" ng-bind="tag.title"></span>
                     <div ng-repeat="post in stream.posts" small-post node="post"></div>
                 </div>
             </div>
