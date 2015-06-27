@@ -101,16 +101,11 @@
 
 .discourse_post_list {
     .drop_post_container.on-drag-enter {
-        background-color: $discourse_post_color;
+        background-color: #008DFF;
+        transition: background-color 0.5s;
     }
-}
-
-.drop_post_container {
-    &.on-drag-hover:after {
-        content: 'Drop';
-        display: block;
-        color: seagreen;
-        font-size: large;
+    .drop_post_container.on-drag-hover {
+        background-color: #73C0FF;
     }
 }
 
