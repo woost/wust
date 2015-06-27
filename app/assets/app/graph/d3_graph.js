@@ -121,7 +121,7 @@ function d3Graph($window, DiscourseNode) {
                 .attr("class", d => d.css)
                 .html(d => d.title);
 
-            let nodeRects = setForeignObjectDimensions(nodeFo, nodeHtml);
+            var nodeRects = setForeignObjectDimensions(nodeFo, nodeHtml);
 
             // control whether tick function should draw
             let drawOnTick = false;
@@ -266,6 +266,10 @@ function d3Graph($window, DiscourseNode) {
                 [width, height] = getElementDimensions(element[0]);
                 svg.attr("width", width);
                 svg.attr("height", height);
+                // if graph was hidden when initialized,
+                // all foreign objects have size 0
+                // this call recalculates the sizes
+                nodeRects = setForeignObjectDimensions(nodeFo, nodeHtml);
                 focusMarkedNodes();
             }
 

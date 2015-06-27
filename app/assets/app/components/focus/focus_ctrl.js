@@ -16,6 +16,13 @@ function FocusCtrl($stateParams, HistoryService, component) {
             this._active = active;
             if (active)
                 HistoryService.changeActiveView(this.index);
+
+            // fire window.resize event to recalculate d3 graph foreignobject dimensions
+            setTimeout( () => {
+                var evt = document.createEvent("UIEvents");
+                evt.initUIEvent("resize", true, false,window,0);
+                window.dispatchEvent(evt);
+            }, 200 );
         }
     }
 
