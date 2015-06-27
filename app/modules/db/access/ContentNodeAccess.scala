@@ -4,7 +4,7 @@ import formatters.json.RequestFormat._
 import model.WustSchema._
 import modules.db.Database.db
 import modules.requests._
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsError, JsSuccess, JsValue}
 import renesca.parameter.implicits._
 
 class ContentNodeWrite[NODE <: ContentNode](override val factory: ContentNodeFactory[NODE]) extends NodeReadDelete(factory) {
@@ -25,22 +25,23 @@ class ContentNodeWrite[NODE <: ContentNode](override val factory: ContentNodeFac
     val failure = storeNode(discourse, user, node)
     //TODO: broadcasts
     // if(failure.isEmpty) {
-      //Broadcaster.broadcastCreate(factory, node)
-      // Broadcaster.broadcastConnect(user, RelationDefinition(ConcreteFactoryNodeDefinition(User), Created, ConcreteFactoryNodeDefinition(factory)), node)
+    //Broadcaster.broadcastCreate(factory, node)
+    // Broadcaster.broadcastConnect(user, RelationDefinition(ConcreteFactoryNodeDefinition(User), Created, ConcreteFactoryNodeDefinition(factory)), node)
     // }
 
     failure
   }
 
   override def create(user: User, json: JsValue): Either[NODE, String] = {
-    val nodeAdd = json.as[NodeAddRequest]
-    val discourse = Discourse.empty
-    val node = createNode(discourse, user, nodeAdd)
+    json.validate[NodeAddRequest].map(request => {
+      val discourse = Discourse.empty
+      val node = createNode(discourse, user, request)
 
-    storeCreateNode(discourse, user, node) match {
-      case Some(err) => Right(s"Cannot create ContentNode with label '${ factory.label }: $err'")
-      case _         => Left(node)
-    }
+      storeCreateNode(discourse, user, node) match {
+        case Some(err) => Right(s"Cannot create ContentNode with label '${ factory.label }: $err'")
+        case _         => Left(node)
+      }
+    }).getOrElse(Right("Error parsing create request"))
   }
 }
 
@@ -48,7 +49,7 @@ class ContentNodeAccess[NODE <: ContentNode](override val factory: ContentNodeFa
   protected def editNode(discourse: Discourse, user: User, uuid: String, nodeAdd: NodeUpdateRequestBase): NODE = {
     val node = factory.matchesContentNode(uuid = Some(uuid), matches = Set("uuid"))
     if(nodeAdd.title.isDefined) {
-      if(node.title.get.isEmpty())
+      if(nodeAdd.title.get.isEmpty)
         node.title = None
       else
         node.title = nodeAdd.title
@@ -69,27 +70,28 @@ class ContentNodeAccess[NODE <: ContentNode](override val factory: ContentNodeFa
     val failure = storeNode(discourse, user, node)
     // TODO: broadcasts
     // if(failure.isEmpty) {
-      // Broadcaster.broadcastEdit(factory, node)
-      // Broadcaster.broadcastConnect(user, RelationDefinition(ConcreteFactoryNodeDefinition(User), Created, ConcreteFactoryNodeDefinition(factory)), node)
+    // Broadcaster.broadcastEdit(factory, node)
+    // Broadcaster.broadcastConnect(user, RelationDefinition(ConcreteFactoryNodeDefinition(User), Created, ConcreteFactoryNodeDefinition(factory)), node)
     // }
 
     failure
   }
 
   override def update(uuid: String, user: User, json: JsValue): Either[NODE, String] = {
-    val nodeAdd = json.as[NodeUpdateRequest]
-    val discourse = Discourse.empty
-    val node = editNode(discourse, user, uuid, nodeAdd)
-    storeEditNode(discourse, user, node) match {
-      case Some(err) => Right(s"Cannot update ContentNode with uuid '$uuid' label '${ factory.label }: $err'")
-      case _         => Left(node)
-    }
+    json.validate[NodeUpdateRequest].map(request => {
+      val discourse = Discourse.empty
+      val node = editNode(discourse, user, uuid, request)
+      storeEditNode(discourse, user, node) match {
+        case Some(err) => Right(s"Cannot update ContentNode with uuid '$uuid' label '${ factory.label }: $err'")
+        case _         => Left(node)
+      }
+    }).getOrElse(Right("Error parsing update request"))
   }
 }
 
 // can add nested tags
 class PostAccess extends ContentNodeAccess[Post](Post) {
-  private def tagDefGraph(addedTags: Seq[String]): Discourse = {
+  private def tagDefGraph(addedTags: List[String]): Discourse = {
     val discourse = Discourse.empty
     val nodes = addedTags.map(tag => Tag.matches(uuid = Some(tag), matches = Set("uuid")))
     discourse.add(nodes: _*)
@@ -107,25 +109,27 @@ class PostAccess extends ContentNodeAccess[Post](Post) {
 
   //TODO: should create/update be nested?
   override def create(user: User, json: JsValue): Either[Post, String] = {
-    val nodeAdd = json.as[TaggedNodeAddRequest]
-    val discourse = tagDefGraph(nodeAdd.addedTags)
+    json.validate[TaggedNodeAddRequest].map(request => {
+      val discourse = tagDefGraph(request.addedTags)
 
-    val node = createNode(discourse, user, nodeAdd)
-    handleAddedTags(discourse, user, node)
-    storeCreateNode(discourse, user, node)
+      val node = createNode(discourse, user, request)
+      handleAddedTags(discourse, user, node)
+      storeCreateNode(discourse, user, node)
 
-    Left(node)
+      Left(node)
+    }).getOrElse(Right("Error parsing create request for post"))
   }
 
   override def update(uuid: String, user: User, json: JsValue): Either[Post, String] = {
-    val nodeAdd = json.as[TaggedNodeUpdateRequest]
-    val discourse = tagDefGraph(nodeAdd.addedTags)
+    json.validate[TaggedNodeUpdateRequest].map(request => {
+      val discourse = tagDefGraph(request.addedTags)
 
-    val node = editNode(discourse, user, uuid, nodeAdd)
-    handleAddedTags(discourse, user, node)
-    storeEditNode(discourse, user, node) match {
-      case Some(err) => Right(s"Cannot update Post with uuid '$uuid' label '${ factory.label }: $err'")
-      case _         => Left(node)
-    }
+      val node = editNode(discourse, user, uuid, request)
+      handleAddedTags(discourse, user, node)
+      storeEditNode(discourse, user, node) match {
+        case Some(err) => Right(s"Cannot update Post with uuid '$uuid' label '${ factory.label }: $err'")
+        case _         => Left(node)
+      }
+    }).getOrElse(Right("Error parsing update request for post"))
   }
 }

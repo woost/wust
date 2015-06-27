@@ -10,5 +10,12 @@
         </li>
     </ul>
 
-    <div discourse-node-list node-model='vm.contributions.model' class="discourse_node_list_vertical"></div>
+    {{vm.contributions}}
+    <ul class="list-group">
+        <div >
+        <li ng-repeat="contribution in vm.contributions" class="list-group-item">
+            <span class="badge" ng-bind="contribution.title"></span>
+            <span small-post node="contribution.data"></span>
+        </li>
+    </ul>
 </div>

@@ -2,51 +2,35 @@ package formatters.json
 
 import modules.requests._
 import play.api.libs.json._
+import play.api.libs.functional.syntax._
 
 object RequestFormat {
-  implicit object NodeAddFormat extends Format[NodeAddRequest] {
-    def reads(json: JsValue) = json match {
-      case JsObject(_) => {
-        JsSuccess(NodeAddRequest((json \ "description").as[String], (json \ "title").as[Option[String]]))
-      }
-      case otherwise   => JsError()
-    }
+  implicit val nodeAddRead = (
+    (__ \ "description").read[String] and
+      (__ \ "title").readNullable[String]
+    )(NodeAddRequest)
 
-    def writes(nodeAdd: NodeAddRequest) = ???
-  }
+  implicit val taggedNodeAddFormat = (
+    (__ \ "description").read[String] and
+      (__ \ "title").readNullable[String] and
+      (__ \ "addedTags").readNullable[List[String]]
+    )(TaggedNodeAddRequest)
 
-  implicit object TaggedNodeAddFormat extends Format[TaggedNodeAddRequest] {
-    def reads(json: JsValue) = json match {
-      case JsObject(_) => {
-        JsSuccess(TaggedNodeAddRequest((json \ "description").as[String], (json \ "title").as[Option[String]], (json \ "addedTags").as[Option[List[String]]].getOrElse(List.empty)))
-      }
-      case otherwise   => JsError()
-    }
+  implicit val nodeUpdateFormat = (
+    (__ \ "description").readNullable[String] and
+      (__ \ "title").readNullable[String]
+    )(NodeUpdateRequest)
 
-    def writes(nodeAdd: TaggedNodeAddRequest) = ???
-  }
+  implicit val taggedNodeUpdateFormat = (
+    (__ \ "description").readNullable[String] and
+      (__ \ "title").readNullable[String] and
+      (__ \ "addedTags").readNullable[List[String]]
+    )(TaggedNodeUpdateRequest)
 
-  implicit object NodeUpdateFormat extends Format[NodeUpdateRequest] {
-    def reads(json: JsValue) = json match {
-      case JsObject(_) => {
-        JsSuccess(NodeUpdateRequest((json \ "description").as[Option[String]], (json \ "title").as[Option[String]]))
-      }
-      case otherwise   => JsError()
-    }
-
-    def writes(nodeAdd: NodeUpdateRequest) = ???
-  }
-
-  implicit object TaggedNodeUpdateFormat extends Format[TaggedNodeUpdateRequest] {
-    def reads(json: JsValue) = json match {
-      case JsObject(_) => {
-        JsSuccess(TaggedNodeUpdateRequest((json \ "description").as[Option[String]], (json \ "title").as[Option[String]], (json \ "addedTags").as[Option[List[String]]].getOrElse(List.empty)))
-      }
-      case otherwise   => JsError()
-    }
-
-    def writes(nodeAdd: TaggedNodeUpdateRequest) = ???
-  }
+  // TODO: why does it not work?
+//  implicit val connectFormat = (
+//    (__ \ "id").read[String]
+//    )(ConnectRequest)
 
   implicit object ConnectFormat extends Format[ConnectRequest] {
     def reads(json: JsValue) = json match {
