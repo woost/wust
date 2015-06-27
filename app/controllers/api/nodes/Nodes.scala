@@ -7,6 +7,7 @@ import model.WustSchema.{User, UuidNode}
 import modules.auth.HeaderEnvironmentModule
 import modules.requests.{NodeSchema, ConnectSchema, HyperConnectSchema}
 import play.api.mvc.Result
+import renesca.schema.Node
 
 trait NodesBase extends NestedResourceRouter with DefaultNestedResourceController with Silhouette[User, JWTAuthenticator] with HeaderEnvironmentModule {
   protected def unauthorized = Unauthorized("Only logged-in users allowed")
@@ -45,5 +46,7 @@ trait NodesBase extends NestedResourceRouter with DefaultNestedResourceControlle
 }
 
 trait Nodes[NODE <: UuidNode] extends ReadableNodes[NODE] with DeletableNodes[NODE] with WritableNodes[NODE] {
-  val nodeSchema: NodeSchema[NODE]
+  val node: (String) => NodeSchema[NODE]
+  // needs to be lazy, otherwise routePath might be not set by the router
+  lazy val nodeSchema = node(routePath)
 }

@@ -5,12 +5,13 @@ import model.WustSchema._
 import modules.requests._
 import play.api.libs.json.Json
 import play.api.mvc.Action
+import renesca.schema.Node
 
 trait ReadableNodes[NODE <: UuidNode] extends NodesBase {
-  protected val nodeSchema: NodeSchema[NODE]
+  def nodeSchema: NodeSchema[NODE]
 
-  private def jsonNode(node: UuidNode) = Ok(Json.toJson(node))
-  private def jsonNodes(nodes: Iterable[_ <: UuidNode]) = Ok(Json.toJson(nodes))
+  private def jsonNode(node: Node) = Ok(Json.toJson(node))
+  private def jsonNodes(nodes: Iterable[Node]) = Ok(Json.toJson(nodes))
 
   override def show(uuid: String) = Action {
     getResult(nodeSchema.op.read(uuid))(jsonNode)
@@ -30,12 +31,12 @@ trait ReadableNodes[NODE <: UuidNode] extends NodesBase {
   override def showNestedMembers(path: String, nestedPath: String, uuid: String, otherUuid: String) = Action {
     val baseNode = nodeSchema.op.toNodeDefinition(uuid)
     getHyperSchema(nodeSchema.connectSchemas, path)({
-      case c@StartHyperConnectSchema(_,_,connectSchemas) =>
+      case c@StartHyperConnectSchema(_, _, connectSchemas) =>
         val hyperRel = c.toNodeDefinition(baseNode, otherUuid)
         getSchema(connectSchemas, nestedPath)(schema =>
           getResult(schema.op.read(hyperRel))(jsonNodes)
         )
-      case c@EndHyperConnectSchema(_,_,connectSchemas) =>
+      case c@EndHyperConnectSchema(_, _, connectSchemas)   =>
         val hyperRel = c.toNodeDefinition(baseNode, otherUuid)
         getSchema(connectSchemas, nestedPath)(schema =>
           getResult(schema.op.read(hyperRel))(jsonNodes)

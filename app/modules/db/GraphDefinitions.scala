@@ -1,14 +1,13 @@
 package modules.db
 
-import common.Helpers
+import model.Helpers
 import model.WustSchema.{Votes, ContentRelationFactory, UuidNode}
+import renesca.graph.Label
 import renesca.parameter.ParameterMap
 import renesca.parameter.implicits._
 import renesca.schema._
 
 package object types {
-
-  type UuidHyperNodeDefinitionBase[NODE <: Node] = HyperNodeDefinition[_, _, _, _ <: UuidNodeDefinition[_], _ <: UuidNodeDefinition[_]] with HyperNodeDefinitionBase[NODE]
 
   // TODO: assure relationdefinition of specific relation type, see database connectNodes methods...
   type ContentRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _, _, _ <: ContentRelationFactory[START, RELATION, END]]
@@ -29,8 +28,6 @@ package object types {
   type FixedAndNodeRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _ <: NodeDefinition[START], _ <: FixedNodeDefinition[END], _]
   type HyperAndNodeRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _ <: HyperNodeDefinitionBase[START], _ <: NodeDefinition[END], _]
   type NodeAndHyperRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _ <: NodeDefinition[START], _ <: HyperNodeDefinitionBase[END], _]
-  type UuidHyperAndNodeRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _ <: UuidHyperNodeDefinitionBase[START], _ <: NodeDefinition[END], _]
-  type NodeAndUuidHyperRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _ <: NodeDefinition[START], _ <: UuidHyperNodeDefinitionBase[END], _]
 
 }
 
@@ -46,6 +43,7 @@ sealed trait NodeDefinition[+NODE <: Node] extends GraphDefinition
 
 sealed trait FactoryNodeDefinition[+NODE <: Node] extends NodeDefinition[NODE] {
   val factory: NodeFactory[NODE]
+  val label = factory.label
 }
 
 sealed trait FixedNodeDefinition[+NODE <: Node] extends NodeDefinition[NODE]
@@ -54,43 +52,52 @@ sealed trait HyperNodeDefinitionBase[+NODE <: Node] extends FixedNodeDefinition[
 
 sealed trait UuidNodeDefinition[+NODE <: UuidNode] extends FixedNodeDefinition[NODE] {
   val uuid: String
-  val uuidVariable = randomVariable //TODO: rename
+  val uuidVariable = randomVariable
   override def parameterMap = Map(uuidVariable -> uuid)
+}
+
+sealed trait LabelledUuidNodeDefinition[+NODE <: UuidNode] extends UuidNodeDefinition[NODE] {
+  val label: Label
+
+  def toQuery = s"($name: `${ label }` {uuid: {$uuidVariable}})"
+}
+
+sealed trait LabelledNodeDefinition[+NODE <: Node] extends FixedNodeDefinition[NODE] {
+  val label: Label
+
+  def toQuery = s"($name: `${ label }`)"
 }
 
 case class FactoryUuidNodeDefinition[+NODE <: UuidNode](
   factory: NodeFactory[NODE],
   uuid: String
-  ) extends UuidNodeDefinition[NODE] with FactoryNodeDefinition[NODE] {
+  ) extends LabelledUuidNodeDefinition[NODE] with FactoryNodeDefinition[NODE]
 
-  def toQuery = s"($name: `${ factory.label }` {uuid: {$uuidVariable}})"
-}
-
-case class ConcreteFactoryNodeDefinition[+NODE <: UuidNode](
+case class ConcreteFactoryNodeDefinition[+NODE <: Node](
   factory: NodeFactory[NODE]
-  ) extends FactoryNodeDefinition[NODE] {
-  def toQuery = s"($name: `${ factory.label }`)"
-}
+  ) extends LabelledNodeDefinition[NODE] with FactoryNodeDefinition[NODE]
 
 case class ConcreteNodeDefinition[+NODE <: UuidNode](
   node: NODE
-  ) extends UuidNodeDefinition[NODE] {
-  val uuid = node.uuid
+  ) extends LabelledUuidNodeDefinition[NODE] {
 
-  def toQuery = s"($name: `${ node.label }` {uuid: {$uuidVariable}})"
+  val uuid = node.uuid
+  val label = node.label
 }
+
+case class LabelUuidNodeDefinition[+NODE <: UuidNode](
+  label: Label,
+  uuid: String
+  ) extends LabelledUuidNodeDefinition[NODE]
+
+case class LabelNodeDefinition[+NODE <: Node](
+  label: Label) extends LabelledNodeDefinition[NODE]
 
 case class AnyUuidNodeDefinition[+NODE <: UuidNode](
   uuid: String
   ) extends UuidNodeDefinition[NODE] {
 
-  def toQuery = s"($name {uuid: {$uuidVariable}})"
-}
-
-case class LabelNodeDefinition[+NODE <: Node](
-  factory: NodeFactory[NODE]) extends NodeDefinition[NODE] {
-
-  def toQuery = s"($name: `${ factory.label }`)"
+  override def toQuery = s"($name {uuid: {$uuidVariable}})"
 }
 
 case class AnyNodeDefinition[+NODE <: Node]() extends NodeDefinition[NODE] {
@@ -133,9 +140,9 @@ END <: Node,
 // TODO: allow hypernodedefinitions with unfixed nodedefinitions as start and end node.
 // -> should be enforced with a typealias FixedHyperNodeDefinition
 case class HyperNodeDefinition[
-START <: UuidNode,
+START <: Node,
 RELATION <: AbstractRelation[START, END] with Node,
-END <: UuidNode,
+END <: Node,
 STARTDEF <: FixedNodeDefinition[START],
 ENDDEF <: FixedNodeDefinition[END]
 ](

@@ -1,11 +1,9 @@
-package common
+package model
 
 import java.nio.ByteBuffer
 import org.apache.commons.codec.binary.Base64
 
 object Helpers {
-
-  def compose[A, B, C](f: PartialFunction[A, B], g: PartialFunction[B, C]): PartialFunction[A, C] = Function.unlift(f.lift(_).flatMap(g.lift))
 
   def uuidBase64 = {
     val uuid = java.util.UUID.randomUUID

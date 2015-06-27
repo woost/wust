@@ -16,20 +16,7 @@ class ContentNodeWrite[NODE <: ContentNode](override val factory: ContentNodeFac
   }
 
   protected def storeNode(discourse: Discourse, user: User, node: NODE): Option[String] = {
-    db.transaction { tx =>
-      tx.persistChanges(discourse)
-    }
-  }
-
-  protected def storeCreateNode(discourse: Discourse, user: User, node: NODE): Option[String] = {
-    val failure = storeNode(discourse, user, node)
-    //TODO: broadcasts
-    // if(failure.isEmpty) {
-    //Broadcaster.broadcastCreate(factory, node)
-    // Broadcaster.broadcastConnect(user, RelationDefinition(ConcreteFactoryNodeDefinition(User), Created, ConcreteFactoryNodeDefinition(factory)), node)
-    // }
-
-    failure
+    db.transaction(_.persistChanges(discourse))
   }
 
   override def create(user: User, json: JsValue): Either[NODE, String] = {
@@ -37,12 +24,16 @@ class ContentNodeWrite[NODE <: ContentNode](override val factory: ContentNodeFac
       val discourse = Discourse.empty
       val node = createNode(discourse, user, request)
 
-      storeCreateNode(discourse, user, node) match {
+      storeNode(discourse, user, node) match {
         case Some(err) => Right(s"Cannot create ContentNode with label '${ factory.label }: $err'")
         case _         => Left(node)
       }
     }).getOrElse(Right("Error parsing create request"))
   }
+}
+
+object ContentNodeWrite {
+  def apply[NODE <: ContentNode](factory: ContentNodeFactory[NODE]) = new ContentNodeWrite(factory)
 }
 
 class ContentNodeAccess[NODE <: ContentNode](override val factory: ContentNodeFactory[NODE]) extends ContentNodeWrite(factory) {
@@ -66,27 +57,20 @@ class ContentNodeAccess[NODE <: ContentNode](override val factory: ContentNodeFa
     node
   }
 
-  protected def storeEditNode(discourse: Discourse, user: User, node: NODE): Option[String] = {
-    val failure = storeNode(discourse, user, node)
-    // TODO: broadcasts
-    // if(failure.isEmpty) {
-    // Broadcaster.broadcastEdit(factory, node)
-    // Broadcaster.broadcastConnect(user, RelationDefinition(ConcreteFactoryNodeDefinition(User), Created, ConcreteFactoryNodeDefinition(factory)), node)
-    // }
-
-    failure
-  }
-
   override def update(uuid: String, user: User, json: JsValue): Either[NODE, String] = {
     json.validate[NodeUpdateRequest].map(request => {
       val discourse = Discourse.empty
       val node = editNode(discourse, user, uuid, request)
-      storeEditNode(discourse, user, node) match {
+      storeNode(discourse, user, node) match {
         case Some(err) => Right(s"Cannot update ContentNode with uuid '$uuid' label '${ factory.label }: $err'")
         case _         => Left(node)
       }
     }).getOrElse(Right("Error parsing update request"))
   }
+}
+
+object ContentNodeAccess {
+  def apply[NODE <: ContentNode](factory: ContentNodeFactory[NODE]) = new ContentNodeAccess(factory)
 }
 
 // can add nested tags
@@ -103,7 +87,6 @@ class PostAccess extends ContentNodeAccess[Post](Post) {
       val categorizes = Categorizes.merge(tag, node)
       val action = TaggingAction.merge(user, categorizes)
       discourse.add(categorizes, action)
-      //TODO: broadcasts...
     })
   }
 
@@ -114,7 +97,7 @@ class PostAccess extends ContentNodeAccess[Post](Post) {
 
       val node = createNode(discourse, user, request)
       handleAddedTags(discourse, user, node)
-      storeCreateNode(discourse, user, node)
+      storeNode(discourse, user, node)
 
       Left(node)
     }).getOrElse(Right("Error parsing create request for post"))
@@ -126,10 +109,14 @@ class PostAccess extends ContentNodeAccess[Post](Post) {
 
       val node = editNode(discourse, user, uuid, request)
       handleAddedTags(discourse, user, node)
-      storeEditNode(discourse, user, node) match {
+      storeNode(discourse, user, node) match {
         case Some(err) => Right(s"Cannot update Post with uuid '$uuid' label '${ factory.label }: $err'")
         case _         => Left(node)
       }
     }).getOrElse(Right("Error parsing update request for post"))
   }
+}
+
+object PostAccess {
+  def apply = new PostAccess
 }

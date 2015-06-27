@@ -7,7 +7,7 @@ import play.api.libs.json._
 import play.api.mvc.Action
 
 trait DeletableNodes[NODE <: UuidNode] extends NodesBase {
-  protected val nodeSchema: NodeSchema[NODE]
+  def nodeSchema: NodeSchema[NODE]
 
   private def deleteResult(deleted: Boolean) = if (deleted)
       Ok(JsObject(Seq()))

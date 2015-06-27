@@ -8,7 +8,7 @@ import play.api.mvc.Action
 
 trait WritableNodes[NODE <: UuidNode] extends NodesBase {
   //TODO: use transactions instead of db
-  protected val nodeSchema: NodeSchema[NODE]
+  def nodeSchema: NodeSchema[NODE]
 
   private def jsonNode(node: UuidNode) = Ok(Json.toJson(node))
 
@@ -30,9 +30,8 @@ trait WritableNodes[NODE <: UuidNode] extends NodesBase {
   override def connectMember(path: String, uuid: String) = UserAwareAction(parse.json) { request =>
     getUser(request.identity)(user => {
       val connect = request.body
-      val baseNode = nodeSchema.op.toNodeDefinition(uuid)
       getSchema(nodeSchema.connectSchemas, path)(connectSchema => {
-        getResult(connectSchema.op.create(baseNode, user, connect))(jsonNode)
+        getResult(connectSchema.op.create(uuid, user, connect))(jsonNode)
       })
     })
   }
@@ -42,12 +41,12 @@ trait WritableNodes[NODE <: UuidNode] extends NodesBase {
       val connect = request.body
       val baseNode = nodeSchema.op.toNodeDefinition(uuid)
       getHyperSchema(nodeSchema.connectSchemas, path)({
-        case c@StartHyperConnectSchema(_,_,connectSchemas)  =>
+        case c@StartHyperConnectSchema(_, _, connectSchemas) =>
           val hyperRel = c.toNodeDefinition(baseNode, otherUuid)
           getSchema(connectSchemas, nestedPath)(schema =>
             getResult(schema.op.createHyper(hyperRel, user, connect))(jsonNode)
           )
-        case c@EndHyperConnectSchema(_, _, connectSchemas) =>
+        case c@EndHyperConnectSchema(_, _, connectSchemas)   =>
           val hyperRel = c.toNodeDefinition(baseNode, otherUuid)
           getSchema(connectSchemas, nestedPath)(schema =>
             getResult(schema.op.createHyper(hyperRel, user, connect))(jsonNode)

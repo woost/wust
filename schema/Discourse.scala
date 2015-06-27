@@ -1,7 +1,6 @@
 package model
 
 import com.mohiva.play.silhouette.api.Identity
-import common.Helpers
 import renesca.schema.macros
 
 @macros.GraphSchema
@@ -13,9 +12,12 @@ object WustSchema {
   @Node trait UuidNode {
     val uuid: String = Helpers.uuidBase64
   }
+
   @Node trait Timestamp {
     val timestamp: Long = System.currentTimeMillis
   }
+
+  @Relation trait Co
 
   // Authentification
   @Graph trait Auth {Nodes(User, LoginInfo, PasswordInfo) }
@@ -45,6 +47,8 @@ object WustSchema {
   //TODO: rename
   @Graph trait Discourse {Nodes(User, UserGroup, Post, Tag, Scope) }
   @Relation trait ContentRelation
+  @Node trait HyperNode extends UuidNode
+  @Relation trait HyperConnection
   // TODO: ContentNode should be general for anything public
   @Node trait ContentNode extends UuidNode {//extends Hidable
     var title: Option[String]
@@ -55,20 +59,20 @@ object WustSchema {
   // }
 
   // Content
-  @Node trait Connectable extends Taggable with UuidNode
-  @HyperRelation class Connects(startNode: Connectable, endNode: Connectable) extends Connectable with ContentRelation
+  @Node trait Connectable extends UuidNode with Taggable
+  @HyperRelation class Connects(startNode: Connectable, endNode: Connectable) extends Connectable with ContentRelation with HyperConnection with HyperNode
   @Node trait Inheritable
-  @HyperRelation class Inherits(startNode: Inheritable, endNode: Inheritable) extends ContentRelation
+  @HyperRelation class Inherits(startNode: Inheritable, endNode: Inheritable) extends ContentRelation with HyperConnection with HyperNode
 
-  @Node class Post extends ContentNode with Connectable with Inheritable with Taggable with ScopeChild
+  @Node class Post extends ContentNode with Connectable with Inheritable with ScopeChild with Taggable
 
 
   // Action
-  @Node trait Action extends UuidNode with Timestamp
+  @Node trait Action extends Timestamp
   //TODO: store content of action in action
-  @HyperRelation class Created(startNode: User, endNode: ContentNode)
-  @HyperRelation class Updated(startNode: User, endNode: ContentNode)
-  @HyperRelation class Deleted(startNode: User, endNode: ContentNode)
+  @HyperRelation class Created(startNode: User, endNode: ContentNode) extends Action
+  @HyperRelation class Updated(startNode: User, endNode: ContentNode) extends Action
+  @HyperRelation class Deleted(startNode: User, endNode: ContentNode) extends Action
   @Relation class Reviewed(startNode: User, endNode: Action)
   //TODO: multidimesional voting?
 
@@ -78,8 +82,7 @@ object WustSchema {
     var isType: Boolean = false
   }
   @Node trait Taggable extends UuidNode
-  // TODO: Categorizes should not inherit from uuidnode
-  @HyperRelation class Categorizes(startNode: Tag, endNode: Taggable) extends ContentRelation with UuidNode
+  @HyperRelation class Categorizes(startNode: Tag, endNode: Taggable) extends ContentRelation with HyperConnection with HyperNode
   @Relation class TaggingAction(startNode: User, endNode: Categorizes)
   @Relation class Votes(startNode: User, endNode: Categorizes) {
     val weight: Long
