@@ -1,11 +1,11 @@
 angular.module("wust.components").controller("DashboardCtrl", DashboardCtrl);
 
-DashboardCtrl.$inject = ["$scope", "$state", "$modal", "Tag", "DiscourseNode"];
+DashboardCtrl.$inject = ["$scope", "$state", "$modal", "Tag", "DiscourseNode", "StreamService"];
 
-function DashboardCtrl($scope, $state, $modal, Tag, DiscourseNode) {
+function DashboardCtrl($scope, $state, $modal, Tag, DiscourseNode, StreamService) {
     let vm = this;
     vm.nodeInfo = DiscourseNode.Tag;
-    vm.streams = [];
+    vm.streams = StreamService.streams;
     vm.open = open;
 
     function open(size) {
@@ -21,15 +21,8 @@ function DashboardCtrl($scope, $state, $modal, Tag, DiscourseNode) {
             }
         });
 
-        modalInstance.result.then(function(selectedItems) {
-            vm.streams.push({
-                "tags": selectedItems,
-                //TODO: search posts with all tags anstead of only first one
-                //TODO: persist streams
-                "posts": Tag.$buildRaw(selectedItems[0]).posts.$search()
-            });
-        }, function() {
-            console.log("Modal dismissed at: " + new Date());
-        });
+        modalInstance.result.then(selectedItems => {
+            StreamService.push(selectedItems);
+        }, () => console.log("Modal dismissed at: " + new Date()));
     }
 }
