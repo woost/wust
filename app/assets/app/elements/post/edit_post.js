@@ -31,10 +31,12 @@ function editPostCtrl(DiscourseNode) {
             onLoad: onEditorLoad,
             onBlur: onEditorBlur,
             advanced: {
+                highlightActiveLine: false,
                 printMarginColumn: false,
-                enableSnippets: true,
-                enableBasicAutocompletion: true,
-                enableLiveAutocompletion: true
+                showPrintMargin: false,
+                enableSnippets: false,
+                enableBasicAutocompletion: false,
+                enableLiveAutocompletion: false
             }
         }
     };
@@ -44,7 +46,7 @@ function editPostCtrl(DiscourseNode) {
     }
 
     function onEditorLoad(editor) {
-        editor.setKeyboardHandler("ace/keyboard/vim");
+        // editor.setKeyboardHandler("ace/keyboard/vim");
         editor.$blockScrolling = Infinity;
     }
 }
