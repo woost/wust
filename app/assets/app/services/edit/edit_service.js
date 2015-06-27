@@ -9,15 +9,15 @@ function EditService(Post, HistoryService, store) {
     class Session {
         constructor(other) {
             this.apply(other);
+            this.tags = angular.copy(other.tags) || [];
         }
 
         apply({
-            id, title, description, tags, addedTags, original
+            id, title, description, addedTags, original
         }) {
             this.id = id;
             this.title = title || "";
             this.description = description || "";
-            this.tags = angular.copy(tags) || [];
             this.addedTags = addedTags || [];
             this.original = original || {
                 title: this.title,
@@ -47,7 +47,8 @@ function EditService(Post, HistoryService, store) {
             let message = model.id === undefined ? "Added new node" : "Updated now";
             Post.$buildRaw(model).$update(dirtyModel).$then(data => {
                 humane.success(message);
-                //this.apply(data);
+                this.apply(data);
+                storeStack();
             });
         }
 
@@ -58,9 +59,10 @@ function EditService(Post, HistoryService, store) {
             }))
                 return;
 
-            tag = _.pick(tag, "id", "title", "description");
-            this.tags.push(tag);
-            this.addedTags.push(tag);
+            let encoded = tag.$encode();
+            this.tags.push(encoded);
+            this.addedTags.push(encoded);
+            storeStack();
         }
 
         onChange() {
