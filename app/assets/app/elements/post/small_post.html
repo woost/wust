@@ -1,5 +1,5 @@
 <span class="small_post_directive">
-    <a ng-href="{{vm.nodeInfo.getHref(vm.node.id)}}" ui-draggable="true" drag="vm.node.$encode ? wm.node.$encode() : vm.node" drag-channel="connect" class="node" ng-class="vm.nodeInfo.css">
+    <a ng-href="{{vm.nodeInfo.getHref(vm.node.id)}}" ui-draggable="true" drag="vm.node.$encode ? wm.node.$encode() : vm.node" drag-channel="{{vm.node.id === undefined ? '' : 'connect'}}" class="node" ng-class="vm.nodeInfo.css">
         {{vm.node.title || (vm.node.description | trim:true:15 | stripMarkdown)}}
     </a>
 </span>
