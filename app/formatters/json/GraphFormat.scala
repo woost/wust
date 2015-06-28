@@ -45,8 +45,8 @@ object GraphFormat {
       case h: HyperRelation[Connectable @unchecked, _, _, _, Connectable @unchecked] =>
         Seq(
           ("hyperEdge", JsBoolean(true)),
-          ("startId", JsString(h.startNode.uuid)),
-          ("endId", JsString(h.endNode.uuid))
+          ("startId", JsString(h.startNodeOpt.map(_.uuid).getOrElse(""))),
+          ("endId", JsString(h.endNodeOpt.map(_.uuid).getOrElse("")))
         )
       case _                                      => Seq.empty
       }))
@@ -58,7 +58,7 @@ object GraphFormat {
     def writes(discourseGraph: Discourse) = {
       JsObject(Seq(
         ("nodes", Json.toJson(discourseGraph.posts ++ discourseGraph.connects)),
-        ("edges", Json.toJson(discourseGraph.connects.flatMap(r => List(r.startRelation.asInstanceOf[Relation[Connectable, Connectable]], r.endRelation.asInstanceOf[Relation[Connectable, Connectable]]))))
+        ("edges", Json.toJson(discourseGraph.connects.flatMap(r => List(r.startRelationOpt, r.endRelationOpt).flatten.map(_.asInstanceOf[Relation[Connectable, Connectable]]))))
       ))
     }
   }
