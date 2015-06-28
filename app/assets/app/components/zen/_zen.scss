@@ -12,11 +12,11 @@
         }
     }
     &.ng-hide-add {
-        @include animation(fadeOutLeft 0.2s);
+        @include animation(fadeOutLeft 0.3s);
         display: block !important;
     }
     &.ng-hide-remove {
-        @include animation(fadeInLeft 0.2s);
+        @include animation(fadeInLeft 0.3s);
         display: block !important;
     }
     &.ng-hide-add.ng-hide-add-active, &.ng-hide-remove {
