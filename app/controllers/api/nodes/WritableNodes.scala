@@ -39,8 +39,8 @@ trait WritableNodes[NODE <: UuidNode] extends NodesBase {
   override def connectNestedMember(path: String, nestedPath: String, uuid: String, otherUuid: String) = UserAwareAction(parse.json) { request =>
     getUser(request.identity)(user => {
       val connect = request.body
-      getNestedSchema(nodeSchema.connectSchemas, path, nestedPath)(schema =>
-          if(schema.reverse)
+      getNestedSchema(nodeSchema.connectSchemas, path, nestedPath)((hyper, schema) =>
+          if(hyper.reverse)
             getResult(schema.op.createHyper(otherUuid, uuid, user, connect))(jsonNode)
           else
             getResult(schema.op.createHyper(uuid, otherUuid, user, connect))(jsonNode)

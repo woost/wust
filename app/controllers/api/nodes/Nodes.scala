@@ -37,9 +37,9 @@ trait NodesBase extends NestedResourceRouter with DefaultNestedResourceControlle
     }
   }
 
-  protected def getNestedSchema[NODE <: UuidNode](schemas: Map[String,_ <: ConnectSchema[NODE]], path: String, nestedPath: String)(handler: ConnectSchema[_] => Result) = {
+  protected def getNestedSchema[NODE <: UuidNode](schemas: Map[String,_ <: ConnectSchema[NODE]], path: String, nestedPath: String)(handler: (ConnectSchema[NODE], ConnectSchema[_]) => Result) = {
     getHyperSchema(schemas, path) (c =>
-      getSchemaInHyper(c.connectSchemas, nestedPath)(handler)
+      getSchemaInHyper(c.connectSchemas, nestedPath)(handler(c,_))
     )
   }
 
