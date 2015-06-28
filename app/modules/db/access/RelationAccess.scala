@@ -12,7 +12,7 @@ trait RelationAccess[-NODE <: UuidNode, +OTHER <: UuidNode] {
   def delete(baseDef: FixedNodeDefinition[NODE], uuid: String): Either[Boolean, String] = Right("No delete access on Relation")
   def deleteHyper(baseDef: HyperNodeDefinitionBase[NODE with AbstractRelation[_, _]], uuid: String): Either[Boolean, String] = Right("No delete access on HyperRelation")
   def create(uuid: String, user: User, json: JsValue): Either[OTHER, String] = Right("No create access on Relation")
-  def createHyper(baseDef: HyperNodeDefinitionBase[NODE with AbstractRelation[_, _]], user: User, json: JsValue): Either[OTHER, String] = Right("No create access on HyperRelation")
+  def createHyper(startUuid: String, endUuid: String, user: User, json: JsValue): Either[OTHER, String] = Right("No create access on HyperRelation")
 
   def toNodeDefinition: NodeDefinition[OTHER]
   def toNodeDefinition(uuid: String): UuidNodeDefinition[OTHER]

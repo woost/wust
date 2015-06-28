@@ -20,6 +20,13 @@ trait NodesBase extends NestedResourceRouter with DefaultNestedResourceControlle
     }
   }
 
+  protected def getSchemaInHyper(schemas: Map[String,_ <: ConnectSchema[_]], path: String)(handler: ConnectSchema[_] => Result) = {
+    schemas.get(path) match {
+      case Some(schema) => handler(schema)
+      case None         => pathNotFound
+    }
+  }
+
   protected def getHyperSchema[NODE <: UuidNode](schemas: Map[String,_ <: ConnectSchema[NODE]], path: String)(handler: HyperConnectSchema[NODE] => Result) = {
     schemas.get(path) match {
       case Some(schema) => schema match {
@@ -28,6 +35,12 @@ trait NodesBase extends NestedResourceRouter with DefaultNestedResourceControlle
       }
       case None         => pathNotFound
     }
+  }
+
+  protected def getNestedSchema[NODE <: UuidNode](schemas: Map[String,_ <: ConnectSchema[NODE]], path: String, nestedPath: String)(handler: ConnectSchema[_] => Result) = {
+    getHyperSchema(schemas, path) (c =>
+      getSchemaInHyper(c.connectSchemas, nestedPath)(handler)
+    )
   }
 
   protected def getResult[T](result: Either[T,String])(handler: T => Result): Result = {
