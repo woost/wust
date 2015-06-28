@@ -87,7 +87,7 @@ class NodeRead[NODE <: UuidNode](val factory: UuidNodeFactory[NODE]) extends Fac
     discourse.add(node)
     //TODO method for only resolving matches...
     db.transaction(_.persistChanges(discourse)) match {
-      case Some(err) => Right(s"Cannot find node with uuid '$uuid' and label '${factory.label}': $err")
+      case Some(err) => Right(s"Cannot find node with uuid '$uuid'': $err")
       case None => Left(node)
     }
   }

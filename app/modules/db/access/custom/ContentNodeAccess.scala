@@ -26,7 +26,7 @@ class ContentNodeWrite[NODE <: ContentNode](override val factory: ContentNodeFac
       val node = createNode(discourse, user, request)
 
       storeNode(discourse, user, node) match {
-        case Some(err) => Right(s"Cannot create ContentNode with label '${ factory.label }: $err'")
+        case Some(err) => Right(s"Cannot create ContentNode: $err'")
         case _         => Left(node)
       }
     }).getOrElse(Right("Error parsing create request"))
@@ -63,7 +63,7 @@ class ContentNodeAccess[NODE <: ContentNode](override val factory: ContentNodeFa
       val discourse = Discourse.empty
       val node = editNode(discourse, user, uuid, request)
       storeNode(discourse, user, node) match {
-        case Some(err) => Right(s"Cannot update ContentNode with uuid '$uuid' label '${ factory.label }: $err'")
+        case Some(err) => Right(s"Cannot update ContentNode with uuid '$uuid': $err'")
         case _         => Left(node)
       }
     }).getOrElse(Right("Error parsing update request"))
@@ -111,7 +111,7 @@ class PostAccess extends ContentNodeAccess[Post](Post) {
       val node = editNode(discourse, user, uuid, request)
       handleAddedTags(discourse, user, node)
       storeNode(discourse, user, node) match {
-        case Some(err) => Right(s"Cannot update Post with uuid '$uuid' label '${ factory.label }: $err'")
+        case Some(err) => Right(s"Cannot update Post with uuid '$uuid': $err'")
         case _         => Left(node)
       }
     }).getOrElse(Right("Error parsing update request for post"))

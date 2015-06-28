@@ -72,6 +72,8 @@ object WustSchema {
   //TODO: store content of action in action
   @HyperRelation class Created(startNode: User, endNode: ContentNode) extends Action
   @HyperRelation class Updated(startNode: User, endNode: ContentNode) extends Action
+  // TODO: should be a node? as the to be deleted node will deleted and we cannot connect there?
+  // hiding nodes seems like more work.
   @HyperRelation class Deleted(startNode: User, endNode: ContentNode) extends Action
   @Relation class Reviewed(startNode: User, endNode: Action)
   //TODO: multidimesional voting?

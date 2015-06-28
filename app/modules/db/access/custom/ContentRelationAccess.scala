@@ -18,9 +18,6 @@ trait ContentRelationHelper {
   }
 }
 
-//TODO: relations should be created unique
-//      afaik this can only be defined with db constraints,
-//      otherwise we'll get race coniditions
 //TODO: track what the user did here
 class StartContentRelationAccess[
 START <: UuidNode,
