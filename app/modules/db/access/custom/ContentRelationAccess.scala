@@ -146,7 +146,8 @@ END <: UuidNode
       val end = endFactory.matchesUuidNode(uuid = Some(endUuid), matches = Set("uuid"))
       val base = baseFactory.matchesHyperConnection(start, end)
       val node = nodeFactory.matchesUuidNode(uuid = Some(request.uuid), Set("uuid"))
-      val relation = factory.mergeContentRelation(node, base)
+      //TODO: should be merge, but query fails!!!
+      val relation = factory.createContentRelation(node, base)
       discourse.add(base, relation)
       persistRelation(discourse, node)
     })
