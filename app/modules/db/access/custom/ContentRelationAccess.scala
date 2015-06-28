@@ -18,6 +18,10 @@ trait ContentRelationHelper {
   }
 
   protected def fail(uuid: String) = Right(s"Cannot connect Nodes with uuid '$uuid'")
+
+  protected def parseConnect[T](js: JsValue)(handler: ConnectRequest => Either[T, String]): Either[T, String] = {
+    js.validate[ConnectRequest].map(handler).getOrElse(Right("Cannot parse connect request"))
+  }
 }
 
 //TODO: track what the user did here
@@ -31,12 +35,13 @@ END <: UuidNode
   baseFactory: UuidNodeFactory[START]) extends StartRelationReadDelete(factory, nodeFactory) with ContentRelationHelper {
 
   override def create(uuid: String, user: User, json: JsValue) = {
-    val connect = json.as[ConnectRequest]
-    val discourse = Discourse.empty
-    val base = baseFactory.matchesUuidNode(uuid = Some(uuid), matches = Set("uuid"))
-    val node = nodeFactory.matchesUuidNode(uuid = Some(connect.uuid), matches = Set("uuid"))
-    discourse.add(factory.mergeContentRelation(base, node))
-    persistRelation(discourse, node)
+    parseConnect(json)(request => {
+      val discourse = Discourse.empty
+      val base = baseFactory.matchesUuidNode(uuid = Some(uuid), matches = Set("uuid"))
+      val node = nodeFactory.matchesUuidNode(uuid = Some(request.uuid), matches = Set("uuid"))
+      discourse.add(factory.mergeContentRelation(base, node))
+      persistRelation(discourse, node)
+    })
   }
 }
 
@@ -64,17 +69,17 @@ END <: UuidNode
   endFactory: UuidNodeFactory[IEND]
   ) extends StartRelationReadDelete(factory, nodeFactory) with ContentRelationHelper {
 
-  //TODO: use renesca like in create
   override def createHyper(startUuid: String, endUuid: String, user: User, json: JsValue) = {
-    val connect = json.as[ConnectRequest]
-    val discourse = Discourse.empty
-    val start = startFactory.matchesUuidNode(uuid = Some(startUuid), matches = Set("uuid"))
-    val end = endFactory.matchesUuidNode(uuid = Some(endUuid), matches = Set("uuid"))
-    val base = baseFactory.matchesHyperConnection(start, end)
-    val node = nodeFactory.matchesUuidNode(uuid = Some(connect.uuid), matches = Set("uuid"))
-    val relation = factory.mergeContentRelation(base, node)
-    discourse.add(base, relation)
-    persistRelation(discourse, node)
+    parseConnect(json)(request => {
+      val discourse = Discourse.empty
+      val start = startFactory.matchesUuidNode(uuid = Some(startUuid), matches = Set("uuid"))
+      val end = endFactory.matchesUuidNode(uuid = Some(endUuid), matches = Set("uuid"))
+      val base = baseFactory.matchesHyperConnection(start, end)
+      val node = nodeFactory.matchesUuidNode(uuid = Some(request.uuid), matches = Set("uuid"))
+      val relation = factory.mergeContentRelation(base, node)
+      discourse.add(base, relation)
+      persistRelation(discourse, node)
+    })
   }
 }
 
@@ -100,12 +105,13 @@ END <: UuidNode
   baseFactory: UuidNodeFactory[END]) extends EndRelationReadDelete(factory, nodeFactory) with ContentRelationHelper {
 
   override def create(uuid: String, user: User, json: JsValue) = {
-    val connect = json.as[ConnectRequest]
-    val discourse = Discourse.empty
-    val base = baseFactory.matchesUuidNode(uuid = Some(uuid), matches = Set("uuid"))
-    val node = nodeFactory.matchesUuidNode(uuid = Some(connect.uuid), matches = Set("uuid"))
-    discourse.add(factory.mergeContentRelation(node, base))
-    persistRelation(discourse, node)
+    parseConnect(json)(request => {
+      val discourse = Discourse.empty
+      val base = baseFactory.matchesUuidNode(uuid = Some(uuid), matches = Set("uuid"))
+      val node = nodeFactory.matchesUuidNode(uuid = Some(request.uuid), matches = Set("uuid"))
+      discourse.add(factory.mergeContentRelation(node, base))
+      persistRelation(discourse, node)
+    })
   }
 }
 
@@ -134,15 +140,16 @@ END <: UuidNode
   ) extends EndRelationReadDelete(factory, nodeFactory) with ContentRelationHelper {
 
   override def createHyper(startUuid: String, endUuid: String, user: User, json: JsValue) = {
-    val connect = json.as[ConnectRequest]
-    val discourse = Discourse.empty
-    val start = startFactory.matchesUuidNode(uuid = Some(startUuid), matches = Set("uuid"))
-    val end = endFactory.matchesUuidNode(uuid = Some(endUuid), matches = Set("uuid"))
-    val base = baseFactory.matchesHyperConnection(start, end)
-    val node = nodeFactory.matchesUuidNode(uuid = Some(connect.uuid), Set("uuid"))
-    val relation = factory.mergeContentRelation(node, base)
-    discourse.add(base, relation)
-    persistRelation(discourse, node)
+    parseConnect(json)(request => {
+      val discourse = Discourse.empty
+      val start = startFactory.matchesUuidNode(uuid = Some(startUuid), matches = Set("uuid"))
+      val end = endFactory.matchesUuidNode(uuid = Some(endUuid), matches = Set("uuid"))
+      val base = baseFactory.matchesHyperConnection(start, end)
+      val node = nodeFactory.matchesUuidNode(uuid = Some(request.uuid), Set("uuid"))
+      val relation = factory.mergeContentRelation(node, base)
+      discourse.add(base, relation)
+      persistRelation(discourse, node)
+    })
   }
 }
 
