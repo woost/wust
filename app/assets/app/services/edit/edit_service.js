@@ -1,8 +1,8 @@
 angular.module("wust.services").service("EditService", EditService);
 
-EditService.$inject = ["Post", "HistoryService", "store"];
+EditService.$inject = ["Post", "HistoryService", "store", "$state"];
 
-function EditService(Post, HistoryService, store) {
+function EditService(Post, HistoryService, store, $state) {
     let editStore = store.getNamespacedStore("edit");
     let self = this;
 
@@ -25,9 +25,8 @@ function EditService(Post, HistoryService, store) {
             };
         }
 
-
         dirtyModel() {
-            let dirtyModel = _.omit(_.pick(this, _.keys(this.original)), (v,k) => this.original[k] === v);
+            let dirtyModel = _.omit(_.pick(this, _.keys(this.original)), (v, k) => this.original[k] === v);
             if (_.any(this.addedTags))
                 dirtyModel.addedTags = _.map(this.addedTags, t => t.id);
 
@@ -43,7 +42,7 @@ function EditService(Post, HistoryService, store) {
             if (this.isPristine(dirtyModel))
                 return;
 
-            let model =_.pick(this, "id");
+            let model = _.pick(this, "id");
             let message = model.id === undefined ? "Added new node" : "Updated now";
             Post.$buildRaw(model).$update(dirtyModel).$then(data => {
                 humane.success(message);
@@ -72,6 +71,22 @@ function EditService(Post, HistoryService, store) {
         remove() {
             _.remove(self.stack, this);
             this.onChange();
+        }
+
+        isLocal() {
+            return this.id === undefined;
+        }
+
+        deleteNode() {
+            if (this.isLocal())
+                return;
+
+            Post.$buildRaw(_.pick(this, "id")).$destroy().$then(() => {
+                HistoryService.remove(this.id);
+                this.remove();
+                humane.success("Removed node");
+                $state.go("browse");
+            });
         }
     }
 
