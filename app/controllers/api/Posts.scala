@@ -3,6 +3,7 @@ package controllers.api
 import controllers.api.nodes.Nodes
 import model.WustSchema._
 import modules.db.access._
+import modules.db.access.custom.{VotesAccess, EndContentRelationAccess, StartContentRelationAccess, PostAccess}
 import modules.requests.dsl._
 
 object Posts extends Nodes[Post] {

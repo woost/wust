@@ -1,7 +1,8 @@
-package modules.db.access
+package modules.db.access.custom
 
 import model.WustSchema._
 import modules.db.Database._
+import modules.db.access.EndRelationFactoryAccess
 import modules.db.{HyperNodeDefinitionBase, RelationDefinition}
 import play.api.libs.json.JsValue
 import renesca.schema._

@@ -1,14 +1,14 @@
-package modules.db.access
+package modules.db.access.custom
 
 import formatters.json.RequestFormat._
 import model.WustSchema._
 import modules.db.Database._
-import modules.db.{RelationDefinition, HyperNodeDefinitionBase}
+import modules.db.access.{StartRelationReadDelete, EndRelationReadDelete}
+import modules.db.{HyperNodeDefinitionBase, RelationDefinition}
 import modules.requests.ConnectRequest
 import play.api.libs.json.JsValue
-import renesca.graph.Label
-import renesca.schema._
 import renesca.parameter.implicits._
+import renesca.schema._
 
 trait ContentRelationHelper {
   def persistRelation[T](discourse: Discourse, result: T): Either[T, String] = {

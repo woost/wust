@@ -1,10 +1,11 @@
-package modules.db.access
+package modules.db.access.custom
 
 import formatters.json.RequestFormat._
 import model.WustSchema._
 import modules.db.Database.db
+import modules.db.access.NodeReadDelete
 import modules.requests._
-import play.api.libs.json.{JsError, JsSuccess, JsValue}
+import play.api.libs.json.JsValue
 import renesca.parameter.implicits._
 
 class ContentNodeWrite[NODE <: ContentNode](override val factory: ContentNodeFactory[NODE]) extends NodeReadDelete(factory) {
