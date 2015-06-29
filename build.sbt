@@ -1,6 +1,6 @@
 name := "wust"
 
-val scalaV = "2.11.6"
+val scalaV = "2.11.7"
 
 val paradiseVersion = "2.1.0-M5"
 
