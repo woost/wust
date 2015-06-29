@@ -154,7 +154,7 @@ object Database {
   def disconnectNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinition: FixedRelationDefinition[START,RELATION,END]) {
     val discourse = itemDiscourseGraph(relationDefinition)
     if (discourse.relations.isEmpty && discourse.hyperRelations.size == 1)
-      discourse.graph.nodes -= discourse.hyperRelations.head.node
+      discourse.graph.nodes -= discourse.hyperRelations.head.rawItem
     else
       discourse.graph.relations.clear()
     db.persistChanges(discourse.graph)
