@@ -18,17 +18,28 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
             this.id = id;
             this.title = title || "";
             this.description = description || "";
-            this.addedTags = addedTags || [];
             this.original = original || {
                 title: this.title,
                 description: this.description
             };
+
+            //TODO: stupid having sometimes numbers and sometimes objects...
+            //TODO: why nulls?
+            this.addedTags = _.map(_.compact(addedTags) || [], t => {
+                if (_.isNumber(t))
+                    return t;
+                else
+                    return t.id;
+            });
         }
 
         dirtyModel() {
             let dirtyModel = _.omit(_.pick(this, _.keys(this.original)), (v, k) => this.original[k] === v);
+            //TODO: why do we have nulls here???
+
             if (_.any(this.addedTags))
-                dirtyModel.addedTags = _.map(this.addedTags, t => t.id);
+                //TODO: why do we have nulls here?
+                dirtyModel.addedTags = _.compact(this.addedTags);
 
             return dirtyModel;
         }
@@ -49,6 +60,12 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
                 humane.success(message);
                 this.apply(data);
                 storeStack();
+                //TODO: weird update
+                if (HistoryService.currentViewNode.id === data.id) {
+                    _.assign(HistoryService.currentViewNode, _.omit(data, "tags"));
+                    //response has empty tags array
+                    HistoryService.currentViewNode.tags = this.tags;
+                }
             });
         }
 
@@ -61,7 +78,7 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
 
             let encoded = tag.$encode();
             this.tags.push(encoded);
-            this.addedTags.push(encoded);
+            this.addedTags.push(encoded.id);
             storeStack();
         }
 

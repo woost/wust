@@ -37,4 +37,5 @@ function FocusCtrl($stateParams, HistoryService, component) {
 
     // we are viewing details about a node, so add it to the nodehistory
     HistoryService.add(vm.rootNode);
+    HistoryService.currentViewNode = vm.rootNode;
 }
