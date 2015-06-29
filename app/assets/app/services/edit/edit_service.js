@@ -1,8 +1,8 @@
 angular.module("wust.services").service("EditService", EditService);
 
-EditService.$inject = ["Post", "HistoryService", "store", "$state"];
+EditService.$inject = ["Post", "HistoryService", "store", "$state", "DiscourseNode"];
 
-function EditService(Post, HistoryService, store, $state) {
+function EditService(Post, HistoryService, store, $state, DiscourseNode) {
     let editStore = store.getNamespacedStore("edit");
     let self = this;
 
@@ -45,6 +45,7 @@ function EditService(Post, HistoryService, store, $state) {
             let model = _.pick(this, "id");
             let message = model.id === undefined ? "Added new node" : "Updated now";
             Post.$buildRaw(model).$update(dirtyModel).$then(data => {
+                DiscourseNode.Post.gotoState(data.id);
                 humane.success(message);
                 this.apply(data);
                 storeStack();
