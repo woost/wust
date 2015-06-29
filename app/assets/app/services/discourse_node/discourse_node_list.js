@@ -15,8 +15,8 @@ function DiscourseNodeList() {
         nodeListDefs[modelName] = modelPath;
     }
 
-    get.$inject = ["$injector", "$rootScope", "DiscourseNode"];
-    function get($injector, $rootScope, DiscourseNode) {
+    get.$inject = ["$injector", "$rootScope", "DiscourseNode", "EditService"];
+    function get($injector, $rootScope, DiscourseNode, EditService) {
         function NodeInfoActions(nodeInfo, mouseHandler) {
             return {
                 writable: true,
@@ -142,9 +142,13 @@ function DiscourseNodeList() {
                 if (this.exists(elem))
                     return;
 
-                let payload = elem.id === undefined ? elem : _.pick(elem, "id");
+                let hasId = elem.id === undefined;
+                let payload = hasId ? elem : _.pick(elem, "id");
                 this.list.$create(payload).$then(data => {
                     humane.success("Connected node");
+                    //TODO: workaround: this should definitely not be synched like this
+                    let scratchpadNode = _.find(EditService.stack, n => elem.description === n.description && elem.title === elem.title && elem.addedTags === elem.addedTags && elem.id === elem.id);
+                    scratchpadNode.id = data.id;
                 });
             }
         }
