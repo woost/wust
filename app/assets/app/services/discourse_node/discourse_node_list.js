@@ -149,6 +149,7 @@ function DiscourseNodeList() {
                     //TODO: workaround: this should definitely not be synched like this
                     let scratchpadNode = _.find(EditService.stack, n => elem.description === n.description && elem.title === elem.title && elem.addedTags === elem.addedTags && elem.id === elem.id);
                     scratchpadNode.id = data.id;
+                    EditService.storeStack();
                 });
             }
         }

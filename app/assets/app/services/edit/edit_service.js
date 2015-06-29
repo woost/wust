@@ -93,6 +93,9 @@ function EditService(Post, HistoryService, store, $state) {
     this.stack = restoreStack();
     this.edit = edit;
 
+    //TODO: should not be exposed!! part of hack in discourse_node_list
+    this.storeStack = storeStack;
+
     function restoreStack() {
         return _.map(editStore.get("stack", self.stack) || [], s => new Session(s));
     }
