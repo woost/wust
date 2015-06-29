@@ -5,9 +5,8 @@ import modules.db.Database._
 import modules.db.access.EndRelationFactoryAccess
 import modules.db.{HyperNodeDefinitionBase, RelationDefinition}
 import play.api.libs.json.JsValue
-import renesca.schema._
+import renesca.parameter.implicits._
 
-//TODO: we need to merge here with onMatch = Set("weight")
 class VotesAccess(
   weight: Long
   ) extends EndRelationFactoryAccess[User, Votes, Categorizes] {
@@ -15,7 +14,16 @@ class VotesAccess(
   val nodeFactory = User
 
   override def createHyper(startUuid: String, endUuid: String, user: User, json: JsValue) = {
-    Right("")
+    val start = Tag.matches(uuid = Some(startUuid), matches = Set("uuid"))
+    //TODO: should be a trait match Taggable
+    val end = Post.matches(uuid = Some(endUuid), matches = Set("uuid"))
+    val hyper = Categorizes.matches(start, end)
+    val votes = Votes.merge(user, hyper, weight = weight, onMatch = Set("weight"))
+    val failure = db.persistChanges(start, end, hyper, votes)
+    if(failure.isDefined)
+      Right("No vote :/")
+    else
+      Left(user)
   }
 }
 

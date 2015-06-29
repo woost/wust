@@ -28,7 +28,7 @@ trait ContentRelationHelper {
         Right("Cannot create post")
       else
         handler(ConnectRequest(node.uuid))
-    }).getOrElse(js.validate[ConnectRequest].map(t => {println("HALLO");handler(t);}).getOrElse(Right("Cannot parse connect request")))
+    }).getOrElse(js.validate[ConnectRequest].map(t => handler(t)).getOrElse(Right("Cannot parse connect request")))
   }
 }
 
