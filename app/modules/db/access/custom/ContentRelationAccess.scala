@@ -5,7 +5,7 @@ import model.WustSchema._
 import modules.db.Database.db
 import modules.db.HyperNodeDefinitionBase
 import modules.db.access.{EndRelationReadDelete, StartRelationReadDelete}
-import modules.requests.ConnectRequest
+import modules.requests.{NodeAddRequest, ConnectRequest}
 import play.api.libs.json.JsValue
 import renesca.parameter.implicits._
 import renesca.schema._
@@ -20,7 +20,15 @@ trait ContentRelationHelper {
   protected def fail(uuid: String) = Right(s"Cannot connect Nodes with uuid '$uuid'")
 
   protected def parseConnect[T](js: JsValue)(handler: ConnectRequest => Either[T, String]): Either[T, String] = {
-    js.validate[ConnectRequest].map(handler).getOrElse(Right("Cannot parse connect request"))
+    //TODO: workaround create should NOT! be done here :D
+    js.validate[NodeAddRequest].map(request => {
+      val node = Post.create(description = request.description, title = request.title)
+      val failure = db.persistChanges(node)
+      if(failure.isDefined)
+        Right("Cannot create post")
+      else
+        handler(ConnectRequest(node.uuid))
+    }).getOrElse(js.validate[ConnectRequest].map(t => {println("HALLO");handler(t);}).getOrElse(Right("Cannot parse connect request")))
   }
 }
 
@@ -65,7 +73,7 @@ END <: UuidNode
   override val factory: ContentRelationFactory[START, RELATION, END],
   nodeFactory: UuidNodeFactory[END],
   startFactory: UuidNodeFactory[ISTART],
-  baseFactory: HyperConnectionFactory[ISTART,START with AbstractRelation[ISTART,IEND],IEND] with UuidNodeFactory[START],
+  baseFactory: HyperConnectionFactory[ISTART, START with AbstractRelation[ISTART, IEND], IEND] with UuidNodeFactory[START],
   endFactory: UuidNodeFactory[IEND]
   ) extends StartRelationReadDelete(factory, nodeFactory) with ContentRelationHelper {
 
@@ -90,7 +98,7 @@ object StartContentRelationHyperAccess {
   START <: UuidNode,
   RELATION <: AbstractRelation[START, END],
   END <: UuidNode
-  ](factory: ContentRelationFactory[START, RELATION, END], nodeFactory: UuidNodeFactory[END]): (UuidNodeFactory[ISTART], HyperConnectionFactory[ISTART,START with AbstractRelation[ISTART,IEND],IEND] with UuidNodeFactory[START], UuidNodeFactory[IEND]) => StartContentRelationHyperAccess[ISTART,IEND,START, RELATION, END] = {
+  ](factory: ContentRelationFactory[START, RELATION, END], nodeFactory: UuidNodeFactory[END]): (UuidNodeFactory[ISTART], HyperConnectionFactory[ISTART, START with AbstractRelation[ISTART, IEND], IEND] with UuidNodeFactory[START], UuidNodeFactory[IEND]) => StartContentRelationHyperAccess[ISTART, IEND, START, RELATION, END] = {
     (startFactory, baseFactory, endFactory) => new StartContentRelationHyperAccess(factory, nodeFactory, startFactory, baseFactory, endFactory)
   }
 }
@@ -135,7 +143,7 @@ END <: UuidNode
   override val factory: ContentRelationFactory[START, RELATION, END],
   nodeFactory: UuidNodeFactory[START],
   startFactory: UuidNodeFactory[ISTART],
-  baseFactory: HyperConnectionFactory[ISTART,END with AbstractRelation[ISTART,IEND],IEND] with UuidNodeFactory[END],
+  baseFactory: HyperConnectionFactory[ISTART, END with AbstractRelation[ISTART, IEND], IEND] with UuidNodeFactory[END],
   endFactory: UuidNodeFactory[IEND]
   ) extends EndRelationReadDelete(factory, nodeFactory) with ContentRelationHelper {
 
@@ -160,7 +168,7 @@ object EndContentRelationHyperAccess {
   START <: UuidNode,
   RELATION <: AbstractRelation[START, END],
   END <: UuidNode
-  ](factory: ContentRelationFactory[START, RELATION, END], nodeFactory: UuidNodeFactory[START]): (UuidNodeFactory[ISTART], HyperConnectionFactory[ISTART,END with AbstractRelation[ISTART,IEND],IEND] with UuidNodeFactory[END], UuidNodeFactory[IEND]) => EndContentRelationHyperAccess[ISTART, IEND, START, RELATION, END] = {
+  ](factory: ContentRelationFactory[START, RELATION, END], nodeFactory: UuidNodeFactory[START]): (UuidNodeFactory[ISTART], HyperConnectionFactory[ISTART, END with AbstractRelation[ISTART, IEND], IEND] with UuidNodeFactory[END], UuidNodeFactory[IEND]) => EndContentRelationHyperAccess[ISTART, IEND, START, RELATION, END] = {
     (startFactory, baseFactory, endFactory) => new EndContentRelationHyperAccess(factory, nodeFactory, startFactory, baseFactory, endFactory)
   }
 }

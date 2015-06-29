@@ -142,7 +142,8 @@ function DiscourseNodeList() {
                 if (this.exists(elem))
                     return;
 
-                this.list.$create(_.pick(elem, "id")).$then(data => {
+                let payload = elem.id === undefined ? elem : _.pick(elem, "id");
+                this.list.$create(payload).$then(data => {
                     humane.success("Connected node");
                 });
             }
