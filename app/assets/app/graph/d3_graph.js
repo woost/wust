@@ -390,9 +390,8 @@ function d3Graph($window, DiscourseNode) {
             }
 
             function applyZoom(translate, scale) {
-                let transform = "translate(" + translate[0] + "px, " + translate[1] + "px) scale(" + scale + ")";
-                svgContainer.style(transformCompat, transform);
-                htmlContainer.style(transformCompat, transform);
+                svgContainer.attr("transform", "translate(" + translate[0] + ", " + translate[1] + ") scale(" + scale + ")");
+                htmlContainer.style(transformCompat, "translate(" + translate[0] + "px, " + translate[1] + "px) scale(" + scale + ")");
             }
 
             // unfix the position of a given node
