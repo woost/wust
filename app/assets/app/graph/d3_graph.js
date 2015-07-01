@@ -75,8 +75,8 @@ function d3Graph($window, DiscourseNode) {
             let htmlContainer = html.append("div")
                 // html initially has its origin centered, svg has (top left)
                 // fixes zooming
-                .style(transformOriginCompat,"top left")
-                .style("pointer-events", "all");
+                .style(transformOriginCompat,"top left");
+                // .style("pointer-events", "all");
 
             // draw gravitational center
             // svgContainer.append("circle")
@@ -104,10 +104,10 @@ function d3Graph($window, DiscourseNode) {
 
             // define events
             let zoom = d3.behavior.zoom().scaleExtent([0.1, 10]).on("zoom", zoomed);
-            let drag = force.drag()
-                .on("dragstart", ignoreHyperEdge(dragstarted))
-                .on("dragend", ignoreHyperEdge(dragended))
-                .on("drag", ignoreHyperEdge(dragged));
+            let drag = d3.behavior.drag()
+                .on("dragstart", ignoreHyperEdge(onDragStart))
+                .on("drag", ignoreHyperEdge(onDrag))
+                .on("dragend", ignoreHyperEdge(onDragEnd));
 
             html.call(zoom)
                 .on("dblclick.zoom", null);
@@ -141,8 +141,23 @@ function d3Graph($window, DiscourseNode) {
                 .data(graph.nodes).enter()
                 .append("div")
                 .call(drag)
+                // .style("border", "1px solid blue")
+                .style("pointer-events", "all")
+                // .style("pointer-events", "all")
                 .on("dblclick", ignoreHyperEdge(node => onDoubleClick({ node })));
-            let nodeHtml = node.append("div")
+
+            // let nodeTools = node
+            //     .append("div")
+            //     .style("display", "inline-block")
+            //     .style("background","#C3E8FF");
+
+            // let nodeDragTool = nodeTools
+            //     .append("div")
+            //     .html("drag")
+            //     // .style("pointer-events", "all")
+            //     .style("cursor", d => d.hyperEdge ? "cursor" : "move");
+
+            let nodeHtml = node
                 .style("position", "absolute")
                 .style("max-width", "150px") // to produce line breaks
                 .style("cursor", d => d.hyperEdge ? "cursor" : "move")
@@ -359,8 +374,6 @@ function d3Graph($window, DiscourseNode) {
                                 `);
                     } else {
                         const line = clampEdgeLine(link);
-                        // const pathAttr = `M 0 0 L ${line.x2 - line.x1} ${line.y2 - line.y1}`;
-                        // d3.select(this).attr("d", pathAttr).style(transformCompat, `translate(${line.x1}px, ${line.y1}px)`);
                         const pathAttr = `M ${line.x1} ${line.y1} L ${line.x2} ${line.y2}`;
                         d3.select(this).attr("d", pathAttr);
                     }
@@ -411,9 +424,41 @@ function d3Graph($window, DiscourseNode) {
 
             // keep track whether the node is currently being dragged
             let isDragging = false;
+            let dragOffsetX, dragOffsetY;
+
+            function onDragStart(d) {
+                console.log("onDragStart");
+                d.fixed |= 2; // copied from force.drag
+                // prevent d3 from interpreting this as panning
+                d3.event.sourceEvent.stopPropagation();
+                let rect = nodeRects[d.index];
+                dragOffsetX = rect.width / 2 - d3.event.sourceEvent.offsetX;
+                dragOffsetY = rect.height / 2 - d3.event.sourceEvent.offsetY;
+            }
+
+            function onDrag(d) {
+                // check whether there was a substantial mouse movement. if
+                // not, we will interpret this as a click event after the
+                // mouse button is released (see dragended handler).
+                let scale = zoom.scale();
+                let diffX = (d.x - dragOffsetX) * scale - d3.event.x;
+                let diffY = (d.y - dragOffsetY) * scale - d3.event.y;
+                let diff = Math.sqrt(diffX * diffX + diffY * diffY);
+                isDragging = isDragging || (diff > 5);
+
+                if( isDragging ) {
+                    // default positioning is center of node.
+                    // but we let node stay under grapped position.
+                    d.px = d3.event.x / scale + dragOffsetX;
+                    d.py = d3.event.y / scale + dragOffsetY;
+                    drawGraph();
+                    force.resume(); // restart annealing
+                }
+            }
 
             // we use dragend instead of click event, because it is emitted on mobile phones as well as on pcs
-            function dragended(d) {
+            function onDragEnd(d) {
+                d.fixed &= ~6; // copied from force.drag
                 if (isDragging) {
                     // if we were dragging before, the node should be fixed
                     setFixedPosition(d);
@@ -422,27 +467,12 @@ function d3Graph($window, DiscourseNode) {
                     // we wait a moment before unsetting the fixed position in
                     // case the user wants to double click the node, so it does
                     // not float away beforehand.
-                    _.delay(unsetFixedPosition, 180, d);
+                    _.delay(unsetFixedPosition, 300, d);
                 }
 
                 isDragging = false;
             }
 
-            function dragstarted(d) {
-                // prevent d3 from interpreting this as panning
-                d3.event.sourceEvent.stopPropagation();
-            }
-
-            function dragged(d) {
-                // check whether there was a substantial mouse movement. if
-                // not, we will interpret this as a click event after the
-                // mouse button is released (see dragended handler).
-                let diff = Math.abs(d.x - d3.event.x) + Math.abs(d.y - d3.event.y);
-                isDragging = isDragging || (diff > 3);
-
-                // do the actual dragging
-                // d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
-            }
 
             // executes specified function only for normal nodes, i.e.,
             // ignores hyperedges
