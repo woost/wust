@@ -10,7 +10,7 @@ object WustSchema {
   // TODO: annotation for hidden defaults?
 
   @Node trait UuidNode {
-    val uuid: String = Helpers.uuidBase64
+    @unique val uuid: String = Helpers.uuidBase64
   }
 
   @Node trait Timestamp {

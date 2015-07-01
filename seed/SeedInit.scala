@@ -20,8 +20,7 @@ object SeedInit extends Task {
   println("Seeding Database")
   val discourse = Discourse.empty
 
-
-  db.query("CREATE INDEX ON :POST(uuid)")
+  setupDbConstraints(db)
 
   discourse.add(Tag.merge(title = Some("Problem"), description = "...a problem", isType = true, merge = Set("title", "isType")))
   discourse.add(Tag.merge(title = Some("Goal"), description = "...a goal", isType = true, merge = Set("title", "isType")))
