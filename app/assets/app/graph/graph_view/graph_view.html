@@ -1,7 +1,9 @@
 <div class="graph_view_component">
-    <div id="filter_input">
-        <input type="text" class="form-control" ng-model="vm.search.title" placeholder="filter">
-    </div>
     <div show-lodium enabled="vm.graphLoading" class="loading_indicator"></div>
-    <div d3-graph graph="vm.graph" on-click="vm.onClick(node)" on-draw="vm.onDraw()" class="graph_network"></div>
+    <div d3-graph graph="vm.graph" on-click="vm.onClick(node)" on-draw="vm.onDraw()" class="graph_network">
+
+        <div id="filter_input">
+            <input type="text" class="form-control" ng-model="vm.search.title" placeholder="filter">
+        </div>
+    </div>
 </div>

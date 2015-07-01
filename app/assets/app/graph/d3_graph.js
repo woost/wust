@@ -22,39 +22,30 @@ function d3Graph($window, DiscourseNode) {
             let graph = angular.copy(data);
             preprocessGraph(graph);
 
-            // get dimensions
+            // get dimensions of containing element
             let [width, height] = getElementDimensions(element[0]);
 
-            // register for resize event
-            angular.element($window).bind("resize", resizeGraph);
-
-            // force configuration
-            let force = d3.layout.force()
-                .size([width, height])
-                .linkStrength(3) // rigidity
-                .friction(0.9)
-                // .linkDistance(120) // weak geometric constraint. Pushes nodes to achieve this distance
-                .linkDistance(d => connectsHyperEdge(d) ? 120 : 200)
-                .charge(d => d.hyperEdge ? -1500 : -1500)
-                .gravity(0.1)
-                .theta(0.8)
-                .alpha(0.1);
-
-            // define events
-            let zoom = d3.behavior.zoom().scaleExtent([0.1, 10]).on("zoom", zoomed);
-            let drag = force.drag()
-                .on("dragstart", ignoreHyperEdge(dragstarted))
-                .on("dragend", ignoreHyperEdge(dragended))
-                .on("drag", ignoreHyperEdge(dragged));
-
-            // construct svg
+            // svg will stay in background and only render the edges
             let svg = d3.select(element[0])
                 .append("svg")
                 .attr("width", width)
                 .attr("height", height)
-                .call(zoom)
-                .on("dblclick.zoom", null);
+                .style("visibility", "hidden") // will be shown when converged
+                .style("position", "absolute");
+                // .style("background", "#FFDDAA")
 
+            // has the same size and position as the svg
+            // renders nodes and relation labels
+            let html = d3.select(element[0])
+                .append("div")
+                .style("width", width + "px")
+                .style("height", height + "px")
+                .style("visibility", "hidden") // will be shown when converged
+                .style("position", "absolute");
+                // .style("background", "rgba(220, 240, 255, 0.5)")
+                // .style("border", "1px solid #333")
+
+            // marker for arrows
             svg.append("svg:defs").append("svg:marker")
                 .attr("id", "graph_arrow")
                 .attr("viewBox", "0 -3 10 6")
@@ -67,17 +58,52 @@ function d3Graph($window, DiscourseNode) {
                 .attr("class", "svglink"); // for the stroke color
 
             // container with enabled pointer events
-            let container = svg.append("g")
+            // translates for zoom/pan will be applied here
+            let svgContainer = svg.append("g");
+            let htmlContainer = html.append("div")
+                // html initially has its origin centered, svg has (top left)
+                // fixes zooming
+                .style("transform-origin","top left")
                 .style("pointer-events", "all");
 
-            // add nodes and edges
-            force
+            // draw gravitational center
+            svgContainer.append("circle")
+                .attr("cx",width/2)
+                .attr("cy",height/2)
+                .attr("r", 20);
+
+            // register for resize event
+            angular.element($window).bind("resize", resizeGraph);
+
+            // force configuration
+            let force = d3.layout.force()
+                .size([width, height])
                 .nodes(graph.nodes)
                 .links(graph.edges)
+                .linkStrength(3) // rigidity
+                .friction(0.9)
+                // .linkDistance(120) // weak geometric constraint. Pushes nodes to achieve this distance
+                .linkDistance(d => connectsHyperEdge(d) ? 120 : 200)
+                .charge(d => d.hyperEdge ? -1500 : -1500)
+                .gravity(0.1)
+                .theta(0.8)
+                .alpha(0.1)
                 .start();
 
+            // define events
+            let zoom = d3.behavior.zoom().scaleExtent([0.1, 10]).on("zoom", zoomed);
+            let drag = force.drag()
+                .on("dragstart", ignoreHyperEdge(dragstarted))
+                .on("dragend", ignoreHyperEdge(dragended))
+                .on("drag", ignoreHyperEdge(dragged));
+
+            html.call(zoom)
+                .on("dblclick.zoom", null);
+
+            svg.on("dblclick.zoom", null);
+
             // create edges in the svg container
-            let link = container.append("g").attr("id","group_links")
+            let link = svgContainer.append("g").attr("id","group_links")
                 .selectAll()
                 .data(graph.edges).enter()
                 .append("path")
@@ -85,55 +111,49 @@ function d3Graph($window, DiscourseNode) {
                 .each(function(link) {
                     // if link is startRelation of a Hypernode
                     if( !(link.target.hyperEdge && link.target.startId === link.source.id) ) {
-                        d3.select(this).style("marker-end", "url(" + window.location.href + "#graph_arrow)");
+                        d3.select(this).style("marker-end", "url(" + location.href + "#graph_arrow)");
                     }
                 });
 
-            let linktextSvg = container.append("g").attr("id","group_link_labels")
+            let linkText = svgContainer.append("div").attr("id","group_link_labels")
                 .selectAll()
                 .data(graph.edges).enter()
-                .append("g");
-
-            let linktextFo = linktextSvg.append("foreignObject")
-                .style("text-align", "center");
-
-            let linktextHtml = linktextFo.append("xhtml:div")
-                // .style("text-shadow", "white -1px 0px, white 0px 1px, white 1px 0px, white 0px -1px")
+                .append("div");
+            let linktextHtml = linkText.append("div")
                 .attr("class", "relation_label")
                 .html(d => connectsHyperEdge(d) ? "" : d.title);
 
-            let linktextRects = setForeignObjectDimensions(linktextFo, linktextHtml);
 
-            // create nodes in the svg container
-            let node = container.append("g").attr("id","group_hypernodes-then-nodes")
+            let node = htmlContainer.append("div").attr("id","group_hypernodes-then-nodes")
                 .selectAll()
                 .data(graph.nodes).enter()
-                .append("g")
+                .append("div")
                 .call(drag)
                 .on("dblclick", ignoreHyperEdge(node => onDoubleClick({ node })));
-
-            let nodeFo = node.append("foreignObject")
-                .style("text-align", "center");
-
-            let nodeHtml = nodeFo.append("xhtml:div")
+            let nodeHtml = node.append("div")
+                .style("position", "absolute")
                 .style("max-width", "150px") // to produce line breaks
                 .style("cursor", d => d.hyperEdge ? "cursor" : "move")
                 .attr("class", d => d.css)
                 .html(d => d.title);
 
-            var nodeRects = setForeignObjectDimensions(nodeFo, nodeHtml);
 
             // control whether tick function should draw
             let drawOnTick = false;
-            svg.style("visibility", "hidden");
 
             // register tick function
             force.on("tick", tick);
 
-            window.requestAnimationFrame(converge);
+            requestAnimationFrame(converge);
 
             // filter on event
             scope.$on("d3graph_filter", filter);
+
+            let linktextRects, nodeRects;
+            function recalculateNodeDimensions() {
+                linktextRects = getObjectDimensions(linktextHtml);
+                nodeRects = getObjectDimensions(nodeHtml);
+            }
 
             // let the simulation converge
             let ia = 0;
@@ -147,26 +167,32 @@ function d3Graph($window, DiscourseNode) {
                 }
 
                 if (force.alpha() > 0) {
-                    window.requestAnimationFrame(converge);
+                    requestAnimationFrame(converge);
                 } else {
-                    console.log("needed " + ia + " ticks to converge.");
-                    drawOnTick = true;
-
-                    // focusMarkedNodes needs visible/marked nodes and edges
-                    _.each(graph.nodes, n => {
-                        n.marked = true;
-                        n.visible = true;
-                    });
-                    _.each(graph.edges, e => {
-                        e.visible = true;
-                    });
-
-                    focusMarkedNodes(0);
-                    drawGraph();
-                    svg.style("visibility", "visible");
-
-                    onDraw();
+                    afterConverge();
                 }
+            }
+
+            function afterConverge() {
+                console.log("needed " + ia + " ticks to converge.");
+                drawOnTick = true;
+
+                // focusMarkedNodes needs visible/marked nodes and edges
+                _.each(graph.nodes, n => {
+                    n.marked = true;
+                    n.visible = true;
+                });
+                _.each(graph.edges, e => {
+                    e.visible = true;
+                });
+
+
+                onDraw();
+                html.style("visibility", "visible");
+                svg.style("visibility", "visible");
+                drawGraph();
+
+                setTimeout(() => focusMarkedNodes(0), 400); //TODO: when is the right time to call focusMarkedNodes?
             }
 
             // filter the graph
@@ -185,6 +211,14 @@ function d3Graph($window, DiscourseNode) {
                         marked
                     });
                 });
+
+                _.each(graph.nodes, node => {
+                    if(node.hyperEdge) {
+                        //TODO: mark chains of hyperedges
+                        node.marked = node.marked || graph.hyperNeighbours[node.id].start.marked && graph.hyperNeighbours[node.id].end.marked;
+                    }
+                });
+
                 graph.edges = _.map(graph.edges, edge => {
                     let visible = _(ids).includes(edge.source.id) && _(ids).includes(edge.target.id);
                     return _.merge(edge, {
@@ -197,27 +231,26 @@ function d3Graph($window, DiscourseNode) {
             }
 
             // reset visibility of nodes after filtering
-            // TODO: set opacity of edges
             function setVisibility() {
+                let notMarkedOpacity = 0.3;
                 // set node visibility
                 _.each(graph.nodes, (node, i) => {
-                    let fo = nodeFo[0][i];
-                    fo.style.opacity = (node.marked || node.hyperEdge) ? 1.0 : 0.3;
-                    fo.style.visibility = node.visible ? "visible" : "hidden";
+                    let domNode = nodeHtml[0][i];
+                    domNode.style.opacity = (node.marked) ? 1.0 : notMarkedOpacity;
+                    domNode.style.visibility = node.visible ? "inherit" : "hidden";
                 });
 
                 // set edge visibility
                 _.each(graph.edges, (edge, i) => {
-                    let line = link[0][i];
-                    let fo = linktextFo[0][i];
-                    let visibility = edge.visible ? "visible" : "hidden";
-                    line.style.visibility = visibility;
-                    fo.style.visibility = visibility;
+                    let path = link[0][i];
+                    path.style.visibility = edge.visible ? "inherit" : "hidden";
+                    path.style.opacity = (edge.source.marked === true && edge.target.marked === true) ? 1.0 : notMarkedOpacity;
                 });
             }
 
             // focus the marked nodes and scale zoom accordingly
             function focusMarkedNodes(duration = 500) {
+                if(width === 0 || height === 0) return;
                 let marked = _.select(graph.nodes, {
                     marked: true
                 });
@@ -238,22 +271,25 @@ function d3Graph($window, DiscourseNode) {
 
                 let translate = [width / 2 - center[0] * scale, height / 2 - center[1] * scale];
 
-                // skip animation if duration is zero
-                if (duration > 0)
-                    svg.transition().duration(duration).call(zoom.translate(translate).scale(scale).event);
-                else
-                    applyZoom(translate, scale);
+                if (duration > 0) {
+                    htmlContainer.transition().duration(duration).call(zoom.translate(translate).scale(scale).event);
+                    svgContainer.transition().duration(duration).call(zoom.translate(translate).scale(scale).event);
+                }
+                else {
+                    // skip animation if duration is zero
+                    htmlContainer.call(zoom.translate(translate).scale(scale).event);
+                    svgContainer.call(zoom.translate(translate).scale(scale).event);
+                }
+
+                recalculateNodeDimensions();
             }
 
             // we need to set the height and weight of the foreignobject
             // to the dimensions of the inner html container.
-            function setForeignObjectDimensions(fo, html) {
-                return _.map(fo[0], (curr, i) => {
-                    let rect = html[0][i].getBoundingClientRect();
-                    curr.setAttribute("width", rect.width);
-                    curr.setAttribute("height", rect.height);
-                    return _.pick(rect, ["width", "height"]);
-                });
+            function getObjectDimensions(nodeHtml) {
+                return _.map(nodeHtml[0], (curr) =>
+                    _.pick(curr.getBoundingClientRect(), ["width", "height"])
+                );
             }
 
             // get the dimensions of a html element
@@ -264,12 +300,11 @@ function d3Graph($window, DiscourseNode) {
             // resize graph according to the current element dimensions
             function resizeGraph() {
                 [width, height] = getElementDimensions(element[0]);
-                svg.attr("width", width);
-                svg.attr("height", height);
+                svg.style("width", width).style("height", height);
+                html.style("width", width + "px").style("height", height + "px");
                 // if graph was hidden when initialized,
                 // all foreign objects have size 0
                 // this call recalculates the sizes
-                nodeRects = setForeignObjectDimensions(nodeFo, nodeHtml);
                 focusMarkedNodes();
             }
 
@@ -278,7 +313,6 @@ function d3Graph($window, DiscourseNode) {
             function tick(e) {
                 // push hypernodes towards the center between its start/end node
                 let hyperEdgePull = 10 * e.alpha;
-                let nodePull = 50 * e.alpha;
                 graph.nodes.forEach(node => {
                     if (node.hyperEdge === true) {
                         let neighbours = graph.hyperNeighbours[node.id];
@@ -290,23 +324,6 @@ function d3Graph($window, DiscourseNode) {
                         };
                         node.x += (center.x - node.x) * hyperEdgePull;
                         node.y += (center.y - node.y) * hyperEdgePull;
-                    //} else {
-                        // switch(node.label) {
-                        //     case DiscourseNode.Goal.label:
-                        //         node.y += -1*nodePull;
-                        //         break;
-                        //     case DiscourseNode.Idea.label:
-                        //         node.y += 1*nodePull;
-                        //         break;
-                        //     case DiscourseNode.ProArgument.label:
-                        //         // node.y += 1*nodePull;
-                        //         node.x += 1*nodePull;
-                        //         break;
-                        //     case DiscourseNode.ConArgument.label:
-                        //         // node.y += 1*nodePull;
-                        //         node.x += -1*nodePull;
-                        //         break;
-                        // }
                     }
                 });
 
@@ -319,6 +336,7 @@ function d3Graph($window, DiscourseNode) {
                 // clamp every edge line to the intersections with its incident node rectangles
                 link.each(function(link) {
                     if( link.source.id === link.target.id ) { // self loop
+                        //TODO: self loops with hypernodes
                         let rect = linktextRects[link.index];
                         d3.select(this).attr("d", `
                                 M ${link.source.x} ${link.source.y - rect.height/2}
@@ -327,18 +345,20 @@ function d3Graph($window, DiscourseNode) {
                                 `);
                     } else {
                         const line = clampEdgeLine(link);
+                        // const pathAttr = `M 0 0 L ${line.x2 - line.x1} ${line.y2 - line.y1}`;
+                        // d3.select(this).attr("d", pathAttr).style("transform", `translate(${line.x1}px, ${line.y1}px)`);
                         const pathAttr = `M ${line.x1} ${line.y1} L ${line.x2} ${line.y2}`;
                         d3.select(this).attr("d", pathAttr);
                     }
                 });
 
-                node.attr("transform", d => {
-                    // center the node
+                node.style("transform", d => {
+                    // center the node on link ends
                     let rect = nodeRects[d.index];
-                    return "translate(" + (d.x - rect.width / 2) + "," + (d.y - rect.height / 2) + ")";
+                    return "translate(" + (d.x - rect.width / 2) + "px," + (d.y - rect.height / 2) + "px)";
                 });
 
-                linktextSvg.attr("transform", d => {
+                linkText.attr("transform", d => {
                     // center the linktext
                     let rect = linktextRects[d.index];
                     if( d.source.id === d.target.id ) { // self loop
@@ -356,7 +376,9 @@ function d3Graph($window, DiscourseNode) {
             }
 
             function applyZoom(translate, scale) {
-                container.attr("transform", "translate(" + translate + ")scale(" + scale + ")");
+                let transform = "translate(" + translate[0] + "px, " + translate[1] + "px) scale(" + scale + ")";
+                svgContainer.style("transform", transform);
+                htmlContainer.style("transform", transform);
             }
 
             // unfix the position of a given node
@@ -402,12 +424,11 @@ function d3Graph($window, DiscourseNode) {
                 // check whether there was a substantial mouse movement. if
                 // not, we will interpret this as a click event after the
                 // mouse button is released (see dragended handler).
-                // TODO: weight by current zoom level!
                 let diff = Math.abs(d.x - d3.event.x) + Math.abs(d.y - d3.event.y);
-                isDragging = isDragging || (diff > 1);
+                isDragging = isDragging || (diff > 3);
 
-                // do the actually dragging
-                d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
+                // do the actual dragging
+                // d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
             }
 
             // executes specified function only for normal nodes, i.e.,
@@ -449,14 +470,14 @@ function d3Graph($window, DiscourseNode) {
                     return a ? a.concat(b) : b;
                 }, _)) || {};
 
-                let idToNode = _.indexBy(graph.nodes, "id");
-                let hyperNodes = _.filter(graph.nodes, node => node.hyperEdge === true);
+                graph.idToNode = _.indexBy(graph.nodes, "id");
+                graph.hyperNodes = _.filter(graph.nodes, node => node.hyperEdge === true);
                 //TODO: Map from node index to other node indices, to avoid string lookups
-                graph.hyperNeighbours = _.indexBy(_.map(hyperNodes, node => {
+                graph.hyperNeighbours = _.indexBy(_.map(graph.hyperNodes, node => {
                     return {
                         id: node.id,
-                        start: idToNode[node.startId],
-                        end: idToNode[node.endId]
+                        start: graph.idToNode[node.startId],
+                        end: graph.idToNode[node.endId]
                     };
                 }), "id");
             }
