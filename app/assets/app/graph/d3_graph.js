@@ -57,13 +57,25 @@ function d3Graph($window, DiscourseNode) {
                 .attr("d", "M 0,-3 L 10,-0.5 L 10,0.5 L0,3")
                 .attr("class", "svglink"); // for the stroke color
 
+            // choose the correct transform style for many browsers
+            var transformCompat = cssCompat("transform", "Transform", "transform");
+            var transformOriginCompat = cssCompat("transformOrigin", "TransformOrigin", "transform-origin");
+            function cssCompat(original, jsSuffix, cssSuffix) {
+                if( !(original in document.body.style) ) {
+                    if( ("Webkit" + jsSuffix) in document.body.style ) { return "-webkit-" + cssSuffix; }
+                    if( ("Moz" + jsSuffix) in document.body.style ) { return "-moz-" + cssSuffix; }
+                    if( ("ms" + jsSuffix) in document.body.style ) { return "-ms-" + cssSuffix; }
+                    if( ("O" + jsSuffix) in document.body.style ) { return "-o-" + cssSuffix; }
+                } else return cssSuffix;
+            }
+
             // container with enabled pointer events
             // translates for zoom/pan will be applied here
             let svgContainer = svg.append("g");
             let htmlContainer = html.append("div")
                 // html initially has its origin centered, svg has (top left)
                 // fixes zooming
-                .style("transform-origin","top left")
+                .style(transformOriginCompat,"top left")
                 .style("pointer-events", "all");
 
             // draw gravitational center
@@ -348,25 +360,25 @@ function d3Graph($window, DiscourseNode) {
                     } else {
                         const line = clampEdgeLine(link);
                         // const pathAttr = `M 0 0 L ${line.x2 - line.x1} ${line.y2 - line.y1}`;
-                        // d3.select(this).attr("d", pathAttr).style("transform", `translate(${line.x1}px, ${line.y1}px)`);
+                        // d3.select(this).attr("d", pathAttr).style(transformCompat, `translate(${line.x1}px, ${line.y1}px)`);
                         const pathAttr = `M ${line.x1} ${line.y1} L ${line.x2} ${line.y2}`;
                         d3.select(this).attr("d", pathAttr);
                     }
                 });
 
-                node.style("transform", d => {
+                node.style(transformCompat, d => {
                     // center the node on link ends
                     let rect = nodeRects[d.index];
                     return "translate(" + (d.x - rect.width / 2) + "px," + (d.y - rect.height / 2) + "px)";
                 });
 
-                linkText.attr("transform", d => {
+                linkText.style(transformCompat, d => {
                     // center the linktext
                     let rect = linktextRects[d.index];
                     if( d.source.id === d.target.id ) { // self loop
-                        return "translate(" + (d.source.x - rect.width/2) + "," + (d.source.y - rect.height/2 - 70) + ")";
+                        return "translate(" + (d.source.x - rect.width/2) + "px," + (d.source.y - rect.height/2 - 70) + "px)";
                     } else {
-                        return "translate(" + (((d.source.x + d.target.x) / 2) - rect.width / 2) + "," + (((d.source.y + d.target.y) / 2) - rect.height / 2) + ")";
+                        return "translate(" + (((d.source.x + d.target.x) / 2) - rect.width / 2) + "px," + (((d.source.y + d.target.y) / 2) - rect.height / 2) + "px)";
                     }
 
                 });
@@ -379,8 +391,8 @@ function d3Graph($window, DiscourseNode) {
 
             function applyZoom(translate, scale) {
                 let transform = "translate(" + translate[0] + "px, " + translate[1] + "px) scale(" + scale + ")";
-                svgContainer.style("transform", transform);
-                htmlContainer.style("transform", transform);
+                svgContainer.style(transformCompat, transform);
+                htmlContainer.style(transformCompat, transform);
             }
 
             // unfix the position of a given node
