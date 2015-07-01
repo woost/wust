@@ -83,7 +83,7 @@ class NodeRead[NODE <: UuidNode](val factory: UuidNodeFactory[NODE]) extends Fac
   override def read(uuid: String) = {
     //TODO possibility to resolve nodes directly without graph?
     val discourse = Discourse.empty
-    val node = factory.matchesUuidNode(uuid = Some(uuid), matches = Set("uuid"))
+    val node = factory.matchesOnUuid(uuid)
     discourse.add(node)
     //TODO method for only resolving matches...
     db.transaction(_.persistChanges(discourse)) match {

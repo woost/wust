@@ -100,4 +100,5 @@ object WustSchema {
   @Relation class BelongsTo(startNode: ScopeChild, endNode: Scope)
 
   //TODO: Node trait ownable?
+  //
 }

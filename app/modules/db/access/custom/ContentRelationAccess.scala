@@ -45,8 +45,8 @@ END <: UuidNode
   override def create(uuid: String, user: User, json: JsValue) = {
     parseConnect(json)(request => {
       val discourse = Discourse.empty
-      val base = baseFactory.matchesUuidNode(uuid = Some(uuid), matches = Set("uuid"))
-      val node = nodeFactory.matchesUuidNode(uuid = Some(request.uuid), matches = Set("uuid"))
+      val base = baseFactory.matchesOnUuid(uuid)
+      val node = nodeFactory.matchesOnUuid(request.uuid)
       discourse.add(factory.mergeContentRelation(base, node))
       persistRelation(discourse, node)
     })
@@ -80,10 +80,10 @@ END <: UuidNode
   override def createHyper(startUuid: String, endUuid: String, user: User, json: JsValue) = {
     parseConnect(json)(request => {
       val discourse = Discourse.empty
-      val start = startFactory.matchesUuidNode(uuid = Some(startUuid), matches = Set("uuid"))
-      val end = endFactory.matchesUuidNode(uuid = Some(endUuid), matches = Set("uuid"))
+      val start = startFactory.matchesOnUuid(startUuid)
+      val end = endFactory.matchesOnUuid(endUuid)
       val base = baseFactory.matchesHyperConnection(start, end)
-      val node = nodeFactory.matchesUuidNode(uuid = Some(request.uuid), matches = Set("uuid"))
+      val node = nodeFactory.matchesOnUuid(request.uuid)
       val relation = factory.mergeContentRelation(base, node)
       discourse.add(base, relation)
       persistRelation(discourse, node)
@@ -115,8 +115,8 @@ END <: UuidNode
   override def create(uuid: String, user: User, json: JsValue) = {
     parseConnect(json)(request => {
       val discourse = Discourse.empty
-      val base = baseFactory.matchesUuidNode(uuid = Some(uuid), matches = Set("uuid"))
-      val node = nodeFactory.matchesUuidNode(uuid = Some(request.uuid), matches = Set("uuid"))
+      val base = baseFactory.matchesOnUuid(uuid)
+      val node = nodeFactory.matchesOnUuid(request.uuid)
       discourse.add(factory.mergeContentRelation(node, base))
       persistRelation(discourse, node)
     })
@@ -150,10 +150,10 @@ END <: UuidNode
   override def createHyper(startUuid: String, endUuid: String, user: User, json: JsValue) = {
     parseConnect(json)(request => {
       val discourse = Discourse.empty
-      val start = startFactory.matchesUuidNode(uuid = Some(startUuid), matches = Set("uuid"))
-      val end = endFactory.matchesUuidNode(uuid = Some(endUuid), matches = Set("uuid"))
+      val start = startFactory.matchesOnUuid(startUuid)
+      val end = endFactory.matchesOnUuid(endUuid)
       val base = baseFactory.matchesHyperConnection(start, end)
-      val node = nodeFactory.matchesUuidNode(uuid = Some(request.uuid), Set("uuid"))
+      val node = nodeFactory.matchesOnUuid(request.uuid)
       val relation = factory.mergeContentRelation(node, base)
       discourse.add(base, relation)
       persistRelation(discourse, node)
