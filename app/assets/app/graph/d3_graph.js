@@ -23,7 +23,7 @@ function d3Graph($window, DiscourseNode) {
             preprocessGraph(graph);
 
             // get dimensions of containing element
-            let [width, height] = getElementDimensions(element[0]);
+            let [width, height] = [element[0].offsetWidth, element[0].offsetHeight];
 
             // svg will stay in background and only render the edges
             let svg = d3.select(element[0])
@@ -67,10 +67,10 @@ function d3Graph($window, DiscourseNode) {
                 .style("pointer-events", "all");
 
             // draw gravitational center
-            svgContainer.append("circle")
-                .attr("cx",width/2)
-                .attr("cy",height/2)
-                .attr("r", 20);
+            // svgContainer.append("circle")
+            //     .attr("cx",width/2)
+            //     .attr("cy",height/2)
+            //     .attr("r", 20);
 
             // register for resize event
             angular.element($window).bind("resize", resizeGraph);
@@ -151,9 +151,10 @@ function d3Graph($window, DiscourseNode) {
 
             let linktextRects, nodeRects;
             function recalculateNodeDimensions() {
-                linktextRects = getObjectDimensions(linktextHtml);
-                nodeRects = getObjectDimensions(nodeHtml);
+                nodeRects = cacheObjectDimensions(nodeHtml);
+                linktextRects = cacheObjectDimensions(linktextHtml);
             }
+            recalculateNodeDimensions();
 
             // let the simulation converge
             let ia = 0;
@@ -281,31 +282,32 @@ function d3Graph($window, DiscourseNode) {
                     svgContainer.call(zoom.translate(translate).scale(scale).event);
                 }
 
-                recalculateNodeDimensions();
+                // recalculateNodeDimensions();
+                drawGraph();
             }
 
             // we need to set the height and weight of the foreignobject
             // to the dimensions of the inner html container.
-            function getObjectDimensions(nodeHtml) {
-                return _.map(nodeHtml[0], (curr) =>
-                    _.pick(curr.getBoundingClientRect(), ["width", "height"])
+            function cacheObjectDimensions(nodeHtml) {
+                return _.map(nodeHtml[0], (curr) => {
+                    return {
+                        width: curr.offsetWidth,
+                        height: curr.offsetHeight
+                    };
+                }
                 );
-            }
-
-            // get the dimensions of a html element
-            function getElementDimensions(elem) {
-                return [elem.offsetWidth, elem.offsetHeight];
             }
 
             // resize graph according to the current element dimensions
             function resizeGraph() {
-                [width, height] = getElementDimensions(element[0]);
+                [width, height] = [element[0].offsetWidth, element[0].offsetHeight];
                 svg.style("width", width).style("height", height);
                 html.style("width", width + "px").style("height", height + "px");
                 // if graph was hidden when initialized,
                 // all foreign objects have size 0
                 // this call recalculates the sizes
                 focusMarkedNodes();
+                recalculateNodeDimensions();
             }
 
             // tick function, called in each step in the force calculation,
