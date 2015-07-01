@@ -8,7 +8,7 @@ import modules.requests.dsl._
 
 object Posts extends Nodes[Post] {
   val node = N(Post, PostAccess.apply,
-    ("connects-from", N <--- (Connects, EndContentRelationAccess(Connects, Post),
+    ("connects-from", N <--- (Connects, EndContentRelationAccess(Connects, Connectable),
       //TODO: should use HR --> to inject hyperrelationfactory...
       //("connects-to", HR --> StartContentRelationHyperAccess(Connects, Post)),
       ("connects-to", N --> new StartContentRelationHyperAccess(Connects, Post, Post, Connects, Post)),

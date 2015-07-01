@@ -63,7 +63,7 @@ object StartAnyRelation {
   RELATION <: AbstractRelation[START, END],
   END <: UuidNode
   ](factory: AbstractRelationFactory[START, RELATION, END]
-    ): UuidNodeFactory[START] => StartAnyRelation[START, RELATION, END] = {
+    ): UuidNodeMatchesFactory[START] => StartAnyRelation[START, RELATION, END] = {
     _ => new StartAnyRelation(factory)
   }
 }
@@ -91,7 +91,7 @@ object EndAnyRelation {
   RELATION <: AbstractRelation[START, END],
   END <: UuidNode
   ](factory: AbstractRelationFactory[START, RELATION, END]
-    ): UuidNodeFactory[END] => StartAnyRelation[START, RELATION, END] = {
+    ): UuidNodeMatchesFactory[END] => StartAnyRelation[START, RELATION, END] = {
     _ => new StartAnyRelation(factory)
   }
 }
@@ -142,7 +142,7 @@ object StartRelationRead {
   ](
     factory: AbstractRelationFactory[START, RELATION, END],
     nodeFactory: NodeFactory[END]
-    ): UuidNodeFactory[START] => StartRelationRead[START, RELATION, END] = {
+    ): UuidNodeMatchesFactory[START] => StartRelationRead[START, RELATION, END] = {
     _ => new StartRelationRead(factory, nodeFactory)
   }
 }
@@ -169,7 +169,7 @@ object EndRelationRead {
   ](
     factory: AbstractRelationFactory[START, RELATION, END],
     nodeFactory: NodeFactory[START]
-    ): UuidNodeFactory[END] => EndRelationRead[START, RELATION, END] = {
+    ): UuidNodeMatchesFactory[END] => EndRelationRead[START, RELATION, END] = {
     _ => new EndRelationRead(factory, nodeFactory)
   }
 }
@@ -240,7 +240,7 @@ object EndRelationReadDelete {
   ](
     factory: AbstractRelationFactory[START, RELATION, END],
     nodeFactory: NodeFactory[START]
-    ): UuidNodeFactory[END] => EndRelationReadDelete[START, RELATION, END] = {
+    ): UuidNodeMatchesFactory[END] => EndRelationReadDelete[START, RELATION, END] = {
     _ => new EndRelationReadDelete(factory, nodeFactory)
   }
 }

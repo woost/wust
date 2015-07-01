@@ -15,8 +15,7 @@ class VotesAccess(
 
   override def createHyper(startUuid: String, endUuid: String, user: User, json: JsValue) = {
     val start = Tag.matches(uuid = Some(startUuid), matches = Set("uuid"))
-    //TODO: should be a trait match Taggable
-    val end = Post.matches(uuid = Some(endUuid), matches = Set("uuid"))
+    val end = Taggable.matches(uuid = Some(endUuid), matches = Set("uuid"))
     val hyper = Categorizes.matches(start, end)
     val votes = Votes.merge(user, hyper, weight = weight, onMatch = Set("weight"))
     val failure = db.persistChanges(start, end, hyper, votes)
