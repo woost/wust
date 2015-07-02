@@ -14,7 +14,7 @@ function d3Graph($window, DiscourseNode) {
     };
 
     function link(scope, element) {
-        let onDoubleClick = scope.onClick || _.noop;
+        let onClick = scope.onClick || _.noop;
         let onDraw = scope.onDraw || _.noop;
 
         // watch for changes in the ngModel
@@ -78,10 +78,17 @@ function d3Graph($window, DiscourseNode) {
                 .style(transformOriginCompat,"top left");
                 // .style("pointer-events", "all");
 
-            // draw gravitational center
+            // // draw gravitational center
             // svgContainer.append("circle")
             //     .attr("cx",width/2)
             //     .attr("cy",height/2)
+            //     .attr("r", 20)
+            //     .style("fill","#7B00D6");
+
+            // // draw origin
+            // svgContainer.append("circle")
+            //     .attr("cx",0)
+            //     .attr("cy",0)
             //     .attr("r", 20);
 
             // register for resize event
@@ -140,29 +147,28 @@ function d3Graph($window, DiscourseNode) {
                 .selectAll()
                 .data(graph.nodes).enter()
                 .append("div")
-                .call(drag)
-                // .style("border", "1px solid blue")
-                .style("pointer-events", "all")
-                // .style("pointer-events", "all")
-                .on("dblclick", ignoreHyperEdge(node => onDoubleClick({ node })));
+                .style("pointer-events", "all");
 
-            // let nodeTools = node
-            //     .append("div")
-            //     .style("display", "inline-block")
-            //     .style("background","#C3E8FF");
-
-            // let nodeDragTool = nodeTools
-            //     .append("div")
-            //     .html("drag")
-            //     // .style("pointer-events", "all")
-            //     .style("cursor", d => d.hyperEdge ? "cursor" : "move");
-
-            let nodeHtml = node
+            let nodeHtml = node.append("div")
                 .style("position", "absolute")
                 .style("max-width", "150px") // to produce line breaks
-                .style("cursor", d => d.hyperEdge ? "cursor" : "move")
                 .attr("class", d => d.css)
-                .html(d => d.title);
+                .html(d => d.title)
+                .style("cursor", d => d.hyperEdge ? "inherit" : "pointer")
+                .on("click", ignoreHyperEdge(node => onClick({ node })));
+
+            let nodeTools = node.append("div")
+                .style("visibility", d => d.hyperEdge ? "hidden" : "inherit")
+                .style("position", "absolute")
+                .style("top", "-20px");
+                // .style("z-index", "200")
+                // .style("background","#C3E8FF");
+
+            let nodeDragTool = nodeTools.append("div")
+                .attr("class", "fa fa-arrows")
+                .style("cursor", d => d.hyperEdge ? "inherit" : "move")
+                .call(drag);
+
 
 
             // control whether tick function should draw
@@ -424,33 +430,40 @@ function d3Graph($window, DiscourseNode) {
 
             // keep track whether the node is currently being dragged
             let isDragging = false;
-            let dragOffsetX, dragOffsetY;
+            let dragStartNodeX, dragStartNodeY;
+            let dragStartMouseX, dragStartMouseY;
 
             function onDragStart(d) {
-                console.log("onDragStart");
+                let event = d3.event.sourceEvent;
+
                 d.fixed |= 2; // copied from force.drag
+
                 // prevent d3 from interpreting this as panning
                 d3.event.sourceEvent.stopPropagation();
-                let rect = nodeRects[d.index];
-                dragOffsetX = rect.width / 2 - d3.event.sourceEvent.offsetX;
-                dragOffsetY = rect.height / 2 - d3.event.sourceEvent.offsetY;
+
+                dragStartNodeX = d.x;
+                dragStartNodeY = d.y;
+                dragStartMouseX = event.clientX;
+                dragStartMouseY = event.clientY;
             }
 
             function onDrag(d) {
+                let event = d3.event.sourceEvent;
+                let scale = zoom.scale();
+
                 // check whether there was a substantial mouse movement. if
                 // not, we will interpret this as a click event after the
                 // mouse button is released (see dragended handler).
-                let scale = zoom.scale();
-                let diffX = (d.x - dragOffsetX) * scale - d3.event.x;
-                let diffY = (d.y - dragOffsetY) * scale - d3.event.y;
+                let diffX = dragStartMouseX - event.clientX;
+                let diffY = dragStartMouseY - event.clientY;
                 let diff = Math.sqrt(diffX * diffX + diffY * diffY);
                 isDragging = isDragging || (diff > 5);
 
                 if( isDragging ) {
                     // default positioning is center of node.
-                    // but we let node stay under grapped position.
-                    d.px = d3.event.x / scale + dragOffsetX;
-                    d.py = d3.event.y / scale + dragOffsetY;
+                    // but we let node stay under grabbed position.
+                    d.px = dragStartNodeX + (event.clientX - dragStartMouseX) / scale;
+                    d.py = dragStartNodeY + (event.clientY - dragStartMouseY) / scale;
                     drawGraph();
                     force.resume(); // restart annealing
                 }
