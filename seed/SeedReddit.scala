@@ -19,8 +19,8 @@ object SeedReddit extends Task {
   val ws = new play.api.libs.ws.ning.NingWSClient(builder.build())
   def getJson(url: String):JsValue = Await.result(ws.url(url).get(), 10.seconds).json
 
-  val subreddit = "gue"
-  val limit = 20
+  val subreddit = "scala"
+  val limit = 10
   println(s"importing comments from subreddit /r/$subreddit")
   val discourse = Discourse.empty
 
