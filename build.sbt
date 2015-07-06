@@ -18,24 +18,24 @@ lazy val wust = (project in file(".")).settings(
     // scalajs
     // "com.vmunier" %% "play-scalajs-scripts" % "0.2.0",
     // angular
-    "org.webjars" % "angularjs" % "1.3.15",
-    "org.webjars.bower" % "angular-ui-router" % "0.2.14",
+    "org.webjars" % "angularjs" % "1.4.1",
+    "org.webjars.bower" % "angular-ui-router" % "0.2.15",
     "org.webjars.bower" % "angular-bootstrap" % "0.13.0",
     "org.webjars.bower" % "angular-native-dragdrop" % "1.1.0",
     "org.webjars.bower" % "angular-restmod" % "1.1.8",
     "org.webjars.npm" % "angular-ui-layout" % "1.0.5-requirejs",
-    "org.webjars.bower" % "a0-angular-storage" % "0.0.9",
+    "org.webjars.bower" % "a0-angular-storage" % "0.0.11",
     "org.webjars.bower" % "ace-builds" % "1.1.9",
     "org.webjars.bower" % "angular-ui-ace" % "0.2.3",
     // styles and fonts
-    "org.webjars" % "animate.css" % "3.2.5",
+    "org.webjars" % "animate.css" % "3.3.0",
     "org.webjars.bower" % "bootstrap-css-only" % "3.3.4",
     "org.webjars" % "font-awesome" % "4.3.0-1",
     "org.webjars.bower" % "lodium" % "0.1.2",
     // js auth
     "org.webjars.bower" % "angular-jwt" % "0.0.7",
     // basic js libraries
-    "org.webjars.bower" % "lodash" % "3.8.0",
+    "org.webjars.bower" % "lodash" % "3.9.3",
     "org.webjars.bower" % "d3" % "3.5.5",
     "org.webjars.bower" % "humane-js" % "3.2.2",
     // markdown parser
@@ -72,7 +72,7 @@ lazy val schema = (project in file("schema")).
     scalaVersion := scalaV,
     scalacOptions ++= scalacOpts,
     libraryDependencies ++= Seq(
-      "com.github.renesca" %% "renesca" % "0.3.0",
+      "com.github.renesca" %% "renesca" % "0.3.1",
       "com.github.renesca" %% "renesca-magic" % "0.3.0",
       // for external inheritance and default value code
       "com.mohiva" %% "play-silhouette" % "2.0"
