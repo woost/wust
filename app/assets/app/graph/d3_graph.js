@@ -270,8 +270,13 @@ function d3Graph($window, DiscourseNode) {
                 // set node visibility
                 _.each(graph.nodes, (node, i) => {
                     let domNode = nodeHtml[0][i];
-                    domNode.style.opacity = (node.marked) ? 1.0 : notMarkedOpacity;
-                    domNode.style.visibility = node.visible ? "inherit" : "hidden";
+                    let domTool = nodeTools[0][i];
+                    let opacity = (node.marked) ? 1.0 : notMarkedOpacity;
+                    let visibility = node.visible ? "inherit" : "hidden";
+                    domNode.style.opacity = opacity;
+                    domNode.style.visibility = visibility;
+                    domTool.style.opacity = opacity;
+                    domTool.style.visibility = visibility;
                 });
 
                 // set edge visibility
