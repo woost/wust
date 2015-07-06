@@ -29,7 +29,7 @@ function graphViewCtrl($scope, DiscourseNode, $filter) {
     vm.graph.$then(createGraph);
 
     $scope.$watch("vm.search.title", filter);
-    let filtered = false;
+    let firstFilter = true;
 
     function createGraph(graph) {
         graph.nodes = graph.nodes.map(node => _.merge(node, {
@@ -38,8 +38,8 @@ function graphViewCtrl($scope, DiscourseNode, $filter) {
     }
 
     function filter() {
-        if (!filtered) {
-            filtered = true;
+        if (firstFilter) {
+            firstFilter = false;
             return;
         }
 
