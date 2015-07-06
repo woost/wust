@@ -21,8 +21,6 @@ graphViewCtrl.$inject = ["$scope", "DiscourseNode", "$filter"];
 function graphViewCtrl($scope, DiscourseNode, $filter) {
     let vm = this;
 
-    vm.graphLoading = true;
-    vm.onDraw = onDraw;
     vm.onClick = onClick;
     vm.search = {
         title: ""
@@ -31,6 +29,7 @@ function graphViewCtrl($scope, DiscourseNode, $filter) {
     vm.graph.$then(createGraph);
 
     $scope.$watch("vm.search.title", filter);
+    let filtered = false;
 
     function createGraph(graph) {
         graph.nodes = graph.nodes.map(node => _.merge(node, {
@@ -39,15 +38,16 @@ function graphViewCtrl($scope, DiscourseNode, $filter) {
     }
 
     function filter() {
+        if (!filtered) {
+            filtered = true;
+            return;
+        }
+
         let filtered = $filter("fuzzyFilter")(_.reject(vm.graph.nodes, { hyperEdge: true }), vm.search);
         $scope.$broadcast("d3graph_filter", filtered);
     }
 
     function onClick(node) {
         DiscourseNode.get(node.label).gotoState(node.id);
-    }
-
-    function onDraw() {
-        $scope.$apply(() => vm.graphLoading = false);
     }
 }

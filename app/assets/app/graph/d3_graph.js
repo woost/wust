@@ -1,8 +1,8 @@
 angular.module("wust.graph").directive("d3Graph", d3Graph);
 
-d3Graph.$inject = ["$window", "DiscourseNode"];
+d3Graph.$inject = ["$window", "DiscourseNode", "Helpers"];
 
-function d3Graph($window, DiscourseNode) {
+function d3Graph($window, DiscourseNode, Helpers) {
     return {
         restrict: "A",
         scope: {
@@ -20,10 +20,11 @@ function d3Graph($window, DiscourseNode) {
         // watch for changes in the ngModel
         scope.graph.$then(data => {
             let graph = angular.copy(data);
-            preprocessGraph(graph);
 
             // get dimensions of containing element
             let [width, height] = [element[0].offsetWidth, element[0].offsetHeight];
+
+            preprocessGraph(graph);
 
             // svg will stay in background and only render the edges
             let svg = d3.select(element[0])
@@ -78,18 +79,18 @@ function d3Graph($window, DiscourseNode) {
                 .style(transformOriginCompat,"top left");
                 // .style("pointer-events", "all");
 
-            // // draw gravitational center
-            // svgContainer.append("circle")
-            //     .attr("cx",width/2)
-            //     .attr("cy",height/2)
-            //     .attr("r", 20)
-            //     .style("fill","#7B00D6");
+            // draw gravitational center
+            svgContainer.append("circle")
+                .attr("cx",width/2)
+                .attr("cy",height/2)
+                .attr("r", 20)
+                .style("fill","#7B00D6");
 
-            // // draw origin
-            // svgContainer.append("circle")
-            //     .attr("cx",0)
-            //     .attr("cy",0)
-            //     .attr("r", 20);
+            // draw origin
+            svgContainer.append("circle")
+                .attr("cx",0)
+                .attr("cy",0)
+                .attr("r", 20);
 
             // register for resize event
             angular.element($window).bind("resize", resizeGraph);
@@ -103,7 +104,7 @@ function d3Graph($window, DiscourseNode) {
                 .friction(0.9)
                 // .linkDistance(120) // weak geometric constraint. Pushes nodes to achieve this distance
                 .linkDistance(d => connectsHyperEdge(d) ? 120 : 200)
-                .charge(d => d.hyperEdge ? -1500 : -1500)
+                .charge(d => -1000)
                 .gravity(0.1)
                 .theta(0.8)
                 .alpha(0.1)
@@ -173,15 +174,23 @@ function d3Graph($window, DiscourseNode) {
                 .style("cursor", d => d.hyperEdge ? "inherit" : "move")
                 .call(drag);
 
-
+            // visibility of convergence
+            let visibleConvergence = false;
 
             // control whether tick function should draw
-            let drawOnTick = false;
+            let drawOnTick = visibleConvergence;
 
             // register tick function
             force.on("tick", tick);
 
-            requestAnimationFrame(converge);
+            let convergeIterations = 0;
+            initConverge();
+            if (visibleConvergence) {
+                force.on("end", afterConverge);
+                force.start();
+            } else {
+                requestAnimationFrame(converge);
+            }
 
             // filter on event
             scope.$on("d3graph_filter", filter);
@@ -193,15 +202,12 @@ function d3Graph($window, DiscourseNode) {
             }
             recalculateNodeDimensions();
 
-            // let the simulation converge
-            let ia = 0;
-            let startTime = Date.now();
-
             function converge() {
+                let startTime = Date.now();
                 // keep a constant frame rate
-                while ((startTime + 300) > Date.now()) {
+                while (((startTime + 300) > Date.now()) && (force.alpha() > 0)) {
                     force.tick();
-                    ia++;
+                    convergeIterations++;
                 }
 
                 if (force.alpha() > 0) {
@@ -211,10 +217,7 @@ function d3Graph($window, DiscourseNode) {
                 }
             }
 
-            function afterConverge() {
-                console.log("needed " + ia + " ticks to converge.");
-                drawOnTick = true;
-
+            function initConverge() {
                 // focusMarkedNodes needs visible/marked nodes and edges
                 _.each(graph.nodes, n => {
                     n.marked = true;
@@ -224,13 +227,15 @@ function d3Graph($window, DiscourseNode) {
                     e.visible = true;
                 });
 
-
-                onDraw();
                 html.style("visibility", "visible");
                 svg.style("visibility", "visible");
-                drawGraph();
+            }
 
-                setTimeout(() => focusMarkedNodes(0), 400); //TODO: when is the right time to call focusMarkedNodes?
+            function afterConverge() {
+                drawOnTick = true;
+                console.log("needed " + convergeIterations + " ticks to converge.");
+                onDraw();
+                setTimeout(_.wrap(0, focusMarkedNodes), 200);
             }
 
             // filter the graph
@@ -356,7 +361,7 @@ function d3Graph($window, DiscourseNode) {
             // maps elements to positions
             function tick(e) {
                 // push hypernodes towards the center between its start/end node
-                let hyperEdgePull = 10 * e.alpha;
+                let hyperEdgePull = e.alpha;
                 graph.nodes.forEach(node => {
                     if (node.hyperEdge === true) {
                         let neighbours = graph.hyperNeighbours[node.id];
@@ -366,8 +371,20 @@ function d3Graph($window, DiscourseNode) {
                             x: (start.x + end.x) / 2,
                             y: (start.y + end.y) / 2
                         };
+                        let startDiffX = start.x - node.x;
+                        let startDiffY = start.y - node.y;
+                        let endDiffX = end.x - node.x;
+                        let endDiffY = end.y - node.y;
                         node.x += (center.x - node.x) * hyperEdgePull;
                         node.y += (center.y - node.y) * hyperEdgePull;
+                        let newStartDiffX = start.x - node.x;
+                        let newStartDiffY = start.y - node.y;
+                        let newEndDiffX = end.x - node.x;
+                        let newEndDiffY = end.y - node.y;
+                        start.x += (startDiffX - newStartDiffX) * hyperEdgePull;
+                        start.y += (startDiffX - newStartDiffX) * hyperEdgePull;
+                        end.x += (endDiffX - newEndDiffX) * hyperEdgePull;
+                        end.y += (endDiffX - newEndDiffX) * hyperEdgePull;
                     }
                 });
 
@@ -423,18 +440,14 @@ function d3Graph($window, DiscourseNode) {
             }
 
             // unfix the position of a given node
+            //TODO: why not just d.fixed = false?
             function unsetFixedPosition(d) {
                 d3.select(this).classed("fixed", d.fixed = false);
-                // need to explicitly resume the force, otherwise the graph
-                // is stuck until a node is dragged
-                force.resume();
             }
 
             // fix the position of a given node
             function setFixedPosition(d) {
                 d3.select(this).classed("fixed", d.fixed = true);
-
-                force.resume();
             }
 
             // keep track whether the node is currently being dragged
@@ -486,10 +499,7 @@ function d3Graph($window, DiscourseNode) {
                     setFixedPosition(d);
                 } else {
                     // if the user just clicked, the position should be reset.
-                    // we wait a moment before unsetting the fixed position in
-                    // case the user wants to double click the node, so it does
-                    // not float away beforehand.
-                    _.delay(unsetFixedPosition, 300, d);
+                    unsetFixedPosition(d);
                 }
 
                 isDragging = false;
@@ -515,6 +525,12 @@ function d3Graph($window, DiscourseNode) {
 
             // prepare graph for usage
             function preprocessGraph(graph) {
+                _(graph.nodes).reject(n => n.hyperEdge).each((n,i) => {
+                    let hash = Math.abs(Helpers.hashCode(n.id));
+                    n.x = width/2 + (hash & 0xfff) - 0xfff/2;
+                    n.y = height/2 + (hash >> 20) - 0xfff/2;
+                }).value();
+
                 // add index to edge
                 // TODO: how to avoid this?  we need to access the
                 // foreignobjects and html direcives through the edge
