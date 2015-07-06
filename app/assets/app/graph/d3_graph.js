@@ -116,6 +116,9 @@ function d3Graph($window, DiscourseNode) {
                 .on("drag", ignoreHyperEdge(onDrag))
                 .on("dragend", ignoreHyperEdge(onDragEnd));
 
+            let disableDrag = d3.behavior.drag()
+                .on("dragstart", (d) => d3.event.sourceEvent.stopPropagation());
+
             html.call(zoom)
                 .on("dblclick.zoom", null);
 
@@ -155,7 +158,8 @@ function d3Graph($window, DiscourseNode) {
                 .attr("class", d => d.css)
                 .html(d => d.title)
                 .style("cursor", d => d.hyperEdge ? "inherit" : "pointer")
-                .on("click", ignoreHyperEdge(node => onClick({ node })));
+                .on("click", ignoreHyperEdge(node => onClick({ node })))
+                .call(disableDrag);
 
             let nodeTools = node.append("div")
                 .style("visibility", d => d.hyperEdge ? "hidden" : "inherit")
