@@ -30,90 +30,18 @@ trait StartRelationAccess[
 START <: UuidNode,
 RELATION <: AbstractRelation[START, END],
 END <: UuidNode
-] extends RelationAccess[START, END] with DirectedRelationAccess[START, RELATION, END]
-
-trait EndRelationAccess[
-START <: UuidNode,
-RELATION <: AbstractRelation[START, END],
-END <: UuidNode
-] extends RelationAccess[END, START] with DirectedRelationAccess[START, RELATION, END]
-
-// TODO: AnyRelations should be deprecated or should be restrict to some
-// labels...
-@deprecated("Use strict RelationAccess", since = "renesca-0.3.0")
-class StartAnyRelation[
-START <: UuidNode,
-RELATION <: AbstractRelation[START, END],
-END <: UuidNode
-](
-  val factory: AbstractRelationFactory[START, RELATION, END]
-  ) extends StartRelationAccess[START, RELATION, END] {
-
-  def toNodeDefinition = AnyNodeDefinition()
-  def toNodeDefinition(uuid: String) = AnyUuidNodeDefinition(uuid)
-
-  override def read(baseDef: FixedNodeDefinition[START]) = {
-    Left(startConnectedDiscourseNodes(RelationDefinition(baseDef, factory, toNodeDefinition)))
-  }
-}
-
-object StartAnyRelation {
-  def apply[
-  START <: UuidNode,
-  RELATION <: AbstractRelation[START, END],
-  END <: UuidNode
-  ](factory: AbstractRelationFactory[START, RELATION, END]
-    ): UuidNodeMatchesFactory[START] => StartAnyRelation[START, RELATION, END] = {
-    _ => new StartAnyRelation(factory)
-  }
-}
-
-@deprecated("Use strict RelationAccess", since = "renesca-0.3.0")
-class EndAnyRelation[
-START <: UuidNode,
-RELATION <: AbstractRelation[START, END],
-END <: UuidNode
-](
-  val factory: AbstractRelationFactory[START, RELATION, END]
-  ) extends EndRelationAccess[START, RELATION, END] {
-
-  def toNodeDefinition = AnyNodeDefinition()
-  def toNodeDefinition(uuid: String) = AnyUuidNodeDefinition(uuid)
-
-  override def read(baseDef: FixedNodeDefinition[END]) = {
-    Left(endConnectedDiscourseNodes(RelationDefinition(toNodeDefinition, factory, baseDef)))
-  }
-}
-
-object EndAnyRelation {
-  def apply[
-  START <: UuidNode,
-  RELATION <: AbstractRelation[START, END],
-  END <: UuidNode
-  ](factory: AbstractRelationFactory[START, RELATION, END]
-    ): UuidNodeMatchesFactory[END] => StartAnyRelation[START, RELATION, END] = {
-    _ => new StartAnyRelation(factory)
-  }
-}
-
-trait StartRelationFactoryAccess[
-START <: UuidNode,
-RELATION <: AbstractRelation[START, END],
-END <: UuidNode
-] extends StartRelationAccess[START, RELATION, END] {
-  val factory: AbstractRelationFactory[START, RELATION, END]
+] extends RelationAccess[START, END] with DirectedRelationAccess[START, RELATION, END] {
   val nodeFactory: NodeFactory[END]
 
   def toNodeDefinition = ConcreteFactoryNodeDefinition(nodeFactory)
   def toNodeDefinition(uuid: String) = FactoryUuidNodeDefinition(nodeFactory, uuid)
 }
 
-trait EndRelationFactoryAccess[
+trait EndRelationAccess[
 START <: UuidNode,
 RELATION <: AbstractRelation[START, END],
 END <: UuidNode
-] extends EndRelationAccess[START, RELATION, END] {
-  val factory: AbstractRelationFactory[START, RELATION, END]
+] extends RelationAccess[END, START] with DirectedRelationAccess[START, RELATION, END] {
   val nodeFactory: NodeFactory[START]
 
   def toNodeDefinition = ConcreteFactoryNodeDefinition(nodeFactory)
@@ -127,7 +55,7 @@ END <: UuidNode
 ](
   val factory: AbstractRelationFactory[START, RELATION, END],
   val nodeFactory: NodeFactory[END]
-  ) extends StartRelationFactoryAccess[START, RELATION, END] {
+  ) extends StartRelationAccess[START, RELATION, END] {
 
   override def read(baseDef: FixedNodeDefinition[START]) = {
     Left(startConnectedDiscourseNodes(RelationDefinition(baseDef, factory, toNodeDefinition)))
@@ -154,7 +82,7 @@ END <: UuidNode
 ](
   val factory: AbstractRelationFactory[START, RELATION, END],
   val nodeFactory: NodeFactory[START]
-  ) extends EndRelationFactoryAccess[START, RELATION, END] {
+  ) extends EndRelationAccess[START, RELATION, END] {
 
   override def read(baseDef: FixedNodeDefinition[END]) = {
     Left(endConnectedDiscourseNodes(RelationDefinition(toNodeDefinition, factory, baseDef)))

@@ -2,14 +2,13 @@ package modules.db.access.custom
 
 import model.WustSchema._
 import modules.db.Database._
-import modules.db.access.EndRelationFactoryAccess
-import modules.db.{HyperNodeDefinitionBase, RelationDefinition}
+import modules.db.access.EndRelationAccess
 import play.api.libs.json.JsValue
 import renesca.parameter.implicits._
 
 class VotesAccess(
   weight: Long
-  ) extends EndRelationFactoryAccess[User, Votes, Categorizes] {
+  ) extends EndRelationAccess[User, Votes, Categorizes] {
   val factory = Votes
   val nodeFactory = User
 
