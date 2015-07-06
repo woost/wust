@@ -28,14 +28,14 @@ function Live() {
                 onClose: response => console.log(`Atmosphere disconnected on ${url} (${response.transport})`)
             }, request);
 
-            console.log("subscribing to " + url);
-            atmosphere.subscribe(newRequest);
+            // console.log("subscribing to " + url);
+            // atmosphere.subscribe(newRequest);
 
             return unsubscribe;
 
             function unsubscribe() {
-                console.log("unsubscribing " + url);
-                atmosphere.unsubscribe(newRequest);
+                // console.log("unsubscribing " + url);
+                // atmosphere.unsubscribe(newRequest);
             }
 
             function onMessage(response) {
