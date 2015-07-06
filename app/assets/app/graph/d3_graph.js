@@ -280,7 +280,7 @@ function d3Graph($window, DiscourseNode) {
                     domNode.style.opacity = opacity;
                     domNode.style.visibility = visibility;
                     domTool.style.opacity = opacity;
-                    domTool.style.visibility = visibility;
+                    domTool.style.visibility = node.hyperEdge ? "hidden" : visibility;
                 });
 
                 // set edge visibility
