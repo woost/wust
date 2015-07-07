@@ -5,7 +5,7 @@ ConnectedComponents.$inject = ["restmod", "GraphDecoder"];
 function ConnectedComponents(restmod, GraphDecoder) {
     return restmod.model("/components").mix({
         $hooks: {
-            "after-fetch": GraphDecoder.refreshIndex
+            "after-fetch": GraphDecoder.refreshHook
         }
     }, {
         nodes: {

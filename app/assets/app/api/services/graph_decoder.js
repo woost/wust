@@ -5,7 +5,7 @@ GraphDecoder.$inject = [];
 function GraphDecoder() {
     this.decodeNodes = decodeNodes;
     this.decodeEdges = decodeEdges;
-    this.refreshIndex = refreshIndex;
+    this.refreshHook = refreshHook;
 
     function decodeNodes(apiNodes) {
         //TODO: shouldn't the api return properly formatted nodes?
@@ -29,9 +29,19 @@ function GraphDecoder() {
         return edges;
     }
 
-    function refreshIndex() {
+
+    function refreshHook() {
+        refreshIndex(this);
+    }
+
+    function refreshIndex(graph) {
+        // also works on wrapped graphs!
+
+        let nodeProperties = ["id", "title", "description", "label", "css", "hyperEdge", "startId", "endId"];
+        let relationProperties = ["startId","endId","label","title"];
+
         // clear all neighbour information
-        _.each(this.nodes, n => {
+        _.each(graph.nodes, n => {
             n.inRelations = [];
             n.outRelations = [];
             Object.defineProperty(n, "relations", {
@@ -70,17 +80,30 @@ function GraphDecoder() {
             };
         });
 
+        graph.wrapped = function() {
+            let wrapped = {"self": this};
+            wrapped.nodes = _(this.nodes).map((n) => {
+                //TODO: define getters for properties instead of copying values
+                return _.merge({"self": n}, _.pick(n,nodeProperties));
+            }).value();
+            wrapped.edges = _(this.edges).map((r) => {
+                return _.merge({"self": r}, _.pick(r,relationProperties));
+            }).value();
+            refreshIndex(wrapped);
+            return wrapped;
+        };
+
         // hehe
-        _.each(this.nodes, n => {
+        _.each(graph.nodes, n => {
             // the id is a string, thus it won't be iterable but you can still
             // lookup nodes via their id: nodes[0] = first node, nodes["adsaf-c32"] = node with id "adsaf-c32"
-            this.nodes[n.id] = n;
+            graph.nodes[n.id] = n;
         });
 
         // reinitialize neighbours
-        _.each(this.edges, e => {
-            e.source = this.nodes[e.startId];
-            e.target = this.nodes[e.endId];
+        _.each(graph.edges, e => {
+            e.source = graph.nodes[e.startId];
+            e.target = graph.nodes[e.endId];
             e.source.outRelations.push(e);
             e.target.inRelations.push(e);
         });

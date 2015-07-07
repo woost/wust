@@ -18,7 +18,8 @@ function d3Graph($window, DiscourseNode, Helpers) {
         let onDraw = scope.onDraw || _.noop;
 
         // watch for changes in the ngModel
-        scope.graph.$then(graph => {
+        scope.graph.$then(_graph => {
+            let graph = _graph.wrapped();
 
             // get dimensions of containing element
             let [width, height] = [element[0].offsetWidth, element[0].offsetHeight];
