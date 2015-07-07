@@ -11,12 +11,12 @@ object Posts extends Nodes[Post] {
     ("connects-from", N <--- (Connects, EndContentRelationAccess(Connects, Connectable),
       //TODO: should use HR --> to inject hyperrelationfactory...
       //("connects-to", HR --> StartContentRelationHyperAccess(Connects, Post)),
-      ("connects-to", N --> new StartContentRelationHyperAccess(Connects, Post, Post, Connects, Post)),
-      ("connects-from", N <-- new EndContentRelationHyperAccess(Connects, Post, Post, Connects, Post))
+      ("connects-to", HR --> StartContentRelationHyperAccess(Connects, Post, Connectable, Connectable)),
+      ("connects-from", HR <-- EndContentRelationHyperAccess(Connects, Post, Connectable, Connectable))
     )),
     ("connects-to", N ---> (Connects, StartContentRelationAccess(Connects, Post),
-      ("connects-to", N --> new StartContentRelationHyperAccess(Connects, Post, Post, Connects, Post)),
-      ("connects-from", N <-- new EndContentRelationHyperAccess(Connects, Post, Post, Connects, Post))
+      ("connects-to", HR --> StartContentRelationHyperAccess(Connects, Post, Connectable, Connectable)),
+      ("connects-from", HR <-- EndContentRelationHyperAccess(Connects, Post, Connectable, Connectable))
     )),
     ("tags", N <--- (Categorizes, EndRelationRead(Categorizes, Tag),
       ("voters", N <-- EndRelationRead(Votes, User)),

@@ -73,7 +73,7 @@ END <: UuidNode
   override val factory: ContentRelationFactory[START, RELATION, END],
   nodeFactory: UuidNodeMatchesFactory[END],
   startFactory: UuidNodeMatchesFactory[ISTART],
-  baseFactory: HyperConnectionFactory[ISTART, START with AbstractRelation[ISTART, IEND], IEND] with NodeFactory[START],
+  baseFactory: HyperConnectionFactory[ISTART, START with AbstractRelation[ISTART, IEND], IEND] with UuidNodeFactory[START],
   endFactory: UuidNodeMatchesFactory[IEND]
   ) extends StartRelationReadDelete(factory, nodeFactory) with ContentRelationHelper {
 
@@ -98,8 +98,8 @@ object StartContentRelationHyperAccess {
   START <: UuidNode,
   RELATION <: AbstractRelation[START, END],
   END <: UuidNode
-  ](factory: ContentRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[END]): (UuidNodeMatchesFactory[ISTART], HyperConnectionFactory[ISTART, START with AbstractRelation[ISTART, IEND], IEND] with NodeFactory[START], UuidNodeMatchesFactory[IEND]) => StartContentRelationHyperAccess[ISTART, IEND, START, RELATION, END] = {
-    (startFactory, baseFactory, endFactory) => new StartContentRelationHyperAccess(factory, nodeFactory, startFactory, baseFactory, endFactory)
+  ](factory: ContentRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[END], startFactory: UuidNodeMatchesFactory[ISTART], endFactory: UuidNodeMatchesFactory[IEND]): (HyperConnectionFactory[ISTART, START with AbstractRelation[ISTART, IEND], IEND] with UuidNodeFactory[START]) => StartContentRelationHyperAccess[ISTART, IEND, START, RELATION, END] = {
+    baseFactory => new StartContentRelationHyperAccess(factory, nodeFactory, startFactory, baseFactory, endFactory)
   }
 }
 
@@ -143,7 +143,7 @@ END <: UuidNode
   override val factory: ContentRelationFactory[START, RELATION, END],
   nodeFactory: UuidNodeMatchesFactory[START],
   startFactory: UuidNodeMatchesFactory[ISTART],
-  baseFactory: HyperConnectionFactory[ISTART, END with AbstractRelation[ISTART, IEND], IEND] with NodeFactory[END],
+  baseFactory: HyperConnectionFactory[ISTART, END with AbstractRelation[ISTART, IEND], IEND] with UuidNodeFactory[END],
   endFactory: UuidNodeMatchesFactory[IEND]
   ) extends EndRelationReadDelete(factory, nodeFactory) with ContentRelationHelper {
 
@@ -168,7 +168,7 @@ object EndContentRelationHyperAccess {
   START <: UuidNode,
   RELATION <: AbstractRelation[START, END],
   END <: UuidNode
-  ](factory: ContentRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[START]): (UuidNodeMatchesFactory[ISTART], HyperConnectionFactory[ISTART, END with AbstractRelation[ISTART, IEND], IEND] with NodeFactory[END], UuidNodeMatchesFactory[IEND]) => EndContentRelationHyperAccess[ISTART, IEND, START, RELATION, END] = {
-    (startFactory, baseFactory, endFactory) => new EndContentRelationHyperAccess(factory, nodeFactory, startFactory, baseFactory, endFactory)
+  ](factory: ContentRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[START], startFactory: UuidNodeMatchesFactory[ISTART], endFactory: UuidNodeMatchesFactory[IEND]): (HyperConnectionFactory[ISTART, END with AbstractRelation[ISTART, IEND], IEND] with UuidNodeFactory[END]) => EndContentRelationHyperAccess[ISTART, IEND, START, RELATION, END] = {
+    baseFactory => new EndContentRelationHyperAccess(factory, nodeFactory, startFactory, baseFactory, endFactory)
   }
 }

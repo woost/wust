@@ -107,7 +107,7 @@ object dsl {
     RELATION <: AbstractRelation[START, END] with UuidNode,
     END <: UuidNode
     ](factory: HyperConnectionFactory[START, RELATION, END] with UuidNodeFactory[RELATION], op: UuidNodeFactory[START] => StartRelationAccess[START, RELATION, END], connectSchemas: (String, (HyperConnectionFactory[START,RELATION,END] with UuidNodeFactory[RELATION]) => ConnectSchema[RELATION])*): UuidNodeFactory[START] => StartHyperConnectSchema[START, RELATION, END] = {
-      (baseFactory) => StartHyperConnectSchema(factory, op(baseFactory), connectSchemas.toMap.mapValues(_(factory)))
+      baseFactory => StartHyperConnectSchema(factory, op(baseFactory), connectSchemas.toMap.mapValues(_(factory)))
     }
 
     def <---[
@@ -142,7 +142,7 @@ object dsl {
     START <: UuidNode,
     RELATION <: AbstractRelation[START, END],
     END <: UuidNode
-    ](op: (HyperConnectionFactory[ISTART,START with AbstractRelation[ISTART,IEND],IEND] with UuidNodeFactory[START]) => StartRelationAccess[START, RELATION, END]): (HyperConnectionFactory[ISTART,START with AbstractRelation[ISTART,IEND],IEND]  with UuidNodeFactory[START]) => StartConnectSchema[START, RELATION, END] = {
+    ](op: (HyperConnectionFactory[ISTART,START with AbstractRelation[ISTART,IEND],IEND] with UuidNodeFactory[START]) => StartRelationAccess[START, RELATION, END]): (HyperConnectionFactory[ISTART,START with AbstractRelation[ISTART,IEND],IEND] with UuidNodeFactory[START]) => StartConnectSchema[START, RELATION, END] = {
       baseFactory => StartConnectSchema(op(baseFactory))
     }
 
@@ -151,7 +151,7 @@ object dsl {
     IEND <: UuidNode,
     START <: UuidNode,
     RELATION <: AbstractRelation[START, END],
-    END <: AbstractRelation[_,_] with UuidNode
+    END <: UuidNode
     ](op: (HyperConnectionFactory[ISTART,END with AbstractRelation[ISTART,IEND],IEND] with UuidNodeFactory[END]) => EndRelationAccess[START, RELATION, END]): (HyperConnectionFactory[ISTART,END with AbstractRelation[ISTART,IEND],IEND] with UuidNodeFactory[END]) => EndConnectSchema[START, RELATION, END] = {
       baseFactory => EndConnectSchema(op(baseFactory))
     }
