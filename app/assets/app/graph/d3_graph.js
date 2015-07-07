@@ -18,8 +18,7 @@ function d3Graph($window, DiscourseNode, Helpers) {
         let onDraw = scope.onDraw || _.noop;
 
         // watch for changes in the ngModel
-        scope.graph.$then(data => {
-            let graph = angular.copy(data);
+        scope.graph.$then(graph => {
 
             // get dimensions of containing element
             let [width, height] = [element[0].offsetWidth, element[0].offsetHeight];
@@ -240,19 +239,12 @@ function d3Graph($window, DiscourseNode, Helpers) {
 
             // filter the graph
             function filter(event, filtered) {
-                let filteredIds = _.map(filtered, "id");
-                let ids = filteredIds;
-                for (let i = 0; i < ids.length; i++) {
-                    ids = _.union(ids, graph.edgeMap[ids[i]]);
-                }
+                let component = _(filtered).map(node => node.component()).flatten().uniq().value();
 
-                graph.nodes = _.map(graph.nodes, node => {
-                    let marked = _(filteredIds).includes(node.id);
-                    let visible = marked || _(ids).includes(node.id);
-                    return _.merge(node, {
-                        visible,
-                        marked
-                    });
+                _.each(graph.nodes, node => {
+                    node.marked = _(filtered).contains(node);
+                    node.visible = node.marked || _(component).contains(node);
+
                 });
 
                 _.each(graph.nodes, node => {
@@ -262,11 +254,8 @@ function d3Graph($window, DiscourseNode, Helpers) {
                     }
                 });
 
-                graph.edges = _.map(graph.edges, edge => {
-                    let visible = _(ids).includes(edge.source.id) && _(ids).includes(edge.target.id);
-                    return _.merge(edge, {
-                        visible
-                    });
+                _.each(graph.edges, edge => {
+                    edge.visible = _(component).includes(edge.source) && _(component).includes(edge.target);
                 });
 
                 setVisibility();
@@ -535,21 +524,6 @@ function d3Graph($window, DiscourseNode, Helpers) {
                 // TODO: how to avoid this?  we need to access the
                 // foreignobjects and html direcives through the edge
                 _.each(graph.edges, (e, i) => e.index = i);
-
-                // create edge map, maps node ids to connected node ids.
-                // at this point, the source/target ids are not yet translated
-                // into node objects by d3. thus, we reference nodes via the
-                // given index in edge.source/target.
-                graph.edgeMap = _(graph.edges).map(edge => {
-                    let source = graph.nodes[edge.source].id;
-                    let target = graph.nodes[edge.target].id;
-                    return {
-                        [source]: [target],
-                        [target]: [source]
-                    };
-                }).reduce(_.partialRight(_.merge, (a, b) => {
-                    return a ? a.concat(b) : b;
-                }, _)) || {};
 
                 graph.idToNode = _.indexBy(graph.nodes, "id");
                 graph.hyperNodes = _.filter(graph.nodes, node => node.hyperEdge === true);

@@ -4,8 +4,12 @@ ConnectedComponents.$inject = ["restmod", "GraphDecoder"];
 
 function ConnectedComponents(restmod, GraphDecoder) {
     return restmod.model("/components").mix({
+        $hooks: {
+            "after-fetch": GraphDecoder.refreshIndex
+        }
+    }, {
         nodes: {
-            decode: GraphDecoder.decodeNodes,
+            decode: GraphDecoder.decodeNodes
         },
         edges: {
             decode: GraphDecoder.decodeEdges
