@@ -240,23 +240,25 @@ function d3Graph($window, DiscourseNode, Helpers) {
 
             // filter the graph
             function filter(event, filtered) {
+                // TODO: filtered should contain wrapped nodes
+                // then we can remove ".self" in this function
                 let component = _(filtered).map(node => node.component()).flatten().uniq().value();
 
                 _.each(graph.nodes, node => {
-                    node.marked = _(filtered).contains(node);
-                    node.visible = node.marked || _(component).contains(node);
+                    node.marked = _(filtered).contains(node.self);
+                    node.visible = node.marked || _(component).contains(node.self);
 
                 });
 
                 _.each(graph.nodes, node => {
                     if(node.hyperEdge) {
                         //TODO: mark chains of hyperedges
-                        node.marked = node.marked || graph.hyperNeighbours[node.id].start.marked && graph.hyperNeighbours[node.id].end.marked;
+                        node.marked = node.marked || node.source.marked && node.target.marked;
                     }
                 });
 
                 _.each(graph.edges, edge => {
-                    edge.visible = _(component).includes(edge.source) && _(component).includes(edge.target);
+                    edge.visible = _(component).contains(edge.source.self) && _(component).contains(edge.target.self);
                 });
 
                 setVisibility();
@@ -354,9 +356,8 @@ function d3Graph($window, DiscourseNode, Helpers) {
                 let hyperEdgePull = e.alpha;
                 graph.nodes.forEach(node => {
                     if (node.hyperEdge === true) {
-                        let neighbours = graph.hyperNeighbours[node.id];
-                        let start = neighbours.start;
-                        let end = neighbours.end;
+                        let start = node.source;
+                        let end = node.target;
                         let center = {
                             x: (start.x + end.x) / 2,
                             y: (start.y + end.y) / 2
@@ -525,17 +526,6 @@ function d3Graph($window, DiscourseNode, Helpers) {
                 // TODO: how to avoid this?  we need to access the
                 // foreignobjects and html direcives through the edge
                 _.each(graph.edges, (e, i) => e.index = i);
-
-                graph.idToNode = _.indexBy(graph.nodes, "id");
-                graph.hyperNodes = _.filter(graph.nodes, node => node.hyperEdge === true);
-                //TODO: Map from node index to other node indices, to avoid string lookups
-                graph.hyperNeighbours = _.indexBy(_.map(graph.hyperNodes, node => {
-                    return {
-                        id: node.id,
-                        start: graph.idToNode[node.startId],
-                        end: graph.idToNode[node.endId]
-                    };
-                }), "id");
             }
 
             function lineIntersection(line1, line2) {

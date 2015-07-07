@@ -80,6 +80,12 @@ function GraphDecoder() {
             };
         });
 
+        Object.defineProperty(graph, "hyperRelations", {
+            get: function() {
+                return _(this.nodes).filter((n) => n.hyperEdge === true).value();
+            }
+        });
+
         graph.wrapped = function() {
             let wrapped = {"self": this};
             wrapped.nodes = _(this.nodes).map((n) => {
@@ -101,7 +107,7 @@ function GraphDecoder() {
         });
 
         // reinitialize neighbours
-        _.each(graph.edges, e => {
+        _.each(graph.edges.concat(graph.hyperRelations), e => {
             e.source = graph.nodes[e.startId];
             e.target = graph.nodes[e.endId];
             e.source.outRelations.push(e);

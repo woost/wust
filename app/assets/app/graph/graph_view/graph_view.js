@@ -32,9 +32,9 @@ function graphViewCtrl($scope, DiscourseNode, $filter) {
     let firstFilter = true;
 
     function createGraph(graph) {
-        graph.nodes = graph.nodes.map(node => _.merge(node, {
-            css: node.hyperEdge ? "relation_label" : `node ${DiscourseNode.get(node.label).css}`
-        }));
+        _.each(graph.nodes, (n) => {
+            n.css = n.hyperEdge ? "relation_label" : `node ${DiscourseNode.get(n.label).css}`;
+        });
     }
 
     function filter() {
