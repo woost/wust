@@ -38,34 +38,38 @@ function GraphDecoder() {
         // also works on wrapped graphs!
 
         let nodeProperties = ["id", "title", "description", "label", "css", "hyperEdge", "startId", "endId"];
-        let relationProperties = ["startId","endId","label","title"];
+        let relationProperties = ["startId", "endId", "label", "title"];
 
         // clear all neighbour information
         _.each(graph.nodes, n => {
             n.inRelations = [];
             n.outRelations = [];
-            Object.defineProperty(n, "relations", {
-                get: function() {
-                    return this.inRelations.concat(this.outRelations);
-                }
-            });
-            Object.defineProperty(n, "inNeighbours", {
-                get: function() {
-                    return _.map(this.inRelations, r => r.source);
-                }
-            });
-            Object.defineProperty(n, "outNeighbours", {
-                get: function() {
-                    return _.map(this.outRelations, r => r.target);
-                }
-            });
-            Object.defineProperty(n, "neighbours", {
-                get: function() {
-                    return this.inNeighbours.concat(this.outNeighbours);
+            Object.defineProperties(n, {
+                relations: {
+                    get: function() {
+                        return this.inRelations.concat(this.outRelations);
+                    }
+                },
+                inNeighbours: {
+                    get: function() {
+                        return _.map(this.inRelations, r => r.source);
+                    }
+                },
+                outNeighbours: {
+                    get: function() {
+                        return _.map(this.outRelations, r => r.target);
+                    }
+                },
+                neighbours: {
+                    get: function() {
+                        return this.inNeighbours.concat(this.outNeighbours);
+                    }
                 }
             });
             n.component = function() {
                 let visited = new Set();
+                findNeighbours(this);
+                return Array.from(visited);
 
                 function findNeighbours(node) {
                     if (visited.has(node))
@@ -74,27 +78,23 @@ function GraphDecoder() {
                     visited.add(node);
                     _.each(node.neighbours, findNeighbours);
                 }
-
-                findNeighbours(this);
-                return Array.from(visited);
             };
         });
 
-        Object.defineProperty(graph, "hyperRelations", {
-            get: function() {
-                return _(this.nodes).filter((n) => n.hyperEdge === true).value();
+        Object.defineProperties(graph, {
+            hyperRelations: {
+                get: function() {
+                    return _(this.nodes).filter((n) => n.hyperEdge === true).value();
+                }
             }
         });
 
         graph.wrapped = function() {
-            let wrapped = {"self": this};
-            wrapped.nodes = _(this.nodes).map((n) => {
-                //TODO: define getters for properties instead of copying values
-                return _.merge({"self": n}, _.pick(n,nodeProperties));
-            }).value();
-            wrapped.edges = _(this.edges).map((r) => {
-                return _.merge({"self": r}, _.pick(r,relationProperties));
-            }).value();
+            let wrapped = {
+                "self": this
+            };
+            wrapped.nodes = _.map(this.nodes, n => new Decorator(n, nodeProperties));
+            wrapped.edges = _.map(this.edges, r => new Decorator(r, relationProperties));
             refreshIndex(wrapped);
             return wrapped;
         };
@@ -113,5 +113,18 @@ function GraphDecoder() {
             e.source.outRelations.push(e);
             e.target.inRelations.push(e);
         });
+
+        function Decorator(self, decorateProperties) {
+            let properties = _(decorateProperties).map(prop => {
+                return {
+                    [prop]: {
+                        get: () => self[prop],
+                        set: val => self.prop = val
+                    }
+                };
+            }).reduce(_.merge);
+
+            Object.defineProperties(this, properties);
+        }
     }
 }
