@@ -38,7 +38,7 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
             //TODO: why do we have nulls here???
 
             if (_.any(this.addedTags))
-                //TODO: why do we have nulls here?
+            //TODO: why do we have nulls here?
                 dirtyModel.addedTags = _.compact(this.addedTags);
 
             return dirtyModel;
@@ -123,11 +123,24 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
     }
 
     function assureSessionExists(node) {
-        let existing = _.find(self.stack, _.pick(node, "id"));
-        if (existing) {
-            _.remove(self.stack, existing);
+        let existing;
+        if (node === undefined) {
+            // fresh session
+            existing = new Session({});
+        } else if (node.id !== undefined) {
+            // add existing node for editing
+            existing = _.find(self.stack, _.pick(node, "id"));
+            if (existing) {
+                // we move the existing to the top.
+                _.remove(self.stack, existing);
+            } else {
+                existing = new Session(node);
+            }
         } else {
-            existing = new Session(node);
+            // this has to be a node which is currently edited
+            // can happen when you drag a node within the scratchpad
+            // TODO: disallow dragging nodes within scratchpad
+            return node;
         }
 
         self.stack.push(existing);
