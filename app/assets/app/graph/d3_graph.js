@@ -22,7 +22,6 @@ function d3Graph($window, DiscourseNode, Helpers) {
             let [width, height] = [element[0].offsetWidth, element[0].offsetHeight];
 
             setInitialNodePositions();
-            setEdgeIndices();
 
             // svg will stay in background and only render the edges
             let svg = d3.select(element[0])
@@ -192,10 +191,9 @@ function d3Graph($window, DiscourseNode, Helpers) {
             // filter on event
             scope.$on("d3graph_filter", filter);
 
-            let linktextRects, nodeRects;
             function recalculateNodeDimensions() {
-                nodeRects = cacheObjectDimensions(nodeHtml);
-                linktextRects = cacheObjectDimensions(linktextHtml);
+                cacheObjectDimensions(nodeHtml);
+                cacheObjectDimensions(linktextHtml);
             }
             recalculateNodeDimensions();
 
@@ -333,8 +331,9 @@ function d3Graph($window, DiscourseNode, Helpers) {
             // we need to set the height and weight of the foreignobject
             // to the dimensions of the inner html container.
             function cacheObjectDimensions(nodeHtml) {
-                return _.map(nodeHtml[0], (curr) => {
-                    return {
+                _.each(nodeHtml[0], (curr) => {
+                    // __data__ contains the respective node/relation object
+                    curr.__data__.rect = {
                         width: curr.offsetWidth,
                         height: curr.offsetHeight
                     };
@@ -394,14 +393,14 @@ function d3Graph($window, DiscourseNode, Helpers) {
                 link.each(function(link) {
                     if( link.source.id === link.target.id ) { // self loop
                         //TODO: self loops with hypernodes
-                        let rect = linktextRects[link.index];
+                        let rect = link.rect;
                         d3.select(this).attr("d", `
                                 M ${link.source.x} ${link.source.y - rect.height/2}
                                 m -20, 0
                                 c -80,-80   120,-80   40,0
                                 `);
                     } else {
-                        const line = Helpers.clampLineByRects(link, nodeRects[link.source.index], nodeRects[link.target.index]);
+                        const line = Helpers.clampLineByRects(link, link.source.rect, link.target.rect);
                         const pathAttr = `M ${line.x1} ${line.y1} L ${line.x2} ${line.y2}`;
                         d3.select(this).attr("d", pathAttr);
                     }
@@ -409,13 +408,12 @@ function d3Graph($window, DiscourseNode, Helpers) {
 
                 node.style(transformCompat, d => {
                     // center the node on link ends
-                    let rect = nodeRects[d.index];
-                    return "translate(" + (d.x - rect.width / 2) + "px," + (d.y - rect.height / 2) + "px)";
+                    return "translate(" + (d.x - d.rect.width / 2) + "px," + (d.y - d.rect.height / 2) + "px)";
                 });
 
                 linkText.style(transformCompat, d => {
                     // center the linktext
-                    let rect = linktextRects[d.index];
+                    let rect = d.rect;
                     if( d.source.id === d.target.id ) { // self loop
                         return "translate(" + (d.source.x - rect.width/2) + "px," + (d.source.y - rect.height/2 - 70) + "px)";
                     } else {
@@ -526,15 +524,6 @@ function d3Graph($window, DiscourseNode, Helpers) {
                     n.y = height/2 + ((hash & 0x00fff000) >> 12) - 0xfff/2;
                 }).value();
             }
-
-            function setEdgeIndices() {
-                // add index to edge
-                // TODO: how to avoid this?  we need to access the
-                // foreignobjects and html direcives through the edge
-                _.each(graph.edges, (e, i) => e.index = i);
-            }
-
-
         });
     }
 }
