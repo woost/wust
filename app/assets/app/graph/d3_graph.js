@@ -104,8 +104,8 @@ function d3Graph($window, DiscourseNode, Helpers) {
                 .charge(d => -1000)
                 .gravity(0.1)
                 .theta(0.8)
-                .alpha(0.1)
                 .start();
+                // .alpha(0.1);
 
             // define events
             let zoom = d3.behavior.zoom().scaleExtent([0.1, 10]).on("zoom", zoomed);
@@ -184,7 +184,6 @@ function d3Graph($window, DiscourseNode, Helpers) {
             initConverge();
             if (visibleConvergence) {
                 force.on("end", afterConverge);
-                force.start();
             } else {
                 requestAnimationFrame(converge);
             }
@@ -224,15 +223,26 @@ function d3Graph($window, DiscourseNode, Helpers) {
                     e.visible = true;
                 });
 
-                html.style("visibility", "visible");
-                svg.style("visibility", "visible");
+                if( visibleConvergence ) {
+                    recalculateNodeDimensions();
+                    focusMarkedNodes(0);
+                    html.style("visibility", "visible");
+                    svg.style("visibility", "visible");
+                }
             }
 
             function afterConverge() {
                 drawOnTick = true;
                 console.log("needed " + convergeIterations + " ticks to converge.");
                 onDraw();
-                setTimeout(_.wrap(0, focusMarkedNodes), 200);
+                if( visibleConvergence )
+                    focusMarkedNodes();
+                else
+                    focusMarkedNodes(0);
+
+
+                html.style("visibility", "visible");
+                svg.style("visibility", "visible");
             }
 
             // filter the graph
@@ -316,7 +326,6 @@ function d3Graph($window, DiscourseNode, Helpers) {
                     svgContainer.call(zoom.translate(translate).scale(scale).event);
                 }
 
-                // recalculateNodeDimensions();
                 drawGraph();
             }
 
@@ -513,8 +522,8 @@ function d3Graph($window, DiscourseNode, Helpers) {
             function preprocessGraph(graph) {
                 _(graph.nodes).reject(n => n.hyperEdge).each((n,i) => {
                     let hash = Math.abs(Helpers.hashCode(n.id));
-                    n.x = width/2 + (hash & 0xfff) - 0xfff/2;
-                    n.y = height/2 + (hash >> 20) - 0xfff/2;
+                    n.x = width/2   + (hash & 0x00000fff) - 0xfff/2;
+                    n.y = height/2 + ((hash & 0x00fff000) >> 12) - 0xfff/2;
                 }).value();
 
                 // add index to edge
