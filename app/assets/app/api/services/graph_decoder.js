@@ -3,13 +3,10 @@ angular.module("wust.api").service("GraphDecoder", GraphDecoder);
 GraphDecoder.$inject = ["$q"];
 
 function GraphDecoder($q) {
-    // extends the restmod record
-    let extendedRecord = {};
-
     // expose restmod mixin
     this.mixin = {
         $hooks: {
-            "after-fetch": refreshHook
+            "after-fetch": constructGraphFromRecord
         },
         $extend: {
             Record: {
@@ -23,7 +20,6 @@ function GraphDecoder($q) {
             decode: decodeEdges
         }
     };
-
 
     // convenience method for having a promise on a wrapped graph
     function wrappedPromise() {
@@ -57,16 +53,16 @@ function GraphDecoder($q) {
     }
 
 
-    function refreshHook() {
-        refreshIndex(this);
+    function constructGraphFromRecord() {
+        constructGraph(this);
+    }
+
+    function constructGraph(graph) {
+        refreshIndex(graph);
+        defineGraphMethods(graph);
     }
 
     function refreshIndex(graph) {
-        // also works on wrapped graphs!
-
-        let nodeProperties = ["id", "title", "description", "label", "hyperEdge", "startId", "endId"];
-        let relationProperties = ["startId", "endId", "label", "title"];
-
         // clear all neighbour information
         _.each(graph.nodes, n => {
             n.inRelations = [];
@@ -116,16 +112,6 @@ function GraphDecoder($q) {
             }
         });
 
-        graph.wrapped = function() {
-            let wrapped = {
-                "self": this
-            };
-            wrapped.nodes = _.map(this.nodes, n => new Decorator(n, nodeProperties));
-            wrapped.edges = _.map(this.edges, r => new Decorator(r, relationProperties));
-            refreshIndex(wrapped);
-            return wrapped;
-        };
-
         // hehe
         _.each(graph.nodes, n => {
             // the id is a string, thus it won't be iterable but you can still
@@ -140,18 +126,57 @@ function GraphDecoder($q) {
             e.source.outRelations.push(e);
             e.target.inRelations.push(e);
         });
+    }
 
-        function Decorator(self, decorateProperties) {
-            let properties = _(decorateProperties).map(prop => {
-                return {
-                    [prop]: {
-                        get: () => self[prop],
-                        set: val => self[prop] = val
-                    }
-                };
-            }).reduce(_.merge);
+    function defineGraphMethods(graph) {
+        // also works on wrapped graphs!
+        let nodeProperties = ["id", "title", "description", "label", "hyperEdge", "startId", "endId"];
+        let relationProperties = ["startId", "endId", "label", "title"];
 
-            Object.defineProperties(this, properties);
-        }
+        graph.knownWrappers = [];
+        graph.wrapped = function() {
+            let wrapped = {
+                "self": this
+            };
+            wrapped.nodes = _.map(this.nodes, n => new Decorator(n, nodeProperties));
+            wrapped.edges = _.map(this.edges, r => new Decorator(r, relationProperties));
+            refreshIndex(wrapped);
+            this.knownWrappers.push(wrapped);
+
+            return wrapped;
+        };
+        graph.addNode = function(node) {
+            _.each(this.knownWrappers, wrapper => wrapper.addNode(node));
+            this.nodes.push(node);
+            refreshIndex(this);
+        };
+        graph.addRelation = function(relation) {
+            _.each(this.knownWrappers, wrapper => wrapper.addRelation(relation));
+            this.relations.push(relation);
+            refreshIndex(this);
+        };
+        graph.removeNode = function(node) {
+            _.each(this.knownWrappers, wrapper => wrapper.removeNode(node));
+            _.remove(this.nodes, node);
+            refreshIndex(this);
+        };
+        graph.removeRelation = function(relation) {
+            _.each(this.knownWrappers, wrapper => wrapper.removeRelation(relation));
+            _.remove(this.relations, relation);
+            refreshIndex(this);
+        };
+    }
+
+    function Decorator(self, decorateProperties) {
+        let properties = _(decorateProperties).map(prop => {
+            return {
+                [prop]: {
+                    get: () => self[prop],
+                    set: val => self[prop] = val
+                }
+            };
+        }).reduce(_.merge);
+
+        Object.defineProperties(this, properties);
     }
 }
