@@ -17,16 +17,10 @@ function branchGraph(DiscourseNode) {
         let onDraw = scope.onDraw || _.noop;
 
         // watch for changes in the ngModel
-        scope.graph.$then(data => {
-
-            //TODO: this is a workaround. Copy graph only once in branch view or wrap original graph
-            data.branchData = data.branchData || angular.copy(data);
-            let graph = data.branchData;
+        scope.graph.$then(_graph => {
+            let graph = _graph.wrapped();
 
             // globals which are set in preprocessGraph
-            let neighbourMap;
-            let predecessorMap;
-            let successorMap;
             let lowestLine = 0;
             preprocessGraph(graph); // assigns node positions in .line and .xShift
 
@@ -52,15 +46,15 @@ function branchGraph(DiscourseNode) {
 
             let edgesWithSquashedHyperEdges = _(graph.edges).reject(
                     // remove edges between hidden nodes
-                    (edge) => graph.nodes[edge.target]._hidden && graph.nodes[edge.source]._hidden
+                    (edge) => edge.target._hidden && edge.source._hidden
                     ).map((edge) => {
                 // point startHyperEdges to the hypernode target
                 // then remove endHyperEdges
-                let target = graph.nodes[edge.target];
+                let target = edge.target;
                 if( target._hidden )
-                    edge.target = graph.nodes.indexOf(successorMap[target.id][0]);
+                    edge.target = target.successors[0];
                 return edge;
-            }).reject((edge) => graph.nodes[edge.source]._hidden).value();
+            }).reject((edge) => edge.source._hidden).value();
 
             let linksvg = svg.append("g").attr("id","group_links")
                 .selectAll()
@@ -94,8 +88,6 @@ function branchGraph(DiscourseNode) {
             // create edges in the svg
             let link = linksvg
                 .each(function(link) {
-                    let target = graph.nodes[link.target];
-                    let source = graph.nodes[link.source];
                     let thisLink = d3.select(this);
 
                     // if link is startRelation of a Hypernode
@@ -106,12 +98,12 @@ function branchGraph(DiscourseNode) {
                     // }
 
                     thisLink.style("stroke-width", border);
-                    thisLink.style("stroke", branchColor(graph.nodes[link.source].branch));
-                    // thisLink.style("stroke-dasharray", d => graph.nodes[link.source].newBranch !== undefined ? ""+(3+graph.nodes[link.source].newBranch/3)+" 5 5 5" : "");
+                    thisLink.style("stroke", branchColor(link.source.branch));
+                    // thisLink.style("stroke-dasharray", d => link.source.newBranch !== undefined ? ""+(3+link.source.newBranch/3)+" 5 5 5" : "");
                 })
             .attr("d",(link) => {
-                let a = graph.nodes[link.target]; // top
-                let b = graph.nodes[link.source]; // bottom
+                let a = link.target; // top
+                let b = link.source; // bottom
                 let r = 50;
                 function sgn(x) {return x > 0 ? 1 : -1; }
                 function abs(x) {return Math.abs(x); }
@@ -186,14 +178,14 @@ function branchGraph(DiscourseNode) {
                 }
             }
 
-            function positionNodePredecessors(branches, predecessorMap, maxWidth = 6, maxYShifts = [], nextLine = 0, nextBranchId = 0) {
+            function positionNodePredecessors(branches, maxWidth = 6, maxYShifts = [], nextLine = 0, nextBranchId = 0) {
                 if(branches.length === 0) return;
 
                 let current = branches[0];
                 if(current.positioned) return; // found a circle
                 current.positioned = true;
 
-                let predecessors = predecessorMap[current.id] || [];
+                let predecessors = current.predecessors;
 
                 // decide, which branch to take first
                 // predecessors = _.sortBy(predecessors, p => p.title);
@@ -212,6 +204,7 @@ function branchGraph(DiscourseNode) {
                     let isLine = predecessors.length === 1;
                     if(predecessors.length > 0) { // more than one child
                         _.each(predecessors, (p,i) => {
+                            console.log(p,i);
                             p.branch = isLine ? current.branch : nextBranchId++; // TODO: not in loop
                             p.line = nextLine++;
                             p.xShift = findFreeShift(current.line, current.xShift, maxYShifts, maxWidth);
@@ -221,47 +214,15 @@ function branchGraph(DiscourseNode) {
                 }
 
                 let nextBranches = predecessors.concat(_.tail(branches));
-                positionNodePredecessors(nextBranches, predecessorMap, maxWidth, maxYShifts, nextLine, nextBranchId);
+                positionNodePredecessors(nextBranches, maxWidth, maxYShifts, nextLine, nextBranchId);
             }
 
             function preprocessGraph(graph) {
-                predecessorMap = _(graph.edges).map(edge => {
-                    let source = graph.nodes[edge.source];
-                    let target = graph.nodes[edge.target];
-                    return {
-                        [target.id]: [source]
-                    };
-                }).reduce(_.partialRight(_.merge, (a, b) => {
-                    return a ? a.concat(b) : b;
-                }, _)) || {};
-
-                successorMap = _(graph.edges).map(edge => {
-                    let source = graph.nodes[edge.source];
-                    let target = graph.nodes[edge.target];
-                    return {
-                        [source.id]: [target]
-                    };
-                }).reduce(_.partialRight(_.merge, (a, b) => {
-                    return a ? a.concat(b) : b;
-                }, _)) || {};
-
-                neighbourMap = _(graph.edges).map(edge => {
-                    let source = graph.nodes[edge.source];
-                    let target = graph.nodes[edge.target];
-                    return {
-                        [target.id]: [source],
-                        [source.id]: [target]
-                    };
-                }).reduce(_.partialRight(_.merge, (a, b) => {
-                    return a ? a.concat(b) : b;
-                }, _)) || {};
-
                 function showPredecessors(node) {
                     if(node._hidden === false) return;
                     node._hidden = false;
 
-                    let predecessors = predecessorMap[node.id] || [];
-                    _.each(predecessors, (p) => showPredecessors(p));
+                    _.each(node.predecessors, showPredecessors);
                 }
                 function hideAllSuccessors(node) {
                     showPredecessors(node);
@@ -273,10 +234,8 @@ function branchGraph(DiscourseNode) {
                     let direct = [];
                     let leaf = [];
 
-                    let successors = successorMap[node.id] || [];
-                    _.each(successors, (s) => { // hypernodes
-                        let successors = successorMap[s.id] || [];
-                        _.each(successors, (s) => { // posts
+                    _.each(node.successors, (s) => { // hypernodes
+                        _.each(s.successors, (s) => { // posts
                             s.directSuccessor = true;
                             direct.push(s);
                         });
@@ -284,12 +243,11 @@ function branchGraph(DiscourseNode) {
 
                     function showLeafSuccessorsRec(node) {
                         //TODO: circle detection
-                        let successors = successorMap[node.id] || [];
-                        if(successors.length === 0) { // node is leaf
+                        if(node.outDegree === 0) { // node is leaf
                             node.leaf = true;
                             leaf.push(node);
                         } else {
-                            _.each(successors, (s) => showLeafSuccessorsRec(s));
+                            _.each(node.successors, showLeafSuccessorsRec);
                         }
                     }
                     showLeafSuccessorsRec(node);
@@ -313,7 +271,7 @@ function branchGraph(DiscourseNode) {
                 }
 
                 function hideLonelyHyperNodes() {
-                    _.each(graph.nodes, (node) => node._hidden = node._hidden || (node.hyperEdge && neighbourMap[node.id].length <= 2));
+                    _.each(graph.nodes, (node) => node._hidden = node._hidden || (node.hyperEdge && node.degree <= 2));
                 }
 
                 let rootNode = _.find(graph.nodes, { id: scope.rootId });
@@ -322,7 +280,7 @@ function branchGraph(DiscourseNode) {
                 showDirectAndLeafSuccessors(rootNode);
                 hideLonelyHyperNodes();
 
-                positionNodePredecessors([rootNode], predecessorMap, 100);
+                positionNodePredecessors([rootNode], 100);
 
                 onDraw();
             }

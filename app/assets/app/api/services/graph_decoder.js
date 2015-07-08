@@ -73,22 +73,38 @@ function GraphDecoder($q) {
                         return this.inRelations.concat(this.outRelations);
                     }
                 },
-                inNeighbours: {
+                predecessors: {
                     get: function() {
                         return _.map(this.inRelations, r => r.source);
                     }
                 },
-                outNeighbours: {
+                successors: {
                     get: function() {
                         return _.map(this.outRelations, r => r.target);
                     }
                 },
                 neighbours: {
                     get: function() {
-                        return this.inNeighbours.concat(this.outNeighbours);
+                        return this.predecessors.concat(this.successors);
+                    }
+                },
+                inDegree: {
+                    get: function() {
+                        return this.inRelations.length;
+                    }
+                },
+                outDegree: {
+                    get: function() {
+                        return this.outRelations.length;
+                    }
+                },
+                degree: {
+                    get: function() {
+                        return this.inDegree + this.outDegree;
                     }
                 }
             });
+
             n.component = function() {
                 let visited = new Set();
                 findNeighbours(this);
