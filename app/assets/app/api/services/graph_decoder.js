@@ -158,7 +158,8 @@ function GraphDecoder($q) {
             };
             wrapped.nodes = _.map(this.nodes, n => new Decorator(n, nodeProperties));
             wrapped.edges = _.map(this.edges, r => new Decorator(r, relationProperties));
-            refreshIndex(wrapped);
+            wrapped.$pk = this.$pk;
+            constructGraph(wrapped);
             knownWrappers.push(wrapped);
 
             return wrapped;
@@ -207,6 +208,9 @@ function GraphDecoder($q) {
             _.remove(relation.source.outRelations, relation);
             _.each(knownWrappers, wrapper => wrapper.removeRelation(relation));
         };
+        graph.rootNode = _.find(graph.nodes, {
+            id: graph.$pk
+        });
     }
 
     function Decorator(self, decorateProperties) {

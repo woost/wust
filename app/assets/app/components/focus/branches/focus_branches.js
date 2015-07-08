@@ -7,8 +7,7 @@ function focusBranches() {
         restrict: "A",
         templateUrl: "assets/app/components/focus/branches/branches.html",
         scope: {
-            component: "=",
-            rootId: "="
+            component: "="
         },
         controller: BranchesCtrl,
         controllerAs: "vm",
