@@ -122,11 +122,8 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
         editStore.set("stack", self.stack);
     }
 
-    function assureSessionExists(node = {}) {
-        let existing = node.id !== undefined ? _.find(self.stack, {
-            id: node.id
-        }) : undefined;
-
+    function assureSessionExists(node) {
+        let existing = _.find(self.stack, _.pick(node, "id"));
         if (existing) {
             _.remove(self.stack, existing);
         } else {
