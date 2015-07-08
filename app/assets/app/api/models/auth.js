@@ -47,6 +47,7 @@ function Auth($rootScope, $window, restmod, jwtHelper, store) {
 
     function logout() {
         // TODO: should this really be a get request
+        // also it does not do anything, except telling the server "i clicked logout" - who cares? we just forget the jwt token locally.
         service.signout.$fetch().$then(response => {
             logoutLocally();
             humane.success("Logged out");
