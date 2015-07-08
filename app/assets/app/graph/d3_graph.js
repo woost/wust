@@ -21,7 +21,8 @@ function d3Graph($window, DiscourseNode, Helpers) {
             // get dimensions of containing element
             let [width, height] = [element[0].offsetWidth, element[0].offsetHeight];
 
-            preprocessGraph(graph);
+            setInitialNodePositions();
+            setEdgeIndices();
 
             // svg will stay in background and only render the edges
             let svg = d3.select(element[0])
@@ -518,14 +519,15 @@ function d3Graph($window, DiscourseNode, Helpers) {
                 return link.source.hyperEdge || link.target.hyperEdge;
             }
 
-            // prepare graph for usage
-            function preprocessGraph(graph) {
+            function setInitialNodePositions() {
                 _(graph.nodes).reject(n => n.hyperEdge).each((n,i) => {
                     let hash = Math.abs(Helpers.hashCode(n.id));
                     n.x = width/2   + (hash & 0x00000fff) - 0xfff/2;
                     n.y = height/2 + ((hash & 0x00fff000) >> 12) - 0xfff/2;
                 }).value();
+            }
 
+            function setEdgeIndices() {
                 // add index to edge
                 // TODO: how to avoid this?  we need to access the
                 // foreignobjects and html direcives through the edge
