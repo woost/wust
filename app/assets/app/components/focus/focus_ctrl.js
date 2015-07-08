@@ -27,7 +27,7 @@ function FocusCtrl($stateParams, HistoryService, component) {
     }
 
     vm.rootId = $stateParams.id;
-    vm.rootNode = _.find(component.nodes, {
+    vm.component.rootNode = _.find(component.nodes, {
         id: vm.rootId
     });
 
