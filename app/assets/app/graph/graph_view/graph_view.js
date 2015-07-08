@@ -26,26 +26,23 @@ function graphViewCtrl($scope, DiscourseNode, $filter) {
         title: ""
     };
 
-    vm.wrappedPromise = vm.graph.$wrappedPromise();
-    vm.wrappedPromise.then(setGraph);
-
+    setGraph(vm.graph);
     let firstFilter = true;
+    $scope.$watch("vm.search.title", filter);
 
-    function setGraph(graph) {
-        _.each(graph.nodes, (n) => {
+    function setGraph() {
+        _.each(vm.graph.nodes, (n) => {
             n.css = n.hyperEdge ? "relation_label" : `node ${DiscourseNode.get(n.label).css}`;
         });
-
-        $scope.$watch("vm.search.title", _.wrap(graph, filter));
     }
 
-    function filter(graph) {
+    function filter() {
         if (firstFilter) {
             firstFilter = false;
             return;
         }
 
-        let filtered = $filter("fuzzyFilter")(_.reject(graph.nodes, { hyperEdge: true }), vm.search);
+        let filtered = $filter("fuzzyFilter")(_.reject(vm.graph.nodes, { hyperEdge: true }), vm.search);
         $scope.$broadcast("d3graph_filter", filtered);
     }
 

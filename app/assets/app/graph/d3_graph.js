@@ -6,7 +6,7 @@ function d3Graph($window, DiscourseNode, Helpers) {
     return {
         restrict: "A",
         scope: {
-            graphPromise: "=",
+            graph: "=",
             onClick: "&",
             onDraw: "&"
         },
@@ -17,7 +17,7 @@ function d3Graph($window, DiscourseNode, Helpers) {
         let onClick = scope.onClick || _.noop;
         let onDraw = scope.onDraw || _.noop;
 
-        scope.graphPromise.then(graph => {
+        let graph = scope.graph;
             // get dimensions of containing element
             let [width, height] = [element[0].offsetWidth, element[0].offsetHeight];
 
@@ -524,6 +524,5 @@ function d3Graph($window, DiscourseNode, Helpers) {
                     n.y = height/2 + ((hash & 0x00fff000) >> 12) - 0xfff/2;
                 }).value();
             }
-        });
     }
 }
