@@ -133,7 +133,9 @@ function GraphDecoder($q) {
         let nodeProperties = ["id", "title", "description", "label", "hyperEdge", "startId", "endId"];
         let relationProperties = ["startId", "endId", "label", "title"];
 
-        graph.knownWrappers = [];
+        let knownWrappers = [];
+        let updateHandlers = [];
+
         graph.wrapped = function() {
             let wrapped = {
                 "self": this
@@ -141,9 +143,19 @@ function GraphDecoder($q) {
             wrapped.nodes = _.map(this.nodes, n => new Decorator(n, nodeProperties));
             wrapped.edges = _.map(this.edges, r => new Decorator(r, relationProperties));
             refreshIndex(wrapped);
-            this.knownWrappers.push(wrapped);
+            knownWrappers.push(wrapped);
 
             return wrapped;
+        };
+        graph.subscribeUpdated = function(handler) {
+            updateHandlers.push(handler);
+        };
+        graph.unsubscribeUpdated = function(handler) {
+            _.remove(updateHandlers, handler);
+        };
+        graph.updated = function() {
+            _.each(updateHandlers, handler => handler());
+            _.each(knownWrappers, wrapper => wrapper.updated());
         };
         // TODO: having sets instead of arrays would be better...nodes,relations,inrelations,outrelations
         graph.addNode = function(node) {
@@ -151,7 +163,7 @@ function GraphDecoder($q) {
                 return;
 
             this.nodes.push(node);
-            _.each(this.knownWrappers, wrapper => wrapper.addNode(node));
+            _.each(knownWrappers, wrapper => wrapper.addNode(node));
         };
         graph.addRelation = function(relation) {
             if (_.contains(this.relations, relation))
@@ -166,18 +178,18 @@ function GraphDecoder($q) {
                 relation.target.inRelations.push(relation);
 
             this.relations.push(relation);
-            _.each(this.knownWrappers, wrapper => wrapper.addRelation(relation));
+            _.each(knownWrappers, wrapper => wrapper.addRelation(relation));
         };
         graph.removeNode = function(node) {
             _.remove(this.nodes, node);
             _.remove(this.relations, r => r.source === node || r.target === node);
-            _.each(this.knownWrappers, wrapper => wrapper.removeNode(node));
+            _.each(knownWrappers, wrapper => wrapper.removeNode(node));
         };
         graph.removeRelation = function(relation) {
             _.remove(this.relations, relation);
             _.remove(relation.target.inRelations, relation);
             _.remove(relation.source.outRelations, relation);
-            _.each(this.knownWrappers, wrapper => wrapper.removeRelation(relation));
+            _.each(knownWrappers, wrapper => wrapper.removeRelation(relation));
         };
     }
 
