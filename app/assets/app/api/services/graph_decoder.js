@@ -37,7 +37,7 @@ function GraphDecoder() {
     function refreshIndex(graph) {
         // also works on wrapped graphs!
 
-        let nodeProperties = ["id", "title", "description", "label", "css", "hyperEdge", "startId", "endId"];
+        let nodeProperties = ["id", "title", "description", "label", "hyperEdge", "startId", "endId"];
         let relationProperties = ["startId", "endId", "label", "title"];
 
         // clear all neighbour information
@@ -119,7 +119,7 @@ function GraphDecoder() {
                 return {
                     [prop]: {
                         get: () => self[prop],
-                        set: val => self.prop = val
+                        set: val => self[prop] = val
                     }
                 };
             }).reduce(_.merge);

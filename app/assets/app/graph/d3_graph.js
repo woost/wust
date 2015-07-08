@@ -18,8 +18,9 @@ function d3Graph($window, DiscourseNode, Helpers) {
         let onDraw = scope.onDraw || _.noop;
 
         // watch for changes in the ngModel
-        scope.graph.$then(_graph => {
-            let graph = _graph.wrapped();
+        scope.$watch("graph", graph => {
+            if (graph === undefined)
+                return;
 
             // get dimensions of containing element
             let [width, height] = [element[0].offsetWidth, element[0].offsetHeight];
@@ -240,13 +241,11 @@ function d3Graph($window, DiscourseNode, Helpers) {
 
             // filter the graph
             function filter(event, filtered) {
-                // TODO: filtered should contain wrapped nodes
-                // then we can remove ".self" in this function
                 let component = _(filtered).map(node => node.component()).flatten().uniq().value();
 
                 _.each(graph.nodes, node => {
-                    node.marked = _(filtered).contains(node.self);
-                    node.visible = node.marked || _(component).contains(node.self);
+                    node.marked = _(filtered).contains(node);
+                    node.visible = node.marked || _(component).contains(node);
 
                 });
 
@@ -258,7 +257,7 @@ function d3Graph($window, DiscourseNode, Helpers) {
                 });
 
                 _.each(graph.edges, edge => {
-                    edge.visible = _(component).contains(edge.source.self) && _(component).contains(edge.target.self);
+                    edge.visible = _(component).contains(edge.source) && _(component).contains(edge.target);
                 });
 
                 setVisibility();
