@@ -215,7 +215,6 @@ function branchGraph(DiscourseNode) {
                 let isLine = predecessors.length === 1;
                 if (predecessors.length > 0) { // more than one child
                     _.each(predecessors, (p, i) => {
-                        console.log(p, i);
                         p.branch = isLine ? current.branch : nextBranchId++; // TODO: not in loop
                         p.line = nextLine++;
                         p.xShift = findFreeShift(current.line, current.xShift, maxYShifts, maxWidth);
