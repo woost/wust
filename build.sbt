@@ -18,7 +18,7 @@ lazy val wust = (project in file(".")).settings(
     // scalajs
     // "com.vmunier" %% "play-scalajs-scripts" % "0.2.0",
     // angular
-    "org.webjars" % "angularjs" % "1.4.1",
+    "org.webjars" % "angularjs" % "1.4.2",
     "org.webjars.bower" % "angular-ui-router" % "0.2.15",
     "org.webjars.bower" % "angular-bootstrap" % "0.13.0",
     "org.webjars.bower" % "angular-native-dragdrop" % "1.1.0",
@@ -28,15 +28,15 @@ lazy val wust = (project in file(".")).settings(
     "org.webjars.bower" % "ace-builds" % "1.1.9",
     "org.webjars.bower" % "angular-ui-ace" % "0.2.3",
     // styles and fonts
-    "org.webjars" % "animate.css" % "3.3.0",
+    "org.webjars.bower" % "animate.css" % "3.3.0",
     "org.webjars.bower" % "bootstrap-css-only" % "3.3.4",
-    "org.webjars" % "font-awesome" % "4.3.0-1",
+    "org.webjars.bower" % "font-awesome" % "4.3.0",
     "org.webjars.bower" % "lodium" % "0.1.2",
     // js auth
-    "org.webjars.bower" % "angular-jwt" % "0.0.7",
+    "org.webjars.bower" % "angular-jwt" % "0.0.9",
     // basic js libraries
-    "org.webjars.bower" % "lodash" % "3.9.3",
-    "org.webjars.bower" % "d3" % "3.5.5",
+    "org.webjars.bower" % "lodash" % "3.10.0",
+    "org.webjars.bower" % "d3" % "3.5.6",
     "org.webjars.bower" % "humane-js" % "3.2.2",
     // markdown parser
     "org.webjars.bower" % "marked" % "0.3.3",
