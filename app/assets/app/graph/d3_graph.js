@@ -97,24 +97,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
             .attr("cy", 0)
             .attr("r", 20);
 
-        // register for resize event
-        angular.element($window).bind("resize", resizeGraph);
-
-        // force configuration
-        let force = d3.layout.force()
-            .size([width, height])
-            .nodes(graph.nodes)
-            .links(graph.edges)
-            .linkStrength(3) // rigidity
-            .friction(0.9)
-            // .linkDistance(120) // weak geometric constraint. Pushes nodes to achieve this distance
-            .linkDistance(d => connectsHyperEdge(d) ? 120 : 200)
-            .charge(d => -1500)
-            .gravity(0.1)
-            .theta(0.8)
-            .start();
-        // .alpha(0.1);
-
         // define events
         let zoom = d3.behavior.zoom().scaleExtent([0.1, 10]).on("zoom", zoomed);
         let drag = d3.behavior.drag()
@@ -188,6 +170,24 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
 
         // control whether tick function should draw
         let drawOnTick = visibleConvergence;
+
+        // register for resize event
+        angular.element($window).bind("resize", resizeGraph);
+
+        // force configuration
+        let force = d3.layout.force()
+            .size([width, height])
+            .nodes(graph.nodes)
+            .links(graph.edges)
+            .linkStrength(3) // rigidity
+            .friction(0.9)
+            // .linkDistance(120) // weak geometric constraint. Pushes nodes to achieve this distance
+            .linkDistance(d => connectsHyperEdge(d) ? 120 : 200)
+            .charge(d => -1500)
+            .gravity(0.1)
+            .theta(0.8)
+            .start();
+        // .alpha(0.1);
 
         // register tick function
         force.on("tick", tick);
