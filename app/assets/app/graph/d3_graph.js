@@ -1,8 +1,8 @@
 angular.module("wust.graph").directive("d3Graph", d3Graph);
 
-d3Graph.$inject = ["$window", "DiscourseNode", "Helpers"];
+d3Graph.$inject = ["$window", "DiscourseNode", "Helpers", "$location"];
 
-function d3Graph($window, DiscourseNode, Helpers) {
+function d3Graph($window, DiscourseNode, Helpers, $location) {
     return {
         restrict: "A",
         scope: {
@@ -139,7 +139,7 @@ function d3Graph($window, DiscourseNode, Helpers) {
             .each(function(link) {
                 // if link is startRelation of a Hypernode
                 if (!(link.target.hyperEdge && link.target.startId === link.source.id)) {
-                    d3.select(this).style("marker-end", "url(" + location.href + "#graph_arrow)");
+                    d3.select(this).style("marker-end", "url(" + $location.absUrl() + "#graph_arrow)");
                 }
             });
 
