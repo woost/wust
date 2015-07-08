@@ -13,6 +13,9 @@
         color: $discourse_node_font_color;
         text-decoration: none;
         &.fixed {
+            -moz-box-shadow: 0 0 20px #000000;
+            -webkit-box-shadow: 0 0 20px #000000;
+            box-shadow: 0 0 20px #000000;
             border: 3px solid black;
         }
     }
