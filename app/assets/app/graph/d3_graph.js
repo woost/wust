@@ -6,7 +6,7 @@ function d3Graph($window, DiscourseNode, Helpers) {
     return {
         restrict: "A",
         scope: {
-            graph: "=",
+            graphPromise: "=",
             onClick: "&",
             onDraw: "&"
         },
@@ -17,11 +17,7 @@ function d3Graph($window, DiscourseNode, Helpers) {
         let onClick = scope.onClick || _.noop;
         let onDraw = scope.onDraw || _.noop;
 
-        // watch for changes in the ngModel
-        scope.$watch("graph", graph => {
-            if (graph === undefined)
-                return;
-
+        scope.graphPromise.then(graph => {
             // get dimensions of containing element
             let [width, height] = [element[0].offsetWidth, element[0].offsetHeight];
 

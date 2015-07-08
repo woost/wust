@@ -6,6 +6,9 @@ function ConnectedComponents(restmod, GraphDecoder) {
     return restmod.model("/components").mix({
         $hooks: {
             "after-fetch": GraphDecoder.refreshHook
+        },
+        $extend: {
+            Record: GraphDecoder.extendedModel
         }
     }, {
         nodes: {

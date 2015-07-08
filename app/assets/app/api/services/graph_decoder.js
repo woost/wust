@@ -1,11 +1,22 @@
 angular.module("wust.api").service("GraphDecoder", GraphDecoder);
 
-GraphDecoder.$inject = [];
+GraphDecoder.$inject = ["$q"];
 
-function GraphDecoder() {
+function GraphDecoder($q) {
     this.decodeNodes = decodeNodes;
     this.decodeEdges = decodeEdges;
     this.refreshHook = refreshHook;
+
+    // extends the restmod model
+    this.extendedModel = {
+        // convenience method for having a promise on a wrapped graph
+        $wrappedPromise: function() {
+            let deferred = $q.defer();
+            this.$then(graph => deferred.resolve(graph.wrapped()));
+
+            return deferred.promise;
+        }
+    };
 
     function decodeNodes(apiNodes) {
         //TODO: shouldn't the api return properly formatted nodes?

@@ -26,15 +26,14 @@ function graphViewCtrl($scope, DiscourseNode, $filter) {
         title: ""
     };
 
-    vm.wrappedGraph = undefined;
-    vm.graph.$then(wrapGraph);
+    vm.wrappedPromise = vm.graph.$wrappedPromise();
+    vm.wrappedPromise.then(setGraphCss);
 
     $scope.$watch("vm.search.title", filter);
     let firstFilter = true;
 
-    function wrapGraph(_graph) {
-        vm.wrappedGraph = _graph.wrapped();
-        _.each(vm.wrappedGraph.nodes, (n) => {
+    function setGraphCss(graph) {
+        _.each(graph.nodes, (n) => {
             n.css = n.hyperEdge ? "relation_label" : `node ${DiscourseNode.get(n.label).css}`;
         });
     }
