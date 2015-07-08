@@ -145,25 +145,39 @@ function GraphDecoder($q) {
 
             return wrapped;
         };
+        // TODO: having sets instead of arrays would be better...nodes,relations,inrelations,outrelations
         graph.addNode = function(node) {
-            _.each(this.knownWrappers, wrapper => wrapper.addNode(node));
+            if (_.contains(this.nodes, node))
+                return;
+
             this.nodes.push(node);
-            refreshIndex(this);
+            _.each(this.knownWrappers, wrapper => wrapper.addNode(node));
         };
         graph.addRelation = function(relation) {
-            _.each(this.knownWrappers, wrapper => wrapper.addRelation(relation));
+            if (_.contains(this.relations, relation))
+                return;
+
+            this.addNode(relation.source);
+            if (!_.contains(relation.source.outRelations, relation))
+                relation.source.outRelations.push(relation);
+
+            this.addNode(relation.target);
+            if (!_.contains(relation.target.inRelations, relation))
+                relation.target.inRelations.push(relation);
+
             this.relations.push(relation);
-            refreshIndex(this);
+            _.each(this.knownWrappers, wrapper => wrapper.addRelation(relation));
         };
         graph.removeNode = function(node) {
-            _.each(this.knownWrappers, wrapper => wrapper.removeNode(node));
             _.remove(this.nodes, node);
-            refreshIndex(this);
+            _.remove(this.relations, r => r.source === node || r.target === node);
+            _.each(this.knownWrappers, wrapper => wrapper.removeNode(node));
         };
         graph.removeRelation = function(relation) {
-            _.each(this.knownWrappers, wrapper => wrapper.removeRelation(relation));
             _.remove(this.relations, relation);
-            refreshIndex(this);
+            _.remove(relation.target.inRelations, relation);
+            _.remove(relation.source.outRelations, relation);
+            _.each(this.knownWrappers, wrapper => wrapper.removeRelation(relation));
         };
     }
 
