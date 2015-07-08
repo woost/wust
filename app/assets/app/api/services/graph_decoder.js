@@ -3,18 +3,30 @@ angular.module("wust.api").service("GraphDecoder", GraphDecoder);
 GraphDecoder.$inject = ["$q"];
 
 function GraphDecoder($q) {
-    this.decodeNodes = decodeNodes;
-    this.decodeEdges = decodeEdges;
-    this.refreshHook = refreshHook;
-
-    // extends the restmod model
-    this.extendedModel = {
+    // extends the restmod record
+    let extendedRecord = {
         // convenience method for having a promise on a wrapped graph
         $wrappedPromise: function() {
             let deferred = $q.defer();
             this.$then(graph => deferred.resolve(graph.wrapped()));
 
             return deferred.promise;
+        }
+    };
+
+    // expose restmod mixin
+    this.mixin = {
+        $hooks: {
+            "after-fetch": refreshHook
+        },
+        $extend: {
+            Record: extendedRecord
+        },
+        nodes: {
+            decode: decodeNodes
+        },
+        edges: {
+            decode: decodeEdges
         }
     };
 
