@@ -12,6 +12,9 @@
         padding: 0px 15px 0px 12px;
         color: $discourse_node_font_color;
         text-decoration: none;
+        &.fixed {
+            border: 3px solid black;
+        }
     }
     @at-root a:hover#{&}, &.btn:hover, &.panel a:hover .panel-heading {
         background-color: $bgcolor-highlight;

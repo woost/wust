@@ -21,8 +21,6 @@ function d3Graph($window, DiscourseNode, Helpers) {
             // get dimensions of containing element
             let [width, height] = [element[0].offsetWidth, element[0].offsetHeight];
 
-            setInitialNodePositions();
-
             // svg will stay in background and only render the edges
             let svg = d3.select(element[0])
                 .append("svg")
@@ -69,8 +67,8 @@ function d3Graph($window, DiscourseNode, Helpers) {
 
             // container with enabled pointer events
             // translates for zoom/pan will be applied here
-            let svgContainer = svg.append("g");
-            let htmlContainer = html.append("div")
+            let svgContainer = svg.append("g").attr("id", "svgContainer");
+            let htmlContainer = html.append("div").attr("id", "htmlContainer")
                 // html initially has its origin centered, svg has (top left)
                 // fixes zooming
                 .style(transformOriginCompat,"top left");
@@ -101,7 +99,7 @@ function d3Graph($window, DiscourseNode, Helpers) {
                 .friction(0.9)
                 // .linkDistance(120) // weak geometric constraint. Pushes nodes to achieve this distance
                 .linkDistance(d => connectsHyperEdge(d) ? 120 : 200)
-                .charge(d => -1000)
+                .charge(d => -1500)
                 .gravity(0.1)
                 .theta(0.8)
                 .start();
@@ -170,6 +168,8 @@ function d3Graph($window, DiscourseNode, Helpers) {
                 .attr("class", "fa fa-arrows")
                 .style("cursor", d => d.hyperEdge ? "inherit" : "move")
                 .call(drag);
+
+            setInitialNodePositions();
 
             // visibility of convergence
             let visibleConvergence = false;
@@ -376,10 +376,14 @@ function d3Graph($window, DiscourseNode, Helpers) {
                         let newStartDiffY = start.y - node.y;
                         let newEndDiffX = end.x - node.x;
                         let newEndDiffY = end.y - node.y;
-                        start.x += (startDiffX - newStartDiffX) * hyperEdgePull;
-                        start.y += (startDiffX - newStartDiffX) * hyperEdgePull;
-                        end.x += (endDiffX - newEndDiffX) * hyperEdgePull;
-                        end.y += (endDiffX - newEndDiffX) * hyperEdgePull;
+                        if(start.fixed !== true) {
+                            start.x += (startDiffX - newStartDiffX) * hyperEdgePull;
+                            start.y += (startDiffX - newStartDiffX) * hyperEdgePull;
+                        }
+                        if(end.fixed !== true) {
+                            end.x += (endDiffX - newEndDiffX) * hyperEdgePull;
+                            end.y += (endDiffX - newEndDiffX) * hyperEdgePull;
+                        }
                     }
                 });
 
@@ -434,14 +438,22 @@ function d3Graph($window, DiscourseNode, Helpers) {
             }
 
             // unfix the position of a given node
-            //TODO: why not just d.fixed = false?
-            function unsetFixedPosition(d) {
-                d3.select(this).classed("fixed", d.fixed = false);
+            function unsetFixed(d) {
+                d.fixed = false;
+                //TODO: this lookup is ugly:
+                let dom = nodeHtml[0].find(function(dom) {return dom.__data__.id === d.id;});
+                d3.select(dom).classed("fixed", false);
+                // the fixed class could change the elements dimensions
+                recalculateNodeDimensions();
             }
 
             // fix the position of a given node
-            function setFixedPosition(d) {
-                d3.select(this).classed("fixed", d.fixed = true);
+            function setFixed(d) {
+                d.fixed = true;
+                let dom = nodeHtml[0].find(function(dom) {return dom.__data__.id === d.id;});
+                d3.select(dom).classed("fixed", true);
+                // the fixed class could change the elements dimensions
+                recalculateNodeDimensions();
             }
 
             // keep track whether the node is currently being dragged
@@ -490,10 +502,10 @@ function d3Graph($window, DiscourseNode, Helpers) {
                 d.fixed &= ~6; // copied from force.drag
                 if (isDragging) {
                     // if we were dragging before, the node should be fixed
-                    setFixedPosition(d);
+                    setFixed(d);
                 } else {
                     // if the user just clicked, the position should be reset.
-                    unsetFixedPosition(d);
+                    unsetFixed(d);
                 }
 
                 isDragging = false;
@@ -523,6 +535,10 @@ function d3Graph($window, DiscourseNode, Helpers) {
                     n.x = width/2   + (hash & 0x00000fff) - 0xfff/2;
                     n.y = height/2 + ((hash & 0x00fff000) >> 12) - 0xfff/2;
                 }).value();
+
+                graph.rootNode.x = width/2;
+                graph.rootNode.y = height/2;
+                setFixed(graph.rootNode);
             }
     }
 }
