@@ -224,5 +224,8 @@ function GraphDecoder($q) {
         }).reduce(_.merge);
 
         Object.defineProperties(this, properties);
+
+        //function for getting the wrapped object equivalent to restmod-models:
+        this.$encode = () => _.pick(self, decorateProperties);
     }
 }

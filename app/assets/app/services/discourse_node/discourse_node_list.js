@@ -82,8 +82,7 @@ function DiscourseNodeList() {
                 if (this.exists(elem))
                     return;
 
-                let hasId = elem.id === undefined;
-                let payload = hasId ? elem : _.pick(elem, "id");
+                let payload = elem.id === undefined ? elem : _.pick(elem, "id");
                 this.list.$create(payload).$then(data => {
                     humane.success("Connected node");
                     //TODO: workaround: this should definitely not be synched like this

@@ -4,7 +4,7 @@ smallPost.$inject = [];
 
 function smallPost() {
     return {
-        restrict: "EA",
+        restrict: "A",
         templateUrl: "assets/app/elements/post/small_post.html",
         scope: {
             node: "=",
