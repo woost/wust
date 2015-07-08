@@ -4,15 +4,7 @@ GraphDecoder.$inject = ["$q"];
 
 function GraphDecoder($q) {
     // extends the restmod record
-    let extendedRecord = {
-        // convenience method for having a promise on a wrapped graph
-        $wrappedPromise: function() {
-            let deferred = $q.defer();
-            this.$then(graph => deferred.resolve(graph.wrapped()));
-
-            return deferred.promise;
-        }
-    };
+    let extendedRecord = {};
 
     // expose restmod mixin
     this.mixin = {
@@ -20,7 +12,9 @@ function GraphDecoder($q) {
             "after-fetch": refreshHook
         },
         $extend: {
-            Record: extendedRecord
+            Record: {
+                $wrappedPromise: wrappedPromise
+            }
         },
         nodes: {
             decode: decodeNodes
@@ -29,6 +23,16 @@ function GraphDecoder($q) {
             decode: decodeEdges
         }
     };
+
+
+    // convenience method for having a promise on a wrapped graph
+    function wrappedPromise() {
+        let deferred = $q.defer();
+        // note: this points to the restmod record
+        this.$then(graph => deferred.resolve(graph.wrapped()));
+
+        return deferred.promise;
+    }
 
     function decodeNodes(apiNodes) {
         //TODO: shouldn't the api return properly formatted nodes?
