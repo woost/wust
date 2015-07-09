@@ -18,7 +18,9 @@ lazy val wust = (project in file(".")).settings(
     // scalajs
     // "com.vmunier" %% "play-scalajs-scripts" % "0.2.0",
     // angular
-    "org.webjars" % "angularjs" % "1.4.2",
+    "org.webjars.bower" % "angularjs" % "1.4.2",
+    "org.webjars.bower" % "angular-animate" % "1.4.2",
+    "org.webjars.bower" % "angular-sanitize" % "1.4.2",
     "org.webjars.bower" % "angular-ui-router" % "0.2.15",
     "org.webjars.bower" % "angular-bootstrap" % "0.13.0",
     "org.webjars.bower" % "angular-native-dragdrop" % "1.1.0",
