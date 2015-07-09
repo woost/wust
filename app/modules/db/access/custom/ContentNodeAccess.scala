@@ -40,15 +40,15 @@ object ContentNodeWrite {
 class ContentNodeAccess[NODE <: ContentNode](override val factory: ContentNodeFactory[NODE]) extends ContentNodeWrite(factory) {
   protected def editNode(discourse: Discourse, user: User, uuid: String, nodeAdd: NodeUpdateRequestBase): NODE = {
     val node = factory.matchesContentNode(uuid = Some(uuid), matches = Set("uuid"))
-    if(nodeAdd.title.isDefined) {
-      if(nodeAdd.title.get.isEmpty)
-        node.title = None
+    if(nodeAdd.description.isDefined) {
+      if(nodeAdd.description.get.isEmpty)
+        node.description = None
       else
-        node.title = nodeAdd.title
+        node.description = nodeAdd.description
     }
 
-    if(nodeAdd.description.isDefined)
-      node.description = nodeAdd.description.get
+    if(nodeAdd.title.isDefined)
+      node.title = nodeAdd.title.get
 
     if(nodeAdd.title.isDefined || nodeAdd.description.isDefined) {
       val contribution = Updated.create(user, node)

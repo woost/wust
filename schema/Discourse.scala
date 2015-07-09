@@ -51,8 +51,8 @@ object WustSchema {
   @Relation trait HyperConnection
   // TODO: ContentNode should be general for anything public
   @Node trait ContentNode extends UuidNode {//extends Hidable
-    var title: Option[String]
-    var description: String
+    var title: String
+    var description: Option[String]
   }
   // @Node trait Hidable {
   //   var visible: Boolean = true

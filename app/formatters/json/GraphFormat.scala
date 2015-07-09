@@ -27,8 +27,8 @@ object GraphFormat {
       def writes(tag: Tag) = JsObject(Seq(
         ("id", JsString(tag.uuid)),
         ("label", JsString(tag.label)),
-        ("title", JsString(tag.title.getOrElse(""))),
-        ("description", JsString(tag.description)),
+        ("title", JsString(tag.title)),
+        ("description", JsString(tag.description.getOrElse(""))),
         ("isType", JsBoolean(tag.isType))
       ))
     }
@@ -38,8 +38,8 @@ object GraphFormat {
       ("label", JsString(node.label))
       ) ++ (node match {
         case n: Post                         => Seq(
-          ("title", JsString(n.title.getOrElse(""))),
-          ("description", JsString(n.description)),
+          ("title", JsString(n.title)),
+          ("description", JsString(n.description.getOrElse(""))),
           ("tags", Json.toJson(n.rev_categorizes))
         )
       case h: HyperRelation[Connectable @unchecked, _, _, _, Connectable @unchecked] =>

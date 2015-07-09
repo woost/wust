@@ -16,28 +16,28 @@ object ApiNodeFormat {
       case n: Post => Seq(
         ("id", JsString(n.uuid)),
         ("label", JsString(n.label)),
-        ("title", JsString(n.title.getOrElse(""))),
-        ("description", JsString(n.description)),
+        ("title", JsString(n.title)),
+        ("description", JsString(n.description.getOrElse(""))),
         ("tags", Json.toJson(n.rev_categorizes))
       )
       case n: Scope => Seq(
         ("id", JsString(n.uuid)),
         ("label", JsString(n.label)),
-        ("title", JsString(n.title.getOrElse(""))),
-        ("description", JsString(n.description))
+        ("title", JsString(n.title)),
+        ("description", JsString(n.description.getOrElse("")))
       )
       case n: Tag => Seq(
         ("id", JsString(n.uuid)),
         ("label", JsString(n.label)),
-        ("title", JsString(n.title.getOrElse(""))),
-        ("description", JsString(n.description)),
+        ("title", JsString(n.title)),
+        ("description", JsString(n.description.getOrElse(""))),
         ("isType", JsBoolean(n.isType))
       )
       case n: ContentNode => Seq(
         ("id", JsString(n.uuid)),
         ("label", JsString(n.label)),
-        ("title", JsString(n.title.getOrElse(""))),
-        ("description", JsString(n.description))
+        ("title", JsString(n.title)),
+        ("description", JsString(n.description.getOrElse("")))
       )
       case n: User        => Seq(
         ("id", JsString(n.uuid)),

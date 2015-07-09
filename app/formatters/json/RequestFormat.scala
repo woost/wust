@@ -6,13 +6,13 @@ import play.api.libs.functional.syntax._
 
 object RequestFormat {
   implicit val nodeAddRead = (
-    (__ \ "description").read[String] and
-      (__ \ "title").readNullable[String]
+    (__ \ "description").readNullable[String] and
+      (__ \ "title").read[String]
     )(NodeAddRequest)
 
   implicit val taggedNodeAddFormat = (
-    (__ \ "description").read[String] and
-      (__ \ "title").readNullable[String] and
+    (__ \ "description").readNullable[String] and
+      (__ \ "title").read[String] and
       (__ \ "addedTags").readNullable[List[String]]
     )(TaggedNodeAddRequest)
 

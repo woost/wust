@@ -23,7 +23,9 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
                 description: this.description
             };
 
-            //TODO: stupid having sometimes numbers and sometimes objects...
+            // initally only show editor if node has description
+            this.collapsedEditor = _.isEmpty(description);
+
             //TODO: why nulls?
             this.addedTags = _.map(_.compact(addedTags) || [], t => {
                 if (_.isNumber(t))
@@ -35,10 +37,8 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
 
         dirtyModel() {
             let dirtyModel = _.omit(_.pick(this, _.keys(this.original)), (v, k) => this.original[k] === v);
-            //TODO: why do we have nulls here???
-
             if (_.any(this.addedTags))
-            //TODO: why do we have nulls here?
+                //TODO: why do we have nulls here?
                 dirtyModel.addedTags = _.compact(this.addedTags);
 
             return dirtyModel;
@@ -48,13 +48,22 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
             return _.isEmpty(dirtyModel);
         }
 
+        isValid(dirtyModel = this.dirtyModel()) {
+            return !_.isEmpty(this.title);
+        }
+
+        canSave(dirtyModel = this.dirtyModel()) {
+            return this.isValid(dirtyModel) && !this.isPristine(dirtyModel);
+        }
+
         save() {
             let dirtyModel = this.dirtyModel();
-            if (this.isPristine(dirtyModel))
+            if (!this.canSave(dirtyModel))
                 return;
 
             let model = _.pick(this, "id");
             let message = model.id === undefined ? "Added new node" : "Updated now";
+
             Post.$buildRaw(model).$update(dirtyModel).$then(data => {
                 DiscourseNode.Post.gotoState(data.id);
                 humane.success(message);

@@ -3,10 +3,7 @@ angular.module("wust.services").provider("DiscourseNodeList", DiscourseNodeList)
 DiscourseNodeList.$inject = [];
 
 function DiscourseNodeList() {
-    //TODO: move title out of discourse_node_list, should be individually set by the caller
-    //TODO: input list or input service?
-    //TODO: should handle event subscriptions?
-    //TODO: take complete collection with nested nodes?
+    //TODO: move title out of discourse_node_list, should be individually set by the caller: but what about nesting?
     let nodeListDefs = {};
     this.setList = setList;
     this.$get = get;

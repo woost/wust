@@ -22,11 +22,11 @@ object SeedInit extends Task {
 
   setupDbConstraints(db)
 
-  discourse.add(Tag.merge(title = Some("Problem"), description = "...a problem", isType = true, merge = Set("title", "isType")))
-  discourse.add(Tag.merge(title = Some("Goal"), description = "...a goal", isType = true, merge = Set("title", "isType")))
-  discourse.add(Tag.merge(title = Some("Idea"), description = "...a idea", isType = true, merge = Set("title", "isType")))
-  discourse.add(Tag.merge(title = Some("Pro"), description = "...a pro", isType = true, merge = Set("title", "isType")))
-  discourse.add(Tag.merge(title = Some("Con"), description = "...a con", isType = true, merge = Set("title", "isType")))
+  discourse.add(Tag.merge(title = "Problem", description = Some("...a problem"), isType = true, merge = Set("title", "isType")))
+  discourse.add(Tag.merge(title = "Goal", description = Some("...a goal"), isType = true, merge = Set("title", "isType")))
+  discourse.add(Tag.merge(title = "Idea", description = Some("...a idea"), isType = true, merge = Set("title", "isType")))
+  discourse.add(Tag.merge(title = "Pro", description = Some("...a pro"), isType = true, merge = Set("title", "isType")))
+  discourse.add(Tag.merge(title = "Con", description = Some("...a con"), isType = true, merge = Set("title", "isType")))
   discourse.add(UserGroup.merge(name = "everyone", merge = Set("name")))
 
   db.persistChanges(discourse.graph)
