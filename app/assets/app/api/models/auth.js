@@ -16,6 +16,7 @@ function Auth($rootScope, $window, restmod, jwtHelper, store) {
     this.logout = logout;
     this.loggedIn = loggedIn;
     this.getUsername = _.wrap("identifier", getProperty);
+    this.getUserId = _.wrap("userId", getProperty);
     this.getToken = _.wrap("token", getProperty);
 
     // every time the window gets focused, clear the inMemoryCache of the store,
@@ -40,7 +41,7 @@ function Auth($rootScope, $window, restmod, jwtHelper, store) {
 
     function authenticate(model, message, user) {
         model.$create(user).$then(response => {
-            authStore.set(userKey, _.pick(response, "identifier", "token"));
+            authStore.set(userKey, _.pick(response, "identifier", "token", "userId"));
             humane.success(message);
         });
     }

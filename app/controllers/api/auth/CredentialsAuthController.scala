@@ -31,7 +31,7 @@ class CredentialsAuthController extends Silhouette[User, JWTAuthenticator]
             env.eventBus.publish(LoginEvent(user, request, request2lang))
             env.authenticatorService.init(authenticator).flatMap { token =>
               env.authenticatorService.embed(token, Future.successful {
-                Ok(Json.toJson(Token(token = token, expiresOn = authenticator.expirationDate)))
+                Ok(Json.toJson(Token(token = token, expiresOn = authenticator.expirationDate, userId = user.uuid)))
               })
             }
           }

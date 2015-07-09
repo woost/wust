@@ -36,7 +36,7 @@
             </form>
 
             <form ng-show="vm.loggedIn()" ng-submit="vm.logout()" class="navbar-form navbar-right">
-                <span style="padding-right: 10px"><i class="fa fa-user"></i> {{vm.getUsername()}}</span>
+                <a ui-sref="users.details({id: vm.getUserId()})" style="padding-right: 10px"><i class="fa fa-user"></i> {{vm.getUsername()}}</a>
                 <input type="submit" value="Logout" class="btn btn-primary">
             </form>
         </div>

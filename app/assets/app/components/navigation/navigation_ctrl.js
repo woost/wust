@@ -17,6 +17,7 @@ function NavigationCtrl(Auth, SearchService) {
     vm.onSearchBoxChange = onSearchBoxChange;
     vm.authenticate = authenticate;
     vm.getUsername = Auth.getUsername.bind(Auth);
+    vm.getUserId = Auth.getUserId.bind(Auth);
     vm.loggedIn = Auth.loggedIn.bind(Auth);
     vm.logout = Auth.logout.bind(Auth);
     vm.search = SearchService.search;

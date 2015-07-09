@@ -32,7 +32,7 @@ with HeaderEnvironmentModule {
             authenticator <- env.authenticatorService.create(loginInfo)
             token <- env.authenticatorService.init(authenticator)
             result <- env.authenticatorService.embed(token, Future.successful {
-              Ok(Json.toJson(Token(token = token, expiresOn = authenticator.expirationDate)))
+              Ok(Json.toJson(Token(token = token, expiresOn = authenticator.expirationDate, userId = user.uuid)))
             })
           } yield {
             env.eventBus.publish(SignUpEvent(user, request, request2lang))
