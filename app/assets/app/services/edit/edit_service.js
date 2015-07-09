@@ -13,11 +13,12 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
         }
 
         apply({
-            id, title, description, addedTags, original
+            id, title, description, addedTags, original, localId
         }) {
             this.id = id;
             this.title = title || "";
             this.description = description || "";
+            this.localId = localId || _.uniqueId();
             this.original = original || {
                 title: this.title,
                 description: this.description
@@ -131,35 +132,36 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
         editStore.set("stack", self.stack);
     }
 
-    function assureSessionExists(node) {
+    function assureSessionExists(node, index) {
         let existing;
         if (node === undefined) {
             // fresh session
             existing = new Session({});
-        } else if (node.id !== undefined) {
+        } else {
+            let searchFor = node.id === undefined ? "localId" : "id";
             // add existing node for editing
-            existing = _.find(self.stack, _.pick(node, "id"));
-            if (existing) {
-                // we move the existing to the top.
-                _.remove(self.stack, existing);
+            let existingIdx = _.findIndex(self.stack, _.pick(node, searchFor));
+            if (existingIdx >= 0) {
+                existing = self.stack[existingIdx];
+                self.stack.splice(existingIdx, 1);
+                if (existingIdx < index)
+                    index -= 1;
             } else {
                 existing = new Session(node);
             }
-        } else {
-            // this has to be a node which is currently edited
-            // can happen when you drag a node within the scratchpad
-            // TODO: disallow dragging nodes within scratchpad
-            return node;
         }
 
-        self.stack.push(existing);
+        self.stack.splice(index, 0, existing);
         storeStack();
         return existing;
     }
 
-    function edit(maybeNodes) {
+    function edit(maybeNodes, index = 0) {
         //TODO: we get an array if multiple nodes were in completion and enter was pressed
         let node = _.isArray(maybeNodes) ? maybeNodes[0] : maybeNodes;
-        assureSessionExists(node);
+        // be aware, the index is reversed!
+        index = _.max([0, self.stack.length - index]);
+
+        assureSessionExists(node, index);
     }
 }

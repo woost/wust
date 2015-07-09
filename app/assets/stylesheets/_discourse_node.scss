@@ -105,6 +105,11 @@
     @include discourse_node($discourse_user_color, ""); // user
 }
 
+
+.drop_post_container {
+    min-height: 5px;
+}
+
 .discourse_post_list {
     .drop_post_container.on-drag-enter {
         background-color: #008DFF;

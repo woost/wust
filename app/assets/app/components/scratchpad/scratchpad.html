@@ -6,9 +6,11 @@
 
     <div id="edit_list" class="discourse_post_list">
         <hr noshade size="1">
-        <div class="drop_post_container" drop-channel="connect" ui-on-Drop="vm.edit($data)">
-            <label>Currently edited:</label>
-            <div ng-repeat="node in vm.editStack | reverse" edit-post node="node"></div>
+        <label>Currently edited:</label>
+        <div ng-repeat="node in vm.editStack | reverse">
+            <div class="drop_post_container" drop-channel="connect" ui-on-Drop="vm.edit($data, $index)"></div>
+            <div edit-post node="node"></div>
         </div>
+        <div class="drop_post_container" drop-channel="connect" ui-on-Drop="vm.edit($data, vm.editStack.length)"></div>
     </div>
 </div>
