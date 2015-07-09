@@ -28,7 +28,7 @@ object WustSchema {
   }
   @Node class LoginInfo {
     val providerID: String
-    val providerKey: String
+    @unique val providerKey: String
   }
 
   @Node class PasswordInfo {
@@ -39,7 +39,7 @@ object WustSchema {
   @Relation class HasLogin(startNode: User, endNode: LoginInfo)
   @Relation class HasPassword(startNode: LoginInfo, endNode: PasswordInfo)
   @Node class UserGroup extends UuidNode {
-    var name: String
+    @unique val name: String
   }
   @Relation class MemberOf(startNode: User, endNode: UserGroup)
 

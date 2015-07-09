@@ -2,7 +2,7 @@ package services
 
 import com.mohiva.play.silhouette.api.{LoginInfo => SLoginInfo}
 import com.mohiva.play.silhouette.api.services.IdentityService
-import model.WustSchema.{Auth, User, LoginInfo, HasLogin}
+import model.WustSchema._
 import model.auth.SignUp
 import modules.db.Database
 import play.api.libs.json.{JsNull, JsValue}
@@ -22,12 +22,15 @@ class UserServiceDB extends UserService {
 
   def create(sLoginInfo: SLoginInfo, signUp: SignUp, json: JsValue = JsNull): Future[User] = {
     val user = User.create(signUp.identifier)
+    val group = UserGroup.matchesOnName("everyone")
+    val memberOf = MemberOf.create(user, group)
     val loginInfo: LoginInfo = sLoginInfo
     val hasLogin = HasLogin.create(user, loginInfo)
-    val auth = Auth.empty
-    auth.add(user, loginInfo, hasLogin)
-    Database.db.persistChanges(auth.graph)
-    Future.successful(user)
+    val auth = Auth(user, loginInfo, group, hasLogin, memberOf)
+    Database.db.persistChanges(auth.graph) match {
+      case None => Future.successful(user)
+      case Some(err) => Future.failed(new Exception(s"Failed to create user: $err"))
+    }
   }
 
   def retrieve(sLoginInfo: SLoginInfo): Future[Option[User]] = {
