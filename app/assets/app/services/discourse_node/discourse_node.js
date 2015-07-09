@@ -13,7 +13,7 @@ function DiscourseNode() {
     function get($state, $injector) {
         _.mapValues(discourseMap, node => _.merge(node, {
             //TODO: we sometimes use ng-href instead of ui-sref because the info seems to be
-            //filled to late for ui-router to recognize the state
+            //filled too late for ui-router to recognize the state
             getHref: id => node.state && (id !== undefined) ? $state.href(node.state, { id }) : "#",
             // check wether a state is defined. If it isn't stay on the current page.
             getState: id => node.state && (id !== undefined) ? `${node.state}({id: "${id}"})` : ".",
