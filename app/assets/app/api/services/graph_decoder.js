@@ -21,6 +21,11 @@ function GraphDecoder($q) {
         }
     };
 
+
+    // define common properties of nodes and relations
+    let nodeProperties = ["id", "title", "description", "label", "hyperEdge", "startId", "endId"];
+    let relationProperties = ["startId", "endId", "label", "title"];
+
     // convenience method for having a promise on a wrapped graph
     function wrappedPromise() {
         let deferred = $q.defer();
@@ -105,6 +110,12 @@ function GraphDecoder($q) {
                 }
             });
 
+
+            // $encode method to get the original 
+            n.$encode = function() {
+                return _.pick(this, nodeProperties);
+            };
+
             n.component = function() {
                 let visited = new Set();
                 findNeighbours(this);
@@ -146,9 +157,6 @@ function GraphDecoder($q) {
 
     function defineGraphMethods(graph) {
         // also works on wrapped graphs!
-        let nodeProperties = ["id", "title", "description", "label", "hyperEdge", "startId", "endId"];
-        let relationProperties = ["startId", "endId", "label", "title"];
-
         let knownWrappers = [];
         let updateHandlers = [];
 
@@ -225,7 +233,6 @@ function GraphDecoder($q) {
 
         Object.defineProperties(this, properties);
 
-        //function for getting the wrapped object equivalent to restmod-models:
-        this.$encode = () => _.pick(self, decorateProperties);
+        this.$encode = self.$encode;
     }
 }
