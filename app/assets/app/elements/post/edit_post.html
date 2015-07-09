@@ -9,7 +9,7 @@
             <span class="pull-right" toggle-zen node="vm.node"></span>
         </div>
         <div class="edit_title">
-            <input type="text" class="underline_input" ng-model="vm.node.title" ng-blur="vm.node.onChange()" placeholder="TL,DR">
+            <input type="text" class="form-control" ng-model="vm.node.title" ng-blur="vm.node.onChange()" placeholder="TL,DR">
         </div>
         <button type="button" class="btn btn-xs btn-default" ng-model="vm.node.collapsedEditor" btn-checkbox>Description</button>
         <div collapse="vm.node.collapsedEditor">
