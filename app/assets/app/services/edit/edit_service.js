@@ -28,7 +28,7 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
             };
 
             // initally only show editor if node has description
-            this.collapsedEditor = _.isEmpty(description);
+            this.expandedEditor = !_.isEmpty(description);
 
             //TODO: why nulls?
             this.addedTags = _.map(_.compact(addedTags) || [], t => {
