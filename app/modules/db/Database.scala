@@ -142,15 +142,6 @@ object Database {
       Some(connectNodes(discourse, nodesOpt.get._2, factory, nodesOpt.get._1))
   }
 
-  //TODO: merge with previous methods...
-  def endConnectHyperNodesToVotes(relationDefinition: NodeAndHyperRelationDefinition[User,Votes,Categorizes] with UuidAndNodeRelationDefinition[User,Votes,Categorizes] with VotesRelationDefinition[User,Votes,Categorizes], weight: Long): Option[(User,Categorizes)] = { import relationDefinition._
-    val (discourse, nodesOpt) = gatherHyperNodesConnector(endDefinition, startDefinition)
-    if (nodesOpt.isEmpty)
-      None
-    else
-      Some(connectNodes(discourse, nodesOpt.get._2, factory, nodesOpt.get._1, weight))
-  }
-
   def disconnectNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinition: FixedRelationDefinition[START,RELATION,END]) {
     val discourse = itemDiscourseGraph(relationDefinition)
     if (discourse.relations.isEmpty && discourse.hyperRelations.size == 1)
