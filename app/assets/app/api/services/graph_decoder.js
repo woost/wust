@@ -67,11 +67,68 @@ function GraphDecoder($q) {
         defineGraphMethods(graph);
     }
 
+    function calculateComponent(startNode) {
+        let visited = new Set();
+        visitNeighbours(startNode);
+        return Array.from(visited);
+
+        function visitNeighbours(node) {
+            if (visited.has(node)) return;
+            visited.add(node);
+
+            _.each(node.neighbours, visitNeighbours);
+        }
+    }
+
+    function calculateDeepSuccessors(startNode) {
+        let visited = new Set();
+        findSuccessors(startNode);
+        return Array.from(visited);
+
+        function findSuccessors(node) {
+            if (visited.has(node))
+                return;
+
+            visited.add(node);
+            _.each(node.successors, findSuccessors);
+        }
+    }
+
+    function calculateDeepPredecessors(startNode) {
+        let visited = new Set();
+        findPredecessors(startNode);
+        return Array.from(visited);
+
+        function findPredecessors(node) {
+            if (visited.has(node))
+                return;
+
+            visited.add(node);
+            _.each(node.predecessors, findPredecessors);
+        }
+    }
+
+
+    function invalidateNodeCache(node) {
+        node.cachedComponent = _.once(calculateComponent);
+        node.cachedDeepSuccessors = _.once(calculateDeepSuccessors);
+        node.cachedDeepPredecessors = _.once(calculateDeepPredecessors);
+    }
+
+    function invalidateGraphCache(graph) {
+        _.each(graph.nodes, n => invalidateNodeCache(n));
+    }
+
     function refreshIndex(graph) {
-        // clear all neighbour information
+
+
+        invalidateGraphCache(graph);
+
+        // clear all neighbour information and redefine properties
         _.each(graph.nodes, n => {
             n.inRelations = [];
             n.outRelations = [];
+
             Object.defineProperties(n, {
                 relations: {
                     get: function() {
@@ -107,28 +164,28 @@ function GraphDecoder($q) {
                     get: function() {
                         return this.inDegree + this.outDegree;
                     }
+                },
+                component: {
+                    get: function() {
+                        return this.cachedComponent(this);
+                    }
+                },
+                deepSuccessors: {
+                    get: function() {
+                        return this.cachedDeepSuccessors(this);
+                    }
+                },
+                deepPredecessors: {
+                    get: function() {
+                        return this.cachedDeepPredecessors(this);
+                    }
                 }
             });
-
-
-            // $encode method to get the original 
+            // $encode method to get the original
             n.$encode = function() {
                 return _.pick(this, nodeProperties);
             };
 
-            n.component = function() {
-                let visited = new Set();
-                findNeighbours(this);
-                return Array.from(visited);
-
-                function findNeighbours(node) {
-                    if (visited.has(node))
-                        return;
-
-                    visited.add(node);
-                    _.each(node.neighbours, findNeighbours);
-                }
-            };
         });
 
         Object.defineProperties(graph, {
@@ -204,17 +261,20 @@ function GraphDecoder($q) {
 
             this.relations.push(relation);
             _.each(knownWrappers, wrapper => wrapper.addRelation(relation));
+            invalidateGraphCache(this);
         };
         graph.removeNode = function(node) {
             _.remove(this.nodes, node);
             _.remove(this.relations, r => r.source === node || r.target === node);
             _.each(knownWrappers, wrapper => wrapper.removeNode(node));
+            invalidateGraphCache(this);
         };
         graph.removeRelation = function(relation) {
             _.remove(this.relations, relation);
             _.remove(relation.target.inRelations, relation);
             _.remove(relation.source.outRelations, relation);
             _.each(knownWrappers, wrapper => wrapper.removeRelation(relation));
+            invalidateGraphCache(this);
         };
         graph.rootNode = _.find(graph.nodes, {
             id: graph.$pk
