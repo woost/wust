@@ -13,12 +13,11 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
         }
 
         apply({
-            id, title, description, addedTags, original, localId
+            id, title, description, addedTags, original
         }) {
             this.id = id;
             this.title = title || "";
             this.description = description || "";
-            this.localId = localId || _.uniqueId();
             this.original = original || {
                 title: this.title,
                 description: this.description
@@ -26,6 +25,9 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
 
             // initally only show editor if node has description
             this.collapsedEditor = _.isEmpty(description);
+
+            // local id to identify nodes without an id
+            this.localId = _.uniqueId();
 
             //TODO: why nulls?
             this.addedTags = _.map(_.compact(addedTags) || [], t => {
