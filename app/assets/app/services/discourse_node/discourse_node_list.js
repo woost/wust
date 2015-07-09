@@ -25,6 +25,7 @@ function DiscourseNodeList() {
         function NodeActions() {
             return {
                 writable: false,
+                getLabel: node => node.label,
                 getCss: node => DiscourseNode.get(node.label).css
             };
         }
@@ -79,13 +80,12 @@ function DiscourseNodeList() {
                 if (this.exists(elem))
                     return;
 
-                let payload = elem.id === undefined ? elem : _.pick(elem, "id");
+                let localNode = elem.id === undefined;
+                let payload = localNode ? elem : _.pick(elem, "id");
                 this.list.$create(payload).$then(data => {
                     humane.success("Connected node");
-                    //TODO: workaround: this should definitely not be synched like this
-                    let scratchpadNode = _.find(EditService.stack, n => elem.description === n.description && elem.title === elem.title && elem.addedTags === elem.addedTags && elem.id === elem.id);
-                    scratchpadNode.id = data.id;
-                    EditService.storeStack();
+                    if (localNode)
+                        EditService.updateNode(this.localId, data);
                 });
             }
         }

@@ -10,6 +10,10 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
         constructor(other) {
             this.apply(other);
             this.tags = angular.copy(other.tags) || [];
+
+            // local id to identify nodes without an id
+            this.localId = _.uniqueId();
+
         }
 
         apply({
@@ -26,9 +30,6 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
             // initally only show editor if node has description
             this.collapsedEditor = _.isEmpty(description);
 
-            // local id to identify nodes without an id
-            this.localId = _.uniqueId();
-
             //TODO: why nulls?
             this.addedTags = _.map(_.compact(addedTags) || [], t => {
                 if (_.isNumber(t))
@@ -41,7 +42,7 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
         dirtyModel() {
             let dirtyModel = _.omit(_.pick(this, _.keys(this.original)), (v, k) => this.original[k] === v);
             if (_.any(this.addedTags))
-                //TODO: why do we have nulls here?
+            //TODO: why do we have nulls here?
                 dirtyModel.addedTags = _.compact(this.addedTags);
 
             return dirtyModel;
@@ -122,9 +123,7 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
 
     this.stack = restoreStack();
     this.edit = edit;
-
-    //TODO: should not be exposed!! part of hack in discourse_node_list
-    this.storeStack = storeStack;
+    this.updateNode = updateNode;
 
     function restoreStack() {
         return _.map(editStore.get("stack", self.stack) || [], s => new Session(s));
@@ -132,6 +131,17 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
 
     function storeStack() {
         editStore.set("stack", self.stack);
+    }
+
+    function updateNode(localId, node) {
+        let existing = _.find(this.stack, {
+            localId
+        });
+
+        if (existing !== undefined) {
+            existing.apply(node);
+            this.storeStack();
+        }
     }
 
     function assureSessionExists(node, index) {
