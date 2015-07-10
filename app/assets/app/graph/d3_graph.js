@@ -107,10 +107,10 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
 
         // define events
         let zoom = d3.behavior.zoom().scaleExtent([0.1, 10]).on("zoom", zoomed);
-        let drag = d3.behavior.drag()
-            .on("dragstart", ignoreHyperEdge(onDragStart))
-            .on("drag", ignoreHyperEdge(onDrag))
-            .on("dragend", ignoreHyperEdge(onDragEnd));
+        let dragMove = d3.behavior.drag()
+            .on("dragstart", ignoreHyperEdge(onDragMoveStart))
+            .on("drag", ignoreHyperEdge(onDragMove))
+            .on("dragend", ignoreHyperEdge(onDragMoveEnd));
 
         let disableDrag = d3.behavior.drag()
             .on("dragstart", (d) => d3.event.sourceEvent.stopPropagation());
@@ -143,15 +143,16 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
 
 
         let node = htmlContainer.append("div").attr("id", "group_hypernodes-then-nodes")
+            .attr("class", "nodecontainer")
             .selectAll()
             .data(graph.nodes).enter()
             .append("div")
             .style("pointer-events", "all");
 
         let nodeHtml = node.append("div")
+            .attr("class", d => d.css)
             .style("position", "absolute")
             .style("max-width", "150px") // to produce line breaks
-            .attr("class", d => d.css)
             .html(d => d.title)
             // .style("border-width", n => Math.abs(n.verticalForce) + "px")
             // .style("border-color", n => n.verticalForce < 0 ? "#3CBAFF" : "#FFA73C")
@@ -162,16 +163,19 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
             .call(disableDrag);
 
         let nodeTools = node.append("div")
-            .style("visibility", d => d.hyperEdge ? "hidden" : "inherit")
-            .style("position", "absolute")
-            .style("top", "-20px");
-        // .style("z-index", "200")
-        // .style("background","#C3E8FF");
+            .attr("class", "nodetools")
+            .style("visibility", d => d.hyperEdge ? "hidden" : "inherit");
 
         let nodeDragTool = nodeTools.append("div")
-            .attr("class", "fa fa-arrows")
+            .attr("class", "nodetool dragtool fa fa-arrows")
+            //TODO: browser-compatibility for grab and grabbed
             .style("cursor", d => d.hyperEdge ? "inherit" : "move")
-            .call(drag);
+            .call(dragMove);
+
+        let nodeConnectTool = nodeTools.append("div")
+            .attr("class","nodetool connecttool fa fa-compress")
+            .style("cursor", d => d.hyperEdge ? "inherit" : "crosshair")
+            .call(dragMove);
 
         setInitialNodePositions();
 
@@ -502,7 +506,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
         let dragStartNodeX, dragStartNodeY;
         let dragStartMouseX, dragStartMouseY;
 
-        function onDragStart(d) {
+        //TODO: rename d to something meaningful in all d3 code
+        function onDragMoveStart(d) {
             let event = d3.event.sourceEvent;
 
             d.fixed |= 2; // copied from force.drag
@@ -514,9 +519,10 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
             dragStartNodeY = d.y;
             dragStartMouseX = event.clientX;
             dragStartMouseY = event.clientY;
+            console.log(d);
         }
 
-        function onDrag(d) {
+        function onDragMove(d) {
             let event = d3.event.sourceEvent;
             let scale = zoom.scale();
 
@@ -538,7 +544,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
         }
 
         // we use dragend instead of click event, because it is emitted on mobile phones as well as on pcs
-        function onDragEnd(d) {
+        function onDragMoveEnd(d) {
             d.fixed &= ~6; // copied from force.drag
             if (isDragging) {
                 // if we were dragging before, the node should be fixed

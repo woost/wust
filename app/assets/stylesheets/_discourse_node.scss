@@ -2,13 +2,14 @@
 
 @mixin discourse_node($color, $icon: "") {
     $bgcolor: lighten(desaturate($color, 0), 10);
-    $bordercolor: desaturate(darken($bgcolor, 34), 43);
-    $bgcolor-highlight: lighten(saturate($bgcolor, 10), 10);
+    $bordercolor: bordercolor($bgcolor);
+    $bgcolor-highlight: highlightbgcolor($bgcolor);
+
     &.node, &.discourse_tag {
         display: inline-block;
         background-color: $bgcolor;
         border: 1px solid $bordercolor;
-        border-radius: 4px;
+        border-radius: $border_radius;
         padding: 0px 15px 0px 12px;
         color: $discourse_node_font_color;
         text-decoration: none;
@@ -54,6 +55,25 @@
         fill: $bgcolor;
     }
 }
+.nodecontainer {
+    .nodetools {
+        $bgcolor: #C3E8FF;
+        position: absolute;
+        top: -28px;
+        left: -6px;
+        // z-index: -1;
+
+        // background: $bgcolor;
+        // border: 1px solid bordercolor($bgcolor);
+        // border-radius: $border_radius;
+        .nodetool {
+            padding: 10px;
+        }
+        // .nodetool:hover {
+        //     background-color: highlightbgcolor($bgcolor)
+        // }
+    }
+}
 
 .relation_label {
     // font-size: 9px;
@@ -63,7 +83,7 @@
     display: inline-block;
     border: 1px solid $graph_link_color;
     color: $graph_link_color;
-    border-radius: 4px;
+    border-radius: $border_radius;
     padding: 0px 3px;
 
     .discourse_node_list & {

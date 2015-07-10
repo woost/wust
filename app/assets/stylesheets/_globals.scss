@@ -1,3 +1,13 @@
+@function bordercolor($bgcolor) {
+    @return desaturate(darken($bgcolor, 34), 43)
+}
+
+@function highlightbgcolor($bgcolor) {
+    @return lighten(saturate($bgcolor, 10), 10);
+}
+
+$border_radius: 4px;
+
 $discourse_goal_color: #6DFFCA;
 $discourse_problem_color: #ffdc6d;
 $discourse_idea_color: #6db5ff;
