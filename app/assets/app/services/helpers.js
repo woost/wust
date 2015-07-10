@@ -30,12 +30,7 @@ function hashCode(string) {
 function lineIntersection(line1, line2) {
     // if the lines intersect, the result contains the x and y of the intersection (treating the lines as infinite) and booleans for whether line segment 1 or line segment 2 contain the point
     // from: http://jsfiddle.net/justin_c_rounds/Gd2S2
-    var denominator, a, b, numerator1, numerator2, result = {
-        x: null,
-        y: null,
-        onLine1: false,
-        onLine2: false
-    };
+    var denominator, a, b, numerator1, numerator2, result = {};
     denominator = ((line2.end.y - line2.start.y) * (line1.end.x - line1.start.x)) -
         ((line2.end.x - line2.start.x) * (line1.end.y - line1.start.y));
     if (denominator === 0) {
@@ -104,8 +99,7 @@ function lineRectIntersection(line, rect) {
         end: corners.x0y1
     }];
 
-    return mapFind(rectLines, r => lineIntersection(line, r), x => x.onLine1 ===
-        true && x.onLine2 === true);
+    return mapFind(rectLines, r => lineIntersection(line, r), x => x.onLine1 && x.onLine2);
 }
 
 function clampLineByRects(edge, sourceRect, targetRect) {

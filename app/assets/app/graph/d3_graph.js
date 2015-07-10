@@ -529,7 +529,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
                 // but we let node stay under grabbed position.
                 d.px = dragStartNodeX + (event.clientX - dragStartMouseX) / scale;
                 d.py = dragStartNodeY + (event.clientY - dragStartMouseY) / scale;
-                drawGraph();
                 force.resume(); // restart annealing
             }
         }
