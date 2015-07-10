@@ -19,10 +19,10 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
 
         let graph = scope.graph;
 
-        _.each(graph.nodes, node => {
+        _(graph.nodes).reject("hyperEdge").each(node => {
             let deepReplies = node.deepSuccessors.length - node.deepPredecessors.length;
             node.verticalForce = deepReplies;
-        });
+        }).sortBy("verticalForce").each((n,i) => n.verticalForce = i).value();
 
         console.log(_.sum(_.map(graph.nodes, node => node.verticalForce)));
 
@@ -189,15 +189,15 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
             .nodes(graph.nodes)
             .links(graph.edges)
             .linkStrength(0.9) // rigidity
-            .friction(0.9)
+            .friction(0.92)
             .linkDistance(100) // weak geometric constraint. Pushes nodes to achieve this distance
             // .linkDistance(d => connectsHyperEdge(d) ? 100 : 200)
             .charge(-1300)
             .chargeDistance(1000)
             .gravity(0.01)
             .theta(0.8)
-            .start()
-            .alpha(0.2);
+            .alpha(0.1)
+            .start();
 
         // register tick function
         force.on("tick", tick);
@@ -253,6 +253,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
         }
 
         function afterConverge() {
+            setFixed(graph.rootNode);
+
             drawOnTick = true;
             console.log("needed " + convergeIterations + " ticks to converge.");
             onDraw();
@@ -408,10 +410,11 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
             });
 
             // pull nodes with more more children up
-            graph.nodes.forEach(node => {
+            let pureNodes = _.reject(graph.nodes, "hyperEdge");
+            pureNodes.forEach(node => {
                 if (node.fixed !== true) {
                     // let forceUp = node.outDegree - node.inDegree;
-                    node.y += node.verticalForce * e.alpha * 0.5;
+                    node.y += (node.verticalForce - pureNodes.length / 2) * e.alpha * 1;
                 }
             });
 
@@ -566,15 +569,18 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
         }
 
         function setInitialNodePositions() {
-            _(graph.nodes).reject(n => n.hyperEdge).each((n, i) => {
+            let squareFactor = 100 * Math.sqrt(graph.nodes.length);
+            let pureNodes = _.reject(graph.nodes, n => n.hyperEdge);
+            _(pureNodes).each((n, i) => {
                 let hash = Math.abs(Helpers.hashCode(n.id));
-                n.x = width / 2 + (hash & 0x00000fff) - 0xfff / 2;
-                n.y = height / 2 + ((hash & 0x00fff000) >> 12) - 0xfff / 2;
+                n.x = squareFactor * (hash & 0xfff) / 0xfff + width / 2 - squareFactor / 2;
+                n.y = squareFactor * n.verticalForce/pureNodes.length + height / 2 - squareFactor / 2;
             }).value();
 
-            graph.rootNode.x = width / 2;
-            graph.rootNode.y = height / 2;
-            setFixed(graph.rootNode);
+            _(graph.nodes).select(n => n.hyperEdge).each((n, i) => {
+                n.x = (n.source.x + n.target.x) / 2;
+                n.y = (n.source.y + n.target.y) / 2;
+            }).value();
         }
     }
 }
