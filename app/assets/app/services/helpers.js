@@ -7,7 +7,7 @@ angular.module("wust.services").value("Helpers", {
 });
 
 function mapFind(arr, mapFunc, findFunc) {
-    for(let i = 0; i < arr.length; i++) {
+    for (let i = 0; i < arr.length; i++) {
         let mapped = mapFunc(arr[i]);
         if (findFunc(mapped))
             return mapped;
@@ -36,14 +36,17 @@ function lineIntersection(line1, line2) {
         onLine1: false,
         onLine2: false
     };
-    denominator = ((line2.end.y - line2.start.y) * (line1.end.x - line1.start.x)) - ((line2.end.x - line2.start.x) * (line1.end.y - line1.start.y));
+    denominator = ((line2.end.y - line2.start.y) * (line1.end.x - line1.start.x)) -
+        ((line2.end.x - line2.start.x) * (line1.end.y - line1.start.y));
     if (denominator === 0) {
         return result;
     }
     a = line1.start.y - line2.start.y;
     b = line1.start.x - line2.start.x;
-    numerator1 = ((line2.end.x - line2.start.x) * a) - ((line2.end.y - line2.start.y) * b);
-    numerator2 = ((line1.end.x - line1.start.x) * a) - ((line1.end.y - line1.start.y) * b);
+    numerator1 = ((line2.end.x - line2.start.x) * a) - ((line2.end.y - line2.start
+        .y) * b);
+    numerator2 = ((line1.end.x - line1.start.x) * a) - ((line1.end.y - line1.start
+        .y) * b);
     a = numerator1 / denominator;
     b = numerator2 / denominator;
 
@@ -101,15 +104,8 @@ function lineRectIntersection(line, rect) {
         end: corners.x0y1
     }];
 
-    let rectIntersection;
-    for(let i = 0; i < rectLines.length; i++) {
-        let x = lineIntersection(line, rectLines[i]);
-        if( x.onLine1 === true && x.onLine2 === true ) {
-            rectIntersection = x;
-            break;
-        }
-    }
-    return rectIntersection;
+    return mapFind(rectLines, r => lineIntersection(line, r), x => x.onLine1 ===
+        true && x.onLine2 === true);
 }
 
 function clampLineByRects(edge, sourceRect, targetRect) {
@@ -124,22 +120,29 @@ function clampLineByRects(edge, sourceRect, targetRect) {
         }
     };
 
-    let sourceIntersection = lineRectIntersection(linkLine,
-        _.merge(sourceRect, {
-            x: edge.source.x - sourceRect.width / 2,
-            y: edge.source.y - sourceRect.height / 2
-        }));
+    let sourceIntersection = lineRectIntersection(linkLine, {
+        width: sourceRect.width,
+        height: sourceRect.height,
+        x: edge.source.x - sourceRect.width / 2,
+        y: edge.source.y - sourceRect.height / 2
+    });
 
-    let targetIntersection = lineRectIntersection(linkLine,
-        _.merge(targetRect, {
-            x: edge.target.x - targetRect.width / 2,
-            y: edge.target.y - targetRect.height / 2
-        }));
+    let targetIntersection = lineRectIntersection(linkLine, {
+        width: targetRect.width,
+        height: targetRect.height,
+        x: edge.target.x - targetRect.width / 2,
+        y: edge.target.y - targetRect.height / 2
+    });
 
     return {
-        x1: sourceIntersection === undefined ? edge.source.x : sourceIntersection.x,
-        y1: sourceIntersection === undefined ? edge.source.y : sourceIntersection.y,
-        x2: targetIntersection === undefined ? edge.target.x : targetIntersection.x,
-        y2: targetIntersection === undefined ? edge.target.y : targetIntersection.y
+        x1: sourceIntersection === undefined ? edge.source.x : sourceIntersection
+            .x,
+        y1: sourceIntersection === undefined ? edge.source.y : sourceIntersection
+            .y,
+        x2: targetIntersection === undefined ? edge.target.x : targetIntersection
+            .x,
+        y2: targetIntersection === undefined ? edge.target.y : targetIntersection
+            .y
     };
 }
+
