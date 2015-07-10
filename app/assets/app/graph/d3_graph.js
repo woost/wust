@@ -179,6 +179,12 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
 
         setInitialNodePositions();
 
+        // write dom element ref into graph node
+        // for easy lookup
+        for(let i = 0; i < graph.nodes.length; i++) {
+            graph.nodes[i].domElement = d3.select(node[0][i]);
+        }
+
         // visibility of convergence
         let visibleConvergence = false;
 
@@ -481,11 +487,9 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
         // unfix the position of a given node
         function unsetFixed(d) {
             d.fixed = false;
-            //TODO: this lookup is ugly:
-            let dom = nodeHtml[0].find(function(dom) {
-                return dom.__data__.id === d.id;
-            });
-            d3.select(dom).classed("fixed", false);
+            console.log(d.domElement);
+            d.domElement.classed({"fixed": false});
+
             // the fixed class could change the elements dimensions
             recalculateNodeDimensions();
         }
@@ -493,10 +497,9 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
         // fix the position of a given node
         function setFixed(d) {
             d.fixed = true;
-            let dom = nodeHtml[0].find(function(dom) {
-                return dom.__data__.id === d.id;
-            });
-            d3.select(dom).classed("fixed", true);
+            d.domElement.classed({"fixed": true});
+            console.log(d.domElement);
+
             // the fixed class could change the elements dimensions
             recalculateNodeDimensions();
         }
@@ -519,10 +522,27 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
             dragStartNodeY = d.y;
             dragStartMouseX = event.clientX;
             dragStartMouseY = event.clientY;
-            console.log(d);
+
+            d.domElement.classed({"moving" : true});
+            console.log(d.domElement);
+        }
+
+        function onDragConnectStart(d) {
+            let event = d3.event.sourceEvent;
+
+            d.fixed |= 2; // copied from force.drag
+
+            // prevent d3 from interpreting this as panning
+            d3.event.sourceEvent.stopPropagation();
+
+            dragStartNodeX = d.x;
+            dragStartNodeY = d.y;
+            dragStartMouseX = event.clientX;
+            dragStartMouseY = event.clientY;
         }
 
         function onDragMove(d) {
+            //TODO: fails when zooming and dragging at the same time
             let event = d3.event.sourceEvent;
             let scale = zoom.scale();
 
@@ -555,6 +575,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
             }
 
             isDragging = false;
+
+            d.domElement.classed({"moving" : false});
         }
 
 

@@ -13,12 +13,6 @@
         padding: 0px 15px 0px 12px;
         color: $discourse_node_font_color;
         text-decoration: none;
-        &.fixed {
-            -moz-box-shadow: 0 0 20px #333;
-            -webkit-box-shadow: 0 0 20px #333;
-            box-shadow: 0 0 20px #333;
-            border: 2px solid black;
-        }
     }
     @at-root a:hover#{&}, &.btn:hover, &.panel a:hover .panel-heading {
         background-color: $bgcolor-highlight;
@@ -56,6 +50,19 @@
     }
 }
 .nodecontainer {
+    .fixed .node {
+        z-index: 100;
+        -moz-box-shadow: 0 0 40px 5px #7dbaff;
+        -webkit-box-shadow: 0 0 40px 5px #7dbaff;
+        box-shadow: 0 0 40px 5px #7dbaff;
+    }
+    .moving .node {
+        -moz-box-shadow: 0 0 20px #333;
+        -webkit-box-shadow: 0 0 20px #333;
+        box-shadow: 0 0 20px #333;
+        border: 1px solid black;
+        // z-index: 2000; //TODO: doesn't work
+    }
     .nodetools {
         $bgcolor: #C3E8FF;
         position: absolute;
