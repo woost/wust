@@ -67,45 +67,29 @@ function GraphDecoder($q) {
         defineGraphMethods(graph);
     }
 
-    function calculateComponent(startNode) {
+    function depthFirstSearch(startNode, nextNodes) {
         let visited = new Set();
-        visitNeighbours(startNode);
+        visitNext(startNode);
         return Array.from(visited);
 
-        function visitNeighbours(node) {
+        function visitNext(node) {
             if (visited.has(node)) return;
             visited.add(node);
 
-            _.each(node.neighbours, visitNeighbours);
+            _.each(nextNodes(node), visitNext);
         }
+    }
+
+    function calculateComponent(startNode) {
+        return depthFirstSearch(startNode, (node) => node.neighbours);
     }
 
     function calculateDeepSuccessors(startNode) {
-        let visited = new Set();
-        findSuccessors(startNode);
-        return Array.from(visited);
-
-        function findSuccessors(node) {
-            if (visited.has(node))
-                return;
-
-            visited.add(node);
-            _.each(node.successors, findSuccessors);
-        }
+        return depthFirstSearch(startNode, (node) => node.successors);
     }
 
     function calculateDeepPredecessors(startNode) {
-        let visited = new Set();
-        findPredecessors(startNode);
-        return Array.from(visited);
-
-        function findPredecessors(node) {
-            if (visited.has(node))
-                return;
-
-            visited.add(node);
-            _.each(node.predecessors, findPredecessors);
-        }
+        return depthFirstSearch(startNode, (node) => node.predecessors);
     }
 
 
