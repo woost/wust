@@ -86,7 +86,7 @@ function DiscourseNodeList() {
                 let self = this;
                 if (elem.id === undefined) {
                     // TODO: element still has properties from edit_service Session
-                    self.list.$buildRaw(elem).$save().$reveal().$then(data => {
+                    self.list.$buildRaw(_.pick(elem, "title", "description", "addedTags")).$save().$reveal().$then(data => {
                         humane.success("Created and connected node");
                         EditService.updateNode(elem.localId, data);
                     }, err => {
