@@ -195,7 +195,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
         let convergeIterations = 0;
         initConverge();
         if (visibleConvergence) {
-            force.on("end", afterConverge);
+            force.on("end", _.once(afterConverge)); // we don't know how to unsubscribe
         } else {
             requestAnimationFrame(converge);
         }
