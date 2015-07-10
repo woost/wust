@@ -11,11 +11,31 @@ trait RelationAccess[-NODE <: UuidNode, +OTHER <: UuidNode] {
   def read(baseDef: FixedNodeDefinition[NODE]): Either[Iterable[OTHER], String] = Right("No read access on Relation")
   def delete(baseDef: FixedNodeDefinition[NODE], uuid: String): Either[Boolean, String] = Right("No delete access on Relation")
   def deleteHyper(baseDef: HyperNodeDefinitionBase[NODE with AbstractRelation[_, _]], uuid: String): Either[Boolean, String] = Right("No delete access on HyperRelation")
-  def create(uuid: String, user: User, json: JsValue): Either[OTHER, String] = Right("No create access on Relation")
-  def createHyper(startUuid: String, endUuid: String, user: User, json: JsValue): Either[OTHER, String] = Right("No create access on HyperRelation")
+  def create(uuid: String, user: User, json: JsValue): Either[OTHER, String]
+  def create(uuid: String, user: User, otherUuid: String): Either[OTHER, String] = Right("No create access on Relation")
+  def createHyper(startUuid: String, endUuid: String, user: User, json: JsValue): Either[OTHER, String]
+  def createHyper(startUuid: String, endUuid: String, user: User, nestedUuid: String): Either[OTHER, String] = Right("No create access on HyperRelation")
 
   def toNodeDefinition: NodeDefinition[OTHER]
   def toNodeDefinition(uuid: String): UuidNodeDefinition[OTHER]
+}
+
+trait NodeAwareRelationAccess[NODE <: UuidNode, OTHER <: UuidNode] extends RelationAccess[NODE, OTHER] {
+  private var nodeAccess: Option[NodeAccess[OTHER]] = None
+  protected def withCreate(access: NodeAccess[OTHER]) = {
+    nodeAccess = Some(access)
+  }
+
+  private def createNode(user: User, js: JsValue): Either[OTHER, String] = {
+    nodeAccess.map(_.create(user, js)).getOrElse(Right("No factory defined on connect path"))
+  }
+
+  def create(uuid: String, user: User, json: JsValue): Either[OTHER, String] = {
+    createNode(user, json).left.toOption.map(n => create(uuid, user, n.uuid)).getOrElse(Right("Cannot create node on connect path"))
+  }
+  def createHyper(startUuid: String, endUuid: String, user: User, json: JsValue): Either[OTHER, String] = {
+    createNode(user, json).left.toOption.map(n => createHyper(startUuid, endUuid, user, n.uuid)).getOrElse(Right("Cannot create node on connect path"))
+  }
 }
 
 trait DirectedRelationAccess[
@@ -30,7 +50,7 @@ trait StartRelationAccess[
 START <: UuidNode,
 RELATION <: AbstractRelation[START, END],
 END <: UuidNode
-] extends RelationAccess[START, END] with DirectedRelationAccess[START, RELATION, END] {
+] extends NodeAwareRelationAccess[START,END] with DirectedRelationAccess[START, RELATION, END] {
   val nodeFactory: NodeFactory[END]
 
   def toNodeDefinition = ConcreteFactoryNodeDefinition(nodeFactory)
@@ -41,7 +61,7 @@ trait EndRelationAccess[
 START <: UuidNode,
 RELATION <: AbstractRelation[START, END],
 END <: UuidNode
-] extends RelationAccess[END, START] with DirectedRelationAccess[START, RELATION, END] {
+] extends NodeAwareRelationAccess[END, START] with DirectedRelationAccess[START, RELATION, END] {
   val nodeFactory: NodeFactory[START]
 
   def toNodeDefinition = ConcreteFactoryNodeDefinition(nodeFactory)

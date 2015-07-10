@@ -13,6 +13,7 @@ function DiscourseNodeList() {
     }
 
     get.$inject = ["$injector", "$rootScope", "DiscourseNode", "EditService"];
+
     function get($injector, $rootScope, DiscourseNode, EditService) {
         function NodeInfoActions(nodeInfo) {
             return {
@@ -42,7 +43,8 @@ function DiscourseNodeList() {
                 if (this.list.$on !== undefined) {
                     // will create nested NodeLists for each added node
                     this.list.$on("after-add", (node) => {
-                        node.nestedNodeLists = _.map(this.nestedNodeLists, list => list.create(node[list.servicePath]));
+                        node.nestedNodeLists = _.map(this.nestedNodeLists,
+                            list => list.create(node[list.servicePath]));
                     });
                 } else {
                     console.warn("showing non-restmod collection");
@@ -59,7 +61,8 @@ function DiscourseNodeList() {
                 this.isNested = true;
                 this.nestedNodeLists.push({
                     servicePath,
-                    create: service => nodeListCreate(service.$search(), title)
+                    create: service => nodeListCreate(service.$search(),
+                        title)
                 });
             }
         }
@@ -80,13 +83,31 @@ function DiscourseNodeList() {
                 if (this.exists(elem))
                     return;
 
-                let localNode = elem.id === undefined;
-                let payload = localNode ? elem : _.pick(elem, "id");
-                this.list.$create(payload).$then(data => {
-                    humane.success("Connected node");
-                    if (localNode)
-                        EditService.updateNode(this.localId, data);
-                });
+                let self = this;
+                if (elem.id === undefined) {
+                    // TODO: element still has properties from edit_service Session
+                    self.list.$buildRaw(elem).$save().$reveal().$then(data => {
+                        humane.success("Created and connected node");
+                        EditService.updateNode(elem.localId, data);
+                    }, err => {
+                        let found = _.find(self.list, {
+                            localId: elem.localId
+                        });
+
+                        if (found !== undefined)
+                            self.list.$remove(found);
+                    });
+                } else {
+                    self.list.$buildRaw(elem).$save({}).$reveal().$then(data => {
+                        humane.success("Connected node");
+                    }, err => {
+                        let found = _.find(self.list, {
+                            id: elem.id
+                        });
+                        if (found !== undefined)
+                            self.list.$remove(found);
+                    });
+                }
             }
         }
 
@@ -109,10 +130,14 @@ function DiscourseNodeList() {
         }
 
         return {
-            write: _.mapValues(nodeListDefs, (v, k) => (nodeList, title = _.capitalize(v)) => {
-                return new NodeList(new WriteNodeModel(nodeList, title, DiscourseNode[k]));
+            write: _.mapValues(nodeListDefs, (v, k) => (nodeList, title = _.capitalize(
+                v)) => {
+                return new NodeList(new WriteNodeModel(nodeList, title,
+                    DiscourseNode[k]));
             }),
-            read: (nodeList, title) => new NodeList(new ReadNodeModel(nodeList, title))
+            read: (nodeList, title) => new NodeList(new ReadNodeModel(nodeList,
+                title))
         };
     }
 }
+

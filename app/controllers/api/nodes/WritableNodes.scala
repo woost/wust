@@ -36,6 +36,14 @@ trait WritableNodes[NODE <: UuidNode] extends NodesBase {
     })
   }
 
+  override def connectMember(path: String, uuid: String, otherUuid: String) = UserAwareAction { request =>
+    getUser(request.identity)(user => {
+      getSchema(nodeSchema.connectSchemas, path)(connectSchema => {
+        getResult(connectSchema.op.create(uuid, user, otherUuid))(jsonNode)
+      })
+    })
+  }
+
   override def connectNestedMember(path: String, nestedPath: String, uuid: String, otherUuid: String) = UserAwareAction(parse.json) { request =>
     getUser(request.identity)(user => {
       val connect = request.body
@@ -44,6 +52,17 @@ trait WritableNodes[NODE <: UuidNode] extends NodesBase {
             getResult(schema.op.createHyper(otherUuid, uuid, user, connect))(jsonNode)
           else
             getResult(schema.op.createHyper(uuid, otherUuid, user, connect))(jsonNode)
+      )
+    })
+  }
+
+  override def connectNestedMember(path: String, nestedPath: String, uuid: String, otherUuid: String, nestedUuid: String) = UserAwareAction { request =>
+    getUser(request.identity)(user => {
+      getNestedSchema(nodeSchema.connectSchemas, path, nestedPath)((hyper, schema) =>
+        if(hyper.reverse)
+          getResult(schema.op.createHyper(otherUuid, uuid, user, nestedUuid))(jsonNode)
+        else
+          getResult(schema.op.createHyper(uuid, otherUuid, user, nestedUuid))(jsonNode)
       )
     })
   }

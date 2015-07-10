@@ -26,20 +26,4 @@ object RequestFormat {
       (__ \ "title").readNullable[String] and
       (__ \ "addedTags").readNullable[List[String]]
     )(TaggedNodeUpdateRequest)
-
-  // TODO: why does it not work?
-//  implicit val connectFormat = (
-//    (__ \ "id").read[String]
-//    )(ConnectRequest)
-
-  implicit object ConnectFormat extends Format[ConnectRequest] {
-    def reads(json: JsValue) = json match {
-      case JsObject(_) => {
-        JsSuccess(ConnectRequest((json \ "id").as[String]))
-      }
-      case otherwise   => JsError()
-    }
-
-    def writes(connect: ConnectRequest) = ???
-  }
 }

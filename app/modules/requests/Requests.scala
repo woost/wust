@@ -18,4 +18,3 @@ case class NodeAddRequest(description: Option[String], title: String) extends No
 case class NodeUpdateRequest(description: Option[String], title: Option[String]) extends NodeUpdateRequestBase
 case class TaggedNodeAddRequest(description: Option[String], title: String, addedTagsOption: Option[List[String]]) extends NodeAddRequestBase with TaggedRequestBase
 case class TaggedNodeUpdateRequest(description: Option[String], title: Option[String], addedTagsOption: Option[List[String]]) extends NodeUpdateRequestBase with TaggedRequestBase
-case class ConnectRequest(uuid: String) extends UserRequest
