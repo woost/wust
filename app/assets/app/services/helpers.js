@@ -1,9 +1,20 @@
 angular.module("wust.services").value("Helpers", {
+    mapFind,
     hashCode,
     lineIntersection,
     lineRectIntersection,
     clampLineByRects
 });
+
+function mapFind(arr, mapFunc, findFunc) {
+    for(let i = 0; i < arr.length; i++) {
+        let mapped = mapFunc(arr[i]);
+        if (findFunc(mapped))
+            return mapped;
+    }
+
+    return undefined;
+}
 
 function hashCode(string) {
     let hash = 0;
