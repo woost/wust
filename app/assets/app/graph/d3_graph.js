@@ -19,12 +19,13 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
 
         let graph = scope.graph;
 
-        _(graph.nodes).reject("hyperEdge").each(node => {
+        // bring nodes in order by calculating the difference between following and
+        // leading nodes. Then assign numbers from -(nodes.length/2) to +(nodes.length/2).
+        // This is used as force to pull nodes upwards or downwards.
+        _(graph.nonHyperRelationNodes).each(node => {
             let deepReplies = node.deepSuccessors.length - node.deepPredecessors.length;
             node.verticalForce = deepReplies;
         }).sortBy("verticalForce").each((n,i) => n.verticalForce = i).value();
-
-        console.log(_.sum(_.map(graph.nodes, node => node.verticalForce)));
 
         // get dimensions of containing element
         let [width, height] = [element[0].offsetWidth, element[0].offsetHeight];
@@ -410,11 +411,10 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
             });
 
             // pull nodes with more more children up
-            let pureNodes = _.reject(graph.nodes, "hyperEdge");
-            pureNodes.forEach(node => {
+            graph.nonHyperRelationNodes.forEach(node => {
                 if (node.fixed !== true) {
                     // let forceUp = node.outDegree - node.inDegree;
-                    node.y += (node.verticalForce - pureNodes.length / 2) * e.alpha * 1;
+                    node.y += (node.verticalForce - graph.nonHyperRelationNodes.length / 2) * e.alpha * 1;
                 }
             });
 
@@ -424,23 +424,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
         }
 
         function drawGraph() {
-            // clamp every edge line to the intersections with its incident node rectangles
-            link.each(function(link) {
-                if (link.source.id === link.target.id) { // self loop
-                    //TODO: self loops with hypernodes
-                    let rect = link.rect;
-                    d3.select(this).attr("d", `
-                                M ${link.source.x} ${link.source.y - rect.height/2}
-                                m -20, 0
-                                c -80,-80   120,-80   40,0
-                                `);
-                } else {
-                    const line = Helpers.clampLineByRects(link, link.source.rect, link.target.rect);
-                    const pathAttr = `M ${line.x1} ${line.y1} L ${line.x2} ${line.y2}`;
-                    d3.select(this).attr("d", pathAttr);
-                }
-            });
-
             let domNodes = node[0];
             for(let i = 0; i < domNodes.length; i++) {
                 let domNode = domNodes[i];
@@ -448,17 +431,35 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
                 domNode.style[transformCompat] = "translate(" + (graphNode.x - graphNode.rect.width / 2) + "px," + (graphNode.y - graphNode.rect.height / 2) + "px)";
             }
 
-            domNodes = linkText[0];
-            for(let i = 0; i < domNodes.length; i++) {
-                let domNode = domNodes[i];
+            let domLinkTextNodes = linkText[0];
+            for(let i = 0; i < domLinkTextNodes.length; i++) {
+                let domLinkTextNode = domLinkTextNodes[i];
+                let domLink = link[0][i];
                 let graphRelation = graph.edges[i];
-                let rect = graphRelation.rect;
+
+                // draw svg paths for lines between nodes
+                if (graphRelation.source.id === graphRelation.target.id) { // self loop
+                    //TODO: self loops with hypernodes
+                    let rect = graphRelation.rect;
+                    domLink.setAttribute("d", `
+                                M ${graphRelation.source.x} ${graphRelation.source.y - rect.height/2}
+                                m -20, 0
+                                c -80,-80   120,-80   40,0
+                                `);
+                } else {
+                    // clamp every edge line to the intersections with its incident node rectangles
+                    const line = Helpers.clampLineByRects(graphRelation, graphRelation.source.rect, graphRelation.target.rect);
+                    const pathAttr = `M ${line.x1} ${line.y1} L ${line.x2} ${line.y2}`;
+                    domLink.setAttribute("d", pathAttr);
+                }
+
 
                 // center the linktext
+                let rect = graphRelation.rect;
                 if (graphRelation.source.id === graphRelation.target.id) { // self loop
-                    domNode.style[transformCompat] = "translate(" + (graphRelation.source.x - rect.width / 2) + "px," + (graphRelation.source.y - rect.height / 2 - 70) + "px)";
+                    domLinkTextNode.style[transformCompat] = "translate(" + (graphRelation.source.x - rect.width / 2) + "px," + (graphRelation.source.y - rect.height / 2 - 70) + "px)";
                 } else {
-                    domNode.style[transformCompat] = "translate(" + (((graphRelation.source.x + graphRelation.target.x) / 2) - rect.width / 2) + "px," + (((graphRelation.source.y + graphRelation.target.y) / 2) - rect.height / 2) + "px)";
+                    domLinkTextNode.style[transformCompat] = "translate(" + (((graphRelation.source.x + graphRelation.target.x) / 2) - rect.width / 2) + "px," + (((graphRelation.source.y + graphRelation.target.y) / 2) - rect.height / 2) + "px)";
                 }
             }
         }
@@ -570,14 +571,13 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
 
         function setInitialNodePositions() {
             let squareFactor = 100 * Math.sqrt(graph.nodes.length);
-            let pureNodes = _.reject(graph.nodes, n => n.hyperEdge);
-            _(pureNodes).each((n, i) => {
+            _(graph.nonHyperRelationNodes).each((n, i) => {
                 let hash = Math.abs(Helpers.hashCode(n.id));
                 n.x = squareFactor * (hash & 0xfff) / 0xfff + width / 2 - squareFactor / 2;
-                n.y = squareFactor * n.verticalForce/pureNodes.length + height / 2 - squareFactor / 2;
+                n.y = squareFactor * n.verticalForce/graph.nonHyperRelationNodes.length + height / 2 - squareFactor / 2;
             }).value();
 
-            _(graph.nodes).select(n => n.hyperEdge).each((n, i) => {
+            _(graph.hyperRelations).each((n, i) => {
                 n.x = (n.source.x + n.target.x) / 2;
                 n.y = (n.source.y + n.target.y) / 2;
             }).value();

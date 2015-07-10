@@ -92,15 +92,24 @@ function GraphDecoder($q) {
         return depthFirstSearch(startNode, (node) => node.predecessors);
     }
 
-
     function invalidateNodeCache(node) {
         node.cachedComponent = _.once(calculateComponent);
         node.cachedDeepSuccessors = _.once(calculateDeepSuccessors);
         node.cachedDeepPredecessors = _.once(calculateDeepPredecessors);
     }
 
+    function calculateNonHyperRelationNodes(graph) {
+        return _.reject(graph.nodes, "hyperEdge");
+    }
+
+    function calculateHyperRelations(graph) {
+        return _.select(graph.nodes, "hyperEdge");
+    }
+
     function invalidateGraphCache(graph) {
         _.each(graph.nodes, n => invalidateNodeCache(n));
+        graph.cachedHyperRelations = _.once(calculateHyperRelations);
+        graph.cachedNonHyperRelationNodes = _.once(calculateNonHyperRelationNodes);
     }
 
     function refreshIndex(graph) {
@@ -175,7 +184,12 @@ function GraphDecoder($q) {
         Object.defineProperties(graph, {
             hyperRelations: {
                 get: function() {
-                    return _(this.nodes).filter((n) => n.hyperEdge === true).value();
+                    return this.cachedHyperRelations(this);
+                }
+            },
+            nonHyperRelationNodes: {
+                get: function() {
+                    return this.cachedNonHyperRelationNodes(this);
                 }
             }
         });
@@ -189,6 +203,7 @@ function GraphDecoder($q) {
 
         // reinitialize neighbours
         _.each(graph.edges.concat(graph.hyperRelations), e => {
+            //TODO: rename to starNode/endNode and provide wrapping function for d3, which implements source/target
             e.source = graph.nodes[e.startId];
             e.target = graph.nodes[e.endId];
             e.source.outRelations.push(e);
