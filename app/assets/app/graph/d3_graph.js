@@ -112,6 +112,11 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
             .on("drag", ignoreHyperEdge(onDragMove))
             .on("dragend", ignoreHyperEdge(onDragMoveEnd));
 
+        let dragConnect = d3.behavior.drag()
+            .on("dragstart", ignoreHyperEdge(onDragConnectStart))
+            .on("drag", ignoreHyperEdge(onDragConnectMove))
+            .on("dragend", ignoreHyperEdge(onDragConnectEnd));
+
         let disableDrag = d3.behavior.drag()
             .on("dragstart", (d) => d3.event.sourceEvent.stopPropagation());
 
@@ -176,7 +181,10 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
         let nodeConnectTool = nodeTools.append("div")
             .attr("class","nodetool connecttool fa fa-compress")
             .style("cursor", d => d.hyperEdge ? "inherit" : "crosshair")
-            .call(dragMove);
+            .call(dragConnect);
+
+        let connectorLine = svgContainer.append("line").classed({"connectorline":true});
+
 
         setInitialNodePositions();
 
@@ -488,7 +496,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
         // unfix the position of a given node
         function unsetFixed(d) {
             d.fixed = false;
-            console.log(d.domElement);
             d.domElement.classed({"fixed": false});
 
             // the fixed class could change the elements dimensions
@@ -499,7 +506,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
         function setFixed(d) {
             d.fixed = true;
             d.domElement.classed({"fixed": true});
-            console.log(d.domElement);
 
             // the fixed class could change the elements dimensions
             recalculateNodeDimensions();
@@ -507,8 +513,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
 
         // keep track whether the node is currently being dragged
         let isDragging = false;
-        let dragStartNodeX, dragStartNodeY;
-        let dragStartMouseX, dragStartMouseY;
+        let dragStartNodeX, dragStartNodeY, dragOffsetX;
+        let dragStartMouseX, dragStartMouseY, dragOffsetY;
 
         //TODO: rename d to something meaningful in all d3 code
         function onDragMoveStart(d) {
@@ -525,13 +531,11 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
             dragStartMouseY = event.clientY;
 
             d.domElement.classed({"moving" : true});
-            console.log(d.domElement);
         }
 
         function onDragConnectStart(d) {
             let event = d3.event.sourceEvent;
-
-            d.fixed |= 2; // copied from force.drag
+            let scale = zoom.scale();
 
             // prevent d3 from interpreting this as panning
             d3.event.sourceEvent.stopPropagation();
@@ -540,6 +544,17 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
             dragStartNodeY = d.y;
             dragStartMouseX = event.clientX;
             dragStartMouseY = event.clientY;
+
+            let domRect = d.domElement[0][0].childNodes[0].getBoundingClientRect();
+            dragOffsetX = (event.srcElement.getBoundingClientRect().left - domRect.left) / scale + event.offsetX - d.domElement[0][0].childNodes[0].offsetWidth / 2;
+            dragOffsetY = (event.srcElement.getBoundingClientRect().top - domRect.top) / scale + event.offsetY - d.domElement[0][0].childNodes[0].offsetHeight / 2;
+
+            connectorLine
+            .attr("x1", dragStartNodeX)
+            .attr("y1", dragStartNodeY)
+            .attr("x2", dragStartNodeX)
+            .attr("y2", dragStartNodeY)
+            .classed({"moving": true});
         }
 
         function onDragMove(d) {
@@ -549,7 +564,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
 
             // check whether there was a substantial mouse movement. if
             // not, we will interpret this as a click event after the
-            // mouse button is released (see dragended handler).
+            // mouse button is released (see onDragMoveEnd handler).
             let diffX = dragStartMouseX - event.clientX;
             let diffY = dragStartMouseY - event.clientY;
             let diff = Math.sqrt(diffX * diffX + diffY * diffY);
@@ -564,7 +579,40 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
             }
         }
 
+        function onDragConnectMove(d) {
+            //TODO: fails when zooming and dragging at the same time
+            let event = d3.event.sourceEvent;
+            let scale = zoom.scale();
+
+            // check whether there was a substantial mouse movement. if
+            // not, we will interpret this as a click event after the
+            // mouse button is released (see dragended handler).
+            let diffX = dragStartMouseX - event.clientX;
+            let diffY = dragStartMouseY - event.clientY;
+            let diff = Math.sqrt(diffX * diffX + diffY * diffY);
+            isDragging = isDragging || (diff > 5);
+
+            // if (isDragging) {
+                // default positioning is center of node.
+                // but we let node stay under grabbed position.
+                connectorLine
+                .attr("x1", dragStartNodeX + dragOffsetX + (event.clientX - dragStartMouseX) /scale)
+                .attr("y1", dragStartNodeY + dragOffsetY + (event.clientY - dragStartMouseY)/scale);
+            // }
+        }
+
         // we use dragend instead of click event, because it is emitted on mobile phones as well as on pcs
+        function onDragConnectEnd(d) {
+            // TODO: connect node
+            // if (isDragging) {
+            // } else {
+            // }
+
+            isDragging = false;
+
+            connectorLine.classed({"moving" : false});
+        }
+
         function onDragMoveEnd(d) {
             d.fixed &= ~6; // copied from force.drag
             if (isDragging) {
