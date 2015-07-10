@@ -122,7 +122,7 @@ function GraphDecoder($q) {
                 predecessors: {
                     get: function() {
                         return _.map(this.inRelations, r => r.source);
-                    }
+                  }
                 },
                 successors: {
                     get: function() {

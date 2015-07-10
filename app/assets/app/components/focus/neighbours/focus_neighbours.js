@@ -20,11 +20,14 @@ NeighboursCtrl.$inject = ["Post", "DiscourseNodeList", "DiscourseNodeCrate"];
 function NeighboursCtrl(Post, DiscourseNodeList, DiscourseNodeCrate) {
     let vm = this;
 
-    let node = vm.component.rootNode;
-    vm.top = DiscourseNodeList.write.Post(node.predecessors, "From");
-        //.nested(DiscourseNodeList.write.Post, "connectsFrom", "From")
-        //.nested(DiscourseNodeList.write.Post, "connectsTo", "To");
-    vm.bottom = DiscourseNodeList.write.Post(node.successors, "To");
-        //.nested(DiscourseNodeList.write.Post, "connectsFrom", "From")
-        //.nested(DiscourseNodeList.write.Post, "connectsTo", "To");
+    let node = Post.$buildRaw(vm.component.rootNode.$encode());
+    //TODO: how can we get updates here?
+    _.each(_.reject(vm.component.rootNode.predecessors, "hyperEdge"), n => node.connectsFrom.$buildRaw(n.$encode()).$reveal());
+    _.each(_.reject(vm.component.rootNode.successors, "hyperEdge"), n => node.connectsTo.$buildRaw(n.$encode()).$reveal());
+    vm.top = DiscourseNodeList.write.Post(node.connectsFrom, "From");
+        // .nested(DiscourseNodeList.write.Post, "connectsFrom", "From")
+        // .nested(DiscourseNodeList.write.Post, "connectsTo", "To");
+    vm.bottom = DiscourseNodeList.write.Post(node.connectsTo, "To");
+        // .nested(DiscourseNodeList.write.Post, "connectsFrom", "From")
+        // .nested(DiscourseNodeList.write.Post, "connectsTo", "To");
 }
