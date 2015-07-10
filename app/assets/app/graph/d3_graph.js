@@ -438,21 +438,26 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
                 }
             });
 
-            node.style(transformCompat, d => {
-                // center the node on link ends
-                return "translate(" + (d.x - d.rect.width / 2) + "px," + (d.y - d.rect.height / 2) + "px)";
-            });
+            let domNodes = node[0];
+            for(let i = 0; i < domNodes.length; i++) {
+                let domNode = domNodes[i];
+                let graphNode = graph.nodes[i];
+                domNode.style[transformCompat] = "translate(" + (graphNode.x - graphNode.rect.width / 2) + "px," + (graphNode.y - graphNode.rect.height / 2) + "px)";
+            }
 
-            linkText.style(transformCompat, d => {
+            domNodes = linkText[0];
+            for(let i = 0; i < domNodes.length; i++) {
+                let domNode = domNodes[i];
+                let graphRelation = graph.edges[i];
+                let rect = graphRelation.rect;
+
                 // center the linktext
-                let rect = d.rect;
-                if (d.source.id === d.target.id) { // self loop
-                    return "translate(" + (d.source.x - rect.width / 2) + "px," + (d.source.y - rect.height / 2 - 70) + "px)";
+                if (graphRelation.source.id === graphRelation.target.id) { // self loop
+                    domNode.style[transformCompat] = "translate(" + (graphRelation.source.x - rect.width / 2) + "px," + (graphRelation.source.y - rect.height / 2 - 70) + "px)";
                 } else {
-                    return "translate(" + (((d.source.x + d.target.x) / 2) - rect.width / 2) + "px," + (((d.source.y + d.target.y) / 2) - rect.height / 2) + "px)";
+                    domNode.style[transformCompat] = "translate(" + (((graphRelation.source.x + graphRelation.target.x) / 2) - rect.width / 2) + "px," + (((graphRelation.source.y + graphRelation.target.y) / 2) - rect.height / 2) + "px)";
                 }
-
-            });
+            }
         }
 
         // zoom into graph
