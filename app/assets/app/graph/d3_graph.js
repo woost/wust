@@ -133,13 +133,14 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
                 }
             });
 
-        let linkText = svgContainer.append("div").attr("id", "group_link_labels")
-            .selectAll()
-            .data(graph.edges).enter()
-            .append("div");
-        let linktextHtml = linkText.append("div")
-            .attr("class", "relation_label")
-            .html(d => connectsHyperEdge(d) ? "" : d.title);
+        // TODO: non-hyper-relation-links are broken
+        // let linkText = svgContainer.append("div").attr("id", "group_link_labels")
+        //     .selectAll()
+        //     .data(graph.edges).enter()
+        //     .append("div");
+        // let linktextHtml = linkText.append("div")
+        //     .attr("class", "relation_label")
+        //     .html(d => connectsHyperEdge(d) ? "" : d.title);
 
 
         let node = htmlContainer.append("div").attr("id", "group_hypernodes-then-nodes")
@@ -226,7 +227,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
 
         function recalculateNodeDimensions() {
             cacheObjectDimensions(nodeHtml);
-            cacheObjectDimensions(linktextHtml);
+            // cacheObjectDimensions(linktextHtml);
         }
         recalculateNodeDimensions();
 
@@ -441,9 +442,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
                 domNode.style[transformCompat] = "translate(" + (graphNode.x - graphNode.rect.width / 2) + "px," + (graphNode.y - graphNode.rect.height / 2) + "px)";
             }
 
-            let domLinkTextNodes = linkText[0];
-            for(let i = 0; i < domLinkTextNodes.length; i++) {
-                let domLinkTextNode = domLinkTextNodes[i];
+            let domLinks = link[0];
+            for(let i = 0; i < domLinks.length; i++) {
                 let domLink = link[0][i];
                 let graphRelation = graph.edges[i];
 
@@ -464,13 +464,14 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
                 }
 
 
-                // center the linktext
-                let rect = graphRelation.rect;
-                if (graphRelation.source.id === graphRelation.target.id) { // self loop
-                    domLinkTextNode.style[transformCompat] = "translate(" + (graphRelation.source.x - rect.width / 2) + "px," + (graphRelation.source.y - rect.height / 2 - 70) + "px)";
-                } else {
-                    domLinkTextNode.style[transformCompat] = "translate(" + (((graphRelation.source.x + graphRelation.target.x) / 2) - rect.width / 2) + "px," + (((graphRelation.source.y + graphRelation.target.y) / 2) - rect.height / 2) + "px)";
-                }
+                // draw normal link-labels and center them
+                // let domLinkTextNode = domLinks[i];
+                // let rect = graphRelation.rect;
+                // if (graphRelation.source.id === graphRelation.target.id) { // self loop
+                //     domLinkTextNode.style[transformCompat] = "translate(" + (graphRelation.source.x - rect.width / 2) + "px," + (graphRelation.source.y - rect.height / 2 - 70) + "px)";
+                // } else {
+                //     domLinkTextNode.style[transformCompat] = "translate(" + (((graphRelation.source.x + graphRelation.target.x) / 2) - rect.width / 2) + "px," + (((graphRelation.source.y + graphRelation.target.y) / 2) - rect.height / 2) + "px)";
+                // }
             }
         }
 

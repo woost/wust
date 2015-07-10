@@ -52,11 +52,13 @@
 .nodecontainer {
     .fixed .node {
         z-index: 100;
+        // blue glow
         -moz-box-shadow: 0 0 40px 5px #7dbaff;
         -webkit-box-shadow: 0 0 40px 5px #7dbaff;
         box-shadow: 0 0 40px 5px #7dbaff;
     }
     .moving .node {
+        // dark shadow
         -moz-box-shadow: 0 0 20px #333;
         -webkit-box-shadow: 0 0 20px #333;
         box-shadow: 0 0 20px #333;
