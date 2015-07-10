@@ -8,6 +8,7 @@ import modules.auth.HeaderEnvironmentModule
 import modules.requests.{NodeSchema, ConnectSchema, HyperConnectSchema}
 import play.api.mvc.Result
 import renesca.schema.Node
+import renesca.parameter.implicits._
 
 trait NodesBase extends NestedResourceRouter with DefaultNestedResourceController with Silhouette[User, JWTAuthenticator] with HeaderEnvironmentModule {
   protected def unauthorized = Unauthorized("Only logged-in users allowed")
@@ -53,7 +54,15 @@ trait NodesBase extends NestedResourceRouter with DefaultNestedResourceControlle
   protected def getUser(identity: Option[User])(handler: User => Result) = {
     identity match {
       case Some(user) => handler(user)
-      case None => unauthorized
+      //case None => unauthorized
+      //TODO: devel: just the devel user
+      case None =>
+        if (play.api.Play.isDev(play.api.Play.current)) {
+          val user = User.merge(name = "devel")
+          handler(user)
+        } else
+          unauthorized
+
     }
   }
 }
