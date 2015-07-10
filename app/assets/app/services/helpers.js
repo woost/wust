@@ -90,9 +90,14 @@ function lineRectIntersection(line, rect) {
         end: corners.x0y1
     }];
 
-    let rectIntersection = _(rectLines).map(rectLine => lineIntersection(line, rectLine))
-        .find(x => x.onLine1 === true && x.onLine2 === true);
-
+    let rectIntersection;
+    for(let i = 0; i < rectLines.length; i++) {
+        let x = lineIntersection(line, rectLines[i]);
+        if( x.onLine1 === true && x.onLine2 === true ) {
+            rectIntersection = x;
+            break;
+        }
+    }
     return rectIntersection;
 }
 
