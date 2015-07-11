@@ -7,7 +7,7 @@ import modules.db.access.StartRelationRead
 import modules.requests.dsl._
 
 object Tags extends Nodes[Tag] {
-  val node = N(Tag, ContentNodeAccess(Tag),
-    ("posts", N --> StartRelationRead(Categorizes, Post))
+  val node = NodeDef(Tag, ContentNodeAccess(Tag),
+    ("posts", N > StartRelationRead(Categorizes, Post))
   )
 }

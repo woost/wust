@@ -45,12 +45,8 @@ object StartContentRelationAccess {
   START <: UuidNode,
   RELATION <: AbstractRelation[START, END],
   END <: UuidNode
-  ](factory: ContentRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[END], nodeAccess: Option[NodeAccess[END]] = None): UuidNodeMatchesFactory[START] => StartContentRelationAccess[START, RELATION, END] = {
-    baseFactory => {
-      val access = new StartContentRelationAccess(factory, nodeFactory, baseFactory)
-      nodeAccess.foreach(access.withCreate(_))
-      access
-    }
+  ](factory: ContentRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[END]): UuidNodeMatchesFactory[START] => StartContentRelationAccess[START, RELATION, END] = {
+    baseFactory => new StartContentRelationAccess(factory, nodeFactory, baseFactory)
   }
 }
 
@@ -87,12 +83,8 @@ object StartContentRelationHyperAccess {
   START <: UuidNode,
   RELATION <: AbstractRelation[START, END],
   END <: UuidNode
-  ](factory: ContentRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[END], startFactory: UuidNodeMatchesFactory[ISTART], endFactory: UuidNodeMatchesFactory[IEND], nodeAccess: Option[NodeAccess[END]] = None): (HyperConnectionFactory[ISTART, START with AbstractRelation[ISTART, IEND], IEND] with UuidNodeFactory[START]) => StartContentRelationHyperAccess[ISTART, IEND, START, RELATION, END] = {
-    baseFactory => {
-      val access = new StartContentRelationHyperAccess(factory, nodeFactory, startFactory, baseFactory, endFactory)
-      nodeAccess.foreach(access.withCreate(_))
-      access
-    }
+  ](factory: ContentRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[END], startFactory: UuidNodeMatchesFactory[ISTART], endFactory: UuidNodeMatchesFactory[IEND]): (HyperConnectionFactory[ISTART, START with AbstractRelation[ISTART, IEND], IEND] with UuidNodeFactory[START]) => StartContentRelationHyperAccess[ISTART, IEND, START, RELATION, END] = {
+    baseFactory => new StartContentRelationHyperAccess(factory, nodeFactory, startFactory, baseFactory, endFactory)
   }
 }
 
@@ -119,12 +111,8 @@ object EndContentRelationAccess {
   START <: UuidNode,
   RELATION <: AbstractRelation[START, END],
   END <: UuidNode
-  ](factory: ContentRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[START], nodeAccess: Option[NodeAccess[START]] = None): UuidNodeMatchesFactory[END] => EndContentRelationAccess[START, RELATION, END] = {
-    baseFactory => {
-      val access = new EndContentRelationAccess(factory, nodeFactory, baseFactory)
-      nodeAccess.foreach(access.withCreate(_))
-      access
-    }
+  ](factory: ContentRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[START]): UuidNodeMatchesFactory[END] => EndContentRelationAccess[START, RELATION, END] = {
+    baseFactory => new EndContentRelationAccess(factory, nodeFactory, baseFactory)
   }
 }
 
@@ -161,11 +149,7 @@ object EndContentRelationHyperAccess {
   START <: UuidNode,
   RELATION <: AbstractRelation[START, END],
   END <: UuidNode
-  ](factory: ContentRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[START], startFactory: UuidNodeMatchesFactory[ISTART], endFactory: UuidNodeMatchesFactory[IEND], nodeAccess: Option[NodeAccess[START]] = None): (HyperConnectionFactory[ISTART, END with AbstractRelation[ISTART, IEND], IEND] with UuidNodeFactory[END]) => EndContentRelationHyperAccess[ISTART, IEND, START, RELATION, END] = {
-    baseFactory => {
-      val access = new EndContentRelationHyperAccess(factory, nodeFactory, startFactory, baseFactory, endFactory)
-      nodeAccess.foreach(access.withCreate(_))
-      access
-    }
+  ](factory: ContentRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[START], startFactory: UuidNodeMatchesFactory[ISTART], endFactory: UuidNodeMatchesFactory[IEND]): (HyperConnectionFactory[ISTART, END with AbstractRelation[ISTART, IEND], IEND] with UuidNodeFactory[END]) => EndContentRelationHyperAccess[ISTART, IEND, START, RELATION, END] = {
+    baseFactory => new EndContentRelationHyperAccess(factory, nodeFactory, startFactory, baseFactory, endFactory)
   }
 }

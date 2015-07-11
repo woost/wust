@@ -22,7 +22,7 @@ trait RelationAccess[-NODE <: UuidNode, +OTHER <: UuidNode] {
 
 trait NodeAwareRelationAccess[NODE <: UuidNode, OTHER <: UuidNode] extends RelationAccess[NODE, OTHER] {
   private var nodeAccess: Option[NodeAccess[OTHER]] = None
-  protected def withCreate(access: NodeAccess[OTHER]) = {
+  def withCreate(access: NodeAccess[OTHER]) = {
     nodeAccess = Some(access)
   }
 
