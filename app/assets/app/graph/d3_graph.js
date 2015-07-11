@@ -1,8 +1,8 @@
 angular.module("wust.graph").directive("d3Graph", d3Graph);
 
-d3Graph.$inject = ["$window", "DiscourseNode", "Helpers", "$location"];
+d3Graph.$inject = ["$window", "DiscourseNode", "Helpers", "$location", "$filter"];
 
-function d3Graph($window, DiscourseNode, Helpers, $location) {
+function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
     return {
         restrict: "A",
         scope: {
@@ -159,7 +159,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location) {
             .attr("class", d => d.css)
             .style("position", "absolute")
             .style("max-width", "150px") // to produce line breaks
-            .html(d => d.title)
+            .html(d => $filter("trim")(d.title, true, 50))
             // .style("border-width", n => Math.abs(n.verticalForce) + "px")
             // .style("border-color", n => n.verticalForce < 0 ? "#3CBAFF" : "#FFA73C")
             .style("cursor", d => d.hyperEdge ? "inherit" : "pointer")
