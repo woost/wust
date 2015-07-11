@@ -1,6 +1,9 @@
 @import "compass/css3/flexbox";
 
 .edit_post_directive {
+    .panel {
+        margin: 0px;
+    }
     .edit_title {
         padding: 5px;
     }
