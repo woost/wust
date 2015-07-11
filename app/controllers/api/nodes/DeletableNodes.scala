@@ -14,7 +14,7 @@ trait DeletableNodes[NODE <: UuidNode] extends NodesBase {
     else
       BadRequest("Cannot delete Node")
 
-  override def destroy(uuid: String) = SecuredAction(WithRole(God)) { request =>
+  override def destroy(uuid: String) = Action { request =>
       getResult(nodeSchema.op.delete(uuid))(deleteResult)
   }
 
