@@ -1,6 +1,10 @@
 #scratchpad_component {
     height: 100%;
     padding: 5px;
+    #node_add {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
     input, .input-group {
         max-width: 300px;
         width: 100%;

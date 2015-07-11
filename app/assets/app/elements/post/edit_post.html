@@ -11,7 +11,9 @@
         <div class="edit_title">
             <input type="text" class="form-control" ng-model="vm.node.title" ng-blur="vm.node.onChange()" placeholder="TL,DR">
         </div>
-        <button type="button" class="btn btn-xs btn-default" onclick="this.blur()" ng-model="vm.node.expandedEditor" btn-checkbox>Description</button>
+        <div class="edit_title">
+            <button type="button" class="btn btn-xs btn-default" onclick="this.blur()" ng-model="vm.node.expandedEditor" btn-checkbox>Description</button>
+        </div>
         <div collapse="!vm.node.expandedEditor">
             <div ui-ace="vm.ace.options" ng-model="vm.node.description"></div>
         </div>
