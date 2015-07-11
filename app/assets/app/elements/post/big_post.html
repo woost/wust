@@ -5,7 +5,7 @@
             <button class="pull-right btn btn-xs btn-success" ng-click="vm.updateFocused()"><i class="fa fa-pencil"></i></button>
             <span class="pull-right" toggle-zen node="vm.node"></span>
         </div>
-        <div class="panel-body">
+        <div ng-show="vm.node.description" class="panel-body">
             <div markdown="vm.node.description" class="post_description"></div>
             <div big-taglist node="vm.node" class="taglist"></div>
         </div>
