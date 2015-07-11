@@ -258,7 +258,7 @@ function GraphDecoder($q) {
             if (!_.contains(relation.target.inRelations, relation))
                 relation.target.inRelations.push(relation);
 
-            this.relations.push(relation);
+            this.edges.push(relation);
             _.each(knownWrappers, wrapper => wrapper.addRelation(relation));
             invalidateGraphCache(this);
         };
