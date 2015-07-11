@@ -77,6 +77,12 @@
         border: 1px solid black;
         // z-index: 2000; //TODO: doesn't work
     }
+    .selected .node {
+        background-color: #BCEFFF;
+    }
+    .selected .relation_label {
+        background-color: #BCEFFF;
+    }
     .nodetools {
         $bgcolor: #C3E8FF;
         position: absolute;

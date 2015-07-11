@@ -155,6 +155,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
             .append("div")
             .style("pointer-events", "all");
 
+        let hoveredNode;
         let nodeHtml = node.append("div")
             .attr("class", d => d.css)
             .style("position", "absolute")
@@ -166,7 +167,10 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
             .on("click", ignoreHyperEdge(node => onClick({
                 node
             })))
-            .call(disableDrag);
+            .call(disableDrag)
+            .on("mouseover", d => hoveredNode = d)
+            .on("mouseout", d => {hoveredNode = undefined; d.domElement.classed({"selected": false});});
+
 
         let nodeTools = node.append("div")
             .attr("class", "nodetools")
@@ -515,6 +519,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
         let isDragging = false;
         let dragStartNodeX, dragStartNodeY, dragOffsetX;
         let dragStartMouseX, dragStartMouseY, dragOffsetY;
+        let dragStartNode;
 
         //TODO: rename d to something meaningful in all d3 code
         function onDragMoveStart(d) {
@@ -544,6 +549,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
             dragStartNodeY = d.y;
             dragStartMouseX = event.clientX;
             dragStartMouseY = event.clientY;
+            dragStartNode = d;
 
             let domRect = d.domElement[0][0].childNodes[0].getBoundingClientRect();
             dragOffsetX = (event.srcElement.getBoundingClientRect().left - domRect.left) / scale + event.offsetX - d.domElement[0][0].childNodes[0].offsetWidth / 2;
@@ -592,25 +598,36 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
             let diff = Math.sqrt(diffX * diffX + diffY * diffY);
             isDragging = isDragging || (diff > 5);
 
-            // if (isDragging) {
+            if (isDragging) {
                 // default positioning is center of node.
                 // but we let node stay under grabbed position.
                 connectorLine
                 .attr("x1", dragStartNodeX + dragOffsetX + (event.clientX - dragStartMouseX) /scale)
                 .attr("y1", dragStartNodeY + dragOffsetY + (event.clientY - dragStartMouseY)/scale);
-            // }
+
+                if( hoveredNode !== undefined ) {
+                    hoveredNode.domElement.classed({"selected": true});
+                    dragStartNode.domElement.classed({"selected": true});
+                } else {
+                    dragStartNode.domElement.classed({"selected": false});
+                }
+            }
         }
 
         // we use dragend instead of click event, because it is emitted on mobile phones as well as on pcs
         function onDragConnectEnd(d) {
-            // TODO: connect node
-            // if (isDragging) {
-            // } else {
-            // }
+            if (isDragging) {
+                if( hoveredNode !== undefined) {
+                    console.log("connect:", dragStartNode, hoveredNode);
+                }
+            }
+            // TODO: else { connect without dragging only by clicking }
+            // TODO: create self loops?
 
             isDragging = false;
 
             connectorLine.classed({"moving" : false});
+            dragStartNode.domElement.classed({"selected": false});
         }
 
         function onDragMoveEnd(d) {
