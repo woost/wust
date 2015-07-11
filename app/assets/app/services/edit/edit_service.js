@@ -140,7 +140,7 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
 
         if (existing !== undefined) {
             existing.apply(node);
-            this.storeStack();
+            storeStack();
         }
     }
 
