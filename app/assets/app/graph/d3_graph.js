@@ -619,6 +619,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
             if (isDragging) {
                 if( hoveredNode !== undefined) {
                     console.log("connect:", dragStartNode, hoveredNode);
+                    graph.addRelation({source: dragStartNode, target:hoveredNode});
                 }
             }
             // TODO: else { connect without dragging only by clicking }
