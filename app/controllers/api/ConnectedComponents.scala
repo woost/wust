@@ -10,6 +10,9 @@ import model.WustSchema.Post
 object ConnectedComponents extends Controller {
   def show(uuid: String) = Action {
     val discourse = connectedComponent(FactoryUuidNodeDefinition(Post, uuid))
-    Ok(Json.toJson(discourse))
+    if (discourse.nodes.isEmpty)
+      NotFound(s"Cannot find node with uuid '$uuid'")
+    else
+      Ok(Json.toJson(discourse))
   }
 }
