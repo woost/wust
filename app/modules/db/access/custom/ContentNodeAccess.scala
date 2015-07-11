@@ -41,10 +41,13 @@ class ContentNodeAccess[NODE <: ContentNode](override val factory: ContentNodeFa
   protected def editNode(discourse: Discourse, user: User, uuid: String, nodeAdd: NodeUpdateRequestBase): NODE = {
     val node = factory.matchesContentNode(uuid = Some(uuid), matches = Set("uuid"))
     if(nodeAdd.description.isDefined) {
-      if(nodeAdd.description.get.isEmpty)
-        node.description = None
-      else
-        node.description = nodeAdd.description
+      //TODO: normally we would want to set it back to None instead of ""
+      // but matches nodes currently cannot save deletions of properties as long
+      // as they are local
+      // if(nodeAdd.description.get.isEmpty)
+      //   node.description = None
+      // else
+      node.description = nodeAdd.description
     }
 
     if(nodeAdd.title.isDefined)
