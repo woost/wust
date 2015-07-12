@@ -22,7 +22,7 @@ lazy val wust = (project in file(".")).settings(
     "org.webjars.bower" % "angular-animate" % "1.4.2",
     "org.webjars.bower" % "angular-sanitize" % "1.4.2",
     "org.webjars.bower" % "angular-ui-router" % "0.2.15",
-    "org.webjars.bower" % "angular-bootstrap" % "0.13.0",
+    "org.webjars.bower" % "angular-bootstrap" % "0.12.1", // wait for release which fixes modal closing with angular 1.4
     "org.webjars.bower" % "angular-native-dragdrop" % "1.1.0",
     "org.webjars.bower" % "angular-restmod" % "1.1.8",
     "org.webjars.npm" % "angular-ui-layout" % "1.0.5-requirejs",
