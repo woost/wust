@@ -644,6 +644,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
             isDragging = false;
 
             d.domElement.classed({"moving" : false});
+            force.alpha(0);
         }
 
 
