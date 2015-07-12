@@ -169,7 +169,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
             })))
             .call(disableDrag)
             .on("mouseover", d => hoveredNode = d)
-            .on("mouseout", d => {hoveredNode = undefined; d.domElement.classed({"selected": false});});
+            .on("mouseout", d => {hoveredNode = undefined; d.d3NodeContainer.classed({"selected": false});});
 
 
         let nodeTools = node.append("div")
@@ -192,11 +192,30 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
 
         setInitialNodePositions();
 
-        // write dom element ref into graph node
-        // for easy lookup
-        for(let i = 0; i < graph.nodes.length; i++) {
-            graph.nodes[i].domElement = d3.select(node[0][i]);
+        function updateNodeRefs(graph) {
+            // write dom element ref and rect into graph node
+            // for easy lookup
+            _.each(graph.nodes, (n, i) => {
+                n.domNodeContainer = node[0][i];
+                n.d3NodeContainer = d3.select(n.domNodeContainer);
+
+                n.domNode= nodeHtml[0][i];
+                n.d3Node = d3.select(n.domNode);
+
+            });
         }
+
+        function recalculateNodeDimensions(graph) {
+            _.each(graph.nodes, (n, i) => {
+                n.rect = {
+                    width: n.domNode.offsetWidth,
+                    height: n.domNode.offsetHeight
+                };
+            });
+        }
+
+        updateNodeRefs(graph);
+        recalculateNodeDimensions(graph);
 
         // visibility of convergence
         let visibleConvergence = false;
@@ -237,12 +256,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
         // filter on event
         scope.$on("d3graph_filter", filter);
 
-        function recalculateNodeDimensions() {
-            cacheObjectDimensions(nodeHtml);
-            // cacheObjectDimensions(linktextHtml);
-        }
-        recalculateNodeDimensions();
-
         function converge() {
             let startTime = Date.now();
             // keep a constant frame rate
@@ -269,7 +282,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
             });
 
             if (visibleConvergence) {
-                recalculateNodeDimensions();
+                recalculateNodeDimensions(graph);
                 focusMarkedNodes(0);
                 html.style("visibility", "visible");
                 svg.style("visibility", "visible");
@@ -375,18 +388,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
             drawGraph();
         }
 
-        // we need to set the height and weight of the foreignobject
-        // to the dimensions of the inner html container.
-        function cacheObjectDimensions(nodeHtml) {
-            _.each(nodeHtml[0], (curr) => {
-                // __data__ contains the respective node/relation object
-                curr.__data__.rect = {
-                    width: curr.offsetWidth,
-                    height: curr.offsetHeight
-                };
-            });
-        }
-
         // resize graph according to the current element dimensions
         function resizeGraph() {
             [width, height] = [element[0].offsetWidth, element[0].offsetHeight];
@@ -396,7 +397,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
             // all foreign objects have size 0
             // this call recalculates the sizes
             focusMarkedNodes();
-            recalculateNodeDimensions();
+            recalculateNodeDimensions(graph);
         }
 
         // tick function, called in each step in the force calculation,
@@ -500,19 +501,19 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
         // unfix the position of a given node
         function unsetFixed(d) {
             d.fixed = false;
-            d.domElement.classed({"fixed": false});
+            d.d3NodeContainer.classed({"fixed": false});
 
             // the fixed class could change the elements dimensions
-            recalculateNodeDimensions();
+            recalculateNodeDimensions(graph);
         }
 
         // fix the position of a given node
         function setFixed(d) {
             d.fixed = true;
-            d.domElement.classed({"fixed": true});
+            d.d3NodeContainer.classed({"fixed": true});
 
             // the fixed class could change the elements dimensions
-            recalculateNodeDimensions();
+            recalculateNodeDimensions(graph);
         }
 
         // keep track whether the node is currently being dragged
@@ -534,8 +535,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
             dragStartNodeY = d.y;
             dragStartMouseX = event.clientX;
             dragStartMouseY = event.clientY;
-
-            d.domElement.classed({"moving" : true});
         }
 
         function onDragConnectStart(d) {
@@ -551,9 +550,9 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
             dragStartMouseY = event.clientY;
             dragStartNode = d;
 
-            let domRect = d.domElement[0][0].childNodes[0].getBoundingClientRect();
-            dragOffsetX = (event.srcElement.getBoundingClientRect().left - domRect.left) / scale + event.offsetX - d.domElement[0][0].childNodes[0].offsetWidth / 2;
-            dragOffsetY = (event.srcElement.getBoundingClientRect().top - domRect.top) / scale + event.offsetY - d.domElement[0][0].childNodes[0].offsetHeight / 2;
+            let domRect = d.domNode.getBoundingClientRect();
+            dragOffsetX = (event.srcElement.getBoundingClientRect().left - domRect.left) / scale + event.offsetX - d.domNode.offsetWidth / 2;
+            dragOffsetY = (event.srcElement.getBoundingClientRect().top - domRect.top) / scale + event.offsetY - d.domNode.offsetHeight / 2;
 
             connectorLine
             .attr("x1", dragStartNodeX)
@@ -574,7 +573,12 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
             let diffX = dragStartMouseX - event.clientX;
             let diffY = dragStartMouseY - event.clientY;
             let diff = Math.sqrt(diffX * diffX + diffY * diffY);
-            isDragging = isDragging || (diff > 5);
+            if( !isDragging ) {
+                if( diff > 5) {
+                    isDragging = true;
+                    d.d3NodeContainer.classed({"moving" : true});
+                }
+            }
 
             if (isDragging) {
                 // default positioning is center of node.
@@ -606,10 +610,10 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
                 .attr("y1", dragStartNodeY + dragOffsetY + (event.clientY - dragStartMouseY)/scale);
 
                 if( hoveredNode !== undefined ) {
-                    hoveredNode.domElement.classed({"selected": true});
-                    dragStartNode.domElement.classed({"selected": true});
+                    hoveredNode.d3NodeContainer.classed({"selected": true});
+                    dragStartNode.d3NodeContainer.classed({"selected": true});
                 } else {
-                    dragStartNode.domElement.classed({"selected": false});
+                    dragStartNode.d3NodeContainer.classed({"selected": false});
                 }
             }
         }
@@ -628,7 +632,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
             isDragging = false;
 
             connectorLine.classed({"moving" : false});
-            dragStartNode.domElement.classed({"selected": false});
+            dragStartNode.d3NodeContainer.classed({"selected": false});
         }
 
         function onDragMoveEnd(d) {
@@ -636,15 +640,16 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
             if (isDragging) {
                 // if we were dragging before, the node should be fixed
                 setFixed(d);
+                force.alpha(0);
             } else {
                 // if the user just clicked, the position should be reset.
                 unsetFixed(d);
+                force.resume();
             }
 
             isDragging = false;
 
-            d.domElement.classed({"moving" : false});
-            force.alpha(0);
+            d.d3NodeContainer.classed({"moving" : false});
         }
 
 
