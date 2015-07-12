@@ -1,6 +1,7 @@
 package controllers.api.nodes
 
 import formatters.json.ApiNodeFormat._
+import formatters.json.ResponseFormat.connectWrites
 import model.WustSchema._
 import modules.requests._
 import play.api.libs.json.Json
@@ -11,6 +12,7 @@ trait WritableNodes[NODE <: UuidNode] extends NodesBase {
   def nodeSchema: NodeSchema[NODE]
 
   private def jsonNode(node: UuidNode) = Ok(Json.toJson(node))
+  private def connectResponse(response: ConnectResponse[UuidNode]) = Ok(Json.toJson(response))
 
   override def create = UserAwareAction(parse.json) { request =>
     getUser(request.identity)(user => {
@@ -31,7 +33,7 @@ trait WritableNodes[NODE <: UuidNode] extends NodesBase {
     getUser(request.identity)(user => {
       val connect = request.body
       getSchema(nodeSchema.connectSchemas, path)(connectSchema => {
-        getResult(connectSchema.op.create(uuid, user, connect))(jsonNode)
+        getResult(connectSchema.op.create(uuid, user, connect))(connectResponse)
       })
     })
   }
@@ -39,7 +41,7 @@ trait WritableNodes[NODE <: UuidNode] extends NodesBase {
   override def connectMember(path: String, uuid: String, otherUuid: String) = UserAwareAction { request =>
     getUser(request.identity)(user => {
       getSchema(nodeSchema.connectSchemas, path)(connectSchema => {
-        getResult(connectSchema.op.create(uuid, user, otherUuid))(jsonNode)
+        getResult(connectSchema.op.create(uuid, user, otherUuid))(connectResponse)
       })
     })
   }
@@ -49,9 +51,9 @@ trait WritableNodes[NODE <: UuidNode] extends NodesBase {
       val connect = request.body
       getNestedSchema(nodeSchema.connectSchemas, path, nestedPath)((hyper, schema) =>
           if(hyper.reverse)
-            getResult(schema.op.createHyper(otherUuid, uuid, user, connect))(jsonNode)
+            getResult(schema.op.createHyper(otherUuid, uuid, user, connect))(connectResponse)
           else
-            getResult(schema.op.createHyper(uuid, otherUuid, user, connect))(jsonNode)
+            getResult(schema.op.createHyper(uuid, otherUuid, user, connect))(connectResponse)
       )
     })
   }
@@ -60,9 +62,9 @@ trait WritableNodes[NODE <: UuidNode] extends NodesBase {
     getUser(request.identity)(user => {
       getNestedSchema(nodeSchema.connectSchemas, path, nestedPath)((hyper, schema) =>
         if(hyper.reverse)
-          getResult(schema.op.createHyper(otherUuid, uuid, user, nestedUuid))(jsonNode)
+          getResult(schema.op.createHyper(otherUuid, uuid, user, nestedUuid))(connectResponse)
         else
-          getResult(schema.op.createHyper(uuid, otherUuid, user, nestedUuid))(jsonNode)
+          getResult(schema.op.createHyper(uuid, otherUuid, user, nestedUuid))(connectResponse)
       )
     })
   }

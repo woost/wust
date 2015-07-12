@@ -22,7 +22,7 @@
                     </div>
                 </div>
                 <div class="panel-body">
-                    <div ng-repeat="nested in node.nestedNodeLists" discourse-node-list node-model='nested.model'></div>
+                    <div ng-repeat="nested in node.nestedNodeLists[vm.nodeModel.connectorType]" discourse-node-list node-model='nested.model'></div>
                 </div>
             </div>
         </div>

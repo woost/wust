@@ -63,8 +63,85 @@ function GraphDecoder($q) {
     }
 
     function constructGraph(graph) {
+        _.each(graph.nodes, defineNodeProperties);
+
+        Object.defineProperties(graph, {
+            hyperRelations: {
+                get: function() {
+                    return this.cached.hyperRelations(this);
+                }
+            },
+            nonHyperRelationNodes: {
+                get: function() {
+                    return this.cached.nonHyperRelationNodes(this);
+                }
+            }
+        });
+
         refreshIndex(graph);
         defineGraphMethods(graph);
+    }
+
+    function defineNodeProperties(n) {
+        n.inRelations = [];
+        n.outRelations = [];
+
+        Object.defineProperties(n, {
+            relations: {
+                get: function() {
+                    return this.inRelations.concat(this.outRelations);
+                }
+            },
+            predecessors: {
+                get: function() {
+                    return this.cached.predecessors(this);
+                }
+            },
+            successors: {
+                get: function() {
+                    return this.cached.successors(this);
+                }
+            },
+            neighbours: {
+                get: function() {
+                    return this.predecessors.concat(this.successors);
+                }
+            },
+            inDegree: {
+                get: function() {
+                    return this.inRelations.length;
+                }
+            },
+            outDegree: {
+                get: function() {
+                    return this.outRelations.length;
+                }
+            },
+            degree: {
+                get: function() {
+                    return this.inDegree + this.outDegree;
+                }
+            },
+            component: {
+                get: function() {
+                    return this.cached.component(this);
+                }
+            },
+            deepSuccessors: {
+                get: function() {
+                    return this.cached.deepSuccessors(this);
+                }
+            },
+            deepPredecessors: {
+                get: function() {
+                    return this.cached.deepPredecessors(this);
+                }
+            }
+        });
+        // $encode method to get the original
+        n.$encode = function() {
+            return _.pick(this, nodeProperties);
+        };
     }
 
     function depthFirstSearch(startNode, nextNodes) {
@@ -92,10 +169,36 @@ function GraphDecoder($q) {
         return depthFirstSearch(startNode, (node) => node.predecessors);
     }
 
+    function calculateSuccessors(node) {
+        let successors = _.reject(_.map(node.outRelations, "target"), "hyperEdge");
+        if (node.hyperEdge) {
+            successors = _.reject(successors, {
+                id: node.endId
+            });
+        }
+
+        return successors;
+    }
+
+    function calculatePredecessors(node) {
+        let predecessors = _.reject(_.map(node.inRelations, "source"), "hyperEdge");
+        if (node.hyperEdge) {
+            predecessors = _.reject(predecessors, {
+                id: node.startId
+            });
+        }
+
+        return predecessors;
+    }
+
     function invalidateNodeCache(node) {
-        node.cachedComponent = _.once(calculateComponent);
-        node.cachedDeepSuccessors = _.once(calculateDeepSuccessors);
-        node.cachedDeepPredecessors = _.once(calculateDeepPredecessors);
+        node.cached = {
+            component: _.once(calculateComponent),
+            deepSuccessors: _.once(calculateDeepSuccessors),
+            deepPredecessors: _.once(calculateDeepPredecessors),
+            predecessors: _.once(calculatePredecessors),
+            successors: _.once(calculateSuccessors)
+        };
     }
 
     function calculateNonHyperRelationNodes(graph) {
@@ -108,92 +211,13 @@ function GraphDecoder($q) {
 
     function invalidateGraphCache(graph) {
         _.each(graph.nodes, n => invalidateNodeCache(n));
-        graph.cachedHyperRelations = _.once(calculateHyperRelations);
-        graph.cachedNonHyperRelationNodes = _.once(calculateNonHyperRelationNodes);
+        graph.cached = {
+            hyperRelations: _.once(calculateHyperRelations),
+            nonHyperRelationNodes: _.once(calculateNonHyperRelationNodes)
+        };
     }
 
     function refreshIndex(graph) {
-
-
-        invalidateGraphCache(graph);
-
-        // clear all neighbour information and redefine properties
-        _.each(graph.nodes, n => {
-            n.inRelations = [];
-            n.outRelations = [];
-
-            Object.defineProperties(n, {
-                relations: {
-                    get: function() {
-                        return this.inRelations.concat(this.outRelations);
-                    }
-                },
-                predecessors: {
-                    get: function() {
-                        return _.map(this.inRelations, r => r.source);
-                  }
-                },
-                successors: {
-                    get: function() {
-                        return _.map(this.outRelations, r => r.target);
-                    }
-                },
-                neighbours: {
-                    get: function() {
-                        return this.predecessors.concat(this.successors);
-                    }
-                },
-                inDegree: {
-                    get: function() {
-                        return this.inRelations.length;
-                    }
-                },
-                outDegree: {
-                    get: function() {
-                        return this.outRelations.length;
-                    }
-                },
-                degree: {
-                    get: function() {
-                        return this.inDegree + this.outDegree;
-                    }
-                },
-                component: {
-                    get: function() {
-                        return this.cachedComponent(this);
-                    }
-                },
-                deepSuccessors: {
-                    get: function() {
-                        return this.cachedDeepSuccessors(this);
-                    }
-                },
-                deepPredecessors: {
-                    get: function() {
-                        return this.cachedDeepPredecessors(this);
-                    }
-                }
-            });
-            // $encode method to get the original
-            n.$encode = function() {
-                return _.pick(this, nodeProperties);
-            };
-
-        });
-
-        Object.defineProperties(graph, {
-            hyperRelations: {
-                get: function() {
-                    return this.cachedHyperRelations(this);
-                }
-            },
-            nonHyperRelationNodes: {
-                get: function() {
-                    return this.cachedNonHyperRelationNodes(this);
-                }
-            }
-        });
-
         // hehe
         _.each(graph.nodes, n => {
             // the id is a string, thus it won't be iterable but you can still
@@ -202,19 +226,25 @@ function GraphDecoder($q) {
         });
 
         // reinitialize neighbours
-        _.each(graph.edges.concat(graph.hyperRelations), e => {
+        // note: we need to use calculateHyperRelations here instead of the cached
+        // properties as we need to wait until the in- and outrelations of all
+        // nodes are calculated before setting the cache.
+        _.each(graph.edges.concat(calculateHyperRelations(graph)), e => {
             //TODO: rename to starNode/endNode and provide wrapping function for d3, which implements source/target
             e.source = graph.nodes[e.startId];
             e.target = graph.nodes[e.endId];
             e.source.outRelations.push(e);
             e.target.inRelations.push(e);
         });
+
+        invalidateGraphCache(graph);
     }
 
     function defineGraphMethods(graph) {
         // also works on wrapped graphs!
         let knownWrappers = [];
         let updateHandlers = [];
+        let graphDiff = freshGraphDiff();
 
         graph.wrapped = function() {
             let wrapped = {
@@ -234,50 +264,86 @@ function GraphDecoder($q) {
         graph.unsubscribeUpdated = function(handler) {
             _.remove(updateHandlers, handler);
         };
+        //TODO: rename to commit!
         graph.updated = function() {
-            _.each(updateHandlers, handler => handler());
+            refreshIndex(this);
+            _.each(updateHandlers, handler => handler(graphDiff));
             _.each(knownWrappers, wrapper => wrapper.updated());
+            graphDiff = freshGraphDiff();
         };
         // TODO: having sets instead of arrays would be better...nodes,relations,inrelations,outrelations
+        // TODO: really needed to refresh the index?
         graph.addNode = function(node) {
-            if (_.contains(this.nodes, node))
+            let nodeSearch = {
+                id: node.id
+            };
+
+            if (_.any(this.nodes, nodeSearch))
                 return;
+
+            defineNodeProperties(node);
 
             this.nodes.push(node);
-            _.each(knownWrappers, wrapper => wrapper.addNode(node));
+            graphDiff.newNodes.push(node);
+            _.remove(graphDiff.removedNodes, nodeSearch);
+
+            _.each(knownWrappers, wrapper => wrapper.addNode(new Decorator(node, nodeProperties)));
         };
         graph.addRelation = function(relation) {
-            if (_.contains(this.relations, relation))
+            let relationSearch = {
+                startId: relation.startId,
+                endId: relation.endId,
+                label: relation.label
+            };
+
+            if (_.any(this.relations, relationSearch))
                 return;
 
-            this.addNode(relation.source);
-            if (!_.contains(relation.source.outRelations, relation))
-                relation.source.outRelations.push(relation);
-
-            this.addNode(relation.target);
-            if (!_.contains(relation.target.inRelations, relation))
-                relation.target.inRelations.push(relation);
-
             this.edges.push(relation);
-            _.each(knownWrappers, wrapper => wrapper.addRelation(relation));
-            invalidateGraphCache(this);
+            graphDiff.newRelations.push(relation);
+            _.remove(graphDiff.removedRelations, relationSearch);
+
+            _.each(knownWrappers, wrapper => wrapper.addRelation(new Decorator(relation, relationProperties)));
         };
         graph.removeNode = function(node) {
-            _.remove(this.nodes, node);
-            _.remove(this.relations, r => r.source === node || r.target === node);
+            let nodeSearch = {
+                id: node.id
+            };
+
+            _.remove(this.nodes, nodeSearch);
+            _.remove(graphDiff.newNodes, nodeSearch);
+            graphDiff.removedNodes.push(node);
+
+            _(this.relations).select(r => r.source === node || r.target === node).each(r => this.removeRelation(r)).value();
             _.each(knownWrappers, wrapper => wrapper.removeNode(node));
-            invalidateGraphCache(this);
         };
         graph.removeRelation = function(relation) {
-            _.remove(this.relations, relation);
-            _.remove(relation.target.inRelations, relation);
-            _.remove(relation.source.outRelations, relation);
+            let relationSearch = {
+                startId: relation.startId,
+                endId: relation.endId,
+                label: relation.label
+            };
+
+            _.remove(this.relations, relationSearch);
+            _.remove(graphDiff.newRelations, relationSearch);
+            graphDiff.removedRelations.push(relation);
+
+            _.remove(relation.target.inRelations, relationSearch);
+            _.remove(relation.source.outRelations, relationSearch);
             _.each(knownWrappers, wrapper => wrapper.removeRelation(relation));
-            invalidateGraphCache(this);
         };
         graph.rootNode = _.find(graph.nodes, {
             id: graph.$pk
         });
+
+        function freshGraphDiff() {
+            return {
+                newRelations: [],
+                newNodes: [],
+                removedRelations: [],
+                removedNodes: []
+            };
+        }
     }
 
     function Decorator(self, decorateProperties) {

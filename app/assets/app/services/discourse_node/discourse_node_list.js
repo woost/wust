@@ -15,40 +15,38 @@ function DiscourseNodeList() {
     get.$inject = ["$injector", "$rootScope", "DiscourseNode", "EditService"];
 
     function get($injector, $rootScope, DiscourseNode, EditService) {
-        function NodeInfoActions(nodeInfo) {
-            return {
-                writable: true,
-                getLabel: () => nodeInfo.label,
-                getCss: () => nodeInfo.css
-            };
-        }
-
-        function NodeActions() {
-            return {
-                writable: false,
-                getLabel: node => node.label,
-                getCss: node => DiscourseNode.get(node.label).css
-            };
-        }
+        const PREDECESSORS = Symbol("predecessors");
+        const SUCCESSORS = Symbol("successors");
 
         class NodeModel {
-            constructor(nodeList, title, listCss) {
-                this.list = nodeList;
+            constructor(component, node, connectorType, title, writable, listCss) {
+                this.component = component;
+                this.node = node;
+                this.connectorType = connectorType;
                 this.title = title;
+                this.writable = writable;
                 this.listCss = listCss;
                 this.isNested = false;
                 this.nestedNodeLists = [];
 
-                //TODO: assure that the list is a restmod collection?
-                if (this.list.$on !== undefined) {
-                    // will create nested NodeLists for each added node
-                    this.list.$on("after-add", (node) => {
-                        node.nestedNodeLists = _.map(this.nestedNodeLists,
-                            list => list.create(node[list.servicePath]));
-                    });
-                } else {
-                    console.warn("showing non-restmod collection");
+                switch(this.connectorType) {
+                    case PREDECESSORS:
+                        this.nodeProperty = "predecessors";
+                        break;
+                    case SUCCESSORS:
+                        this.nodeProperty = "successors";
+                        break;
+                    default:
+                        throw "Invalid connectorType for node list: " + this.connectorType;
                 }
+
+                component.subscribeUpdated(graphDiff => {
+                    _.each(graphDiff.newNodes, node => this.applyAllNested(node));
+                });
+            }
+
+            get list() {
+                return this.node[this.nodeProperty];
             }
 
             exists(elem) {
@@ -57,28 +55,98 @@ function DiscourseNodeList() {
                 });
             }
 
-            nested(nodeListCreate, servicePath, title) {
+            applyAllNested(node) {
+                _.each(this.nestedNodeLists, def => this.applyNested(node, def));
+            }
+
+            applyNested(node, def) {
+                node.nestedNodeLists = node.nestedNodeLists || {};
+                if (node.nestedNodeLists[this.connectorType] === undefined) {
+                    node.nestedNodeLists[this.connectorType] = [];
+                }
+
+                //TODO: do not caclulate here, use graph wrapper
+                let hyperNode;
+                switch(this.connectorType) {
+                    case PREDECESSORS:
+                    hyperNode = _(this.node.inRelations).map("source").select("hyperEdge").find({
+                        startId: node.id,
+                        endId: this.node.id
+                    });
+                        break;
+                    case SUCCESSORS:
+                    hyperNode = _(this.node.outRelations).map("target").select("hyperEdge").find({
+                        startId: this.node.id,
+                        endId: node.id
+                    });
+                        break;
+                }
+
+                console.log("apply nesting", this);
+                console.log("node", node);
+                console.log("hypernode", hyperNode);
+
+                let nodeList = def(hyperNode);
+                console.log("nodelist", nodeList);
+                nodeList.model.setParent(this, node);
+                node.nestedNodeLists[this.connectorType].push(nodeList);
+                console.log("nesting now", node.nestedNodeLists);
+            }
+
+            nested(nodeListCreate, title, modelProperty) {
                 this.isNested = true;
-                this.nestedNodeLists.push({
-                    servicePath,
-                    create: service => nodeListCreate(service.$search(),
-                        title)
-                });
+                let nestedNodeListDef = node => nodeListCreate(this.component, node, title, modelProperty);
+                this.nestedNodeLists.push(nestedNodeListDef);
+                _.each(this.list, node => this.applyNested(node, nestedNodeListDef));
             }
         }
 
         class WriteNodeModel extends NodeModel {
-            constructor(nodeList, title, nodeInfo) {
-                super(nodeList, title, `${nodeInfo.css}_list`);
-                _.assign(this, NodeInfoActions(nodeInfo));
+            constructor(component, node, connectorType, title, modelProperty, nodeInfo) {
+                super(component, node, connectorType, title, true, `${nodeInfo.css}_list`);
+                this.modelProperty = modelProperty;
+                this.service = nodeInfo.service;
+            }
+
+            // the parentList is used in order to construct the correct url for
+            // the api call. The reference node is needed as this.node is a
+            // hyperEdge for all nested lists, but the api refers to hyperEdge
+            // via their start and endnode.
+            setParent(parentList, referenceNode) {
+                // TODO: we actually could construct ReadNodeModels with a
+                // NodeInfo, thus we would have a way to get the apilist of the
+                // parent event if it was a ReadNodeModel
+                if(!(parentList instanceof WriteNodeModel))
+                    throw "Cannot nest WriteNodeModel into non-WriteNodeModels";
+
+                this.parent = parentList;
+                this._referenceNode = referenceNode;
+            }
+
+            get referenceNode() {
+                return this._referenceNode || this.node;
+            }
+
+            get apiList() {
+                let wrapped;
+                if (this.parent === undefined) {
+                    wrapped = this.service.$buildRaw(this.referenceNode.$encode());
+                } else {
+                    let wrappedParent = this.parent.apiList;
+                    wrapped = wrappedParent.$buildRaw(this.referenceNode.$encode());
+                }
+
+                return wrapped[this.modelProperty];
             }
 
             remove(elem) {
                 let self = this;
-                self.list.$remove(elem);
-                elem.$destroy().$then(() => {
+                // TODO: handle addition/removal on graph, not on apilist!
+                this.apiList.$buildRaw(elem.$encode()).$destroy().$then(() => {
                     humane.success("Disconnected node");
-                }, () => self.list.$add(elem));
+                    self.component.self.removeNode(elem);
+                    self.component.self.updated();
+                });
             }
 
             add(elem) {
@@ -88,36 +156,37 @@ function DiscourseNodeList() {
                 let self = this;
                 if (elem.id === undefined) {
                     // TODO: element still has properties from edit_service Session
-                    self.list.$buildRaw(_.pick(elem, "title", "description", "addedTags")).$save().$reveal().$then(data => {
+                    // TODO: handle addition/removal on graph, not on apilist!
+                    self.apiList.$buildRaw(_.pick(elem, "title", "description", "addedTags")).$save().$then(data => {
+                        self.applyAllNested(elem);
                         humane.success("Created and connected node");
-                        EditService.updateNode(elem.localId, data);
-                    }, err => {
-                        let found = _.find(self.list, {
-                            localId: elem.localId
-                        });
-
-                        if (found !== undefined)
-                            self.list.$remove(found);
+                        EditService.updateNode(elem.localId, data.node);
+                        //TODO: graph should only contain created items
+                        //this.component.self.addNode(elem);
+                        _.each(data.graph.nodes, n => self.component.self.addNode(n));
+                        _.each(data.graph.edges, r => self.component.self.addRelation(r));
+                        self.component.self.updated();
+                        self.applyAllNested(elem);
                     });
                 } else {
-                    self.list.$buildRaw(elem).$save({}).$reveal().$then(data => {
+                    // TODO: handle addition/removal on graph, not on apilist!
+                    self.apiList.$buildRaw(elem).$save({}).$then(data => {
                         humane.success("Connected node");
-                    }, err => {
-                        let found = _.find(self.list, {
-                            id: elem.id
-                        });
-                        if (found !== undefined)
-                            self.list.$remove(found);
+                        _.each(data.graph.nodes, n => self.component.self.addNode(n));
+                        _.each(data.graph.edges, r => self.component.self.addRelation(r));
+                        self.component.self.updated();
+                        self.applyAllNested(elem);
                     });
                 }
             }
         }
 
         class ReadNodeModel extends NodeModel {
-            constructor(nodeList, title) {
-                super(nodeList, title, "read_node_list");
-                _.assign(this, NodeActions());
+            constructor(component, node, connectorType, title) {
+                super(component, node, connectorType, title, false, "read_node_list");
             }
+
+            setParent() {}
         }
 
         class NodeList {
@@ -125,20 +194,27 @@ function DiscourseNodeList() {
                 this.model = nodeModel;
             }
 
-            nested(nodeListCreate, servicePath, title) {
-                this.model.nested(nodeListCreate, servicePath, title);
+            nested(nodeListCreate, title, modelProperty) {
+                this.model.nested(nodeListCreate, title, modelProperty);
                 return this;
             }
         }
 
         return {
-            write: _.mapValues(nodeListDefs, (v, k) => (nodeList, title = _.capitalize(
-                v)) => {
-                return new NodeList(new WriteNodeModel(nodeList, title,
-                    DiscourseNode[k]));
+            write: _.mapValues(nodeListDefs, (v, k) => {
+                return {
+                    predecessors: (component, node, title, modelProperty) => {
+                        return new NodeList(new WriteNodeModel(component, node, PREDECESSORS, title, modelProperty, DiscourseNode[k]));
+                    },
+                    successors: (component, node, title, modelProperty) => {
+                        return new NodeList(new WriteNodeModel(component, node, SUCCESSORS, title, modelProperty, DiscourseNode[k]));
+                    }
+                };
             }),
-            read: (nodeList, title) => new NodeList(new ReadNodeModel(nodeList,
-                title))
+            read: {
+                predecessors: (component, node, title) => new NodeList(new ReadNodeModel(component, node, PREDECESSORS, title)),
+                successors: (component, node, title) => new NodeList(new ReadNodeModel(component, node, SUCCESSORS, title))
+            }
         };
     }
 }

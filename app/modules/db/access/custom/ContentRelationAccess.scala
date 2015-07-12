@@ -5,17 +5,21 @@ import model.WustSchema._
 import modules.db.Database.db
 import modules.db.HyperNodeDefinitionBase
 import modules.db.access.{NodeAccess, EndRelationReadDelete, StartRelationReadDelete}
-import modules.requests.{NodeAddRequest}
+import modules.requests.{ConnectResponse, NodeAddRequest}
 import org.atmosphere.config.service.Post
 import play.api.libs.json.JsValue
 import renesca.parameter.implicits._
 import renesca.schema._
 
 trait ContentRelationHelper {
-  protected def persistRelation[T](discourse: Discourse, result: T): Either[T, String] = {
+  protected def persistRelation[T <: UuidNode](discourse: Discourse, result: T): Either[ConnectResponse[T], String] = {
     db.transaction(_.persistChanges(discourse)).map(err =>
       Right(s"Cannot create ContentRelation: $err'")
-    ).getOrElse(Left(result))
+    ).getOrElse({
+      //TODO: Only send partial graph: the created relations!
+      //TODO: should only send node if the node was newly created
+      Left(ConnectResponse[T](discourse, Some(result)))
+    })
   }
 
   protected def fail(uuid: String) = Right(s"Cannot connect Nodes with uuid '$uuid'")

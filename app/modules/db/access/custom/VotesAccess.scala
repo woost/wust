@@ -3,6 +3,7 @@ package modules.db.access.custom
 import model.WustSchema._
 import modules.db.Database._
 import modules.db.access.EndRelationAccess
+import modules.requests.ConnectResponse
 import play.api.libs.json.JsValue
 import renesca.parameter.implicits._
 
@@ -21,7 +22,7 @@ class VotesAccess(
     if(failure.isDefined)
       Right("No vote :/")
     else
-      Left(user)
+      Left(ConnectResponse(Discourse.empty, Some(user)))
   }
 }
 
