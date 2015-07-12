@@ -74,9 +74,11 @@ function DiscourseNodeList() {
             }
 
             remove(elem) {
+                let self = this;
+                self.list.$remove(elem);
                 elem.$destroy().$then(() => {
                     humane.success("Disconnected node");
-                });
+                }, () => self.list.$add(elem));
             }
 
             add(elem) {
