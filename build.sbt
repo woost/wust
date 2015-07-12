@@ -15,6 +15,7 @@ lazy val wust = (project in file(".")).settings(
   libraryDependencies ++= Seq(
     cache,
     ws,
+    filters,
     // scalajs
     // "com.vmunier" %% "play-scalajs-scripts" % "0.2.0",
     // angular

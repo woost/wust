@@ -9,11 +9,12 @@ import play.api.{GlobalSettings, _}
 import play.api.i18n.Lang
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.mvc.Results._
-import play.api.mvc.{Handler, RequestHeader, Result}
+import play.api.mvc.{Handler, RequestHeader, Result, WithFilters}
+import play.filters.gzip.GzipFilter
 
 import scala.concurrent.Future
 
-object Global extends GlobalSettings with SecuredSettings with Logger {
+object Global extends WithFilters(new GzipFilter()) with GlobalSettings with SecuredSettings with Logger {
 
   override def onNotAuthenticated(request: RequestHeader, lang: Lang): Option[Future[Result]] = {
     // Called when a user is not authenticated.
