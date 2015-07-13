@@ -192,7 +192,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
         // define events
         let zoom = d3.behavior.zoom().scaleExtent([0.1, 10]).on("zoom", _.partial(zoomed, d3SvgContainer, d3HtmlContainer, transformCompat));
         let dragMove = d3.behavior.drag()
-            .on("dragstart", ignoreHyperEdge(_.partial(onDragMoveStart, dragState)))
+            .on("dragstart", ignoreHyperEdge(_.partial(onDragMoveStart, dragState, zoom)))
             .on("drag", ignoreHyperEdge(_.partial(onDragMove, globalState, dragState, zoom, force)))
             .on("dragend", ignoreHyperEdge(_.partial(onDragMoveEnd, dragState, force, graph)));
 
@@ -246,27 +246,12 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
         converge(globalState, force, graph, zoom, d3HtmlContainer, d3SvgContainer, onDraw, transformCompat);
     }
 
-    //TODO: rename d to something meaningful in all d3 code
-    function onDragMoveStart(dragState, d) {
-        let event = d3.event.sourceEvent;
-
-        d.fixed |= 2; // copied from force.drag
-
+    function onDragStartInit(dragState, zoom, d) {
         // prevent d3 from interpreting this as panning
         d3.event.sourceEvent.stopPropagation();
 
-        dragState.dragStartNodeX = d.x;
-        dragState.dragStartNodeY = d.y;
-        dragState.dragStartMouseX = event.clientX;
-        dragState.dragStartMouseY = event.clientY;
-    }
-
-    function onDragConnectStart(globalState, dragState, zoom, d3ConnectorLine, d) {
         let event = d3.event.sourceEvent;
         let scale = zoom.scale();
-
-        // prevent d3 from interpreting this as panning
-        d3.event.sourceEvent.stopPropagation();
 
         dragState.dragStartNodeX = d.x;
         dragState.dragStartNodeY = d.y;
@@ -275,8 +260,20 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
         dragState.dragStartNode = d;
 
         let domRect = d.domNode.getBoundingClientRect();
-        dragState.dragOffsetX = (event.srcElement.getBoundingClientRect().left - domRect.left) / scale + event.offsetX - d.domNode.offsetWidth / 2;
-        dragState.dragOffsetY = (event.srcElement.getBoundingClientRect().top - domRect.top) / scale + event.offsetY - d.domNode.offsetHeight / 2;
+        let eventRect = event.srcElement.getBoundingClientRect();
+        dragState.dragOffsetX = (eventRect.left - domRect.left) / scale + event.offsetX - d.domNode.offsetWidth / 2;
+        dragState.dragOffsetY = (eventRect.top - domRect.top) / scale + event.offsetY - d.domNode.offsetHeight / 2;
+    }
+
+    //TODO: rename d to something meaningful in all d3 code
+    function onDragMoveStart(dragState, zoom, d) {
+        onDragStartInit(dragState, zoom, d);
+
+        d.fixed |= 2; // copied from force.drag
+    }
+
+    function onDragConnectStart(globalState, dragState, zoom, d3ConnectorLine, d) {
+        onDragStartInit(dragState, zoom, d);
 
         d3ConnectorLine
             .attr("x1", dragState.dragStartNodeX)
@@ -288,11 +285,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
             });
     }
 
-    function onDragMove(globalState, dragState, zoom, force, d) {
-        //TODO: fails when zooming/scrolling and dragging at the same time
-        let event = d3.event.sourceEvent;
-        let scale = zoom.scale();
-
+    function onDragMoveInit(dragState, d, onStartDragging = () => {}) {
         // check whether there was a substantial mouse movement. if
         // not, we will interpret this as a click event after the
         // mouse button is released (see onDragMoveEnd handler).
@@ -302,34 +295,32 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
         if (!dragState.isDragging) {
             if (diff > 5) {
                 dragState.isDragging = true;
-                d.d3NodeContainer.classed({
-                    "moving": true
-                });
+                onStartDragging();
             }
         }
+    }
+
+    function onDragMove(globalState, dragState, zoom, force, d) {
+        //TODO: fails when zooming/scrolling and dragging at the same time
+        onDragMoveInit(dragState, d, () => d.d3NodeContainer.classed({ "moving": true }));
 
         if (dragState.isDragging) {
             // default positioning is center of node.
             // but we let node stay under grabbed position.
+            let event = d3.event.sourceEvent;
+            let scale = zoom.scale();
             d.px = dragState.dragStartNodeX + (event.clientX - dragState.dragStartMouseX) / scale;
             d.py = dragState.dragStartNodeY + (event.clientY - dragState.dragStartMouseY) / scale;
             force.resume(); // restart annealing
         }
     }
 
-    //TODO: exctract common stuff from onDrag... functions
-    function onDragConnectMove(globalState, dragState, zoom, d3ConnectorLine) {
+    function onDragConnectMove(globalState, dragState, zoom, d3ConnectorLine, d) {
         //TODO: fails when zooming/scrolling and dragging at the same time
         let event = d3.event.sourceEvent;
         let scale = zoom.scale();
 
-        // check whether there was a substantial mouse movement. if
-        // not, we will interpret this as a click event after the
-        // mouse button is released (see dragended handler).
-        let diffX = dragState.dragStartMouseX - event.clientX;
-        let diffY = dragState.dragStartMouseY - event.clientY;
-        let diff = Math.sqrt(diffX * diffX + diffY * diffY);
-        dragState.isDragging = dragState.isDragging || (diff > 5);
+        onDragMoveInit(dragState, d);
 
         if (dragState.isDragging) {
             // default positioning is center of node.
@@ -339,16 +330,10 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
                 .attr("y1", dragState.dragStartNodeY + dragState.dragOffsetY + (event.clientY - dragState.dragStartMouseY) / scale);
 
             if (globalState.hoveredNode !== undefined) {
-                globalState.hoveredNode.d3NodeContainer.classed({
-                    "selected": true
-                });
-                dragState.dragStartNode.d3NodeContainer.classed({
-                    "selected": true
-                });
+                globalState.hoveredNode.d3NodeContainer.classed({ "selected": true });
+                dragState.dragStartNode.d3NodeContainer.classed({ "selected": true });
             } else {
-                dragState.dragStartNode.d3NodeContainer.classed({
-                    "selected": false
-                });
+                dragState.dragStartNode.d3NodeContainer.classed({ "selected": false });
             }
         }
     }
