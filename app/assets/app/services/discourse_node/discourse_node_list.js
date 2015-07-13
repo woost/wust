@@ -39,10 +39,6 @@ function DiscourseNodeList() {
                     default:
                         throw "Invalid connectorType for node list: " + this.connectorType;
                 }
-
-                component.subscribeUpdated(graphDiff => {
-                    _.each(graphDiff.newNodes, node => this.applyAllNested(node));
-                });
             }
 
             get list() {
@@ -156,7 +152,6 @@ function DiscourseNodeList() {
                 let self = this;
                 if (elem.id === undefined) {
                     // TODO: element still has properties from edit_service Session
-                    // TODO: handle addition/removal on graph, not on apilist!
                     self.apiList.$buildRaw(_.pick(elem, "title", "description", "addedTags")).$save().$then(data => {
                         self.applyAllNested(elem);
                         humane.success("Created and connected node");
@@ -166,16 +161,17 @@ function DiscourseNodeList() {
                         _.each(data.graph.nodes, n => self.component.self.addNode(n));
                         _.each(data.graph.edges, r => self.component.self.addRelation(r));
                         self.component.self.updated();
-                        self.applyAllNested(elem);
+                        let node = self.component.nodes[data.node.id];
+                        this.applyAllNested(node);
                     });
                 } else {
-                    // TODO: handle addition/removal on graph, not on apilist!
                     self.apiList.$buildRaw(elem).$save({}).$then(data => {
                         humane.success("Connected node");
                         _.each(data.graph.nodes, n => self.component.self.addNode(n));
                         _.each(data.graph.edges, r => self.component.self.addRelation(r));
                         self.component.self.updated();
-                        self.applyAllNested(elem);
+                        let node = self.component.nodes[elem.id];
+                        this.applyAllNested(node);
                     });
                 }
             }
