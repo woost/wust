@@ -20,14 +20,33 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
         let graph = scope.graph;
         let rootDomElement = element[0];
 
-        // bring nodes in order by calculating the difference between following and
-        // leading nodes. Then assign numbers from -(nodes.length/2) to +(nodes.length/2).
-        // This is used as force to pull nodes upwards or downwards.
-        // TODO: extract function
-        _(graph.nonHyperRelationNodes).each(node => {
-            let deepReplies = node.deepSuccessors.length - node.deepPredecessors.length;
-            node.verticalForce = deepReplies;
-        }).sortBy("verticalForce").each((n, i) => n.verticalForce = i).value();
+        let globalState = {
+            // settings
+            visibleConvergence: false,
+            debugDraw: false,
+            hyperRelationAlignForce: 0.5,
+            nodeVerticalForce: 1,
+
+            // state
+            drawOnTick: false,
+            hoveredNode: undefined,
+            width: rootDomElement.offsetWidth,
+            height: rootDomElement.offsetHeight,
+        };
+
+        let force = d3.layout.force()
+            .size([globalState.width, globalState.height])
+            .nodes(graph.nodes)
+            .links(graph.edges)
+            .linkStrength(0.9) // rigidity
+            .friction(0.92)
+            .linkDistance(100) // weak geometric constraint. Pushes nodes to achieve this distance
+            // .linkDistance(d => connectsHyperEdge(d) ? 100 : 200)
+            .charge(-1300)
+            .chargeDistance(1000)
+            .gravity(0.01)
+            .theta(0.8)
+            .alpha(0.1);
 
         let dragState = {
             isDragging: false,
@@ -38,15 +57,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
             dragStartMouseY: undefined,
             dragStartOffsetX: undefined,
             dragStartOffsetY: undefined
-        };
-
-        let globalState = {
-            visibleConvergence: false,
-            debugDraw: false,
-            drawOnTick: false,
-            hoveredNode: undefined,
-            width: rootDomElement.offsetWidth,
-            height: rootDomElement.offsetHeight,
         };
 
         globalState.drawOnTick = globalState.visibleConvergence;
@@ -174,72 +184,17 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
             "connectorline": true
         });
 
-        // force configuration
-        let force = d3.layout.force()
-            .size([globalState.width, globalState.height])
-            .nodes(graph.nodes)
-            .links(graph.edges)
-            .linkStrength(0.9) // rigidity
-            .friction(0.92)
-            .linkDistance(100) // weak geometric constraint. Pushes nodes to achieve this distance
-            // .linkDistance(d => connectsHyperEdge(d) ? 100 : 200)
-            .charge(-1300)
-            .chargeDistance(1000)
-            .gravity(0.01)
-            .theta(0.8)
-            .alpha(0.1);
-
         // register tick function
         force.on("tick", _.partial(tick, graph, globalState, d3NodeContainer, transformCompat));
 
-        // define events
-        let zoom = d3.behavior.zoom().scaleExtent([0.1, 10]).on("zoom", _.partial(zoomed, d3SvgContainer, d3HtmlContainer, transformCompat));
-        let dragMove = d3.behavior.drag()
-            .on("dragstart", ignoreHyperEdge(_.partial(onDragMoveStart, dragState, zoom)))
-            .on("drag", ignoreHyperEdge(_.partial(onDragMove, globalState, dragState, zoom, force)))
-            .on("dragend", ignoreHyperEdge(_.partial(onDragMoveEnd, dragState, force, graph)));
-
-        let dragConnect = d3.behavior.drag()
-            .on("dragstart", ignoreHyperEdge(_.partial(onDragConnectStart, globalState, dragState, zoom, d3ConnectorLine)))
-            .on("drag", ignoreHyperEdge(_.partial(onDragConnectMove, globalState, dragState, zoom, d3ConnectorLine)))
-            .on("dragend", ignoreHyperEdge(_.partial(onDragConnectEnd, globalState, dragState, graph, d3ConnectorLine)));
-
-        let disableDrag = d3.behavior.drag()
-            .on("dragstart", () => d3.event.sourceEvent.stopPropagation());
-
-        d3Html.call(zoom)
-            .on("dblclick.zoom", null);
-
-        d3Svg.on("dblclick.zoom", null);
-
-        d3Node.on("click", ignoreHyperEdge(node => onClick({
-                node
-            })))
-            .call(disableDrag)
-            .on("mouseover", d => globalState.hoveredNode = d)
-            .on("mouseout", d => {
-                globalState.hoveredNode = undefined;
-                d.d3NodeContainer.classed({
-                    "selected": false
-                });
-            });
-
-        d3NodeDragTool.call(dragMove);
-        d3NodeConnectTool.call(dragConnect);
-
-        // register for resize event
-        angular.element($window).bind("resize", _.partial(resizeGraph, graph, globalState, zoom, rootDomElement, d3SvgContainer, d3HtmlContainer, transformCompat));
-
-        // filter on event
-        scope.$on("d3graph_filter", _.partial(filter, globalState, graph, zoom, d3SvgContainer, d3HtmlContainer));
+        let zoom = d3.behavior.zoom().scaleExtent([0.1, 10]);
 
 
+        //////////////////////////////////////////////////
 
-
-
+        registerUIEvents();
         setInitialNodePositions(globalState, graph);
-
-
+        calculateNodeVerticalForce(graph);
 
         updateGraphRefs(graph, d3NodeContainer, d3Node, d3NodeTools, d3LinkPath);
         recalculateNodeDimensions(graph);
@@ -247,7 +202,51 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
         force.start();
 
         converge(globalState, force, graph, zoom, d3HtmlContainer, d3SvgContainer, onDraw, transformCompat);
+
+        //////////////////////////////////////////////////
+
+
+        function registerUIEvents() {
+            // define events
+            zoom.on("zoom", _.partial(zoomed, d3SvgContainer, d3HtmlContainer, transformCompat));
+            let dragMove = d3.behavior.drag()
+                .on("dragstart", ignoreHyperEdge(_.partial(onDragMoveStart, dragState, zoom)))
+                .on("drag", ignoreHyperEdge(_.partial(onDragMove, globalState, dragState, zoom, force)))
+                .on("dragend", ignoreHyperEdge(_.partial(onDragMoveEnd, dragState, force, graph)));
+
+            let dragConnect = d3.behavior.drag()
+                .on("dragstart", ignoreHyperEdge(_.partial(onDragConnectStart, globalState, dragState, zoom, d3ConnectorLine)))
+                .on("drag", ignoreHyperEdge(_.partial(onDragConnectMove, globalState, dragState, zoom, d3ConnectorLine)))
+                .on("dragend", ignoreHyperEdge(_.partial(onDragConnectEnd, globalState, dragState, graph, d3ConnectorLine)));
+
+            let disableDrag = d3.behavior.drag()
+                .on("dragstart", () => d3.event.sourceEvent.stopPropagation());
+
+            d3Html.call(zoom).on("dblclick.zoom", null);
+
+            d3Svg.on("dblclick.zoom", null);
+
+            d3Node.on("click", ignoreHyperEdge(node => onClick({ node })))
+            .call(disableDrag)
+                .on("mouseover", d => globalState.hoveredNode = d)
+                .on("mouseout", d => {
+                    globalState.hoveredNode = undefined;
+                    d.d3NodeContainer.classed({
+                        "selected": false
+                    });
+                });
+
+            d3NodeDragTool.call(dragMove);
+            d3NodeConnectTool.call(dragConnect);
+
+            // register for resize event
+            angular.element($window).bind("resize", _.partial(resizeGraph, graph, globalState, zoom, rootDomElement, d3SvgContainer, d3HtmlContainer, transformCompat));
+
+            // filter on event
+            scope.$on("d3graph_filter", _.partial(filter, globalState, graph, zoom, d3SvgContainer, d3HtmlContainer));
+        }
     }
+
 
     function onDragStartInit(dragState, zoom, d) {
         // prevent d3 from interpreting this as panning
@@ -409,6 +408,16 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
             n.x = (n.source.x + n.target.x) / 2;
             n.y = (n.source.y + n.target.y) / 2;
         }).value();
+    }
+
+    function calculateNodeVerticalForce(graph) {
+        // bring nodes in order by calculating the difference between following and
+        // leading nodes. Then assign numbers from -(nodes.length/2) to +(nodes.length/2).
+        // This is used as force to pull nodes upwards or downwards.
+        _(graph.nonHyperRelationNodes).each(node => {
+            let deepReplies = node.deepSuccessors.length - node.deepPredecessors.length;
+            node.verticalForce = deepReplies;
+        }).sortBy("verticalForce").each((n, i) => n.verticalForce = i).value();
     }
 
     function converge(globalState, force, graph, zoom, d3HtmlContainer, d3SvgContainer, onDraw, transformCompat) {
@@ -649,7 +658,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
     // maps elements to positions
     function tick(graph, globalState, d3NodeContainer, transformCompat, e) {
         // push hypernodes towards the center between its start/end node
-        let hyperEdgePull = e.alpha * 0.5;
+        let pullStrength = e.alpha * globalState.hyperRelationAlignForce;
         graph.nodes.forEach(node => {
             if (node.hyperEdge === true) {
                 let start = node.source;
@@ -662,19 +671,19 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
                 let startDiffY = start.y - node.y;
                 let endDiffX = end.x - node.x;
                 let endDiffY = end.y - node.y;
-                node.x += (center.x - node.x) * hyperEdgePull;
-                node.y += (center.y - node.y) * hyperEdgePull;
+                node.x += (center.x - node.x) * pullStrength;
+                node.y += (center.y - node.y) * pullStrength;
                 let newStartDiffX = start.x - node.x;
                 let newStartDiffY = start.y - node.y;
                 let newEndDiffX = end.x - node.x;
                 let newEndDiffY = end.y - node.y;
                 if (start.fixed !== true) {
-                    start.x += (startDiffX - newStartDiffX) * hyperEdgePull;
-                    start.y += (startDiffY - newStartDiffY) * hyperEdgePull;
+                    start.x += (startDiffX - newStartDiffX) * pullStrength;
+                    start.y += (startDiffY - newStartDiffY) * pullStrength;
                 }
                 if (end.fixed !== true) {
-                    end.x += (endDiffX - newEndDiffX) * hyperEdgePull;
-                    end.y += (endDiffY - newEndDiffY) * hyperEdgePull;
+                    end.x += (endDiffX - newEndDiffX) * pullStrength;
+                    end.y += (endDiffY - newEndDiffY) * pullStrength;
                 }
             }
         });
@@ -682,7 +691,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
         // pull nodes with more more children up
         graph.nonHyperRelationNodes.forEach(node => {
             if (node.fixed !== true) {
-                node.y += (node.verticalForce - graph.nonHyperRelationNodes.length / 2) * e.alpha * 1;
+                node.y += (node.verticalForce - graph.nonHyperRelationNodes.length / 2) * e.alpha * globalState.nodeVerticalForce;
             }
         });
 
