@@ -17,7 +17,8 @@ function FocusCtrl($stateParams, HistoryService, component) {
             if (active)
                 HistoryService.changeActiveView(this.index);
 
-            // fire window.resize event to recalculate d3 graph foreignobject dimensions
+            // fire window.resize event to recalculate d3 graph node dimensions.
+            // they are 0x0 in some cases.
             setTimeout( () => {
                 var evt = document.createEvent("UIEvents");
                 evt.initUIEvent("resize", true, false,window,0);

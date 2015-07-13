@@ -108,7 +108,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
             .style("visibility", "hidden"); // will be shown when converged
         // .style("pointer-events", "all");
 
-        if(globalState.debugDraw) {
+        if (globalState.debugDraw) {
             // draw gravitational center
             d3SvgContainer.append("circle")
                 .attr("cx", globalState.width / 2)
@@ -150,54 +150,26 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
         // }
 
 
-        let d3NodeContainer = d3HtmlContainer.append("div").attr("id", "group_hypernodes-then-nodes")
-            .attr("class", "nodecontainer")
-            .selectAll()
-            .data(graph.nodes).enter()
-            .append("div")
-            .style("pointer-events", "all");
+        let d3NodeContainer = d3HtmlContainer.append("div").attr("id", "hypernodes-then-nodes")
+            .attr("class", "nodecontainer");
 
-        let d3Node = d3NodeContainer.append("div")
-            .attr("class", d => d.css)
-            .style("position", "absolute")
-            .style("max-width", "150px") // to produce line breaks
-            .html(d => $filter("trim")(d.title, true, 50))
-            // .style("border-width", n => Math.abs(n.verticalForce) + "px")
-            // .style("border-color", n => n.verticalForce < 0 ? "#3CBAFF" : "#FFA73C")
-            .style("cursor", d => d.hyperEdge ? "inherit" : "pointer");
-
-
-        let d3NodeTools = d3NodeContainer.append("div")
-            .attr("class", "nodetools")
-            .style("visibility", d => d.hyperEdge ? "hidden" : "inherit");
-
-        let d3NodeDragTool = d3NodeTools.append("div")
-            .attr("class", "nodetool dragtool fa fa-arrows")
-            //TODO: browser-compatibility for grab and grabbed
-            .style("cursor", d => d.hyperEdge ? "inherit" : "move");
-
-        let d3NodeConnectTool = d3NodeTools.append("div")
-            .attr("class", "nodetool connecttool fa fa-compress")
-            .style("cursor", d => d.hyperEdge ? "inherit" : "crosshair");
 
         let d3ConnectorLine = d3SvgContainer.append("line").classed({
             "connectorline": true
         });
 
         // register tick function
-        force.on("tick", _.partial(tick, graph, globalState, d3NodeContainer, transformCompat));
+        force.on("tick", _.partial(tick, graph, globalState, transformCompat));
 
         let zoom = d3.behavior.zoom().scaleExtent([0.1, 10]);
 
 
         //////////////////////////////////////////////////
 
-        registerUIEvents();
         setInitialNodePositions(globalState, graph);
-        calculateNodeVerticalForce(graph);
 
-        updateGraphRefs(graph, d3NodeContainer, d3Node, d3NodeTools, d3LinkPath);
-        recalculateNodeDimensions(graph);
+        updateGraph();
+        graph.onCommit((changes) => updateGraph());
 
         force.start();
 
@@ -205,46 +177,91 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
 
         //////////////////////////////////////////////////
 
+        function updateGraph() {
+            let d3NodeContainerWithData = d3NodeContainer
+                .selectAll()
+                .data(graph.nodes, (d) => d.id);
 
-        function registerUIEvents() {
-            // define events
-            zoom.on("zoom", _.partial(zoomed, d3SvgContainer, d3HtmlContainer, transformCompat));
-            let dragMove = d3.behavior.drag()
-                .on("dragstart", ignoreHyperEdge(_.partial(onDragMoveStart, dragState, zoom)))
-                .on("drag", ignoreHyperEdge(_.partial(onDragMove, globalState, dragState, zoom, force)))
-                .on("dragend", ignoreHyperEdge(_.partial(onDragMoveEnd, dragState, force, graph)));
+            // remove nodes
+            d3NodeContainerWithData.exit().remove();
 
-            let dragConnect = d3.behavior.drag()
-                .on("dragstart", ignoreHyperEdge(_.partial(onDragConnectStart, globalState, dragState, zoom, d3ConnectorLine)))
-                .on("drag", ignoreHyperEdge(_.partial(onDragConnectMove, globalState, dragState, zoom, d3ConnectorLine)))
-                .on("dragend", ignoreHyperEdge(_.partial(onDragConnectEnd, globalState, dragState, graph, d3ConnectorLine)));
+            // add
+            let d3Node = d3NodeContainerWithData.enter()
+                .append("div")
+                .style("pointer-events", "all")
+                .append("div")
+                .attr("class", d => d.css)
+                .style("position", "absolute")
+                .style("max-width", "150px") // to produce line breaks
+                .html(d => $filter("trim")(d.title, true, 50))
+                // .style("border-width", n => Math.abs(n.verticalForce) + "px")
+                // .style("border-color", n => n.verticalForce < 0 ? "#3CBAFF" : "#FFA73C")
+                .style("cursor", d => d.hyperEdge ? "inherit" : "pointer");
 
-            let disableDrag = d3.behavior.drag()
-                .on("dragstart", () => d3.event.sourceEvent.stopPropagation());
+            let d3NodeTools = d3NodeContainerWithData.append("div")
+                .attr("class", "nodetools")
+                .style("visibility", d => d.hyperEdge ? "hidden" : "inherit");
 
-            d3Html.call(zoom).on("dblclick.zoom", null);
+            let d3NodeDragTool = d3NodeTools.append("div")
+                .attr("class", "nodetool dragtool fa fa-arrows")
+                //TODO: browser-compatibility for grab and grabbed
+                .style("cursor", d => d.hyperEdge ? "inherit" : "move");
 
-            d3Svg.on("dblclick.zoom", null);
+            let d3NodeConnectTool = d3NodeTools.append("div")
+                .attr("class", "nodetool connecttool fa fa-compress")
+                .style("cursor", d => d.hyperEdge ? "inherit" : "crosshair");
 
-            d3Node.on("click", ignoreHyperEdge(node => onClick({ node })))
-            .call(disableDrag)
-                .on("mouseover", d => globalState.hoveredNode = d)
-                .on("mouseout", d => {
-                    globalState.hoveredNode = undefined;
-                    d.d3NodeContainer.classed({
-                        "selected": false
+            updateGraphRefs(graph, d3NodeContainerWithData, d3Node, d3NodeTools, d3LinkPath);
+            registerUIEvents();
+            calculateNodeVerticalForce(graph);
+            recalculateNodeDimensions(graph);
+
+            function registerUIEvents() {
+                // define events
+                zoom.on("zoom", _.partial(zoomed, d3SvgContainer, d3HtmlContainer, transformCompat));
+                let dragMove = d3.behavior.drag()
+                    .on("dragstart", ignoreHyperEdge(_.partial(onDragMoveStart, dragState, zoom)))
+                    .on("drag", ignoreHyperEdge(_.partial(onDragMove, globalState, dragState, zoom, force)))
+                    .on("dragend", ignoreHyperEdge(_.partial(onDragMoveEnd, dragState, force, graph)));
+
+                let dragConnect = d3.behavior.drag()
+                    .on("dragstart", ignoreHyperEdge(_.partial(onDragConnectStart, globalState, dragState, zoom, d3ConnectorLine)))
+                    .on("drag", ignoreHyperEdge(_.partial(onDragConnectMove, globalState, dragState, zoom, d3ConnectorLine)))
+                    .on("dragend", ignoreHyperEdge(_.partial(onDragConnectEnd, globalState, dragState, graph, d3ConnectorLine)));
+
+                let disableDrag = d3.behavior.drag()
+                    .on("dragstart", () => d3.event.sourceEvent.stopPropagation());
+
+                d3Html.call(zoom).on("dblclick.zoom", null);
+
+                d3Svg.on("dblclick.zoom", null);
+
+                d3Node.on("click", ignoreHyperEdge(node => {
+                        console.log("click");
+                        onClick({
+                            node
+                        });
+                    }))
+                    .call(disableDrag)
+                    .on("mouseover", d => globalState.hoveredNode = d)
+                    .on("mouseout", d => {
+                        globalState.hoveredNode = undefined;
+                        d.d3NodeContainer.classed({
+                            "selected": false
+                        });
                     });
-                });
 
-            d3NodeDragTool.call(dragMove);
-            d3NodeConnectTool.call(dragConnect);
+                d3NodeDragTool.call(dragMove);
+                d3NodeConnectTool.call(dragConnect);
 
-            // register for resize event
-            angular.element($window).bind("resize", _.partial(resizeGraph, graph, globalState, zoom, rootDomElement, d3SvgContainer, d3HtmlContainer, transformCompat));
+                // register for resize event
+                angular.element($window).bind("resize", _.partial(resizeGraph, graph, globalState, zoom, rootDomElement, d3SvgContainer, d3HtmlContainer, transformCompat));
 
-            // filter on event
-            scope.$on("d3graph_filter", _.partial(filter, globalState, graph, zoom, d3SvgContainer, d3HtmlContainer));
+                // filter on event
+                scope.$on("d3graph_filter", _.partial(filter, globalState, graph, zoom, d3SvgContainer, d3HtmlContainer));
+            }
         }
+
     }
 
 
@@ -304,7 +321,9 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
 
     function onDragMove(globalState, dragState, zoom, force, d) {
         //TODO: fails when zooming/scrolling and dragging at the same time
-        onDragMoveInit(dragState, d, () => d.d3NodeContainer.classed({ "moving": true }));
+        onDragMoveInit(dragState, d, () => d.d3NodeContainer.classed({
+            "moving": true
+        }));
 
         if (dragState.isDragging) {
             // default positioning is center of node.
@@ -332,10 +351,16 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
                 .attr("y1", dragState.dragStartNodeY + dragState.dragOffsetY + (event.clientY - dragState.dragStartMouseY) / scale);
 
             if (globalState.hoveredNode !== undefined) {
-                globalState.hoveredNode.d3NodeContainer.classed({ "selected": true });
-                dragState.dragStartNode.d3NodeContainer.classed({ "selected": true });
+                globalState.hoveredNode.d3NodeContainer.classed({
+                    "selected": true
+                });
+                dragState.dragStartNode.d3NodeContainer.classed({
+                    "selected": true
+                });
             } else {
-                dragState.dragStartNode.d3NodeContainer.classed({ "selected": false });
+                dragState.dragStartNode.d3NodeContainer.classed({
+                    "selected": false
+                });
             }
         }
     }
@@ -349,6 +374,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
                     source: dragState.dragStartNode,
                     target: globalState.hoveredNode
                 });
+                graph.commit();
             }
         }
         // TODO: else { connect without dragging only by clicking }
@@ -656,7 +682,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
 
     // tick function, called in each step in the force calculation,
     // maps elements to positions
-    function tick(graph, globalState, d3NodeContainer, transformCompat, e) {
+    function tick(graph, globalState, transformCompat, e) {
         // push hypernodes towards the center between its start/end node
         let pullStrength = e.alpha * globalState.hyperRelationAlignForce;
         graph.nodes.forEach(node => {
