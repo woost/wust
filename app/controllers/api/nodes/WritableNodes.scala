@@ -39,9 +39,11 @@ trait WritableNodes[NODE <: UuidNode] extends NodesBase {
   }
 
   override def connectMember(path: String, uuid: String, otherUuid: String) = UserAwareAction { request =>
-    getUser(request.identity)(user => {
-      getSchema(nodeSchema.connectSchemas, path)(connectSchema => {
-        getResult(connectSchema.op.create(uuid, user, otherUuid))(connectResponse)
+    validateConnect(uuid, otherUuid)(() => {
+      getUser(request.identity)(user => {
+        getSchema(nodeSchema.connectSchemas, path)(connectSchema => {
+          getResult(connectSchema.op.create(uuid, user, otherUuid))(connectResponse)
+        })
       })
     })
   }
@@ -58,6 +60,8 @@ trait WritableNodes[NODE <: UuidNode] extends NodesBase {
     })
   }
 
+  //TODO: forbid self loop of hyperedges
+  // at this point, we do not know whether nestedUuid = HyperRelation(uuid, otherUuid).uuid
   override def connectNestedMember(path: String, nestedPath: String, uuid: String, otherUuid: String, nestedUuid: String) = UserAwareAction { request =>
     getUser(request.identity)(user => {
       getNestedSchema(nodeSchema.connectSchemas, path, nestedPath)((hyper, schema) =>

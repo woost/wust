@@ -51,7 +51,7 @@ trait NodesBase extends NestedResourceRouter with DefaultNestedResourceControlle
     }
   }
 
-  protected def getUser(identity: Option[User])(handler: User => Result) = {
+  protected def getUser(identity: Option[User])(handler: User => Result): Result = {
     identity match {
       case Some(user) => handler(user)
       //case None => unauthorized
@@ -64,6 +64,13 @@ trait NodesBase extends NestedResourceRouter with DefaultNestedResourceControlle
           unauthorized
 
     }
+  }
+
+  protected def validateConnect(uuid: String, otherUuid: String)(handler: () => Result): Result = {
+    if (uuid == otherUuid)
+      BadRequest("Self loops are not allowed")
+    else
+      handler()
   }
 }
 
