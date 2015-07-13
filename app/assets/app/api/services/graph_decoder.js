@@ -60,6 +60,7 @@ function GraphDecoder($q) {
 
     function constructGraphFromRecord() {
         constructGraph(this);
+        defineGraphRecordMethods(this);
     }
 
     function constructGraph(graph) {
@@ -240,11 +241,8 @@ function GraphDecoder($q) {
         invalidateGraphCache(graph);
     }
 
-    function defineGraphMethods(graph) {
-        // also works on wrapped graphs!
+    function defineGraphRecordMethods(graph) {
         let knownWrappers = [];
-        let updateHandlers = [];
-        let graphDiff = freshGraphDiff();
 
         graph.wrapped = function() {
             let wrapped = {
@@ -254,26 +252,66 @@ function GraphDecoder($q) {
             wrapped.edges = _.map(this.edges, r => new Decorator(r, relationProperties));
             wrapped.$pk = this.$pk;
             constructGraph(wrapped);
-            knownWrappers.push(wrapped);
 
+            wrapped.commit = function() {
+                this.self.commit();
+            };
+            wrapped.addNode = function(node) {
+                this.self.addNode(node);
+            };
+            wrapped.addRelation = function(relation) {
+                this.self.addRelation(relation);
+            };
+            wrapped.removeNode = function(node) {
+                this.self.removeNode(node);
+            };
+            wrapped.removeRelation = function(relation) {
+                this.self.removeRelation(relation);
+            };
+
+            knownWrappers.push(wrapped);
             return wrapped;
         };
-        graph.subscribeUpdated = function(handler) {
+        //TODO: rename to commit!
+        graph.commit = function() {
+            this.commitInternal();
+            _.each(knownWrappers, wrapper => wrapper.commitInternal());
+        };
+        graph.addNode = function(node) {
+            this.addNodeInternal(node);
+            _.each(knownWrappers, wrapper => wrapper.addNodeInternal(new Decorator(node, nodeProperties)));
+        };
+        graph.addRelation = function(relation) {
+            this.addRelationInternal(relation);
+            _.each(knownWrappers, wrapper => wrapper.addRelationInternal(new Decorator(relation, relationProperties)));
+        };
+        graph.removeNode = function(node) {
+            this.removeNodeInternal(node);
+            _.each(knownWrappers, wrapper => wrapper.removeNodeInternal(node));
+        };
+        graph.removeRelation = function(relation) {
+            this.removeRelationInternal(relation);
+            _.each(knownWrappers, wrapper => wrapper.removeRelationInternal(relation));
+        };
+    }
+
+    function defineGraphMethods(graph) {
+        let updateHandlers = [];
+        let graphDiff = freshGraphDiff();
+
+        graph.onCommit = function(handler) {
             updateHandlers.push(handler);
         };
-        graph.unsubscribeUpdated = function(handler) {
+        graph.unsubscribeOnCommit = function(handler) {
             _.remove(updateHandlers, handler);
         };
-        //TODO: rename to commit!
-        graph.updated = function() {
+        graph.commitInternal = function() {
             refreshIndex(this);
             _.each(updateHandlers, handler => handler(graphDiff));
-            _.each(knownWrappers, wrapper => wrapper.updated());
             graphDiff = freshGraphDiff();
         };
         // TODO: having sets instead of arrays would be better...nodes,relations,inrelations,outrelations
-        // TODO: really needed to refresh the index?
-        graph.addNode = function(node) {
+        graph.addNodeInternal = function(node) {
             let nodeSearch = {
                 id: node.id
             };
@@ -286,10 +324,8 @@ function GraphDecoder($q) {
             this.nodes.push(node);
             graphDiff.newNodes.push(node);
             _.remove(graphDiff.removedNodes, nodeSearch);
-
-            _.each(knownWrappers, wrapper => wrapper.addNode(new Decorator(node, nodeProperties)));
         };
-        graph.addRelation = function(relation) {
+        graph.addRelationInternal = function(relation) {
             let relationSearch = {
                 startId: relation.startId,
                 endId: relation.endId,
@@ -302,10 +338,8 @@ function GraphDecoder($q) {
             this.edges.push(relation);
             graphDiff.newRelations.push(relation);
             _.remove(graphDiff.removedRelations, relationSearch);
-
-            _.each(knownWrappers, wrapper => wrapper.addRelation(new Decorator(relation, relationProperties)));
         };
-        graph.removeNode = function(node) {
+        graph.removeNodeInternal = function(node) {
             let nodeSearch = {
                 id: node.id
             };
@@ -315,9 +349,8 @@ function GraphDecoder($q) {
             graphDiff.removedNodes.push(node);
 
             _(this.relations).select(r => r.source === node || r.target === node).each(r => this.removeRelation(r)).value();
-            _.each(knownWrappers, wrapper => wrapper.removeNode(node));
         };
-        graph.removeRelation = function(relation) {
+        graph.removeRelationInternal = function(relation) {
             let relationSearch = {
                 startId: relation.startId,
                 endId: relation.endId,
@@ -330,7 +363,6 @@ function GraphDecoder($q) {
 
             _.remove(relation.target.inRelations, relationSearch);
             _.remove(relation.source.outRelations, relationSearch);
-            _.each(knownWrappers, wrapper => wrapper.removeRelation(relation));
         };
         graph.rootNode = _.find(graph.nodes, {
             id: graph.$pk

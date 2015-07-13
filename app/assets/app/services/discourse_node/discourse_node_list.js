@@ -140,8 +140,8 @@ function DiscourseNodeList() {
                 // TODO: handle addition/removal on graph, not on apilist!
                 this.apiList.$buildRaw(elem.$encode()).$destroy().$then(() => {
                     humane.success("Disconnected node");
-                    self.component.self.removeNode(elem);
-                    self.component.self.updated();
+                    self.component.removeNode(elem);
+                    self.component.commit();
                 });
             }
 
@@ -158,18 +158,18 @@ function DiscourseNodeList() {
                         EditService.updateNode(elem.localId, data.node);
                         //TODO: graph should only contain created items
                         //this.component.self.addNode(elem);
-                        _.each(data.graph.nodes, n => self.component.self.addNode(n));
-                        _.each(data.graph.edges, r => self.component.self.addRelation(r));
-                        self.component.self.updated();
+                        _.each(data.graph.nodes, n => self.component.addNode(n));
+                        _.each(data.graph.edges, r => self.component.addRelation(r));
+                        self.component.commit();
                         let node = self.component.nodes[data.node.id];
                         this.applyAllNested(node);
                     });
                 } else {
                     self.apiList.$buildRaw(elem).$save({}).$then(data => {
                         humane.success("Connected node");
-                        _.each(data.graph.nodes, n => self.component.self.addNode(n));
-                        _.each(data.graph.edges, r => self.component.self.addRelation(r));
-                        self.component.self.updated();
+                        _.each(data.graph.nodes, n => self.component.addNode(n));
+                        _.each(data.graph.edges, r => self.component.addRelation(r));
+                        self.component.commit();
                         let node = self.component.nodes[elem.id];
                         this.applyAllNested(node);
                     });
