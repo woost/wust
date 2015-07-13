@@ -58,7 +58,7 @@ trait NodesBase extends NestedResourceRouter with DefaultNestedResourceControlle
       //TODO: devel: just the devel user
       case None =>
         if (play.api.Play.isDev(play.api.Play.current)) {
-          val user = User.merge(name = "devel")
+          val user = User.merge(name = "devel", merge = Set("name"))
           handler(user)
         } else
           unauthorized
