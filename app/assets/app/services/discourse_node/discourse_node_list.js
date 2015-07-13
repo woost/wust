@@ -161,7 +161,7 @@ function DiscourseNodeList() {
                         _.each(data.graph.nodes, n => self.component.addNode(n));
                         _.each(data.graph.edges, r => self.component.addRelation(r));
                         self.component.commit();
-                        let node = self.component.nodes[data.node.id];
+                        let node = self.component.nodes.byId(data.node.id);
                         this.applyAllNested(node);
                     });
                 } else {
@@ -170,7 +170,7 @@ function DiscourseNodeList() {
                         _.each(data.graph.nodes, n => self.component.addNode(n));
                         _.each(data.graph.edges, r => self.component.addRelation(r));
                         self.component.commit();
-                        let node = self.component.nodes[elem.id];
+                        let node = self.component.nodes.byId(data.node.id);
                         this.applyAllNested(node);
                     });
                 }
