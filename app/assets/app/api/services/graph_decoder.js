@@ -1,8 +1,8 @@
 angular.module("wust.api").service("GraphDecoder", GraphDecoder);
 
-GraphDecoder.$inject = ["$q"];
+GraphDecoder.$inject = ["$q", "UniqArr"];
 
-function GraphDecoder($q) {
+function GraphDecoder($q, UniqArr) {
     // expose restmod mixin
     this.mixin = {
         $hooks: {
@@ -84,8 +84,8 @@ function GraphDecoder($q) {
     }
 
     function defineNodeProperties(n) {
-        n.inRelations = [];
-        n.outRelations = [];
+        n.inRelations = UniqArr.relation();
+        n.outRelations = UniqArr.relation();
 
         Object.defineProperties(n, {
             relations: {
@@ -248,8 +248,8 @@ function GraphDecoder($q) {
             let wrapped = {
                 "self": this
             };
-            wrapped.nodes = _.map(this.nodes, n => new Decorator(n, nodeProperties));
-            wrapped.edges = _.map(this.edges, r => new Decorator(r, relationProperties));
+            wrapped.nodes = UniqArr.node(_.map(this.nodes, n => new Decorator(n, nodeProperties)));
+            wrapped.edges = UniqArr.relation(_.map(this.edges, r => new Decorator(r, relationProperties)));
             wrapped.$pk = this.$pk;
             constructGraph(wrapped);
 
@@ -312,57 +312,30 @@ function GraphDecoder($q) {
         };
         // TODO: having sets instead of arrays would be better...nodes,relations,inrelations,outrelations
         graph.addNodeInternal = function(node) {
-            let nodeSearch = {
-                id: node.id
-            };
-
-            if (_.any(this.nodes, nodeSearch))
-                return;
-
             defineNodeProperties(node);
-
             this.nodes.push(node);
             graphDiff.newNodes.push(node);
-            _.remove(graphDiff.removedNodes, nodeSearch);
+            graphDiff.removedNodes.remove(node.id);
         };
         graph.addRelationInternal = function(relation) {
-            let relationSearch = {
-                startId: relation.startId,
-                endId: relation.endId,
-                label: relation.label
-            };
-
-            if (_.any(this.relations, relationSearch))
-                return;
-
             this.edges.push(relation);
             graphDiff.newRelations.push(relation);
-            _.remove(graphDiff.removedRelations, relationSearch);
+            graphDiff.removedRelations.remove(relation);
         };
         graph.removeNodeInternal = function(node) {
-            let nodeSearch = {
-                id: node.id
-            };
-
-            _.remove(this.nodes, nodeSearch);
-            _.remove(graphDiff.newNodes, nodeSearch);
+            this.nodes.remove(node);
+            graphDiff.newNodes.remove(node);
             graphDiff.removedNodes.push(node);
 
             _(this.relations).select(r => r.source === node || r.target === node).each(r => this.removeRelation(r)).value();
         };
         graph.removeRelationInternal = function(relation) {
-            let relationSearch = {
-                startId: relation.startId,
-                endId: relation.endId,
-                label: relation.label
-            };
-
-            _.remove(this.relations, relationSearch);
-            _.remove(graphDiff.newRelations, relationSearch);
+            this.relations.remove(relation);
+            graphDiff.newRelations.remove(relation);
             graphDiff.removedRelations.push(relation);
 
-            _.remove(relation.target.inRelations, relationSearch);
-            _.remove(relation.source.outRelations, relationSearch);
+            relation.target.inRelations.remove(relation);
+            relation.source.outRelations.remove(relation);
         };
         graph.rootNode = _.find(graph.nodes, {
             id: graph.$pk
@@ -370,10 +343,10 @@ function GraphDecoder($q) {
 
         function freshGraphDiff() {
             return {
-                newRelations: [],
-                newNodes: [],
-                removedRelations: [],
-                removedNodes: []
+                newRelations: UniqArr.relation(),
+                newNodes: UniqArr.node(),
+                removedRelations: UniqArr.relation(),
+                removedNodes: UniqArr.node()
             };
         }
     }
