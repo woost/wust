@@ -219,11 +219,10 @@ function GraphDecoder($q, UniqArr) {
     }
 
     function refreshIndex(graph) {
-        // hehe
+        let nodesById = {};
+        graph.nodes.byId = id => nodesById[id];
         _.each(graph.nodes, n => {
-            // the id is a string, thus it won't be iterable but you can still
-            // lookup nodes via their id: nodes[0] = first node, nodes["adsaf-c32"] = node with id "adsaf-c32"
-            graph.nodes[n.id] = n;
+            nodesById[n.id] = n;
         });
 
         // reinitialize neighbours
@@ -232,8 +231,8 @@ function GraphDecoder($q, UniqArr) {
         // nodes are calculated before setting the cache.
         _.each(graph.edges.concat(calculateHyperRelations(graph)), e => {
             //TODO: rename to starNode/endNode and provide wrapping function for d3, which implements source/target
-            e.source = graph.nodes[e.startId];
-            e.target = graph.nodes[e.endId];
+            e.source = graph.nodes.byId(e.startId);
+            e.target = graph.nodes.byId(e.endId);
             e.source.outRelations.push(e);
             e.target.inRelations.push(e);
         });
