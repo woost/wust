@@ -42,6 +42,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
 
         let globalState = {
             visibleConvergence: false,
+            debugDraw: false,
             drawOnTick: false,
             hoveredNode: undefined,
             width: rootDomElement.offsetWidth,
@@ -97,18 +98,20 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
             .style("visibility", "hidden"); // will be shown when converged
         // .style("pointer-events", "all");
 
-        // draw gravitational center
-        d3SvgContainer.append("circle")
-            .attr("cx", globalState.width / 2)
-            .attr("cy", globalState.height / 2)
-            .attr("r", 20)
-            .style("fill", "#7B00D6");
+        if(globalState.debugDraw) {
+            // draw gravitational center
+            d3SvgContainer.append("circle")
+                .attr("cx", globalState.width / 2)
+                .attr("cy", globalState.height / 2)
+                .attr("r", 20)
+                .style("fill", "#7B00D6");
 
-        // draw origin
-        d3SvgContainer.append("circle")
-            .attr("cx", 0)
-            .attr("cy", 0)
-            .attr("r", 20);
+            // draw origin
+            d3SvgContainer.append("circle")
+                .attr("cx", 0)
+                .attr("cy", 0)
+                .attr("r", 20);
+        }
 
         // create edges in the svg container
         let d3LinkPath = d3SvgContainer.append("g").attr("id", "linkContainer")
