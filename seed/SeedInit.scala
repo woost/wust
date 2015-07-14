@@ -8,30 +8,28 @@ import renesca._
 import renesca.parameter.implicits._
 import java.io.File
 
-trait Task extends App {
-  val db = new DbService
-  db.restService = new RestService(
-    server = "http://localhost:7474",
-    credentials = Some(spray.http.BasicHttpCredentials("neo4j", "neo4j"))
-  )
-}
-
 object SeedInit extends Task {
-  println("Seeding Database")
-  val discourse = Discourse.empty
+  println("Seeding Database...")
 
-  setupDbConstraints(db)
+  dbContext { implicit db =>
+    setupDbConstraints(db)
+    //TODO: allow uniqueness constraints in subclass (modeling)
+    db.query("CREATE CONSTRAINT ON (n:TAG) ASSERT n.title IS UNIQUE");
 
-  //TODO: allow uniqueness constraints in subclass (modeling)
-  db.query("CREATE CONSTRAINT ON (n:TAG) ASSERT n.title IS UNIQUE");
+    modifyDiscourse { implicit discourse =>
+      mergeTag("Problem", isType = true)
+      mergeTag("Goal", isType = true)
+      mergeTag("Idea", isType = true)
+      mergeTag("Pro", isType = true)
+      mergeTag("Con", isType = true)
 
-  discourse.add(Tag.merge(title = "Problem", description = Some("...a problem"), isType = true, merge = Set("title", "isType")))
-  discourse.add(Tag.merge(title = "Goal", description = Some("...a goal"), isType = true, merge = Set("title", "isType")))
-  discourse.add(Tag.merge(title = "Idea", description = Some("...a idea"), isType = true, merge = Set("title", "isType")))
-  discourse.add(Tag.merge(title = "Pro", description = Some("...a pro"), isType = true, merge = Set("title", "isType")))
-  discourse.add(Tag.merge(title = "Con", description = Some("...a con"), isType = true, merge = Set("title", "isType")))
-  discourse.add(UserGroup.merge(name = "everyone", merge = Set("name")))
+      mergeTag("HN-Story")
+      mergeTag("HN-Ask")
+      mergeTag("HN-Show")
 
-  db.persistChanges(discourse.graph)
-  db.restService.actorSystem.shutdown()
+      discourse.add(Connects.create(Post.create("hello"), Post.create("moon")))
+
+  def mergeTag(title: String, description: Option[String] = None, isType: Boolean = false)(implicit discourse: Discourse): Unit = {
+    discourse.add(Tag.merge(title = title, description = description, isType = isType, merge = Set("title", "isType")))
+  }
 }

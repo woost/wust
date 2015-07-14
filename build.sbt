@@ -95,8 +95,9 @@ lazy val schema = (project in file("schema")).
 
 lazy val seed = (project in file("seed")).settings(
   scalaVersion := scalaV,
-  scalacOptions ++= scalacOpts
-).dependsOn(wust)
+  scalacOptions ++= scalacOpts,
+  libraryDependencies += "com.github.seratch" %% "hackernews4s" % "0.5.0"
+).dependsOn(schema, wust)
 
 val scalacOpts = Seq(
   "-encoding", "UTF-8",
