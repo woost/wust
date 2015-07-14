@@ -8,10 +8,10 @@
             <button class="pull-right btn btn-xs btn-success" ng-click="vm.node.save()" ng-disabled="!vm.node.canSave()"><i class="fa fa-paper-plane-o"></i></button>
             <span class="pull-right" toggle-zen node="vm.node"></span>
         </div>
-        <div class="edit_title">
+        <div>
             <input type="text" class="form-control" ng-model="vm.node.title" ng-blur="vm.node.onChange()" placeholder="TL,DR">
         </div>
-        <div class="edit_title">
+        <div>
             <button type="button" class="btn btn-xs btn-default" onclick="this.blur()" ng-model="vm.node.expandedEditor" btn-checkbox>Description</button>
         </div>
         <div collapse="!vm.node.expandedEditor">

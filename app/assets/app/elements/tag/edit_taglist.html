@@ -1,4 +1,3 @@
 <div class="edit_taglist_directive">
-    <span ng-repeat="tag in vm.node.tags" ng-class="vm.nodeInfo.css" class="{{vm.nodeInfo.tagCss(tag)}}" ng-bind="tag.title"></span>
-    <div discourse-node-search-form ng-model='vm.tagTyped' on-select="vm.node.addTag(item)" on-submit="vm.node.addTag(items)" search-nodes='vm.searchTags(term)' icon-class="fa fa-search"></span>
+    <div tag-editor ng-model="vm.node.tags" get-suggestions="vm.searchTags(search)"></div>
 </div>

@@ -22,6 +22,9 @@ object SeedInit extends Task {
 
   setupDbConstraints(db)
 
+  //TODO: allow uniqueness constraints in subclass (modeling)
+  db.query("CREATE CONSTRAINT ON (n:TAG) ASSERT n.title IS UNIQUE");
+
   discourse.add(Tag.merge(title = "Problem", description = Some("...a problem"), isType = true, merge = Set("title", "isType")))
   discourse.add(Tag.merge(title = "Goal", description = Some("...a goal"), isType = true, merge = Set("title", "isType")))
   discourse.add(Tag.merge(title = "Idea", description = Some("...a idea"), isType = true, merge = Set("title", "isType")))
