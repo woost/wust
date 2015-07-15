@@ -169,7 +169,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
         setInitialNodePositions(globalState, graph);
 
         updateGraph();
-        graph.onCommit((changes) => updateGraph());
+        graph.onCommit(updateGraph);
 
         force.start();
 
@@ -177,7 +177,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
 
         //////////////////////////////////////////////////
 
-        function updateGraph() {
+        function updateGraph(changes) {
             let d3NodeContainerWithData = d3NodeContainer
                 .selectAll()
                 .data(graph.nodes, (d) => d.id);
@@ -371,8 +371,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
             if (globalState.hoveredNode !== undefined) {
                 console.log("connect:", dragState.dragStartNode, dragState.hoveredNode);
                 graph.addRelation({
-                    source: dragState.dragStartNode,
-                    target: globalState.hoveredNode
+                    startId: dragState.dragStartNode.id,
+                    endId: globalState.hoveredNode.id
                 });
                 graph.commit();
             }
