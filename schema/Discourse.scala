@@ -17,8 +17,6 @@ object WustSchema {
     val timestamp: Long = System.currentTimeMillis
   }
 
-  @Relation trait Co
-
   // Authentification
   @Graph trait Auth {Nodes(User, LoginInfo, PasswordInfo) }
   @Node class User extends UuidNode with Identity {
@@ -53,6 +51,11 @@ object WustSchema {
   @Node trait ContentNode extends UuidNode {//extends Hidable
     var title: String
     var description: Option[String]
+
+    override def validate = if (title.trim.isEmpty)
+        Some("Title may not be blank")
+      else
+        None
   }
   // @Node trait Hidable {
   //   var visible: Boolean = true
