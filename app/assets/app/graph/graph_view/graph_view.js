@@ -26,15 +26,8 @@ function graphViewCtrl($scope, DiscourseNode, $filter) {
         title: ""
     };
 
-    setGraph(vm.graph);
     let firstFilter = true;
     $scope.$watch("vm.search.title", filter);
-
-    function setGraph() {
-        _.each(vm.graph.nodes, (n) => {
-            n.css = n.hyperEdge ? "relation_label" : `node ${DiscourseNode.get(n.label).css}`;
-        });
-    }
 
     function filter() {
         if (firstFilter) {

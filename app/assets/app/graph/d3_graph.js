@@ -1,8 +1,8 @@
 angular.module("wust.graph").directive("d3Graph", d3Graph);
 
-d3Graph.$inject = ["$window", "DiscourseNode", "Helpers", "$location", "$filter"];
+d3Graph.$inject = ["$window", "DiscourseNode", "Helpers", "$location", "$filter", "Post"];
 
-function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
+function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
     return {
         restrict: "A",
         scope: {
@@ -142,36 +142,34 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
 
         //////////////////////////////////////////////////
 
-        setInitialNodePositions(globalState, graph);
-
         updateGraph();
         graph.onCommit(updateGraph);
-
-        force.start();
 
         converge(globalState, force, graph, zoom, d3HtmlContainer, d3SvgContainer, onDraw, transformCompat);
 
         //////////////////////////////////////////////////
 
         function updateGraph(changes) {
-            console.log("update graph");
-            console.log(graph);
+            setInitialNodePositions(globalState, graph);
+            console.log("------ update graph");
+            console.log(graph.nonHyperRelationNodes.map((n) => n.title), graph.hyperRelations.map((r) => r.source.title + " --> " + r.target.title));
             // create data joins
             // http://bost.ocks.org/mike/join/
             let d3NodeContainerWithData = d3NodeContainer
-                .selectAll()
+                .selectAll("div")
                 .data(graph.nodes, (d) => d.id);
 
             let d3LinkPathWithData = d3LinkPath
-                .selectAll()
-                .data(graph.edges);
+                .selectAll("path")
+                .data(graph.edges, (d) => d.startId + " --> " + d.endId);
 
             // add nodes
-            let d3Node = d3NodeContainerWithData.enter()
+            let d3NodeFrame = d3NodeContainerWithData.enter()
                 .append("div")
-                .style("pointer-events", "all")
-                .append("div")
-                .attr("class", d => d.css)
+                .style("pointer-events", "all");
+
+            let d3Node = d3NodeContainerWithData.append("div")
+                .attr("class", d => d.hyperEdge ? "relation_label" : `node ${DiscourseNode.get(d.label).css}`)
                 .style("position", "absolute")
                 .style("max-width", "150px") // to produce line breaks
                 .html(d => $filter("trim")(d.title, true, 50))
@@ -203,10 +201,12 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
                 .attr("class", "nodetool connecttool fa fa-compress")
                 .style("cursor", d => d.hyperEdge ? "inherit" : "crosshair");
 
-            // remove nodes and relations
+            /// remove nodes and relations
             d3NodeContainerWithData.exit().remove();
-            d3LinkPathWithData.exit().remove();
+            d3LinkPathWithData.exit().remove();//
 
+            console.log(graph.nodes.map(n => n.id.slice(0,3)),d3NodeContainer.node());
+            console.log(graph.edges,d3LinkPath.node());
 
             // TODO: non-hyper-relation-links are broken
             // let linkText = svgContainer.append("div").attr("id", "group_link_labels")
@@ -225,6 +225,9 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
             registerUIEvents();
             calculateNodeVerticalForce(graph);
             recalculateNodeDimensions(graph);
+            // force.tick();
+            // drawGraph(graph, transformCompat);
+            force.start();
 
             function registerUIEvents() {
                 // define events
@@ -380,11 +383,12 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
         if (dragState.isDragging) {
             if (globalState.hoveredNode !== undefined) {
                 console.log("connect:", dragState.dragStartNode, globalState.hoveredNode);
-                graph.addRelation({
-                    startId: dragState.dragStartNode.id,
-                    endId: globalState.hoveredNode.id
+                let start = Post.$buildRaw(dragState.dragStartNode.$encode());
+                start.connectsTo.$buildRaw(globalState.hoveredNode.$encode()).$save({}).$then(response => {
+                    _.each(response.graph.nodes, n => graph.addNode(n));
+                    _.each(response.graph.edges, r => graph.addRelation(r));
+                    graph.commit();
                 });
-                graph.commit();
             }
         }
         // TODO: else { connect without dragging only by clicking }

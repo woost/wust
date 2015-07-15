@@ -36,9 +36,6 @@ function GraphDecoder($q, UniqArr) {
     }
 
     function decodeNodes(apiNodes) {
-        //TODO: shouldn't the api return properly formatted nodes?
-        _(apiNodes).select(n => n.hyperEdge).each(n => n.title = n.label.toLowerCase()).value();
-
         // sorting the nodes by hyperEdge puts normal nodes after hypernodes.
         // This ensures that normal nodes are always drawn on top of hypernodes.
         return _.sortBy(apiNodes, n => n.hyperEdge);
@@ -137,12 +134,16 @@ function GraphDecoder($q, UniqArr) {
                 get: function() {
                     return this.cached.deepPredecessors(this);
                 }
-            }
+            },
         });
         // $encode method to get the original
         n.$encode = function() {
             return _.pick(this, nodeProperties);
         };
+
+        //TODO: shouldn't the api return properly formatted nodes?
+        if (n.hyperEdge)
+            n.title = n.label.toLowerCase();
     }
 
     function depthFirstSearch(startNode, nextNodes) {
