@@ -312,13 +312,19 @@ function GraphDecoder($q, UniqArr) {
         // TODO: having sets instead of arrays would be better...nodes,relations,inrelations,outrelations
         graph.addNodeInternal = function(node) {
             defineNodeProperties(node);
+            let len = this.nodes.length;
             this.nodes.push(node);
-            graphDiff.newNodes.push(node);
+            if (this.nodes.length > len)
+                graphDiff.newNodes.push(node);
+
             graphDiff.removedNodes.remove(node.id);
         };
         graph.addRelationInternal = function(relation) {
+            let len = this.edges.length;
             this.edges.push(relation);
-            graphDiff.newRelations.push(relation);
+            if (this.edges.length > len)
+                graphDiff.newRelations.push(relation);
+
             graphDiff.removedRelations.remove(relation);
         };
         graph.removeNodeInternal = function(node) {
