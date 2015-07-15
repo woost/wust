@@ -123,36 +123,12 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
                 .attr("r", 20);
         }
 
-        // create edges in the svg container
-        let d3LinkPath = d3SvgContainer.append("g").attr("id", "linkContainer")
-            .selectAll()
-            .data(graph.edges).enter()
-            .append("path")
-            .attr("class", "svglink")
-            .each(function(link) {
-                // if link is startRelation of a Hypernode
-                if (!(link.target.hyperEdge && link.target.startId === link.source.id)) {
-                    d3.select(this).style("marker-end", "url(" + $location.absUrl() + "#graph_arrow)");
-                }
-            });
-
-        // TODO: non-hyper-relation-links are broken
-        // let linkText = svgContainer.append("div").attr("id", "group_link_labels")
-        //     .selectAll()
-        //     .data(graph.edges).enter()
-        //     .append("div");
-        // let linktextHtml = linkText.append("div")
-        //     .attr("class", "relation_label")
-        //     .html(d => connectsHyperEdge(d) ? "" : d.title);
-        // check whether a link connects to a hyperedge-node
-        // function connectsHyperEdge(link) {
-        //     return link.source.hyperEdge || link.target.hyperEdge;
-        // }
 
 
         let d3NodeContainer = d3HtmlContainer.append("div").attr("id", "hypernodes-then-nodes")
             .attr("class", "nodecontainer");
 
+        let d3LinkPath = d3SvgContainer.append("g").attr("id", "linkContainer");
 
         let d3ConnectorLine = d3SvgContainer.append("line").classed({
             "connectorline": true
@@ -178,14 +154,19 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
         //////////////////////////////////////////////////
 
         function updateGraph(changes) {
+            console.log("update graph");
+            console.log(graph);
+            // create data joins
+            // http://bost.ocks.org/mike/join/
             let d3NodeContainerWithData = d3NodeContainer
                 .selectAll()
                 .data(graph.nodes, (d) => d.id);
 
-            // remove nodes
-            d3NodeContainerWithData.exit().remove();
+            let d3LinkPathWithData = d3LinkPath
+                .selectAll()
+                .data(graph.edges);
 
-            // add
+            // add nodes
             let d3Node = d3NodeContainerWithData.enter()
                 .append("div")
                 .style("pointer-events", "all")
@@ -197,6 +178,17 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
                 // .style("border-width", n => Math.abs(n.verticalForce) + "px")
                 // .style("border-color", n => n.verticalForce < 0 ? "#3CBAFF" : "#FFA73C")
                 .style("cursor", d => d.hyperEdge ? "inherit" : "pointer");
+
+            // add relations
+            d3LinkPathWithData.enter()
+                .append("path")
+                .attr("class", "svglink")
+                .each(function(link) {
+                    // if link is startRelation of a Hypernode
+                    if (!(link.target.hyperEdge && link.target.startId === link.source.id)) {
+                        d3.select(this).style("marker-end", "url(" + $location.absUrl() + "#graph_arrow)");
+                    }
+                });
 
             let d3NodeTools = d3NodeContainerWithData.append("div")
                 .attr("class", "nodetools")
@@ -211,7 +203,25 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
                 .attr("class", "nodetool connecttool fa fa-compress")
                 .style("cursor", d => d.hyperEdge ? "inherit" : "crosshair");
 
-            updateGraphRefs(graph, d3NodeContainerWithData, d3Node, d3NodeTools, d3LinkPath);
+            // remove nodes and relations
+            d3NodeContainerWithData.exit().remove();
+            d3LinkPathWithData.exit().remove();
+
+
+            // TODO: non-hyper-relation-links are broken
+            // let linkText = svgContainer.append("div").attr("id", "group_link_labels")
+            //     .selectAll()
+            //     .data(graph.edges).enter()
+            //     .append("div");
+            // let linktextHtml = linkText.append("div")
+            //     .attr("class", "relation_label")
+            //     .html(d => connectsHyperEdge(d) ? "" : d.title);
+            // check whether a link connects to a hyperedge-node
+            // function connectsHyperEdge(link) {
+            //     return link.source.hyperEdge || link.target.hyperEdge;
+            // }
+
+            updateGraphRefs(graph, d3NodeContainerWithData, d3Node, d3NodeTools, d3LinkPathWithData);
             registerUIEvents();
             calculateNodeVerticalForce(graph);
             recalculateNodeDimensions(graph);
@@ -369,7 +379,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter) {
     function onDragConnectEnd(globalState, dragState, graph, d3ConnectorLine) {
         if (dragState.isDragging) {
             if (globalState.hoveredNode !== undefined) {
-                console.log("connect:", dragState.dragStartNode, dragState.hoveredNode);
+                console.log("connect:", dragState.dragStartNode, globalState.hoveredNode);
                 graph.addRelation({
                     startId: dragState.dragStartNode.id,
                     endId: globalState.hoveredNode.id
