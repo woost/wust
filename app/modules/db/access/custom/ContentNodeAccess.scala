@@ -101,9 +101,10 @@ class PostAccess extends ContentNodeAccess[Post](Post) {
 
       val node = createNode(discourse, user, request)
       handleAddedTags(discourse, user, node)
-      storeNode(discourse, user, node)
-
-      Left(node)
+      storeNode(discourse, user, node) match {
+        case Some(err) => Right(s"Cannot create Post: $err'")
+        case _         => Left(node)
+      }
     }).getOrElse(Right("Error parsing create request for post"))
   }
 
