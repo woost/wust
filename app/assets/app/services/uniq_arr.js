@@ -9,7 +9,7 @@ function UniqArr(uniqProperties, initialArray = []) {
                 Array.prototype.push.apply(arr, [elem]);
         });
 
-        return elems;
+        return arr.length;
     };
 
     arr.remove = function(...elems) {
@@ -17,7 +17,7 @@ function UniqArr(uniqProperties, initialArray = []) {
             _.remove(arr, _.pick(elem, uniqProperties));
         });
 
-        return elems;
+        return arr.length;
     };
 
     return arr;
