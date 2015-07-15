@@ -28,6 +28,8 @@ object SeedInit extends Task {
       mergeTag("HN-Show")
 
       discourse.add(Connects.create(Post.create("hello"), Post.create("moon")))
+   }
+  }
 
   def mergeTag(title: String, description: Option[String] = None, isType: Boolean = false)(implicit discourse: Discourse): Unit = {
     discourse.add(Tag.merge(title = title, description = description, isType = isType, merge = Set("title", "isType")))
