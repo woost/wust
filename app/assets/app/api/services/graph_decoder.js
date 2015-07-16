@@ -223,6 +223,8 @@ function GraphDecoder($q, UniqArr) {
         graph.nodes.byId = id => nodesById[id];
         _.each(graph.nodes, n => {
             nodesById[n.id] = n;
+            n.inRelations = UniqArr.relation();
+            n.outRelations = UniqArr.relation();
         });
 
         // reinitialize neighbours
@@ -242,6 +244,9 @@ function GraphDecoder($q, UniqArr) {
 
     function defineGraphRecordMethods(graph) {
         let knownWrappers = [];
+
+        graph.nodes = UniqArr.node(graph.nodes);
+        graph.edges = UniqArr.relation(graph.edges);
 
         graph.wrapped = function() {
             let wrapped = {
@@ -332,15 +337,17 @@ function GraphDecoder($q, UniqArr) {
             graphDiff.newNodes.remove(node);
             graphDiff.removedNodes.push(node);
 
-            _(this.relations).select(r => r.source === node || r.target === node).each(r => this.removeRelation(r)).value();
+            _.each(node.relations, n => {
+                if (n.hyperEdge)
+                    this.removeNodeInternal(n);
+                else
+                    this.removeRelationInternal(n);
+            });
         };
         graph.removeRelationInternal = function(relation) {
-            this.relations.remove(relation);
+            this.edges.remove(relation);
             graphDiff.newRelations.remove(relation);
             graphDiff.removedRelations.push(relation);
-
-            relation.target.inRelations.remove(relation);
-            relation.source.outRelations.remove(relation);
         };
         graph.rootNode = _.find(graph.nodes, {
             id: graph.$pk
