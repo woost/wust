@@ -43,7 +43,7 @@ sealed trait NodeDefinition[+NODE <: Node] extends GraphDefinition
 
 sealed trait FactoryNodeDefinition[+NODE <: Node] extends NodeDefinition[NODE] {
   val factory: NodeFactory[NODE]
-  val label = factory.label
+  val labels = factory.labels
 }
 
 sealed trait FixedNodeDefinition[+NODE <: Node] extends NodeDefinition[NODE]
@@ -57,15 +57,15 @@ sealed trait UuidNodeDefinition[+NODE <: UuidNode] extends FixedNodeDefinition[N
 }
 
 sealed trait LabelledUuidNodeDefinition[+NODE <: UuidNode] extends UuidNodeDefinition[NODE] {
-  val label: Label
+  val labels: Set[Label]
 
-  def toQuery = s"($name: `${ label }` {uuid: {$uuidVariable}})"
+  def toQuery = s"($name ${labels.map(l => s":`$l`").mkString} {uuid: {$uuidVariable}})"
 }
 
 sealed trait LabelledNodeDefinition[+NODE <: Node] extends FixedNodeDefinition[NODE] {
-  val label: Label
+  val labels: Set[Label]
 
-  def toQuery = s"($name: `${ label }`)"
+  def toQuery = s"($name: `${labels.map(l => s":`$l`").mkString}`)"
 }
 
 case class FactoryUuidNodeDefinition[+NODE <: UuidNode](
@@ -82,16 +82,16 @@ case class ConcreteNodeDefinition[+NODE <: UuidNode](
   ) extends LabelledUuidNodeDefinition[NODE] {
 
   val uuid = node.uuid
-  val label = node.label
+  val labels = node.labels
 }
 
 case class LabelUuidNodeDefinition[+NODE <: UuidNode](
-  label: Label,
+  labels: Set[Label],
   uuid: String
   ) extends LabelledUuidNodeDefinition[NODE]
 
 case class LabelNodeDefinition[+NODE <: Node](
-  label: Label) extends LabelledNodeDefinition[NODE]
+  labels: Set[Label]) extends LabelledNodeDefinition[NODE]
 
 case class AnyUuidNodeDefinition[+NODE <: UuidNode](
   uuid: String
