@@ -152,6 +152,7 @@ object Database {
   }
 
   def connectedComponent(focusNode: UuidNodeDefinition[_], depth:Int = 5): Discourse = {
+    // depth * 2 because hyperrelation depth
     val query = s"""
       match ${focusNode.toQuery}
       match (${focusNode.name})-[rel:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..${depth * 2}]-(all:POST)
