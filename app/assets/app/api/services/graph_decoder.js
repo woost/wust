@@ -235,7 +235,13 @@ function GraphDecoder($q, UniqArr) {
         _.each(graph.edges.concat(calculateHyperRelations(graph)), e => {
             //TODO: rename to starNode/endNode and provide wrapping function for d3, which implements source/target
             e.source = graph.nodes.byId(e.startId);
+            if (e.source === undefined) {
+                throw `Cannot find source node (${e.startId}) of relation '${e}'`;
+            }
             e.target = graph.nodes.byId(e.endId);
+            if (e.target === undefined) {
+                throw `Cannot find target node (${e.endId}) of relation '${e}'`;
+            }
             e.source.outRelations.push(e);
             e.target.inRelations.push(e);
         });
