@@ -145,7 +145,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
         updateGraph();
         graph.onCommit(updateGraph);
 
-        converge(globalState, force, graph, zoom, d3HtmlContainer, d3SvgContainer, onDraw, transformCompat);
+        converge(globalState, force, graph, zoom, d3HtmlContainer, d3SvgContainer, rootDomElement, d3NodeContainer, onDraw, transformCompat);
 
         //////////////////////////////////////////////////
 
@@ -474,7 +474,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
         }).sortBy("verticalForce").each((n, i) => n.verticalForce = i).value();
     }
 
-    function converge(globalState, force, graph, zoom, d3HtmlContainer, d3SvgContainer, onDraw, transformCompat) {
+    function converge(globalState, force, graph, zoom, d3HtmlContainer, d3SvgContainer, rootDomElement, d3NodeContainer, onDraw, transformCompat) {
         let convergeIterations = 0;
         initConverge(globalState, graph, d3HtmlContainer, d3SvgContainer, zoom);
 
@@ -497,7 +497,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
             if (force.alpha() > 0) {
                 requestAnimationFrame(nonBlockingConverge);
             } else {
-                afterConverge(globalState, graph, d3HtmlContainer, d3SvgContainer, zoom, onDraw, convergeIterations, transformCompat);
+                afterConverge(globalState, graph, d3HtmlContainer, d3SvgContainer, rootDomElement, d3NodeContainer, zoom, onDraw, convergeIterations, transformCompat);
             }
         }
     }
@@ -520,7 +520,9 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
         }
     }
 
-    function afterConverge(globalState, graph, d3HtmlContainer, d3SvgContainer, zoom, onDraw, convergeIterations, transformCompat) {
+    function afterConverge(globalState, graph, d3HtmlContainer, d3SvgContainer, rootDomElement, d3NodeContainer, zoom, onDraw, convergeIterations, transformCompat) {
+        resizeGraph(graph, globalState, zoom, rootDomElement, d3SvgContainer, d3HtmlContainer, d3NodeContainer, transformCompat);
+
         setFixed(graph, graph.rootNode);
 
         globalState.drawOnTick = true;
