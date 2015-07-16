@@ -150,7 +150,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
         //////////////////////////////////////////////////
 
         function updateGraph(changes) {
-            setInitialNodePositions(globalState, graph);
             console.log("------ update graph");
             console.log(graph.nonHyperRelationNodes.map((n) => n.title), graph.hyperRelations.map((r) => r.source.title + " --> " + r.target.title));
             // create data joins
@@ -221,6 +220,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
             //     return link.source.hyperEdge || link.target.hyperEdge;
             // }
 
+            setInitialNodePositions(globalState, graph);
             updateGraphRefs(graph, d3NodeContainerWithData, d3Node, d3NodeTools, d3LinkPathWithData);
             registerUIEvents();
             calculateNodeVerticalForce(graph);
@@ -438,13 +438,13 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
 
     function setInitialNodePositions(globalState, graph) {
         let squareFactor = 100 * Math.sqrt(graph.nodes.length);
-        _(graph.nonHyperRelationNodes).each(n => {
+        _(graph.nonHyperRelationNodes).filter(n => isNaN(n.x) || isNaN(n.y)).each(n => {
             let hash = Math.abs(Helpers.hashCode(n.id));
             n.x = squareFactor * (hash & 0xfff) / 0xfff + globalState.width / 2 - squareFactor / 2;
             n.y = squareFactor * n.verticalForce / graph.nonHyperRelationNodes.length + globalState.height / 2 - squareFactor / 2;
         }).value();
 
-        _(graph.hyperRelations).each(n => {
+        _(graph.hyperRelations).filter(n => isNaN(n.x) || isNaN(n.y)).each(n => {
             n.x = (n.source.x + n.target.x) / 2;
             n.y = (n.source.y + n.target.y) / 2;
         }).value();
