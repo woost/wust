@@ -2,7 +2,8 @@
     <div class="results">
         <div ng-repeat="result in vm.search.results" small-post node="result"></div>
     </div>
-    <span ng-show="vm.search.results.length === 0" class="no_results">No results.</span>
+    <span ng-show="vm.search.results.length === 0 && vm.search.waiting" class="search_status">Searching…</span>
+    <span ng-show="vm.search.results.length === 0 && !vm.search.waiting" class="search_status">No results.</span>
     <div class="search_options">
         <button class="btn btn-default fa fa-close pull-right" ng-click="vm.closeResults();"></button>
         <div style="clear:both;"></div>

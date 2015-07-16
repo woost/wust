@@ -21,9 +21,10 @@
         top: 0;
         right: 0;
     }
-    .no_results {
+    .search_status {
         font-size: 30px;
         color: #AAA;
+        margin-left: 20px;
     }
     &.ng-hide-add {
         @include animation(fadeOutUp 0.3s);
