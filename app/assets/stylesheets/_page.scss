@@ -1,3 +1,6 @@
+@import "compass/css3/flexbox";
+@import "compass/css3";
+
 h1 {
     text-align: center;
     text-transform: uppercase;
@@ -16,30 +19,37 @@ html, body {
     font-family: 'Droid Sans', Helvetica, Arial, sans-serif;
     font-size: 14px;
     height: 100%;
+    overflow: hidden;
     main {
         height: inherit;
         padding-top: 50px;
+        overflow: hidden;
         #main_view {
             height: inherit;
-            position: relative;
-            .ui-layout-container {
+            @include display-flex(flex);
+            @include flex-direction(columns);
+            #left_hand_side, #right_hand_side {
                 height: inherit;
-                #content_view {
-                    min-width: 600px;
-                }
-                #scratchpad_view {
-                    min-width: 300px;
-                }
                 #content_view, #scratchpad_view {
                     height: inherit;
                     & > .ng-scope {
                         height: inherit;
-                        overflow: auto;
                     }
                 }
             }
-            .route_animation > .ng-enter {
-                @include animation(fadeIn 0.3s);
+            #left_hand_side {
+                @include flex-grow(0);
+                width: 0px;
+                overflow-y: auto;
+                transition: width 0.1s ease;
+                &.visible {
+                    width: 400px;
+                }
+            }
+            #right_hand_side {
+                @include flex-grow(1);
+                min-width: 600px;
+                transition: width 0.1s ease;
             }
         }
     }
@@ -51,3 +61,4 @@ html, body {
         text-align: center;
     }
 }
+

@@ -2,10 +2,10 @@
     background: white;
     position: absolute;
     left: 0px;
-    top: 0px;
+    top: 50px;
     width: 100%;
     height: 100%;
-    z-index: 1001;
+    z-index: 1002;
     .results {
         padding: 30px;
         .discourse_post.node {
@@ -27,11 +27,11 @@
         margin-left: 20px;
     }
     &.ng-hide-add {
-        @include animation(fadeOutUp 0.3s);
+        @include animation(fadeOutUp 0.1s);
         display: block !important;
     }
     &.ng-hide-remove {
-        @include animation(fadeInDown 0.3s);
+        @include animation(fadeInDown 0.1s);
         display: block !important;
     }
     &.ng-hide-add.ng-hide-add-active, &.ng-hide-remove {

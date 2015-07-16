@@ -6,6 +6,14 @@
     animation: $type;
 }
 
+@mixin transition($type) {
+    -webkit-transition: $type;
+    -moz-transition: $type;
+    -ms-transition: $type;
+    -o-transition: $type;
+    transition: $type;
+}
+
 @mixin transform($type) {
     -webkit-transform: $type;
     -moz-transform: $type;

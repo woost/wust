@@ -1,8 +1,17 @@
+//TODO: challenge -> better idea?
+//the 400px width refers to the value set in _main.scss
+#left_hand_side.visible + #right_hand_side #zen_component {
+    left: 400px !important;
+    width: -moz-calc(100% - 400px) !important;
+    width: -webkit-calc(100% - 400px) !important;
+    width: calc(100% - 400px) !important;
+}
 #zen_component {
-    position: absolute;
+    float: right;
     left: 0px;
-    top: 0px;
     width: 100%;
+    position: absolute;
+    top: 50px;
     height: 100%;
     z-index: 1001;
     #zenetized_markdown {
@@ -12,11 +21,11 @@
         }
     }
     &.ng-hide-add {
-        @include animation(fadeOutLeft 0.3s);
+        @include animation(fadeOut 0.1s);
         display: block !important;
     }
     &.ng-hide-remove {
-        @include animation(fadeInLeft 0.3s);
+        @include animation(fadeIn 0.1s);
         display: block !important;
     }
     &.ng-hide-add.ng-hide-add-active, &.ng-hide-remove {

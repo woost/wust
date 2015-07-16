@@ -1,10 +1,10 @@
 <div id="navigation_view" ui-view="navigation"></div>
 <main role="main">
-    <div id="main_view" ui-layout="{flow : 'column', dividerSize: 12}">
-        <div ui-layout-container size="25%">
-            <div id="scratchpad_view" class="route_animation" ui-view="scratchpad"></div>
+    <div id="main_view">
+        <div id="left_hand_side" visible-left-side>
+            <div ng-showid="scratchpad_view" class="route_animation" ui-view="scratchpad"></div>
         </div>
-        <div ui-layout-container>
+        <div id="right_hand_side">
             <div id="zen_view" ui-view="zen"></div>
             <div id="search_view" ui-view="search"></div>
             <div route-loading-indicator></div>

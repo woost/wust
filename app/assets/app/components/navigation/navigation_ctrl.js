@@ -1,8 +1,8 @@
 angular.module("wust.components").controller("NavigationCtrl", NavigationCtrl);
 
-NavigationCtrl.$inject = ["Auth", "SearchService"];
+NavigationCtrl.$inject = ["Auth", "SearchService", "LeftSideService"];
 
-function NavigationCtrl(Auth, SearchService) {
+function NavigationCtrl(Auth, SearchService, LeftSideService) {
     let vm = this;
 
     vm.navbarCollapsed = true;
@@ -40,4 +40,5 @@ function NavigationCtrl(Auth, SearchService) {
         }
     }
 
+    vm.leftSide = LeftSideService;
 }

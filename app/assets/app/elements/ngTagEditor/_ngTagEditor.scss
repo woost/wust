@@ -1,5 +1,7 @@
 .tag-editor-directive {
     .tag-editor {
+        max-width: 300px;
+        width: 100%;
         display: block;
         position: relative;
         margin: 5px 0 10px 0;
@@ -43,7 +45,6 @@
     }
     .tag-editor .tag-input {
         display: inline-block;
-        width: auto;
         height: 38px;
         border: 0;
         margin: 0;

@@ -1,7 +1,6 @@
 angular.module("wust", [
     "ui.bootstrap",
     "ngAnimate",
-    "ui.layout",
     "ngSanitize",
     "wust.config",
     "wust.filters",

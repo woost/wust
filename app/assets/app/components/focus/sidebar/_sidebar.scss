@@ -3,7 +3,7 @@
 #sidebar {
     position: absolute;
     right: 0px;
-    top: 0px;
+    top: 50px;
     z-index: 10;
     @include display-flex(flex);
     @include flex-direction(rows);
@@ -14,10 +14,10 @@
         border-radius: 5px;
         padding: 5px;
         &.ng-hide-add {
-            @include animation(fadeOutUp 0.3s);
+            @include animation(fadeOutUp 0.2s);
         }
         &.ng-hide-remove {
-            @include animation(fadeInDown 0.3s);
+            @include animation(fadeInDown 0.2s);
         }
     }
 }
