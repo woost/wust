@@ -3,82 +3,12 @@ package modules.db.access.custom
 import formatters.json.RequestFormat._
 import model.WustSchema._
 import modules.db.Database.db
-import modules.db.access.NodeReadDelete
+import modules.db.access.{NodeRead, NodeReadDelete}
 import modules.requests._
 import play.api.libs.json.JsValue
 import renesca.parameter.implicits._
 
-class ContentNodeWrite[NODE <: ContentNode](override val factory: ContentNodeFactory[NODE]) extends NodeReadDelete(factory) {
-  protected def createNode(discourse: Discourse, user: User, nodeAdd: NodeAddRequestBase): NODE = {
-    val node = factory.createContentNode(title = nodeAdd.title, description = nodeAdd.description)
-    val contribution = Created.create(user, node)
-    discourse.add(node, contribution)
-    node
-  }
-
-  protected def storeNode(discourse: Discourse, user: User, node: NODE): Option[String] = {
-    db.transaction(_.persistChanges(discourse))
-  }
-
-  override def create(user: User, json: JsValue): Either[NODE, String] = {
-    json.validate[NodeAddRequest].map(request => {
-      val discourse = Discourse.empty
-      val node = createNode(discourse, user, request)
-
-      storeNode(discourse, user, node) match {
-        case Some(err) => Right(s"Cannot create ContentNode: $err'")
-        case _         => Left(node)
-      }
-    }).getOrElse(Right("Error parsing create request"))
-  }
-}
-
-object ContentNodeWrite {
-  def apply[NODE <: ContentNode](factory: ContentNodeFactory[NODE]) = new ContentNodeWrite(factory)
-}
-
-class ContentNodeAccess[NODE <: ContentNode](override val factory: ContentNodeFactory[NODE]) extends ContentNodeWrite(factory) {
-  protected def editNode(discourse: Discourse, user: User, uuid: String, nodeAdd: NodeUpdateRequestBase): NODE = {
-    val node = factory.matchesContentNode(uuid = Some(uuid), matches = Set("uuid"))
-    if(nodeAdd.description.isDefined) {
-      //TODO: normally we would want to set it back to None instead of ""
-      // but matches nodes currently cannot save deletions of properties as long
-      // as they are local
-      // if(nodeAdd.description.get.isEmpty)
-      //   node.description = None
-      // else
-      node.description = nodeAdd.description
-    }
-
-    if(nodeAdd.title.isDefined)
-      node.title = nodeAdd.title.get
-
-    if(nodeAdd.title.isDefined || nodeAdd.description.isDefined) {
-      val contribution = Updated.create(user, node)
-      discourse.add(contribution)
-    }
-
-    node
-  }
-
-  override def update(uuid: String, user: User, json: JsValue): Either[NODE, String] = {
-    json.validate[NodeUpdateRequest].map(request => {
-      val discourse = Discourse.empty
-      val node = editNode(discourse, user, uuid, request)
-      storeNode(discourse, user, node) match {
-        case Some(err) => Right(s"Cannot update ContentNode with uuid '$uuid': $err'")
-        case _         => Left(node)
-      }
-    }).getOrElse(Right("Error parsing update request"))
-  }
-}
-
-object ContentNodeAccess {
-  def apply[NODE <: ContentNode](factory: ContentNodeFactory[NODE]) = new ContentNodeAccess(factory)
-}
-
-// can add nested tags
-class PostAccess extends ContentNodeAccess[Post](Post) {
+class PostAccess extends NodeReadDelete(Post) {
   private def tagDefGraph(addedTags: List[String]): Discourse = {
     val discourse = Discourse.empty
     val nodes = addedTags.map(tag => Tag.matches(uuid = Some(tag), matches = Set("uuid")))
@@ -86,7 +16,7 @@ class PostAccess extends ContentNodeAccess[Post](Post) {
     discourse
   }
 
-  private def handleAddedTags(discourse: Discourse, user: User, node: Post) {
+  private def addTagsToGraph(discourse: Discourse, user: User, node: Post) {
     discourse.tags.foreach(tag => {
       val categorizes = Categorizes.merge(tag, node)
       val action = TaggingAction.merge(user, categorizes)
@@ -96,32 +26,94 @@ class PostAccess extends ContentNodeAccess[Post](Post) {
 
   //TODO: should create/update be nested?
   override def create(user: User, json: JsValue): Either[Post, String] = {
-    json.validate[TaggedNodeAddRequest].map(request => {
+    json.validate[TaggedPostAddRequest].map(request => {
       val discourse = tagDefGraph(request.addedTags)
 
-      val node = createNode(discourse, user, request)
-      handleAddedTags(discourse, user, node)
-      storeNode(discourse, user, node) match {
+      val node = Post.create(title = request.title, description = request.description)
+      val contribution = Created.create(user, node)
+      discourse.add(node, contribution)
+
+      addTagsToGraph(discourse, user, node)
+
+      db.transaction(_.persistChanges(discourse)) match {
         case Some(err) => Right(s"Cannot create Post: $err'")
         case _         => Left(node)
       }
-    }).getOrElse(Right("Error parsing create request for post"))
+    }).getOrElse(Right("Error parsing create request for Tag"))
   }
 
   override def update(uuid: String, user: User, json: JsValue): Either[Post, String] = {
-    json.validate[TaggedNodeUpdateRequest].map(request => {
+    json.validate[TaggedPostUpdateRequest].map(request => {
       val discourse = tagDefGraph(request.addedTags)
 
-      val node = editNode(discourse, user, uuid, request)
-      handleAddedTags(discourse, user, node)
-      storeNode(discourse, user, node) match {
+      val node = Post.matchesOnUuid(uuid)
+      if(request.description.isDefined) {
+        //TODO: normally we would want to set it back to None instead of ""
+        // but matches nodes currently cannot save deletions of properties as long
+        // as they are local. this is also true for merge nodes!
+        // if(request.description.get.isEmpty)
+        //   node.description = None
+        // else
+        node.description = request.description
+      }
+
+      if(request.title.isDefined)
+        node.title = request.title.get
+
+      if(request.title.isDefined || request.description.isDefined) {
+        val contribution = Updated.create(user, node)
+        discourse.add(contribution)
+      }
+
+      addTagsToGraph(discourse, user, node)
+
+      db.transaction(_.persistChanges(discourse)) match {
         case Some(err) => Right(s"Cannot update Post with uuid '$uuid': $err'")
         case _         => Left(node)
       }
-    }).getOrElse(Right("Error parsing update request for post"))
+    }).getOrElse(Right("Error parsing update request for Tag"))
   }
 }
 
 object PostAccess {
   def apply = new PostAccess
+}
+
+class TagAccess extends NodeRead(Tag) {
+  //TODO: should create/update be nested?
+  override def create(user: User, json: JsValue): Either[Tag, String] = {
+    json.validate[TagAddRequest].map(request => {
+
+      val node = Tag.merge(title = request.title, merge = Set("title"))
+      val contribution = Created.create(user, node)
+
+      val discourse = Discourse(node, contribution)
+      db.transaction(_.persistChanges(discourse)) match {
+        case Some(err) => Right(s"Cannot create Tag: $err'")
+        case _         => Left(node)
+      }
+    }).getOrElse(Right("Error parsing create request for Tag"))
+  }
+
+  override def update(uuid: String, user: User, json: JsValue): Either[Tag, String] = {
+    json.validate[TagUpdateRequest].map(request => {
+      val node = Tag.matchesOnUuid(uuid)
+      //TODO: normally we would want to set it back to None instead of ""
+      if (request.description.isDefined) {
+        node.description = request.description
+      }
+
+      val contribution = Updated.create(user, node)
+
+      val discourse = Discourse(contribution)
+      db.transaction(_.persistChanges(discourse)) match {
+        case Some(err) => Right(s"Cannot update Tag with uuid '$uuid': $err'")
+        case _         => Left(node)
+      }
+    }).getOrElse(Right("Error parsing update request for Tag"))
+  }
+}
+
+object TagAccess {
+  def apply = new TagAccess
 }

@@ -13,8 +13,6 @@ object SeedInit extends Task {
 
   dbContext { implicit db =>
     setupDbConstraints(db)
-    //TODO: allow uniqueness constraints in subclass (modeling)
-    db.query("CREATE CONSTRAINT ON (n:TAG) ASSERT n.title IS UNIQUE");
 
     modifyDiscourse { implicit discourse =>
       mergeTag("Problem", isType = true)

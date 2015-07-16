@@ -1,20 +1,14 @@
 package modules.requests
 
-trait UserRequest
-trait NodeRequestBase extends UserRequest {
-  val description: Option[String]
-}
-trait NodeAddRequestBase extends NodeRequestBase {
-  val title: String
-}
-trait NodeUpdateRequestBase extends NodeRequestBase {
-  val title: Option[String]
-}
-trait TaggedRequestBase extends NodeRequestBase {
+trait TaggedRequestBase {
   val addedTagsOption: Option[List[String]]
   def addedTags = addedTagsOption.getOrElse(List.empty)
 }
-case class NodeAddRequest(description: Option[String], title: String) extends NodeAddRequestBase
-case class NodeUpdateRequest(description: Option[String], title: Option[String]) extends NodeUpdateRequestBase
-case class TaggedNodeAddRequest(description: Option[String], title: String, addedTagsOption: Option[List[String]]) extends NodeAddRequestBase with TaggedRequestBase
-case class TaggedNodeUpdateRequest(description: Option[String], title: Option[String], addedTagsOption: Option[List[String]]) extends NodeUpdateRequestBase with TaggedRequestBase
+
+case class PostAddRequest(description: Option[String], title: String)
+case class PostUpdateRequest(description: Option[String], title: Option[String])
+case class TaggedPostAddRequest(description: Option[String], title: String, addedTagsOption: Option[List[String]]) extends TaggedRequestBase
+case class TaggedPostUpdateRequest(description: Option[String], title: Option[String], addedTagsOption: Option[List[String]]) extends TaggedRequestBase
+
+case class TagAddRequest(title: String)
+case class TagUpdateRequest(description: Option[String])

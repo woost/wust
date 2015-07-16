@@ -22,9 +22,7 @@ object ApiNodeFormat {
       )
       case n: Scope => Seq(
         ("id", JsString(n.uuid)),
-        ("label", JsString(n.label)),
-        ("title", JsString(n.title)),
-        ("description", JsString(n.description.getOrElse("")))
+        ("label", JsString(n.label))
       )
       case n: Tag => Seq(
         ("id", JsString(n.uuid)),
@@ -32,12 +30,6 @@ object ApiNodeFormat {
         ("title", JsString(n.title)),
         ("description", JsString(n.description.getOrElse(""))),
         ("isType", JsBoolean(n.isType))
-      )
-      case n: ContentNode => Seq(
-        ("id", JsString(n.uuid)),
-        ("label", JsString(n.label)),
-        ("title", JsString(n.title)),
-        ("description", JsString(n.description.getOrElse("")))
       )
       case n: User        => Seq(
         ("id", JsString(n.uuid)),

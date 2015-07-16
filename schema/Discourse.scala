@@ -41,33 +41,27 @@ object WustSchema {
   }
   @Relation class MemberOf(startNode: User, endNode: UserGroup)
 
-
   //TODO: rename
   @Graph trait Discourse {Nodes(User, UserGroup, Post, Tag, Scope) }
   @Relation trait ContentRelation
-  @Node trait HyperNode extends UuidNode
   @Relation trait HyperConnection
-  // TODO: ContentNode should be general for anything public
-  @Node trait ContentNode extends UuidNode {//extends Hidable
-    var title: String
-    var description: Option[String]
-
-    override def validate = if (title.trim.isEmpty)
-        Some("Title may not be blank")
-      else
-        None
-  }
-  // @Node trait Hidable {
-  //   var visible: Boolean = true
-  // }
+  @Node trait ContentNode extends UuidNode
 
   // Content
   @Node trait Connectable extends UuidNode with Taggable
-  @HyperRelation class Connects(startNode: Connectable, endNode: Connectable) extends Connectable with ContentRelation with HyperConnection with HyperNode
+  @HyperRelation class Connects(startNode: Connectable, endNode: Connectable) extends Connectable with ContentRelation with HyperConnection with UuidNode
   @Node trait Inheritable
-  @HyperRelation class Inherits(startNode: Inheritable, endNode: Inheritable) extends ContentRelation with HyperConnection with HyperNode
+  @HyperRelation class Inherits(startNode: Inheritable, endNode: Inheritable) extends ContentRelation with HyperConnection with UuidNode
 
-  @Node class Post extends ContentNode with Connectable with Inheritable with ScopeChild with Taggable
+  @Node class Post extends ContentNode with Connectable with Inheritable with ScopeChild with Taggable {
+    var title: String
+    var description: Option[String]
+
+    // override def validate = if (title.trim.isEmpty)
+    //     Some("Title may not be blank")
+    //   else
+    //     None
+  }
 
 
   // Action
@@ -84,10 +78,12 @@ object WustSchema {
 
   // Tags
   @Node class Tag extends ContentNode {
+    @unique val title: String
+    var description: Option[String]
     var isType: Boolean = false
   }
   @Node trait Taggable extends UuidNode
-  @HyperRelation class Categorizes(startNode: Tag, endNode: Taggable) extends ContentRelation with HyperConnection with HyperNode
+  @HyperRelation class Categorizes(startNode: Tag, endNode: Taggable) extends ContentRelation with HyperConnection with UuidNode
   @Relation class TaggingAction(startNode: User, endNode: Categorizes)
   @Relation class Votes(startNode: User, endNode: Categorizes) {
     val weight: Long
