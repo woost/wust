@@ -388,13 +388,22 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
     function onDragConnectEnd(globalState, dragState, graph, d3ConnectorLine) {
         if (dragState.isDragging) {
             if (globalState.hoveredNode !== undefined) {
-                console.log("connect:", dragState.dragStartNode, globalState.hoveredNode);
-                let start = Post.$buildRaw(dragState.dragStartNode.$encode());
-                start.connectsTo.$buildRaw(globalState.hoveredNode.$encode()).$save({}).$then(response => {
-                    _.each(response.graph.nodes, n => graph.addNode(n));
-                    _.each(response.graph.edges, r => graph.addRelation(r));
-                    graph.commit();
-                });
+                let sourceNode = dragState.dragStartNode; // always normal node
+                let targetNode = globalState.hoveredNode;
+                let referenceNode;
+                if(targetNode.hyperEdge) {
+                    let start = Post.$buildRaw({id: targetNode.startId});
+                    let hyper = start.connectsTo.$buildRaw({id: targetNode.endId});
+                    referenceNode = hyper.connectsFrom.$buildRaw(sourceNode.$encode());
+                } else {
+                    let start = Post.$buildRaw(sourceNode.$encode());
+                    referenceNode = start.connectsTo.$buildRaw(targetNode.$encode());
+                }
+                referenceNode.$save({}).$then(response => {
+                        _.each(response.graph.nodes, n => graph.addNode(n));
+                        _.each(response.graph.edges, r => graph.addRelation(r));
+                        graph.commit();
+                    });
             }
         }
         // TODO: else { connect without dragging only by clicking }
