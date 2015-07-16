@@ -80,15 +80,9 @@ function DiscourseNodeList() {
                         break;
                 }
 
-                console.log("apply nesting", this);
-                console.log("node", node);
-                console.log("hypernode", hyperNode);
-
                 let nodeList = def(hyperNode);
-                console.log("nodelist", nodeList);
                 nodeList.model.setParent(this, node);
                 node.nestedNodeLists[this.connectorType].push(nodeList);
-                console.log("nesting now", node.nestedNodeLists);
             }
 
             nested(nodeListCreate, title, modelProperty) {

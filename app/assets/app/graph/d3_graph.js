@@ -150,8 +150,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
         //////////////////////////////////////////////////
 
         function updateGraph(changes) {
-            console.log("------ update graph");
-            console.log(graph.nonHyperRelationNodes.map((n) => n.title), graph.hyperRelations.map((r) => r.source.title + " --> " + r.target.title));
+            // console.log("------ update graph");
+            // console.log(graph.nonHyperRelationNodes.map((n) => n.title), graph.hyperRelations.map((r) => r.source.title + " --> " + r.target.title));
             // create data joins
             // http://bost.ocks.org/mike/join/
             let d3NodeContainerWithData = d3NodeContainer
@@ -210,8 +210,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
             d3NodeContainerWithData.exit().remove();
             d3LinkPathWithData.exit().remove();//
 
-            console.log(graph.nodes.map(n => n.id.slice(0,3)),d3NodeContainer.node());
-            console.log(graph.edges,d3LinkPath.node());
+            // console.log(graph.nodes.map(n => n.id.slice(0,3)),d3NodeContainer.node());
+            // console.log(graph.edges,d3LinkPath.node());
 
             // TODO: non-hyper-relation-links are broken
             // let linkText = svgContainer.append("div").attr("id", "group_link_labels")
