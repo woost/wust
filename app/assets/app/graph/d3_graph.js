@@ -188,17 +188,23 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
                 });
 
             let d3NodeTools = d3NodeContainerWithData.append("div")
-                .attr("class", "nodetools")
-                .style("visibility", d => d.hyperEdge ? "hidden" : "inherit");
+                .attr("class", "nodetools");
 
             let d3NodeDragTool = d3NodeTools.append("div")
+                .style("display", d => d.hyperEdge ? "none" : "inline-block")
                 .attr("class", "nodetool dragtool fa fa-arrows")
                 //TODO: browser-compatibility for grab and grabbed
-                .style("cursor", d => d.hyperEdge ? "inherit" : "move");
+                .style("cursor", "move");
 
             let d3NodeConnectTool = d3NodeTools.append("div")
+                .style("display", d => d.hyperEdge ? "none" : "inline-block")
                 .attr("class", "nodetool connecttool fa fa-compress")
-                .style("cursor", d => d.hyperEdge ? "inherit" : "crosshair");
+                .style("cursor", "crosshair");
+
+            let d3NodeDisconnectTool = d3NodeTools.append("div")
+                .style("display", d => d.hyperEdge ? "inline-block" : "none")
+                .attr("class", "nodetool connecttool fa fa-expand")
+                .style("cursor", "pointer");
 
             /// remove nodes and relations
             d3NodeContainerWithData.exit().remove();
@@ -266,6 +272,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
 
                 d3NodeDragTool.call(dragMove);
                 d3NodeConnectTool.call(dragConnect);
+                d3NodeDisconnectTool.on("click", _.partial(disconnectHyperRelation, graph));
 
                 // register for resize event
                 angular.element($window).bind("resize", _.partial(resizeGraph, graph, globalState, zoom, rootDomElement, d3SvgContainer, d3HtmlContainer, transformCompat));
@@ -274,7 +281,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
                 scope.$on("d3graph_filter", _.partial(filter, globalState, graph, zoom, d3SvgContainer, d3HtmlContainer));
             }
         }
-
     }
 
 
@@ -420,6 +426,14 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
 
         d.d3NodeContainer.classed({
             "moving": false
+        });
+    }
+
+    function disconnectHyperRelation(graph, d) {
+        let start = Post.$buildRaw({id: d.startId});
+        start.connectsTo.$buildRaw({id: d.endId}).$destroy().$then(response => {
+            graph.removeNode(d);
+            graph.commit();
         });
     }
 

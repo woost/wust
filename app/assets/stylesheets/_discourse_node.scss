@@ -90,11 +90,13 @@
         left: -6px;
         // z-index: -1;
 
-        // background: $bgcolor;
+        // background: rgba($bgcolor, 0.2);
         // border: 1px solid bordercolor($bgcolor);
         // border-radius: $border_radius;
+
         .nodetool {
             padding: 10px;
+            // border: 1px solid #EEE;
         }
         // .nodetool:hover {
         //     background-color: highlightbgcolor($bgcolor)
