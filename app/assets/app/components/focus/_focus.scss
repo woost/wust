@@ -6,6 +6,9 @@
     .tabs-left, .nav, .tab-content, .tab-pane {
         height: inherit;
     }
+    .tab-content {
+        overflow: auto;
+    }
     .tab-pane > div {
         height: inherit;
     }
