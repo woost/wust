@@ -39,6 +39,8 @@ function DiscourseNodeList() {
                     default:
                         throw "Invalid connectorType for node list: " + this.connectorType;
                 }
+
+                this.component.onCommit(changes => _.each(changes.newNodes, n => this.applyAllNested(n)));
             }
 
             get list() {
@@ -153,7 +155,6 @@ function DiscourseNodeList() {
                 if (elem.id === undefined) {
                     // TODO: element still has properties from edit_service Session
                     self.apiList.$buildRaw(_.pick(elem, "title", "description", "addedTags")).$save().$then(data => {
-                        self.applyAllNested(elem);
                         humane.success("Created and connected node");
                         EditService.updateNode(elem.localId, data.node);
                         //TODO: graph should only contain created items
@@ -162,7 +163,6 @@ function DiscourseNodeList() {
                         _.each(data.graph.edges, r => self.component.addRelation(r));
                         self.component.commit();
                         let node = self.component.nodes.byId(data.node.id);
-                        this.applyAllNested(node);
                     });
                 } else {
                     self.apiList.$buildRaw(elem).$save({}).$then(data => {
@@ -171,7 +171,6 @@ function DiscourseNodeList() {
                         _.each(data.graph.edges, r => self.component.addRelation(r));
                         self.component.commit();
                         let node = self.component.nodes.byId(data.node.id);
-                        this.applyAllNested(node);
                     });
                 }
             }
