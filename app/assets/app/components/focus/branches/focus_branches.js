@@ -19,9 +19,4 @@ BranchesCtrl.$inject = ["DiscourseNodeList"];
 
 function BranchesCtrl(DiscourseNodeList) {
     let vm = this;
-
-    //TODO: implement own list
-    vm.nodeList = DiscourseNodeList.read(vm.component.nodes);
-    //this is not supported by the discourse_node_list anymore
-    vm.nodeList.model.orderProperty = "line";
 }

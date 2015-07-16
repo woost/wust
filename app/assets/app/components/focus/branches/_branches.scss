@@ -14,12 +14,11 @@
         }
         @include display-flex(flex);
         @include flex-wrap(wrap);
-        .branch_graph {
+        .node_list {
             padding: 10px;
-            padding-top: 35px;
-        }
-        .discourse_node_list {
-            padding: 10px;
+            .node {
+                margin: 8px;
+            }
         }
     }
 }
