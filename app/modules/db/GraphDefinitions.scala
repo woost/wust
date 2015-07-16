@@ -65,7 +65,7 @@ sealed trait LabelledUuidNodeDefinition[+NODE <: UuidNode] extends UuidNodeDefin
 sealed trait LabelledNodeDefinition[+NODE <: Node] extends FixedNodeDefinition[NODE] {
   val labels: Set[Label]
 
-  def toQuery = s"($name: `${labels.map(l => s":`$l`").mkString}`)"
+  def toQuery = s"($name ${labels.map(l => s":`$l`").mkString})"
 }
 
 case class FactoryUuidNodeDefinition[+NODE <: UuidNode](
