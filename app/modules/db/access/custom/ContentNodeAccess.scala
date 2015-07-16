@@ -80,7 +80,6 @@ object PostAccess {
 }
 
 class TagAccess extends NodeRead(Tag) {
-  //TODO: should create/update be nested?
   override def create(user: User, json: JsValue): Either[Tag, String] = {
     json.validate[TagAddRequest].map(request => {
 
