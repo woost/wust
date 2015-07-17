@@ -1,5 +1,6 @@
 //TODO: challenge -> better idea?
 //the 400px width refers to the value set in _main.scss
+//cannot use a variable with calc :/
 #left_hand_side.visible + #right_hand_side #zen_component {
     left: 400px !important;
     width: -moz-calc(100% - 400px) !important;
@@ -21,17 +22,23 @@
         }
     }
     &.ng-hide-add {
-        @include animation(fadeOut 0.1s);
+        @include animation-play-state(paused !important);
+        @include animation(fadeOut 0.15s);
         display: block !important;
+        visibility: hidden;
     }
     &.ng-hide-remove {
-        @include animation(fadeIn 0.1s);
+        @include animation-play-state(paused !important);
+        @include animation(fadeIn 0.15s);
         display: block !important;
+        visibility: hidden;
     }
     &.ng-hide-add.ng-hide-add-active, &.ng-hide-remove {
-        opacity: 0;
+        visibility: visible;
+        @include animation-play-state(running !important);
     }
     &.ng-hide-add, &.ng-hide-remove.ng-hide-remove-active {
-        opacity: 1;
+        visibility: visible;
+        @include animation-play-state(running !important);
     }
 }
