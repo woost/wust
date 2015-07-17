@@ -22,6 +22,8 @@ function NavigationCtrl(Auth, SearchService, LeftSideService) {
     vm.logout = Auth.logout.bind(Auth);
     vm.search = SearchService.search;
     vm.delayedTriggerSearch = undefined;
+    vm.leftSide = LeftSideService;
+    vm.searchToggleDisabled = searchToggleDisabled;
 
     function authenticate(register) {
         let func = register ? Auth.register : Auth.login;
@@ -30,8 +32,12 @@ function NavigationCtrl(Auth, SearchService, LeftSideService) {
         vm.newUser.password = "";
     }
 
+    function searchToggleDisabled() {
+        return SearchService.search.query === "";
+    }
+
     function onSearchBoxChange() {
-        if( SearchService.search.query === "" )
+        if(searchToggleDisabled())
             SearchService.search.resultsVisible = false;
         else {
             if( vm.delayedTriggerSearch ) clearTimeout(vm.delayedTriggerSearch);
@@ -39,6 +45,4 @@ function NavigationCtrl(Auth, SearchService, LeftSideService) {
             SearchService.search.resultsVisible = true;
         }
     }
-
-    vm.leftSide = LeftSideService;
 }

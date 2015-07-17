@@ -21,7 +21,7 @@
                 <div class="input-group">
                     <input type="text" class="form-control" ng-model="vm.search.query" ng-change='vm.onSearchBoxChange()'>
                     <span class="input-group-btn">
-                        <button type="button" class="btn btn-default fa fa-search" onclick="this.blur()" ng-model="vm.search.resultsVisible" btn-checkbox></button>
+                        <button type="button" class="btn btn-default fa fa-search" onclick="this.blur()" ng-model="vm.search.resultsVisible" btn-checkbox ng-disabled="vm.searchToggleDisabled()"></button>
                     </span>
                 </div>
             </form>
