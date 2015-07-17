@@ -1,7 +1,9 @@
 package model
 
 import com.mohiva.play.silhouette.api.Identity
+import renesca.parameter.LongPropertyValue
 import renesca.schema.macros
+import renesca.Transaction
 
 @macros.GraphSchema
 object WustSchema {
@@ -100,4 +102,16 @@ object WustSchema {
 
   //TODO: Node trait ownable?
   //
+
+  def deleteConnectsGarbage(tx: Transaction) {
+    println("deleteConnectsGarbage")
+    // while there are hyperrelations without any of both helper relations
+    // delete them
+    while(tx.queryTable(
+      """MATCH (c:CONNECTS)
+          WHERE NOT (()-[:CONNECTABLETOCONNECTS]->(c) AND (c)-[:CONNECTSTOCONNECTABLE]->())
+          OPTIONAL MATCH (c)-[r]-()
+          DELETE c,r
+          RETURN COUNT(c)""").rows.head.cells.head.asInstanceOf[LongPropertyValue].value > 0) {}
+  }
 }
