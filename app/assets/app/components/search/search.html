@@ -1,12 +1,11 @@
 <div ng-show="vm.search.resultsVisible" id="search_component">
-    <div class="results">
-        <div ng-repeat="result in vm.search.results" small-post node="result"></div>
+    <div id="search_options">
+        <label>Descriptions</label>
+        <div switch ng-model="vm.search.searchDescriptions" class="pull-right" ng-change="vm.search.triggerSearch"></div>
     </div>
-    <span ng-show="vm.search.results.length === 0 && vm.search.waiting" class="search_status">Searching…</span>
-    <span ng-show="vm.search.results.length === 0 && !vm.search.waiting" class="search_status">No results.</span>
-    <div class="search_options">
-        <div style="clear:both;"></div>
-
-        <label><input type="checkbox" ng-model="vm.search.searchDescriptions" ng-change="vm.search.triggerSearch()" /> descriptions</label>
+    <div id="search_results">
+        <div ng-repeat="result in vm.search.results" small-post node="result"></div>
+        <span ng-show="vm.search.results.length === 0 && vm.search.waiting" class="search_status">Searching…</span>
+        <span ng-show="vm.search.results.length === 0 && !vm.search.waiting" class="search_status">No results.</span>
     </div>
 </div>

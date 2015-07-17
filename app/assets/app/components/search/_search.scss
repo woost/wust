@@ -1,29 +1,32 @@
+@import "compass/css3/flexbox";
+
 #search_component {
     background: white;
-    border-radius: 10px;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
     box-shadow: 0px 2px 2px 2px #aaa;
     position: absolute;
-    left: 10px;
-    right: 10px;
-    bottom: 10px;
+    left: 20px;
+    right: 20px;
+    bottom: 20px;
     top: 50px;
     z-index: 1002;
-    .results {
+    @include display-flex(flex);
+    #search_results {
         padding: 30px;
         .discourse_post.node {
             margin: 3px;
         }
     }
-    .search_options {
+    #search_options {
+        label {
+            line-height: 30px;
+        }
         background: #eee;
-        width: 150px;
+        width: 200px;
         height: 100%;
         padding: 10px;
-        position: absolute;
-        top: 0;
-        right: 0;
-        border-top-right-radius: 10px;
-        border-bottom-right-radius: 10px;
+        border-bottom-left-radius: 10px;
     }
     .search_status {
         font-size: 30px;

@@ -2,6 +2,7 @@ angular.module("wust", [
     "ui.bootstrap",
     "ngAnimate",
     "ngSanitize",
+    "uiSwitch",
     "wust.config",
     "wust.filters",
     "wust.elements",
