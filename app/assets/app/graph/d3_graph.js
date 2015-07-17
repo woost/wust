@@ -171,7 +171,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
                 .attr("class", d => d.hyperEdge ? "relation_label" : `node ${DiscourseNode.get(d.label).css}`)
                 .style("position", "absolute")
                 .style("max-width", "150px") // to produce line breaks
-                .html(d => $filter("trim")(d.title, true, 50))
+                .html(d => d.title)
                 // .style("border-width", n => Math.abs(n.verticalForce) + "px")
                 // .style("border-color", n => n.verticalForce < 0 ? "#3CBAFF" : "#FFA73C")
                 .style("cursor", d => d.hyperEdge ? "inherit" : "pointer");

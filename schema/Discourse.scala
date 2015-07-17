@@ -59,10 +59,19 @@ object WustSchema {
     var title: String
     var description: Option[String]
 
-    // override def validate = if (title.trim.isEmpty)
-    //     Some("Title may not be blank")
-    //   else
-    //     None
+    override def validate: Option[String] = {
+    //TODO: challenge validation should work for matches nodes, but they are
+    //weird do not have all properties set before they are resolved.
+      if (!rawItem.properties.isDefinedAt("title"))
+        return None
+
+      if (title.trim.isEmpty)
+        Some("Title may not be blank")
+      else if (title.length > 140)
+        Some("Title may not exceed length of 140 characters")
+      else
+        None
+    }
   }
 
 
