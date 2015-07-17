@@ -72,7 +72,7 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
                 DiscourseNode.Post.gotoState(data.id);
                 humane.success(message);
                 this.apply(data);
-                storeStack();
+                storeEditList();
                 //TODO: weird update
                 if (HistoryService.currentViewNode.id === data.id) {
                     _.assign(HistoryService.currentViewNode, _.omit(data, "tags"));
@@ -92,15 +92,15 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
             let encoded = tag.$encode();
             this.tags.push(encoded);
             this.addedTags.push(encoded.id);
-            storeStack();
+            storeEditList();
         }
 
         onChange() {
-            storeStack();
+            storeEditList();
         }
 
         remove() {
-            _.remove(self.stack, this);
+            _.remove(self.list, this);
             this.onChange();
         }
 
@@ -121,26 +121,26 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
         }
     }
 
-    this.stack = restoreStack();
+    this.list = restoreEditList();
     this.edit = edit;
     this.updateNode = updateNode;
 
-    function restoreStack() {
-        return _.map(editStore.get("stack", self.stack) || [], s => new Session(s));
+    function restoreEditList() {
+        return _.map(editStore.get("list", self.list) || [], s => new Session(s));
     }
 
-    function storeStack() {
-        editStore.set("stack", self.stack);
+    function storeEditList() {
+        editStore.set("list", self.list);
     }
 
     function updateNode(localId, node) {
-        let existing = _.find(this.stack, {
+        let existing = _.find(this.list, {
             localId
         });
 
         if (existing !== undefined) {
             existing.apply(node);
-            storeStack();
+            storeEditList();
         }
     }
 
@@ -152,10 +152,10 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
         } else {
             let searchFor = node.id === undefined ? "localId" : "id";
             // add existing node for editing
-            let existingIdx = _.findIndex(self.stack, _.pick(node, searchFor));
+            let existingIdx = _.findIndex(self.list, _.pick(node, searchFor));
             if (existingIdx >= 0) {
-                existing = self.stack[existingIdx];
-                self.stack.splice(existingIdx, 1);
+                existing = self.list[existingIdx];
+                self.list.splice(existingIdx, 1);
                 if (existingIdx < index)
                     index -= 1;
             } else {
@@ -163,8 +163,8 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
             }
         }
 
-        self.stack.splice(index, 0, existing);
-        storeStack();
+        self.list.splice(index, 0, existing);
+        storeEditList();
         return existing;
     }
 
@@ -172,7 +172,7 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
         //TODO: we get an array if multiple nodes were in completion and enter was pressed
         let node = _.isArray(maybeNodes) ? maybeNodes[0] : maybeNodes;
         // be aware, the index is reversed!
-        index = _.max([0, self.stack.length - index]);
+        index = _.max([0, self.list.length - index]);
 
         assureSessionExists(node, index);
     }

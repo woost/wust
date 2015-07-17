@@ -6,6 +6,6 @@ function ScratchpadCtrl(EditService, DiscourseNode) {
     let vm = this;
 
     vm.nodeInfo = DiscourseNode.Post;
-    vm.editStack = EditService.stack;
+    vm.editList = EditService.list;
     vm.edit = EditService.edit;
 }
