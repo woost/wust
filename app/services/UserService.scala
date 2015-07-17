@@ -27,7 +27,7 @@ class UserServiceDB extends UserService {
     val loginInfo: LoginInfo = sLoginInfo
     val hasLogin = HasLogin.create(user, loginInfo)
     val auth = Auth(user, loginInfo, group, hasLogin, memberOf)
-    Database.db.persistChanges(auth.graph) match {
+    Database.db.transaction(_.persistChanges(auth.graph)) match {
       case None => Future.successful(user)
       case Some(err) => Future.failed(new Exception(s"Failed to create user: $err"))
     }

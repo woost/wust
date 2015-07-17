@@ -18,7 +18,7 @@ class VotesAccess(
     val end = Taggable.matches(uuid = Some(endUuid), matches = Set("uuid"))
     val hyper = Categorizes.matches(start, end)
     val votes = Votes.merge(user, hyper, weight = weight, onMatch = Set("weight"))
-    val failure = db.persistChanges(start, end, hyper, votes)
+    val failure = db.transaction(_.persistChanges(start, end, hyper, votes))
     if(failure.isDefined)
       Right("No vote :/")
     else

@@ -86,20 +86,20 @@ object Database {
   def deleteNodes[NODE <: UuidNode](definitions: NodeDefinition[NODE]*) {
     val discourse = discourseGraph(definitions: _*)
     discourse.graph.nodes.clear()
-    db.persistChanges(discourse.graph)
+    db.transaction(_.persistChanges(discourse.graph))
   }
 
   //TODO: unique connections?
   def connectNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](discourse: Discourse, start: START, factory: ContentRelationFactory[START, RELATION, END], end: END): (START, END) = {
     discourse.add(factory.createContentRelation(start, end))
-    db.persistChanges(discourse.graph)
+    db.transaction(_.persistChanges(discourse.graph))
     (start, end)
   }
 
   //TODO: merge with previous
   def connectNodes(discourse: Discourse, start: User, factory: Votes.type, end: Categorizes, weight: Long): (User, Categorizes) = {
     discourse.add(factory.merge(start, end, weight = weight, onMatch = Set("weight")))
-    db.persistChanges(discourse.graph)
+    db.transaction(_.persistChanges(discourse.graph))
     (start, end)
   }
 
@@ -148,7 +148,7 @@ object Database {
       discourse.graph.nodes -= discourse.hyperRelations.head.rawItem
     else
       discourse.graph.relations.clear()
-    db.persistChanges(discourse.graph)
+    db.transaction(_.persistChanges(discourse.graph))
   }
 
   def connectedComponent(focusNode: UuidNodeDefinition[_], depth:Int = 5): Discourse = {
