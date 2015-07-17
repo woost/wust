@@ -90,6 +90,11 @@ function GraphDecoder($q, UniqArr) {
                     return this.inRelations.concat(this.outRelations);
                 }
             },
+            hyperRelations: {
+                get: function() {
+                    return this.relations.filter((r) => r.hyperEdge);
+                }
+            },
             predecessors: {
                 get: function() {
                     return this.cached.predecessors(this);
@@ -323,6 +328,12 @@ function GraphDecoder($q, UniqArr) {
         };
         // TODO: having sets instead of arrays would be better...nodes,relations,inrelations,outrelations
         graph.addNodeInternal = function(node) {
+            if(node.hyperEdge && (node.startId === "" || node.endId === "")) {
+                //TODO: server should not send this, only newly created stuff
+                console.warn("wtf edding: " , node);
+                return;
+            }
+
             defineNodeProperties(node);
             this.nodes.push(node);
             graphDiff.newNodes.push(node);
@@ -336,16 +347,17 @@ function GraphDecoder($q, UniqArr) {
             graphDiff.removedRelations.remove(relation);
         };
         graph.removeNodeInternal = function(node) {
+            if( node.hyperEdge )
+                _.each(node.relations, r => this.removeRelationInternal(r));
+
+            _.each(node.hyperRelations, n => {
+                //TODO: handle raw relations
+                this.removeNodeInternal(n);
+            });
+
             this.nodes.remove(node);
             graphDiff.newNodes.remove(node);
             graphDiff.removedNodes.push(node);
-
-            _.each(node.relations, n => {
-                if (n.hyperEdge)
-                    this.removeNodeInternal(n);
-                else
-                    this.removeRelationInternal(n);
-            });
         };
         graph.removeRelationInternal = function(relation) {
             this.edges.remove(relation);
