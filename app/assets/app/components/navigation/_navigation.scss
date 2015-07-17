@@ -1,4 +1,9 @@
-nav {
+#navigation {
+    background-color: $nav_normal_background;
+    border-width: 0px;
+    ul.nav li.dropdown:hover > ul.dropdown-menu {
+        display: block;
+    }
     color: $nav_normal_color;
     .nav {
         a:link, a:hover, a:visited, a.active {
@@ -13,16 +18,27 @@ nav {
             background-color: $nav_active_background !important;
         }
     }
-}
-
-#navigation {
-    background-color: $nav_normal_background;
-    border-width: 0px;
-    ul.nav li.dropdown:hover > ul.dropdown-menu {
-        display: block;
-    }
     #node_search_form {
         width: 200px;
+        margin-top: 0px;
+        margin-bottom: 0px;
+        height: 50px;
+        .input-group {
+            margin-top: 8px;
+            margin-bottom: 8px;
+            height: 34px;
+        }
+    }
+    .search_results_visible {
+        #node_search_form {
+            background-color: white !important;
+        }
+        .nav {
+            a.active {
+                color: $nav_normal_color !important;
+                background-color: $nav_normal_background !important;
+            }
+        }
     }
     #left_side_toggle {
         margin-right: 10px;
@@ -65,3 +81,4 @@ nav {
 .navbar-collapse.in {
     overflow-y: visible;
 }
+

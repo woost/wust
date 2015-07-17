@@ -10,7 +10,7 @@
             </button>
         </div>
 
-        <div class="collapse navbar-collapse" collapse="vm.navbarCollapsed">
+        <div ng-class="{search_results_visible: vm.search.resultsVisible}" class="collapse navbar-collapse" collapse="vm.navbarCollapsed">
             <ul class="nav navbar-nav navbar-left">
                 <li><a ui-sref="dashboard" ui-sref-active="active"><i class="fa fa-newspaper-o"></i> Dashboard</a></li>
                 <li><a ui-sref="vote" ui-sref-active="active"><i class="fa fa-sort"></i> Vote</a></li>
