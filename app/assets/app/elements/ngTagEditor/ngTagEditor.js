@@ -37,7 +37,7 @@ angular.module("wust.elements")
                     $scope.options = [];
                     $scope.suggestions = [];
                     $scope.options.output = $attrs.output || "title";
-                    $scope.options.placeholder = $attrs.placeholder || "Enter a few letters...";
+                    $scope.options.placeholder = $attrs.placeholder || "Enter tag";
                     $scope.search = "";
 
                     $scope.$watch("search", function(value) {
