@@ -104,7 +104,6 @@ object WustSchema {
   //
 
   def deleteConnectsGarbage(tx: Transaction) {
-    println("deleteConnectsGarbage")
     // while there are hyperrelations without any of both helper relations
     // delete them
     while(tx.queryTable(
