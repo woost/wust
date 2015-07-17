@@ -68,7 +68,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
             .attr("width", globalState.width)
             .attr("height", globalState.height)
             .style("position", "absolute");
-        // .style("background", "#FFDDAA")
+        // .style("background", "rgba(220, 255, 240, 0.5)");
 
         // has the same size and position as the svg
         // renders nodes and relation labels
@@ -77,7 +77,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
             .style("width", globalState.width + "px")
             .style("height", globalState.height + "px")
             .style("position", "absolute");
-        // .style("background", "rgba(220, 240, 255, 0.5)")
+        // .style("background", "rgba(220, 240, 255, 0.5)");
         // .style("border", "1px solid #333")
 
         // marker for arrows
@@ -145,7 +145,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
         updateGraph();
         graph.onCommit(updateGraph);
 
-        converge(globalState, force, graph, zoom, d3HtmlContainer, d3SvgContainer, rootDomElement, d3NodeContainer, onDraw, transformCompat);
+        converge(globalState, force, graph, zoom, d3Svg, d3Html, d3SvgContainer, d3HtmlContainer, rootDomElement, d3NodeContainer, onDraw, transformCompat);
 
         //////////////////////////////////////////////////
 
@@ -275,7 +275,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
                 d3NodeDisconnectTool.on("click", _.partial(disconnectHyperRelation, graph));
 
                 // register for resize event
-                angular.element($window).bind("resize", _.partial(resizeGraph, graph, globalState, zoom, rootDomElement, d3SvgContainer, d3HtmlContainer, transformCompat));
+                angular.element($window).bind("resize", _.partial(resizeGraph, graph, globalState, zoom, rootDomElement, d3Svg, d3Html, d3SvgContainer, d3HtmlContainer, transformCompat));
 
                 // filter on event
                 scope.$on("d3graph_filter", _.partial(filter, globalState, graph, zoom, d3SvgContainer, d3HtmlContainer));
@@ -483,13 +483,13 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
         }).sortBy("verticalForce").each((n, i) => n.verticalForce = i).value();
     }
 
-    function converge(globalState, force, graph, zoom, d3HtmlContainer, d3SvgContainer, rootDomElement, d3NodeContainer, onDraw, transformCompat) {
+    function converge(globalState, force, graph, zoom, d3Svg, d3Html, d3SvgContainer, d3HtmlContainer, rootDomElement, d3NodeContainer, onDraw, transformCompat) {
         let convergeIterations = 0;
         initConverge(globalState, graph, d3HtmlContainer, d3SvgContainer, zoom);
 
         if (globalState.visibleConvergence) {
             //TODO: why two times afterConverge? also in nonBlockingConverge
-            force.on("end", _.once(_.partial(afterConverge, globalState, graph, d3HtmlContainer, d3SvgContainer, zoom, onDraw, convergeIterations, transformCompat))); // we don't know how to unsubscribe
+            force.on("end", _.once(_.partial(afterConverge, globalState, graph, d3Svg, d3Html, d3SvgContainer, d3HtmlContainer, zoom, onDraw, convergeIterations, transformCompat))); // we don't know how to unsubscribe
         } else {
             requestAnimationFrame(nonBlockingConverge);
         }
@@ -506,7 +506,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
             if (force.alpha() > 0) {
                 requestAnimationFrame(nonBlockingConverge);
             } else {
-                afterConverge(globalState, graph, d3HtmlContainer, d3SvgContainer, rootDomElement, d3NodeContainer, zoom, onDraw, convergeIterations, transformCompat);
+                afterConverge(globalState, graph, d3Svg, d3Html, d3SvgContainer, d3HtmlContainer, rootDomElement, d3NodeContainer, zoom, onDraw, convergeIterations, transformCompat);
             }
         }
     }
@@ -529,8 +529,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
         }
     }
 
-    function afterConverge(globalState, graph, d3HtmlContainer, d3SvgContainer, rootDomElement, d3NodeContainer, zoom, onDraw, convergeIterations, transformCompat) {
-        resizeGraph(graph, globalState, zoom, rootDomElement, d3SvgContainer, d3HtmlContainer, d3NodeContainer, transformCompat);
+    function afterConverge(globalState, graph, d3Svg, d3Html, d3SvgContainer, d3HtmlContainer, rootDomElement, d3NodeContainer, zoom, onDraw, convergeIterations, transformCompat) {
+        resizeGraph(graph, globalState, zoom, rootDomElement, d3Svg, d3Html, d3SvgContainer, d3HtmlContainer, d3NodeContainer, transformCompat);
 
         setFixed(graph, graph.rootNode);
 
@@ -706,12 +706,12 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
     }
 
     // resize graph according to the current element dimensions
-    function resizeGraph(graph, globalState, zoom, rootDomElement, d3SvgContainer, d3HtmlContainer, d3NodeContainer, transformCompat) {
+    function resizeGraph(graph, globalState, zoom, rootDomElement, d3Svg, d3Html, d3SvgContainer, d3HtmlContainer, d3NodeContainer, transformCompat) {
         globalState.width = rootDomElement.offsetWidth;
         globalState.height = rootDomElement.offsetHeight;
         let [width, height] = [globalState.width, globalState.height];
-        d3SvgContainer.style("width", width).style("height", height);
-        d3HtmlContainer.style("width", width + "px").style("height", height + "px");
+        d3Svg.style("width", width).style("height", height);
+        d3Html.style("width", width + "px").style("height", height + "px");
         // if graph was hidden when initialized,
         // all foreign objects have size 0
         // this call recalculates the sizes
