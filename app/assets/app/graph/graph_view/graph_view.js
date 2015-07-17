@@ -21,6 +21,7 @@ graphViewCtrl.$inject = ["$scope", "DiscourseNode", "$filter"];
 function graphViewCtrl($scope, DiscourseNode, $filter) {
     let vm = this;
 
+    vm.addNodeToGraph = addNodeToGraph;
     vm.onClick = onClick;
     vm.search = {
         title: ""
@@ -37,6 +38,11 @@ function graphViewCtrl($scope, DiscourseNode, $filter) {
 
         let filtered = $filter("fuzzyFilter")(_.reject(vm.graph.nodes, { hyperEdge: true }), vm.search);
         $scope.$broadcast("d3graph_filter", filtered);
+    }
+
+    function addNodeToGraph(node) {
+        vm.graph.addNode(node);
+        vm.graph.commit();
     }
 
     function onClick(node) {

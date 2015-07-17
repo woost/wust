@@ -160,14 +160,12 @@
     min-height: 15px;
 }
 
-.discourse_post_list {
-    .drop_post_container.on-drag-enter {
-        background-color: #008DFF;
-        transition: background-color 0.5s;
-    }
-    .drop_post_container.on-drag-hover {
-        background-color: #73C0FF;
-    }
+.graph_network.on-drag-enter, .drop_post_container.on-drag-enter {
+    background-color: #008DFF;
+    transition: background-color 0.5s;
+}
+.graph_network.on-drag-hover, .drop_post_container.on-drag-hover {
+    background-color: #73C0FF;
 }
 
 .discourse_node_list_horizontal {

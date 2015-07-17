@@ -1,6 +1,5 @@
 <div class="graph_view_component">
-    <div d3-graph graph="vm.graph" on-click="vm.onClick(node)" class="graph_network">
-
+    <div d3-graph graph="vm.graph" on-click="vm.onClick(node)" class="graph_network" ui-on-Drop="vm.addNodeToGraph($data)" drop-channel="connect">
         <div id="filter_input">
             <input type="text" class="form-control" ng-model="vm.search.title" placeholder="filter">
         </div>

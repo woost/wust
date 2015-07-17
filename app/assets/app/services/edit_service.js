@@ -17,14 +17,17 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
         }
 
         apply({
-            id, title, description, addedTags, original
+            id, title, description, label, addedTags, original
         }) {
             this.id = id;
             this.title = title || "";
             this.description = description || "";
+            this.label = label;
             this.original = original || {
+                id: this.id,
                 title: this.title,
-                description: this.description
+                description: this.description,
+                label: this.label
             };
 
             // initally only show editor if node has description
@@ -80,6 +83,10 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
                     HistoryService.currentViewNode.tags = angular.copy(this.tags);
                 }
             });
+        }
+
+        $encode() {
+            return this.original;
         }
 
         addTag(maybeTags) {
