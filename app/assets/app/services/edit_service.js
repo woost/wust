@@ -174,6 +174,6 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
         // be aware, the index is reversed!
         index = _.max([0, self.list.length - index]);
 
-        assureSessionExists(node, index);
+        return assureSessionExists(node, index);
     }
 }
