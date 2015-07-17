@@ -45,6 +45,7 @@ html, body {
                 &.visible {
                     width: 400px;
                 }
+                resize: horizontal;
             }
             #right_hand_side {
                 @include flex-grow(1);
