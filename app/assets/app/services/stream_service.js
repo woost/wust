@@ -7,16 +7,16 @@ function StreamService(Tag, store) {
     let self = this;
 
     this.streams = [];
-    restoreStack();
-    this.push = pushStack;
-    this.persist = storeStack;
-    this.forget = clearStack;
+    restoreList();
+    this.push = pustList;
+    this.persist = storeList;
+    this.forget = clearList;
 
-    function restoreStack() {
-        _.each(streamStore.get("streams") || [], pushStack);
+    function restoreList() {
+        _.each(streamStore.get("streams") || [], pustList);
     }
 
-    function pushStack(tags) {
+    function pustList(tags) {
         if (!_.isArray(tags) || _.isEmpty(tags))
             return;
 
@@ -28,15 +28,15 @@ function StreamService(Tag, store) {
         };
 
         self.streams.push(stream);
-        storeStack();
+        storeList();
     }
 
-    function clearStack() {
+    function clearList() {
         self.streams = [];
-        storeStack();
+        storeList();
     }
 
-    function storeStack() {
+    function storeList() {
         streamStore.set("streams", _.map(self.streams, t => t.tags));
     }
 }
