@@ -62,7 +62,7 @@
 }
 
 .nodecontainer {
-    .fixed .node {
+    .fixed .node, .fixed .relation_label {
         z-index: 100;
         // blue glow
         -moz-box-shadow: 0 0 40px 5px #7dbaff;

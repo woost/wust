@@ -191,10 +191,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
                 .attr("class", "nodetools");
 
             let d3NodeDragTool = d3NodeTools.append("div")
-                .style("display", d => d.hyperEdge ? "none" : "inline-block")
                 .attr("class", "nodetool dragtool fa fa-arrows")
-                //TODO: browser-compatibility for grab and grabbed
-                .style("cursor", "move");
+                .style("cursor", "move"); //TODO: browser-compatibility for grab and grabbed cursor
 
             let d3NodeConnectTool = d3NodeTools.append("div")
                 .style("display", d => d.hyperEdge ? "none" : "inline-block")
@@ -239,9 +237,9 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
                 // define events
                 zoom.on("zoom", _.partial(zoomed, d3SvgContainer, d3HtmlContainer, transformCompat));
                 let dragMove = d3.behavior.drag()
-                    .on("dragstart", ignoreHyperEdge(_.partial(onDragMoveStart, dragState, zoom)))
-                    .on("drag", ignoreHyperEdge(_.partial(onDragMove, globalState, dragState, zoom, force)))
-                    .on("dragend", ignoreHyperEdge(_.partial(onDragMoveEnd, dragState, force, graph)));
+                    .on("dragstart", _.partial(onDragMoveStart, dragState, zoom))
+                    .on("drag", _.partial(onDragMove, globalState, dragState, zoom, force))
+                    .on("dragend", _.partial(onDragMoveEnd, dragState, force, graph));
 
                 let dragConnect = d3.behavior.drag()
                     .on("dragstart", ignoreHyperEdge(_.partial(onDragConnectStart, globalState, dragState, zoom, d3ConnectorLine)))
@@ -725,7 +723,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
         // push hypernodes towards the center between its start/end node
         let pullStrength = e.alpha * globalState.hyperRelationAlignForce;
         graph.nodes.forEach(node => {
-            if (node.hyperEdge === true) {
+            if (node.hyperEdge === true && node.fixed !== true) {
                 let start = node.source;
                 let end = node.target;
                 let center = {
