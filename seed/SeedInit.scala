@@ -25,6 +25,8 @@ object SeedInit extends Task {
       mergeTag("HN-Ask")
       mergeTag("HN-Show")
 
+      discourse.add(UserGroup.merge(name = "everyone", merge = Set("name")))
+
       discourse.add(Connects.create(Post.create("hello"), Post.create("moon")))
    }
   }
