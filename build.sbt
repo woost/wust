@@ -46,9 +46,6 @@ lazy val wust = (project in file(".")).settings(
     // authentication / authorization
     "com.mohiva" %% "play-silhouette" % "2.0",
     "com.typesafe.play.plugins" %% "play-plugins-mailer" % "2.3.1",
-    // atmosphere
-    "org.atmosphere" % "atmosphere-play" % "2.1.2",
-    "org.webjars.bower" % "atmosphere" % "2.2.7",
     // database
     "commons-codec" % "commons-codec" % "1.10" // for base64 encoding of uuids
   ),

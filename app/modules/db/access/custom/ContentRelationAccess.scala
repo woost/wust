@@ -6,7 +6,6 @@ import modules.db.Database.db
 import modules.db.HyperNodeDefinitionBase
 import modules.db.access.{NodeAccess, EndRelationReadDelete, StartRelationReadDelete}
 import modules.requests.{ConnectResponse, PostAddRequest}
-import org.atmosphere.config.service.Post
 import play.api.libs.json.JsValue
 import renesca.parameter.implicits._
 import renesca.schema._

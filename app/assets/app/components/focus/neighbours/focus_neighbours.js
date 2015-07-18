@@ -15,9 +15,9 @@ function focusNeighbours() {
     };
 }
 
-NeighboursCtrl.$inject = ["Post", "DiscourseNodeList", "DiscourseNodeCrate"];
+NeighboursCtrl.$inject = ["Post", "DiscourseNodeList"];
 
-function NeighboursCtrl(Post, DiscourseNodeList, DiscourseNodeCrate) {
+function NeighboursCtrl(Post, DiscourseNodeList) {
     let vm = this;
 
     vm.top = DiscourseNodeList.write.Post.successors(vm.component, vm.component.rootNode, "References", "connectsTo")

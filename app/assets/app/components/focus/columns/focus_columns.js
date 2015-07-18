@@ -16,9 +16,9 @@ function focusColumns() {
     };
 }
 
-ColumnsCtrl.$inject = ["DiscourseNodeCrate", "DiscourseNode", "DiscourseNodeList", "ContentNode"];
+ColumnsCtrl.$inject = ["DiscourseNode", "DiscourseNodeList", "ContentNode"];
 
-function ColumnsCtrl(DiscourseNodeCrate, DiscourseNode, DiscourseNodeList, ContentNode) {
+function ColumnsCtrl(DiscourseNode, DiscourseNodeList, ContentNode) {
     let vm = this;
 
     let relationMap = {
@@ -104,7 +104,7 @@ function ColumnsCtrl(DiscourseNodeCrate, DiscourseNode, DiscourseNodeList, Conte
     //TODO: remove info here
     function nodeWithInfo(data) {
         let info = DiscourseNode.get(data.label);
-        let node = DiscourseNodeCrate(info.service.$buildRaw(data));
+        let node = info.service.$buildRaw(data);
         node.subscribe();
         return {
             node, info

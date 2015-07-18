@@ -10,16 +10,15 @@ function Schema($provide) {
         _.each(schema.models, model => {
             $provide.factory(model.name, ApiFactory);
 
-            ApiFactory.$inject = ["restmod", "Live"];
+            ApiFactory.$inject = ["restmod"];
 
-            function ApiFactory(restmod, Live) {
+            function ApiFactory(restmod) {
                 return restmod.model(model.path).mix(_(model.subs).map((sub, path) => {
                     return {
                         [_.camelCase(path)]: {
                             [sub.cardinality]: restmod.model().mix(_.merge({
                                 $extend: {
                                     Collection: {
-                                        $subscribeToLiveEvent: _.partial(subscribe, Live)
                                     }
                                 }
                             }, _(sub.subs).map((sub, path) => {
@@ -34,16 +33,10 @@ function Schema($provide) {
                 }).reduce(_.merge, {
                     $extend: {
                         Record: {
-                            $subscribeToLiveEvent: _.partial(subscribe, Live)
                         }
                     }
                 }));
             }
         });
-
-        function subscribe(liveService, handler, nested = "") {
-            let url = this.$url().slice(schema.api.restRoot.length + 1) + (nested ? "/" + _.kebabCase(nested) : "");
-            return liveService.subscribe(url, handler);
-        }
     }
 }
