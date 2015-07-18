@@ -11,6 +11,8 @@ import scala.concurrent.Future
 
 object Global extends WithFilters(new GzipFilter()) with GlobalSettings with SecuredSettings with Logger {
 
+  wust.Shared.hello()
+
   override def onNotAuthenticated(request: RequestHeader, lang: Lang): Option[Future[Result]] = {
     // Called when a user is not authenticated.
     // As defined by RFC 2616, the status code of the response should be 401 Unauthorized.

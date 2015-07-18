@@ -66,7 +66,7 @@ lazy val wust = (project in file(".")).settings(
 ).
   enablePlugins(PlayScala).
   dependsOn(schema, scalajsSharedJvm).
-  aggregate(schema, scalajs)
+  aggregate(schema, scalajs, scalajsSharedJvm)
 
 lazy val schema = (project in file("schema")).
   settings(
@@ -104,8 +104,6 @@ lazy val scalajsShared = (crossProject.crossType(CrossType.Pure) in file("scalaj
 lazy val scalajsSharedJvm = scalajsShared.jvm
 lazy val scalajsSharedJs = scalajsShared.js
 
-// loads the Play project at sbt startup
-onLoad in Global := (Command.process("project wust", _: State)) compose (onLoad in Global).value
 
 lazy val seed = (project in file("seed")).settings(
   scalaVersion := scalaV,
