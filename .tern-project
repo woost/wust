@@ -1,0 +1,10 @@
+{
+    "libs": [
+        "browser",
+        "ecma6",
+        "underscore"
+    ],
+    "plugins": {
+        "angular": "./"
+    }
+}
