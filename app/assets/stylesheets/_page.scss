@@ -40,11 +40,14 @@ html, body {
             #left_hand_side {
                 @include flex-grow(0);
                 width: 0px;
+                min-width: 0px;
+                max-width: 0px;
                 overflow-y: auto;
                 transition: width 0.1s ease;
                 &.visible {
                     width: 400px;
                     min-width: 400px;
+                    max-width: 400px;
                 }
                 resize: horizontal;
             }
