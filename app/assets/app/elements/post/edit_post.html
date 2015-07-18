@@ -1,12 +1,14 @@
 <div class="edit_post_directive">
     <div class="panel panel-default">
         <div class="panel-heading">
-            <button class="pull-left btn btn-xs btn-default" ng-click="vm.node.remove()"><i class="fa fa-minus"></i></button>
+            <button class="btn btn-xs btn-default" ng-click="vm.node.remove()"><i class="fa fa-minus"></i></button>
             <i ng-if="vm.node.isLocal()" class="fa fa-asterisk"></i>
             <span small-post node="vm.node" valid="!vm.node.isLocal() || vm.node.canSave()"></span>
-            <button class="pull-right btn btn-xs btn-danger" ng-click="vm.node.deleteNode()" ng-disabled="vm.node.isLocal()"><i class="fa fa-trash-o"></i></button>
-            <button class="pull-right btn btn-xs btn-success" ng-click="vm.node.save()" ng-disabled="!vm.node.canSave()"><i class="fa fa-paper-plane-o"></i></button>
-            <span class="pull-right" toggle-zen node="vm.node"></span>
+            <span class="pull-right">
+                <button class="btn btn-xs btn-danger" ng-click="vm.node.deleteNode()" ng-disabled="vm.node.isLocal()"><i class="fa fa-trash-o"></i></button>
+                <button class="btn btn-xs btn-success" ng-click="vm.node.save()" ng-disabled="!vm.node.canSave()"><i class="fa fa-paper-plane-o"></i></button>
+                <span toggle-zen node="vm.node"></span>
+            </span>
         </div>
         <div>
             <input type="text" class="form-control" ng-model="vm.node.title" ng-blur="vm.node.onChange()" placeholder="TL,DR">

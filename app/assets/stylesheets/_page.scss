@@ -44,6 +44,7 @@ html, body {
                 transition: width 0.1s ease;
                 &.visible {
                     width: 400px;
+                    min-width: 400px;
                 }
                 resize: horizontal;
             }
