@@ -12,12 +12,13 @@ val paradiseVersion = "2.1.0-M5"
 lazy val wust = (project in file(".")).settings(
   scalaVersion := scalaV,
   resolvers += "Atlassian Releases" at "https://maven.atlassian.com/public/",
+  resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases",
   libraryDependencies ++= Seq(
     cache,
     ws,
     filters,
     // scalajs
-    // "com.vmunier" %% "play-scalajs-scripts" % "0.2.0",
+    "com.vmunier" %% "play-scalajs-scripts" % "0.2.2",
     // angular
     "org.webjars.bower" % "angular" % "1.4.2",
     "org.webjars.bower" % "angular-animate" % "1.4.2",
@@ -55,17 +56,17 @@ lazy val wust = (project in file(".")).settings(
   TraceurKeys.sourceFileNames := Seq("app/module.js", "app/*/**/*.js"),
   // use compass with sbt-sass
   sassOptions in Assets ++= Seq("--compass", "-r", "compass", "-r", "sass-globbing", "--update", "./app/assets:./target/web/public/main"),
-  // scalaJSProjects := Seq(scalajs),
-  pipelineStages := Seq(/*closure, */ cssCompress, digest, gzip),
+  scalaJSProjects := Seq(scalajs),
+  pipelineStages := Seq(/*closure, */ scalaJSProd, cssCompress, digest, gzip),
   excludeFilter in gzip := (excludeFilter in gzip).value || new SimpleFileFilter(file => new File(file.getAbsolutePath + ".gz").exists), // do not compress assets for which a gzipped version already exists
   // includeFilter in closure := (includeFilter in closure).value && new SimpleFileFilter(f => f.getName.contains("main.js") ),
   // Closure.flags := Seq("--language_in=ECMASCRIPT5"),
   includeFilter in cssCompress := (includeFilter in cssCompress).value && new SimpleFileFilter(f => f.getName.contains("app")),
   scalacOptions ++= scalacOpts
 ).
-  enablePlugins(PlayScala, SbtWeb).
-  dependsOn(schema).
-  aggregate(schema)
+  enablePlugins(PlayScala).
+  dependsOn(schema, scalajsSharedJvm).
+  aggregate(schema, scalajs)
 
 lazy val schema = (project in file("schema")).
   settings(
@@ -80,15 +81,31 @@ lazy val schema = (project in file("schema")).
     addCompilerPlugin("org.scalamacros" % "paradise" % paradiseVersion cross CrossVersion.full)
   )
 
+// ScalaJs
+// https://github.com/vmunier/play-with-scalajs-example
+import sbt.Project.projectToRef
 
+lazy val scalajs = (project in file("scalajs")).settings(
+  scalaVersion := scalaV,
+  persistLauncher := true, // run Main automatically
+  persistLauncher in Test := false,
+  sourceMapsDirectories += scalajsSharedJs.base / "..",
+  libraryDependencies ++= Seq(
+    "org.scala-js" %%% "scalajs-dom" % "0.8.0"
+  )
+  ).enablePlugins(ScalaJSPlugin, ScalaJSPlay).
+dependsOn(scalajsSharedJs)
 
-// lazy val scalajs = (project in file("scalajs")).
-//   settings(
-//     scalaVersion := scalaV,
-//     persistLauncher := true, // launch main class on website load
-//     persistLauncher in Test := false,
-//     scalacOptions ++= scalacOpts
-//   ).enablePlugins(ScalaJSPlugin, ScalaJSPlay)
+lazy val scalajsShared = (crossProject.crossType(CrossType.Pure) in file("scalajs-shared")).
+  settings(scalaVersion := scalaV).
+  jsConfigure(_ enablePlugins ScalaJSPlay).
+  jsSettings(sourceMapsBase := baseDirectory.value / "..")
+
+lazy val scalajsSharedJvm = scalajsShared.jvm
+lazy val scalajsSharedJs = scalajsShared.js
+
+// loads the Play project at sbt startup
+onLoad in Global := (Command.process("project wust", _: State)) compose (onLoad in Global).value
 
 lazy val seed = (project in file("seed")).settings(
   scalaVersion := scalaV,
