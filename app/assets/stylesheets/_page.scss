@@ -54,6 +54,7 @@ html, body {
                 @include flex-grow(1);
                 min-width: 600px;
                 transition: width 0.1s ease;
+                overflow: auto;
             }
         }
     }
