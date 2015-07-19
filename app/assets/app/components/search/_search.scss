@@ -13,6 +13,7 @@
     z-index: 1002;
     @include display-flex(flex);
     #search_results {
+        overflow: auto;
         padding: 30px;
         .discourse_post.node {
             margin: 3px;

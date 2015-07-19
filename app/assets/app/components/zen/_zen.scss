@@ -15,6 +15,9 @@
     top: 50px;
     height: 100%;
     z-index: 1001;
+    overflow: auto;
+    // transition should fit to the one defined on #left_hand_side in page.scss
+    transition: all 0.1s ease;
     #zenetized_markdown {
         height: 100%;
         & > div {

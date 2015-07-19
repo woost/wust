@@ -41,9 +41,9 @@ html, body {
                 @include flex-grow(0);
                 width: 0px;
                 min-width: 0px;
-                max-width: 400px;
                 overflow-y: auto;
                 transition: all 0.1s ease;
+                border-right: $sidebar_border;
                 &.visible {
                     width: 400px;
                     min-width: 400px;

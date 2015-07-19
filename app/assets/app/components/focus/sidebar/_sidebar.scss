@@ -9,7 +9,7 @@
     @include flex-direction(rows);
     #sidebar_toggle {}
     #sidebar_content {
-        border: 1px solid $sidebar_border;
+        border: $sidebar_border;
         border-radius: 5px;
         padding: 5px;
         &.ng-hide-add {
