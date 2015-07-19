@@ -1,12 +1,12 @@
 <div id="user_detail_component">
     <ul class="list-group">
         <li class="list-group-item">
-            <span class="badge" ng-bind="vm.user.id"></span>
-            Id
-        </li>
-        <li class="list-group-item">
             <span class="badge" ng-bind="vm.user.name"></span>
             Name
+        </li>
+        <li ng-if="vm.user.email" class="list-group-item">
+            <span class="badge" ng-bind="vm.user.email"></span>
+            Email
         </li>
     </ul>
 

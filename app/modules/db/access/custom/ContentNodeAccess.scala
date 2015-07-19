@@ -116,3 +116,22 @@ class TagAccess extends NodeRead(Tag) {
 object TagAccess {
   def apply = new TagAccess
 }
+
+class UserAccess extends NodeRead(User) {
+  override def update(uuid: String, user: User, json: JsValue): Either[User, String] = {
+  json.validate[UserUpdateRequest].map(request => {
+      //TODO: sanity check + welcome mail
+      if (request.email.isDefined)
+        user.email = request.email
+
+      db.transaction(_.persistChanges(user)) match {
+        case Some(err) => Right(s"Cannot update User: $err'")
+        case _         => Left(user)
+      }
+    }).getOrElse(Right("Error parsing update request for User"))
+  }
+}
+
+object UserAccess {
+  def apply = new UserAccess
+}

@@ -30,4 +30,6 @@ object RequestFormat {
   implicit val tagAddFormat = (__ \ "title").read[String].map(TagAddRequest(_))
 
   implicit val tagUpdateFormat = (__ \ "description").readNullable[String].map(TagUpdateRequest(_))
+
+  implicit val userUpdateFormat = (__ \ "email").readNullable[String].map(UserUpdateRequest(_))
 }

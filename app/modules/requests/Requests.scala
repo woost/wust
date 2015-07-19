@@ -12,3 +12,5 @@ case class TaggedPostUpdateRequest(description: Option[String], title: Option[St
 
 case class TagAddRequest(title: String)
 case class TagUpdateRequest(description: Option[String])
+
+case class UserUpdateRequest(email: Option[String])
