@@ -1,10 +1,15 @@
 {
     "libs": [
         "browser",
-        "ecma6",
-        "underscore"
+        "ecma5",
+        "ecma6"
     ],
     "plugins": {
         "angular": "./"
-    }
+    },
+    "loadEagerly": [
+        "target/web/public/main/lib/lodash/lodash.js",
+        "target/web/public/main/lib/marked/lib/marked.js",
+        "target/web/public/main/lib/d3/d3.js"
+    ]
 }
