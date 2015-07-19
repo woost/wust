@@ -77,6 +77,8 @@
         "d3",
         "humane",
         "Lodium",
-        "marked"
+        "marked",
+        "GraphFactory",
+        "Graph"
     ]
 }

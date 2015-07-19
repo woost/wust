@@ -57,6 +57,8 @@ function GraphDecoder($q, UniqArr) {
 
     function constructGraphFromRecord() {
         constructGraph(this);
+        let g = GraphFactory().fromRecord(this);
+        console.log(g.toString());
         defineGraphRecordMethods(this);
     }
 

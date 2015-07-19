@@ -19,6 +19,8 @@ lazy val wust = (project in file(".")).settings(
     filters,
     // scalajs
     "com.vmunier" %% "play-scalajs-scripts" % "0.2.2",
+    // in case we need to export shared code to js:
+    // https://stackoverflow.com/questions/28413266/how-to-export-properties-of-shared-case-classes
     // angular
     "org.webjars.bower" % "angular" % "1.4.2",
     "org.webjars.bower" % "angular-animate" % "1.4.2",
