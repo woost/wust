@@ -16,7 +16,12 @@ function SchemaConfig(SchemaProvider, DiscourseNodeProvider, DiscourseNodeListPr
         $extend: {
             Model: {
                 encodeUrlName: _.kebabCase
-            }
+            },
+            Record: {
+                encode: function() {
+                    return this.$encode();
+                }
+            },
         }
     });
 

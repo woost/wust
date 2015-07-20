@@ -49,8 +49,7 @@ trait NodeLike {
 
   import js.JSConverters._
 
-  @JSExport
-  def $encode = js.Dynamic.literal(id = id, label = label, title = title, description.orUndefined)
+  def encode() = js.Dynamic.literal(id = id, label = label, title = title, description.orUndefined)
 }
 
 trait NodeDelegates extends NodeLike {
@@ -110,8 +109,7 @@ case class Node(rawNode: RawNode) extends NodeDelegates with RelationLike {
     _deepPredecessors.invalidate()
   }
 
-  @JSExport
-  @deprecated override def $encode = super[NodeDelegates].$encode
+  @deprecated override def encode() = super[NodeDelegates].encode()
 }
 
 trait RelationLike {
@@ -122,8 +120,7 @@ trait RelationLike {
   @JSExport @deprecated def source = startNode
   @JSExport @deprecated def target = endNode
 
-  @JSExport
-  def $encode = js.Dynamic.literal(startId = startId, endId = endId)
+  def encode() = js.Dynamic.literal(startId = startId, endId = endId)
 }
 
 @JSExport
@@ -202,8 +199,7 @@ case class HyperRelation(rawNode: RawNode) extends NodeDelegates with RelationLi
 
   import js.JSConverters._
 
-  @JSExport
-  override def $encode = js.Dynamic.literal(id = id, label = label, title = title, description.orUndefined, startId = startId, endId = endId)
+  override def encode() = js.Dynamic.literal(id = id, label = label, title = title, description.orUndefined, startId = startId, endId = endId)
 }
 
 @JSExport

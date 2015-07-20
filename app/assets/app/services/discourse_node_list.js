@@ -116,10 +116,10 @@ function DiscourseNodeList() {
             get apiList() {
                 let wrapped;
                 if (this.parent === undefined) {
-                    wrapped = this.service.$buildRaw(this.referenceNode.$encode());
+                    wrapped = this.service.$buildRaw(this.referenceNode.encode());
                 } else {
                     let wrappedParent = this.parent.apiList;
-                    wrapped = wrappedParent.$buildRaw(this.referenceNode.$encode());
+                    wrapped = wrappedParent.$buildRaw(this.referenceNode.encode());
                 }
 
                 return wrapped[this.modelProperty];
@@ -128,7 +128,7 @@ function DiscourseNodeList() {
             remove(elem) {
                 let self = this;
                 // TODO: handle addition/removal on graph, not on apilist!
-                this.apiList.$buildRaw(elem.$encode()).$destroy().$then(() => {
+                this.apiList.$buildRaw(elem.encode()).$destroy().$then(() => {
                     humane.success("Disconnected node");
                     //TODO: response should include the deleted relation
                     switch(this.connectorType) {

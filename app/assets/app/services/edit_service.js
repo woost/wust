@@ -85,7 +85,7 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
             });
         }
 
-        $encode() {
+        encode() {
             return this.original;
         }
 
@@ -96,7 +96,7 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
             }))
                 return;
 
-            let encoded = tag.$encode();
+            let encoded = tag.encode();
             this.tags.push(encoded);
             this.addedTags.push(encoded.id);
             storeEditList();

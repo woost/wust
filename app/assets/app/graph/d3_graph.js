@@ -392,10 +392,10 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
                 if(targetNode.hyperEdge) {
                     let start = Post.$buildRaw({id: targetNode.startId});
                     let hyper = start.connectsTo.$buildRaw({id: targetNode.endId});
-                    referenceNode = hyper.connectsFrom.$buildRaw(sourceNode.$encode());
+                    referenceNode = hyper.connectsFrom.$buildRaw(sourceNode.encode());
                 } else {
-                    let start = Post.$buildRaw(sourceNode.$encode());
-                    referenceNode = start.connectsTo.$buildRaw(targetNode.$encode());
+                    let start = Post.$buildRaw(sourceNode.encode());
+                    referenceNode = start.connectsTo.$buildRaw(targetNode.encode());
                 }
                 referenceNode.$save({}).$then(response => {
                         _.each(response.graph.nodes, n => graph.addNode(n));

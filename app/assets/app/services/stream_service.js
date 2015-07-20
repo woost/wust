@@ -24,7 +24,7 @@ function StreamService(Tag, store) {
         let stream = {
             //TODO: search posts with all tags anstead of only first one
             posts: Tag.$buildRaw(tags[0]).posts.$search(),
-            tags: _.map(tags, t => t.$encode ? t.$encode() : t)
+            tags: _.map(tags, t => t.encode ? t.encode() : t)
         };
 
         self.streams.push(stream);
