@@ -15,7 +15,7 @@ function GraphDecoder($q, UniqArr) {
     function rawGraphPromise() {
         let deferred = $q.defer();
         this.$then(graph => {
-            let g = GraphFactory().fromRecord(graph);
+            let g = renesca.js.GraphFactory().fromRecord(graph);
             deferred.resolve(g);
         });
 

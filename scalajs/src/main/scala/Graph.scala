@@ -1,6 +1,8 @@
+package renesca.js
+
+import scala.collection.mutable
 import scala.scalajs.js
-import scala.scalajs.js.annotation.{JSExportNamed, JSExport, JSExportAll}
-import collection.mutable
+import scala.scalajs.js.annotation.{JSExport, JSExportAll}
 
 // http://www.scala-js.org/doc/export-to-javascript.html
 object GraphAlgorithms {
@@ -41,7 +43,7 @@ case class Cacher[O](func: () => O) {
   }
 }
 
-trait NodeLike {
+sealed trait NodeLike {
   val id: String
   val label: String
   def title: String
@@ -52,7 +54,7 @@ trait NodeLike {
   def encode() = js.Dynamic.literal(id = id, label = label, title = title, description.orUndefined)
 }
 
-trait NodeDelegates extends NodeLike {
+sealed trait NodeDelegates extends NodeLike {
   def rawNode: RawNode
 
   @JSExport
@@ -112,7 +114,7 @@ case class Node(rawNode: RawNode) extends NodeDelegates with RelationLike {
   @deprecated override def encode() = super[NodeDelegates].encode()
 }
 
-trait RelationLike {
+sealed trait RelationLike {
   def startId: String
   def endId: String
   @JSExport var startNode: Node = _
@@ -132,7 +134,7 @@ case class Relation(rawRelation: RawRelation) extends RelationLike {
 
 case class GraphChanges[RELATION <: RelationLike](newNodes: Set[Node], newRelations: Set[RELATION])
 
-trait WrappedGraph[RELATION <: RelationLike] {
+sealed trait WrappedGraph[RELATION <: RelationLike] {
   def rawGraph: RawGraph
   def nodeSet: mutable.Set[Node]
   def relationSet: mutable.Set[RELATION]
@@ -258,8 +260,8 @@ class Graph(val rawGraph: RawGraph) extends WrappedGraph[Relation] {
   def addNode(n: RecordNode) { rawGraph.add(new RawNode(n)) }
   def addRelation(r: RecordRelation) { rawGraph.add(new RawRelation(r)) }
   //TOOD: remove relations
-  def remove(node: Node) { rawGraph.remove(node.rawNode) }
-  def remove(relation: Relation) { rawGraph.remove(relation.rawRelation) }
+  def removeNode(node: Node) { rawGraph.remove(node.rawNode) }
+  def removeRelation(relation: Relation) { rawGraph.remove(relation.rawRelation) }
 
   // propagations upwards, coming from rawGraph
   def rawAdd(node: RawNode) { nodeSet += new Node(node); }
@@ -308,7 +310,56 @@ class RawGraph(var nodes: Set[RawNode], var relations: Set[RawRelation], var roo
   def add(node: RawNode) { nodes += node; wrappers.foreach(_.rawAdd(node)); currentGraphChanges.newNodes += node }
   def add(relation: RawRelation) { relations += relation; wrappers.foreach(_.rawAdd(relation)); currentGraphChanges.newRelations += relation }
   //TODO: add to currentGraphChanges.removedNodes
-  def remove(node: RawNode) { nodes -= node; wrappers.foreach(_.rawRemove(node)) }
+  def remove(node: RawNode) {
+    if(node.hyperEdge) {
+
+    } else {
+      removeAndPropagate(node)
+      incidentRelationsWithoutHyperHelperRelations(node).foreach(removeAndPropagate)
+      incidentHyperRelations(node).foreach(remove)
+    }
+  }
+
+  //TODO: cache lookup maps/sets
+  def hyperRelations = nodes.filter(_.hyperEdge)
+  def hyperHelperRelations: Set[RawRelation] = {
+    val hyperIds: Set[String] = hyperRelations.map(_.id).toSet
+    val hyperIdToStartId: Map[String, String] = hyperRelations.map(h => h.id -> h.startId.get).toMap
+    val hyperIdToEndId: Map[String, String] = hyperRelations.map(h => h.id -> h.endId.get).toMap
+    relations.filter(
+      r => ((hyperIds contains r.startId) && r.endId == hyperIdToEndId(r.startId)) ||
+        ((hyperIds contains r.endId) && r.startId == hyperIdToStartId(r.endId))
+    )
+  }
+
+  //  def hyperHelperRelations(node: RawNode): Set[RawRelation] = {
+  //    require(node.hyperEdge)
+  //    Set(
+  //      relations.find()
+  //    )
+  //  }
+
+  def incidentRelations(node: RawNode): Set[RawRelation] = {
+    relations.filter(r => r.startId == node.id || r.endId == node.id)
+  }
+
+  def incidentRelationsWithoutHyperHelperRelations(node: RawNode): Set[RawRelation] = {
+    incidentRelations(node) diff hyperHelperRelations
+  }
+
+  def incidentHyperRelations(node: RawNode): Set[RawNode] = {
+    nodes.filter(n => n.hyperEdge && (n.startId.get == node.id || n.endId.get == node.id))
+  }
+
+  def removeAndPropagate(node: RawNode) {
+    nodes -= node
+    wrappers.foreach(_.rawRemove(node))
+  }
+  def removeAndPropagate(relation: RawRelation) {
+    relations -= relation
+    wrappers.foreach(_.rawRemove(relation))
+  }
+
   def remove(relation: RawRelation) { relations -= relation; wrappers.foreach(_.rawRemove(relation)) }
   def commit() { wrappers.foreach(_.rawCommit(currentGraphChanges)); currentGraphChanges = new RawGraphChanges }
 

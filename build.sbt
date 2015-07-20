@@ -85,22 +85,25 @@ lazy val schema = (project in file("schema")).
 
 // ScalaJs
 // https://github.com/vmunier/play-with-scalajs-example
+
 import sbt.Project.projectToRef
 
 lazy val scalajs = (project in file("scalajs")).settings(
   scalaVersion := scalaV,
   scalacOptions ++= scalacOpts,
-  persistLauncher := true, // run Main automatically
-  persistLauncher in Test := false,
+  persistLauncher := false, // run Main automatically
   sourceMapsDirectories += scalajsSharedJs.base / "..",
   libraryDependencies ++= Seq(
-    "org.scala-js" %%% "scalajs-dom" % "0.8.0"
-  )
-  ).enablePlugins(ScalaJSPlugin, ScalaJSPlay).
-dependsOn(scalajsSharedJs)
+    "org.scala-js" %%% "scalajs-dom" % "0.8.0",
+    "com.lihaoyi" %%% "utest" % "0.3.1"
+  ),
+  testFrameworks += new TestFramework("utest.runner.Framework"),
+  persistLauncher in Test := false
+).enablePlugins(ScalaJSPlugin, ScalaJSPlay).
+  dependsOn(scalajsSharedJs)
 
 lazy val scalajsShared = (crossProject.crossType(CrossType.Pure) in file("scalajs-shared")).
-  settings(scalaVersion := scalaV,scalacOptions ++= scalacOpts).
+  settings(scalaVersion := scalaV, scalacOptions ++= scalacOpts).
   jsConfigure(_ enablePlugins ScalaJSPlay).
   jsSettings(sourceMapsBase := baseDirectory.value / "..")
 
