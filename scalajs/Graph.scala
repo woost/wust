@@ -46,6 +46,10 @@ trait NodeLike {
   val label: String
   def title: String
   def description: Option[String]
+
+  import js.JSConverters._
+
+  def $encode = js.Dynamic.literal(id = id, label = label, title = title, description.orUndefined)
 }
 
 trait NodeDelegates extends NodeLike {
@@ -66,6 +70,9 @@ case class Node(rawNode: RawNode) extends NodeDelegates {
   def predecessors = inRelations.map(_.startNode)
   def successors = outRelations.map(_.endNode)
   def neighbours = predecessors ++ successors
+  def inDegree = inRelations.size
+  def outDegree = outRelations.size
+  def degree = inDegree + outDegree
 
   import GraphAlgorithms._
 
@@ -88,6 +95,10 @@ trait RelationLike {
   def endId: String
   var startNode: Node = _
   var endNode: Node = _
+  @deprecated def source = startNode
+  @deprecated def target = endNode
+
+  def $encode = js.Dynamic.literal(startId = startId, endId = endId)
 }
 
 case class Relation(rawRelation: RawRelation) extends RelationLike {
@@ -99,6 +110,7 @@ trait WrappedGraph[RELATION <: RelationLike] {
   def rawGraph: RawGraph
   def nodes: mutable.Set[Node]
   def relations: mutable.Set[RELATION]
+  var rootNode: Node = _
 
   // propagations upwards, coming from rawGraph
   def rawAdd(node: RawNode)
@@ -111,6 +123,7 @@ trait WrappedGraph[RELATION <: RelationLike] {
   var relationByIds: Map[(String, String), RELATION] = _
 
   def refreshIndex() {
+    rootNode = nodeById(rawGraph.rootNodeId)
     nodeById = nodes.map(n => n.id -> n).toMap
     relationByIds = relations.map(r => (r.startId, r.endId) -> r).toMap
     for(n <- nodes) {
@@ -130,6 +143,10 @@ trait WrappedGraph[RELATION <: RelationLike] {
 case class HyperRelation(rawNode: RawNode) extends NodeDelegates with RelationLike {
   def startId = rawNode.startId.get
   def endId = rawNode.endId.get
+
+  import js.JSConverters._
+
+  override def $encode = js.Dynamic.literal(id = id, label = label, title = title, description.orUndefined, startId = startId, endId = endId)
 }
 
 class HyperGraph(val rawGraph: RawGraph) extends WrappedGraph[HyperRelation] {
@@ -194,7 +211,7 @@ class RawRelation(val startId: String, val endId: String) extends RelationLike {
 
 @JSExport
 @JSExportAll
-class RawGraph(var nodes: Set[RawNode] = Set.empty, var relations: Set[RawRelation] = Set.empty) {
+class RawGraph(var nodes: Set[RawNode], var relations: Set[RawRelation], var rootNodeId: String) {
   val wrappers = mutable.Set.empty[WrappedGraph[_]]
   def wrap(): Graph = {
     val graph = new Graph(this)
@@ -236,6 +253,8 @@ trait RecordRelation extends js.Object {
 trait RecordGraph extends js.Object {
   def nodes: js.Array[RecordNode] = js.native
   def edges: js.Array[RecordRelation] = js.native
+
+  def $pk: String = js.native // rootNodeId
 }
 
 @JSExport
@@ -248,11 +267,12 @@ object GraphFactory {
     js.Dynamic.global.console.warn("jooo")
     fromTraversable(
       record.nodes.map(n => new RawNode(n)),
-      record.edges.map(r => new RawRelation(r))
+      record.edges.map(r => new RawRelation(r)),
+      record.$pk // rootNodeId
     )
   }
 
-  def fromTraversable(nodes: Traversable[RawNode], relations: Traversable[RawRelation]): RawGraph = {
-    new RawGraph(nodes.toSet, relations.toSet)
+  def fromTraversable(nodes: Traversable[RawNode], relations: Traversable[RawRelation], rootNodeId: String): RawGraph = {
+    new RawGraph(nodes.toSet, relations.toSet, rootNodeId)
   }
 }
