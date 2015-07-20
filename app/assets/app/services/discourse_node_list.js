@@ -133,10 +133,10 @@ function DiscourseNodeList() {
                     //TODO: response should include the deleted relation
                     switch(this.connectorType) {
                         case PREDECESSORS:
-                            _.each(elem.outRelations, r => r.hyperEdge ? self.component.removeNode(r) : self.component.removeRelation(r));
+                            _.each(elem.outRelations, r => r.remove(r));
                             break;
                         case SUCCESSORS:
-                            _.each(elem.inRelations, r => r.hyperEdge ? self.component.removeNode(r) : self.component.removeRelation(r));
+                            _.each(elem.inRelations, r => r.remove(r));
                             break;
                     }
 
@@ -156,16 +156,14 @@ function DiscourseNodeList() {
                         EditService.updateNode(elem.localId, data.node);
                         //TODO: graph should only contain created items
                         //this.component.self.addNode(elem);
-                        _.each(data.graph.nodes, n => self.component.addNode(n));
-                        _.each(data.graph.edges, r => self.component.addRelation(r));
+                        _.each(data.graph.nodes, n => self.component.add(n));
                         self.component.commit();
                         let node = self.component.nodes.byId(data.node.id);
                     });
                 } else {
                     self.apiList.$buildRaw(elem).$save({}).$then(data => {
                         humane.success("Connected node");
-                        _.each(data.graph.nodes, n => self.component.addNode(n));
-                        _.each(data.graph.edges, r => self.component.addRelation(r));
+                        _.each(data.graph.nodes, n => self.component.add(n));
                         self.component.commit();
                         let node = self.component.nodes.byId(data.node.id);
                     });
