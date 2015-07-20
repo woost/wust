@@ -89,6 +89,7 @@ import sbt.Project.projectToRef
 
 lazy val scalajs = (project in file("scalajs")).settings(
   scalaVersion := scalaV,
+  scalacOptions ++= scalacOpts,
   persistLauncher := true, // run Main automatically
   persistLauncher in Test := false,
   sourceMapsDirectories += scalajsSharedJs.base / "..",
@@ -99,7 +100,7 @@ lazy val scalajs = (project in file("scalajs")).settings(
 dependsOn(scalajsSharedJs)
 
 lazy val scalajsShared = (crossProject.crossType(CrossType.Pure) in file("scalajs-shared")).
-  settings(scalaVersion := scalaV).
+  settings(scalaVersion := scalaV,scalacOptions ++= scalacOpts).
   jsConfigure(_ enablePlugins ScalaJSPlay).
   jsSettings(sourceMapsBase := baseDirectory.value / "..")
 
