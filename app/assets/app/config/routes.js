@@ -57,7 +57,7 @@ function RoutesConfig($stateProvider, $urlRouterProvider, $locationProvider, Dis
         controller: "FocusCtrl as vm",
         resolve: {
             component: ["ConnectedComponents","$stateParams", function(ConnectedComponents, $stateParams) {
-                return ConnectedComponents.$find($stateParams.id).$asPromise();
+                return ConnectedComponents.$find($stateParams.id).$rawGraphPromise();
             }]
         }
     });
