@@ -311,19 +311,23 @@ class RawGraph(var nodes: Set[RawNode], var relations: Set[RawRelation], var roo
   def add(relation: RawRelation) { relations += relation; wrappers.foreach(_.rawAdd(relation)); currentGraphChanges.newRelations += relation }
   //TODO: add to currentGraphChanges.removedNodes
   def remove(node: RawNode) {
-    if(node.hyperEdge) {
+    nodes -= node
+    wrappers.foreach(_.rawRemove(node))
 
-    } else {
-      removeAndPropagate(node)
-      incidentRelationsWithoutHyperHelperRelations(node).foreach(removeAndPropagate)
-      incidentHyperRelations(node).foreach(remove)
-    }
+    incidentRelationsWithoutHyperHelperRelations(node).foreach(remove)
+    incidentHyperRelations(node).foreach(remove)
   }
+  def remove(relation: RawRelation) {
+    relations -= relation
+    wrappers.foreach(_.rawRemove(relation))
+  }
+
+  def commit() { wrappers.foreach(_.rawCommit(currentGraphChanges)); currentGraphChanges = new RawGraphChanges }
 
   //TODO: cache lookup maps/sets
   def hyperRelations = nodes.filter(_.hyperEdge)
   def hyperHelperRelations: Set[RawRelation] = {
-    val hyperIds: Set[String] = hyperRelations.map(_.id).toSet
+    val hyperIds: Set[String] = hyperRelations.map(_.id)
     val hyperIdToStartId: Map[String, String] = hyperRelations.map(h => h.id -> h.startId.get).toMap
     val hyperIdToEndId: Map[String, String] = hyperRelations.map(h => h.id -> h.endId.get).toMap
     relations.filter(
@@ -331,13 +335,6 @@ class RawGraph(var nodes: Set[RawNode], var relations: Set[RawRelation], var roo
         ((hyperIds contains r.endId) && r.startId == hyperIdToStartId(r.endId))
     )
   }
-
-  //  def hyperHelperRelations(node: RawNode): Set[RawRelation] = {
-  //    require(node.hyperEdge)
-  //    Set(
-  //      relations.find()
-  //    )
-  //  }
 
   def incidentRelations(node: RawNode): Set[RawRelation] = {
     relations.filter(r => r.startId == node.id || r.endId == node.id)
@@ -351,17 +348,6 @@ class RawGraph(var nodes: Set[RawNode], var relations: Set[RawRelation], var roo
     nodes.filter(n => n.hyperEdge && (n.startId.get == node.id || n.endId.get == node.id))
   }
 
-  def removeAndPropagate(node: RawNode) {
-    nodes -= node
-    wrappers.foreach(_.rawRemove(node))
-  }
-  def removeAndPropagate(relation: RawRelation) {
-    relations -= relation
-    wrappers.foreach(_.rawRemove(relation))
-  }
-
-  def remove(relation: RawRelation) { relations -= relation; wrappers.foreach(_.rawRemove(relation)) }
-  def commit() { wrappers.foreach(_.rawCommit(currentGraphChanges)); currentGraphChanges = new RawGraphChanges }
 
   override def toString = s"Graph(${ nodes.map(_.id).mkString(",") }, ${ relations.map(r => r.startId + "->" + r.endId).mkString(",") })"
 }
