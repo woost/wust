@@ -67,16 +67,10 @@ function DiscourseNodeList() {
                 let hyperNode;
                 switch(this.connectorType) {
                     case PREDECESSORS:
-                    hyperNode = _(this.node.inRelations).map("source").select("hyperEdge").find({
-                        startId: node.id,
-                        endId: this.node.id
-                    });
+                        hyperNode = this.component.relationByIds(node.id, this.node.id);
                         break;
                     case SUCCESSORS:
-                    hyperNode = _(this.node.outRelations).map("target").select("hyperEdge").find({
-                        startId: this.node.id,
-                        endId: node.id
-                    });
+                        hyperNode = this.component.relationByIds(this.node.id, node.id);
                         break;
                 }
 

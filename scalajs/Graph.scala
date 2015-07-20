@@ -154,10 +154,13 @@ trait WrappedGraph[RELATION <: RelationLike] {
   def onCommit(f: js.Function1[GraphChanges[RELATION], Any]) { onCommitAction = f }
   var onCommitAction: Function[GraphChanges[RELATION], Any] = (x) => {}
 
-  @JSExport
   var nodeById: Map[String, Node] = _
-  @JSExport
   var relationByIds: Map[(String, String), RELATION] = _
+
+  @JSExport("nodeById")
+  def jsNodeById(id: String) = nodeById(id)
+  @JSExport("relationByIds")
+  def jsRelationByIds(startId: String, endId: String) = relationByIds((startId, endId))
 
   import js.JSConverters._
 
