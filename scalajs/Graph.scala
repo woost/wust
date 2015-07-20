@@ -201,7 +201,7 @@ class Graph(val rawGraph: RawGraph) extends WrappedGraph[Relation] {
 @JSExport
 @JSExportAll
 class RawNode(val id: String, val label: String, var title: String, var description: Option[String], val hyperEdge: Boolean, val startId: Option[String], val endId: Option[String]) extends NodeLike {
-  def this(n: RecordNode) = this(n.id, n.label, n.title, n.description.toOption, n.hyperEdge.getOrElse(false), n.startId.toOption, n.endId.toOption)
+  def this(n: RecordNode) = this(n.id, n.label, n.title.getOrElse(n.label), n.description.toOption, n.hyperEdge.getOrElse(false), n.startId.toOption, n.endId.toOption)
 }
 
 @JSExport
@@ -239,7 +239,7 @@ class RawGraph(var nodes: Set[RawNode], var relations: Set[RawRelation], var roo
 trait RecordNode extends js.Object {
   def id: String = js.native
   def label: String = js.native
-  def title: String = js.native
+  def title: js.UndefOr[String] = js.native
   def description: js.UndefOr[String] = js.native
 
   def hyperEdge: js.UndefOr[Boolean] = js.native
