@@ -55,11 +55,17 @@ trait NodeLike {
 trait NodeDelegates extends NodeLike {
   def rawNode: RawNode
 
+  @JSExport
   val id = rawNode.id
+  @JSExport
   val label = rawNode.label
+  @JSExport
   def title = rawNode.title
-  def newTitle_=(newTitle: String) = rawNode.title = newTitle
+  @JSExport
+  def title_=(newTitle: String) = rawNode.title = newTitle
+  @JSExport
   def description = rawNode.description
+  @JSExport
   def description_=(newDescription: Option[String]) = rawNode.description = newDescription
 }
 
@@ -114,10 +120,12 @@ case class GraphChanges[RELATION <: RelationLike](newNodes: Set[Node], newRelati
 
 trait WrappedGraph[RELATION <: RelationLike] {
   def rawGraph: RawGraph
-  def nodes: mutable.Set[Node]
-  def edges: mutable.Set[RELATION]
-  @JSExport
-  var rootNode: Node = _
+  def nodeSet: mutable.Set[Node]
+  def relationSet: mutable.Set[RELATION]
+
+  @JSExport var nodes: js.Array[Node] = _
+  @JSExport @deprecated var edges: js.Array[RELATION] = _
+  @JSExport var rootNode: Node = _
 
   // propagations upwards, coming from rawGraph
   def rawAdd(node: RawNode)
@@ -142,17 +150,20 @@ trait WrappedGraph[RELATION <: RelationLike] {
   @JSExport
   var relationByIds: Map[(String, String), RELATION] = _
 
+  import js.JSConverters._
 
   def refreshIndex() {
-    nodeById = nodes.map(n => n.id -> n).toMap
-    relationByIds = edges.map(r => (r.startId, r.endId) -> r).toMap
+    nodes = nodeSet.toJSArray
+    edges = relationSet.toJSArray
+    nodeById = nodeSet.map(n => n.id -> n).toMap
+    relationByIds = relationSet.map(r => (r.startId, r.endId) -> r).toMap
     rootNode = nodeById(rawGraph.rootNodeId)
-    for(n <- nodes) {
+    for(n <- nodeSet) {
       n.invalidate()
       n.inRelations = Set.empty
       n.outRelations = Set.empty
     }
-    for(r <- edges) {
+    for(r <- relationSet) {
       r.startNode = nodeById(r.startId)
       r.endNode = nodeById(r.endId)
       r.startNode.outRelations += r
@@ -175,9 +186,9 @@ case class HyperRelation(rawNode: RawNode) extends NodeDelegates with RelationLi
 @JSExport
 @JSExportAll
 class HyperGraph(val rawGraph: RawGraph) extends WrappedGraph[HyperRelation] {
-  val nodes: mutable.Set[Node] = mutable.Set.empty ++ rawGraph.nodes.map(new Node(_))
+  val nodeSet: mutable.Set[Node] = mutable.Set.empty ++ rawGraph.nodes.map(new Node(_))
   val hyperRelations: mutable.Set[HyperRelation] = mutable.Set.empty ++ rawGraph.nodes.filter(_.hyperEdge).map(new HyperRelation(_))
-  def edges = hyperRelations
+  def relationSet = hyperRelations
   refreshIndex()
 
   // propagate downwards
@@ -194,20 +205,20 @@ class HyperGraph(val rawGraph: RawGraph) extends WrappedGraph[HyperRelation] {
 
   // propagations upwards, coming from rawGraph
   def rawAdd(node: RawNode) {
-    nodes += new Node(node)
+    nodeSet += new Node(node)
     if(node.hyperEdge)
       hyperRelations += new HyperRelation(node)
   }
   def rawAdd(relation: RawRelation) {}
-  def rawRemove(node: RawNode) { nodes -= nodeById(node.id) }
+  def rawRemove(node: RawNode) { nodeSet -= nodeById(node.id) }
   def rawRemove(relation: RawRelation) {}
 }
 
 @JSExport
 @JSExportAll
 class Graph(val rawGraph: RawGraph) extends WrappedGraph[Relation] {
-  val nodes: mutable.Set[Node] = mutable.Set.empty ++ rawGraph.nodes.map(new Node(_))
-  val edges: mutable.Set[Relation] = mutable.Set.empty ++ rawGraph.relations.map(new Relation(_))
+  val nodeSet: mutable.Set[Node] = mutable.Set.empty ++ rawGraph.nodes.map(new Node(_))
+  val relationSet: mutable.Set[Relation] = mutable.Set.empty ++ rawGraph.relations.map(new Relation(_))
   refreshIndex()
 
   // propagate downwards
@@ -217,10 +228,10 @@ class Graph(val rawGraph: RawGraph) extends WrappedGraph[Relation] {
   def remove(relation: Relation) { rawGraph.remove(relation.rawRelation) }
 
   // propagations upwards, coming from rawGraph
-  def rawAdd(node: RawNode) { nodes += new Node(node); }
-  def rawAdd(relation: RawRelation) { edges += new Relation(relation) }
-  def rawRemove(node: RawNode) { nodes -= nodeById(node.id) }
-  def rawRemove(relation: RawRelation) { edges -= relationByIds((relation.startId, relation.endId)) }
+  def rawAdd(node: RawNode) { nodeSet += new Node(node); }
+  def rawAdd(relation: RawRelation) { relationSet += new Relation(relation) }
+  def rawRemove(node: RawNode) { nodeSet -= nodeById(node.id) }
+  def rawRemove(relation: RawRelation) { relationSet -= relationByIds((relation.startId, relation.endId)) }
 
   def hyper() = rawGraph.hyperWrap()
 }
