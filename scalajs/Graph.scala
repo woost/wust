@@ -59,6 +59,8 @@ trait NodeDelegates extends NodeLike {
   val id = rawNode.id
   @JSExport
   val label = rawNode.label
+  @JSExport @deprecated
+  val hyperEdge = rawNode.hyperEdge
   @JSExport
   def title = rawNode.title
   @JSExport
@@ -67,11 +69,15 @@ trait NodeDelegates extends NodeLike {
   def description = rawNode.description
   @JSExport
   def description_=(newDescription: Option[String]) = rawNode.description = newDescription
+
+  @JSExport @deprecated def startId = rawNode.startId.get
+  @JSExport @deprecated def endId = rawNode.endId.get
 }
 
+//TODO: do not extend RelationLike
 @JSExport
 @JSExportAll
-case class Node(rawNode: RawNode) extends NodeDelegates {
+case class Node(rawNode: RawNode) extends NodeDelegates with RelationLike {
   var inRelations: Set[RelationLike] = Set.empty
   var outRelations: Set[RelationLike] = Set.empty
   def relations = inRelations ++ outRelations
@@ -96,6 +102,8 @@ case class Node(rawNode: RawNode) extends NodeDelegates {
     _deepSuccessors.invalidate()
     _deepPredecessors.invalidate()
   }
+
+  @deprecated override def $encode = super[NodeDelegates].$encode
 }
 
 trait RelationLike {
@@ -124,6 +132,7 @@ trait WrappedGraph[RELATION <: RelationLike] {
   def relationSet: mutable.Set[RELATION]
 
   @JSExport var nodes: js.Array[Node] = _
+  @JSExport @deprecated var nonHyperRelationNodes: js.Array[Node] = _
   @JSExport @deprecated var edges: js.Array[RELATION] = _
   @JSExport var rootNode: Node = _
 
@@ -154,6 +163,7 @@ trait WrappedGraph[RELATION <: RelationLike] {
 
   def refreshIndex() {
     nodes = nodeSet.toJSArray
+    nonHyperRelationNodes = nodeSet.filterNot(_.hyperEdge).toJSArray
     edges = relationSet.toJSArray
     nodeById = nodeSet.map(n => n.id -> n).toMap
     relationByIds = relationSet.map(r => (r.startId, r.endId) -> r).toMap
@@ -175,8 +185,8 @@ trait WrappedGraph[RELATION <: RelationLike] {
 @JSExport
 @JSExportAll
 case class HyperRelation(rawNode: RawNode) extends NodeDelegates with RelationLike {
-  def startId = rawNode.startId.get
-  def endId = rawNode.endId.get
+  override def startId = rawNode.startId.get
+  override def endId = rawNode.endId.get
 
   import js.JSConverters._
 
@@ -201,6 +211,7 @@ class HyperGraph(val rawGraph: RawGraph) extends WrappedGraph[HyperRelation] {
       rawGraph.add(new RawRelation(n.id, n.endId.get))
     }
   }
+  //TOOD: recursive removal
   def remove(node: Node) { rawGraph.remove(node.rawNode) }
 
   // propagations upwards, coming from rawGraph
@@ -219,11 +230,22 @@ class HyperGraph(val rawGraph: RawGraph) extends WrappedGraph[HyperRelation] {
 class Graph(val rawGraph: RawGraph) extends WrappedGraph[Relation] {
   val nodeSet: mutable.Set[Node] = mutable.Set.empty ++ rawGraph.nodes.map(new Node(_))
   val relationSet: mutable.Set[Relation] = mutable.Set.empty ++ rawGraph.relations.map(new Relation(_))
+
+  @deprecated override def refreshIndex() {
+    super.refreshIndex()
+    for(r <- nodeSet.filter(_.hyperEdge)) {
+      r.startNode = nodeById(r.startId)
+      r.endNode = nodeById(r.endId)
+      r.startNode.outRelations += r
+      r.endNode.inRelations += r
+    }
+  }
   refreshIndex()
 
   // propagate downwards
   def addNode(n: RecordNode) { rawGraph.add(new RawNode(n)) }
   def addRelation(r: RecordRelation) { rawGraph.add(new RawRelation(r)) }
+  //TOOD: remove relations
   def remove(node: Node) { rawGraph.remove(node.rawNode) }
   def remove(relation: Relation) { rawGraph.remove(relation.rawRelation) }
 
@@ -238,7 +260,7 @@ class Graph(val rawGraph: RawGraph) extends WrappedGraph[Relation] {
 
 @JSExport
 @JSExportAll
-class RawNode(val id: String, val label: String, var title: String, var description: Option[String], val hyperEdge: Boolean, val startId: Option[String], val endId: Option[String]) extends NodeLike {
+class RawNode(val id: String, val label: String, var title: String, var description: Option[String], @deprecated val hyperEdge: Boolean, val startId: Option[String], val endId: Option[String]) extends NodeLike {
   def this(n: RecordNode) = this(n.id, n.label, n.title.getOrElse(n.label), n.description.toOption, n.hyperEdge.getOrElse(false), n.startId.toOption, n.endId.toOption)
 }
 
@@ -310,8 +332,6 @@ object GraphFactory {
 
   @JSExport
   def fromRecord(record: RecordGraph): RawGraph = {
-    println("fromRecord")
-    js.Dynamic.global.console.warn("jooo")
     fromTraversable(
       record.nodes.map(n => new RawNode(n)),
       record.edges.map(r => new RawRelation(r)),
