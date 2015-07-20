@@ -49,6 +49,7 @@ trait NodeLike {
 
   import js.JSConverters._
 
+  @JSExport
   def $encode = js.Dynamic.literal(id = id, label = label, title = title, description.orUndefined)
 }
 
@@ -65,10 +66,16 @@ trait NodeDelegates extends NodeLike {
   def title = rawNode.title
   @JSExport
   def title_=(newTitle: String) = rawNode.title = newTitle
-  @JSExport
+
   def description = rawNode.description
-  @JSExport
-  def description_=(newDescription: Option[String]) = rawNode.description = newDescription
+  def description_=(newDescription: Option[String]) = { rawNode.description = newDescription }
+
+  import js.JSConverters._
+
+  @JSExport("description")
+  def descriptionJs = description.orUndefined
+  @JSExport("description_=")
+  def descriptionJs_=(newDescription: js.UndefOr[String]) = { description = newDescription.toOption }
 
   @JSExport @deprecated def startId = rawNode.startId.get
   @JSExport @deprecated def endId = rawNode.endId.get
@@ -103,6 +110,7 @@ case class Node(rawNode: RawNode) extends NodeDelegates with RelationLike {
     _deepPredecessors.invalidate()
   }
 
+  @JSExport
   @deprecated override def $encode = super[NodeDelegates].$encode
 }
 
@@ -114,6 +122,7 @@ trait RelationLike {
   @JSExport @deprecated def source = startNode
   @JSExport @deprecated def target = endNode
 
+  @JSExport
   def $encode = js.Dynamic.literal(startId = startId, endId = endId)
 }
 
@@ -193,6 +202,7 @@ case class HyperRelation(rawNode: RawNode) extends NodeDelegates with RelationLi
 
   import js.JSConverters._
 
+  @JSExport
   override def $encode = js.Dynamic.literal(id = id, label = label, title = title, description.orUndefined, startId = startId, endId = endId)
 }
 
