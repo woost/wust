@@ -63,6 +63,8 @@ trait NodeDelegates extends NodeLike {
   def description_=(newDescription: Option[String]) = rawNode.description = newDescription
 }
 
+@JSExport
+@JSExportAll
 case class Node(rawNode: RawNode) extends NodeDelegates {
   var inRelations: Set[RelationLike] = Set.empty
   var outRelations: Set[RelationLike] = Set.empty
@@ -101,6 +103,8 @@ trait RelationLike {
   def $encode = js.Dynamic.literal(startId = startId, endId = endId)
 }
 
+@JSExport
+@JSExportAll
 case class Relation(rawRelation: RawRelation) extends RelationLike {
   def startId = rawRelation.startId
   def endId = rawRelation.endId
@@ -110,6 +114,7 @@ trait WrappedGraph[RELATION <: RelationLike] {
   def rawGraph: RawGraph
   def nodes: mutable.Set[Node]
   def relations: mutable.Set[RELATION]
+  @JSExport
   var rootNode: Node = _
 
   // propagations upwards, coming from rawGraph
@@ -119,15 +124,16 @@ trait WrappedGraph[RELATION <: RelationLike] {
   def rawRemove(relation: RawRelation)
   def rawCommit() { refreshIndex() }
 
+  @JSExport
   var nodeById: Map[String, Node] = _
+  @JSExport
   var relationByIds: Map[(String, String), RELATION] = _
 
-  refreshIndex()
 
   def refreshIndex() {
-    rootNode = nodeById(rawGraph.rootNodeId)
     nodeById = nodes.map(n => n.id -> n).toMap
     relationByIds = relations.map(r => (r.startId, r.endId) -> r).toMap
+    rootNode = nodeById(rawGraph.rootNodeId)
     for(n <- nodes) {
       n.invalidate()
       n.inRelations = Set.empty
@@ -142,6 +148,8 @@ trait WrappedGraph[RELATION <: RelationLike] {
   }
 }
 
+@JSExport
+@JSExportAll
 case class HyperRelation(rawNode: RawNode) extends NodeDelegates with RelationLike {
   def startId = rawNode.startId.get
   def endId = rawNode.endId.get
@@ -151,10 +159,14 @@ case class HyperRelation(rawNode: RawNode) extends NodeDelegates with RelationLi
   override def $encode = js.Dynamic.literal(id = id, label = label, title = title, description.orUndefined, startId = startId, endId = endId)
 }
 
+@JSExport
+@JSExportAll
 class HyperGraph(val rawGraph: RawGraph) extends WrappedGraph[HyperRelation] {
   val nodes: mutable.Set[Node] = mutable.Set.empty ++ rawGraph.nodes.map(new Node(_))
   val hyperRelations: mutable.Set[HyperRelation] = mutable.Set.empty ++ rawGraph.nodes.filter(_.hyperEdge).map(new HyperRelation(_))
   def relations = hyperRelations
+  refreshIndex()
+  js.Dynamic.global.console.log("refreshed", rootNode.toString);
 
   // propagate downwards
   def add(n: RecordNode) {
@@ -179,13 +191,16 @@ class HyperGraph(val rawGraph: RawGraph) extends WrappedGraph[HyperRelation] {
   def rawRemove(relation: RawRelation) {}
 }
 
+@JSExport
+@JSExportAll
 class Graph(val rawGraph: RawGraph) extends WrappedGraph[Relation] {
   val nodes: mutable.Set[Node] = mutable.Set.empty ++ rawGraph.nodes.map(new Node(_))
   val relations: mutable.Set[Relation] = mutable.Set.empty ++ rawGraph.relations.map(new Relation(_))
+  refreshIndex()
 
   // propagate downwards
-  def add(n: RecordNode) { rawGraph.add(new RawNode(n)) }
-  def add(r: RecordRelation) { rawGraph.add(new RawRelation(r)) }
+  def addNode(n: RecordNode) { rawGraph.add(new RawNode(n)) }
+  def addRelation(r: RecordRelation) { rawGraph.add(new RawRelation(r)) }
   def remove(node: Node) { rawGraph.remove(node.rawNode) }
   def remove(relation: Relation) { rawGraph.remove(relation.rawRelation) }
 
