@@ -101,10 +101,10 @@ case class Node(rawNode: RawNode) extends NodeDelegates {
 trait RelationLike {
   def startId: String
   def endId: String
-  var startNode: Node = _
-  var endNode: Node = _
-  @deprecated def source = startNode
-  @deprecated def target = endNode
+  @JSExport var startNode: Node = _
+  @JSExport var endNode: Node = _
+  @JSExport @deprecated def source = startNode
+  @JSExport @deprecated def target = endNode
 
   def $encode = js.Dynamic.literal(startId = startId, endId = endId)
 }
