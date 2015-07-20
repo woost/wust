@@ -122,6 +122,8 @@ trait WrappedGraph[RELATION <: RelationLike] {
   var nodeById: Map[String, Node] = _
   var relationByIds: Map[(String, String), RELATION] = _
 
+  refreshIndex()
+
   def refreshIndex() {
     rootNode = nodeById(rawGraph.rootNodeId)
     nodeById = nodes.map(n => n.id -> n).toMap
