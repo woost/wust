@@ -123,7 +123,7 @@ val scalacOpts = Seq(
   "-deprecation",
   "-explaintypes",
   "-feature",
-  "-Yinline", "-Yinline-warnings",
+  //"-Yinline", "-Yinline-warnings",
   "-language:_",
   "-Xlint:_"
   //,"-Xdisable-assertions", "-optimize"

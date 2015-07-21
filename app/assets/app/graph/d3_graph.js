@@ -150,8 +150,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
         //////////////////////////////////////////////////
 
         function updateGraph(changes) {
-             console.log("------ update graph");
-             console.log(graph.nonHyperRelationNodes.map((n) => n.title), graph.hyperRelationsJs.map((r) => r.source.title + " --> " + r.target.title));
+             // console.log("------ update graph");
+             // console.log(graph.nonHyperRelationNodes.map((n) => n.title), graph.hyperRelations.map((r) => r.source.title + " --> " + r.target.title));
             // create data joins
             // http://bost.ocks.org/mike/join/
             let d3NodeContainerWithData = d3NodeContainer
@@ -208,8 +208,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
             d3NodeContainerWithData.exit().remove();
             d3LinkPathWithData.exit().remove();//
 
-            console.log(graph.nodes.map(n => n.id.slice(0,3)),d3NodeContainer.node());
-            console.log(graph.edges,d3LinkPath.node());
+            // console.log(graph.nodes.map(n => n.id.slice(0,3)),d3NodeContainer.node());
+            // console.log(graph.edges,d3LinkPath.node());
 
             // TODO: non-hyper-relation-links are broken
             // let linkText = svgContainer.append("div").attr("id", "group_link_labels")
@@ -224,11 +224,13 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
             //     return link.source.hyperEdge || link.target.hyperEdge;
             // }
 
+            calculateNodeVerticalForce(graph);
             setInitialNodePositions(globalState, graph);
             updateGraphRefs(graph, d3NodeContainerWithData, d3Node, d3NodeTools, d3LinkPathWithData);
             registerUIEvents();
-            calculateNodeVerticalForce(graph);
             recalculateNodeDimensions(graph);
+            force.nodes(graph.nodes); // nodes and edges get replaced instead of just changed by scalajs
+            force.links(graph.edges); // that's why we need to set the new references
             // force.tick();
             // drawGraph(graph, transformCompat);
             force.start();
@@ -464,7 +466,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
             n.y = squareFactor * n.verticalForce / graph.nonHyperRelationNodes.length + globalState.height / 2 - squareFactor / 2;
         }).value();
 
-        _(graph.hyperRelationsJs).filter(n => isNaN(n.x) || isNaN(n.y)).each(n => {
+        _(graph.hyperRelations).filter(n => isNaN(n.x) || isNaN(n.y)).each(n => {
             n.x = (n.source.x + n.target.x) / 2;
             n.y = (n.source.y + n.target.y) / 2;
         }).value();
@@ -721,8 +723,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
     function tick(graph, globalState, transformCompat, e) {
         // push hypernodes towards the center between its start/end node
         let pullStrength = e.alpha * globalState.hyperRelationAlignForce;
-        graph.nodes.forEach(node => {
-            if (node.hyperEdge === true && node.fixed !== true) {
+        graph.hyperRelations.forEach(node => {
+            if (!node.fixed) {
                 let start = node.source;
                 let end = node.target;
                 let center = {
@@ -780,8 +782,12 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
             } else {
                 // clamp every edge line to the intersections with its incident node rectangles
                 let line = Helpers.clampLineByRects(relation, relation.source.rect, relation.target.rect);
-                let pathAttr = `M ${line.x1} ${line.y1} L ${line.x2} ${line.y2}`;
-                relation.domPath.setAttribute("d", pathAttr);
+                if(isNaN(line.x1) || isNaN(line.y1) || isNaN(line.x2) || isNaN(line.y2))
+                    console.warn("invalid coordinates for relation");
+                else {
+                    let pathAttr = `M ${line.x1} ${line.y1} L ${line.x2} ${line.y2}`;
+                    relation.domPath.setAttribute("d", pathAttr);
+                }
             }
 
 

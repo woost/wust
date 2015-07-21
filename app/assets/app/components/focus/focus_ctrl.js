@@ -29,7 +29,7 @@ function FocusCtrl($stateParams, HistoryService, component) {
 
     vm.graphComponent = component.wrap();
     vm.neighboursComponent = component.hyperWrap();
-    vm.branchesComponent = component.wrap();
+    // vm.branchesComponent = component.wrap();
 
     vm.tabViews = _.map([0, 1, 2, 3], i => new Tab(i));
     vm.tabViews[HistoryService.activeViewIndex]._active = true;

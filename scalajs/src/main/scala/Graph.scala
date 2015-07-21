@@ -2,32 +2,33 @@ package renesca.js
 
 import scala.collection.mutable
 import scala.scalajs.js
-import scala.scalajs.js.annotation.{JSExport, JSExportAll, JSExportNamed}
+import scala.scalajs.js.annotation.{JSExport, JSExportAll}
+import js.JSConverters._
 
 // http://www.scala-js.org/doc/export-to-javascript.html
 object GraphAlgorithms {
-  def depthFirstSearch(startNode: Node, nextNodes: Node => Traversable[Node]): Set[Node] = {
-    var visited: Set[Node] = Set.empty
+  def depthFirstSearch(startNode: NodeBase, nextNodes: NodeBase => Traversable[NodeBase]): Set[NodeBase] = {
+    var visited: Set[NodeBase] = Set.empty
     visitNext(startNode)
 
-    def visitNext(node: Node) {
+    def visitNext(node: NodeBase) {
       if(!(visited contains node)) {
         visited += node
-        nextNodes(node).foreach(nextNodes)
+        nextNodes(node).foreach(visitNext)
       }
     }
 
     visited
   }
 
-  def calculateComponent(startNode: Node): Set[Node] = {
+  def calculateComponent(startNode: NodeBase): Set[NodeBase] = {
     depthFirstSearch(startNode, _.neighbours)
   }
-  def calculateDeepPredecessors(startNode: Node): Set[Node] = {
-    depthFirstSearch(startNode, _.predecessors)
+  def calculateDeepPredecessors(startNode: NodeBase): Set[NodeBase] = {
+    depthFirstSearch(startNode, _.predecessors) - startNode
   }
-  def calculateDeepSuccessors(startNode: Node): Set[Node] = {
-    depthFirstSearch(startNode, _.successors)
+  def calculateDeepSuccessors(startNode: NodeBase): Set[NodeBase] = {
+    depthFirstSearch(startNode, _.successors) - startNode
   }
 }
 
@@ -48,10 +49,6 @@ sealed trait NodeLike {
   val label: String
   def title: String
   def description: Option[String]
-
-  import js.JSConverters._
-
-  def encode() = js.Dynamic.literal(id = id, label = label, title = title, description.orUndefined)
 }
 
 sealed trait NodeDelegates extends NodeLike {
@@ -61,7 +58,7 @@ sealed trait NodeDelegates extends NodeLike {
   val id = rawNode.id
   @JSExport
   val label = rawNode.label
-  @JSExport @deprecated
+  @JSExport
   val hyperEdge = rawNode.hyperEdge
   @JSExport
   def title = rawNode.title
@@ -71,58 +68,65 @@ sealed trait NodeDelegates extends NodeLike {
   def description = rawNode.description
   def description_=(newDescription: Option[String]) = { rawNode.description = newDescription }
 
-  import js.JSConverters._
 
   @JSExport("description")
   def descriptionJs = description.orUndefined
   @JSExport("description_=")
   def descriptionJs_=(newDescription: js.UndefOr[String]) = { description = newDescription.toOption }
 
-  @JSExport @deprecated def startId = rawNode.startId.get
-  @JSExport @deprecated def endId = rawNode.endId.get
+  @JSExport def startId = rawNode.startId.get
+  @JSExport def endId = rawNode.endId.get
 }
 
-//TODO: do not extend RelationLike
-@JSExport
-@JSExportAll
-case class Node(rawNode: RawNode) extends NodeDelegates with RelationLike {
+trait NodeBase extends NodeDelegates {
   var inRelations: Set[RelationLike] = Set.empty
   var outRelations: Set[RelationLike] = Set.empty
   def relations = inRelations ++ outRelations
-  def predecessors = inRelations.map(_.startNode)
-  def successors = outRelations.map(_.endNode)
-  def neighbours = predecessors ++ successors
-  def inDegree = inRelations.size
-  def outDegree = outRelations.size
-  def degree = inDegree + outDegree
+  @JSExport def predecessors = inRelations.map(_.startNode).toJSArray
+  @JSExport def successors = outRelations.map(_.endNode).toJSArray
+  @JSExport def neighbours = predecessors ++ successors
+  @JSExport def inDegree = inRelations.size
+  @JSExport def outDegree = outRelations.size
+  @JSExport def degree = inDegree + outDegree
 
   import GraphAlgorithms._
 
-  private val _component = Cacher(() => calculateComponent(this))
+  val _component = Cacher(() => calculateComponent(this))
   def component = _component()
-  private val _deepSuccessors = Cacher(() => calculateDeepSuccessors(this))
+  val _componentJs = Cacher(() => calculateComponent(this).toJSArray)
+  @JSExport("component") def componentJs = _componentJs()
+
+  val _deepSuccessors = Cacher(() => calculateDeepSuccessors(this))
   def deepSuccessors = _deepSuccessors()
-  private val _deepPredecessors = Cacher(() => calculateDeepPredecessors(this))
+  val _deepSuccessorsJs = Cacher(() => calculateDeepSuccessors(this).toJSArray)
+  @JSExport("deepSuccessors") def deepSuccessorsJs = _deepSuccessorsJs()
+
+  val _deepPredecessors = Cacher(() => calculateDeepPredecessors(this))
   def deepPredecessors = _deepPredecessors()
+  val _deepPredecessorsJs = Cacher(() => calculateDeepPredecessors(this).toJSArray)
+  @JSExport("deepPredecessors") def deepPredecessorsJs = _deepPredecessorsJs()
 
   def invalidate() {
     _component.invalidate()
+    _componentJs.invalidate()
     _deepSuccessors.invalidate()
+    _deepSuccessorsJs.invalidate()
     _deepPredecessors.invalidate()
+    _deepPredecessorsJs.invalidate()
   }
+}
 
-  @deprecated override def encode() = super[NodeDelegates].encode()
+@JSExport
+class Node(val rawNode: RawNode) extends NodeBase {
+  @JSExport def encode() = js.Dynamic.literal(id = id, label = label, title = title, description.orUndefined)
 }
 
 sealed trait RelationLike {
   def startId: String
   def endId: String
-  @JSExport var startNode: Node = _
-  @JSExport var endNode: Node = _
-  @JSExport @deprecated def source = startNode
-  @JSExport @deprecated def target = endNode
+  var startNode: NodeBase = _
+  var endNode: NodeBase = _
 
-  def encode() = js.Dynamic.literal(startId = startId, endId = endId)
 }
 
 @JSExport
@@ -130,20 +134,29 @@ sealed trait RelationLike {
 case class Relation(rawRelation: RawRelation) extends RelationLike {
   def startId = rawRelation.startId
   def endId = rawRelation.endId
+
+  @JSExport("startNode") def _startNode: NodeBase = startNode
+  @JSExport("endNode") def _endNode: NodeBase = endNode
+  @JSExport def source = startNode
+  @JSExport def target = endNode
+
+  @JSExport def encode() = js.Dynamic.literal(startId = startId, endId = endId) 
 }
 
-case class GraphChanges[RELATION <: RelationLike](newNodes: Set[Node], newRelations: Set[RELATION])
+case class GraphChanges[RELATION <: RelationLike](newNodes: Set[NodeBase], newRelations: Set[RELATION]) {
+  @JSExport("newNodes") val newNodesJs = newNodes.toJSArray
+  @JSExport("newRelations") val newRelationsJs = newRelations.toJSArray
+}
 
 sealed trait WrappedGraph[RELATION <: RelationLike] {
-  def rawGraph: RawGraph
-  def nodeSet: mutable.Set[Node]
-  def relationSet: mutable.Set[RELATION]
+  private[js] def rawGraph: RawGraph
+  private[js] def nodes: mutable.Set[NodeBase]
+  private[js] def relations: mutable.Set[RELATION]
 
-  @JSExport var nodes: js.Array[Node] = _
-  @JSExport @deprecated var nonHyperRelationNodes: js.Array[Node] = _
-  @JSExport @deprecated var hyperRelationsJs: js.Array[Node] = _
-  @JSExport @deprecated var edges: js.Array[RELATION] = _
-  @JSExport var rootNode: Node = _
+  var nodesJs: js.Array[NodeBase] = _
+  var relationsJs: js.Array[RELATION] = _
+  var nonHyperRelationNodes: js.Array[Node] = _
+  var rootNode: NodeBase = _ // eigentlich soll das auch ne node sein...egal
 
   // propagations upwards, coming from rawGraph
   private[js] def rawAdd(node: RawNode)
@@ -153,73 +166,82 @@ sealed trait WrappedGraph[RELATION <: RelationLike] {
   private[js] def wrapRawChanges(rawChanges: RawGraphChanges): GraphChanges[RELATION]
   private[js] def rawCommit(graphChanges: RawGraphChanges) {
     refreshIndex()
-    println("rawCommit")
-    println(graphChanges.newRelations)
-    println(relationByIds)
     val changes = wrapRawChanges(graphChanges)
-    println("after building changes")
-    onCommitAction(changes)
-    println("after onCommitAction")
+    onCommitActions.foreach(_(changes))
   }
 
   @JSExport
-  def onCommit(f: js.Function1[GraphChanges[RELATION], Any]) { println("onCommit"); onCommitAction = f; }
-  var onCommitAction: Function[GraphChanges[RELATION], Any] = (x) => {}
+  def onCommit(f: js.Function1[GraphChanges[RELATION], Any]) { onCommitActions += f }
+  val onCommitActions: mutable.ArrayBuffer[Function[GraphChanges[RELATION], Any]] = mutable.ArrayBuffer.empty
 
   @JSExport
   def commit() { rawGraph.commit() }
 
-  var nodeById: Map[String, Node] = _
+  var nodeById: Map[String, NodeBase] = _
   var relationByIds: Map[(String, String), RELATION] = _
 
-  @JSExport("nodeById")
-  def jsNodeById(id: String) = nodeById(id)
-  @JSExport("relationByIds")
-  def jsRelationByIds(startId: String, endId: String) = relationByIds((startId, endId))
+  @JSExport("nodeById") def nodeByIdJs(id: String) = nodeById(id)
+  @JSExport("relationByIds") def relationByIdsJs(startId: String, endId: String) = {
+    relationByIds((startId, endId))
+  }
 
-  import js.JSConverters._
 
   private[js] def refreshIndex() {
-    println("refreshIndex")
-    nodes = nodeSet.toJSArray
-    nonHyperRelationNodes = nodeSet.filterNot(_.hyperEdge).toJSArray
-    hyperRelationsJs = nodeSet.filter(_.hyperEdge).toJSArray
-    edges = relationSet.toJSArray
-    nodeById = nodeSet.map(n => n.id -> n).toMap
-    relationByIds = relationSet.map(r => (r.startId, r.endId) -> r).toMap
+    nodeById = nodes.map(n => n.id -> n).toMap
+    relationByIds = relations.map(r => (r.startId, r.endId) -> r).toMap
     rootNode = nodeById(rawGraph.rootNodeId)
-    for(n <- nodeSet) {
+    for(n <- nodes) {
       n.invalidate()
       n.inRelations = Set.empty
       n.outRelations = Set.empty
     }
-    for(r <- relationSet) {
+    for(r <- relations) {
       r.startNode = nodeById(r.startId)
       r.endNode = nodeById(r.endId)
       r.startNode.outRelations += r
       r.endNode.inRelations += r
     }
+    nodesJs = nodes.toJSArray
+    relationsJs = relations.toJSArray
+    nonHyperRelationNodes = nodes.collect{case n:Node => n}.toJSArray
   }
 }
 
 @JSExport
-@JSExportAll
-case class HyperRelation(rawNode: RawNode) extends NodeDelegates with RelationLike {
-  override def startId = rawNode.startId.get
-  override def endId = rawNode.endId.get
+case class HyperRelation(rawNode: RawNode) extends NodeBase with RelationLike {
+  @JSExport override def startId = rawNode.startId.get
+  @JSExport override def endId = rawNode.endId.get
 
-  import js.JSConverters._
+  @JSExport("startNode") def _startNode: NodeBase = startNode
+  @JSExport("endNode") def _endNode: NodeBase = endNode
+  @JSExport def source = startNode
+  @JSExport def target = endNode
 
-  override def encode() = js.Dynamic.literal(id = id, label = label, title = title, description.orUndefined, startId = startId, endId = endId)
+  @JSExport def encode() = js.Dynamic.literal(id = id, label = label, title = title, description.orUndefined, startId = startId, endId = endId)
+}
+
+object Node {
+    def apply(node: RawNode) = {
+        if (node.hyperEdge)
+            new HyperRelation(node)
+        else
+            new Node(node)
+    }
 }
 
 @JSExport
-@JSExportAll
 class HyperGraph(val rawGraph: RawGraph) extends WrappedGraph[HyperRelation] {
-  //TODO: why do we have hyperrelations in nodes?
-  val nodeSet: mutable.Set[Node] = mutable.Set.empty ++ rawGraph.nodes.map(new Node(_))
-  val hyperRelations: mutable.Set[HyperRelation] = mutable.Set.empty ++ rawGraph.nodes.filter(_.hyperEdge).map(new HyperRelation(_))
-  def relationSet = hyperRelations
+  @JSExport def AAA_HyperGraph = "Penos"
+  // hyperrelations are added to the nodeset as well as to the relationset,
+  // because they are used in both ways:
+  //  1) as a relation which connects two nodes (or hyperrelations)
+  //  2) as a node which is the start- or endnode (nodeById has to be mapped) of a relation
+  val nodes: mutable.Set[NodeBase] = mutable.Set.empty ++ rawGraph.nodes.map(Node(_))
+  val hyperRelations: mutable.Set[HyperRelation] = mutable.Set.empty ++ nodes.collect { case n: HyperRelation => n }
+  def relations = hyperRelations
+  @JSExport("relations") def _relationsJs = relationsJs
+  @JSExport("nodes") def _nodesJs = nodesJs
+  @JSExport("rootNode") def _rootNode = rootNode
   refreshIndex()
 
   override def wrapRawChanges(rawChanges: RawGraphChanges): GraphChanges[HyperRelation] = {
@@ -232,9 +254,14 @@ class HyperGraph(val rawGraph: RawGraph) extends WrappedGraph[HyperRelation] {
   }
 
   // propagate downwards
+  @JSExport
   def add(n: RecordNode) {
-    rawGraph.add(new RawNode(n))
-    if(n.hyperEdge.getOrElse(false)) {
+    add(new RawNode(n))
+  }
+
+  def add(n: RawNode) {
+    rawGraph.add(n)
+    if(n.hyperEdge) {
       if(n.startId.isEmpty || n.endId.isEmpty)
         js.Dynamic.global.console.warn(s"Adding HyperRelation ${ n.id } with empty startId or endId.")
       rawGraph.add(new RawRelation(n.startId.get, n.id))
@@ -242,27 +269,41 @@ class HyperGraph(val rawGraph: RawGraph) extends WrappedGraph[HyperRelation] {
     }
   }
 
-  @JSExportNamed
+  @JSExport
   def removeNode(id: String) { rawGraph.remove(nodeById(id).rawNode) }
-  @JSExportNamed
-  def removeRelation(startId: String, endId:String) { rawGraph.remove(relationByIds(startId, endId).rawNode) }
+  @JSExport
+  def removeRelation(startId: String, endId: String) { rawGraph.remove(relationByIds(startId -> endId).rawNode) }
 
   // propagations upwards, coming from rawGraph
-  private[js] def rawAdd(node: RawNode) {
-    nodeSet += new Node(node)
+  private[js] def rawAdd(rawNode: RawNode) {
+    val node = Node(rawNode)
+    nodes += node
     if(node.hyperEdge)
-      hyperRelations += new HyperRelation(node)
+      hyperRelations += node.asInstanceOf[HyperRelation]
   }
   private[js] def rawAdd(relation: RawRelation) {}
-  private[js] def rawRemove(node: RawNode) { nodeSet -= nodeById(node.id) }
+  private[js] def rawRemove(node: RawNode) {
+    nodes -= nodeById(node.id) 
+    if (node.hyperEdge)
+      relations -= relationByIds(node.startId.get, node.endId.get)
+  }
   private[js] def rawRemove(relation: RawRelation) {}
 }
 
-@JSExport
-@JSExportAll
-class Graph(val rawGraph: RawGraph) extends WrappedGraph[Relation] {
-  val nodeSet: mutable.Set[Node] = mutable.Set.empty ++ rawGraph.nodes.map(new Node(_))
-  val relationSet: mutable.Set[Relation] = mutable.Set.empty ++ rawGraph.relations.map(new Relation(_))
+@JSExport // überflüssig, da graph aus der factory kommt
+//nein nich ueberfluessig, der graph muss exposed sein.
+class Graph(private[js] val rawGraph: RawGraph) extends WrappedGraph[Relation] {
+@JSExport def AAA_NormalGraph = "Penos"
+  val nodes: mutable.Set[NodeBase] = mutable.Set.empty ++ rawGraph.nodes.map(new
+      Node(_)) //wrong
+  val relations: mutable.Set[Relation] = mutable.Set.empty ++ rawGraph.relations.map(new Relation(_))
+  var hyperRelations: mutable.Set[HyperRelation] = _
+  @JSExport("hyperRelations") var hyperRelationsJs: js.Array[HyperRelation] = _
+  @JSExport("relations") def _relationsJs = relationsJs
+  @JSExport def edges = relationsJs
+  @JSExport("nodes") def _nodesJs = nodesJs
+  @JSExport("nonHyperRelationNodes") def _nonHyperRelationNodes = nonHyperRelationNodes
+  @JSExport("rootNode") def _rootNode = rootNode
 
   override def wrapRawChanges(rawChanges: RawGraphChanges): GraphChanges[Relation] = {
     GraphChanges(
@@ -270,40 +311,49 @@ class Graph(val rawGraph: RawGraph) extends WrappedGraph[Relation] {
       rawChanges.newRelations.map(r => relationByIds((r.startId, r.endId))).toSet
     )
   }
-
-  @deprecated override def refreshIndex() {
+  override def refreshIndex() {
     super.refreshIndex()
-    for(r <- nodeSet.filter(_.hyperEdge)) {
+    hyperRelations = nodes.collect { case n: HyperRelation => n }
+    for(r <- hyperRelations) {
       r.startNode = nodeById(r.startId)
       r.endNode = nodeById(r.endId)
       r.startNode.outRelations += r
       r.endNode.inRelations += r
     }
+    hyperRelationsJs = hyperRelations.toJSArray
   }
   refreshIndex()
-  println(relationByIds)
 
   // propagate downwards
-  def addNode(n: RecordNode) { rawGraph.add(new RawNode(n)) }
-  def addRelation(r: RecordRelation) { rawGraph.add(new RawRelation(r)) }
+  @JSExport
+  def addNode(n: RecordNode) { addNode(new RawNode(n)) }
+  @JSExport
+  def addNode(n: RawNode) { rawGraph.add(n) }
+  @JSExport
+  def addRelation(r: RecordRelation) { addRelation(new RawRelation(r)) }
+  @JSExport
+  def addRelation(r: RawRelation) { rawGraph.add(r) }
 
-  @JSExportNamed
-  def removeNode(id:String) { rawGraph.remove(nodeById(id).rawNode) }
-  @JSExportNamed
-  def removeRelation(startId:String, endId:String) { rawGraph.remove(relationByIds(startId -> endId).rawRelation) }
+  @JSExport
+  def removeNode(id: String) {
+    rawGraph.remove(nodeById(id).rawNode)
+  }
+  @JSExport
+  def removeRelation(startId: String, endId: String) { rawGraph.remove(relationByIds(startId -> endId).rawRelation) }
 
   // propagations upwards, coming from rawGraph
-  def rawAdd(node: RawNode) { nodeSet += new Node(node); }
-  def rawAdd(relation: RawRelation) { relationSet += new Relation(relation) }
-  def rawRemove(node: RawNode) { nodeSet -= nodeById(node.id) }
-  def rawRemove(relation: RawRelation) { relationSet -= relationByIds((relation.startId, relation.endId)) }
+  def rawAdd(node: RawNode) { nodes += Node(node); }
+  def rawAdd(relation: RawRelation) { relations += new Relation(relation) }
+  def rawRemove(node: RawNode) { nodes -= nodeById(node.id) }
+  def rawRemove(relation: RawRelation) { relations -= relationByIds((relation.startId, relation.endId)) }
 
+  @JSExport
   def hyper() = rawGraph.hyperWrap()
 }
 
 @JSExport
 @JSExportAll
-class RawNode(val id: String, val label: String, var title: String, var description: Option[String], @deprecated val hyperEdge: Boolean, val startId: Option[String], val endId: Option[String]) extends NodeLike {
+class RawNode(val id: String, val label: String, var title: String, var description: Option[String], val hyperEdge: Boolean, val startId: Option[String], val endId: Option[String]) {
   def this(n: RecordNode) = this(n.id, n.label, n.title.getOrElse(n.label), n.description.toOption, n.hyperEdge.getOrElse(false), n.startId.toOption, n.endId.toOption)
   override def toString = s"RawNode($id)"
 
@@ -319,7 +369,7 @@ class RawNode(val id: String, val label: String, var title: String, var descript
 
 @JSExport
 @JSExportAll
-class RawRelation(val startId: String, val endId: String) extends RelationLike {
+class RawRelation(val startId: String, val endId: String) {
   def this(r: RecordRelation) = this(r.startId, r.endId)
   override def toString = s"RawRelation($startId -> $endId)"
 
@@ -337,7 +387,7 @@ case class RawGraphChanges(newNodes: Set[RawNode], newRelations: Set[RawRelation
 
 @JSExport
 @JSExportAll
-class RawGraph(var nodes: Set[RawNode], var relations: Set[RawRelation], var rootNodeId: String) {
+class RawGraph(private[js] var nodes: Set[RawNode], private[js] var relations: Set[RawRelation], var rootNodeId: String) {
   val wrappers = mutable.Set.empty[WrappedGraph[_]]
   def wrap(): Graph = {
     val graph = new Graph(this)

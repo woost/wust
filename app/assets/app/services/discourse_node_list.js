@@ -40,7 +40,17 @@ function DiscourseNodeList() {
                         throw "Invalid connectorType for node list: " + this.connectorType;
                 }
 
-                this.component.onCommit(changes => _.each(changes.newNodes, n => this.applyAllNested(n)));
+                let self = this;
+                this.component.onCommit(changes => {
+                    changes.newNodes.forEach(r => {
+                        if (r.hyperEdge) {
+                            if (self.connectorType === SUCCESSORS && r.startId === self.node.id)
+                                self.applyAllNested(r.endNode, r);
+                            else if (self.connectorType === PREDECESSORS && r.endId === self.node.id)
+                                self.applyAllNested(r.startNode, r);
+                        }
+                    });
+                });
             }
 
             get list() {
@@ -53,25 +63,15 @@ function DiscourseNodeList() {
                 });
             }
 
-            applyAllNested(node) {
-                _.each(this.nestedNodeLists, def => this.applyNested(node, def));
+            applyAllNested(node, hyperNode) {
+                delete node.nestedNodeLists;
+                _.each(this.nestedNodeLists, def => this.applyNested(node, hyperNode, def));
             }
 
-            applyNested(node, def) {
+            applyNested(node, hyperNode, def) {
                 node.nestedNodeLists = node.nestedNodeLists || {};
                 if (node.nestedNodeLists[this.connectorType] === undefined) {
                     node.nestedNodeLists[this.connectorType] = [];
-                }
-
-                //TODO: do not caclulate here, use graph wrapper
-                let hyperNode;
-                switch(this.connectorType) {
-                    case PREDECESSORS:
-                        hyperNode = this.component.relationByIds(node.id, this.node.id);
-                        break;
-                    case SUCCESSORS:
-                        hyperNode = this.component.relationByIds(this.node.id, node.id);
-                        break;
                 }
 
                 let nodeList = def(hyperNode);
@@ -79,11 +79,23 @@ function DiscourseNodeList() {
                 node.nestedNodeLists[this.connectorType].push(nodeList);
             }
 
+            getHyperRelationTo(node) {
+                switch(this.connectorType) {
+                    case PREDECESSORS:
+                        return this.component.relationByIds(node.id, this.node.id);
+                    case SUCCESSORS:
+                        return this.component.relationByIds(this.node.id, node.id);
+                }
+            }
+
             nested(nodeListCreate, title, modelProperty) {
                 this.isNested = true;
                 let nestedNodeListDef = node => nodeListCreate(this.component, node, title, modelProperty);
                 this.nestedNodeLists.push(nestedNodeListDef);
-                _.each(this.list, node => this.applyNested(node, nestedNodeListDef));
+                _.each(this.list, node => {
+                    //TODO: do not caclulate here, use graph wrapper
+                    this.applyNested(node, this.getHyperRelationTo(node), nestedNodeListDef);
+                });
             }
         }
 
@@ -131,16 +143,15 @@ function DiscourseNodeList() {
                 this.apiList.$buildRaw(elem.encode()).$destroy().$then(() => {
                     humane.success("Disconnected node");
                     //TODO: response should include the deleted relation
-                    switch(this.connectorType) {
-                        case PREDECESSORS:
-                            _.each(elem.outRelations, r => self.component.removeRelation(r.startId, r.endId));
-                            break;
-                        case SUCCESSORS:
-                            _.each(elem.inRelations, r => self.component.removeRelation(r.startId, r.endId));
-                            break;
-                    }
-
+                    let hyperNode = this.getHyperRelationTo(elem);
+                    self.component.removeRelation(hyperNode.startId, hyperNode.endId);
+                    console.log("prerel"+ self.component.relations);
+                    console.log("prepre"+ self.node.predecessors);
+                    console.log("presucc"+ self.node.successors);
                     self.component.commit();
+                    console.log("rel"+ self.component.relations);
+                    console.log("pre"+ self.node.predecessors);
+                    console.log("succ"+ self.node.successors);
                 });
             }
 
