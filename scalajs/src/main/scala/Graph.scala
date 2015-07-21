@@ -2,7 +2,7 @@ package renesca.js
 
 import scala.collection.mutable
 import scala.scalajs.js
-import scala.scalajs.js.annotation.{JSExport, JSExportAll}
+import scala.scalajs.js.annotation.{JSExport, JSExportAll, JSExportNamed}
 
 // http://www.scala-js.org/doc/export-to-javascript.html
 object GraphAlgorithms {
@@ -146,13 +146,12 @@ sealed trait WrappedGraph[RELATION <: RelationLike] {
   @JSExport var rootNode: Node = _
 
   // propagations upwards, coming from rawGraph
-  //TODO: private
   private[js] def rawAdd(node: RawNode)
-  def rawAdd(relation: RawRelation)
-  def rawRemove(node: RawNode)
-  def rawRemove(relation: RawRelation)
-  def wrapRawChanges(rawChanges: RawGraphChanges): GraphChanges[RELATION]
-  def rawCommit(graphChanges: RawGraphChanges) {
+  private[js] def rawAdd(relation: RawRelation)
+  private[js] def rawRemove(node: RawNode)
+  private[js] def rawRemove(relation: RawRelation)
+  private[js] def wrapRawChanges(rawChanges: RawGraphChanges): GraphChanges[RELATION]
+  private[js] def rawCommit(graphChanges: RawGraphChanges) {
     refreshIndex()
     println("rawCommit")
     println(graphChanges.newRelations)
@@ -180,7 +179,7 @@ sealed trait WrappedGraph[RELATION <: RelationLike] {
 
   import js.JSConverters._
 
-  def refreshIndex() {
+  private[js] def refreshIndex() {
     println("refreshIndex")
     nodes = nodeSet.toJSArray
     nonHyperRelationNodes = nodeSet.filterNot(_.hyperEdge).toJSArray
@@ -241,18 +240,19 @@ class HyperGraph(val rawGraph: RawGraph) extends WrappedGraph[HyperRelation] {
       rawGraph.add(new RawRelation(n.id, n.endId.get))
     }
   }
-  //TOOD: recursive removal
-  def remove(node: Node) { rawGraph.remove(node.rawNode) }
+
+  @JSExportNamed
+  def removeNode(id: String) { rawGraph.remove(nodeById(id).rawNode) }
 
   // propagations upwards, coming from rawGraph
-  def rawAdd(node: RawNode) {
+  private[js] def rawAdd(node: RawNode) {
     nodeSet += new Node(node)
     if(node.hyperEdge)
       hyperRelations += new HyperRelation(node)
   }
-  def rawAdd(relation: RawRelation) {}
-  def rawRemove(node: RawNode) { nodeSet -= nodeById(node.id) }
-  def rawRemove(relation: RawRelation) {}
+  private[js] def rawAdd(relation: RawRelation) {}
+  private[js] def rawRemove(node: RawNode) { nodeSet -= nodeById(node.id) }
+  private[js] def rawRemove(relation: RawRelation) {}
 }
 
 @JSExport
@@ -283,9 +283,11 @@ class Graph(val rawGraph: RawGraph) extends WrappedGraph[Relation] {
   // propagate downwards
   def addNode(n: RecordNode) { rawGraph.add(new RawNode(n)) }
   def addRelation(r: RecordRelation) { rawGraph.add(new RawRelation(r)) }
-  //TOOD: remove relations
-  def removeNode(node: Node) { rawGraph.remove(node.rawNode) }
-  def removeRelation(relation: Relation) { rawGraph.remove(relation.rawRelation) }
+
+  @JSExportNamed
+  def removeNode(id:String) { rawGraph.remove(nodeById(id).rawNode) }
+  @JSExportNamed
+  def removeRelation(startId:String, endId:String) { rawGraph.remove(relationByIds(startId -> endId).rawRelation) }
 
   // propagations upwards, coming from rawGraph
   def rawAdd(node: RawNode) { nodeSet += new Node(node); }
@@ -306,7 +308,7 @@ class RawNode(val id: String, val label: String, var title: String, var descript
 
   override def equals(other: Any): Boolean = other match {
     case that: RawNode => (that canEqual this) && this.id == that.id
-    case _          => false
+    case _             => false
   }
 
   override def hashCode: Int = id.hashCode
@@ -322,7 +324,7 @@ class RawRelation(val startId: String, val endId: String) extends RelationLike {
 
   override def equals(other: Any): Boolean = other match {
     case that: RawRelation => (that canEqual this) && this.startId == that.startId && this.endId == that.endId
-    case _          => false
+    case _                 => false
   }
 
   override def hashCode: Int = Seq(startId, endId).hashCode
@@ -350,7 +352,7 @@ class RawGraph(var nodes: Set[RawNode], var relations: Set[RawRelation], var roo
   var currentNewRelations = Set.empty[RawRelation]
 
   def add(node: RawNode) {
-    if (nodes.contains(node))
+    if(nodes.contains(node))
       return
 
     nodes += node
@@ -358,7 +360,7 @@ class RawGraph(var nodes: Set[RawNode], var relations: Set[RawRelation], var roo
     currentNewNodes += node
   }
   def add(relation: RawRelation) {
-    if (relations.contains(relation))
+    if(relations.contains(relation))
       return
 
     relations += relation

@@ -158,14 +158,12 @@ function DiscourseNodeList() {
                         //this.component.self.addNode(elem);
                         _.each(data.graph.nodes, n => self.component.add(n));
                         self.component.commit();
-                        let node = self.component.nodes.byId(data.node.id);
                     });
                 } else {
                     self.apiList.$buildRaw(elem).$save({}).$then(data => {
                         humane.success("Connected node");
                         _.each(data.graph.nodes, n => self.component.add(n));
                         self.component.commit();
-                        let node = self.component.nodes.byId(data.node.id);
                     });
                 }
             }
