@@ -133,10 +133,10 @@ function DiscourseNodeList() {
                     //TODO: response should include the deleted relation
                     switch(this.connectorType) {
                         case PREDECESSORS:
-                            _.each(elem.outRelations, r => self.component.remove(r.startId, r.endId));
+                            _.each(elem.outRelations, r => self.component.removeRelation(r.startId, r.endId));
                             break;
                         case SUCCESSORS:
-                            _.each(elem.inRelations, r => self.component.remove(r.startId, r.endId));
+                            _.each(elem.inRelations, r => self.component.removeRelation(r.startId, r.endId));
                             break;
                     }
 

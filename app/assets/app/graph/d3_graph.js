@@ -439,11 +439,10 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
     function disconnectHyperRelation(graph, d) {
         let start = Post.$buildRaw({id: d.startId});
         start.connectsTo.$buildRaw({id: d.endId}).$destroy().$then(response => {
-            graph.remove(d.id);
+            graph.removeNode(d.id);
             graph.commit();
         });
     }
-
 
     // executes specified function only for normal nodes, i.e.,
     // ignores hyperedges
