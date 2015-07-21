@@ -146,19 +146,18 @@ sealed trait WrappedGraph[RELATION <: RelationLike] {
   @JSExport var rootNode: Node = _
 
   // propagations upwards, coming from rawGraph
-  def rawAdd(node: RawNode)
+  //TODO: private
+  private[js] def rawAdd(node: RawNode)
   def rawAdd(relation: RawRelation)
   def rawRemove(node: RawNode)
   def rawRemove(relation: RawRelation)
+  def wrapRawChanges(rawChanges: RawGraphChanges): GraphChanges[RELATION]
   def rawCommit(graphChanges: RawGraphChanges) {
-    refreshIndex()
+    refreshIndex() // hier
     println("rawCommit")
     println(graphChanges.newRelations)
     println(relationByIds)
-    val changes = GraphChanges(
-      graphChanges.newNodes.map(n => nodeById(n.id)).toSet,
-      graphChanges.newRelations.map(r => relationByIds((r.startId, r.endId))).toSet
-    )
+    val changes = wrapRawChanges(graphChanges)
     println("after building changes")
     onCommitAction(changes)
     println("after onCommitAction")
@@ -223,6 +222,14 @@ class HyperGraph(val rawGraph: RawGraph) extends WrappedGraph[HyperRelation] {
   def relationSet = hyperRelations
   refreshIndex()
 
+  override def wrapRawChanges(rawChanges: RawGraphChanges): GraphChanges[HyperRelation] = {
+    GraphChanges(
+      rawChanges.newNodes.map(n => nodeById(n.id)).toSet,
+      //TODO: this should be the general solution and con be implemented in WrappedGraph
+      rawChanges.newRelations.flatMap(r => relationByIds.get((r.startId, r.endId))).toSet
+    )
+  }
+
   // propagate downwards
   def add(n: RecordNode) {
     rawGraph.add(new RawNode(n))
@@ -252,6 +259,13 @@ class HyperGraph(val rawGraph: RawGraph) extends WrappedGraph[HyperRelation] {
 class Graph(val rawGraph: RawGraph) extends WrappedGraph[Relation] {
   val nodeSet: mutable.Set[Node] = mutable.Set.empty ++ rawGraph.nodes.map(new Node(_))
   val relationSet: mutable.Set[Relation] = mutable.Set.empty ++ rawGraph.relations.map(new Relation(_))
+
+  override def wrapRawChanges(rawChanges: RawGraphChanges): GraphChanges[Relation] = {
+    GraphChanges(
+      rawChanges.newNodes.map(n => nodeById(n.id)).toSet,
+      rawChanges.newRelations.map(r => relationByIds((r.startId, r.endId))).toSet
+    )
+  }
 
   @deprecated override def refreshIndex() {
     super.refreshIndex()

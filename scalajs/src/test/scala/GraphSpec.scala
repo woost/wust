@@ -134,6 +134,33 @@ object GraphSpec extends TestSuite {
           assert(RArB.startId == "A", RArB.endId == "B")
         }
       }
+
+      'WrapRawGraphChanges {
+        // the new nodes/relations are already in the graph
+        val g = graph(Set(A, B, C, AXB), Set(ArX, XrB, ArC))
+        val rawChanges = new RawGraphChanges
+        rawChanges.newNodes ++= Seq(C, AXB)
+        rawChanges.newRelations ++= Seq(ArX, XrB, ArC)
+
+        'Graph {
+          val wrapped = g.wrap()
+          import wrapped.{nodeById => nid}
+          import wrapped.{relationByIds => rid}
+          val changes = GraphChanges(
+            Set(nid("C"), nid("X")),
+            Set(rid("A" -> "X"), rid("X" -> "B"), rid("A" -> "C")))
+          assert(wrapped.wrapRawChanges(rawChanges) == changes)
+        }
+        'HyperGraph {
+          val wrapped = g.hyperWrap()
+          import wrapped.{nodeById => nid}
+          import wrapped.{relationByIds => rid}
+          val changes = GraphChanges(
+            Set(nid("C"), nid("X")),
+            Set(rid("A" -> "B")))
+          assert(wrapped.wrapRawChanges(rawChanges) == changes)
+        }
+      }
     }
   }
 }
