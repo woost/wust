@@ -301,6 +301,15 @@ class Graph(val rawGraph: RawGraph) extends WrappedGraph[Relation] {
 class RawNode(val id: String, val label: String, var title: String, var description: Option[String], @deprecated val hyperEdge: Boolean, val startId: Option[String], val endId: Option[String]) extends NodeLike {
   def this(n: RecordNode) = this(n.id, n.label, n.title.getOrElse(n.label), n.description.toOption, n.hyperEdge.getOrElse(false), n.startId.toOption, n.endId.toOption)
   override def toString = s"RawNode($id)"
+
+  def canEqual(other: Any): Boolean = other.isInstanceOf[RawNode]
+
+  override def equals(other: Any): Boolean = other match {
+    case that: RawNode => (that canEqual this) && this.id == that.id
+    case _          => false
+  }
+
+  override def hashCode: Int = id.hashCode
 }
 
 @JSExport
@@ -308,6 +317,15 @@ class RawNode(val id: String, val label: String, var title: String, var descript
 class RawRelation(val startId: String, val endId: String) extends RelationLike {
   def this(r: RecordRelation) = this(r.startId, r.endId)
   override def toString = s"RawRelation($startId -> $endId)"
+
+  def canEqual(other: Any): Boolean = other.isInstanceOf[RawRelation]
+
+  override def equals(other: Any): Boolean = other match {
+    case that: RawRelation => (that canEqual this) && this.startId == that.startId && this.endId == that.endId
+    case _          => false
+  }
+
+  override def hashCode: Int = Seq(startId, endId).hashCode
 }
 
 case class RawGraphChanges(newNodes: Set[RawNode], newRelations: Set[RawRelation])
@@ -332,11 +350,17 @@ class RawGraph(var nodes: Set[RawNode], var relations: Set[RawRelation], var roo
   var currentNewRelations = Set.empty[RawRelation]
 
   def add(node: RawNode) {
+    if (nodes.contains(node))
+      return
+
     nodes += node
     wrappers.foreach(_.rawAdd(node));
     currentNewNodes += node
   }
   def add(relation: RawRelation) {
+    if (relations.contains(relation))
+      return
+
     relations += relation
     wrappers.foreach(_.rawAdd(relation))
     currentNewRelations += relation
