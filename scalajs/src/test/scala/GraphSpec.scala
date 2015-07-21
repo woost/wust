@@ -138,9 +138,7 @@ object GraphSpec extends TestSuite {
       'WrapRawGraphChanges {
         // the new nodes/relations are already in the graph
         val g = graph(Set(A, B, C, AXB), Set(ArX, XrB, ArC))
-        val rawChanges = new RawGraphChanges
-        rawChanges.newNodes ++= Seq(C, AXB)
-        rawChanges.newRelations ++= Seq(ArX, XrB, ArC)
+        val rawChanges = new RawGraphChanges(Set(C, AXB), Set(ArX, XrB, ArC))
 
         'Graph {
           val wrapped = g.wrap()
@@ -149,7 +147,8 @@ object GraphSpec extends TestSuite {
           val changes = GraphChanges(
             Set(nid("C"), nid("X")),
             Set(rid("A" -> "X"), rid("X" -> "B"), rid("A" -> "C")))
-          assert(wrapped.wrapRawChanges(rawChanges) == changes)
+          val wrappedChanges = wrapped.wrapRawChanges(rawChanges)
+          assert(wrappedChanges == changes)
         }
         'HyperGraph {
           val wrapped = g.hyperWrap()
@@ -158,7 +157,8 @@ object GraphSpec extends TestSuite {
           val changes = GraphChanges(
             Set(nid("C"), nid("X")),
             Set(rid("A" -> "B")))
-          assert(wrapped.wrapRawChanges(rawChanges) == changes)
+          val wrappedChanges = wrapped.wrapRawChanges(rawChanges)
+          assert(wrappedChanges == changes)
         }
       }
     }

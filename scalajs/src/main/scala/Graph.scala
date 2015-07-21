@@ -153,7 +153,7 @@ sealed trait WrappedGraph[RELATION <: RelationLike] {
   def rawRemove(relation: RawRelation)
   def wrapRawChanges(rawChanges: RawGraphChanges): GraphChanges[RELATION]
   def rawCommit(graphChanges: RawGraphChanges) {
-    refreshIndex() // hier
+    refreshIndex()
     println("rawCommit")
     println(graphChanges.newRelations)
     println(relationByIds)
@@ -225,8 +225,9 @@ class HyperGraph(val rawGraph: RawGraph) extends WrappedGraph[HyperRelation] {
   override def wrapRawChanges(rawChanges: RawGraphChanges): GraphChanges[HyperRelation] = {
     GraphChanges(
       rawChanges.newNodes.map(n => nodeById(n.id)).toSet,
-      //TODO: this should be the general solution and con be implemented in WrappedGraph
-      rawChanges.newRelations.flatMap(r => relationByIds.get((r.startId, r.endId))).toSet
+      //TODO: this should be the general solution and can be implemented in WrappedGraph
+      rawChanges.newRelations.flatMap(r => relationByIds.get(r.startId -> r.endId)).toSet ++
+        rawChanges.newNodes.filter(_.hyperEdge).map(n => relationByIds(n.startId.get -> n.endId.get))
     )
   }
 
@@ -309,10 +310,7 @@ class RawRelation(val startId: String, val endId: String) extends RelationLike {
   override def toString = s"RawRelation($startId -> $endId)"
 }
 
-class RawGraphChanges {
-  val newNodes = mutable.Set.empty[RawNode]
-  val newRelations = mutable.Set.empty[RawRelation]
-}
+case class RawGraphChanges(newNodes: Set[RawNode], newRelations: Set[RawRelation])
 
 @JSExport
 @JSExportAll
@@ -330,17 +328,18 @@ class RawGraph(var nodes: Set[RawNode], var relations: Set[RawRelation], var roo
     graph
   }
 
-  var currentGraphChanges = new RawGraphChanges
+  var currentNewNodes = Set.empty[RawNode]
+  var currentNewRelations = Set.empty[RawRelation]
 
   def add(node: RawNode) {
     nodes += node
     wrappers.foreach(_.rawAdd(node));
-    currentGraphChanges.newNodes += node
+    currentNewNodes += node
   }
   def add(relation: RawRelation) {
     relations += relation
     wrappers.foreach(_.rawAdd(relation))
-    currentGraphChanges.newRelations += relation
+    currentNewRelations += relation
   }
   //TODO: add to currentGraphChanges.removedNodes/relations
   def remove(node: RawNode) {
@@ -355,7 +354,12 @@ class RawGraph(var nodes: Set[RawNode], var relations: Set[RawRelation], var roo
     wrappers.foreach(_.rawRemove(relation))
   }
 
-  def commit() { wrappers.foreach(_.rawCommit(currentGraphChanges)); currentGraphChanges = new RawGraphChanges }
+  def commit() {
+    val changes = RawGraphChanges(currentNewNodes, currentNewRelations)
+    wrappers.foreach(_.rawCommit(changes))
+    currentNewNodes = Set.empty[RawNode]
+    currentNewRelations = Set.empty[RawRelation]
+  }
 
   //TODO: cache lookup maps/sets
   def hyperRelations = nodes.filter(_.hyperEdge)
