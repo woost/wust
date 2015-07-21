@@ -141,6 +141,7 @@ sealed trait WrappedGraph[RELATION <: RelationLike] {
 
   @JSExport var nodes: js.Array[Node] = _
   @JSExport @deprecated var nonHyperRelationNodes: js.Array[Node] = _
+  @JSExport @deprecated var hyperRelationsJs: js.Array[Node] = _
   @JSExport @deprecated var edges: js.Array[RELATION] = _
   @JSExport var rootNode: Node = _
 
@@ -150,16 +151,21 @@ sealed trait WrappedGraph[RELATION <: RelationLike] {
   def rawRemove(node: RawNode)
   def rawRemove(relation: RawRelation)
   def rawCommit(graphChanges: RawGraphChanges) {
+    refreshIndex()
+    println("rawCommit")
+    println(graphChanges.newRelations)
+    println(relationByIds)
     val changes = GraphChanges(
       graphChanges.newNodes.map(n => nodeById(n.id)).toSet,
       graphChanges.newRelations.map(r => relationByIds((r.startId, r.endId))).toSet
     )
+    println("after building changes")
     onCommitAction(changes)
-    refreshIndex()
+    println("after onCommitAction")
   }
 
   @JSExport
-  def onCommit(f: js.Function1[GraphChanges[RELATION], Any]) { onCommitAction = f }
+  def onCommit(f: js.Function1[GraphChanges[RELATION], Any]) { println("onCommit"); onCommitAction = f; }
   var onCommitAction: Function[GraphChanges[RELATION], Any] = (x) => {}
 
   @JSExport
@@ -176,8 +182,10 @@ sealed trait WrappedGraph[RELATION <: RelationLike] {
   import js.JSConverters._
 
   def refreshIndex() {
+    println("refreshIndex")
     nodes = nodeSet.toJSArray
     nonHyperRelationNodes = nodeSet.filterNot(_.hyperEdge).toJSArray
+    hyperRelationsJs = nodeSet.filter(_.hyperEdge).toJSArray
     edges = relationSet.toJSArray
     nodeById = nodeSet.map(n => n.id -> n).toMap
     relationByIds = relationSet.map(r => (r.startId, r.endId) -> r).toMap
@@ -255,6 +263,7 @@ class Graph(val rawGraph: RawGraph) extends WrappedGraph[Relation] {
     }
   }
   refreshIndex()
+  println(relationByIds)
 
   // propagate downwards
   def addNode(n: RecordNode) { rawGraph.add(new RawNode(n)) }
@@ -276,12 +285,14 @@ class Graph(val rawGraph: RawGraph) extends WrappedGraph[Relation] {
 @JSExportAll
 class RawNode(val id: String, val label: String, var title: String, var description: Option[String], @deprecated val hyperEdge: Boolean, val startId: Option[String], val endId: Option[String]) extends NodeLike {
   def this(n: RecordNode) = this(n.id, n.label, n.title.getOrElse(n.label), n.description.toOption, n.hyperEdge.getOrElse(false), n.startId.toOption, n.endId.toOption)
+  override def toString = s"RawNode($id)"
 }
 
 @JSExport
 @JSExportAll
 class RawRelation(val startId: String, val endId: String) extends RelationLike {
   def this(r: RecordRelation) = this(r.startId, r.endId)
+  override def toString = s"RawRelation($startId -> $endId)"
 }
 
 class RawGraphChanges {
@@ -307,9 +318,17 @@ class RawGraph(var nodes: Set[RawNode], var relations: Set[RawRelation], var roo
 
   var currentGraphChanges = new RawGraphChanges
 
-  def add(node: RawNode) { nodes += node; wrappers.foreach(_.rawAdd(node)); currentGraphChanges.newNodes += node }
-  def add(relation: RawRelation) { relations += relation; wrappers.foreach(_.rawAdd(relation)); currentGraphChanges.newRelations += relation }
-  //TODO: add to currentGraphChanges.removedNodes
+  def add(node: RawNode) {
+    nodes += node
+    wrappers.foreach(_.rawAdd(node));
+    currentGraphChanges.newNodes += node
+  }
+  def add(relation: RawRelation) {
+    relations += relation
+    wrappers.foreach(_.rawAdd(relation))
+    currentGraphChanges.newRelations += relation
+  }
+  //TODO: add to currentGraphChanges.removedNodes/relations
   def remove(node: RawNode) {
     nodes -= node
     wrappers.foreach(_.rawRemove(node))

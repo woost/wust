@@ -150,8 +150,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
         //////////////////////////////////////////////////
 
         function updateGraph(changes) {
-            // console.log("------ update graph");
-            // console.log(graph.nonHyperRelationNodes.map((n) => n.title), graph.hyperRelations.map((r) => r.source.title + " --> " + r.target.title));
+             console.log("------ update graph");
+             console.log(graph.nonHyperRelationNodes.map((n) => n.title), graph.hyperRelationsJs.map((r) => r.source.title + " --> " + r.target.title));
             // create data joins
             // http://bost.ocks.org/mike/join/
             let d3NodeContainerWithData = d3NodeContainer
