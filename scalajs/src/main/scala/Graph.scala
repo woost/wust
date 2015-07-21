@@ -216,6 +216,7 @@ case class HyperRelation(rawNode: RawNode) extends NodeDelegates with RelationLi
 @JSExport
 @JSExportAll
 class HyperGraph(val rawGraph: RawGraph) extends WrappedGraph[HyperRelation] {
+  //TODO: why do we have hyperrelations in nodes?
   val nodeSet: mutable.Set[Node] = mutable.Set.empty ++ rawGraph.nodes.map(new Node(_))
   val hyperRelations: mutable.Set[HyperRelation] = mutable.Set.empty ++ rawGraph.nodes.filter(_.hyperEdge).map(new HyperRelation(_))
   def relationSet = hyperRelations
@@ -243,6 +244,8 @@ class HyperGraph(val rawGraph: RawGraph) extends WrappedGraph[HyperRelation] {
 
   @JSExportNamed
   def removeNode(id: String) { rawGraph.remove(nodeById(id).rawNode) }
+  @JSExportNamed
+  def removeRelation(startId: String, endId:String) { rawGraph.remove(relationByIds(startId, endId).rawNode) }
 
   // propagations upwards, coming from rawGraph
   private[js] def rawAdd(node: RawNode) {
