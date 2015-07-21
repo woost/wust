@@ -208,8 +208,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
             d3NodeContainerWithData.exit().remove();
             d3LinkPathWithData.exit().remove();//
 
-            // console.log(graph.nodes.map(n => n.id.slice(0,3)),d3NodeContainer.node());
-            // console.log(graph.edges,d3LinkPath.node());
+            console.log(graph.nodes.map(n => n.id.slice(0,3)),d3NodeContainer.node());
+            console.log(graph.edges,d3LinkPath.node());
 
             // TODO: non-hyper-relation-links are broken
             // let linkText = svgContainer.append("div").attr("id", "group_link_labels")
@@ -464,7 +464,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
             n.y = squareFactor * n.verticalForce / graph.nonHyperRelationNodes.length + globalState.height / 2 - squareFactor / 2;
         }).value();
 
-        _(graph.hyperRelations).filter(n => isNaN(n.x) || isNaN(n.y)).each(n => {
+        _(graph.hyperRelationsJs).filter(n => isNaN(n.x) || isNaN(n.y)).each(n => {
             n.x = (n.source.x + n.target.x) / 2;
             n.y = (n.source.y + n.target.y) / 2;
         }).value();
