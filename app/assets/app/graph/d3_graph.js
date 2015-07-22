@@ -275,9 +275,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
 
                 // register for resize event
                 angular.element($window).bind("resize", this.resizeGraph.bind(this));
-
-                // filter on event
-                scope.$on("d3graph_filter", this.filter.bind(this));
             }
 
 
@@ -555,11 +552,11 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
 
 
             // filter the graph
-            filter(event, filtered) {
-                let component = _(filtered).map(node => node.component).flatten().uniq().value();
+            filter(matchingNodes) {
+                let component = _(matchingNodes).map(node => node.component).flatten().uniq().value();
 
                 _.each(this.graph.nodes, node => {
-                    node.marked = _(filtered).contains(node);
+                    node.marked = _(matchingNodes).contains(node);
                     node.visible = node.marked || _(component).contains(node);
 
                 });
@@ -800,7 +797,9 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
         }
 
         let d3Graph = new D3Graph(scope.graph, element[0], scope.onClick, scope.onDraw);
+        scope.controlGraph = d3Graph;
         d3Graph.init();
+
     }
 
     return {

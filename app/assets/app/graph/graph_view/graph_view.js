@@ -36,8 +36,8 @@ function graphViewCtrl($scope, DiscourseNode, $filter) {
             return;
         }
 
-        let filtered = $filter("fuzzyFilter")(_.reject(vm.graph.nodes, { hyperEdge: true }), vm.search);
-        $scope.$broadcast("d3graph_filter", filtered);
+        let matchingNodes = $filter("fuzzyFilter")(_.reject(vm.graph.nodes, { hyperEdge: true }), vm.search);
+        vm.controlGraph.filter(matchingNodes);
     }
 
     function addNodeToGraph(node, event) {
@@ -45,7 +45,6 @@ function graphViewCtrl($scope, DiscourseNode, $filter) {
         vm.graph.addNode(node);
         vm.graph.commit();
         let wrappedNode = vm.graph.nodeById(node.id);
-        //TODO: felix kuemmert sich hier drum
         wrappedNode.x = event.offsetX;
         wrappedNode.y = event.offsetY;
         wrappedNode.fixed = true;
