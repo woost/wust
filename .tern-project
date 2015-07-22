@@ -9,8 +9,6 @@
     },
     "loadEagerly": [
         "target/web/public/main/lib/lodash/lodash.js",
-        "target/web/public/main/lib/marked/lib/marked.js",
-        "target/web/public/main/lib/d3/d3.js",
-        "target/web/public/main/scalajs-fastopt.js"
+        "target/web/public/main/lib/d3/d3.js"
     ]
 }
