@@ -8,12 +8,10 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
 
     class Session {
         constructor(other) {
-            this.apply(other);
-            this.tags = angular.copy(other.tags) || [];
-
             // local id to identify nodes without an id
             this.localId = _.uniqueId();
-
+            this.apply(other);
+            this.tags = angular.copy(other.tags) || [];
         }
 
         apply({
@@ -25,6 +23,7 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
             this.label = label;
             this.original = original || {
                 id: this.id,
+                localId: this.localId,
                 title: this.title,
                 description: this.description,
                 label: this.label
@@ -153,15 +152,19 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
 
     function assureSessionExists(node, index) {
         let existing;
+        console.log("assure edit", node, index);
         if (node === undefined) {
             // fresh session
             existing = new Session({});
         } else {
             let searchFor = node.id === undefined ? "localId" : "id";
+            console.log("searchFor", searchFor);
             // add existing node for editing
             let existingIdx = _.findIndex(self.list, _.pick(node, searchFor));
+            console.log("existingidx", existingIdx);
             if (existingIdx >= 0) {
                 existing = self.list[existingIdx];
+                console.log("existing", existingIdx);
                 self.list.splice(existingIdx, 1);
                 if (existingIdx < index)
                     index -= 1;
@@ -170,6 +173,7 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
             }
         }
 
+        console.log("at index", index, existing, self.list);
         self.list.splice(index, 0, existing);
         storeEditList();
         return existing;
