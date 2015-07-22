@@ -11,22 +11,23 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
             // local id to identify nodes without an id
             this.localId = _.uniqueId();
             this.apply(other);
-            this.tags = angular.copy(other.tags) || [];
         }
 
         apply({
-            id, title, description, label, addedTags, original
+            id, title, description, label, addedTags, original, tags
         }) {
             this.id = id;
             this.title = title || "";
             this.description = description || "";
             this.label = label;
+            this.tags = angular.copy(tags) || [];
             this.original = original || {
                 id: this.id,
                 localId: this.localId,
                 title: this.title,
                 description: this.description,
-                label: this.label
+                label: this.label,
+                tags: tags
             };
 
             // initally only show editor if node has description
@@ -84,8 +85,13 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
             });
         }
 
+        discard() {
+            this.apply(this.original);
+            this.addedTags = [];
+        }
+
         encode() {
-            return this.original;
+            return this.id === undefined ? _.pick(this, _.keys(this.original)) : this.original;
         }
 
         addTag(maybeTags) {
