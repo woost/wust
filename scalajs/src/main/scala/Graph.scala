@@ -140,7 +140,7 @@ case class Relation(rawRelation: RawRelation) extends RelationLike {
   @JSExport def source = startNode
   @JSExport def target = endNode
 
-  @JSExport def encode() = js.Dynamic.literal(startId = startId, endId = endId) 
+  @JSExport def encode() = js.Dynamic.literal(startId = startId, endId = endId)
 }
 
 case class GraphChanges[RELATION <: RelationLike](newNodes: Set[NodeBase], newRelations: Set[RELATION]) {
@@ -283,9 +283,9 @@ class HyperGraph(val rawGraph: RawGraph) extends WrappedGraph[HyperRelation] {
   }
   private[js] def rawAdd(relation: RawRelation) {}
   private[js] def rawRemove(node: RawNode) {
-    nodes -= nodeById(node.id) 
+    nodes -= nodeById(node.id)
     if (node.hyperEdge)
-      relations -= relationByIds(node.startId.get, node.endId.get)
+      relations -= relationByIds(node.startId.get -> node.endId.get)
   }
   private[js] def rawRemove(relation: RawRelation) {}
 }
@@ -294,8 +294,7 @@ class HyperGraph(val rawGraph: RawGraph) extends WrappedGraph[HyperRelation] {
 //nein nich ueberfluessig, der graph muss exposed sein.
 class Graph(private[js] val rawGraph: RawGraph) extends WrappedGraph[Relation] {
 @JSExport def AAA_NormalGraph = "Penos"
-  val nodes: mutable.Set[NodeBase] = mutable.Set.empty ++ rawGraph.nodes.map(new
-      Node(_)) //wrong
+  val nodes: mutable.Set[NodeBase] = mutable.Set.empty ++ rawGraph.nodes.map(Node(_))
   val relations: mutable.Set[Relation] = mutable.Set.empty ++ rawGraph.relations.map(new Relation(_))
   var hyperRelations: mutable.Set[HyperRelation] = _
   @JSExport("hyperRelations") var hyperRelationsJs: js.Array[HyperRelation] = _

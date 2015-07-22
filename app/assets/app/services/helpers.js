@@ -1,6 +1,7 @@
 angular.module("wust.services").value("Helpers", {
     mapFind,
     hashCode,
+    cssCompat,
     lineIntersection,
     lineRectIntersection,
     clampLineByRects
@@ -25,6 +26,23 @@ function hashCode(string) {
         hash = hash & hash; // Convert to 32bit integer
     }
     return hash;
+}
+
+function cssCompat(original, jsSuffix, cssSuffix) {
+    if (!(original in document.body.style)) {
+        if (("Webkit" + jsSuffix) in document.body.style) {
+            return "-webkit-" + cssSuffix;
+        }
+        if (("Moz" + jsSuffix) in document.body.style) {
+            return "-moz-" + cssSuffix;
+        }
+        if (("ms" + jsSuffix) in document.body.style) {
+            return "-ms-" + cssSuffix;
+        }
+        if (("O" + jsSuffix) in document.body.style) {
+            return "-o-" + cssSuffix;
+        }
+    } else return cssSuffix;
 }
 
 function lineIntersection(line1, line2) {
