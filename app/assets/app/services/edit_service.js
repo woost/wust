@@ -57,7 +57,6 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
         }
 
         isPristine(dirtyModel = this.dirtyModel()) {
-            console.log("dirye", dirtyModel);
             return _.isEmpty(dirtyModel);
         }
 
@@ -164,19 +163,15 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
 
     function assureSessionExists(node, index) {
         let existing;
-        console.log("assure edit", node, index);
         if (node === undefined) {
             // fresh session
             existing = new Session({});
         } else {
             let searchFor = node.id === undefined ? "localId" : "id";
-            console.log("searchFor", searchFor);
             // add existing node for editing
             let existingIdx = _.findIndex(self.list, _.pick(node, searchFor));
-            console.log("existingidx", existingIdx);
             if (existingIdx >= 0) {
                 existing = self.list[existingIdx];
-                console.log("existing", existingIdx);
                 self.list.splice(existingIdx, 1);
                 if (existingIdx < index)
                     index -= 1;
@@ -185,7 +180,6 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
             }
         }
 
-        console.log("at index", index, existing, self.list);
         self.list.splice(index, 0, existing);
         storeEditList();
         return existing;

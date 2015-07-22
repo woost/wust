@@ -147,13 +147,7 @@ function DiscourseNodeList() {
                     //TODO: response should include the deleted relation
                     let hyperNode = this.getHyperRelationTo(elem);
                     self.component.removeRelation(hyperNode.startId, hyperNode.endId);
-                    console.log("prerel"+ self.component.relations);
-                    console.log("prepre"+ self.node.predecessors);
-                    console.log("presucc"+ self.node.successors);
                     self.component.commit();
-                    console.log("rel"+ self.component.relations);
-                    console.log("pre"+ self.node.predecessors);
-                    console.log("succ"+ self.node.successors);
                 });
             }
 
