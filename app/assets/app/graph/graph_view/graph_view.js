@@ -40,9 +40,14 @@ function graphViewCtrl($scope, DiscourseNode, $filter) {
         $scope.$broadcast("d3graph_filter", filtered);
     }
 
-    function addNodeToGraph(node) {
+    function addNodeToGraph(node, event) {
         vm.graph.addNode(node);
         vm.graph.commit();
+        let wrappedNode = vm.graph.nodeById(node.id);
+        //TODO: felix kuemmert sich hier drum
+        wrappedNode.x = event.offsetX;
+        wrappedNode.y = event.offsetY;
+        wrappedNode.fixed = true;
     }
 
     function onClick(node) {
