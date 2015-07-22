@@ -1,27 +1,26 @@
 <div class="edit_post_directive">
     <div class="panel panel-default">
         <div class="panel-heading">
-            <button class="btn btn-xs btn-default" ng-click="vm.node.remove()"><i class="fa fa-minus"></i></button>
-            <i ng-if="vm.node.isLocal()" class="fa fa-asterisk"></i>
-            <span small-post node="vm.node" valid="!vm.node.isLocal() || vm.node.canSave()"></span>
+            <span class="pull-left">
+                <i ng-click="vm.node.expandedEditor = !vm.node.expandedEditor" class="accordion_toggle glyphicon" ng-class="{'glyphicon-chevron-down': vm.node.expandedEditor, 'glyphicon-chevron-right': !vm.node.expandedEditor}"></i>
+                <button class="btn btn-xs btn-default" ng-click="vm.node.remove()"><i class="fa fa-minus"></i></button>
+                <i ng-if="vm.node.isLocal()" class="fa fa-asterisk"></i>
+            </span>
+            <span editable-text="vm.node.title" onaftersave="vm.node.onChange()" buttons="no">
+                <span small-post node="vm.node" valid="!vm.node.isLocal() || vm.node.canSave()"></span>
+            </span>
             <span class="pull-right">
                 <button class="btn btn-xs btn-success" ng-click="vm.node.save()" ng-disabled="!vm.node.canSave()"><i class="fa fa-paper-plane-o"></i></button>
                 <span toggle-zen node="vm.node"></span>
             </span>
         </div>
-        <div>
-            <input type="text" class="form-control" ng-model="vm.node.title" ng-blur="vm.node.onChange()" placeholder="TL,DR">
+        <div collapse="!vm.node.expandedEditor">
             <button class="pull-right btn btn-xs btn-danger" ng-click="vm.node.deleteNode()" ng-disabled="vm.node.isLocal()"><i class="fa fa-trash-o"></i></button>
             <button class="pull-right btn btn-xs btn-primary" ng-click="vm.node.discard()" ng-disabled="vm.node.isPristine()"><i class="fa fa-undo"></i></button>
-        </div>
-        <div>
-            <button type="button" class="btn btn-xs btn-default" onclick="this.blur()" ng-model="vm.node.expandedEditor" btn-checkbox>Description</button>
-        </div>
-        <div collapse="!vm.node.expandedEditor">
             <div ui-ace="vm.ace.options" ng-model="vm.node.description"></div>
-        </div>
-        <div class="edit_tags">
-            <div edit-taglist node="vm.node" class="taglist"></div>
+            <div class="edit_tags">
+                <div edit-taglist node="vm.node" class="taglist"></div>
+            </div>
         </div>
     </div>
 </div>
