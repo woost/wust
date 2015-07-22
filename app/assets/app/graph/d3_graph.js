@@ -683,6 +683,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
                     .classed({
                         "moving": true
                     });
+
+                this.force.alpha(0);
             }
 
             onDragMoveInit(d, onStartDragging = () => {}) {
