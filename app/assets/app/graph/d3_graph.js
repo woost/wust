@@ -518,7 +518,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
             resizeGraph() {
                 this.width = this.rootDomElement.offsetWidth;
                 this.height = this.rootDomElement.offsetHeight;
-                let [width, height] = [width, height];
+                let [width, height] = [this.width, this.height];
                 this.d3Svg.style("width", width).style("height", height);
                 this.d3Html.style("width", width + "px").style("height", height + "px");
                 // if graph was hidden when initialized,
