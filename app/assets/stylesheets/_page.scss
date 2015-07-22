@@ -48,11 +48,11 @@ html, body {
                     width: 400px;
                     min-width: 400px;
                 }
-                resize: horizontal;
-                // fixes inherited resize property in webkit
-                * {
-                    resize: none;
-                }
+                // resize: horizontal;
+                // // fixes inherited resize property in webkit
+                // * {
+                //     resize: none;
+                // }
             }
             #right_hand_side {
                 @include flex-grow(1);
