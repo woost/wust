@@ -50,6 +50,7 @@
         fill: $bgcolor;
     }
 }
+
 .connectorline {
     fill: none;
     stroke: #3B85FF;
@@ -60,6 +61,9 @@
     &.moving {
         visibility: visible;
     }
+}
+marker path.connectorlinearrow {
+    fill: #3B85FF !important;
 }
 
 .nodecontainer {

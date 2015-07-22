@@ -84,8 +84,10 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
                 // .style("background", "rgba(220, 240, 255, 0.5)");
                 // .style("border", "1px solid #333")
 
+                // contains markers for arrows
+                this.d3SvgDefs = this.d3Svg.append("svg:defs");
                 // svg-marker for relation arrows
-                this.d3Svg.append("svg:defs").append("svg:marker")
+                this.d3SvgDefs.append("svg:marker")
                     .attr("id", "graph_arrow")
                     .attr("viewBox", "0 -3 10 6")
                     .attr("refX", 10)
@@ -95,6 +97,18 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
                     .append("svg:path")
                     .attr("d", "M 0,-3 L 10,-0.5 L 10,0.5 L0,3")
                     .attr("class", "svglink"); // for the stroke color
+
+                // svg-marker for connector line arrow
+                this.d3SvgDefs.append("svg:marker")
+                    .attr("id", "graph_connector_arrow")
+                    .attr("viewBox", "-5 -1.5 5 3")
+                    .attr("refX", -5)
+                    .attr("markerWidth", 5)
+                    .attr("markerHeight", 3)
+                    .attr("orient", "auto")
+                    .append("svg:path")
+                    .attr("d", "M 0,-1.5 L -5,-0.5 L -5,0.5 L0,1.5")
+                    .attr("class", "connectorlinearrow"); // for the stroke color
 
                 // choose the correct transform style for many browsers
                 this.transformCompat = Helpers.cssCompat("transform", "Transform", "transform");
@@ -136,7 +150,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
 
                 this.d3ConnectorLine = this.d3SvgContainer.append("line").classed({
                     "connectorline": true
-                });
+                }).style("marker-start", "url(" + $location.absUrl() + "#graph_connector_arrow)");
             }
 
 
