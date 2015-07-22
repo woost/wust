@@ -3,6 +3,7 @@ angular.module("wust", [
     "ngAnimate",
     "ngSanitize",
     "uiSwitch",
+    "xeditable",
     "wust.config",
     "wust.filters",
     "wust.elements",
