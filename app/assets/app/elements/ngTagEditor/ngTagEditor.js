@@ -44,9 +44,9 @@ angular.module("wust.elements")
                         $scope.suggestions = $scope.getSuggestions({search: value});
                     });
                     $scope.add = function(tag) {
+                        tag = tag.encode ? tag.encode() : tag;
                         $scope.tags.push(tag);
                         $scope.search = "";
-                        $scope.$apply();
                     };
                     $scope.remove = function(index) {
                         $scope.tags.splice(index, 1);
@@ -70,7 +70,6 @@ angular.module("wust.elements")
                             }
                             e.preventDefault();
                         }
-                        $scope.$apply();
                     });
                 }
             ]

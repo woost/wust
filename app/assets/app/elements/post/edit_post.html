@@ -12,6 +12,7 @@
         <div>
             <input type="text" class="form-control" ng-model="vm.node.title" ng-blur="vm.node.onChange()" placeholder="TL,DR">
             <button class="pull-right btn btn-xs btn-danger" ng-click="vm.node.deleteNode()" ng-disabled="vm.node.isLocal()"><i class="fa fa-trash-o"></i></button>
+            <button class="pull-right btn btn-xs btn-primary" ng-click="vm.node.discard()" ng-disabled="vm.node.isPristine()"><i class="fa fa-undo"></i></button>
         </div>
         <div>
             <button type="button" class="btn btn-xs btn-default" onclick="this.blur()" ng-model="vm.node.expandedEditor" btn-checkbox>Description</button>

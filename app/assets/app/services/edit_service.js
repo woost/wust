@@ -16,11 +16,12 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
         apply({
             id, title, description, label, addedTags, original, tags
         }) {
+            tags = tags || [];
             this.id = id;
             this.title = title || "";
             this.description = description || "";
             this.label = label;
-            this.tags = angular.copy(tags) || [];
+            this.tags = angular.copy(tags);
             this.original = original || {
                 id: this.id,
                 localId: this.localId,
@@ -48,10 +49,15 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
             //TODO: why do we have nulls here?
                 dirtyModel.addedTags = _.compact(this.addedTags);
 
+            // no empty tags array:
+            if (_.isEmpty(dirtyModel.tags))
+                delete dirtyModel.tags;
+
             return dirtyModel;
         }
 
         isPristine(dirtyModel = this.dirtyModel()) {
+            console.log("dirye", dirtyModel);
             return _.isEmpty(dirtyModel);
         }
 
