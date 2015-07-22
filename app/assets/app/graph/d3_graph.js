@@ -7,6 +7,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
         restrict: "A",
         scope: {
             graph: "=",
+            controlGraph: "=",
             onClick: "&",
             onDraw: "&"
         },
@@ -14,6 +15,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
     };
 
     function link(scope, element) {
+        scope.controlGraph = {penos: 1};
         let onClick = scope.onClick || _.noop;
         let onDraw = scope.onDraw || _.noop;
 

@@ -41,6 +41,7 @@ function graphViewCtrl($scope, DiscourseNode, $filter) {
     }
 
     function addNodeToGraph(node, event) {
+        console.log(vm.controlGraph);
         vm.graph.addNode(node);
         vm.graph.commit();
         let wrappedNode = vm.graph.nodeById(node.id);
