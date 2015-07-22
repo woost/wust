@@ -65,4 +65,8 @@ function RoutesConfig($stateProvider, $urlRouterProvider, $locationProvider, Dis
     $urlRouterProvider.otherwise("/dashboard");
 
     $locationProvider.html5Mode(true);
+
+    //TODO: https://github.com/angular/angular.js/issues/8934https://github.com/angular/angular.js/issues/8934
+    // should fix our problem with paths to marker defs
+    // $locationProvider.html5Mode({enabled: true, requireBase: false});
 }
