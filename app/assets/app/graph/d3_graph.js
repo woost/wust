@@ -637,6 +637,14 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
                 });
             }
 
+            setNodePositionFromOffset(node, x, y) {
+                let scale = this.zoom.scale();
+                let translate = this.zoom.translate();
+                node.x = (x - translate[0]) / scale;
+                node.y = (y - translate[1]) / scale;
+                node.px = node.x;
+                node.py = node.y;
+            }
 
             onDragStartInit(d) {
                 // prevent d3 from interpreting this as panning

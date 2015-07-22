@@ -41,13 +41,13 @@ function graphViewCtrl($scope, DiscourseNode, $filter) {
     }
 
     function addNodeToGraph(node, event) {
-        console.log(vm.controlGraph);
         vm.graph.addNode(node);
         vm.graph.commit();
         let wrappedNode = vm.graph.nodeById(node.id);
-        wrappedNode.x = event.offsetX;
-        wrappedNode.y = event.offsetY;
-        wrappedNode.fixed = true;
+
+        vm.controlGraph.setNodePositionFromOffset(wrappedNode, event.offsetX, event.offsetY);
+        vm.controlGraph.setFixed(wrappedNode);
+        vm.controlGraph.drawGraph();
     }
 
     function onClick(node) {
