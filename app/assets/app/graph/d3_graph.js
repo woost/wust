@@ -194,6 +194,10 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
                 .attr("class", "nodetool dragtool fa fa-arrows")
                 .style("cursor", "move"); //TODO: browser-compatibility for grab and grabbed cursor
 
+            let d3NodePinTool = d3NodeTools.append("div")
+                .attr("class", "nodetool pintool fa fa-thumb-tack")
+                .style("cursor", "pointer");
+
             let d3NodeConnectTool = d3NodeTools.append("div")
                 .style("display", d => d.hyperEdge ? "none" : "inline-block")
                 .attr("class", "nodetool connecttool fa fa-compress")
@@ -201,7 +205,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
 
             let d3NodeDisconnectTool = d3NodeTools.append("div")
                 .style("display", d => d.hyperEdge ? "inline-block" : "none")
-                .attr("class", "nodetool connecttool fa fa-expand")
+                .attr("class", "nodetool disconnecttool fa fa-scissors")
                 .style("cursor", "pointer");
 
             /// remove nodes and relations
@@ -271,6 +275,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
                     });
 
                 d3NodeDragTool.call(dragMove);
+                d3NodePinTool.on("click", _.partial(toggleFixed, graph, force));
                 d3NodeConnectTool.call(dragConnect);
                 d3NodeDisconnectTool.on("click", _.partial(disconnectHyperRelation, graph));
 
@@ -423,12 +428,11 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
         d.fixed &= ~6; // copied from force.drag
         if (dragState.isDragging) {
             // if we were dragging before, the node should be fixed
-            setFixed(graph, d);
-            force.alpha(0);
+            setFixed(graph, force, d);
         } else {
             // if the user just clicked, the position should be reset.
-            unsetFixed(graph, d);
-            force.resume();
+            // unsetFixed(graph, force, d);
+            // this is disabled, because we have the pin to unfix
         }
 
         dragState.isDragging = false;
@@ -488,7 +492,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
 
         if (globalState.visibleConvergence) {
             //TODO: why two times afterConverge? also in nonBlockingConverge
-            force.on("end", _.once(_.partial(afterConverge, globalState, graph, d3Svg, d3Html, d3SvgContainer, d3HtmlContainer, zoom, onDraw, convergeIterations, transformCompat))); // we don't know how to unsubscribe
+            force.on("end", _.once(_.partial(afterConverge, globalState, graph, force, d3Svg, d3Html, d3SvgContainer, d3HtmlContainer, zoom, onDraw, convergeIterations, transformCompat))); // we don't know how to unsubscribe
         } else {
             requestAnimationFrame(nonBlockingConverge);
         }
@@ -505,7 +509,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
             if (force.alpha() > 0) {
                 requestAnimationFrame(nonBlockingConverge);
             } else {
-                afterConverge(globalState, graph, d3Svg, d3Html, d3SvgContainer, d3HtmlContainer, rootDomElement, d3NodeContainer, zoom, onDraw, convergeIterations, transformCompat);
+                afterConverge(globalState, graph, force, d3Svg, d3Html, d3SvgContainer, d3HtmlContainer, rootDomElement, d3NodeContainer, zoom, onDraw, convergeIterations, transformCompat);
             }
         }
     }
@@ -528,10 +532,10 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
         }
     }
 
-    function afterConverge(globalState, graph, d3Svg, d3Html, d3SvgContainer, d3HtmlContainer, rootDomElement, d3NodeContainer, zoom, onDraw, convergeIterations, transformCompat) {
+    function afterConverge(globalState, graph, force, d3Svg, d3Html, d3SvgContainer, d3HtmlContainer, rootDomElement, d3NodeContainer, zoom, onDraw, convergeIterations, transformCompat) {
         resizeGraph(graph, globalState, zoom, rootDomElement, d3Svg, d3Html, d3SvgContainer, d3HtmlContainer, d3NodeContainer, transformCompat);
 
-        setFixed(graph, graph.rootNode);
+        setFixed(graph, force, graph.rootNode);
 
         globalState.drawOnTick = true;
         onDraw();
@@ -584,8 +588,13 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
         d3HtmlContainer.style(transformCompat, "translate(" + translate[0] + "px, " + translate[1] + "px) scale(" + scale + ")");
     }
 
+    function toggleFixed(graph, force, d) {
+        if( d.fixed ) unsetFixed(graph, force, d);
+        else setFixed(graph, force, d);
+    }
+
     // unfix the position of a given node
-    function unsetFixed(graph, d) {
+    function unsetFixed(graph, force, d) {
         d.fixed = false;
         d.d3NodeContainer.classed({
             "fixed": false
@@ -593,10 +602,11 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
 
         // the fixed class could change the elements dimensions
         recalculateNodeDimensions(graph);
+        force.resume();
     }
 
     // fix the position of a given node
-    function setFixed(graph, d) {
+    function setFixed(graph, force, d) {
         d.fixed = true;
         d.d3NodeContainer.classed({
             "fixed": true
@@ -604,6 +614,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
 
         // the fixed class could change the elements dimensions
         recalculateNodeDimensions(graph);
+        force.alpha(0);
     }
 
     function cssCompat(original, jsSuffix, cssSuffix) {

@@ -1,4 +1,5 @@
 @import "compass/css3/flexbox";
+@import "compass/css3/box-shadow";
 
 @mixin discourse_node($color, $icon: "") {
     $bgcolor: lighten(desaturate($color, 0), 10);
@@ -65,15 +66,11 @@
     .fixed .node, .fixed .relation_label {
         z-index: 100;
         // blue glow
-        -moz-box-shadow: 0 0 40px 5px #7dbaff;
-        -webkit-box-shadow: 0 0 40px 5px #7dbaff;
-        box-shadow: 0 0 40px 5px #7dbaff;
+        @include box-shadow(0 0 40px 5px #7dbaff);
     }
     .moving .node {
         // dark shadow
-        -moz-box-shadow: 0 0 20px #333;
-        -webkit-box-shadow: 0 0 20px #333;
-        box-shadow: 0 0 20px #333;
+        @include box-shadow(0 0 20px #333);
         border: 1px solid black;
         // z-index: 2000; //TODO: doesn't work
     }
@@ -84,24 +81,43 @@
         background-color: #BCEFFF;
     }
     .nodetools {
-        $bgcolor: #C3E8FF;
+        $tool_color: #111;
+        $inactive_tool_color: #AAA;
         position: absolute;
         top: -28px;
         left: -6px;
         // z-index: -1;
 
+        // $bgcolor: #C3E8FF;
         // background: rgba($bgcolor, 0.2);
         // border: 1px solid bordercolor($bgcolor);
         // border-radius: $border_radius;
-
-        .nodetool {
-            padding: 10px;
-            // border: 1px solid #EEE;
-        }
         // .nodetool:hover {
         //     background-color: highlightbgcolor($bgcolor)
         // }
+
+        .nodetool {
+            padding: 10px;
+            // color: $tool_color !important;
+            // border: 1px solid #EEE;
+            &+.pintool {
+                @include transform(rotate(45deg));
+                color: $inactive_tool_color;
+            }
+        }
+
     }
+    .fixed {
+        .pintool {
+            @include transform(rotate(0deg) !important);
+            // $tool_color !important;
+            color: #111 !important;
+        }
+    }
+}
+
+.fa-rotate-45 {
+    @include transform(rotate(45deg));
 }
 
 .relation_label {
