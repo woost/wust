@@ -28,6 +28,7 @@ function DiscourseNodeList() {
                 this.listCss = listCss;
                 this.isNested = false;
                 this.nestedNodeLists = [];
+                this.listId = _.uniqueId();
 
                 switch(this.connectorType) {
                     case PREDECESSORS:
@@ -64,19 +65,20 @@ function DiscourseNodeList() {
             }
 
             applyAllNested(node, hyperNode) {
-                delete node.nestedNodeLists;
+                if (node.nestedNodeLists !== undefined && node.nestedNodeLists[this.listId] !== undefined)
+                    delete node.nestedNodeLists[this.listId];
                 _.each(this.nestedNodeLists, def => this.applyNested(node, hyperNode, def));
             }
 
             applyNested(node, hyperNode, def) {
                 node.nestedNodeLists = node.nestedNodeLists || {};
-                if (node.nestedNodeLists[this.connectorType] === undefined) {
-                    node.nestedNodeLists[this.connectorType] = [];
+                if (node.nestedNodeLists[this.listId] === undefined) {
+                    node.nestedNodeLists[this.listId] = [];
                 }
 
                 let nodeList = def(hyperNode);
                 nodeList.model.setParent(this, node);
-                node.nestedNodeLists[this.connectorType].push(nodeList);
+                node.nestedNodeLists[this.listId].push(nodeList);
             }
 
             getHyperRelationTo(node) {
