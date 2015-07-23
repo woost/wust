@@ -1,0 +1,89 @@
+node {
+  diameter: 50px;
+  color: #A5ABB6;
+  border-color: #9AA1AC;
+  border-width: 2px;
+  text-color-internal: #FFFFFF;
+  font-size: 10px;
+}
+
+relationship {
+  color: #A5ABB6;
+  shaft-width: 1px;
+  font-size: 8px;
+  padding: 3px;
+  text-color-external: #000000;
+  text-color-internal: #FFFFFF;
+  caption: '<type>';
+}
+
+node.INHERITS {
+  color: #DE9BF9;
+  border-color: #BF85D6;
+  text-color-internal: #FFFFFF;
+  caption: '{uuid}';
+  diameter: 20px;
+}
+
+node.POST {
+  diameter: 80px;
+  caption: '{title}';
+  color: #A5ABB6;
+  border-color: #9AA1AC;
+  text-color-internal: #FFFFFF;
+}
+
+node.TAG {
+  color: #6DCE9E;
+  border-color: #60B58B;
+  text-color-internal: #FFFFFF;
+  caption: '{title}';
+  diameter: 80px;
+}
+
+node.SCOPE {
+  color: #FFD86E;
+  border-color: #EDBA39;
+  text-color-internal: #604A0E;
+  diameter: 80px;
+  caption: '{title}';
+}
+
+relationship.BELONGSTO {
+  color: #FFD86E;
+  border-color: #EDBA39;
+  text-color-internal: #604A0E;
+  shaft-width: 3px;
+}
+
+node.CONNECTS {
+  diameter: 10px;
+  color: #A5ABB6;
+  border-color: #9AA1AC;
+  text-color-internal: #FFFFFF;
+}
+
+node.CONNECTABLE {
+  caption: '{title}';
+}
+
+node.CATEGORIZES {
+  color: #6DCE9E;
+  border-color: #60B58B;
+  text-color-internal: #FFFFFF;
+  caption: '{uuid}';
+  diameter: 10px;
+}
+
+relationship.TAGTOCATEGORIZES {
+  color: #6DCE9E;
+  border-color: #60B58B;
+  text-color-internal: #FFFFFF;
+}
+
+relationship.CATEGORIZESTOTAGGABLE {
+  color: #6DCE9E;
+  border-color: #60B58B;
+  text-color-internal: #FFFFFF;
+}
+
