@@ -207,12 +207,13 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                     .attr("ng-click", "setPopoverPosition($event)");
 
                 this.d3Node
-                    .append("span")
+                    .append("div")
                     .attr("edit-popover", "")
-                    .text(d => d.title)
+                    .style("cursor", "pointer")
+                    .append("span")
+                    .text(d => d.title);
                     // .style("border-width", n => Math.abs(n.verticalForce) + "px")
                     // .style("border-color", n => n.verticalForce < 0 ? "#3CBAFF" : "#FFA73C")
-                    .style("cursor", d => d.hyperEdge ? "inherit" : "pointer");
 
                 // add relations
                 this.d3LinkPathWithData.enter()
