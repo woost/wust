@@ -213,6 +213,11 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
                     .attr("class", "nodetool disconnecttool fa fa-scissors")
                     .style("cursor", "pointer");
 
+                this.d3NodeDeleteTool = this.d3NodeTools.append("div")
+                    .style("display", d => d.hyperEdge ? "none" : "inline-block")
+                    .attr("class", "nodetool deletetool fa fa-trash")
+                    .style("cursor", "pointer");
+
                 /// remove nodes and relations
                 this.d3NodeContainerWithData.exit().remove();
                 this.d3LinkPathWithData.exit().remove(); //
@@ -286,6 +291,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
                 this.d3NodePinTool.on("click", this.toggleFixed.bind(this));
                 this.d3NodeConnectTool.call(dragConnect);
                 this.d3NodeDisconnectTool.on("click", this.disconnectHyperRelation.bind(this));
+                this.d3NodeDeleteTool.on("click", this.removeNode.bind(this));
 
                 // register for resize event
                 angular.element($window).bind("resize", this.resizeGraph.bind(this));
@@ -650,6 +656,16 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
                     this.graph.commit();
                 });
             }
+
+            removeNode(d) {
+                Post.$buildRaw({
+                    id: d.id
+                }).$destroy().$then(response => {
+                    this.graph.removeNode(d.id);
+                    this.graph.commit();
+                });
+            }
+
 
             setNodePositionFromOffset(node, x, y) {
                 let scale = this.zoom.scale();

@@ -82,11 +82,13 @@ object Database {
     nodesWithType[START](discourse.nodes)
   }
 
-  // TODO: leaks hyperedges
   def deleteNodes[NODE <: UuidNode](definitions: NodeDefinition[NODE]*) {
     val discourse = discourseGraph(definitions: _*)
     discourse.graph.nodes.clear()
-    db.transaction(_.persistChanges(discourse.graph))
+    db.transaction{ tx =>
+      tx.persistChanges(discourse.graph)
+      model.WustSchema.deleteConnectsGarbage(tx)
+    }
   }
 
   //TODO: unique connections?
