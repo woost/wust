@@ -1,12 +1,7 @@
 package tasks
 
-import common.ConfigString._
 import model.WustSchema._
-import modules.db.Database
-import play.core.StaticApplication
 import renesca._
-import renesca.parameter.implicits._
-import java.io.File
 
 trait Task extends App {
   private val db = new DbService

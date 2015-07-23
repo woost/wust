@@ -60,15 +60,15 @@ object WustSchema {
     var description: Option[String]
 
     override def validate: Option[String] = {
-    //TODO: challenge validation should work for matches nodes, but they are
-    //weird do not have all properties set before they are resolved.
-      if (!rawItem.properties.isDefinedAt("title"))
+      //TODO: challenge validation should work for matches nodes, but they are
+      //weird do not have all properties set before they are resolved.
+      if(!rawItem.properties.isDefinedAt("title"))
         return None
 
-      if (title.trim.isEmpty)
+      if(title.trim.isEmpty)
         Some("Title may not be blank")
-      else if (title.length > 140)
-        Some("Title may not exceed length of 140 characters")
+      else if(title.length > 140)
+             Some("Title may not exceed length of 140 characters")
       else
         None
     }
@@ -88,7 +88,7 @@ object WustSchema {
 
 
   // Tags
-  @Node class Tag extends ContentNode {
+  @Node class Tag extends ContentNode with Inheritable with ScopeChild {
     @unique val title: String
     var description: Option[String]
     var isType: Boolean = false
@@ -101,7 +101,11 @@ object WustSchema {
   }
 
   // Scopes
-  @Node class Scope extends ContentNode with Inheritable with Taggable
+  @Node class Scope extends ContentNode with Inheritable with Taggable {
+    val title: String
+    val description: Option[String]
+  }
+
   @Relation class HasReadAccess(startNode: UserGroup, endNode: Scope)
   @Relation class HasWriteAccess(startNode: UserGroup, endNode: Scope)
   @Relation class Owns(startNode: UserGroup, endNode: Scope)
