@@ -1,6 +1,7 @@
 angular.module("wust", [
-    "ui.bootstrap",
     "ngAnimate",
+    "ui.bootstrap",
+    "mgcrea.ngStrap",
     "ngSanitize",
     "uiSwitch",
     "xeditable",

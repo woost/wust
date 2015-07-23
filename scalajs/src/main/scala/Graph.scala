@@ -293,7 +293,6 @@ class HyperGraph(val rawGraph: RawGraph) extends WrappedGraph[HyperRelation] {
 @JSExport // überflüssig, da graph aus der factory kommt
 //nein nich ueberfluessig, der graph muss exposed sein.
 class Graph(private[js] val rawGraph: RawGraph) extends WrappedGraph[Relation] {
-@JSExport def AAA_NormalGraph = "Penos"
   val nodes: mutable.Set[NodeBase] = mutable.Set.empty ++ rawGraph.nodes.map(Node(_))
   val relations: mutable.Set[Relation] = mutable.Set.empty ++ rawGraph.relations.map(new Relation(_))
   var hyperRelations: mutable.Set[HyperRelation] = _
@@ -303,6 +302,9 @@ class Graph(private[js] val rawGraph: RawGraph) extends WrappedGraph[Relation] {
   @JSExport("nodes") def _nodesJs = nodesJs
   @JSExport("nonHyperRelationNodes") def _nonHyperRelationNodes = nonHyperRelationNodes
   @JSExport("rootNode") def _rootNode = rootNode
+
+  //TODO: d3_graph needs to sort the nodes: first hyperedges, then nodes...
+  @JSExport def setNodes(newNodes: js.Array[NodeBase]) = nodesJs = newNodes
 
   override def wrapRawChanges(rawChanges: RawGraphChanges): GraphChanges[Relation] = {
     GraphChanges(

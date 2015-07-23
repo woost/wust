@@ -10,9 +10,12 @@ function editPopover($compile) {
         scope: true,
         compile: function(el) {
             el.removeAttr("edit-popover"); // necessary to avoid infinite compile loop
-            el.attr("popover", "'edit_popover.html'");
-            el.attr("popover-title", "penos");
-            el.attr("popover-placement", "bottom");
+            el.attr("content-template", "assets/app/elements/edit_popover/edit_popover.html");
+            el.attr("title", "penos");
+            el.attr("placement", "bottom");
+            el.attr("auto-close", "1");
+            el.attr("animation", "am-flip-x");
+            el.attr("bs-popover", "");
             el[0].classList.add("edit_popover_directive");
             var fn = $compile(el);
             return function(scope) {

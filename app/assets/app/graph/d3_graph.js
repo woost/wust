@@ -151,10 +151,18 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                 this.d3ConnectorLine = this.d3SvgContainer.append("line").classed({
                     "connectorline": true
                 }).style("marker-start", "url(" + $location.absUrl() + "#graph_connector_arrow)");
+
+                // add use element as the last(!) element to the svg, this controls the foremost element
+                //http://stackoverflow.com/a/6289809
+                // this.svgUseElement = this.d3NodeContainer.append("use").attr("id", "svgUseElement").attr("xlink:href", "#svgUseElement");
             }
 
 
             updateGraph(changes) {
+                //add nodes to svg, first hypernodes then nodes, so the normal
+                //nodes are drawn on top of the hypernodes in the svg
+                this.graph.setNodes(_.sortBy(this.graph.nodes, n => !n.hyperEdge));
+
                 this.calculateNodeVerticalForce();
                 this.setInitialNodePositions();
 
@@ -195,6 +203,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                     .attr("class", d => d.hyperEdge ? "relation_label" : `node ${DiscourseNode.get(d.label).css}`)
                     .style("position", "absolute")
                     .style("max-width", "150px") // to produce line breaks
+                    .style("word-wrap", "break-word")
                     .attr("ng-click", "setPopoverPosition($event)");
 
                 this.d3Node
