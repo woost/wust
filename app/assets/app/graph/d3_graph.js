@@ -1,8 +1,8 @@
 angular.module("wust.graph").directive("d3Graph", d3Graph);
 
-d3Graph.$inject = ["$window", "DiscourseNode", "Helpers", "$location", "$filter", "Post"];
+d3Graph.$inject = ["$window", "DiscourseNode", "Helpers", "$location", "$filter", "Post", "$compile"];
 
-function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
+function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $compile) {
 
     function link(scope, element) {
 
@@ -155,6 +155,9 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
 
 
             updateGraph(changes) {
+                this.calculateNodeVerticalForce();
+                this.setInitialNodePositions();
+
                 // console.log("------ update graph");
                 // console.log(graph.nonHyperRelationNodes.map((n) => n.title), graph.hyperRelations.map((r) => r.source.title + " --> " + r.target.title));
                 // create data joins
@@ -172,11 +175,32 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
                     .append("div")
                     .style("pointer-events", "all");
 
+                // onclick handler to position the popover according to the current node position,
+                // otherwise the position will be off if we zoomed.
+                scope.setPopoverPosition = function(event) {
+                    let nodeElement = event.currentTarget;
+                    // the popover was closed -> nothing todo
+                    if (nodeElement.childElementCount < 2)
+                        return;
+
+                    // set the position according to the node
+                    // positioning is relative!
+                    let popover = nodeElement.children[1];
+                    let node = nodeElement.__data__;
+                    popover.style.top = node.rect.height + "px";
+                    popover.style.left = (node.rect.width - popover.clientWidth) / 2 + "px";
+                };
+
                 this.d3Node = this.d3NodeContainerWithData.append("div")
                     .attr("class", d => d.hyperEdge ? "relation_label" : `node ${DiscourseNode.get(d.label).css}`)
                     .style("position", "absolute")
                     .style("max-width", "150px") // to produce line breaks
-                    .html(d => d.title)
+                    .attr("ng-click", "setPopoverPosition($event)");
+
+                this.d3Node
+                    .append("span")
+                    .attr("edit-popover", "")
+                    .text(d => d.title)
                     // .style("border-width", n => Math.abs(n.verticalForce) + "px")
                     // .style("border-color", n => n.verticalForce < 0 ? "#3CBAFF" : "#FFA73C")
                     .style("cursor", d => d.hyperEdge ? "inherit" : "pointer");
@@ -238,8 +262,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
                 //     return link.source.hyperEdge || link.target.hyperEdge;
                 // }
 
-                this.calculateNodeVerticalForce();
-                this.setInitialNodePositions();
                 this.updateGraphRefs();
                 this.registerUIEvents();
                 this.recalculateNodeDimensions();
@@ -251,6 +273,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
 
                 this.registerUIEvents();
 
+                $compile(this.d3Html[0])(scope);
             }
 
             registerUIEvents() {
@@ -273,11 +296,11 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
 
                 this.d3Svg.on("dblclick.zoom", null);
 
-                this.d3Node.on("click", this.ignoreHyperEdge(node => {
+                this.d3Node/*.on("click", this.ignoreHyperEdge(node => {
                         this.onClick({
                             node
                         });
-                    }))
+                    }))*/
                     .call(disableDrag)
                     .on("mouseover", d => this.hoveredNode = d)
                     .on("mouseout", d => {
@@ -839,7 +862,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
         let d3Graph = new D3Graph(scope.graph, element[0], scope.onClick, scope.onDraw);
         scope.controlGraph = d3Graph;
         d3Graph.init();
-
     }
 
     return {
