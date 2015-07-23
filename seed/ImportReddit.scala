@@ -20,11 +20,12 @@ object ImportReddit extends Task {
   def getJson(url: String): JsValue = Await.result(ws.url(url).get(), 10.seconds).json
 
   dbContext { implicit db =>
-    val subreddit = "javascript"
+    val subreddit = "lifeprotips"
     val limit = 10
     println(s"importing comments from subreddit /r/$subreddit")
 
-    val url = s"http://www.reddit.com/r/$subreddit/top.json?limit=$limit&t=all"
+    // val url = s"http://www.reddit.com/r/$subreddit/top.json?limit=$limit&t=week"
+    val url = s"http://www.reddit.com/r/$subreddit/hot.json?limit=$limit"
     val response = getJson(url)
     (response \ "data" \ "children") match {
       case JsArray(children) => children.foreach { post =>
