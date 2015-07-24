@@ -15,6 +15,7 @@ function editPopover($compile) {
             el.attr("placement", "bottom");
             el.attr("auto-close", "1");
             el.attr("animation", "am-flip-x");
+            // el.attr("animation", "");
             el.attr("bs-popover", "");
             el[0].classList.add("edit_popover_directive");
             var fn = $compile(el);

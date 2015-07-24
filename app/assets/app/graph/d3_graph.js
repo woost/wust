@@ -197,6 +197,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                     let node = nodeElement.__data__;
                     popover.style.top = node.rect.height + "px";
                     popover.style.left = (node.rect.width - popover.clientWidth) / 2 + "px";
+                    //TODO: we should probably manually enable the popover but we cant...
                 };
 
                 this.d3Node = this.d3NodeContainerWithData.append("div")
