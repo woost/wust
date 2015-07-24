@@ -9,6 +9,7 @@ function editPopover($compile, EditPopoverService) {
         restrict: "A",
         scope: true,
         compile: function(el) {
+            //TODO: we should normally use the $popover service to construct a popover in a directive, but this does not work for content-template-url -> this seems to be a bug in angular-strap.
             el.removeAttr("edit-popover"); // necessary to avoid in
             el.attr("content-template", "assets/app/elements/edit_popover/edit_popover.html");
             el.attr("title", "penos");
