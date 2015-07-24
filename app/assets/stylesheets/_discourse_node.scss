@@ -94,8 +94,6 @@ marker path.connectorlinearrow {
         background-color: #BCEFFF;
     }
     .nodetools {
-        $tool_color: #111;
-        $inactive_tool_color: #AAA;
         position: absolute;
         top: -28px;
         left: -6px;
@@ -112,11 +110,9 @@ marker path.connectorlinearrow {
         .nodetool {
             padding: 8px;
             display: inline-block;
-            // color: $tool_color !important;
             // border: 1px solid #EEE;
             &+.pintool {
                 @include transform(rotate(45deg));
-                color: $inactive_tool_color;
             }
         }
 
@@ -124,11 +120,30 @@ marker path.connectorlinearrow {
     .fixed {
         .pintool {
             @include transform(rotate(0deg) !important);
-            // $tool_color !important;
-            color: #111 !important;
         }
     }
 }
+// no hover
+.nodeframe {
+    .nodetools {
+        .nodetool {
+            opacity: 1;
+        }
+    }
+}
+// node hover
+.nodeframe:hover {
+    .nodetools {
+        .nodetool {
+            opacity: 1;
+        }
+        // single tool hover
+        .nodetool:hover {
+            opacity: 1;
+        }
+    }
+}
+
 
 .fa-rotate-45 {
     @include transform(rotate(45deg));
