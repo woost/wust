@@ -9,7 +9,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
         class D3Graph {
             //TODO: rename onClick -> onNodeClick
             //TODO: rename edge, link, ... -> relation
-            //TODO: replace _.each
             constructor(graph, rootDomElement, onClick = _.noop, onDraw = _.noop) {
                 this.graph = graph;
                 this.rootDomElement = rootDomElement;
@@ -398,20 +397,20 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
 
             initConverge() {
                 // focusMarkedNodes needs visible/marked nodes and edges
-                _.each(this.graph.nodes, n => {
+                this.graph.nodes.forEach( n => {
                     n.marked = true;
                     n.visible = true;
                 });
-                _.each(this.graph.edges, e => {
+                this.graph.edges.forEach( e => {
                     e.visible = true;
                 });
-
                 if (this.visibleConvergence) {
                     this.recalculateNodeDimensions();
                     this.focusMarkedNodes(0);
                     this.d3HtmlContainer.style("visibility", "visible");
                     this.d3SvgContainer.style("visibility", "visible");
                 }
+
             }
 
             afterConverge() {
@@ -445,14 +444,14 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                     n.d3NodeTools = d3.select(n.domNodeTools);
                 });
 
-                _.each(this.graph.edges, (r, i) => {
+                this.graph.edges.forEach( (r, i) => {
                     r.domPath = this.d3LinkPathWithData[0][i];
                     r.d3Path = d3.select(r.domPath);
                 });
             }
 
             recalculateNodeDimensions() {
-                _.each(this.graph.nodes, n => {
+                this.graph.nodes.forEach( n => {
                     n.rect = {
                         width: n.domNode.offsetWidth,
                         height: n.domNode.offsetHeight
@@ -506,11 +505,11 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
             }
 
             drawGraph() {
-                _.each(this.graph.nodes, (node) => {
+                this.graph.nodes.forEach( (node) => {
                     node.domNodeContainer.style[this.transformCompat] = "translate(" + (node.x - node.rect.width / 2) + "px," + (node.y - node.rect.height / 2) + "px)";
                 });
 
-                _.each(this.graph.edges, (relation) => {
+                this.graph.edges.forEach( (relation) => {
                     // draw svg paths for lines between nodes
                     // if (relation.source.id === relation.target.id) { // self loop
                     //     //TODO: self loops with hypernodes
@@ -608,20 +607,20 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
             filter(matchingNodes) {
                 let component = _(matchingNodes).map(node => node.component).flatten().uniq().value();
 
-                _.each(this.graph.nodes, node => {
+                this.graph.nodes.forEach( node => {
                     node.marked = _(matchingNodes).contains(node);
                     node.visible = node.marked || _(component).contains(node);
 
                 });
 
-                _.each(this.graph.nodes, node => {
+                this.graph.nodes.forEach( node => {
                     if (node.hyperEdge) {
                         //TODO: mark chains of hyperedges
                         node.marked = node.marked || node.source.marked && node.target.marked;
                     }
                 });
 
-                _.each(this.graph.edges, edge => {
+                this.graph.edges.forEach( edge => {
                     edge.visible = _(component).contains(edge.source) && _(component).contains(edge.target);
                 });
 
@@ -633,7 +632,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
             setVisibility() {
                 let notMarkedOpacity = 0.3;
                 // set node visibility
-                _.each(this.graph.nodes, node => {
+                this.graph.nodes.forEach( node => {
                     let opacity = (node.marked) ? 1.0 : notMarkedOpacity;
                     let visibility = node.visible ? "inherit" : "hidden";
                     node.domNode.style.opacity = opacity;
@@ -643,7 +642,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                 });
 
                 // set edge visibility
-                _.each(this.graph.edges, (edge, i) => {
+                this.graph.edges.forEach( (edge, i) => {
                     edge.domPath.style.visibility = edge.visible ? "inherit" : "hidden";
                     edge.domPath.style.opacity = (edge.source.marked === true && edge.target.marked === true) ? 1.0 : notMarkedOpacity;
                 });
@@ -831,8 +830,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                             referenceNode = start.connectsTo.$buildRaw(targetNode.encode());
                         }
                         referenceNode.$save({}).$then(response => {
-                            _.each(response.graph.nodes, n => this.graph.addNode(n));
-                            _.each(response.graph.edges, r => this.graph.addRelation(r));
+                            response.graph.nodes.forEach( n => this.graph.addNode(n));
+                            response.graph.edges.forEach( r => this.graph.addRelation(r));
                             this.graph.commit();
                         });
                     }
