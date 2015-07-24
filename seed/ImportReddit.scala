@@ -27,12 +27,10 @@ object ImportReddit extends Task with TagTools {
   def mergeTags()(implicit db: DbService) {
     println("merging Reddit tags...")
     modifyDiscourse { implicit discourse =>
-      val reddit = mergeTag("Reddit")
       discourse.add(
-        Inherits.merge(startPostTag, reddit),
-        Inherits.merge(commentTag, reddit),
-        Inherits.merge(commentTag, mergeTag("Comment")),
-        belongsTo(reddit, redditScope)
+        Inherits.merge(startPostTag, redditScope),
+        Inherits.merge(commentTag, redditScope),
+        Inherits.merge(commentTag, mergeTag("Comment"))
       )
     }
   }

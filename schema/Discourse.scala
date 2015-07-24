@@ -88,11 +88,13 @@ object WustSchema {
 
 
   // Tags
-  @Node class Tag extends ContentNode with Inheritable with ScopeChild {
+  @Node trait TagLike extends ContentNode with Inheritable {
     @unique val title: String
     var description: Option[String]
     var isType: Boolean = false
   }
+  @Node class Tag extends TagLike
+
   @Node trait Taggable extends UuidNode
   @HyperRelation class Categorizes(startNode: Tag, endNode: Taggable) extends ContentRelation with HyperConnection with UuidNode
   @Relation class TaggingAction(startNode: User, endNode: Categorizes)
@@ -101,11 +103,7 @@ object WustSchema {
   }
 
   // Scopes
-  @Node class Scope extends ContentNode with Inheritable with Taggable {
-    val title: String
-    val description: Option[String]
-  }
-
+  @Node class Scope extends TagLike
   @Relation class HasReadAccess(startNode: UserGroup, endNode: Scope)
   @Relation class HasWriteAccess(startNode: UserGroup, endNode: Scope)
   @Relation class Owns(startNode: UserGroup, endNode: Scope)

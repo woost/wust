@@ -19,24 +19,18 @@ object ImportHackerNews extends Task with TagTools {
     }
 
     val itemId: Option[ItemId] = None //Some(ItemId(9869886))
-    if(itemId.isDefined) {
-      importItem(forceGetItem(itemId.get))
-    } else {
-      importTopStories()
-    }
+    if(itemId.isDefined) importItem(forceGetItem(itemId.get))
+    else importTopStories()
   }
 
   def mergeTags()(implicit db: DbService) {
-    println("merging HackerNews tags...")
     modifyDiscourse { implicit discourse =>
-      val hackerNews = mergeTag("HackerNews")
       discourse.add(
-        Inherits.merge(mergeTag("HN-Story"), hackerNews),
-        Inherits.merge(mergeTag("HN-Show"), hackerNews),
-        Inherits.merge(mergeTag("HN-Ask"), hackerNews),
-        Inherits.merge(mergeTag("HN-Comment"), hackerNews),
-        Inherits.merge(mergeTag("HN-Comment"), mergeTag("Comment")),
-        belongsTo(hackerNews, hackerNewsScope)
+        Inherits.merge(mergeTag("HN-Story"), hackerNewsScope),
+        Inherits.merge(mergeTag("HN-Show"), hackerNewsScope),
+        Inherits.merge(mergeTag("HN-Ask"), hackerNewsScope),
+        Inherits.merge(mergeTag("HN-Comment"), hackerNewsScope),
+        Inherits.merge(mergeTag("HN-Comment"), mergeTag("Comment"))
       )
     }
   }
