@@ -37,5 +37,5 @@ function FocusCtrl($stateParams, HistoryService, component) {
     // we are viewing details about a node, so add it to the nodehistory
     let focusComponent = component.hyperWrap();
     HistoryService.add(focusComponent.rootNode);
-    HistoryService.currentViewNode = focusComponent.rootNode;
+    HistoryService.setCurrentView(focusComponent);
 }

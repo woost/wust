@@ -82,11 +82,8 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
                 this.apply(data);
                 storeEditList();
                 //TODO: weird update
-                if (HistoryService.currentViewNode.id === data.id) {
-                    _.assign(HistoryService.currentViewNode, _.omit(data, "tags"));
-                    //response has empty tags array
-                    HistoryService.currentViewNode.tags = angular.copy(this.tags);
-                }
+                let updateNode = angular.copy(this.tags);
+                HistoryService.updateCurrentView(updateNode);
             });
         }
 

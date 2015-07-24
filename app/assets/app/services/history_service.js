@@ -16,8 +16,26 @@ function HistoryService(Post, DiscourseNode, store) {
     this.remove = removeNode;
     this.changeActiveView = changeActiveView;
 
-    //TODO: should be handled by updates...
-    this.currentViewNode = null;
+    this.updateCurrentView = updateCurrentView;
+    this.setCurrentView = setCurrentView;
+
+    let currentViewComponent;
+
+    function setCurrentView(component) {
+        currentViewComponent = component;
+    }
+
+    function updateCurrentView(node) {
+        if (currentViewComponent === undefined)
+            return;
+
+        let existing = _.find(currentViewComponent.nodes, {
+            id: node.id
+        });
+        if (existing !== undefined) {
+            _.assign(existing, node);
+        }
+    }
 
     function restoreNode(id) {
         Post.$find(id).$then(node => addNode(node.encode()));
