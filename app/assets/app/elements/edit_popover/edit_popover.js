@@ -1,26 +1,21 @@
 angular.module("wust.elements").directive("editPopover", editPopover);
 
-editPopover.$inject = ["$compile"];
+editPopover.$inject = ["$popover"];
 
-function editPopover($compile) {
+function editPopover($popover) {
     return {
         priority: 1001, // compiles first
         terminal: true, // prevent lower priority directives to compile after it
         restrict: "A",
         scope: true,
-        compile: function(el) {
-            el.removeAttr("edit-popover"); // necessary to avoid infinite compile loop
-            el.attr("content-template", "assets/app/elements/edit_popover/edit_popover.html");
-            el.attr("title", "penos");
-            el.attr("placement", "bottom");
-            el.attr("auto-close", "1");
-            el.attr("animation", "am-flip-x");
-            el.attr("bs-popover", "");
-            el[0].classList.add("edit_popover_directive");
-            var fn = $compile(el);
-            return function(scope) {
-                fn(scope);
-            };
+        link: function(scope, el) {
+            var myPopover = $popover(el, {
+                "content-template": "assets/app/elements/edit_popover/edit_popover.html",
+                "title": "penos",
+                "placement": "bottom",
+                "auto-close": "1",
+                "animation": "am-flip-x",
+            });
         }
     };
 }
