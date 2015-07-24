@@ -67,16 +67,25 @@ marker path.connectorlinearrow {
 }
 
 .nodecontainer {
-    .fixed .node, .fixed .relation_label {
+    .nodeframe {
+        z-index: 95;
+    }
+    .fixed.nodeframe {
         z-index: 100;
+    }
+    .moving.nodeframe {
+        z-index: 110;
+    }
+
+    .fixed .node, .fixed .relation_label {
         // blue glow
         @include box-shadow(0 0 40px 5px #7dbaff);
     }
+
     .moving .node {
         // dark shadow
-        @include box-shadow(0 0 20px #333);
+        @include box-shadow(0 5px 20px #333);
         border: 1px solid black;
-        // z-index: 2000; //TODO: doesn't work
     }
     .selected .node {
         background-color: #BCEFFF;

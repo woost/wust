@@ -179,7 +179,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
 
                 // add nodes
                 let d3NodeFrame = this.d3NodeContainerWithData.enter()
-                    .append("div")
+                    .append("div").attr("class","nodeframe")
+                    .style("position", "relative") // needed for z-index (moving/fixed have higher z-index)
                     .style("pointer-events", "all");
 
                 // onclick handler to position the popover according to the current node position,
