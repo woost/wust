@@ -1,7 +1,11 @@
 angular.module("wust", [
     "ngAnimate",
-    "ui.bootstrap",
-    "mgcrea.ngStrap",
+    "ui.bootstrap.collapse",
+    "ui.bootstrap.tabs",
+    "template/tabs/tab.html",
+    "template/tabs/tabset.html",
+    "mgcrea.ngStrap.tooltip",
+    "mgcrea.ngStrap.popover",
     "ngSanitize",
     "uiSwitch",
     "xeditable",
