@@ -714,6 +714,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
 
                 let event = d3.event.sourceEvent;
                 let scale = this.zoom.scale();
+                var target = event.target || event.srcElement;
 
                 this.dragStartNodeX = d.x;
                 this.dragStartNodeY = d.y;
@@ -722,7 +723,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                 this.dragStartNode = d;
 
                 let domRect = d.domNode.getBoundingClientRect();
-                let eventRect = event.srcElement.getBoundingClientRect();
+                let eventRect = target.getBoundingClientRect();
                 this.dragOffsetX = (eventRect.left - domRect.left) / scale + event.offsetX - d.domNode.offsetWidth / 2;
                 this.dragOffsetY = (eventRect.top - domRect.top) / scale + event.offsetY - d.domNode.offsetHeight / 2;
             }
@@ -753,6 +754,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                 // check whether there was a substantial mouse movement. if
                 // not, we will interpret this as a click event after the
                 // mouse button is released (see onDragMoveEnd handler).
+                let event = d3.event.sourceEvent;
                 let diffX = this.dragStartMouseX - event.clientX;
                 let diffY = this.dragStartMouseY - event.clientY;
                 let diff = Math.sqrt(diffX * diffX + diffY * diffY);
