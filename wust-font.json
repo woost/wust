@@ -1,0 +1,64 @@
+{
+  "name": "wust-font",
+  "css_prefix_text": "icon-",
+  "css_use_suffix": false,
+  "hinting": true,
+  "units_per_em": 1000,
+  "ascent": 850,
+  "glyphs": [
+    {
+      "uid": "c1f1975c885aa9f3dad7810c53b82074",
+      "css": "lock",
+      "code": 59395,
+      "src": "fontawesome"
+    },
+    {
+      "uid": "657ab647f6248a6b57a5b893beaf35a9",
+      "css": "lock-open",
+      "code": 59393,
+      "src": "fontawesome"
+    },
+    {
+      "uid": "7a9d73c640892d4b917c706ad95d6fec",
+      "css": "anchor",
+      "code": 59397,
+      "src": "fontawesome"
+    },
+    {
+      "uid": "6cea40aa6cc50057083e4f0a5b92410c",
+      "css": "flow-line",
+      "code": 59392,
+      "src": "entypo"
+    },
+    {
+      "uid": "c1bea2b4c01d1d4bd1e4e1f79e51cdd2",
+      "css": "flow-merge",
+      "code": 59394,
+      "src": "typicons"
+    },
+    {
+      "uid": "eb707fc827e812cdcfdf25b13622fb7b",
+      "css": "anchor-2",
+      "code": 59399,
+      "src": "typicons"
+    },
+    {
+      "uid": "afdef1656447e2558662b393d6b4bb75",
+      "css": "share",
+      "code": 59401,
+      "src": "iconic"
+    },
+    {
+      "uid": "23c2239369a69f752e790de95123b9e9",
+      "css": "male",
+      "code": 59403,
+      "src": "mfglabs"
+    },
+    {
+      "uid": "dd432b7aa4b7c276a475015a93dec8a3",
+      "css": "anchor-1",
+      "code": 59398,
+      "src": "mfglabs"
+    }
+  ]
+}

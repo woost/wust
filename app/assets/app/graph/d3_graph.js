@@ -241,7 +241,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
 
                 this.d3NodeConnectTool = this.d3NodeTools.append("div")
                     .style("display", d => d.hyperEdge ? "none" : "inline-block")
-                    .attr("class", "nodetool connecttool fa fa-compress")
+                    .attr("class", "nodetool connecttool icon-flow-merge")
                     .style("cursor", "crosshair");
 
                 this.d3NodeDisconnectTool = this.d3NodeTools.append("div")
