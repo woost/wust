@@ -95,7 +95,7 @@ marker path.connectorlinearrow {
     }
     .nodetools {
         position: absolute;
-        top: -28px;
+        top: -32px;
         left: -6px;
         // z-index: -1;
 
@@ -113,6 +113,11 @@ marker path.connectorlinearrow {
             // border: 1px solid #EEE;
             &+.pintool {
                 @include transform(rotate(45deg));
+            }
+
+            &+.connecttool {
+                font-size: 130%;
+                padding: 5px;
             }
         }
 
@@ -147,6 +152,10 @@ marker path.connectorlinearrow {
 
 .fa-rotate-45 {
     @include transform(rotate(45deg));
+}
+
+.fa-rotate-minus45 {
+    @include transform(rotate(-45deg));
 }
 
 .relation_label {
