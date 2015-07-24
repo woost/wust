@@ -10,6 +10,7 @@ angular.module("wust", [
     "mgcrea.ngStrap.tooltip",
     "mgcrea.ngStrap.popover",
     "mgcrea.ngStrap.modal",
+    "mgcrea.ngStrap.button",
     "ngSanitize",
     "uiSwitch",
     "xeditable",
