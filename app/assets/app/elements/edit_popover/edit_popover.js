@@ -1,8 +1,8 @@
 angular.module("wust.elements").directive("editPopover", editPopover);
 
-editPopover.$inject = ["$compile"];
+editPopover.$inject = ["$compile", "EditPopoverService"];
 
-function editPopover($compile) {
+function editPopover($compile, EditPopoverService) {
     return {
         priority: 1001, // compiles first
         terminal: true, // prevent lower priority directives to compile after it
@@ -18,8 +18,10 @@ function editPopover($compile) {
             // el.attr("animation", "");
             el.attr("bs-popover", "");
             el[0].classList.add("edit_popover_directive");
+
             var fn = $compile(el);
-            return function(scope) {
+            return function(scope, el) {
+                scope.editPopoverService = EditPopoverService;
                 fn(scope);
             };
         }

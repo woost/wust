@@ -1,8 +1,8 @@
 angular.module("wust.graph").directive("d3Graph", d3Graph);
 
-d3Graph.$inject = ["$window", "DiscourseNode", "Helpers", "$location", "$filter", "Post", "$compile"];
+d3Graph.$inject = ["$window", "DiscourseNode", "Helpers", "$location", "$filter", "Post", "$compile", "EditPopoverService"];
 
-function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $compile) {
+function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $compile, EditPopoverService) {
 
     function link(scope, element) {
 
@@ -198,10 +198,11 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                     popover.style.top = node.rect.height + "px";
                     popover.style.left = (node.rect.width - popover.clientWidth) / 2 + "px";
                     //TODO: we should probably manually enable the popover but we cant...
+                    EditPopoverService.editNode = node;
                 };
 
                 this.d3Node = this.d3NodeContainerWithData.append("div")
-                    .attr("class", d => d.hyperEdge ? "relation_label" : `node ${DiscourseNode.get(d.label).css}`)
+                    .attr("class", d => d.hyperEdge ? "no_flick relation_label" : `no_flick node ${DiscourseNode.get(d.label).css}`)
                     .style("position", "absolute")
                     .style("max-width", "150px") // to produce line breaks
                     .style("word-wrap", "break-word")
