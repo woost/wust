@@ -3,13 +3,12 @@ angular.module("wust.services").service("EditPopoverService", EditPopoverService
 EditPopoverService.$inject = ["EditService"];
 
 function EditPopoverService(EditService) {
-    let editNode;
+    let currentEditNode;
 
     Object.defineProperty(this, "editNode", {
-        get: () => editNode,
+        get: () => currentEditNode,
         set: val => {
-            editNode = val;
-            EditService.edit(editNode);
+            currentEditNode = EditService.edit(val);
         }
     });
 }
