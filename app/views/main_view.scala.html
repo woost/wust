@@ -2,13 +2,13 @@
 <main role="main">
     <div id="main_view">
         <div id="left_hand_side" visible-left-side>
-            <div ng-showid="scratchpad_view" class="route_animation" ui-view="scratchpad"></div>
+            <div id="scratchpad_view" ui-view="scratchpad"></div>
         </div>
         <div id="right_hand_side">
             <div id="zen_view" ui-view="zen"></div>
             <div id="search_view" ui-view="search"></div>
             <div route-loading-indicator></div>
-            <div id="content_view" class="route_animation" ng-hide='isRouteLoading' ui-view="content"></div>
+            <div id="content_view" ng-hide='isRouteLoading' ui-view="content"></div>
         </div>
     </div>
 </main>
