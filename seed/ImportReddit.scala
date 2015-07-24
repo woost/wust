@@ -59,7 +59,7 @@ object ImportReddit extends Task with TagTools {
             val id = (post \ "data" \ "id").as[String]
             val title = (post \ "data" \ "title").as[String]
             val content = (post \ "data" \ "selftext").as[String]
-            val startPost = Post.create(title = title, description = Some(content))
+            val startPost = Post.create(title = title.take(140), description = Some(content))
             println(s"thread: $title")
             discourse.add(startPost, belongsTo(startPost, subredditScope), tag(startPost, startPostTag), commentTag, replyTag, subredditScope)
 
@@ -75,7 +75,7 @@ object ImportReddit extends Task with TagTools {
                   val title = body.take(100) + (if(body.size > 100) "..." else "")
 
                   //                  println(s"comment: $title")
-                  val commentNode = Post.create(title = title, description = Some(body))
+                  val commentNode = Post.create(title = title.take(140), description = Some(body))
                   val connects = Connects.create(commentNode, parent)
                   discourse.add(commentNode, connects, tag(commentNode, commentTag), tag(connects, replyTag))
 

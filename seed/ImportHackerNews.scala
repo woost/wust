@@ -61,7 +61,7 @@ object ImportHackerNews extends Task with TagTools {
   def importItem(hnItem: Item)(implicit db: DbService): Unit = {
     modifyDiscourse { discourse =>
       println(s"importing ${ hnItem.itemType }: ${ hnItem.title.get }")
-      val post = Post.create(hnItem.title.get, description = Some(hnItem.text))
+      val post = Post.create(hnItem.title.get.take(140), description = Some(hnItem.text))
       val commentTag = mergeTag("HN-Comment")
       val replyTag = mergeTag("repliesTo")
       discourse.add(
