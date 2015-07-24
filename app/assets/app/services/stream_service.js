@@ -8,15 +8,15 @@ function StreamService(Tag, store) {
 
     this.streams = [];
     restoreList();
-    this.push = pustList;
+    this.push = pushList;
     this.persist = storeList;
     this.forget = clearList;
 
     function restoreList() {
-        _.each(streamStore.get("streams") || [], pustList);
+        _.each(streamStore.get("streams") || [], pushList);
     }
 
-    function pustList(tags) {
+    function pushList(tags) {
         if (!_.isArray(tags) || _.isEmpty(tags))
             return;
 

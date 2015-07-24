@@ -1,28 +1,23 @@
 angular.module("wust.components").controller("NewStreamCtrl", NewStreamCtrl);
 
-NewStreamCtrl.$inject = ["$scope", "$modalInstance", "items", "Search", "DiscourseNode"];
+NewStreamCtrl.$inject = ["$scope", "Search", "DiscourseNode", "StreamService"];
 
-function NewStreamCtrl($scope, $modalInstance, items, Search, DiscourseNode) {
+function NewStreamCtrl($scope, Search, DiscourseNode, StreamService) {
     let vm = this;
-    vm.ok = ok;
-    vm.cancel = cancel;
 
+    vm.save = save;
     vm.searchTags = searchTags;
     vm.selectTag = selectTag;
     vm.nodeInfo = DiscourseNode.Tag;
     vm.selectedTags = [];
 
-    function ok(selectedTags) {
-        $modalInstance.close(selectedTags);
+    function save() {
+        StreamService.push(vm.selectedTags);
     }
-
-    function cancel() {
-        $modalInstance.dismiss("cancel");
-    }
-
 
     function selectTag(tag) {
         //TODO: possibility to create new tags
+        // afaik it does not make sense to create tags when you are creating a stream
         vm.selectedTags.push(tag);
     }
 

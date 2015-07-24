@@ -4,25 +4,25 @@ DashboardCtrl.$inject = ["$scope", "$state", "$modal", "Tag", "DiscourseNode", "
 
 function DashboardCtrl($scope, $state, $modal, Tag, DiscourseNode, StreamService) {
     let vm = this;
+
+    let modalInstance = $modal({
+            show: false,
+            templateUrl: "assets/app/components/dashboard/new_stream.html",
+            controller: "NewStreamCtrl",
+            controllerAs: "vm",
+            animation: "am-fade-and-slide-top"
+    });
+
     vm.nodeInfo = DiscourseNode.Tag;
     vm.streams = StreamService.streams;
-    vm.open = open;
+    vm.showModal = showModal;
+    vm.hideModal = hideModal;
 
-    function open(size) {
-        var modalInstance = $modal.open({
-            animation: true,
-            templateUrl: "assets/app/components/dashboard/new_stream.html",
-            controller: "NewStreamCtrl as vm",
-            size: size,
-            resolve: {
-                items: function() {
-                    return vm.items;
-                }
-            }
-        });
+    function showModal() {
+        modalInstance.$promise.then(modalInstance.show);
+    }
 
-        modalInstance.result.then(selectedItems => {
-            StreamService.push(selectedItems);
-        }, () => console.log("Modal dismissed at: " + new Date()));
+    function hideModal() {
+        modalInstance.$promise.then(modalInstance.hide);
     }
 }
