@@ -89,7 +89,9 @@ marker path.connectorlinearrow {
     .moving .node {
         // dark shadow
         @include box-shadow(0 5px 20px #333);
-        border: 1px solid black;
+        border-color: #000;
+        border-width: 2px;
+        padding: 0.5px 14px 0px 11px; // -1px in width/height because of 1px more border
     }
     .selected .node {
         background-color: #BCEFFF;

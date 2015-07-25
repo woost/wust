@@ -231,10 +231,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                 this.d3NodeTools = this.d3NodeContainerWithData.append("div")
                     .attr("class", "nodetools");
 
-                this.d3NodeDragTool = this.d3NodeTools.append("div")
-                    .attr("class", "nodetool dragtool fa fa-arrows")
-                    .style("cursor", "move"); //TODO: browser-compatibility for grab and grabbed cursor
-
                 this.d3NodePinTool = this.d3NodeTools.append("div")
                     .attr("class", "nodetool pintool fa fa-thumb-tack")
                     .style("cursor", "pointer");
@@ -322,7 +318,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                         });
                     });
 
-                this.d3NodeDragTool.call(dragMove);
+                this.d3Node.call(dragMove);
                 this.d3NodePinTool.on("click", this.toggleFixed.bind(this));
                 this.d3NodeConnectTool.call(dragConnect);
                 this.d3NodeDisconnectTool.on("click", this.disconnectHyperRelation.bind(this));
