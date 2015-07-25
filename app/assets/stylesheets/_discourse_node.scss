@@ -11,7 +11,7 @@
         background-color: $bgcolor;
         border: 1px solid $bordercolor;
         border-radius: $border_radius;
-        padding: 0px 15px 0px 12px;
+        padding: 1px 15px 1px 12px;
         color: $discourse_node_font_color;
         text-decoration: none;
     }
@@ -79,7 +79,10 @@ marker path.connectorlinearrow {
 
     .fixed .node, .fixed .relation_label {
         // blue glow
-        @include box-shadow(0 0 40px 5px #7dbaff);
+        // @include box-shadow(0 0 40px 5px #7dbaff);
+        border-color: #000;
+        border-width: 2px;
+        padding: 0.5px 14px 0px 11px; // -1px in width/height because of 1px more border
     }
 
     .moving .node {
