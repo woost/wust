@@ -1,0 +1,45 @@
+<div class="d3_graph_directive">
+    <svg style="position: absolute;" ng-style="{height: height, width: width}">
+        <defs>
+            <marker id="graph_arrow" viewBox="0 -3 10 6" refX="10" markerWidth="15" markerHeight="9" orient="auto">
+                <path d="M 0,-3 L 10,-0.5 L 10,0.5 L0,3" class="svglink"></path>
+            </marker>
+            <marker id="graph_connector_arrow" viewBox="-5 -1.5 5 3" refX="-5" markerWidth="5" markerHeight="3" orient="auto">
+                <path d="M 0,-1.5 L -5,-0.5 L -5,0.5 L0,1.5" class="connectorlinearrow"></path>
+            </marker>
+        </defs>
+        <g id="svgContainer" style="visibility: visible;">
+            <g id="linkContainer">
+                <!-- track by -->
+                <div ng-repeat="relation in graph.relations" d3-relation relation="relation"></div>
+                <!--
+                // if link is startRelation of a Hypernode
+                if (!(link.target.hyperEdge && link.target.startId === link.source.id)) {
+                d3.select(this).style("marker-end", "url(" + $location.absUrl() + "#graph_arrow)");
+                }
+                //-->
+            </g>
+            <line class="connectorline" style="marker-start: url(http://localhost:9000/focus/tue1ocmDRB6XhyDIoRiQwQ#graph_connector_arrow);"></line>
+        </g>
+    </svg>
+    <div style="position: absolute;" ng-style="{width: width, height: height}">
+        <div id="htmlContainer" style="transform-origin: left top 0px; visibility: visible;">
+            <!-- <div id="hypernodes" class="nodecontainer"> -->
+            <!--     <div ng-repeat="hypernode in graph.hyperNodes" class="nodeframe" style="position: relative; pointer-events: all"> -->
+            <!--         <div class="relation_label" style="position: absolute; max-width: 150px; word-wrap: break-word;"> -->
+            <!--             <div><span ng-bind="hyperNode.label"></span></div> -->
+            <!--         </div> -->
+            <!--         <div class="nodetools"> -->
+            <!--             <div class="nodetool pintool fa fa-thumb-tack" style="cursor: pointer;"></div> -->
+            <!--             <div class="nodetool connecttool icon-flow-line fa-rotate-minus45" style="display: none; cursor: crosshair;"></div> -->
+            <!--             <div class="nodetool disconnecttool fa fa-scissors" style="display: inline-block; cursor: pointer;"></div> -->
+            <!--             <div class="nodetool deletetool fa fa-trash" style="display: none; cursor: pointer;"></div> -->
+            <!--         </div> -->
+            <!--     </div> -->
+            <!-- </div> -->
+            <div id="normalnodes" class="nodecontainer">
+                <div ng-repeat="node in graph.nodes track by node.id" d3-node node="node"></div>
+            </div>
+        </div>
+    </div>
+</div>

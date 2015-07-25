@@ -1,0 +1,13 @@
+<div ng-style="{transform: node.transformStyle}" class="nodeframe" ng-class="{fixed: node.fixed}" style="position: relative; pointer-events: all;">
+    <!-- position relative: needed for z-index (moving/fixed have higher z-index) -->
+    <div class="node discourse_post" style="position: absolute; max-width: 150px; word-wrap: break-word;">
+        <div style="cursor: pointer;"><span ng-bind="node.title"></span></div>
+    </div>
+    <div class="nodetools">
+        <!-- TODO: auslagern und reuse in hypernodes+nodes -->
+        <div class="nodetool pintool fa fa-thumb-tack" style="cursor: pointer;"></div>
+        <div class="nodetool connecttool icon-flow-line fa-rotate-minus45" style="display: inline-block; cursor: crosshair;"></div>
+        <div class="nodetool disconnecttool fa fa-scissors" style="display: none; cursor: pointer;"></div>
+        <div class="nodetool deletetool fa fa-trash" style="display: inline-block; cursor: pointer;"></div>
+    </div>
+</div>

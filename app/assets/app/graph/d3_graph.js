@@ -1,8 +1,8 @@
 angular.module("wust.graph").directive("d3Graph", d3Graph);
 
-d3Graph.$inject = ["$window", "DiscourseNode", "Helpers", "$location", "$filter", "Post", "$compile", "EditPopoverService"];
+d3Graph.$inject = ["$window", "DiscourseNode", "Helpers", "$location", "$filter", "Post", "$q", "EditPopoverService"];
 
-function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $compile, EditPopoverService) {
+function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $q, EditPopoverService) {
 
     function link(scope, element) {
 
@@ -53,8 +53,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
             }
 
             init() {
-                this.initDom();
-
+                console.log("d3graph.init()");
                 // call tick on every simulation step
                 this.force.on("tick", this.tick.bind(this));
                 this.graph.onCommit(this.updateGraph.bind(this));
@@ -64,224 +63,17 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                 this.converge();
             }
 
-            initDom() {
-                // svg will stay in background and only render the edges
-                this.d3Svg = d3.select(this.rootDomElement)
-                    .append("svg")
-                    .attr("width", this.width)
-                    .attr("height", this.height)
-                    .style("position", "absolute");
-                // .style("background", "rgba(220, 255, 240, 0.5)");
-
-                // has the same size and position as the svg
-                // renders nodes and relation labels
-                this.d3Html = d3.select(this.rootDomElement)
-                    .append("div")
-                    .style("width", this.width + "px")
-                    .style("height", this.height + "px")
-                    .style("position", "absolute");
-                // .style("background", "rgba(220, 240, 255, 0.5)");
-                // .style("border", "1px solid #333")
-
-                // contains markers for arrows
-                this.d3SvgDefs = this.d3Svg.append("svg:defs");
-                // svg-marker for relation arrows
-                this.d3SvgDefs.append("svg:marker")
-                    .attr("id", "graph_arrow")
-                    .attr("viewBox", "0 -3 10 6")
-                    .attr("refX", 10)
-                    .attr("markerWidth", 15)
-                    .attr("markerHeight", 9)
-                    .attr("orient", "auto")
-                    .append("svg:path")
-                    .attr("d", "M 0,-3 L 10,-0.5 L 10,0.5 L0,3")
-                    .attr("class", "svglink"); // for the stroke color
-
-                // svg-marker for connector line arrow
-                this.d3SvgDefs.append("svg:marker")
-                    .attr("id", "graph_connector_arrow")
-                    .attr("viewBox", "-5 -1.5 5 3")
-                    .attr("refX", -5)
-                    .attr("markerWidth", 5)
-                    .attr("markerHeight", 3)
-                    .attr("orient", "auto")
-                    .append("svg:path")
-                    .attr("d", "M 0,-1.5 L -5,-0.5 L -5,0.5 L0,1.5")
-                    .attr("class", "connectorlinearrow"); // for the stroke color
-
-                // choose the correct transform style for many browsers
-                this.transformCompat = Helpers.cssCompat("transform", "Transform", "transform");
-                this.transformOriginCompat = Helpers.cssCompat("transformOrigin", "TransformOrigin", "transform-origin");
-
-
-                // svg and html each have full-size
-                // containers with enabled pointer events
-                // translate-styles for zoom/pan will be applied here
-                this.d3SvgContainer = this.d3Svg.append("g").attr("id", "svgContainer")
-                    .style("visibility", "hidden"); // will be shown when converged
-                this.d3HtmlContainer = this.d3Html.append("div").attr("id", "htmlContainer")
-                    // zoom fix: html initially has its origin centered, svg has (top left)
-                    .style(this.transformOriginCompat, "top left")
-                    .style("visibility", "hidden"); // will be shown when converged
-
-                if (this.debugDraw) {
-                    // draw gravitational center
-                    this.d3SvgContainer.append("circle")
-                        .attr("cx", this.width / 2)
-                        .attr("cy", this.height / 2)
-                        .attr("r", 20)
-                        .style("fill", "#7B00D6");
-
-                    // draw origin
-                    this.d3SvgContainer.append("circle")
-                        .attr("cx", 0)
-                        .attr("cy", 0)
-                        .attr("r", 20);
-                }
-
-                // contains all nodes
-                this.d3NodeContainer = this.d3HtmlContainer.append("div")
-                    .attr("id", "hypernodes-then-nodes")
-                    .attr("class", "nodecontainer");
-
-                // contains all relations
-                this.d3LinkPath = this.d3SvgContainer.append("g").attr("id", "linkContainer");
-
-                this.d3ConnectorLine = this.d3SvgContainer.append("line").classed({
-                    "connectorline": true
-                }).style("marker-start", "url(" + $location.absUrl() + "#graph_connector_arrow)");
-
-                // add use element as the last(!) element to the svg, this controls the foremost element
-                //http://stackoverflow.com/a/6289809
-                // this.svgUseElement = this.d3NodeContainer.append("use").attr("id", "svgUseElement").attr("xlink:href", "#svgUseElement");
-            }
-
-
             updateGraph(changes) {
-                //add nodes to svg, first hypernodes then nodes, so the normal
-                //nodes are drawn on top of the hypernodes in the svg
-                this.graph.setNodes(_.sortBy(this.graph.nodes, n => !n.hyperEdge));
-
                 this.calculateNodeVerticalForce();
                 this.setInitialNodePositions();
 
-                // console.log("------ update graph");
-                // console.log(graph.nonHyperRelationNodes.map((n) => n.title), graph.hyperRelations.map((r) => r.source.title + " --> " + r.target.title));
-                // create data joins
-                // http://bost.ocks.org/mike/join/
-                this.d3NodeContainerWithData = this.d3NodeContainer
-                    .selectAll("div")
-                    .data(this.graph.nodes, (d) => d.id);
-
-                this.d3LinkPathWithData = this.d3LinkPath
-                    .selectAll("path")
-                    .data(this.graph.edges, (d) => d.startId + " --> " + d.endId);
-
-                // add nodes
-                let d3NodeFrame = this.d3NodeContainerWithData.enter()
-                    .append("div").attr("class","nodeframe")
-                    .style("position", "relative") // needed for z-index (moving/fixed have higher z-index)
-                    .style("pointer-events", "all");
-
-                // onclick handler to position the popover according to the current node position,
-                // otherwise the position will be off if we zoomed.
-                scope.setPopoverPosition = function(event) {
-                    let nodeElement = event.currentTarget;
-                    // the popover was closed -> nothing todo
-                    if (nodeElement.childElementCount < 2)
-                        return;
-
-                    // set the position according to the node
-                    // positioning is relative!
-                    let popover = nodeElement.children[1];
-                    let node = nodeElement.__data__;
-                    popover.style.top = node.rect.height + "px";
-                    popover.style.left = (node.rect.width - popover.clientWidth) / 2 + "px";
-                    //TODO: we should probably manually enable the popover but we cant...
-                    EditPopoverService.editNode = node;
-                };
-
-                this.d3Node = this.d3NodeContainerWithData.append("div")
-                    .attr("class", d => d.hyperEdge ? "no_flick relation_label" : `no_flick node ${DiscourseNode.get(d.label).css}`)
-                    .style("position", "absolute")
-                    .style("max-width", "150px") // to produce line breaks
-                    .style("word-wrap", "break-word")
-                    .attr("ng-click", "setPopoverPosition($event)");
-
-                this.d3Node
-                    .append("div")
-                    .attr("edit-popover", "")
-                    .style("cursor", "pointer")
-                    .append("span")
-                    .text(d => d.title);
-                    // .style("border-width", n => Math.abs(n.verticalForce) + "px")
-                    // .style("border-color", n => n.verticalForce < 0 ? "#3CBAFF" : "#FFA73C")
-
-                // add relations
-                this.d3LinkPathWithData.enter()
-                    .append("path")
-                    .attr("class", "svglink")
-                    .each(function(link) {
-                        // if link is startRelation of a Hypernode
-                        if (!(link.target.hyperEdge && link.target.startId === link.source.id)) {
-                            d3.select(this).style("marker-end", "url(" + $location.absUrl() + "#graph_arrow)");
-                        }
-                    });
-
-                this.d3NodeTools = this.d3NodeContainerWithData.append("div")
-                    .attr("class", "nodetools");
-
-                this.d3NodePinTool = this.d3NodeTools.append("div")
-                    .attr("class", "nodetool pintool fa fa-thumb-tack")
-                    .style("cursor", "pointer");
-
-                this.d3NodeConnectTool = this.d3NodeTools.append("div")
-                    .style("display", d => d.hyperEdge ? "none" : "inline-block")
-                    .attr("class", "nodetool connecttool icon-flow-line fa-rotate-minus45")
-                    .style("cursor", "crosshair");
-
-                this.d3NodeDisconnectTool = this.d3NodeTools.append("div")
-                    .style("display", d => d.hyperEdge ? "inline-block" : "none")
-                    .attr("class", "nodetool disconnecttool fa fa-scissors")
-                    .style("cursor", "pointer");
-
-                this.d3NodeDeleteTool = this.d3NodeTools.append("div")
-                    .style("display", d => d.hyperEdge ? "none" : "inline-block")
-                    .attr("class", "nodetool deletetool fa fa-trash")
-                    .style("cursor", "pointer");
-
-                /// remove nodes and relations
-                this.d3NodeContainerWithData.exit().remove();
-                this.d3LinkPathWithData.exit().remove(); //
-
-                // console.log(graph.nodes.map(n => n.id.slice(0,3)),d3NodeContainer.node());
-                // console.log(graph.edges,d3LinkPath.node());
-
-                // TODO: non-hyper-relation-links are broken
-                // let linkText = svgContainer.append("div").attr("id", "group_link_labels")
-                //     .selectAll()
-                //     .data(graph.edges).enter()
-                //     .append("div");
-                // let linktextHtml = linkText.append("div")
-                //     .attr("class", "relation_label")
-                //     .html(d => connectsHyperEdge(d) ? "" : d.title);
-                // check whether a link connects to a hyperedge-node
-                // function connectsHyperEdge(link) {
-                //     return link.source.hyperEdge || link.target.hyperEdge;
-                // }
-
-                this.updateGraphRefs();
-                this.registerUIEvents();
                 this.recalculateNodeDimensions();
+
+                //this.registerUIEvents();
                 this.force.nodes(this.graph.nodes); // nodes and edges get replaced instead of just changed by scalajs
                 this.force.links(this.graph.edges); // that's why we need to set the new references
-                // force.tick();
-                // drawGraph(graph, transformCompat);
+
                 this.force.start();
-
-                this.registerUIEvents();
-
-                $compile(this.d3Html[0])(scope);
             }
 
             registerUIEvents() {
@@ -304,11 +96,12 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
 
                 this.d3Svg.on("dblclick.zoom", null);
 
-                this.d3Node/*.on("click", this.ignoreHyperEdge(node => {
-                        this.onClick({
-                            node
-                        });
-                    }))*/
+                this.d3Node
+                    /*.on("click", this.ignoreHyperEdge(node => {
+                                            this.onClick({
+                                                node
+                                            });
+                                        }))*/
                     .call(disableDrag)
                     .on("mouseover", d => this.hoveredNode = d)
                     .on("mouseout", d => {
@@ -375,8 +168,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                 } else {
                     requestAnimationFrame(this.nonBlockingConverge.bind(this));
                 }
-
-
             }
 
             nonBlockingConverge() {
@@ -396,11 +187,11 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
 
             initConverge() {
                 // focusMarkedNodes needs visible/marked nodes and edges
-                this.graph.nodes.forEach( n => {
+                this.graph.nodes.forEach(n => {
                     n.marked = true;
                     n.visible = true;
                 });
-                this.graph.edges.forEach( e => {
+                this.graph.edges.forEach(e => {
                     e.visible = true;
                 });
                 if (this.visibleConvergence) {
@@ -429,28 +220,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                 this.d3SvgContainer.style("visibility", "visible");
             }
 
-            updateGraphRefs() {
-                // write dom element ref and rect into graph node
-                // for easy lookup
-                this.graph.nodes.forEach((n, i) => {
-                    n.domNodeContainer = this.d3NodeContainerWithData[0][i];
-                    n.d3NodeContainer = d3.select(n.domNodeContainer);
-
-                    n.domNode = this.d3Node[0][i];
-                    n.d3Node = d3.select(n.domNode);
-
-                    n.domNodeTools = this.d3NodeTools[0][i];
-                    n.d3NodeTools = d3.select(n.domNodeTools);
-                });
-
-                this.graph.edges.forEach( (r, i) => {
-                    r.domPath = this.d3LinkPathWithData[0][i];
-                    r.d3Path = d3.select(r.domPath);
-                });
-            }
-
             recalculateNodeDimensions() {
-                this.graph.nodes.forEach( n => {
+                this.graph.nodes.forEach(n => {
                     n.rect = {
                         width: n.domNode.offsetWidth,
                         height: n.domNode.offsetHeight
@@ -504,40 +275,18 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
             }
 
             drawGraph() {
-                this.graph.nodes.forEach( (node) => {
-                    node.domNodeContainer.style[this.transformCompat] = "translate(" + (node.x - node.rect.width / 2) + "px," + (node.y - node.rect.height / 2) + "px)";
+                this.graph.nodes.forEach((node) => {
+                    node.domNode.style[this.transformCompat] = "translate(" + (node.x - node.rect.width / 2) + "px," + (node.y - node.rect.height / 2) + "px)";
                 });
 
-                this.graph.edges.forEach( (relation) => {
-                    // draw svg paths for lines between nodes
-                    // if (relation.source.id === relation.target.id) { // self loop
-                    //     //TODO: self loops with hypernodes
-                    //     let rect = relation.rect;
-                    //     relation.domPath.setAttribute("d", `
-                    //             M ${relation.source.x} ${relation.source.y - rect.height/2}
-                    //             m -20, 0
-                    //             c -80,-80   120,-80   40,0
-                    //             `);
-                    // } else {
-                    // clamp every edge line to the intersections with its incident node rectangles
+                this.graph.edges.forEach((relation) => {
                     let line = Helpers.clampLineByRects(relation, relation.source.rect, relation.target.rect);
                     if (isNaN(line.x1) || isNaN(line.y1) || isNaN(line.x2) || isNaN(line.y2))
                         console.warn("invalid coordinates for relation");
                     else {
                         let pathAttr = `M ${line.x1} ${line.y1} L ${line.x2} ${line.y2}`;
-                        relation.domPath.setAttribute("d", pathAttr);
+                        relation.domRelation.setAttribute("d", pathAttr);
                     }
-                    // }
-
-
-                    // draw normal link-labels and center them
-                    // let domLinkTextNode = domLinks[i];
-                    // let rect = relation.rect;
-                    // if (relation.source.id === relation.target.id) { // self loop
-                    //     domLinkTextNode.style[transformCompat] = "translate(" + (relation.source.x - rect.width / 2) + "px," + (relation.source.y - rect.height / 2 - 70) + "px)";
-                    // } else {
-                    //     domLinkTextNode.style[transformCompat] = "translate(" + (((relation.source.x + relation.target.x) / 2) - rect.width / 2) + "px," + (((relation.source.y + relation.target.y) / 2) - rect.height / 2) + "px)";
-                    // }
                 });
             }
 
@@ -553,11 +302,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
 
             // resize graph according to the current element dimensions
             resizeGraph() {
-                this.width = this.rootDomElement.offsetWidth;
-                this.height = this.rootDomElement.offsetHeight;
-                let [width, height] = [this.width, this.height];
-                this.d3Svg.style("width", width).style("height", height);
-                this.d3Html.style("width", width + "px").style("height", height + "px");
+                scope.width = this.width = this.rootDomElement.offsetWidth;
+                scope.height = this.height = this.rootDomElement.offsetHeight;
                 // if graph was hidden when initialized,
                 // all foreign objects have size 0
                 // this call recalculates the sizes
@@ -568,37 +314,37 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
 
             // focus the marked nodes and scale zoom accordingly
             focusMarkedNodes(duration = 500) {
-                if (this.width === 0 || this.height === 0) return;
-                let marked = _.select(this.graph.nodes, {
-                    marked: true
-                });
-                if (_.isEmpty(marked)) {
-                    return;
-                }
+                // if (this.width === 0 || this.height === 0) return;
+                // let marked = _.select(this.graph.nodes, {
+                //     marked: true
+                // });
+                // if (_.isEmpty(marked)) {
+                //     return;
+                // }
 
-                let min = [_.min(marked, "x").x, _.min(marked, "y").y];
-                let max = [_.max(marked, "x").x, _.max(marked, "y").y];
-                let center = [(max[0] + min[0]) / 2, (max[1] + min[1]) / 2];
+                // let min = [_.min(marked, "x").x, _.min(marked, "y").y];
+                // let max = [_.max(marked, "x").x, _.max(marked, "y").y];
+                // let center = [(max[0] + min[0]) / 2, (max[1] + min[1]) / 2];
 
-                let scale;
-                if (max[0] === min[0] || max[1] === min[1]) {
-                    scale = 1;
-                } else {
-                    scale = Math.min(1, 0.9 * this.width / (max[0] - min[0]), 0.9 * this.height / (max[1] - min[1]));
-                }
+                // let scale;
+                // if (max[0] === min[0] || max[1] === min[1]) {
+                //     scale = 1;
+                // } else {
+                //     scale = Math.min(1, 0.9 * this.width / (max[0] - min[0]), 0.9 * this.height / (max[1] - min[1]));
+                // }
 
-                let translate = [this.width / 2 - center[0] * scale, this.height / 2 - center[1] * scale];
+                // let translate = [this.width / 2 - center[0] * scale, this.height / 2 - center[1] * scale];
 
-                if (duration > 0) {
-                    this.d3HtmlContainer.transition().duration(duration).call(this.zoom.translate(translate).scale(scale).event);
-                    this.d3SvgContainer.transition().duration(duration).call(this.zoom.translate(translate).scale(scale).event);
-                } else {
-                    // skip animation if duration is zero
-                    this.d3HtmlContainer.call(this.zoom.translate(translate).scale(scale).event);
-                    this.d3SvgContainer.call(this.zoom.translate(translate).scale(scale).event);
-                }
+                // if (duration > 0) {
+                //     this.d3HtmlContainer.transition().duration(duration).call(this.zoom.translate(translate).scale(scale).event);
+                //     this.d3SvgContainer.transition().duration(duration).call(this.zoom.translate(translate).scale(scale).event);
+                // } else {
+                //     // skip animation if duration is zero
+                //     this.d3HtmlContainer.call(this.zoom.translate(translate).scale(scale).event);
+                //     this.d3SvgContainer.call(this.zoom.translate(translate).scale(scale).event);
+                // }
 
-                this.drawGraph();
+                // this.drawGraph();
             }
 
 
@@ -606,20 +352,20 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
             filter(matchingNodes) {
                 let component = _(matchingNodes).map(node => node.component).flatten().uniq().value();
 
-                this.graph.nodes.forEach( node => {
+                this.graph.nodes.forEach(node => {
                     node.marked = _(matchingNodes).contains(node);
                     node.visible = node.marked || _(component).contains(node);
 
                 });
 
-                this.graph.nodes.forEach( node => {
+                this.graph.nodes.forEach(node => {
                     if (node.hyperEdge) {
                         //TODO: mark chains of hyperedges
                         node.marked = node.marked || node.source.marked && node.target.marked;
                     }
                 });
 
-                this.graph.edges.forEach( edge => {
+                this.graph.edges.forEach(edge => {
                     edge.visible = _(component).contains(edge.source) && _(component).contains(edge.target);
                 });
 
@@ -631,7 +377,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
             setVisibility() {
                 let notMarkedOpacity = 0.3;
                 // set node visibility
-                this.graph.nodes.forEach( node => {
+                this.graph.nodes.forEach(node => {
                     let opacity = (node.marked) ? 1.0 : notMarkedOpacity;
                     let visibility = node.visible ? "inherit" : "hidden";
                     node.domNode.style.opacity = opacity;
@@ -641,9 +387,9 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                 });
 
                 // set edge visibility
-                this.graph.edges.forEach( (edge, i) => {
-                    edge.domPath.style.visibility = edge.visible ? "inherit" : "hidden";
-                    edge.domPath.style.opacity = (edge.source.marked === true && edge.target.marked === true) ? 1.0 : notMarkedOpacity;
+                this.graph.edges.forEach((edge, i) => {
+                    edge.domRelation.style.visibility = edge.visible ? "inherit" : "hidden";
+                    edge.domRelation.style.opacity = (edge.source.marked === true && edge.target.marked === true) ? 1.0 : notMarkedOpacity;
                 });
             }
 
@@ -831,8 +577,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                             referenceNode = start.connectsTo.$buildRaw(targetNode.encode());
                         }
                         referenceNode.$save({}).$then(response => {
-                            response.graph.nodes.forEach( n => this.graph.addNode(n));
-                            response.graph.edges.forEach( r => this.graph.addRelation(r));
+                            response.graph.nodes.forEach(n => this.graph.addNode(n));
+                            response.graph.edges.forEach(r => this.graph.addRelation(r));
                             this.graph.commit();
                         });
                     }
@@ -871,11 +617,20 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
 
         let d3Graph = new D3Graph(scope.graph, element[0], scope.onClick, scope.onDraw);
         scope.controlGraph = d3Graph;
-        d3Graph.init();
+
+        //TODO: maybe better callback functions
+        let nodeLast = $q.defer();
+        let relationLast = $q.defer();
+        scope.$on("d3_node_last", () => {console.log("node last");nodeLast.resolve();});
+        scope.$on("d3_relation_last", () => {console.log("node last");relationLast.resolve();});
+        let allLast = $q.all([nodeLast.promise, relationLast.promise]).then(() => {
+            d3Graph.init();
+        });
     }
 
     return {
         restrict: "A",
+        templateUrl: "assets/app/graph/d3_graph/d3_graph.html",
         scope: {
             graph: "=",
             controlGraph: "=",
@@ -884,5 +639,4 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
         },
         link
     };
-
 }

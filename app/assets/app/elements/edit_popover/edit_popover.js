@@ -9,6 +9,22 @@ function editPopover($compile, EditPopoverService) {
         restrict: "A",
         scope: true,
         compile: function(el) {
+
+                //scope.setPopoverPosition = function(event) {
+                //    let nodeElement = event.currentTarget;
+                //    // the popover was closed -> nothing todo
+                //    if (nodeElement.childElementCount < 2)
+                //        return;
+
+                //    // set the position according to the node
+                //    // positioning is relative!
+                //    let popover = nodeElement.children[1];
+                //    let node = nodeElement.__data__;
+                //    popover.style.top = node.rect.height + "px";
+                //    popover.style.left = (node.rect.width - popover.clientWidth) / 2 + "px";
+                //    //TODO: we should probably manually enable the popover but we cant...
+                //    EditPopoverService.editNode = node;
+                //};
             //TODO: we should normally use the $popover service to construct a popover in a directive, but this does not work for content-template-url -> this seems to be a bug in angular-strap.
             el.removeAttr("edit-popover"); // necessary to avoid in
             el.attr("content-template", "assets/app/elements/edit_popover/edit_popover.html");
