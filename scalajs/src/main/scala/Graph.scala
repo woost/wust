@@ -4,6 +4,7 @@ import scala.collection.mutable
 import scala.scalajs.js
 import scala.scalajs.js.annotation.{JSExport, JSExportAll}
 import js.JSConverters._
+import js.Dynamic.{global => g}
 
 // http://www.scala-js.org/doc/export-to-javascript.html
 object GraphAlgorithms {
@@ -82,12 +83,19 @@ trait NodeBase extends NodeDelegates {
   var inRelations: Set[RelationLike] = Set.empty
   var outRelations: Set[RelationLike] = Set.empty
   def relations = inRelations ++ outRelations
-  @JSExport def predecessors = inRelations.map(_.startNode).toJSArray
-  @JSExport def successors = outRelations.map(_.endNode).toJSArray
-  @JSExport def neighbours = predecessors ++ successors
+  def predecessors = inRelations.map(_.startNode)
+  def successors = outRelations.map(_.endNode)
+  def neighbours = predecessors ++ successors
   @JSExport def inDegree = inRelations.size
   @JSExport def outDegree = outRelations.size
   @JSExport def degree = inDegree + outDegree
+
+  @JSExport("inRelations") def inRelationsJs = inRelations.toJSArray
+  @JSExport("outRelations") def outRelationsJs = outRelations.toJSArray
+  @JSExport("relations") def relationsJs = relations.toJSArray
+  @JSExport("predecessors") def predecessorsJs = predecessors.toJSArray
+  @JSExport("successors") def successorsJs = successors.toJSArray
+  @JSExport("neighbours") def neighboursJs = neighbours.toJSArray
 
   import GraphAlgorithms._
 
@@ -231,7 +239,6 @@ object Node {
 
 @JSExport
 class HyperGraph(val rawGraph: RawGraph) extends WrappedGraph[HyperRelation] {
-  @JSExport def AAA_HyperGraph = "Penos"
   // hyperrelations are added to the nodeset as well as to the relationset,
   // because they are used in both ways:
   //  1) as a relation which connects two nodes (or hyperrelations)
@@ -263,7 +270,7 @@ class HyperGraph(val rawGraph: RawGraph) extends WrappedGraph[HyperRelation] {
     rawGraph.add(n)
     if(n.hyperEdge) {
       if(n.startId.isEmpty || n.endId.isEmpty)
-        js.Dynamic.global.console.warn(s"Adding HyperRelation ${ n.id } with empty startId or endId.")
+        g.console.warn(s"Adding HyperRelation ${ n.id } with empty startId or endId.")
       rawGraph.add(new RawRelation(n.startId.get, n.id))
       rawGraph.add(new RawRelation(n.id, n.endId.get))
     }
@@ -318,8 +325,6 @@ class Graph(private[js] val rawGraph: RawGraph) extends WrappedGraph[Relation] {
     for(r <- hyperRelations) {
       r.startNode = nodeById(r.startId)
       r.endNode = nodeById(r.endId)
-      r.startNode.outRelations += r
-      r.endNode.inRelations += r
     }
     hyperRelationsJs = hyperRelations.toJSArray
   }
@@ -429,13 +434,13 @@ class RawGraph(private[js] var nodes: Set[RawNode], private[js] var relations: S
     incidentRelationsWithoutHyperHelperRelations(node).foreach(remove)
     incidentHyperRelations(node).foreach(remove)
     if( nodes.size == 0) {
-      js.Dynamic.global.console.warn(s"""Deleted last node""")
+      g.console.warn(s"""Deleted last node""")
     }
     else {
       //TODO!: what should happen when removing the rootNode?
       if(node.id == rootNodeId) {
         rootNodeId = nodes.head.id
-        js.Dynamic.global.console.warn(s"""Deleted rootNode, rootNode is now: ${nodes.head.id} - "${nodes.head.title}"""")
+        g.console.warn(s"""Deleted rootNode, rootNode is now: ${nodes.head.id} - "${nodes.head.title}"""")
       }
     }
   }
