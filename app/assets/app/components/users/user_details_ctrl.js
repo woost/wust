@@ -10,6 +10,7 @@ function UserDetailsCtrl($stateParams, User, Auth, $q) {
     vm.saveUser = saveUser;
 
     vm.contributions = [];
+    //TODO: get all contributions at once
     let created = vm.user.created.$search().$asPromise();
     let updated = vm.user.updated.$search().$asPromise();
     let deleted = vm.user.deleted.$search().$asPromise();
