@@ -1,11 +1,13 @@
 angular.module("wust.components").controller("UserDetailsCtrl", UserDetailsCtrl);
 
-UserDetailsCtrl.$inject = ["$stateParams", "User", "$q"];
+UserDetailsCtrl.$inject = ["$stateParams", "User", "Auth", "$q"];
 
-function UserDetailsCtrl($stateParams, User, $q) {
+function UserDetailsCtrl($stateParams, User, Auth, $q) {
     let vm = this;
 
     vm.user = User.$find($stateParams.id);
+    vm.isCurrentUser = $stateParams.id === Auth.getUserId();
+    vm.saveUser = saveUser;
 
     vm.contributions = [];
     let created = vm.user.created.$search().$asPromise();
@@ -26,4 +28,8 @@ function UserDetailsCtrl($stateParams, User, $q) {
             data: d
         };
     })).flatten().value());
+
+    function saveUser() {
+        return vm.user.$save().$asPromise();
+    }
 }

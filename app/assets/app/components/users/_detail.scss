@@ -1,2 +1,13 @@
 #user_detail_component {
+    .list-group-item {
+        padding: 3px;
+        min-height: 42px;
+        .show_value {
+            padding-top: 7px;
+            padding-left: 13px;
+        }
+    }
+    .contributions {
+        margin-top: 20px;
+    }
 }

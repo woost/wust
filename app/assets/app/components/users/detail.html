@@ -1,20 +1,43 @@
 <div id="user_detail_component">
-    <ul class="list-group">
-        <li class="list-group-item">
-            <span class="badge" ng-bind="vm.user.name"></span>
-            Name
-        </li>
-        <li ng-if="vm.user.email" class="list-group-item">
-            <span class="badge" ng-bind="vm.user.email"></span>
-            Email
-        </li>
-    </ul>
+    <form editable-form name="userForm" onaftersave="vm.saveUser()">
+        <ul class="list-group">
+            <li class="list-group-item">
+                <div class="badge">
+                    Name
+                </div>
+                <div class="show_value" ng-bind="vm.user.name"></span>
+            </li>
+            <li class="list-group-item">
+                <div class="badge">
+                    Email
+                </div>
+                <div class="show_value" editable-text="vm.user.email" ng-bind="vm.user.email"></span>
+            </li>
+        </ul>
+        <div ng-if="vm.isCurrentUser" class="buttons">
+        <!-- button to show form -->
+        <button type="button" class="btn btn-default" ng-click="userForm.$show()" ng-show="!userForm.$visible">
+            Edit
+        </button>
+        <!-- buttons to submit / cancel form -->
+        <span ng-show="userForm.$visible">
+            <button type="button" class="btn btn-default" ng-disabled="userForm.$waiting" ng-click="userForm.$cancel()">
+            Cancel
+            </button>
+            <button type="submit" class="btn btn-primary" ng-disabled="userForm.$waiting">
+            Save
+            </button>
+        </span>
+        </div>
 
+    </form>
+
+    <h2>Contributions</h2>
     <ul class="list-group">
         <div >
         <li ng-repeat="contribution in vm.contributions" class="list-group-item">
             <span class="badge" ng-bind="contribution.title"></span>
-            <span small-post node="contribution.data"></span>
+            <div class="show_value" small-post node="contribution.data"></span>
         </li>
     </ul>
 </div>
