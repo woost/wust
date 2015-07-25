@@ -1,8 +1,8 @@
 angular.module("wust.graph").directive("d3Graph", d3Graph);
 
-d3Graph.$inject = ["$window", "DiscourseNode", "Helpers", "$location", "$filter", "Post", "$compile", "EditPopoverService"];
+d3Graph.$inject = ["$window", "DiscourseNode", "Helpers", "$location", "$filter", "Post", "$compile"];
 
-function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $compile, EditPopoverService) {
+function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $compile) {
 
     function link(scope, element) {
 
@@ -183,35 +183,14 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                     .style("position", "relative") // needed for z-index (moving/fixed have higher z-index)
                     .style("pointer-events", "all");
 
-                // onclick handler to position the popover according to the current node position,
-                // otherwise the position will be off if we zoomed.
-                scope.setPopoverPosition = function(event) {
-                    let nodeElement = event.currentTarget;
-                    // the popover was closed -> nothing todo
-                    if (nodeElement.childElementCount < 2)
-                        return;
-
-                    // set the position according to the node
-                    // positioning is relative!
-                    let popover = nodeElement.children[1];
-                    let node = nodeElement.__data__;
-                    popover.style.top = node.rect.height + "px";
-                    popover.style.left = (node.rect.width - popover.clientWidth) / 2 + "px";
-                    //TODO: we should probably manually enable the popover but we cant...
-                    EditPopoverService.editNode = node;
-                };
-
                 this.d3Node = this.d3NodeContainerWithData.append("div")
                     .attr("class", d => d.hyperEdge ? "no_flick relation_label" : `no_flick node ${DiscourseNode.get(d.label).css}`)
                     .style("position", "absolute")
                     .style("max-width", "150px") // to produce line breaks
                     .style("word-wrap", "break-word")
-                    .attr("ng-click", "setPopoverPosition($event)");
+                    .style("cursor", "pointer");
 
                 this.d3Node
-                    .append("div")
-                    .attr("edit-popover", "")
-                    .style("cursor", "pointer")
                     .append("span")
                     .text(d => d.title);
                     // .style("border-width", n => Math.abs(n.verticalForce) + "px")
@@ -271,8 +250,16 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                 // }
 
                 this.updateGraphRefs();
-                this.registerUIEvents();
                 this.recalculateNodeDimensions();
+
+                // now we can use the calculated rect
+                this.d3Node
+                    .attr("description-popover", "")
+                    .attr("node-id", d => d.id)
+                    .attr("position-hack-width", d => d.rect.width)
+                    .attr("position-hack-height", d => d.rect.height);
+
+                this.registerUIEvents();
                 this.force.nodes(this.graph.nodes); // nodes and edges get replaced instead of just changed by scalajs
                 this.force.links(this.graph.edges); // that's why we need to set the new references
                 // force.tick();
@@ -309,7 +296,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                             node
                         });
                     }))*/
-                    .call(disableDrag)
                     .on("mouseover", d => this.hoveredNode = d)
                     .on("mouseout", d => {
                         this.hoveredNode = undefined;

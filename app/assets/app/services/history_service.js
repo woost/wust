@@ -7,7 +7,9 @@ function HistoryService(Post, DiscourseNode, store) {
     let maximum = 8;
     let self = this;
 
+    // the activeViewIndex refers to currently selected focus view: graph, neighbour, ...
     this.activeViewIndex = historyStore.get("activeViewIndex") || 0;
+
     this.visited = [];
     storeVisited();
     _.each(historyStore.get("visited"), restoreNode);
@@ -17,19 +19,14 @@ function HistoryService(Post, DiscourseNode, store) {
     this.changeActiveView = changeActiveView;
 
     this.updateCurrentView = updateCurrentView;
-    this.setCurrentView = setCurrentView;
 
-    let currentViewComponent;
-
-    function setCurrentView(component) {
-        currentViewComponent = component;
-    }
+    this.currentViewComponent = undefined;
 
     function updateCurrentView(node) {
-        if (currentViewComponent === undefined)
+        if (this.currentViewComponent === undefined)
             return;
 
-        let existing = _.find(currentViewComponent.nodes, {
+        let existing = _.find(this.currentViewComponent.nodes, {
             id: node.id
         });
         if (existing !== undefined) {
