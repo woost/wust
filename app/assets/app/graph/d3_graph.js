@@ -319,10 +319,10 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                     });
 
                 this.d3Node.call(dragMove);
-                this.d3NodePinTool.on("click", this.toggleFixed.bind(this));
+                this.d3NodePinTool.on("click", this.toggleFixed.bind(this)).call(disableDrag);
                 this.d3NodeConnectTool.call(dragConnect);
-                this.d3NodeDisconnectTool.on("click", this.disconnectHyperRelation.bind(this));
-                this.d3NodeDeleteTool.on("click", this.removeNode.bind(this));
+                this.d3NodeDisconnectTool.on("click", this.disconnectHyperRelation.bind(this)).call(disableDrag);
+                this.d3NodeDeleteTool.on("click", this.removeNode.bind(this)).call(disableDrag);
 
                 // register for resize event
                 angular.element($window).bind("resize", this.resizeGraph.bind(this));
