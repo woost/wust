@@ -1,8 +1,0 @@
-// prevent flickering of animations in webkit
-// http://stackoverflow.com/questions/3461441/prevent-flicker-on-webkit-transition-of-webkit-transform
-.no_flick, .popover {
-    -webkit-backface-visibility: hidden;
-    * {
-        -webkit-transform: translateZ(0)
-    }
-}
