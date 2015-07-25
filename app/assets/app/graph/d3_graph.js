@@ -682,19 +682,17 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                 });
                 start.connectsTo.$buildRaw({
                     id: d.endId
-                }).$destroy().$then(response => {
-                    this.graph.removeNode(d.id);
-                    this.graph.commit();
-                });
+                }).$destroy().$then(_.noop, response => humane.error("Server error:\n" + response));
+                this.graph.removeNode(d.id);
+                this.graph.commit();
             }
 
             removeNode(d) {
                 Post.$buildRaw({
                     id: d.id
-                }).$destroy().$then(response => {
-                    this.graph.removeNode(d.id);
-                    this.graph.commit();
-                });
+                }).$destroy().$then(_.noop, response => humane.error("Server error:\n" + response));
+                this.graph.removeNode(d.id);
+                this.graph.commit();
             }
 
 

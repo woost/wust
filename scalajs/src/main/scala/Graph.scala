@@ -189,7 +189,7 @@ sealed trait WrappedGraph[RELATION <: RelationLike] {
   private[js] def refreshIndex() {
     nodeById = nodes.map(n => n.id -> n).toMap
     relationByIds = relations.map(r => (r.startId, r.endId) -> r).toMap
-    rootNode = nodeById(rawGraph.rootNodeId)
+    rootNode = nodeById.get(rawGraph.rootNodeId).getOrElse(null) //TODO: now what?
     for(n <- nodes) {
       n.invalidate()
       n.inRelations = Set.empty
@@ -428,6 +428,16 @@ class RawGraph(private[js] var nodes: Set[RawNode], private[js] var relations: S
 
     incidentRelationsWithoutHyperHelperRelations(node).foreach(remove)
     incidentHyperRelations(node).foreach(remove)
+    if( nodes.size == 0) {
+      js.Dynamic.global.console.warn(s"""Deleted last node""")
+    }
+    else {
+      //TODO!: what should happen when removing the rootNode?
+      if(node.id == rootNodeId) {
+        rootNodeId = nodes.head.id
+        js.Dynamic.global.console.warn(s"""Deleted rootNode, rootNode is now: ${nodes.head.id} - "${nodes.head.title}"""")
+      }
+    }
   }
   def remove(relation: RawRelation) {
     relations -= relation
