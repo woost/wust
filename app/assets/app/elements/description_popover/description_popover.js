@@ -20,16 +20,14 @@ function descriptionPopover($compile, $popover, HistoryService) {
                     "contentTemplate": "assets/app/elements/description_popover/description_popover.html",
                     // "title": "penos",
                     "placement": "bottom",
-                    "autoClose": "1",
+                    "autoClose": "0",
                     "animation": "",
                     "trigger": "manual",
                 });
 
                 let elem = el[0];
                 let origZindex = elem.style.zIndex;
-                let popoverElem, origPopoverZindex;
-                popover.$promise.then(() => {
-                });
+                let origPopoverZindex;
 
                 let originalApplyPlacement = popover.$applyPlacement;
                 popover.$applyPlacement = function() {
