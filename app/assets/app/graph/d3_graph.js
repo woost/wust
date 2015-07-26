@@ -48,7 +48,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                     .gravity(0.01)
                     .theta(0.8)
                     .alpha(0.1);
-                this.zoom = d3.behavior.zoom().scaleExtent([0.1, 10]); // min/max zoom level
+                this.zoom = d3.behavior.zoom().scaleExtent([0.1, 3]); // min/max zoom level
 
             }
 
