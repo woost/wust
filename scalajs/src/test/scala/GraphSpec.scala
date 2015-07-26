@@ -113,25 +113,25 @@ object GraphSpec extends TestSuite {
       'WrapItems {
         val g = graph(Set(A, B, C, AXB), Set(ArX, XrB, ArC))
         'Graph {
-          val wrapped = g.wrap()
+          val wrapped = g.wrap("")
           assert(wrapped.nodes.map(_.id) == Set("A", "B", "C", "X"))
           assert(wrapped.relations.map(r => r.startId -> r.endId) == Set("A" -> "X", "X" -> "B", "A" -> "C"))
         }
         'HyperGraph {
-          val wrapped = g.hyperWrap()
+          val wrapped = g.hyperWrap("")
           assert(wrapped.nodes.map(_.id) == Set("A", "B", "C", "X"))
           assert(wrapped.hyperRelations.map(r => r.startId -> r.endId) == Set("A" -> "B"))
         }
       }
       'nodeById {
         val g = graph(Set(A), Set())
-        val wrapped = g.wrap()
+        val wrapped = g.wrap("")
         assert(wrapped.nodeById("A") == wrapped.nodes.head)
       }
       'relationById {
         val g = graph(Set(A, B, C, AXB), Set(ArX, XrB, ArC))
         'Graph {
-          val wrapped = g.wrap()
+          val wrapped = g.wrap("")
           import wrapped.relationByIds
           assert(relationByIds.size == 3)
 
@@ -145,7 +145,7 @@ object GraphSpec extends TestSuite {
           assert(RArC.startId == "A", RArC.endId == "C")
         }
         'HyperGraph {
-          val wrapped = g.hyperWrap()
+          val wrapped = g.hyperWrap("")
           import wrapped.relationByIds
           assert(relationByIds.size == 1)
 
@@ -160,7 +160,7 @@ object GraphSpec extends TestSuite {
         val rawChanges = new RawGraphChanges(Set(C, AXB), Set(ArX, XrB, ArC))
 
         'Graph {
-          val wrapped = g.wrap()
+          val wrapped = g.wrap("")
           import wrapped.{nodeById => nid}
           import wrapped.{relationByIds => rid}
           val changes = GraphChanges(
@@ -170,7 +170,7 @@ object GraphSpec extends TestSuite {
           assert(wrappedChanges == changes)
         }
         'HyperGraph {
-          val wrapped = g.hyperWrap()
+          val wrapped = g.hyperWrap("")
           import wrapped.{nodeById => nid}
           import wrapped.{relationByIds => rid}
           val changes = GraphChanges(
@@ -184,7 +184,7 @@ object GraphSpec extends TestSuite {
       'CacheUpdates {
         val g = graph(Set(A, B, C, D, E, F, G, AXB), Set(ArX, XrB, ArC, DrA, ErF, CrG))
         'Graph {
-          val wrapped = g.wrap()
+          val wrapped = g.wrap("")
           // shadowing:
           val A = wrapped.nodeById("A")
           val B = wrapped.nodeById("B")
@@ -299,7 +299,7 @@ object GraphSpec extends TestSuite {
         }
 
         'HyperGraph {
-          val wrapped = g.hyperWrap()
+          val wrapped = g.hyperWrap("")
           // shadowing:
           val A = wrapped.nodeById("A")
           val B = wrapped.nodeById("B")
