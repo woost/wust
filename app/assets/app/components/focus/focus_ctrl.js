@@ -28,14 +28,13 @@ function FocusCtrl($stateParams, HistoryService, component) {
     }
 
     vm.graphComponent = component.wrap("graph");
-    vm.neighboursComponent = component.hyperWrap("neigbours");
+    vm.neighboursComponent = component.hyperWrap("focus");
     // vm.branchesComponent = component.wrap();
 
     vm.tabViews = _.map([0, 1, 2, 3], i => new Tab(i));
     vm.tabViews[HistoryService.activeViewIndex]._active = true;
 
     // we are viewing details about a node, so add it to the nodehistory
-    let focusComponent = component.hyperWrap("focus");
-    HistoryService.add(focusComponent.rootNode);
+    HistoryService.add(vm.neighboursComponent.rootNode);
     HistoryService.currentViewComponent = component;
 }

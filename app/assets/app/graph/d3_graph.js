@@ -59,7 +59,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                 this.force.on("tick", this.tick.bind(this));
                 this.graph.onCommit(this.updateGraph.bind(this));
 
-                this.updateGraph();
+                this.updateGraph({ newNodes: this.graph.nodes });
 
                 this.converge();
             }
@@ -156,7 +156,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                 // this.svgUseElement = this.d3NodeContainer.append("use").attr("id", "svgUseElement").attr("xlink:href", "#svgUseElement");
             }
 
-
             updateGraph(changes) {
                 //add nodes to svg, first hypernodes then nodes, so the normal
                 //nodes are drawn on top of the hypernodes in the svg
@@ -250,7 +249,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                 // }
 
                 this.updateGraphRefs();
-                this.recalculateNodeDimensions();
+                //TODO: take care of nodes where the title/description was changed
+                this.recalculateNodeDimensions(changes.newNodes);
 
                 // now we can use the calculated rect
                 this.d3Node
@@ -434,7 +434,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                     e.visible = true;
                 });
                 if (this.visibleConvergence) {
-                    this.recalculateNodeDimensions();
+                    this.recalculateNodeDimensions(this.graph.nodes);
                     this.focusMarkedNodes(0);
                     this.d3HtmlContainer.style("visibility", "visible");
                     this.d3SvgContainer.style("visibility", "visible");
@@ -479,8 +479,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                 });
             }
 
-            recalculateNodeDimensions() {
-                this.graph.nodes.forEach( n => {
+            recalculateNodeDimensions(nodes) {
+                nodes.forEach( n => {
                     n.rect = {
                         width: n.domNode.offsetWidth,
                         height: n.domNode.offsetHeight
@@ -592,7 +592,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                 // all foreign objects have size 0
                 // this call recalculates the sizes
                 this.focusMarkedNodes();
-                this.recalculateNodeDimensions();
+                this.recalculateNodeDimensions(this.graph.nodes);
             }
 
 
@@ -690,7 +690,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                 });
 
                 // the fixed class could change the elements dimensions
-                this.recalculateNodeDimensions();
+                this.recalculateNodeDimensions([d]);
                 this.force.alpha(0);
             }
 
@@ -702,7 +702,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                 });
 
                 // the fixed class could change the elements dimensions
-                this.recalculateNodeDimensions();
+                this.recalculateNodeDimensions([d]);
                 this.force.resume();
             }
 
