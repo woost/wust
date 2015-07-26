@@ -211,7 +211,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                     .attr("class", "nodetools");
 
                 this.d3NodePinTool = this.d3NodeTools.append("div")
-                    .attr("class", "nodetool pintool fa fa-thumb-tack")
+                    .attr("class", "nodetool pintool fa fa-thumb-tack fa-rotate-45")
                     .style("cursor", "pointer");
 
                 this.d3NodeConnectTool = this.d3NodeTools.append("div")
