@@ -14,10 +14,11 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
         }
 
         apply({
-            id, title, description, label, addedTags, original, tags
+            id, title, description, label, addedTags, original, tags, localId
         }) {
             tags = tags || [];
             this.id = id;
+            this.localId = localId === undefined ? this.localId : localId;
             this.title = title || "";
             this.description = description || "";
             this.label = label;
@@ -90,6 +91,7 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
         discard() {
             this.apply(this.original);
             this.addedTags = [];
+            this.onChange();
         }
 
         encode() {
