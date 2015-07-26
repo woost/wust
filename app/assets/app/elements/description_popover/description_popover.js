@@ -33,11 +33,13 @@ function descriptionPopover($compile, $popover, HistoryService) {
 
                 let originalApplyPlacement = popover.$applyPlacement;
                 popover.$applyPlacement = function() {
+                    originalApplyPlacement.apply(popover);
+
                     let popoverElem = popover.$element[0];
                     origPopoverZindex = popoverElem.style.zIndex;
 
                     elem.style.zIndex = 200;
-                    popoverElem.style.zIndex = 200;
+                    popoverElem.style.zIndex = 300;
                     popoverElem.style.top = attrs.positionHackHeight + "px";
                     // sadly the markdown parser does not directly fill the
                     // html and therefore the client width is unknown,
