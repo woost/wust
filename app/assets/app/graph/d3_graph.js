@@ -288,6 +288,13 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                     .on("dragstart", () => d3.event.sourceEvent.stopPropagation());
 
                 this.d3Html.call(this.zoom).on("dblclick.zoom", null);
+                function stopPropagationAfter(func) {
+                    return d => {
+                    console.log(d3.event);
+                        d3.event.stopImmediatePropagation();
+                        func(d);
+                    };
+                }
 
                 this.d3Svg.on("dblclick.zoom", null);
 
@@ -305,10 +312,10 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                     });
 
                 this.d3Node.call(dragMove);
-                this.d3NodePinTool.on("click", this.toggleFixed.bind(this)).call(disableDrag);
+                this.d3NodePinTool.on("click", stopPropagationAfter(this.toggleFixed.bind(this))).call(disableDrag);
                 this.d3NodeConnectTool.call(dragConnect);
-                this.d3NodeDisconnectTool.on("click", this.disconnectHyperRelation.bind(this)).call(disableDrag);
-                this.d3NodeDeleteTool.on("click", this.removeNode.bind(this)).call(disableDrag);
+                this.d3NodeDisconnectTool.on("click", stopPropagationAfter(this.disconnectHyperRelation.bind(this))).call(disableDrag);
+                this.d3NodeDeleteTool.on("click", stopPropagationAfter(this.removeNode.bind(this))).call(disableDrag);
 
                 // register for resize event
                 angular.element($window).bind("resize", this.resizeGraph.bind(this));
