@@ -287,7 +287,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                 let disableDrag = d3.behavior.drag()
                     .on("dragstart", () => d3.event.sourceEvent.stopPropagation());
 
-                this.d3Html.call(this.zoom).on("dblclick.zoom", null);
                 function stopPropagationAfter(func) {
                     return d => {
                     console.log(d3.event);
@@ -295,6 +294,17 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                         func(d);
                     };
                 }
+
+                //TODO: function onlyLeftMouseButton() {} for all drag-handlers
+
+                this.d3Html.call(this.zoom)
+                    .on("dblclick.zoom", null)
+                     .on("mousedown", () => {
+                         this.force.stop();
+                     })
+                     .on("dblclick", () => {
+                        this.force.resume();
+                     });
 
                 this.d3Svg.on("dblclick.zoom", null);
 
@@ -678,6 +688,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                 }).$destroy().$then(_.noop, response => humane.error("Server error:\n" + response));
                 this.graph.removeNode(d.id);
                 this.graph.commit();
+                this.force.stop();
             }
 
             removeNode(d) {
@@ -686,6 +697,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                 }).$destroy().$then(_.noop, response => humane.error("Server error:\n" + response));
                 this.graph.removeNode(d.id);
                 this.graph.commit();
+                this.force.stop();
             }
 
 
