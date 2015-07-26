@@ -25,6 +25,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                 this.hoveredNode = undefined;
                 this.width = rootDomElement.offsetWidth;
                 this.height = rootDomElement.offsetHeight;
+                this.dragInitiated = false; // if dragStart was triggered with the correct mouse button
 
                 // state for drag+drop
                 this.isDragging = false;
@@ -54,6 +55,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
 
             init() {
                 this.initDom();
+                this.registerInitUIEvents();
 
                 // call tick on every simulation step
                 this.force.on("tick", this.tick.bind(this));
@@ -270,58 +272,56 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                 $compile(this.d3Html[0])(scope);
             }
 
-            registerUIEvents() {
-                function stopPropagationAfter(func) {
-                    return d => {
-                    console.log(d3.event);
-                        d3.event.stopImmediatePropagation();
+            stopPropagationAfter(func) {
+                return d => {
+                    d3.event.stopImmediatePropagation();
+                    func(d);
+                };
+            }
+
+            // from: http://stackoverflow.com/a/17111220/793909
+            dragStartWithButton(button, func) {
+                return d => {
+                    if(d3.event.sourceEvent.which === button) {
+                        this.dragInitiated = true;
                         func(d);
-                    };
-                }
+                    }
+                    d3.event.sourceEvent.stopPropagation();
+                };
+            }
+            dragWithButton(button, func) {
+                return d => {
+                    if(d3.event.sourceEvent.which === button && this.dragInitiated) {
+                        func(d);
+                    }
+                    d3.event.sourceEvent.stopPropagation();
+                };
+            }
+            dragEndWithButton(button, func) {
+                return d => {
+                    if(d3.event.sourceEvent.which === button && this.dragInitiated) {
+                        func(d);
+                        this.dragInitiated = false;
+                    }
+                    d3.event.sourceEvent.stopPropagation();
+                };
+            }
 
-                // from: http://stackoverflow.com/a/17111220/793909
-                let dragInitiated = false;
-                function dragStartWithButton(button, func) {
-                    return d => {
-                        if(d3.event.sourceEvent.which === button) {
-                            dragInitiated = true;
-                            func(d);
-                        }
-                        d3.event.sourceEvent.stopPropagation();
-                    };
-                }
-                function dragWithButton(button, func) {
-                    return d => {
-                        if(d3.event.sourceEvent.which === button && dragInitiated) {
-                            func(d);
-                        }
-                        d3.event.sourceEvent.stopPropagation();
-                    };
-                }
-                function dragEndWithButton(button, func) {
-                    return d => {
-                        if(d3.event.sourceEvent.which === button && dragInitiated) {
-                            func(d);
-                            dragInitiated = false;
-                        }
-                        d3.event.sourceEvent.stopPropagation();
-                    };
-                }
-
+            registerInitUIEvents() {
                 // define events
                 this.zoom.on("zoom", this.zoomed.bind(this));
 
-                let dragMove = d3.behavior.drag()
-                    .on("dragstart", dragStartWithButton(1, this.onDragMoveStart.bind(this)))
-                    .on("drag", dragWithButton(1, this.onDragMove.bind(this)))
-                    .on("dragend", dragEndWithButton(1, this.onDragMoveEnd.bind(this)));
+                this.dragMove = d3.behavior.drag()
+                    .on("dragstart", this.dragStartWithButton(1, this.onDragMoveStart.bind(this)))
+                    .on("drag", this.dragWithButton(1, this.onDragMove.bind(this)))
+                    .on("dragend", this.dragEndWithButton(1, this.onDragMoveEnd.bind(this)));
 
-                let dragConnect = d3.behavior.drag()
-                    .on("dragstart", dragStartWithButton(1, this.onDragConnectStart.bind(this)))
-                    .on("drag", dragWithButton(1, this.onDragConnectMove.bind(this)))
-                    .on("dragend", dragEndWithButton(1, this.onDragConnectEnd.bind(this)));
+                this.dragConnect = d3.behavior.drag()
+                    .on("dragstart", this.dragStartWithButton(1, this.onDragConnectStart.bind(this)))
+                    .on("drag", this.dragWithButton(1, this.onDragConnectMove.bind(this)))
+                    .on("dragend", this.dragEndWithButton(1, this.onDragConnectEnd.bind(this)));
 
-                let disableDrag = d3.behavior.drag()
+                this.disableDrag = d3.behavior.drag()
                     .on("dragstart", () => d3.event.sourceEvent.stopPropagation());
 
                 this.d3Html.call(this.zoom)
@@ -335,6 +335,12 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
 
                 this.d3Svg.on("dblclick.zoom", null);
 
+                // register for resize event
+                angular.element($window).bind("resize", this.resizeGraph.bind(this));
+            }
+
+            registerUIEvents() {
+                //TODO: register only on added d3Nodes
                 this.d3Node/*.on("click", this.ignoreHyperEdge(node => {
                         this.onClick({
                             node
@@ -348,14 +354,11 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                         });
                     });
 
-                this.d3Node.call(dragMove);
-                this.d3NodePinTool.on("click", stopPropagationAfter(this.toggleFixed.bind(this))).call(disableDrag);
-                this.d3NodeConnectTool.call(dragConnect);
-                this.d3NodeDisconnectTool.on("click", stopPropagationAfter(this.disconnectHyperRelation.bind(this))).call(disableDrag);
-                this.d3NodeDeleteTool.on("click", stopPropagationAfter(this.removeNode.bind(this))).call(disableDrag);
-
-                // register for resize event
-                angular.element($window).bind("resize", this.resizeGraph.bind(this));
+                this.d3Node.call(this.dragMove);
+                this.d3NodePinTool.on("click", this.stopPropagationAfter(this.toggleFixed.bind(this))).call(this.disableDrag);
+                this.d3NodeConnectTool.call(this.dragConnect);
+                this.d3NodeDisconnectTool.on("click", this.stopPropagationAfter(this.disconnectHyperRelation.bind(this))).call(this.disableDrag);
+                this.d3NodeDeleteTool.on("click", this.stopPropagationAfter(this.removeNode.bind(this))).call(this.disableDrag);
             }
 
 
