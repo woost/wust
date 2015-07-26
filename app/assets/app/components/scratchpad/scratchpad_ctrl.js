@@ -1,11 +1,11 @@
 angular.module("wust.components").controller("ScratchpadCtrl", ScratchpadCtrl);
 
-ScratchpadCtrl.$inject = ["EditService", "DiscourseNode"];
+ScratchpadCtrl.$inject = ["EditService", "LeftSideService"];
 
-function ScratchpadCtrl(EditService, DiscourseNode) {
+function ScratchpadCtrl(EditService, LeftSideService) {
     let vm = this;
 
-    vm.nodeInfo = DiscourseNode.Post;
+    vm.leftSide = LeftSideService;
     vm.editList = EditService.list;
     vm.edit = EditService.edit;
 }
