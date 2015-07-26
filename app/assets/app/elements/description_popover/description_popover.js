@@ -67,6 +67,12 @@ function descriptionPopover($compile, $popover, HistoryService) {
 
                 scope.disablePopover = function() {
                     popover.$promise.then(() => {
+                        // when hovering really fast over the element, the
+                        // popover was not created and therefore, there is no
+                        // need to hide it.
+                        if (!popover.$element)
+                            return;
+
                         let popoverElem = popover.$element[0];
                         elem.style.zIndex = origZindex;
                         popoverElem.style.zIndex = origPopoverZindex;
