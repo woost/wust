@@ -1,7 +1,7 @@
 <div class="tag-editor-directive">
     <div class="tag-editor" ng-class="{active:focus}" ng-init="focus = false" ng-click="setFocus = true">
         <div class="tag-draft">
-            <span class="tag" ng-repeat="tag in tags">
+            <span class="tag" ng-repeat="tag in tags track by tag.id">
                 <span ng-bind="tag[options.output]"></span>
                 <span class="remove" ng-click="remove($index)">x</span>
             </span>
@@ -10,7 +10,7 @@
         </div>
         <div class="tag-suggestions" ng-show="suggestions && focus">
             <span class="title">Suggestions:</span>
-            <span class="tag" ng-repeat="tag in suggestions" ng-mousedown="add(tag)" ng-bind="tag[options.output]"></span>
+            <span class="tag" ng-repeat="tag in suggestions track by tag.id" ng-mousedown="add(tag)" ng-bind="tag[options.output]"></span>
         </div>
     </div>
 </div>

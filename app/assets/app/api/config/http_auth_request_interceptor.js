@@ -11,7 +11,7 @@ function HttpAuthConfig($httpProvider, jwtInterceptorProvider) {
             return null;
         }
 
-        return Auth.getToken();
+        return Auth.current.token;
     };
 
     $httpProvider.interceptors.push("jwtInterceptor");

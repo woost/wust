@@ -15,9 +15,7 @@ function Auth($rootScope, $window, restmod, jwtHelper, store) {
     this.register = _.partial(authenticate, service.signup, "Registered");
     this.logout = logout;
     this.loggedIn = loggedIn;
-    this.getUsername = _.wrap("identifier", getProperty);
-    this.getUserId = _.wrap("userId", getProperty);
-    this.getToken = _.wrap("token", getProperty);
+    this.current = authStore.get(userKey) || {};
 
     // every time the window gets focused, clear the inMemoryCache of the store,
     // so all changes in store get propagated into our current angular session.
@@ -25,7 +23,8 @@ function Auth($rootScope, $window, restmod, jwtHelper, store) {
     $window.onfocus = () => {
         let prev = authStore.get(userKey);
         delete authStore.inMemoryCache[userKey];
-        if (prev !== authStore.get(userKey)) {
+        this.current = authStore.get(userKey) || {};
+        if (prev !== this.current) {
             $rootScope.$apply();
         }
     };
@@ -35,13 +34,10 @@ function Auth($rootScope, $window, restmod, jwtHelper, store) {
         return currentUser && !jwtHelper.isTokenExpired(currentUser.token);
     }
 
-    function getProperty(name) {
-        return loggedIn() ? authStore.get(userKey)[name] : undefined;
-    }
-
     function authenticate(model, message, user) {
         model.$create(user).$then(response => {
-            authStore.set(userKey, _.pick(response, "identifier", "token", "userId"));
+            this.current = _.pick(response, "identifier", "token", "userId");
+            authStore.set(userKey, this.current);
             humane.success(message);
         });
     }
@@ -57,5 +53,6 @@ function Auth($rootScope, $window, restmod, jwtHelper, store) {
 
     function logoutLocally() {
         authStore.remove(userKey);
+        this.current = {};
     }
 }

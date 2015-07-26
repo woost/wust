@@ -1,8 +1,8 @@
 angular.module("wust.components").controller("NavigationCtrl", NavigationCtrl);
 
-NavigationCtrl.$inject = ["Auth", "SearchService", "$state", "LeftSideService"];
+NavigationCtrl.$inject = ["Auth", "SearchService", "LeftSideService"];
 
-function NavigationCtrl(Auth, SearchService, $state, LeftSideService) {
+function NavigationCtrl(Auth, SearchService, LeftSideService) {
     let vm = this;
 
     vm.navbarCollapsed = true;
@@ -16,15 +16,13 @@ function NavigationCtrl(Auth, SearchService, $state, LeftSideService) {
 
     vm.onSearchBoxChange = onSearchBoxChange;
     vm.authenticate = authenticate;
-    vm.getUsername = Auth.getUsername.bind(Auth);
-    vm.getUserId = Auth.getUserId.bind(Auth);
+    vm.currentAuth = Auth.current;
     vm.loggedIn = Auth.loggedIn.bind(Auth);
     vm.logout = Auth.logout.bind(Auth);
     vm.search = SearchService.search;
     vm.delayedTriggerSearch = undefined;
     vm.leftSide = LeftSideService;
     vm.searchToggleDisabled = searchToggleDisabled;
-    vm.$state = $state;
 
     function authenticate(register) {
         let func = register ? Auth.register : Auth.login;
