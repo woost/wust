@@ -901,7 +901,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
         }
 
         let d3Graph = new D3Graph(scope.graph, element[0], scope.onClick, scope.onDraw);
-        scope.controlGraph = d3Graph;
+        d3Graph.graph.d3Graph = d3Graph;
         d3Graph.init();
     }
 
@@ -909,7 +909,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
         restrict: "A",
         scope: {
             graph: "=",
-            controlGraph: "=",
             onClick: "&",
             onDraw: "&"
         },

@@ -37,7 +37,7 @@ function graphViewCtrl($scope, DiscourseNode, $filter) {
         }
 
         let matchingNodes = $filter("fuzzyFilter")(_.reject(vm.graph.nodes, { hyperEdge: true }), vm.search);
-        vm.controlGraph.filter(matchingNodes);
+        vm.graph.d3Graph.filter(matchingNodes);
     }
 
     function addNodeToGraph(node, event) {
@@ -45,9 +45,9 @@ function graphViewCtrl($scope, DiscourseNode, $filter) {
         vm.graph.commit();
         let wrappedNode = vm.graph.nodeById(node.id);
 
-        vm.controlGraph.setNodePositionFromOffset(wrappedNode, event.offsetX, event.offsetY);
-        vm.controlGraph.setFixed(wrappedNode);
-        vm.controlGraph.drawGraph();
+        vm.graph.d3Graph.setNodePositionFromOffset(wrappedNode, event.offsetX, event.offsetY);
+        vm.graph.d3Graph.setFixed(wrappedNode);
+        vm.graph.d3Graph.drawGraph();
     }
 
     function onClick(node) {
