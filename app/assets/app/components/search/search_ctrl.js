@@ -7,7 +7,7 @@ function SearchCtrl(SearchService, $rootScope) {
 
     vm.search = SearchService.search;
 
-    $rootScope.$on("$stateChangeSuccess", () => {
+    $rootScope.$on("$stateChangeStart", () => {
         vm.search.resultsVisible = false;
     });
 }
