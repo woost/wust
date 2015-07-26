@@ -680,12 +680,12 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
             }
 
             disconnectHyperRelation(d) {
-                let start = Post.$buildRaw({
+                Post.$buildRaw({
                     id: d.startId
-                });
-                start.connectsTo.$buildRaw({
+                }).connectsTo.$buildRaw({
                     id: d.endId
-                }).$destroy().$then(_.noop, response => humane.error("Server error:\n" + response));
+                }).$destroy().$then(response => {
+                }, response => humane.error("Server error:\n" + response));
                 this.graph.removeNode(d.id);
                 this.graph.commit();
                 this.force.stop();
@@ -694,7 +694,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
             removeNode(d) {
                 Post.$buildRaw({
                     id: d.id
-                }).$destroy().$then(_.noop, response => humane.error("Server error:\n" + response));
+                }).$destroy().$then(response => {
+                }, response => humane.error("Server error:\n" + response));
                 this.graph.removeNode(d.id);
                 this.graph.commit();
                 this.force.stop();
