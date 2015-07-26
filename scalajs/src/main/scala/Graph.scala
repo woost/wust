@@ -4,7 +4,12 @@ import scala.collection.mutable
 import scala.scalajs.js
 import scala.scalajs.js.annotation.{JSExport, JSExportAll}
 import js.JSConverters._
-import js.Dynamic.{global => g}
+
+object ConsoleImport {
+  val console = js.Dynamic.global.console
+}
+
+import ConsoleImport.console
 
 // http://www.scala-js.org/doc/export-to-javascript.html
 object GraphAlgorithms {
@@ -211,7 +216,7 @@ sealed trait WrappedGraph[RELATION <: RelationLike] {
     }
     nodesJs = nodes.toJSArray
     relationsJs = relations.toJSArray
-    nonHyperRelationNodes = nodes.collect{case n:Node => n}.toJSArray
+    nonHyperRelationNodes = nodes.collect { case n: Node => n }.toJSArray
   }
 }
 
@@ -229,12 +234,12 @@ case class HyperRelation(rawNode: RawNode) extends NodeBase with RelationLike {
 }
 
 object Node {
-    def apply(node: RawNode) = {
-        if (node.hyperEdge)
-            new HyperRelation(node)
-        else
-            new Node(node)
-    }
+  def apply(node: RawNode) = {
+    if(node.hyperEdge)
+      new HyperRelation(node)
+    else
+      new Node(node)
+  }
 }
 
 @JSExport
@@ -270,7 +275,7 @@ class HyperGraph(val rawGraph: RawGraph) extends WrappedGraph[HyperRelation] {
     rawGraph.add(n)
     if(n.hyperEdge) {
       if(n.startId.isEmpty || n.endId.isEmpty)
-        g.console.warn(s"Adding HyperRelation ${ n.id } with empty startId or endId.")
+        console.warn(s"Adding HyperRelation ${ n.id } with empty startId or endId.")
       rawGraph.add(new RawRelation(n.startId.get, n.id))
       rawGraph.add(new RawRelation(n.id, n.endId.get))
     }
@@ -291,7 +296,7 @@ class HyperGraph(val rawGraph: RawGraph) extends WrappedGraph[HyperRelation] {
   private[js] def rawAdd(relation: RawRelation) {}
   private[js] def rawRemove(node: RawNode) {
     nodes -= nodeById(node.id)
-    if (node.hyperEdge)
+    if(node.hyperEdge)
       relations -= relationByIds(node.startId.get -> node.endId.get)
   }
   private[js] def rawRemove(relation: RawRelation) {}
@@ -426,26 +431,39 @@ class RawGraph(private[js] var nodes: Set[RawNode], private[js] var relations: S
     currentNewRelations += relation
   }
   //TODO: add to currentGraphChanges.removedNodes/relations
-  def remove(node: RawNode) {
-    nodes -= node
-    wrappers.values.foreach(_.rawRemove(node))
 
-    incidentRelationsWithoutHyperHelperRelations(node).foreach(remove)
-    incidentHyperRelations(node).foreach(remove)
-    if( nodes.size == 0) {
-      g.console.warn(s"""Deleted last node""")
+  def remove(node: RawNode) {
+    removeRecursive(node)
+
+    def removeRecursive(node: RawNode) {
+      // console.log(s"removing ${ node.id } (${ node.title.take(20).mkString })")
+      nodes -= node
+      wrappers.values.foreach(_.rawRemove(node))
+
+      incidentRelationsWithoutHyperHelperRelations(node).foreach(remove)
+      incidentHyperRelations(node).foreach(removeRecursive)
+    }
+
+    if(nodes.size == 0) {
+      console.warn( s"""Deleted last node""")
     }
     else {
       //TODO!: what should happen when removing the rootNode?
       if(node.id == rootNodeId) {
         rootNodeId = nodes.head.id
-        g.console.warn(s"""Deleted rootNode, rootNode is now: ${nodes.head.id} - "${nodes.head.title}"""")
+        console.warn( s"""Deleted rootNode, rootNode is now: ${ nodes.head.id } - "${ nodes.head.title }"""")
       }
     }
   }
+
   def remove(relation: RawRelation) {
-    relations -= relation
-    wrappers.values.foreach(_.rawRemove(relation))
+    removeRecursive(relation)
+
+    def removeRecursive(relation: RawRelation) {
+      // console.log(s"removing ${ relation.startId } -> ${ relation.endId }")
+      relations -= relation
+      wrappers.values.foreach(_.rawRemove(relation))
+    }
   }
 
   def commit() {
