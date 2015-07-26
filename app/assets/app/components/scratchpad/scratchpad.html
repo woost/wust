@@ -7,7 +7,7 @@
         <label>Currently edited:</label>
         <div ng-repeat="node in vm.editList | reverse">
             <div class="drop_post_container" drop-channel="create_connect,connect,move" ui-on-Drop="vm.edit($data, $index)"></div>
-            <div edit-post node="node"></div>
+            <div collapse-edit-post node="node"></div>
         </div>
         <div class="drop_post_container" drop-channel="create_connect,connect,move" ui-on-Drop="vm.edit($data, vm.editList.length)"></div>
     </div>

@@ -1,0 +1,17 @@
+@import "compass/css3/flexbox";
+
+.collapse_edit_post_directive {
+    .panel {
+        margin: 0px;
+        .panel-heading {
+            min-height: 55px;
+            @include display-flex(flex);
+            @include justify-content(space-between);
+            .small_post_directive {
+                width: 100%;
+                line-height: 32px;
+            }
+        }
+    }
+}
+

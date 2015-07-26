@@ -1,0 +1,14 @@
+<div class="static_edit_post_directive">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <input type="text" class="form-control" ng-model="vm.node.title" ng-blur="vm.node.onChange()" placeholder="TL,DR">
+            <div class="control_buttons">
+                <div toggle-zen node="vm.node"></div>
+                <button class="btn btn-xs btn-success" ng-click="vm.node.save()" ng-disabled="!vm.node.canSave()"><i class="fa fa-paper-plane-o"></i></button>
+            </div>
+        </div>
+        <div>
+            <div edit-post node="vm.node"></div>
+        </div>
+    </div>
+</div>

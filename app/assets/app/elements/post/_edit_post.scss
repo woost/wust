@@ -1,18 +1,10 @@
-@import "compass/css3/flexbox";
-
 .edit_post_directive {
-    .panel {
-        margin: 0px;
-        .panel-heading {
-            min-height: 55px;
-            .small_post_directive {
-                line-height: 32px;
-            }
-        }
-    }
     .ace_editor {
         margin: 5px;
         height: 150px;
+    }
+    .edit_tags {
+        padding-left: 15px;
     }
 }
 
