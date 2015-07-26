@@ -2,7 +2,12 @@ package renesca.js
 
 import utest._
 
+import scala.scalajs.js
+
 object GraphSpec extends TestSuite {
+  // console.warn polyfill
+  if(js.Dynamic.global.console.warn == js.undefined)
+    js.Dynamic.global.console.updateDynamic("warn")((m: String) => println(m))
 
   val tests = TestSuite {
     import TestHelpers._
