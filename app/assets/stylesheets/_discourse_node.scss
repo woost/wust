@@ -131,6 +131,7 @@ marker path.connectorlinearrow {
     .fixed {
         .pintool {
             @include transform(rotate(0deg) !important);
+            opacity: 1 !important;
         }
     }
 }
