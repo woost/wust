@@ -200,20 +200,26 @@ sealed trait WrappedGraph[RELATION <: RelationLike] {
 
 
   private[js] def refreshIndex() {
-    nodeById = nodes.map(n => n.id -> n).toMap
-    relationByIds = relations.map(r => (r.startId, r.endId) -> r).toMap
-    rootNode = nodeById.get(rawGraph.rootNodeId).getOrElse(null) //TODO: now what?
-    for(n <- nodes) {
+    nodeById = nodes.map { n =>
+      // do the invalidation here in the map instead of an additional loop
       n.invalidate()
       n.inRelations = Set.empty
       n.outRelations = Set.empty
-    }
-    for(r <- relations) {
+
+      n.id -> n // this goes into the hashMap
+    }.toMap
+
+    relationByIds = relations.map { r =>
+      // do the invalidation here in the map instead of an additional loop
       r.startNode = nodeById(r.startId)
       r.endNode = nodeById(r.endId)
       r.startNode.outRelations += r
       r.endNode.inRelations += r
-    }
+
+      (r.startId, r.endId) -> r // this goes into the hashMap
+    }.toMap
+
+    rootNode = nodeById.get(rawGraph.rootNodeId).getOrElse(null) //TODO: now what?
     nodesJs = nodes.toJSArray
     relationsJs = relations.toJSArray
     nonHyperRelationNodes = nodes.collect { case n: Node => n }.toJSArray
