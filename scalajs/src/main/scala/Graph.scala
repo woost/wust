@@ -302,8 +302,6 @@ class HyperGraph(val rawGraph: RawGraph) extends WrappedGraph[HyperRelation] {
   private[js] def rawRemove(relation: RawRelation) {}
 }
 
-@JSExport // überflüssig, da graph aus der factory kommt
-//nein nich ueberfluessig, der graph muss exposed sein.
 class Graph(private[js] val rawGraph: RawGraph) extends WrappedGraph[Relation] {
   val nodes: mutable.Set[NodeBase] = mutable.Set.empty ++ rawGraph.nodes.map(Node(_))
   val relations: mutable.Set[Relation] = mutable.Set.empty ++ rawGraph.relations.map(new Relation(_))
@@ -440,8 +438,8 @@ class RawGraph(private[js] var nodes: Set[RawNode], private[js] var relations: S
       nodes -= node
       wrappers.values.foreach(_.rawRemove(node))
 
-      incidentRelationsWithoutHyperHelperRelations(node).foreach(remove)
       incidentHyperRelations(node).foreach(removeRecursive)
+      incidentRelations(node).foreach(remove) // relation remove, also recursive
     }
 
     if(nodes.size == 0) {
@@ -457,13 +455,10 @@ class RawGraph(private[js] var nodes: Set[RawNode], private[js] var relations: S
   }
 
   def remove(relation: RawRelation) {
-    removeRecursive(relation)
-
-    def removeRecursive(relation: RawRelation) {
-      // console.log(s"removing ${ relation.startId } -> ${ relation.endId }")
-      relations -= relation
-      wrappers.values.foreach(_.rawRemove(relation))
-    }
+    // TODO: if relation is a helperRelation of a hyperrelation, remove hyperrelation and recurse in remove(node)
+    // console.log(s"removing ${ relation.startId } -> ${ relation.endId }")
+    relations -= relation
+    wrappers.values.foreach(_.rawRemove(relation))
   }
 
   def commit() {
@@ -475,22 +470,9 @@ class RawGraph(private[js] var nodes: Set[RawNode], private[js] var relations: S
 
   //TODO: cache lookup maps/sets
   def hyperRelations = nodes.filter(_.hyperEdge)
-  def hyperHelperRelations: Set[RawRelation] = {
-    val hyperIds: Set[String] = hyperRelations.map(_.id)
-    val hyperIdToStartId: Map[String, String] = hyperRelations.map(h => h.id -> h.startId.get).toMap
-    val hyperIdToEndId: Map[String, String] = hyperRelations.map(h => h.id -> h.endId.get).toMap
-    relations.filter(
-      r => ((hyperIds contains r.startId) && r.endId == hyperIdToEndId(r.startId)) ||
-        ((hyperIds contains r.endId) && r.startId == hyperIdToStartId(r.endId))
-    )
-  }
 
   def incidentRelations(node: RawNode): Set[RawRelation] = {
     relations.filter(r => r.startId == node.id || r.endId == node.id)
-  }
-
-  def incidentRelationsWithoutHyperHelperRelations(node: RawNode): Set[RawRelation] = {
-    incidentRelations(node) diff hyperHelperRelations
   }
 
   def incidentHyperRelations(node: RawNode): Set[RawNode] = {

@@ -18,39 +18,44 @@ object GraphSpec extends TestSuite {
 
         g.remove(ArB)
 
-        assert(g.nodes == Set(A, B), g.relations == Set())
+        assert(g.nodes == Set(A, B))
+        assert(g.relations == Set())
       }
 
-      'deleteNodeWithOutRelation {
+      'deleteNodeWith_OutRelation {
         val g = graph(Set(A, B), Set(ArB))
 
         g.remove(A)
 
-        assert(g.nodes == Set(B), g.relations == Set())
+        assert(g.nodes == Set(B))
+        assert(g.relations == Set())
       }
 
-      'deleteNodeWithInRelation {
+      'deleteNodeWith_InRelation {
         val g = graph(Set(A, B), Set(ArB))
 
         g.remove(B)
 
-        assert(g.nodes == Set(A), g.relations == Set())
+        assert(g.nodes == Set(A))
+        assert(g.relations == Set())
       }
 
-      'deleteNodeWithOutHyperRelation {
+      'deleteNodeWith_OutHyperRelation {
         val g = graph(Set(A, B, AXB), Set(ArX, XrB))
 
         g.remove(A)
 
-        assert(g.nodes == Set(B), g.relations == Set())
+        assert(g.nodes == Set(B))
+        assert(g.relations == Set())
       }
 
-      'deleteNodeWithInHyperRelation {
+      'deleteNodeWith_InHyperRelation {
         val g = graph(Set(A, B, AXB), Set(ArX, XrB))
 
         g.remove(B)
 
-        assert(g.nodes == Set(A), g.relations == Set())
+        assert(g.nodes == Set(A))
+        assert(g.relations == Set())
       }
 
       'deleteNodeWithRelationAndHyperRelation {
@@ -58,7 +63,8 @@ object GraphSpec extends TestSuite {
 
         g.remove(B)
 
-        assert(g.nodes == Set(A), g.relations == Set())
+        assert(g.nodes == Set(A))
+        assert(g.relations == Set())
       }
 
       'deleteHyperRelation {
@@ -66,7 +72,8 @@ object GraphSpec extends TestSuite {
 
         g.remove(AXB)
 
-        assert(g.nodes == Set(A, B), g.relations == Set())
+        assert(g.nodes == Set(A, B))
+        assert(g.relations == Set())
       }
 
       'deleteHyperRelationWithRelation {
@@ -74,7 +81,8 @@ object GraphSpec extends TestSuite {
 
         g.remove(AXB)
 
-        assert(g.nodes == Set(A, B, C), g.relations == Set())
+        assert(g.nodes == Set(A, B, C))
+        assert(g.relations == Set())
       }
 
       'deleteHyperRelationWithHyperRelation {
@@ -82,7 +90,8 @@ object GraphSpec extends TestSuite {
 
         g.remove(AXB)
 
-        assert(g.nodes == Set(A, B, C), g.relations == Set())
+        assert(g.nodes == Set(A, B, C))
+        assert(g.relations == Set())
       }
       'deleteHyperRelationWithInterconnectedHyperRelations {
         val g = graph(Set(A, B, AXB, C, CYX, D, XZD), Set(ArX, XrB, CrY, YrX, XrZ, ZrD, YrZ))
@@ -90,22 +99,28 @@ object GraphSpec extends TestSuite {
         'deleteHyperRelation {
           g.remove(AXB)
 
-          assert(g.nodes == Set(A, B, C, D), g.relations == Set())
+          assert(g.nodes == Set(A, B, C, D))
+          assert(g.relations == Set())
         }
 
         'deleteNode {
           g.remove(A)
 
-          assert(g.nodes == Set(B, C, D), g.relations == Set())
+          assert(g.nodes == Set(B, C, D))
+          assert(g.relations == Set())
         }
       }
 
-      'hierarchyCollapse {
+      'HyperSelfLoopHierarchyCollapse {
+        // two nodes: A, B, hyperrelation X
+        // both nodes have a hyperrelation (P, X) pointing to X (hyper half self loop)
+        // A has a hyperrelation (S) to the self-loop of B
         val g = graph(Set(A, B, AXB, APX, BQX, ASQ), Set(ArX, XrB, ArP, PrX, BrQ, QrX, ArS, SrQ))
 
         g.remove(AXB)
 
-        assert(g.nodes == Set(A, B), g.relations == Set())
+        assert(g.nodes == Set(A, B))
+        assert(g.relations == Set())
       }
     }
 
