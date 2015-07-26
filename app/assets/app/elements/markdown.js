@@ -28,6 +28,6 @@ function markdown() {
     };
 
     function link(scope) {
-        scope.$watch("markdown", val => scope.markdownHTML = marked(val));
+        scope.$watch("markdown", val => scope.markdownHTML = marked(val || ""));
     }
 }

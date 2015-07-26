@@ -256,8 +256,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                 this.d3Node
                     .attr("description-popover", "")
                     .attr("node-id", d => d.id)
-                    .attr("position-hack-width", d => d.rect.width)
-                    .attr("position-hack-height", d => d.rect.height);
+                    .attr("enable-position-hack", true);
 
                 this.registerUIEvents();
                 this.force.nodes(this.graph.nodes); // nodes and edges get replaced instead of just changed by scalajs

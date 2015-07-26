@@ -352,9 +352,6 @@ class Graph(private[js] val rawGraph: RawGraph) extends WrappedGraph[Relation] {
   def rawAdd(relation: RawRelation) { relations += new Relation(relation) }
   def rawRemove(node: RawNode) { nodes -= nodeById(node.id) }
   def rawRemove(relation: RawRelation) { relations -= relationByIds((relation.startId, relation.endId)) }
-
-  @JSExport
-  def hyper() = rawGraph.hyperWrap()
 }
 
 @JSExport
@@ -394,18 +391,20 @@ case class RawGraphChanges(newNodes: Set[RawNode], newRelations: Set[RawRelation
 @JSExport
 @JSExportAll
 class RawGraph(private[js] var nodes: Set[RawNode], private[js] var relations: Set[RawRelation], var rootNodeId: String) {
-  val wrappers = mutable.Set.empty[WrappedGraph[_]]
-  def wrap(): Graph = {
+  val wrappers = mutable.HashMap.empty[String, WrappedGraph[_]]
+  def wrap(name: String): Graph = {
     val graph = new Graph(this)
-    wrappers += graph
+    wrappers += name -> graph
     graph
   }
 
-  def hyperWrap(): HyperGraph = {
+  def hyperWrap(name: String): HyperGraph = {
     val graph = new HyperGraph(this)
-    wrappers += graph
+    wrappers += name -> graph
     graph
   }
+
+  def getWrap(name: String) = wrappers(name)
 
   var currentNewNodes = Set.empty[RawNode]
   var currentNewRelations = Set.empty[RawRelation]
@@ -415,7 +414,7 @@ class RawGraph(private[js] var nodes: Set[RawNode], private[js] var relations: S
       return
 
     nodes += node
-    wrappers.foreach(_.rawAdd(node));
+    wrappers.values.foreach(_.rawAdd(node));
     currentNewNodes += node
   }
   def add(relation: RawRelation) {
@@ -423,13 +422,13 @@ class RawGraph(private[js] var nodes: Set[RawNode], private[js] var relations: S
       return
 
     relations += relation
-    wrappers.foreach(_.rawAdd(relation))
+    wrappers.values.foreach(_.rawAdd(relation))
     currentNewRelations += relation
   }
   //TODO: add to currentGraphChanges.removedNodes/relations
   def remove(node: RawNode) {
     nodes -= node
-    wrappers.foreach(_.rawRemove(node))
+    wrappers.values.foreach(_.rawRemove(node))
 
     incidentRelationsWithoutHyperHelperRelations(node).foreach(remove)
     incidentHyperRelations(node).foreach(remove)
@@ -446,12 +445,12 @@ class RawGraph(private[js] var nodes: Set[RawNode], private[js] var relations: S
   }
   def remove(relation: RawRelation) {
     relations -= relation
-    wrappers.foreach(_.rawRemove(relation))
+    wrappers.values.foreach(_.rawRemove(relation))
   }
 
   def commit() {
     val changes = RawGraphChanges(currentNewNodes, currentNewRelations)
-    wrappers.foreach(_.rawCommit(changes))
+    wrappers.values.foreach(_.rawCommit(changes))
     currentNewNodes = Set.empty[RawNode]
     currentNewRelations = Set.empty[RawRelation]
   }
