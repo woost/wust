@@ -1,3 +1,3 @@
 <span class="small_post_directive">
-    <a ng-href="vm.href" ui-draggable="true" drag="vm.node.encode ? vm.node.encode() : vm.node" drag-channel="{{vm.valid ? (vm.node.id === undefined ? 'create_connect' : 'connect') : 'move'}}" class="node" ng-class="::vm.css" ng-bind="vm.node.title"></a>
+    <a ng-href="{{::vm.href}}" ui-draggable="true" drag="vm.node.encode ? vm.node.encode() : vm.node" drag-channel="{{vm.valid ? (vm.node.id === undefined ? 'create_connect' : 'connect') : 'move'}}" class="node" ng-class="::vm.css" ng-bind="vm.node.title"></a>
 </span>
