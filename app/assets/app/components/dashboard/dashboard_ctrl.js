@@ -1,8 +1,8 @@
 angular.module("wust.components").controller("DashboardCtrl", DashboardCtrl);
 
-DashboardCtrl.$inject = ["$scope", "$state", "$modal", "Tag", "DiscourseNode", "StreamService"];
+DashboardCtrl.$inject = ["$modal", "DiscourseNode", "StreamService"];
 
-function DashboardCtrl($scope, $state, $modal, Tag, DiscourseNode, StreamService) {
+function DashboardCtrl($modal, DiscourseNode, StreamService) {
     let vm = this;
 
     let modalInstance = $modal({
