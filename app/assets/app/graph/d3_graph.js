@@ -271,21 +271,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
             }
 
             registerUIEvents() {
-                // define events
-                this.zoom.on("zoom", this.zoomed.bind(this));
-                let dragMove = d3.behavior.drag()
-                    .on("dragstart", this.onDragMoveStart.bind(this))
-                    .on("drag", this.onDragMove.bind(this))
-                    .on("dragend", this.onDragMoveEnd.bind(this));
-
-                let dragConnect = d3.behavior.drag()
-                    .on("dragstart", this.ignoreHyperEdge(this.onDragConnectStart.bind(this)))
-                    .on("drag", this.ignoreHyperEdge(this.onDragConnectMove.bind(this)))
-                    .on("dragend", this.ignoreHyperEdge(this.onDragConnectEnd.bind(this)));
-
-                let disableDrag = d3.behavior.drag()
-                    .on("dragstart", () => d3.event.sourceEvent.stopPropagation());
-
                 function stopPropagationAfter(func) {
                     return d => {
                     console.log(d3.event);
@@ -294,7 +279,50 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                     };
                 }
 
-                //TODO: function onlyLeftMouseButton() {} for all drag-handlers
+                // from: http://stackoverflow.com/a/17111220/793909
+                let dragInitiated = false;
+                function dragStartWithButton(button, func) {
+                    return d => {
+                        if(d3.event.sourceEvent.which === button) {
+                            dragInitiated = true;
+                            func(d);
+                        }
+                        d3.event.sourceEvent.stopPropagation();
+                    };
+                }
+                function dragWithButton(button, func) {
+                    return d => {
+                        if(d3.event.sourceEvent.which === button && dragInitiated) {
+                            func(d);
+                        }
+                        d3.event.sourceEvent.stopPropagation();
+                    };
+                }
+                function dragEndWithButton(button, func) {
+                    return d => {
+                        if(d3.event.sourceEvent.which === button && dragInitiated) {
+                            func(d);
+                            dragInitiated = false;
+                        }
+                        d3.event.sourceEvent.stopPropagation();
+                    };
+                }
+
+                // define events
+                this.zoom.on("zoom", this.zoomed.bind(this));
+
+                let dragMove = d3.behavior.drag()
+                    .on("dragstart", dragStartWithButton(1, this.onDragMoveStart.bind(this)))
+                    .on("drag", dragWithButton(1, this.onDragMove.bind(this)))
+                    .on("dragend", dragEndWithButton(1, this.onDragMoveEnd.bind(this)));
+
+                let dragConnect = d3.behavior.drag()
+                    .on("dragstart", dragStartWithButton(1, this.onDragConnectStart.bind(this)))
+                    .on("drag", dragWithButton(1, this.onDragConnectMove.bind(this)))
+                    .on("dragend", dragEndWithButton(1, this.onDragConnectEnd.bind(this)));
+
+                let disableDrag = d3.behavior.drag()
+                    .on("dragstart", () => d3.event.sourceEvent.stopPropagation());
 
                 this.d3Html.call(this.zoom)
                     .on("dblclick.zoom", null)
