@@ -1,16 +1,8 @@
-@import "compass/css3/flexbox";
-
 .static_edit_post_directive {
     .panel {
         margin: 0px;
         .panel-heading {
             min-height: 55px;
-            @include display-flex(flex);
-            @include justify-content(space-between);
-            .form-control {
-            }
-            .control_buttons {
-            }
         }
     }
 }
