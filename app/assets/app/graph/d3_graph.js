@@ -577,8 +577,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                 this.width = this.rootDomElement.offsetWidth;
                 this.height = this.rootDomElement.offsetHeight;
                 let [width, height] = [this.width, this.height];
-                this.d3Svg.style("width", width).style("height", height);
-                this.d3Html.style("width", width + "px").style("height", height + "px");
+                this.d3Svg.style("width", this.width + "px").style("height", this.height + "px");
+                this.d3Html.style("width", this.width + "px").style("height", this.height + "px");
                 // if graph was hidden when initialized,
                 // all foreign objects have size 0
                 // this call recalculates the sizes
