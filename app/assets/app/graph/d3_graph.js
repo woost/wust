@@ -392,10 +392,12 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                 // bring nodes in order by calculating the difference between following and
                 // leading nodes. Then assign numbers from -(nodes.length/2) to +(nodes.length/2).
                 // This is used as force to pull nodes upwards or downwards.
-                _(this.graph.nonHyperRelationNodes).each(node => {
+                this.graph.nonHyperRelationNodes.forEach(node => {
                     let deepReplies = node.deepSuccessors.length - node.deepPredecessors.length;
                     node.verticalForce = deepReplies;
-                }).sortBy("verticalForce").each((n, i) => n.verticalForce = i).value();
+                });
+
+                _.sortBy(this.graph.nonHyperRelationNodes, "verticalForce").forEach((n, i) => n.verticalForce = i);
             }
 
             converge() {
