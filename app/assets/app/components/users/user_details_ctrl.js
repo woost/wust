@@ -9,26 +9,7 @@ function UserDetailsCtrl($stateParams, User, Auth, $q) {
     vm.isCurrentUser = $stateParams.id === Auth.current.userId;
     vm.saveUser = saveUser;
 
-    vm.contributions = [];
-    //TODO: get all contributions at once
-    let created = vm.user.created.$search().$asPromise();
-    let updated = vm.user.updated.$search().$asPromise();
-    let deleted = vm.user.deleted.$search().$asPromise();
-    $q.all([created, updated, deleted]).then(list => vm.contributions = _([{
-        title: "Created",
-        data: list[0]
-    }, {
-        title: "Updated",
-        data: list[1]
-    }, {
-        title: "Deleted",
-        data: list[2]
-    }]).map(c => _.map(c.data, d => {
-        return {
-            title: c.title,
-            data: d
-        };
-    })).flatten().value());
+    vm.contributions = vm.user.contributions.$search();
 
     function saveUser() {
         return vm.user.$save().$asPromise();

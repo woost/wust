@@ -9,6 +9,7 @@ import renesca.schema._
 
 trait RelationAccess[-NODE <: UuidNode, +OTHER <: UuidNode] {
   //TODO: switch left/right...left should be errors
+  //TODO: no nodedefinitions as args
   def read(baseDef: FixedNodeDefinition[NODE]): Either[Iterable[OTHER], String] = Right("No read access on Relation")
   def delete(baseDef: FixedNodeDefinition[NODE], uuid: String): Either[Boolean, String] = Right("No delete access on Relation")
   def deleteHyper(baseDef: HyperNodeDefinitionBase[NODE with AbstractRelation[_, _]], uuid: String): Either[Boolean, String] = Right("No delete access on HyperRelation")
@@ -16,9 +17,6 @@ trait RelationAccess[-NODE <: UuidNode, +OTHER <: UuidNode] {
   def create(uuid: String, user: User, otherUuid: String): Either[ConnectResponse[OTHER], String] = Right("No create access on Relation")
   def createHyper(startUuid: String, endUuid: String, user: User, json: JsValue): Either[ConnectResponse[OTHER], String]
   def createHyper(startUuid: String, endUuid: String, user: User, nestedUuid: String): Either[ConnectResponse[OTHER], String] = Right("No create access on HyperRelation")
-
-  def toNodeDefinition: NodeDefinition[OTHER]
-  def toNodeDefinition(uuid: String): UuidNodeDefinition[OTHER]
 }
 
 trait NodeAwareRelationAccess[NODE <: UuidNode, OTHER <: UuidNode] extends RelationAccess[NODE, OTHER] {
@@ -39,19 +37,11 @@ trait NodeAwareRelationAccess[NODE <: UuidNode, OTHER <: UuidNode] extends Relat
   }
 }
 
-trait DirectedRelationAccess[
-START <: UuidNode,
-RELATION <: AbstractRelation[START, END],
-END <: UuidNode
-] {
-  val factory: AbstractRelationFactory[START, RELATION, END]
-}
-
 trait StartRelationAccess[
 START <: UuidNode,
 RELATION <: AbstractRelation[START, END],
 END <: UuidNode
-] extends NodeAwareRelationAccess[START,END] with DirectedRelationAccess[START, RELATION, END] {
+] extends NodeAwareRelationAccess[START,END] {
   val nodeFactory: NodeFactory[END]
 
   def toNodeDefinition = ConcreteFactoryNodeDefinition(nodeFactory)
@@ -62,12 +52,39 @@ trait EndRelationAccess[
 START <: UuidNode,
 RELATION <: AbstractRelation[START, END],
 END <: UuidNode
-] extends NodeAwareRelationAccess[END, START] with DirectedRelationAccess[START, RELATION, END] {
+] extends NodeAwareRelationAccess[END,START] {
   val nodeFactory: NodeFactory[START]
 
   def toNodeDefinition = ConcreteFactoryNodeDefinition(nodeFactory)
   def toNodeDefinition(uuid: String) = FactoryUuidNodeDefinition(nodeFactory, uuid)
 }
+
+case class StartMultiRelationRead[
+START <: UuidNode,
+END <: UuidNode
+](
+  factories: AbstractRelationFactory[START,AbstractRelation[START,END],END]*
+)(
+  val nodeFactory: NodeFactory[END]
+) extends StartRelationAccess[START,AbstractRelation[START,END],END] {
+  override def read(baseDef: FixedNodeDefinition[START]) = {
+    Left(startConnectedDiscourseNodes(factories.map(RelationDefinition(baseDef, _, toNodeDefinition)): _*))
+  }
+}
+
+case class EndMultiRelationRead[
+START <: UuidNode,
+END <: UuidNode
+](
+  factories: AbstractRelationFactory[START,AbstractRelation[START,END],END]*
+)(
+  val nodeFactory: NodeFactory[START]
+) extends EndRelationAccess[START,AbstractRelation[START,END],END] {
+  override def read(baseDef: FixedNodeDefinition[END]) = {
+    Left(endConnectedDiscourseNodes(factories.map(RelationDefinition(toNodeDefinition, _, baseDef)): _*))
+  }
+}
+
 
 class StartRelationRead[
 START <: UuidNode,
