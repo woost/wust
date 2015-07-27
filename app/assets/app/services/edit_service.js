@@ -77,7 +77,7 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
             let model = _.pick(this, "id");
             let message = model.id === undefined ? "Added new node" : "Updated now";
 
-            Post.$buildRaw(model).$update(dirtyModel).$then(data => {
+            return Post.$buildRaw(model).$update(dirtyModel).$then(data => {
                 // DiscourseNode.Post.gotoState(data.id);
                 humane.success(message);
                 this.apply(data);
@@ -140,6 +140,7 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
     this.list = restoreEditList();
     this.edit = edit;
     this.updateNode = updateNode;
+    this.findNode = findNode;
 
     function restoreEditList() {
         return _.map(editStore.get("list", self.list) || [], s => new Session(s));
@@ -150,14 +151,17 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
     }
 
     function updateNode(localId, node) {
-        let existing = _.find(this.list, {
-            localId
-        });
-
+        let existing = findNode(localId);
         if (existing !== undefined) {
             existing.apply(node);
             storeEditList();
         }
+    }
+
+    function findNode(localId) {
+        return _.find(this.list, {
+            localId
+        });
     }
 
     function assureSessionExists(node, index) {

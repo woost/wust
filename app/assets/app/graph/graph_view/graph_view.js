@@ -16,9 +16,9 @@ function graphView() {
     };
 }
 
-graphViewCtrl.$inject = ["$scope", "DiscourseNode", "$filter"];
+graphViewCtrl.$inject = ["$scope", "DiscourseNode", "$filter", "EditService"];
 
-function graphViewCtrl($scope, DiscourseNode, $filter) {
+function graphViewCtrl($scope, DiscourseNode, $filter, EditService) {
     let vm = this;
 
     vm.addNodeToGraph = addNodeToGraph;
@@ -42,6 +42,17 @@ function graphViewCtrl($scope, DiscourseNode, $filter) {
     }
 
     function addNodeToGraph(node, event) {
+        // we can drop local nodes from the scratchpad here,
+        // so let us create them if before putting them in the graph, so we
+        // have an id in the graph
+        if (node.id === undefined) {
+            EditService.findNode(node.localId).save().$then(data => placeNodeInGraph(data, event));
+        } else {
+            placeNodeInGraph(node, event);
+        }
+    }
+
+    function placeNodeInGraph(node, event) {
         vm.graph.addNode(node);
         vm.graph.commit();
         let wrappedNode = vm.graph.nodeById(node.id);
