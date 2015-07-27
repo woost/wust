@@ -1,8 +1,8 @@
 angular.module("wust.services").service("EditService", EditService);
 
-EditService.$inject = ["Post", "HistoryService", "store", "$state", "DiscourseNode"];
+EditService.$inject = ["Post", "HistoryService", "store", "DiscourseNode"];
 
-function EditService(Post, HistoryService, store, $state, DiscourseNode) {
+function EditService(Post, HistoryService, store, DiscourseNode) {
     let editStore = store.getNamespacedStore("edit");
     let self = this;
 
@@ -129,7 +129,6 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
                 HistoryService.remove(this.id);
                 this.remove();
                 humane.success("Removed node");
-                $state.go("browse");
             });
         }
     }
