@@ -27,10 +27,11 @@ function Auth($rootScope, $window, restmod, jwtHelper, store) {
         $window.onfocus = () => {
             let prev = authStore.get(userKey);
             delete authStore.inMemoryCache[userKey];
-            self.current = authStore.get(userKey) || {};
-            if (prev !== self.current) {
-                $rootScope.$applyAsync();
-            }
+            let response = authStore.get(userKey) || {};
+            self.current.identifier = response.identifier;
+            self.current.token = response.token;
+            self.current.userId = response.userId;
+            $rootScope.$apply();
         };
     }
 
@@ -45,6 +46,7 @@ function Auth($rootScope, $window, restmod, jwtHelper, store) {
             self.current.token = response.token;
             self.current.userId = response.userId;
             authStore.set(userKey, self.current);
+            $rootScope.$apply();
             humane.success(message);
         });
     }
@@ -59,9 +61,10 @@ function Auth($rootScope, $window, restmod, jwtHelper, store) {
     }
 
     function logoutLocally() {
-        authStore.remove(userKey);
         delete self.current.identifier;
         delete self.current.token;
         delete self.current.userId;
+        authStore.remove(userKey);
+        $rootScope.$apply();
     }
 }
