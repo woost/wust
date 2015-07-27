@@ -1,4 +1,4 @@
 <div class="post-preview">
-    <h2 ng-hide="vm.node.title.slice(0,137) == vm.node.description.slice(0,137)">{{vm.node.title}}</h2>
-    <div ng-show="vm.node.description.length > 0" markdown="vm.node.description"></div>
+    <h2 ng-show="vm.displayTitle" ng-bind="vm.node.title"></h2>
+    <div ng-show="vm.node.description" markdown="vm.node.description"></div>
 </div>

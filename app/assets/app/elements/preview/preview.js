@@ -16,8 +16,15 @@ function preview() {
     };
 }
 
-previewCtrl.$inject = [];
+previewCtrl.$inject = ["$scope"];
 
-function previewCtrl() {
+function previewCtrl($scope) {
     let vm = this;
+
+    $scope.$watch("vm.node.title", updateDisplayedProperties);
+    $scope.$watch("vm.node.description", updateDisplayedProperties);
+
+    function updateDisplayedProperties() {
+        vm.displayTitle = vm.node.title.slice(0, 137) !== (vm.node.description || "").slice(0, 137);
+    }
 }
