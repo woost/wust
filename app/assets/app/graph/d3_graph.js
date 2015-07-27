@@ -185,7 +185,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                     .style("pointer-events", "all");
 
                 this.d3Node = this.d3NodeContainerWithData.append("div")
-                    .attr("class", d => d.hyperEdge ? "no_flick relation_label" : `no_flick node ${DiscourseNode.get(d.label).css}`)
+                    .attr("class", d => d.hyperEdge ? "relation_label" : `node ${DiscourseNode.get(d.label).css}`)
                     .style("position", "absolute")
                     .style("max-width", "150px") // to produce line breaks
                     .style("word-wrap", "break-word")

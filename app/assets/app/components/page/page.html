@@ -1,14 +1,14 @@
-<div navigation></div>
+<div navigation ng-cloak></div>
 <main role="main">
     <div id="main_view">
         <div id="left_hand_side" visible-left-side>
-            <div scratchpad></div>
+            <div scratchpad ng-cloak></div>
         </div>
         <div id="right_hand_side">
             <div zen></div>
             <div search></div>
             <div route-loading-indicator></div>
-            <div id="content_view" ng-hide='isRouteLoading' ui-view></div>
+            <div id="content_view" ng-hide='isRouteLoading' ui-view ng-cloak></div>
         </div>
     </div>
 </main>
