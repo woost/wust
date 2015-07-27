@@ -5,7 +5,7 @@
                 <h3 class="modal-title">Post</h3>
             </div>
             <div class="modal-body">
-                <span ng-if="vm.previewEnabled" markdown="vm.node.description"></span>
+                <span ng-if="vm.previewEnabled" preview node="vm.node"></span>
                 <span ng-if="!vm.previewEnabled" static-edit-post node="vm.node"></span>
             </div>
             <div class="modal-footer">

@@ -18,11 +18,8 @@
     overflow: auto;
     // transition should fit to the one defined on #left_hand_side in page.scss
     transition: all 0.1s ease;
-    #zenetized_markdown {
+    .zenetized_preview {
         height: 100%;
-        & > div {
-            height: 100%;
-        }
     }
     &.ng-hide-add {
         @include animation-play-state(paused !important);
