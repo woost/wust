@@ -1,4 +1,5 @@
 @import "compass/css3/transform";
+@import "compass/css3/box-shadow";
 
 .graph_view_component {
     overflow: hidden;
@@ -32,7 +33,7 @@
     #filter_input {
         width: 30%;
         position: absolute;
-        z-index:100;
+        z-index:200;
     }
     .popover {
         margin: 0px;
@@ -47,5 +48,29 @@
     }
     marker path.svglink {
         fill: $graph_link_color !important;
+    }
+
+    .post-preview-frame {
+        position: absolute;
+        width: 30%;
+        height: 100%;
+        top: 0;
+        z-index: 300;
+
+        &.right {
+            right: 0;
+        }
+        &.left {
+            left: 0;
+        }
+
+        .post-preview {
+            margin: 15px;
+            @include box-shadow(0 0 20px #555);
+            background: #EFEFEF;
+            border: 1px solid #DDD;
+            border-radius: 5px;
+            padding: 10px;
+        }
     }
 }
