@@ -12,6 +12,8 @@ function UserDetailsCtrl($stateParams, User, Auth, $q) {
     vm.contributions = vm.user.contributions.$search();
 
     function saveUser() {
-        return vm.user.$save().$asPromise();
+        return vm.user.$save().$then(() => {
+            humane.success("Updated user profile");
+        }, () => humane.error("Error updating user profile")).$asPromise();
     }
 }
