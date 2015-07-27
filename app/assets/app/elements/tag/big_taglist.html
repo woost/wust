@@ -1,5 +1,5 @@
 <div class="big_taglist_directive">
-    <span ng-repeat="tag in vm.node.tags track by tag.id" ng-class="vm.nodeInfo.css" class="{{vm.nodeInfo.tagCss(tag)}}">
+    <span ng-repeat="tag in vm.node.tags track by tag.id" class="{{::vm.nodeInfo.css}} {{::vm.nodeInfo.tagCss(tag)}}">
         <span ng-bind="tag.title"></span>
         <i ng-click="vm.downvote(tag)" class="vote_button fa fa-chevron-down"></i>
         <i ng-click="vm.upvote(tag)" class="vote_button fa fa-chevron-up"></i>

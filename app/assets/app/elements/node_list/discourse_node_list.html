@@ -1,7 +1,7 @@
 <div class="discourse_node_list_container">
     <div class='discourse_node_list' ng-class='vm.nodeModel.listCss'>
-        <h2 ng-if="!vm.nodeModel.writable">{{vm.nodeModel.title}}</h2>
-        <h2 ng-if="vm.nodeModel.writable" class="drop_post_container" ui-on-Drop="vm.nodeModel.add($data)" drop-channel="create_connect,connect">{{vm.nodeModel.title}}</h2>
+        <h2 ng-if="::!vm.nodeModel.writable" ng-bind="::vm.nodeModel.title"></h2>
+        <h2 ng-if="::vm.nodeModel.writable" class="drop_post_container" ui-on-Drop="vm.nodeModel.add($data)" drop-channel="create_connect,connect" ng-bind="::vm.nodeModel.title"></h2>
 
         <div ng-include="'show_discourse_node_list.html'"></div>
     </div>
