@@ -794,6 +794,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
                 let event = d3.event.sourceEvent;
                 let scale = this.zoom.scale();
 
+                //TODO: instant dragging without tolerance!
                 this.onDragMoveInit(d);
 
                 if (this.isDragging) {
