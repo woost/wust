@@ -33,7 +33,7 @@
     #filter_input {
         width: 30%;
         position: absolute;
-        z-index:200;
+        z-index: $zindex_fiter_input;
     }
     .popover {
         margin: 0px;
@@ -53,7 +53,7 @@
     .post-preview-frame {
         position: absolute;
         width: 30%;
-        z-index: 300;
+        z-index: $zindex_post_preview_frame;
 
         &.right { right: 0; }
         &.left { left: 0; }

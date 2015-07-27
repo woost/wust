@@ -14,7 +14,7 @@
     position: absolute;
     top: 50px;
     height: 100%;
-    z-index: 1001;
+    z-index: $zindex_zen;
     overflow: auto;
     // transition should fit to the one defined on #left_hand_side in page.scss
     transition: all 0.1s ease;
