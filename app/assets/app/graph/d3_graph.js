@@ -538,22 +538,14 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                     this.drawGraph();
             }
 
-            drawGraph() {
+            drawNodes() {
                 this.graph.nodes.forEach( (node) => {
-                    node.domNodeContainer.style[this.transformCompat] = "translate(" + (node.x - node.rect.width / 2) + "px," + (node.y - node.rect.height / 2) + "px)";
+                    node.domNodeContainer.style[this.transformCompat] = `translate(${node.x - node.rect.width / 2}px, ${node.y - node.rect.height / 2}px)`;
                 });
+            }
 
+            drawRelations() {
                 this.graph.edges.forEach( (relation) => {
-                    // draw svg paths for lines between nodes
-                    // if (relation.source.id === relation.target.id) { // self loop
-                    //     //TODO: self loops with hypernodes
-                    //     let rect = relation.rect;
-                    //     relation.domPath.setAttribute("d", `
-                    //             M ${relation.source.x} ${relation.source.y - rect.height/2}
-                    //             m -20, 0
-                    //             c -80,-80   120,-80   40,0
-                    //             `);
-                    // } else {
                     // clamp every edge line to the intersections with its incident node rectangles
                     let line = Helpers.clampLineByRects(relation, relation.source.rect, relation.target.rect);
                     if (isNaN(line.x1) || isNaN(line.y1) || isNaN(line.x2) || isNaN(line.y2))
@@ -562,18 +554,12 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                         let pathAttr = `M ${line.x1} ${line.y1} L ${line.x2} ${line.y2}`;
                         relation.domPath.setAttribute("d", pathAttr);
                     }
-                    // }
-
-
-                    // draw normal link-labels and center them
-                    // let domLinkTextNode = domLinks[i];
-                    // let rect = relation.rect;
-                    // if (relation.source.id === relation.target.id) { // self loop
-                    //     domLinkTextNode.style[transformCompat] = "translate(" + (relation.source.x - rect.width / 2) + "px," + (relation.source.y - rect.height / 2 - 70) + "px)";
-                    // } else {
-                    //     domLinkTextNode.style[transformCompat] = "translate(" + (((relation.source.x + relation.target.x) / 2) - rect.width / 2) + "px," + (((relation.source.y + relation.target.y) / 2) - rect.height / 2) + "px)";
-                    // }
                 });
+            }
+
+            drawGraph() {
+                this.drawNodes();
+                this.drawRelations();
             }
 
             // zoom into graph
