@@ -22,14 +22,17 @@ function Auth($rootScope, $window, restmod, jwtHelper, store) {
     // every time the window gets focused, clear the inMemoryCache of the store,
     // so all changes in store get propagated into our current angular session.
     // if the value has changed, we trigger rerendering of the whole.
-    $window.onfocus = () => {
-        let prev = authStore.get(userKey);
-        delete authStore.inMemoryCache[userKey];
-        self.current = authStore.get(userKey) || {};
-        if (prev !== self.current) {
-            $rootScope.$apply();
-        }
-    };
+    // this is only needed if storage is available, otherwise we won't share data between buffers.
+    if (authStore.storageAvailable) {
+        $window.onfocus = () => {
+            let prev = authStore.get(userKey);
+            delete authStore.inMemoryCache[userKey];
+            self.current = authStore.get(userKey) || {};
+            if (prev !== self.current) {
+                $rootScope.$applyAsync();
+            }
+        };
+    }
 
     function loggedIn() {
         let currentUser = authStore.get(userKey);
@@ -38,7 +41,9 @@ function Auth($rootScope, $window, restmod, jwtHelper, store) {
 
     function authenticate(model, message, user) {
         model.$create(user).$then(response => {
-            self.current = _.pick(response, "identifier", "token", "userId");
+            self.current.identifier = response.identifier;
+            self.current.token = response.token;
+            self.current.userId = response.userId;
             authStore.set(userKey, self.current);
             humane.success(message);
         });
@@ -55,6 +60,8 @@ function Auth($rootScope, $window, restmod, jwtHelper, store) {
 
     function logoutLocally() {
         authStore.remove(userKey);
-        self.current = {};
+        delete self.current.identifier;
+        delete self.current.token;
+        delete self.current.userId;
     }
 }
