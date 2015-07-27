@@ -15,6 +15,7 @@ function ModalEditService($modal, EditService) {
     this.hide = hideModal;
 
     let currentNode;
+    //TODO: this does not work when the browser is reloaded and also it might be that we have removed the session from the scratchpad
     Object.defineProperty(this, "currentNode", {
         get: () => {
             if (currentNode === undefined || !currentNode.isLocal()) {
