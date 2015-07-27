@@ -1,5 +1,5 @@
 <div class="discourse_node_list_container">
-    <div class='discourse_node_list' ng-class='vm.nodeModel.listCss'>
+    <div class='discourse_node_list' ng-class='::vm.nodeModel.listCss'>
         <h2 ng-if="::!vm.nodeModel.writable" ng-bind="::vm.nodeModel.title"></h2>
         <h2 ng-if="::vm.nodeModel.writable" class="drop_post_container" ui-on-Drop="vm.nodeModel.add($data)" drop-channel="create_connect,connect" ng-bind="::vm.nodeModel.title"></h2>
 
@@ -10,14 +10,14 @@
 <script type="text/ng-template" id="show_discourse_node_list.html">
     <div class="node_model_list">
         <div ng-repeat='node in vm.nodeModel.list track by node.id'>
-            <div ng-if="!vm.nodeModel.isNested" class="btn-group" role="group">
-                    <button ng-if="vm.nodeModel.writable" class='btn btn-default btn-xs' ng-click='vm.nodeModel.remove(node)'><i class='fa fa-minus text-default'></i></button>
+            <div ng-if="::!vm.nodeModel.isNested" class="btn-group" role="group">
+                    <button ng-if="::vm.nodeModel.writable" class='btn btn-default btn-xs' ng-click='vm.nodeModel.remove(node)'><i class='fa fa-minus text-default'></i></button>
                     <span class="input" small-post node="node"></span>
             </div>
-            <div ng-if="vm.nodeModel.isNested" class="panel panel-default">
+            <div ng-if="::vm.nodeModel.isNested" class="panel panel-default">
                 <div class="panel-heading">
                     <div class="btn-group" role="group">
-                        <button ng-if="vm.nodeModel.writable" class='btn btn-default btn-xs' ng-click='vm.nodeModel.remove(node)'><i class='fa fa-minus text-default'></i></button>
+                        <button ng-if="::vm.nodeModel.writable" class='btn btn-default btn-xs' ng-click='vm.nodeModel.remove(node)'><i class='fa fa-minus text-default'></i></button>
                         <span class="input" small-post node="node"></span>
                     </div>
                 </div>
