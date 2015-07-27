@@ -22,7 +22,8 @@ angular.module("wust.config", [
     "ui.router",
     "restmod",
     "wust.api",
-    "wust.services"
+    "wust.services",
+    "wust.elements",
 ]);
 
 angular.module("wust.api", [

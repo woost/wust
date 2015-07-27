@@ -1,0 +1,34 @@
+@import "compass/css3/flexbox";
+@import "compass/css3";
+
+h1 {
+    text-align: center;
+    text-transform: uppercase;
+    font-size: 30px;
+    line-height: 45px;
+}
+
+h2 {
+    text-align: center;
+    font-size: 24px;
+    line-height: 36px;
+}
+
+html, body {
+    margin: 0px;
+    font-family: 'Droid Sans', Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    height: 100%;
+    overflow: hidden;
+    #page {
+        height: 100%;
+    }
+    #noscriptmsg {
+        margin: 20px auto;
+        width: 300px;
+        background-color: seagreen;
+        color: white;
+        text-align: center;
+    }
+}
+

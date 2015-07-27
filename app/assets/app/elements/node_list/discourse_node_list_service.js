@@ -1,4 +1,4 @@
-angular.module("wust.services").provider("DiscourseNodeList", DiscourseNodeList);
+angular.module("wust.elements").provider("DiscourseNodeList", DiscourseNodeList);
 
 DiscourseNodeList.$inject = [];
 

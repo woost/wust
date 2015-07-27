@@ -6,27 +6,8 @@ function RoutesConfig($stateProvider, $urlRouterProvider, $locationProvider, Dis
     const templateBase = "assets/app/components";
     $stateProvider.state("page", {
         abstract: true,
-        views: {
-            "navigation": {
-                templateUrl: `${templateBase}/navigation/navigation.html`,
-                controller: "NavigationCtrl as vm",
-            },
-            "scratchpad": {
-                templateUrl: `${templateBase}/scratchpad/scratchpad.html`,
-                controller: "ScratchpadCtrl as vm",
-            },
-            "zen": {
-                templateUrl: `${templateBase}/zen/zen.html`,
-                controller: "ZenCtrl as vm",
-            },
-            "search": {
-                templateUrl: `${templateBase}/search/search.html`,
-                controller: "SearchCtrl as vm",
-            },
-            "content": {
-                template: "<div ui-view></div>",
-            }
-        }
+        templateUrl: `${templateBase}/page/page.html`,
+        controller: "PageCtrl as vm",
     }).state("dashboard", {
         parent: "page",
         url: "/dashboard",

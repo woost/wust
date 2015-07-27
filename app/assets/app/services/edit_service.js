@@ -187,9 +187,6 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
     function edit(maybeNodes, index = 0) {
         //TODO: we get an array if multiple nodes were in completion and enter was pressed
         let node = _.isArray(maybeNodes) ? maybeNodes[0] : maybeNodes;
-        // be aware, the index is reversed!
-        index = _.max([0, self.list.length - index]);
-
         return assureSessionExists(node, index);
     }
 }

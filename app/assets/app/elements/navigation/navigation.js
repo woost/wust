@@ -1,8 +1,21 @@
-angular.module("wust.components").controller("NavigationCtrl", NavigationCtrl);
+angular.module("wust.components").directive("navigation", navigation);
 
-NavigationCtrl.$inject = ["Auth", "SearchService", "LeftSideService", "ModalEditService"];
+navigation.$inject = [];
 
-function NavigationCtrl(Auth, SearchService, LeftSideService, ModalEditService) {
+function navigation() {
+    return {
+        restrict: "A",
+        templateUrl: "assets/app/elements/navigation/navigation.html",
+        scope: true,
+        controller: navigationCtrl,
+        controllerAs: "vm",
+        bindToController: true
+    };
+}
+
+navigationCtrl.$inject = ["Auth", "SearchService", "LeftSideService", "ModalEditService"];
+
+function navigationCtrl(Auth, SearchService, LeftSideService, ModalEditService) {
     let vm = this;
 
     vm.navbarCollapsed = true;

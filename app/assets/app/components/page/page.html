@@ -1,0 +1,14 @@
+<div id="navigation_view" navigation></div>
+<main role="main">
+    <div id="main_view">
+        <div id="left_hand_side" visible-left-side>
+            <div id="scratchpad_view" scratchpad></div>
+        </div>
+        <div id="right_hand_side">
+            <div id="zen_view" zen></div>
+            <div id="search_view" search></div>
+            <div route-loading-indicator></div>
+            <div id="content_view" ng-hide='isRouteLoading' ui-view></div>
+        </div>
+    </div>
+</main>
