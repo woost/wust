@@ -81,13 +81,11 @@ END <: UuidNode
 
 object StartContentRelationHyperAccess {
   def apply[
-  ISTART <: UuidNode,
-  IEND <: UuidNode,
   START <: UuidNode,
   RELATION <: AbstractRelation[START, END],
   END <: UuidNode
-  ](factory: ContentRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[END], startFactory: UuidNodeMatchesFactory[ISTART], endFactory: UuidNodeMatchesFactory[IEND]): (HyperConnectionFactory[ISTART, START with AbstractRelation[ISTART, IEND], IEND] with UuidNodeFactory[START]) => StartContentRelationHyperAccess[ISTART, IEND, START, RELATION, END] = {
-    baseFactory => new StartContentRelationHyperAccess(factory, nodeFactory, startFactory, baseFactory, endFactory)
+  ](factory: ContentRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[END], startFactory: UuidNodeMatchesFactory[Connectable], endFactory: UuidNodeMatchesFactory[Connectable]): (HyperConnectionFactory[Connectable, START with AbstractRelation[Connectable, Connectable], Connectable] with UuidNodeFactory[START]) => StartContentRelationHyperAccess[Connectable, Connectable, START, RELATION, END] = {
+    baseFactory => new StartContentRelationHyperAccess(factory, nodeFactory, Connectable, baseFactory, Connectable)
   }
 }
 
@@ -157,13 +155,11 @@ END <: UuidNode
 
 object EndContentRelationHyperAccess {
   def apply[
-  ISTART <: UuidNode,
-  IEND <: UuidNode,
   START <: UuidNode,
   RELATION <: AbstractRelation[START, END],
   END <: UuidNode
-  ](factory: ContentRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[START], startFactory: UuidNodeMatchesFactory[ISTART], endFactory: UuidNodeMatchesFactory[IEND]): (HyperConnectionFactory[ISTART, END with AbstractRelation[ISTART, IEND], IEND] with UuidNodeFactory[END]) => EndContentRelationHyperAccess[ISTART, IEND, START, RELATION, END] = {
-    baseFactory => new EndContentRelationHyperAccess(factory, nodeFactory, startFactory, baseFactory, endFactory)
+  ](factory: ContentRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[START], startFactory: UuidNodeMatchesFactory[Connectable], endFactory: UuidNodeMatchesFactory[Connectable]): (HyperConnectionFactory[Connectable, END with AbstractRelation[Connectable, Connectable], Connectable] with UuidNodeFactory[END]) => EndContentRelationHyperAccess[Connectable, Connectable, START, RELATION, END] = {
+    baseFactory => new EndContentRelationHyperAccess(factory, nodeFactory, Connectable, baseFactory, Connectable)
   }
 }
 
