@@ -42,6 +42,8 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
                 else
                     return t.id;
             });
+
+            this.setValidityProperties();
         }
 
         dirtyModel() {
@@ -57,21 +59,10 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
             return dirtyModel;
         }
 
-        isPristine(dirtyModel = this.dirtyModel()) {
-            return _.isEmpty(dirtyModel);
-        }
-
-        isValid(dirtyModel = this.dirtyModel()) {
-            return !_.isEmpty(this.title);
-        }
-
-        canSave(dirtyModel = this.dirtyModel()) {
-            return this.isValid(dirtyModel) && !this.isPristine(dirtyModel);
-        }
-
         save() {
             let dirtyModel = this.dirtyModel();
-            if (!this.canSave(dirtyModel))
+            this.setValidityProperties();
+            if (!this.canSave)
                 return;
 
             let model = _.pick(this, "id");
@@ -108,11 +99,21 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
             let encoded = tag.encode();
             this.tags.push(encoded);
             this.addedTags.push(encoded.id);
-            storeEditList();
+
+            this.onChange();
         }
 
         onChange() {
+            this.setValidityProperties();
             storeEditList();
+        }
+
+        setValidityProperties() {
+            let dirtyModel = this.dirtyModel();
+            this.isPristine = _.isEmpty(dirtyModel);
+            this.isValid = !_.isEmpty(this.title);
+            this.canSave = this.isValid && !this.isPristine;
+            this.isLocal = this.id === undefined;
         }
 
         remove() {
@@ -120,12 +121,8 @@ function EditService(Post, HistoryService, store, $state, DiscourseNode) {
             this.onChange();
         }
 
-        isLocal() {
-            return this.id === undefined;
-        }
-
         deleteNode() {
-            if (this.isLocal())
+            if (this.isLocal)
                 return;
 
             Post.$buildRaw(_.pick(this, "id")).$destroy().$then(() => {
