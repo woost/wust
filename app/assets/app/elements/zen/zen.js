@@ -20,4 +20,8 @@ function zenCtrl(ZenService, $rootScope) {
     let vm = this;
 
     vm.zen = ZenService;
+
+    $rootScope.$on("$stateChangeStart", () => {
+        vm.zen.visible = false;
+    });
 }
