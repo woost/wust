@@ -14,7 +14,9 @@ import play.api.libs.json._
 import scala.util.Try
 import scala.concurrent.duration._
 
-object ImportReddit extends Task with TagTools {
+object ImportReddit extends Task with SeedTools {
+
+
   val builder = new com.ning.http.client.AsyncHttpClientConfig.Builder()
   val ws = new play.api.libs.ws.ning.NingWSClient(builder.build())
   def getJson(url: String): JsValue = Await.result(ws.url(url).get(), 10.seconds).json
@@ -36,14 +38,14 @@ object ImportReddit extends Task with TagTools {
   }
 
   dbContext { implicit db =>
-    val subreddits = List("neo4j", "scala", "lifeprotips")
-    val limit = 20
+    val subreddits = List("lifeprotips", "scala", "neo4j")
+    val limit = 10
 
     mergeTags()
 
     for(subreddit <- subreddits) {
       println(s"importing comments from subreddit /r/$subreddit")
-      // val url = s"http://www.reddit.com/r/$subreddit/top.json?limit=$limit&t=week"
+      // val url = s"http://www.reddit.com/r/$subreddit/top.json?limit=$limit&t=year"
       val url = s"http://www.reddit.com/r/$subreddit/hot.json?limit=$limit"
 
       println("merging subreddit Scope...")
@@ -53,35 +55,34 @@ object ImportReddit extends Task with TagTools {
       }
 
       val response = getJson(url)
-      (response \ "data" \ "children") match {
+      (response \ "data" \ "children": @unchecked) match {
         case JsArray(children) => children.foreach { post =>
           modifyDiscourse { implicit discourse =>
             val id = (post \ "data" \ "id").as[String]
             val title = (post \ "data" \ "title").as[String]
             val content = (post \ "data" \ "selftext").as[String]
-            val startPost = Post.create(title = title.take(140), description = Some(content))
-            println(s"thread: $title")
+            val startPost = createPost(title, content)
+            print(s"thread: $title")
             discourse.add(startPost, belongsTo(startPost, subredditScope), tag(startPost, startPostTag), commentTag, replyTag, subredditScope)
 
-            val comments = getJson(s"http://www.reddit.com/r/$subreddit/comments/$id.json").as[List[JsValue]].apply(1)
-            addCommentsDeep(comments, startPost)
+            val jsonComments = getJson(s"http://www.reddit.com/r/$subreddit/comments/$id.json").as[List[JsValue]].apply(1)
+            var commentCount = 0
+            addCommentsDeep(jsonComments, startPost)
+            println(s" ($commentCount comments)")
 
-            def addCommentsDeep(comments: JsValue, parent: Post) {
-              if((comments \ "kind").as[String] != "Listing") return;
+            def addCommentsDeep(jsonComments: JsValue, parent: Post) {
+              if((jsonComments \ "kind").as[String] != "Listing") return;
               //              println(comments)
-              (comments \ "data" \ "children") match {
+              (jsonComments \ "data" \ "children": @unchecked) match {
                 case JsArray(comments) => comments.filter(c => (c \ "kind").as[String] != "more").foreach { comment =>
-                  val body = (comment \ "data" \ "body").as[String]
-                  val title = body.take(100) + (if(body.size > 100) "..." else "")
+                  commentCount += 1
+                  val commentPost = createPost((comment \ "data" \ "body").as[String])
+                  val connects = Connects.create(commentPost, parent)
+                  discourse.add(commentPost, connects, tag(commentPost, commentTag), tag(connects, replyTag))
 
-                  //                  println(s"comment: $title")
-                  val commentNode = Post.create(title = title.take(140), description = Some(body))
-                  val connects = Connects.create(commentNode, parent)
-                  discourse.add(commentNode, connects, tag(commentNode, commentTag), tag(connects, replyTag))
-
-                  val replies = (comment \ "data" \ "replies") match {
+                  val replies = (comment \ "data" \ "replies": @unchecked) match {
                     case JsString("")     =>
-                    case replies: JsValue => addCommentsDeep(replies, parent = commentNode)
+                    case replies: JsValue => addCommentsDeep(replies, parent = commentPost)
                   }
                 }
               }

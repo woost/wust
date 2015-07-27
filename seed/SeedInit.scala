@@ -3,7 +3,7 @@ package tasks
 import model.WustSchema._
 import renesca.parameter.implicits._
 
-object SeedInit extends Task with TagTools {
+object SeedInit extends Task with SeedTools {
   println("Seeding Database...")
 
   dbContext { implicit db =>

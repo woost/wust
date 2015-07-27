@@ -7,7 +7,8 @@ import renesca.parameter.implicits._
 
 import scala.util.Try
 
-object ImportHackerNews extends Task with TagTools {
+object ImportHackerNews extends Task with SeedTools {
+
   val hackerNewsScope = mergeScope(s"HackerNews")
   dbContext { implicit db =>
     println("merging HackerNews Tags...")
@@ -20,7 +21,10 @@ object ImportHackerNews extends Task with TagTools {
 
     val itemId: Option[ItemId] = None //Some(ItemId(9869886))
     if(itemId.isDefined) importItem(forceGetItem(itemId.get))
-    else importTopStories()
+    else {
+      importTopQuestions()
+      importTopStories()
+    }
   }
 
   def mergeTags()(implicit db: DbService) {
@@ -29,6 +33,7 @@ object ImportHackerNews extends Task with TagTools {
         Inherits.merge(mergeTag("HN-Story"), hackerNewsScope),
         Inherits.merge(mergeTag("HN-Show"), hackerNewsScope),
         Inherits.merge(mergeTag("HN-Ask"), hackerNewsScope),
+        Inherits.merge(mergeTag("HN-Ask"), mergeTag("Question")),
         Inherits.merge(mergeTag("HN-Comment"), hackerNewsScope),
         Inherits.merge(mergeTag("HN-Comment"), mergeTag("Comment"))
       )
@@ -38,6 +43,13 @@ object ImportHackerNews extends Task with TagTools {
   def importTopStories()(implicit db: DbService) {
     println("importing top Stories...")
     HackerNews.getItemIdsForTopStories().foreach { id =>
+      importItem(forceGetItem(id))
+    }
+  }
+
+  def importTopQuestions()(implicit db: DbService) {
+    println("importing top Questions...")
+    HackerNews.getItemIdsForAskStories().foreach { id =>
       importItem(forceGetItem(id))
     }
   }
@@ -61,30 +73,30 @@ object ImportHackerNews extends Task with TagTools {
   def importItem(hnItem: Item)(implicit db: DbService): Unit = {
     modifyDiscourse { discourse =>
       println(s"importing ${ hnItem.itemType }: ${ hnItem.title.get }")
-      val post = Post.create(hnItem.title.get.take(140), description = Some(hnItem.text))
+      val startPost = createPost(hnItem.title.get, hnItem.url.map(_ + "\n\n").getOrElse("") + hnItem.text)
       val commentTag = mergeTag("HN-Comment")
       val replyTag = mergeTag("repliesTo")
       discourse.add(
-        tag(post, mergeTag(s"HN-${ hnItem.itemType }")),
-          belongsTo(post, hackerNewsScope),
+        tag(startPost, mergeTag(s"HN-${ hnItem.itemType }")),
+        belongsTo(startPost, hackerNewsScope),
         commentTag
       )
-      addDeepChildItems(hnItem, post)
+      addDeepChildItems(hnItem, startPost)
       println()
 
       def addDeepChildItems(parentHnItem: Item, parentPost: Post): Unit = {
         parentHnItem.commentIds.foreach { itemId =>
           val hnItem = forceGetItem(itemId)
-          val post = Post.create(title = hnItem.text.take(140), description = Some(hnItem.text))
+          val commentPost = createPost(hnItem.text)
           if(!hnItem.deleted) {
-            if(post.validate.isDefined) {
-              println("\nerror: " + post.validate.get)
+            if(commentPost.validate.isDefined) {
+              println("\nerror: " + commentPost.validate.get)
               println("item: " + hnItem)
             } else {
-              val connects = Connects.create(post, parentPost)
-              discourse.add(post, connects, tag(post, commentTag), tag(connects, replyTag))
+              val connects = Connects.create(commentPost, parentPost)
+              discourse.add(commentPost, connects, tag(commentPost, commentTag), tag(connects, replyTag))
               print(".")
-              addDeepChildItems(hnItem, post)
+              addDeepChildItems(hnItem, commentPost)
             }
           }
         }
