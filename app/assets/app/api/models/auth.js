@@ -3,6 +3,8 @@ angular.module("wust.api").service("Auth", Auth);
 Auth.$inject = ["$rootScope", "$window", "restmod", "jwtHelper", "store"];
 
 function Auth($rootScope, $window, restmod, jwtHelper, store) {
+    let self = this;
+
     let authStore = store.getNamespacedStore("auth");
     let userKey = "currentUser";
     let service = {
@@ -23,8 +25,8 @@ function Auth($rootScope, $window, restmod, jwtHelper, store) {
     $window.onfocus = () => {
         let prev = authStore.get(userKey);
         delete authStore.inMemoryCache[userKey];
-        this.current = authStore.get(userKey) || {};
-        if (prev !== this.current) {
+        self.current = authStore.get(userKey) || {};
+        if (prev !== self.current) {
             $rootScope.$apply();
         }
     };
@@ -36,8 +38,8 @@ function Auth($rootScope, $window, restmod, jwtHelper, store) {
 
     function authenticate(model, message, user) {
         model.$create(user).$then(response => {
-            this.current = _.pick(response, "identifier", "token", "userId");
-            authStore.set(userKey, this.current);
+            self.current = _.pick(response, "identifier", "token", "userId");
+            authStore.set(userKey, self.current);
             humane.success(message);
         });
     }
@@ -53,6 +55,6 @@ function Auth($rootScope, $window, restmod, jwtHelper, store) {
 
     function logoutLocally() {
         authStore.remove(userKey);
-        this.current = {};
+        self.current = {};
     }
 }
