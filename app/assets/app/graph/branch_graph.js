@@ -86,7 +86,7 @@ function branchGraph(DiscourseNode) {
                 return d.y;
             })
             .attr("r", radius)
-            .attr("class", d => d.hyperEdge ? "relation_label" : "branch_node " + DiscourseNode.get(d.label).css)
+            .attr("class", d => d.hyperEdge ? "hyperrelation" : "branch_node " + DiscourseNode.get(d.label).css)
             .style("stroke", n => n.leaf === true ? "black" : (n.directSuccessor === true ? "#666" : branchColor(n.branch)))
             .style("stroke-width", border)
             .style("stroke-dasharray", d => d.hyperEdge ? "4 3" : "");

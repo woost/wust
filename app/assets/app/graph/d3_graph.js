@@ -59,6 +59,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
 
                 // call tick on every simulation step
                 this.force.on("tick", this.tick.bind(this));
+                // react on graph changes
                 this.graph.onCommit(this.updateGraph.bind(this));
 
                 this.updateGraph({ newNodes: this.graph.nodes });
@@ -71,17 +72,13 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                 this.d3Svg = d3.select(this.rootDomElement)
                     .append("svg")
                     .attr("width", this.width)
-                    .attr("height", this.height)
-                    .style("position", "absolute");
+                    .attr("height", this.height);
                 // .style("background", "rgba(220, 255, 240, 0.5)");
 
                 // has the same size and position as the svg
                 // renders nodes and relation labels
                 this.d3Html = d3.select(this.rootDomElement)
-                    .append("div")
-                    .style("width", this.width + "px")
-                    .style("height", this.height + "px")
-                    .style("position", "absolute");
+                    .append("div").attr("id", "d3Html");
                 // .style("background", "rgba(220, 240, 255, 0.5)");
                 // .style("border", "1px solid #333")
 
@@ -113,18 +110,12 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
 
                 // choose the correct transform style for many browsers
                 this.transformCompat = Helpers.cssCompat("transform", "Transform", "transform");
-                this.transformOriginCompat = Helpers.cssCompat("transformOrigin", "TransformOrigin", "transform-origin");
-
 
                 // svg and html each have full-size
                 // containers with enabled pointer events
                 // translate-styles for zoom/pan will be applied here
-                this.d3SvgContainer = this.d3Svg.append("g").attr("id", "svgContainer")
-                    .style("visibility", "hidden"); // will be shown when converged
-                this.d3HtmlContainer = this.d3Html.append("div").attr("id", "htmlContainer")
-                    // zoom fix: html initially has its origin centered, svg has (top left)
-                    .style(this.transformOriginCompat, "top left")
-                    .style("visibility", "hidden"); // will be shown when converged
+                this.d3SvgContainer = this.d3Svg.append("g").attr("id", "svgContainer");
+                this.d3HtmlContainer = this.d3Html.append("div").attr("id", "htmlContainer");
 
                 if (this.debugDraw) {
                     // draw gravitational center
@@ -180,16 +171,10 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
 
                 // add nodes
                 let d3NodeFrame = this.d3NodeContainerWithData.enter()
-                    .append("div").attr("class","nodeframe")
-                    .style("position", "relative") // needed for z-index (moving/fixed have higher z-index)
-                    .style("pointer-events", "all");
+                    .append("div").attr("class", d => "nodeframe" + (d.hyperEdge ? " nodeframe-hyperrelation" : ""));
 
                 this.d3Node = this.d3NodeContainerWithData.append("div")
-                    .attr("class", d => d.hyperEdge ? "relation_label" : `node ${DiscourseNode.get(d.label).css}`)
-                    .style("position", "absolute")
-                    .style("max-width", "150px") // to produce line breaks
-                    .style("word-wrap", "break-word")
-                    .style("cursor", "pointer");
+                    .attr("class", d => d.hyperEdge ? "hyperrelation" : `node ${DiscourseNode.get(d.label).css}`);
 
                 this.d3Node
                     .append("span")
@@ -212,23 +197,16 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                     .attr("class", "nodetools");
 
                 this.d3NodePinTool = this.d3NodeTools.append("div")
-                    .attr("class", "nodetool pintool fa fa-thumb-tack fa-rotate-45")
-                    .style("cursor", "pointer");
+                    .attr("class", "nodetool pintool fa fa-thumb-tack");
 
                 this.d3NodeConnectTool = this.d3NodeTools.append("div")
-                    .style("display", d => d.hyperEdge ? "none" : "inline-block")
-                    .attr("class", "nodetool connecttool icon-flow-line fa-rotate-minus45")
-                    .style("cursor", "crosshair");
+                    .attr("class", "nodetool connecttool icon-flow-line");
 
                 this.d3NodeDisconnectTool = this.d3NodeTools.append("div")
-                    .style("display", d => d.hyperEdge ? "inline-block" : "none")
-                    .attr("class", "nodetool disconnecttool fa fa-scissors")
-                    .style("cursor", "pointer");
+                    .attr("class", "nodetool disconnecttool fa fa-scissors");
 
                 this.d3NodeDeleteTool = this.d3NodeTools.append("div")
-                    .style("display", d => d.hyperEdge ? "none" : "inline-block")
-                    .attr("class", "nodetool deletetool fa fa-trash")
-                    .style("cursor", "pointer");
+                    .attr("class", "nodetool deletetool fa fa-trash");
 
                 /// remove nodes and relations
                 this.d3NodeContainerWithData.exit().remove();
@@ -243,7 +221,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                 //     .data(graph.edges).enter()
                 //     .append("div");
                 // let linktextHtml = linkText.append("div")
-                //     .attr("class", "relation_label")
+                //     .attr("class", "hyperrelation")
                 //     .html(d => connectsHyperEdge(d) ? "" : d.title);
                 // check whether a link connects to a hyperedge-node
                 // function connectsHyperEdge(link) {
@@ -441,8 +419,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                 if (this.visibleConvergence) {
                     this.recalculateNodeDimensions(this.graph.nodes);
                     this.focusMarkedNodes(0);
-                    this.d3HtmlContainer.style("visibility", "visible");
-                    this.d3SvgContainer.style("visibility", "visible");
+                    this.d3HtmlContainer.classed({"converged": true});
+                    this.d3SvgContainer.classed({"converged": true});
                 }
 
             }
@@ -460,8 +438,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                     this.focusMarkedNodes(0);
 
 
-                this.d3HtmlContainer.style("visibility", "visible");
-                this.d3SvgContainer.style("visibility", "visible");
+                this.d3HtmlContainer.classed({"converged": true});
+                this.d3SvgContainer.classed({"converged": true});
             }
 
             updateGraphRefs() {
@@ -576,7 +554,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
             resizeGraph() {
                 this.width = this.rootDomElement.offsetWidth;
                 this.height = this.rootDomElement.offsetHeight;
-                let [width, height] = [this.width, this.height];
                 this.d3Svg.style("width", this.width + "px").style("height", this.height + "px");
                 this.d3Html.style("width", this.width + "px").style("height", this.height + "px");
                 // if graph was hidden when initialized,

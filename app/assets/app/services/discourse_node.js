@@ -29,7 +29,7 @@ function DiscourseNode() {
         }).reduce(_.merge);
 
         let defaultNode = {
-            css: "relation_label",
+            css: "hyperrelation",
             tagCss: _.constant(""),
             getHref: _.constant("#"),
             getState: _.constant("."),

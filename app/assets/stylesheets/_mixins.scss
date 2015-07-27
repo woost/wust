@@ -13,11 +13,3 @@
     -o-transition: $type;
     transition: $type;
 }
-
-@mixin transform($type) {
-    -webkit-transform: $type;
-    -moz-transform: $type;
-    -ms-transform: $type;
-    -o-transform: $type;
-    transform: $type;
-}

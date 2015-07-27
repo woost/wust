@@ -1,5 +1,6 @@
 @import "compass/css3/flexbox";
 @import "compass/css3/box-shadow";
+@import "compass/css3/transform";
 
 @mixin discourse_node($color, $icon: "") {
     $bgcolor: lighten(desaturate($color, 0), 10);
@@ -78,7 +79,7 @@ marker path.connectorlinearrow {
         z-index: 110;
     }
 
-    .fixed .node, .fixed .relation_label {
+    .fixed .node, .fixed .hyperrelation {
         // blue glow
         // @include box-shadow(0 0 40px 5px #7dbaff);
         border-color: #000;
@@ -91,12 +92,12 @@ marker path.connectorlinearrow {
         @include box-shadow(0 5px 20px #333);
         border-color: #000;
         border-width: 2px;
-        padding: 0.5px 14px 0px 11px; // -1px in width/height because of 1px more border
+        padding: 0.5px 14px 0px 11px; // -1px in width/height because of 1px more border //TODO: use border-box instead
     }
     .selected .node {
         background-color: #BCEFFF;
     }
-    .selected .relation_label {
+    .selected .hyperrelation {
         background-color: #BCEFFF;
     }
     .nodetools {
@@ -116,25 +117,57 @@ marker path.connectorlinearrow {
         .nodetool {
             padding: 8px;
             display: inline-block;
+            // display: inline-block;
             // border: 1px solid #EEE;
-            &+.pintool {
-                @include transform(rotate(45deg));
-            }
+        }
+        .pintool {
+            @include transform(translate(0px, 0px) rotate(45deg));
+            cursor: pointer;
+        }
 
-            &+.connecttool {
-                font-size: 130%;
-                padding: 5px;
-            }
+        .connecttool {
+            @include transform(rotate(-45deg));
+            font-size: 130%; // larger symbol
+            padding: 5px;
+            cursor: crosshair;
+        }
+
+        .disconnecttool {
+            cursor: pointer;
+            display: none;
+        }
+
+        .deletetool {
+            cursor: pointer;
         }
 
     }
+    .nodeframe-hyperrelation {
+        .connecttool, .deletetool {
+            display: none;
+        }
+        .disconnecttool {
+            display: inline-block;
+        }
+    }
     .fixed {
         .pintool {
-            @include transform(rotate(0deg) !important);
+            @include transform(translate(0px, 0px) rotate(0deg));
             opacity: 1 !important;
         }
     }
 }
+
+.nodeframe {
+    position: absolute; // needed for z-index (moving/fixed have higher z-index)
+    pointer-events: all;
+    max-width: 150px;
+    .node {
+        word-wrap: break-word;
+        cursor: pointer;
+    }
+}
+
 // no hover
 .nodeframe {
     .nodetools {
@@ -156,16 +189,7 @@ marker path.connectorlinearrow {
     }
 }
 
-
-.fa-rotate-45 {
-    @include transform(rotate(45deg));
-}
-
-.fa-rotate-minus45 {
-    @include transform(rotate(-45deg));
-}
-
-.relation_label {
+.hyperrelation {
     // font-size: 9px;
     // line-height: 16px;
     background-color: $graph_link_label_bg;

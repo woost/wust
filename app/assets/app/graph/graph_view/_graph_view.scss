@@ -1,3 +1,5 @@
+@import "compass/css3/transform";
+
 .graph_view_component {
     overflow: hidden;
     height: 100%;
@@ -7,6 +9,24 @@
         svg {
             height: 100%;
             width: 100%;
+            position:absolute;
+            #svgContainer {
+                visibility: hidden; // will be shown when converged
+                &.converged {
+                    visibility: visible;
+                }
+            }
+        }
+        #d3Html {
+            position: absolute;
+            #htmlContainer {
+                // zoom fix: html initially has its origin centered, svg has (top left)
+                @include apply-origin(top left, false); // 3D = false
+                visibility: hidden; // will be shown when converged
+                &.converged {
+                    visibility: visible;
+                }
+            }
         }
     }
     #filter_input {
