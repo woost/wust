@@ -22,19 +22,19 @@
                 <div class="input-group">
                     <input type="text" class="form-control" ng-model="vm.search.query" ng-change='vm.onSearchBoxChange()'>
                     <span class="input-group-btn">
-                        <button type="button" class="btn btn-default fa fa-search" onclick="this.blur()" ng-model="vm.search.resultsVisible" bs-checkbox ng-disabled="vm.searchToggleDisabled()"></button>
+                        <button type="button" class="btn btn-default fa fa-search" onclick="this.blur()" ng-model="vm.search.resultsVisible" bs-checkbox ng-disabled="!vm.search.query"></button>
                     </span>
                 </div>
             </form>
 
-            <form ng-hide="vm.loggedIn()" name="signForm" ng-submit="vm.authenticate(registerUser)" class="navbar-form navbar-right">
+            <form ng-hide="vm.currentAuth.userId" name="signForm" ng-submit="vm.authenticate(registerUser)" class="navbar-form navbar-right">
                 <input class="form-control" size="10" name="username" type="text" ng-model='vm.newUser.identifier' placeholder="Username" required>
                 <input class="form-control" size="10" name="password" type="password" ng-model='vm.newUser.password' placeholder="Password" required>
                 <input type="submit" value="Login" ng-click="registerUser = false" class="btn btn-primary" ng-disabled="signForm.$invalid">
                 <input type="submit" value="Register" ng-click="registerUser = true" class="btn btn-primary" ng-disabled="signForm.$invalid">
             </form>
 
-            <form ng-show="vm.loggedIn()" ng-submit="vm.logout()" class="navbar-form navbar-right">
+            <form ng-show="vm.currentAuth.userId" ng-submit="vm.logout()" class="navbar-form navbar-right">
                 <a ui-sref="users.details({id: vm.currentAuth.userId})" style="padding-right: 10px"><i class="fa fa-user"></i> {{vm.currentAuth.identifier}}</a>
                 <input type="submit" value="Logout" class="btn btn-primary">
             </form>

@@ -16,8 +16,10 @@ function Auth($rootScope, $window, restmod, jwtHelper, store) {
     this.login = _.partial(authenticate, service.signin, "Logged in");
     this.register = _.partial(authenticate, service.signup, "Registered");
     this.logout = logout;
-    this.loggedIn = loggedIn;
     this.current = authStore.get(userKey) || {};
+    this.checkLoggedIn = checkLoggedIn;
+
+    checkLoggedIn();
 
     // every time the window gets focused, clear the inMemoryCache of the store,
     // so all changes in store get propagated into our current angular session.
@@ -35,9 +37,9 @@ function Auth($rootScope, $window, restmod, jwtHelper, store) {
         };
     }
 
-    function loggedIn() {
-        let currentUser = authStore.get(userKey);
-        return currentUser && !jwtHelper.isTokenExpired(currentUser.token);
+    function checkLoggedIn() {
+        if (self.current.token && jwtHelper.isTokenExpired(self.current.token))
+            logoutLocally();
     }
 
     function authenticate(model, message, user) {

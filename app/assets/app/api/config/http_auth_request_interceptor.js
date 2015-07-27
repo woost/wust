@@ -11,6 +11,7 @@ function HttpAuthConfig($httpProvider, jwtInterceptorProvider) {
             return null;
         }
 
+        Auth.checkLoggedIn();
         return Auth.current.token;
     };
 
