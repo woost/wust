@@ -22,6 +22,7 @@ function graphViewCtrl($scope, DiscourseNode, $filter) {
     let vm = this;
 
     vm.addNodeToGraph = addNodeToGraph;
+    vm.state = {};
     vm.onClick = onClick;
     vm.search = {
         title: ""
@@ -37,7 +38,7 @@ function graphViewCtrl($scope, DiscourseNode, $filter) {
         }
 
         let matchingNodes = $filter("fuzzyFilter")(_.reject(vm.graph.nodes, { hyperEdge: true }), vm.search);
-        vm.graph.d3Graph.filter(matchingNodes);
+        vm.d3Graph.filter(matchingNodes);
     }
 
     function addNodeToGraph(node, event) {
@@ -45,9 +46,9 @@ function graphViewCtrl($scope, DiscourseNode, $filter) {
         vm.graph.commit();
         let wrappedNode = vm.graph.nodeById(node.id);
 
-        vm.graph.d3Graph.setNodePositionFromOffset(wrappedNode, event.offsetX, event.offsetY);
-        vm.graph.d3Graph.setFixed(wrappedNode);
-        vm.graph.d3Graph.drawGraph();
+        vm.d3Graph.setNodePositionFromOffset(wrappedNode, event.offsetX, event.offsetY);
+        vm.d3Graph.setFixed(wrappedNode);
+        vm.d3Graph.drawGraph();
     }
 
     function onClick(node) {

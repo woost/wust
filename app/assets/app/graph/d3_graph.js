@@ -1,10 +1,18 @@
 angular.module("wust.graph").directive("d3Graph", d3Graph);
 
-d3Graph.$inject = ["$window", "DiscourseNode", "Helpers", "$location", "$filter", "Post", "$compile"];
+d3Graph.$inject = ["$window", "DiscourseNode", "Helpers", "$location", "$filter", "Post"];
 
-function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $compile) {
+function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
+    return {
+        restrict: "A",
+        scope: false,
+        link
+    };
 
     function link(scope, element) {
+        //TODO: ugly that we have to know that the embedding controller uses
+        //controllerAs 'vm', but we want to share the scope with it
+        let vm = scope.vm;
 
         class D3Graph {
             //TODO: rename onClick -> onNodeClick
@@ -22,7 +30,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                 this.nodeVerticalForce = 1;
                 // state
                 this.drawOnTick = this.drawOnTick = this.visibleConvergence;
-                this.hoveredNode = undefined;
+                vm.state.hoveredNode = undefined;
                 this.width = rootDomElement.offsetWidth;
                 this.height = rootDomElement.offsetHeight;
                 this.dragInitiated = false; // if dragStart was triggered with the correct mouse button
@@ -50,7 +58,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                     .theta(0.8)
                     .alpha(0.1);
                 this.zoom = d3.behavior.zoom().scaleExtent([0.1, 3]); // min/max zoom level
-
             }
 
             init() {
@@ -232,12 +239,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                 //TODO: take care of nodes where the title/description was changed
                 this.recalculateNodeDimensions(changes.newNodes);
 
-                // now we can use the calculated rect
-                this.d3Node
-                    .attr("description-popover", "")
-                    .attr("node-id", d => d.id)
-                    .attr("enable-position-hack", true);
-
                 this.registerUIEvents();
                 this.force.nodes(this.graph.nodes); // nodes and edges get replaced instead of just changed by scalajs
                 this.force.links(this.graph.edges); // that's why we need to set the new references
@@ -246,8 +247,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                 this.force.start();
 
                 this.registerUIEvents();
-
-                $compile(this.d3Html[0])(scope);
             }
 
             stopPropagationAfter(func) {
@@ -320,13 +319,11 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
             registerUIEvents() {
                 //TODO: register only on added d3Nodes
                 this.d3Node/*.on("click", this.ignoreHyperEdge(node => {
-                        this.onClick({
-                            node
-                        });
+                        this.onClick(node);
                     }))*/
-                    .on("mouseover", d => this.hoveredNode = d)
+                    .on("mouseover", d => scope.$applyAsync(() => vm.state.hoveredNode = d))
                     .on("mouseout", d => {
-                        this.hoveredNode = undefined;
+                        scope.$applyAsync(() => vm.state.hoveredNode = undefined);
                         d.d3NodeContainer.classed({
                             "selected": false
                         });
@@ -795,8 +792,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
                         .attr("x1", this.dragStartNodeX + this.dragOffsetX + (event.clientX - this.dragStartMouseX) / scale)
                         .attr("y1", this.dragStartNodeY + this.dragOffsetY + (event.clientY - this.dragStartMouseY) / scale);
 
-                    if (this.hoveredNode !== undefined) {
-                        this.hoveredNode.d3NodeContainer.classed({
+                    if (vm.state.hoveredNode !== undefined) {
+                        vm.state.hoveredNode.d3NodeContainer.classed({
                             "selected": true
                         });
                         this.dragStartNode.d3NodeContainer.classed({
@@ -813,9 +810,9 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
             // we use dragend instead of click event, because it is emitted on mobile phones as well as on pcs
             onDragConnectEnd() {
                 if (this.isDragging) {
-                    if (this.hoveredNode !== undefined) {
+                    if (vm.state.hoveredNode !== undefined) {
                         let sourceNode = this.dragStartNode; // always normal node
-                        let targetNode = this.hoveredNode;
+                        let targetNode = vm.state.hoveredNode;
                         let referenceNode;
                         if (targetNode.hyperEdge) {
                             let start = Post.$buildRaw({
@@ -868,19 +865,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, $com
             }
         }
 
-        let d3Graph = new D3Graph(scope.graph, element[0], scope.onClick, scope.onDraw);
-        d3Graph.graph.d3Graph = d3Graph;
-        d3Graph.init();
+        vm.d3Graph = new D3Graph(vm.graph, element[0], vm.onClick, vm.onDraw);
+        vm.d3Graph.init();
     }
-
-    return {
-        restrict: "A",
-        scope: {
-            graph: "=",
-            onClick: "&",
-            onDraw: "&"
-        },
-        link
-    };
-
 }

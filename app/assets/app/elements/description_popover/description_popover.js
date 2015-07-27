@@ -9,8 +9,7 @@ function descriptionPopover($compile, $popover, HistoryService) {
         terminal: true, // prevent lower priority directives to compile after it
         restrict: "A",
         scope: {
-            enablePositionHack: "@",
-            nodeId: "@"
+            node: "="
         },
         compile: function(el) {
             el.removeAttr("description-popover");

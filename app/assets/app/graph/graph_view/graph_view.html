@@ -1,6 +1,7 @@
 <div class="graph_view_component">
-    <div d3-graph graph="vm.graph" on-click="vm.onClick(node)" class="graph_network" ui-on-Drop="vm.addNodeToGraph($data, $event)" drop-channel="connect">
+    <div d3-graph class="graph_network" ui-on-Drop="vm.addNodeToGraph($data, $event)" drop-channel="connect">
         <div id="filter_input">
+            saddasf: {{vm.state.hoveredNode.title}}
             <input type="text" class="form-control" ng-model="vm.search.title" placeholder="filter">
         </div>
     </div>
