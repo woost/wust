@@ -28,6 +28,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
                 this.debugDraw = false;
                 this.hyperRelationAlignForce = 0.5;
                 this.nodeVerticalForce = 1;
+
                 // state
                 this.drawOnTick = this.drawOnTick = this.visibleConvergence;
                 vm.state.hoveredNode = undefined;
@@ -321,7 +322,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
                 this.d3Node/*.on("click", this.ignoreHyperEdge(node => {
                         this.onClick(node);
                     }))*/
-                    .on("mouseover", d => scope.$applyAsync(() => vm.state.hoveredNode = d))
+                    .on("mouseover", d => scope.$applyAsync(() => {this.setNodeOffset(d); vm.state.hoveredNode = d;}))
                     .on("mouseout", d => {
                         scope.$applyAsync(() => vm.state.hoveredNode = undefined);
                         d.d3NodeContainer.classed({
@@ -701,6 +702,16 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
                 node.y = (y - translate[1]) / scale;
                 node.px = node.x;
                 node.py = node.y;
+            }
+
+            // used to decide where to place preview
+            setNodeOffset(node) {
+                let scale = this.zoom.scale();
+                let translate = this.zoom.translate();
+                node.xOffset = node.x * scale + translate[0];
+                node.yOffset = node.y * scale + translate[1];
+                node.onLeftHalf = node.xOffset < this.width / 2;
+                node.onUpperHalf = node.yOffset < this.height / 2;
             }
 
             onDragStartInit(d) {

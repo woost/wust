@@ -53,21 +53,24 @@
     .post-preview-frame {
         position: absolute;
         width: 30%;
-        height: 100%;
-        top: 0;
         z-index: 300;
 
-        &.right {
-            right: 0;
-        }
-        &.left {
-            left: 0;
-        }
+        &.right { right: 0; }
+        &.left { left: 0; }
+        &.top { top: 0; }
+        &.bottom { bottom: 0; }
 
         .post-preview {
+            h2 {
+                font-size: 20px;
+                line-height: 20px;
+                margin-top: 0;
+                padding-top: 5px;
+                text-align: left;
+            }
             margin: 15px;
             @include box-shadow(0 0 20px #555);
-            background: #EFEFEF;
+            background: #F5F5F5;
             border: 1px solid #DDD;
             border-radius: 5px;
             padding: 10px;
