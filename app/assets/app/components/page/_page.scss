@@ -33,7 +33,7 @@ main {
         #right_hand_side {
             #left_side_toggle {
                 position: fixed;
-                top: 80px;
+                bottom: 0px;
             }
             @include flex-grow(1);
             min-width: 600px;
