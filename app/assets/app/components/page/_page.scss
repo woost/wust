@@ -8,11 +8,8 @@ main {
         @include flex-direction(columns);
         #left_hand_side, #right_hand_side {
             height: inherit;
-            #content_view, #scratchpad_view {
+            #content_view {
                 height: inherit;
-                & > .ng-scope {
-                    height: inherit;
-                }
             }
         }
         #left_hand_side {

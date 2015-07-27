@@ -5,6 +5,7 @@ navigation.$inject = [];
 function navigation() {
     return {
         restrict: "A",
+        replace: true,
         templateUrl: "assets/app/elements/navigation/navigation.html",
         scope: true,
         controller: navigationCtrl,
