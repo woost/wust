@@ -91,6 +91,16 @@ object StartContentRelationHyperAccess {
   }
 }
 
+object StartContentRelationPostHyperAccess {
+  def apply[
+  START <: UuidNode,
+  RELATION <: AbstractRelation[START, END],
+  END <: UuidNode
+  ](factory: ContentRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[END]): (HyperConnectionFactory[Connectable, START with AbstractRelation[Connectable, Connectable], Connectable] with UuidNodeFactory[START]) => StartContentRelationHyperAccess[Connectable, Connectable, START, RELATION, END] = {
+    baseFactory => new StartContentRelationHyperAccess(factory, nodeFactory, Post, baseFactory, Post)
+  }
+}
+
 class EndContentRelationAccess[
 START <: UuidNode,
 RELATION <: AbstractRelation[START, END],
@@ -154,5 +164,15 @@ object EndContentRelationHyperAccess {
   END <: UuidNode
   ](factory: ContentRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[START], startFactory: UuidNodeMatchesFactory[ISTART], endFactory: UuidNodeMatchesFactory[IEND]): (HyperConnectionFactory[ISTART, END with AbstractRelation[ISTART, IEND], IEND] with UuidNodeFactory[END]) => EndContentRelationHyperAccess[ISTART, IEND, START, RELATION, END] = {
     baseFactory => new EndContentRelationHyperAccess(factory, nodeFactory, startFactory, baseFactory, endFactory)
+  }
+}
+
+object EndContentRelationPostHyperAccess {
+  def apply[
+  START <: UuidNode,
+  RELATION <: AbstractRelation[START, END],
+  END <: UuidNode
+  ](factory: ContentRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[START]): (HyperConnectionFactory[Connectable, END with AbstractRelation[Connectable, Connectable], Connectable] with UuidNodeFactory[END]) => EndContentRelationHyperAccess[Connectable, Connectable, START, RELATION, END] = {
+    baseFactory => new EndContentRelationHyperAccess(factory, nodeFactory, Post, baseFactory, Post)
   }
 }
