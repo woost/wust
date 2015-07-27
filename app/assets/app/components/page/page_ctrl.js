@@ -1,8 +1,9 @@
 angular.module("wust.components").controller("PageCtrl", PageCtrl);
 
-PageCtrl.$inject = [];
+PageCtrl.$inject = ["LeftSideService"];
 
-function PageCtrl() {
+function PageCtrl(LeftSideService) {
     let vm = this;
 
+    vm.leftSide = LeftSideService;
 }

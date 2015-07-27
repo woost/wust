@@ -14,9 +14,9 @@ function navigation() {
     };
 }
 
-navigationCtrl.$inject = ["Auth", "SearchService", "LeftSideService", "ModalEditService"];
+navigationCtrl.$inject = ["Auth", "SearchService", "ModalEditService"];
 
-function navigationCtrl(Auth, SearchService, LeftSideService, ModalEditService) {
+function navigationCtrl(Auth, SearchService, ModalEditService) {
     let vm = this;
 
     vm.navbarCollapsed = true;
@@ -36,7 +36,6 @@ function navigationCtrl(Auth, SearchService, LeftSideService, ModalEditService) 
     vm.search = SearchService.search;
     vm.delayedTriggerSearch = undefined;
     vm.modalEdit = ModalEditService;
-    vm.leftSide = LeftSideService;
     vm.searchToggleDisabled = searchToggleDisabled;
 
     function authenticate(register) {
