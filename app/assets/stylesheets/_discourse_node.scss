@@ -104,6 +104,7 @@ marker path.connectorlinearrow {
         position: absolute;
         top: -32px;
         left: -6px;
+        width: 120px; // to not break line of tool symbols
         // z-index: -1;
 
         // $bgcolor: #C3E8FF;
@@ -137,6 +138,10 @@ marker path.connectorlinearrow {
             display: none;
         }
 
+        .replytool {
+            cursor: pointer;
+        }
+
         .deletetool {
             cursor: pointer;
         }
@@ -146,7 +151,7 @@ marker path.connectorlinearrow {
         .connecttool, .deletetool {
             display: none;
         }
-        .disconnecttool {
+        .disconnecttool, .replytool {
             display: inline-block;
         }
     }
@@ -198,7 +203,7 @@ marker path.connectorlinearrow {
     border: 1px solid $graph_link_color;
     color: $graph_link_color;
     border-radius: $border_radius;
-    padding: 0px 3px;
+    padding: 1px 15px 1px 12px;
 
     .discourse_node_list & {
         padding: 5px 15px 0px 12px;

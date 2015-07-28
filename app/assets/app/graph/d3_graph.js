@@ -1,8 +1,8 @@
 angular.module("wust.graph").directive("d3Graph", d3Graph);
 
-d3Graph.$inject = ["$window", "DiscourseNode", "Helpers", "$location", "$filter", "Post"];
+d3Graph.$inject = ["$window", "DiscourseNode", "Helpers", "$location", "$filter", "Post", "ModalEditService"];
 
-function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
+function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, ModalEditService) {
     return {
         restrict: "A",
         scope: false,
@@ -213,6 +213,9 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
                 this.d3NodeDisconnectTool = this.d3NodeTools.append("div")
                     .attr("class", "nodetool disconnecttool fa fa-scissors");
 
+                this.d3NodeReplyTool = this.d3NodeTools.append("div")
+                    .attr("class", "nodetool replytool fa fa-reply");
+
                 this.d3NodeDeleteTool = this.d3NodeTools.append("div")
                     .attr("class", "nodetool deletetool fa fa-trash");
 
@@ -334,6 +337,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
                 this.d3NodePinTool.on("click", this.stopPropagationAfter(this.toggleFixed.bind(this))).call(this.disableDrag);
                 this.d3NodeConnectTool.call(this.dragConnect);
                 this.d3NodeDisconnectTool.on("click", this.stopPropagationAfter(this.disconnectHyperRelation.bind(this))).call(this.disableDrag);
+                this.d3NodeReplyTool.on("click", this.stopPropagationAfter(this.replyToNode.bind(this))).call(this.disableDrag);
                 this.d3NodeDeleteTool.on("click", this.stopPropagationAfter(this.removeNode.bind(this))).call(this.disableDrag);
             }
 
@@ -672,6 +676,27 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
                 this.force.resume();
             }
 
+            connectNodes(startNode, endNode) {
+                let referenceNode;
+                if (endNode.hyperEdge) {
+                    let start = Post.$buildRaw({
+                        id: endNode.startId
+                    });
+                    let hyper = start.connectsTo.$buildRaw({
+                        id: endNode.endId
+                    });
+                    referenceNode = hyper.connectsFrom.$buildRaw(startNode.encode());
+                } else {
+                    let start = Post.$buildRaw(startNode.encode());
+                    referenceNode = start.connectsTo.$buildRaw(endNode.encode());
+                }
+                referenceNode.$save({}).$then(response => {
+                    response.graph.nodes.forEach( n => this.graph.addNode(n));
+                    response.graph.edges.forEach( r => this.graph.addRelation(r));
+                    this.graph.commit();
+                });
+            }
+
             disconnectHyperRelation(d) {
                 Post.$buildRaw({
                     id: d.startId
@@ -692,6 +717,16 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
                 this.graph.removeNode(d.id);
                 this.graph.commit();
                 this.force.stop();
+            }
+
+            replyToNode(existingNode) {
+                ModalEditService.onSave(rawNewNode => {
+                    this.graph.addNode(rawNewNode);
+                    this.graph.commit();
+                    let newNode = this.graph.nodeById(rawNewNode.id);
+                    this.connectNodes(newNode, existingNode);
+                });
+                ModalEditService.show();
             }
 
 
@@ -823,26 +858,9 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
             onDragConnectEnd() {
                 if (this.isDragging) {
                     if (vm.state.hoveredNode !== undefined) {
-                        let sourceNode = this.dragStartNode; // always normal node
-                        let targetNode = vm.state.hoveredNode;
-                        let referenceNode;
-                        if (targetNode.hyperEdge) {
-                            let start = Post.$buildRaw({
-                                id: targetNode.startId
-                            });
-                            let hyper = start.connectsTo.$buildRaw({
-                                id: targetNode.endId
-                            });
-                            referenceNode = hyper.connectsFrom.$buildRaw(sourceNode.encode());
-                        } else {
-                            let start = Post.$buildRaw(sourceNode.encode());
-                            referenceNode = start.connectsTo.$buildRaw(targetNode.encode());
-                        }
-                        referenceNode.$save({}).$then(response => {
-                            response.graph.nodes.forEach( n => this.graph.addNode(n));
-                            response.graph.edges.forEach( r => this.graph.addRelation(r));
-                            this.graph.commit();
-                        });
+                        let startNode = this.dragStartNode; // always normal node
+                        let endNode = vm.state.hoveredNode;
+                        this.connectNodes(startNode, endNode);
                     }
                 }
                 // TODO: else { connect without dragging only by clicking }
@@ -857,6 +875,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post) {
                     "selected": false
                 });
             }
+
 
             onDragMoveEnd(d) {
                 d.fixed &= ~6; // copied from force.drag
