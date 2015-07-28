@@ -18,16 +18,16 @@ angular.module("wust.elements")
             };
         }
     ]).directive("tagEditor", function() {
+        // this directive relies on the node being a session from the editservice
         return {
             restrict: "AE",
             scope: {
-                tags: "=ngModel",
+                node: "=",
                 getSuggestions: "&"
             },
             templateUrl: "assets/app/elements/ngTagEditor/ngTagEditor.html",
             controller: ["$scope", "$attrs", "$element", "$filter", "Tag",
                 function($scope, $attrs, $element, $filter, Tag) {
-
                     $scope.suggestions = [];
                     $scope.search = "";
 
@@ -36,25 +36,26 @@ angular.module("wust.elements")
                     });
                     $scope.add = function(tag) {
                         tag = tag.encode ? tag.encode() : tag;
-                        $scope.tags.push(tag);
+                        $scope.node.addTag(tag);
                         $scope.search = "";
                     };
                     $scope.remove = function(index) {
-                        $scope.tags.splice(index, 1);
+                        // $scope.tags.splice(index, 1);
                     };
 
                     $element.find("input").on("keydown", function(e) {
                         if (e.which === 8) { /* backspace */
-                            if ($scope.search.length === 0 &&
-                                $scope.tags.length) {
-                                $scope.tags.pop();
-                                e.preventDefault();
-                            }
+                            // if ($scope.search.length === 0 &&
+                            //     $scope.tags.length) {
+                            //     $scope.tags.pop();
+                            //     e.preventDefault();
+                            // }
                         } else if (e.which === 32 || e.which === 13) { /* space & enter */
                             let newTag = {title: $scope.search};
-                            if (_.any($scope.tags, newTag)) {
+                            if (_.any($scope.node.tags, newTag)) {
                                 $scope.search = "";
                             } else {
+                                //TODO: we should not create a tag here.
                                 Tag.$create(newTag).$then(tag => {
                                     $scope.add(tag);
                                 });

@@ -46,15 +46,15 @@ function EditService(Post, HistoryService, store, DiscourseNode) {
             this.setValidityProperties();
         }
 
+        //TODO: we should rewrite the whole logic here, it is weird and hacky, but it works so i leave it as is :)
         dirtyModel() {
             let dirtyModel = _.omit(_.pick(this, _.keys(this.original)), (v, k) => this.original[k] === v);
             if (_.any(this.addedTags))
             //TODO: why do we have nulls here?
                 dirtyModel.addedTags = _.compact(this.addedTags);
 
-            // no empty tags array:
-            if (_.isEmpty(dirtyModel.tags))
-                delete dirtyModel.tags;
+            // no tags array
+            delete dirtyModel.tags;
 
             return dirtyModel;
         }
@@ -96,7 +96,7 @@ function EditService(Post, HistoryService, store, DiscourseNode) {
             }))
                 return;
 
-            let encoded = tag.encode();
+            let encoded = tag.encode ? tag.encode() : tag;
             this.tags.push(encoded);
             this.addedTags.push(encoded.id);
 
