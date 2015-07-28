@@ -48,7 +48,6 @@ function Auth($rootScope, $window, restmod, jwtHelper, store) {
             self.current.token = response.token;
             self.current.userId = response.userId;
             authStore.set(userKey, self.current);
-            $rootScope.$apply();
             humane.success(message);
         });
     }
@@ -67,6 +66,5 @@ function Auth($rootScope, $window, restmod, jwtHelper, store) {
         delete self.current.token;
         delete self.current.userId;
         authStore.remove(userKey);
-        $rootScope.$apply();
     }
 }
