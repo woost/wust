@@ -6,4 +6,5 @@ function ModalEditCtrl(ModalEditService) {
     let vm = this;
 
     vm.node = ModalEditService.currentNode;
+    vm.save = ModalEditService.save;
 }

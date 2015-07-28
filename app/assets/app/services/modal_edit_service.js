@@ -13,8 +13,10 @@ function ModalEditService($modal, EditService) {
 
     this.show = showModal;
     this.hide = hideModal;
+    this.save = save;
+    this.onSave = onSave;
 
-    let currentNode;
+    let saveHandler, currentNode;
     //TODO: this does not work when the browser is reloaded and also it might be that we have removed the session from the scratchpad
     Object.defineProperty(this, "currentNode", {
         get: () => {
@@ -26,6 +28,22 @@ function ModalEditService($modal, EditService) {
             }
         }
     });
+
+    function onSave(func) {
+        saveHandler = func;
+    }
+
+    function save() {
+        if (currentNode === undefined)
+            return;
+
+        currentNode.save().$then(data => {
+            if (saveHandler !== undefined) {
+                saveHandler(data);
+                saveHandler = undefined;
+            }
+        });
+    }
 
     function showModal() {
         modalInstance.$promise.then(modalInstance.show);

@@ -11,7 +11,7 @@
             <div class="modal-footer">
                 <button class="btn btn-default" ng-click="$hide()">Close</button>
                 <button class='btn btn-primary' ng-click='vm.previewEnabled = !vm.previewEnabled'><i class='fa' ng-class="{'fa-eye': !vm.previewEnabled, 'fa-eye-slash': vm.previewEnabled}"></i></button>
-                <button class="btn btn-success" ng-click="vm.node.save();$hide()" ng-disabled="!vm.node.canSave"><i class="fa fa-paper-plane-o"></i></button>
+                <button class="btn btn-success" ng-click="vm.save();$hide()" ng-disabled="!vm.node.canSave"><i class="fa fa-paper-plane-o"></i></button>
             </div>
         </div>
     </div>
