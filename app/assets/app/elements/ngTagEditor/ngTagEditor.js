@@ -1,11 +1,5 @@
 angular.module("wust.elements")
-    .filter("getCol", function() {
-        return function(items, row) {
-            return items && items.map(function(item) {
-                return item[row];
-            }).join(",");
-        };
-    }).directive("focusMe", ["$timeout", "$parse",
+    .directive("focusMe", ["$timeout", "$parse",
         function($timeout, $parse) {
             return {
                 link: function(scope, element, attrs) {
@@ -34,10 +28,7 @@ angular.module("wust.elements")
             controller: ["$scope", "$attrs", "$element", "$filter", "Tag",
                 function($scope, $attrs, $element, $filter, Tag) {
 
-                    $scope.options = [];
                     $scope.suggestions = [];
-                    $scope.options.output = $attrs.output || "title";
-                    $scope.options.placeholder = $attrs.placeholder || "Enter tag";
                     $scope.search = "";
 
                     $scope.$watch("search", function(value) {
