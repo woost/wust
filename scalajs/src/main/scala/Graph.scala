@@ -70,6 +70,8 @@ sealed trait NodeDelegates extends NodeLike {
   def title = rawNode.title
   @JSExport
   def title_=(newTitle: String) = rawNode.title = newTitle
+  @JSExport
+  def tags = rawNode.tags
 
   def description = rawNode.description
   def description_=(newDescription: Option[String]) = { rawNode.description = newDescription }
@@ -365,8 +367,9 @@ class Graph(private[js] val rawGraph: RawGraph) extends WrappedGraph[Relation] {
 
 @JSExport
 @JSExportAll
-class RawNode(val id: String, val label: String, var title: String, var description: Option[String], val hyperEdge: Boolean, val startId: Option[String], val endId: Option[String]) {
-  def this(n: RecordNode) = this(n.id, n.label, n.title.getOrElse(n.label), n.description.toOption, n.hyperEdge.getOrElse(false), n.startId.toOption, n.endId.toOption)
+//TODO: maybe give a concrete type for tags
+class RawNode(val id: String, val label: String, var title: String, var description: Option[String], val hyperEdge: Boolean, val startId: Option[String], val endId: Option[String], val tags: js.Array[js.Object]) {
+  def this(n: RecordNode) = this(n.id, n.label, n.title.getOrElse(n.label), n.description.toOption, n.hyperEdge.getOrElse(false), n.startId.toOption, n.endId.toOption, n.tags)
   override def toString = s"RawNode($id)"
 
   def canEqual(other: Any): Boolean = other.isInstanceOf[RawNode]
@@ -498,6 +501,8 @@ trait RecordNode extends js.Object {
   def hyperEdge: js.UndefOr[Boolean] = js.native
   def startId: js.UndefOr[String] = js.native
   def endId: js.UndefOr[String] = js.native
+
+  def tags: js.Array[js.Object] = js.native
 }
 
 trait RecordRelation extends js.Object {
