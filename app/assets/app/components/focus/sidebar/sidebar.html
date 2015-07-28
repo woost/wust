@@ -1,5 +1,5 @@
 <div id="sidebar">
-    <div id="sidebar_content" ng-show="vm.sidebarActive">
+    <div id="sidebar_content" ng-if="vm.sidebarActive" class="ng-trans ng-trans-slide-up ease">
         <span ng-repeat="visited in vm.visited track by visited.id" small-post node="visited"></span>
     </div>
     <div id="sidebar_toggle">

@@ -1,4 +1,4 @@
-<div ng-show="vm.zen.visible" class="ng-hide" id="zen_component">
+<div ng-if="vm.zen.visible" class="ng-trans ng-trans-fade ease" id="zen_component">
     <button class="btn btn-primary fa fa-eye-slash pull-right" ng-click="vm.zen.hide()"></button>
     <div preview node="vm.zen.node" class="zenetized_preview"></div>
 </div>

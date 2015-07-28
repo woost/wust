@@ -29,6 +29,7 @@ lazy val wust = (project in file(".")).settings(
     "org.webjars.bower" % "angular-bootstrap" % "0.13.1",
     "org.webjars.bower" % "angular-strap" % "2.3.1", //similar (maybe even better?) to angular-ui-bootstrap but with working popover
     "org.webjars.bower" % "angular-motion" % "0.4.2", // animations for angular-strap
+    "org.webjars.bower" % "ng-trans-css" % "0.9.1",
     "org.webjars.bower" % "angular-native-dragdrop" % "1.1.0",
     "org.webjars.bower" % "angular-restmod" % "1.1.8",
     "org.webjars.bower" % "angular-xeditable" % "0.1.9",

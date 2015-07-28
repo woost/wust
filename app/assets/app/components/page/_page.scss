@@ -17,7 +17,7 @@ main {
             width: 0px;
             min-width: 0px;
             overflow-y: auto;
-            transition: all 0.1s ease;
+            @include transition(all 200ms ease);
             border-right: $sidebar_border;
             &.visible {
                 width: 400px;
@@ -38,9 +38,13 @@ main {
             }
             @include flex-grow(1);
             min-width: 600px;
-            transition: width 0.1s ease;
+            @include transition(width 200ms ease);
             overflow: auto;
         }
+    }
+    // make transitions a bit faster
+    .ng-trans {
+        @include transition(200ms all);
     }
 }
 

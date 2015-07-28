@@ -17,28 +17,7 @@
     z-index: $zindex_zen;
     overflow: auto;
     // transition should fit to the one defined on #left_hand_side in page.scss
-    transition: all 0.1s ease;
     .zenetized_preview {
         height: 100%;
-    }
-    &.ng-hide-add {
-        @include animation-play-state(paused !important);
-        @include animation(fadeOut 0.15s);
-        display: block !important;
-        visibility: hidden;
-    }
-    &.ng-hide-remove {
-        @include animation-play-state(paused !important);
-        @include animation(fadeIn 0.15s);
-        display: block !important;
-        visibility: hidden;
-    }
-    &.ng-hide-add.ng-hide-add-active, &.ng-hide-remove {
-        visibility: visible;
-        @include animation-play-state(running !important);
-    }
-    &.ng-hide-add, &.ng-hide-remove.ng-hide-remove-active {
-        visibility: visible;
-        @include animation-play-state(running !important);
     }
 }
