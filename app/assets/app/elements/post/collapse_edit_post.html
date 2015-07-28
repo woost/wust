@@ -1,18 +1,25 @@
 <div class="collapse_edit_post_directive">
     <div class="panel panel-default">
         <div class="panel-heading">
-            <span class="pull-left">
+            <div class="pull-left left-controls">
                 <i ng-click="vm.node.expandedEditor = !vm.node.expandedEditor" class="accordion_toggle glyphicon" ng-class="{'glyphicon-chevron-down': vm.node.expandedEditor, 'glyphicon-chevron-right': !vm.node.expandedEditor}"></i>
-                <button class="btn btn-xs btn-default" ng-click="vm.node.remove()"><i class="fa fa-minus"></i></button>
-                <i ng-if="vm.node.isLocal" class="fa fa-asterisk"></i>
-            </span>
-            <div editable-text="vm.node.title" onaftersave="vm.node.onChange()" buttons="no">
-                <span small-post node="vm.node" valid="!vm.node.isLocal || vm.node.canSave"></span>
             </div>
-            <div class="control_buttons">
-                <div toggle-zen node="vm.node"></div>
-                <button class="btn btn-xs btn-success" ng-click="vm.node.save()" ng-disabled="!vm.node.canSave"><i class="fa fa-paper-plane-o"></i></button>
+
+            <div class="center-controls" trigger="hover" data-title="click to edit" bs-tooltip animation="">
+                <div editable-text="vm.node.title" onaftersave="vm.node.onChange()" buttons="no">
+                    <div editable-email="vm.node.title" ng-bind="vm.node.title"></div>
+
+                    <!--                     <a ng-href="{{::vm.href}}" ui-draggable="true" drag="vm.node.encode ? vm.node.encode() : vm.node" drag-channel="{{(!vm.node.isLocal || vm.node.canSave) ? (vm.node.id === undefined ? 'create_connect' : 'connect') : 'move'}}" class="node" ng-class="::vm.css" ng-bind="vm.node.title || 'uiae'"></a> -->
+                </div>
             </div>
+            <!-- <div class="control_buttons"> -->
+            <!--     <div toggle-zen node="vm.node"></div> -->
+            <!--     <button class="btn btn-xs btn-success" ng-click="vm.node.save()" ng-disabled="!vm.node.canSave"><i class="fa fa-paper-plane-o"></i></button> -->
+            <!-- </div> -->
+            <div class="pull-right right-controls">
+                <i ng-if="vm.node.isLocal" class="fa fa-asterisk text-danger"></i>
+            </div>
+            <button class="close" ng-click="vm.node.remove()" type="button" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         </div>
         <div collapse="!vm.node.expandedEditor">
             <div edit-post node="vm.node"></div>

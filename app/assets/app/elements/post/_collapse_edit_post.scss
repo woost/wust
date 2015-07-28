@@ -7,9 +7,29 @@
             min-height: 55px;
             @include display-flex(flex);
             @include justify-content(space-between);
-            .small_post_directive {
+            $center-line: 35px;
+            .left-controls {
+                white-space: nowrap;
+                line-height: $center-line; // vertical center
+            }
+            .center-controls {
                 width: 100%;
-                line-height: 32px;
+                border: 1px solid blue;
+                padding-right: 10px;
+                .editable-click {
+                    line-height: $center-line; // vertical center
+                    padding-left: 6px;
+                    color: inherit;
+                    border: 0;
+                }
+                input, form {
+                    width: 100%;
+                }
+            }
+            .right-controls {
+                width: 30px;
+                white-space: nowrap;
+                line-height: $center-line; // vertical center
             }
         }
     }
