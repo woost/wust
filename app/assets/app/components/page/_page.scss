@@ -33,8 +33,11 @@ main {
         #right_hand_side {
             #left_side_toggle {
                 position: fixed;
-                bottom: 0px;
+                top: 150px;
                 z-index: $zindex_left_side_toggle;
+                border-radius: 0 4px 4px 0;
+                border-left: 0;
+                margin-left: -1px;
             }
             @include flex-grow(1);
             min-width: 600px;

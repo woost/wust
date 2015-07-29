@@ -5,7 +5,7 @@
             <div scratchpad ng-cloak></div>
         </div>
         <div id="right_hand_side">
-            <button id="left_side_toggle" type="button" class="btn btn-default fa fa-clipboard" onclick="this.blur()" ng-model="vm.leftSide.visible" bs-checkbox></button>
+            <button id="left_side_toggle" type="button" class="btn btn-default fa" ng-class="{'fa-arrow-right':!vm.leftSide.visible, 'fa-arrow-left':vm.leftSide.visible}" onclick="this.blur()" ng-click="vm.leftSide.visible = !vm.leftSide.visible"></button>
             <div zen></div>
             <div search></div>
             <div route-loading-indicator></div>

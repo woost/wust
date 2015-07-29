@@ -6,7 +6,7 @@
             </div>
 
             <div class="center-controls" data-title="click to edit" bs-tooltip animation="">
-                <a editable-text="vm.node.title" ng-bind="vm.node.title" onaftersave="vm.node.save()övm.node.onChange();" buttons="no" e-placeholder="TL;DR">
+                <a editable-text="vm.node.title" ng-bind="vm.node.title" onaftersave="vm.node.save();vm.node.onChange();" buttons="no" e-placeholder="TL;DR">
 
                     <!--                     <a ng-href="{{::vm.href}}" ui-draggable="true" drag="vm.node.encode ? vm.node.encode() : vm.node" drag-channel="{{(!vm.node.isLocal || vm.node.canSave) ? (vm.node.id === undefined ? 'create_connect' : 'connect') : 'move'}}" class="node" ng-class="::vm.css" ng-bind="vm.node.title || 'uiae'"></a> -->
                 </a>
