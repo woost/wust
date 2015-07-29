@@ -5,22 +5,18 @@
                 <i ng-click="vm.node.expandedEditor = !vm.node.expandedEditor" class="accordion_toggle glyphicon" ng-class="{'glyphicon-chevron-down': vm.node.expandedEditor, 'glyphicon-chevron-right': !vm.node.expandedEditor}"></i>
             </div>
 
-            <div class="center-controls" trigger="hover" data-title="click to edit" bs-tooltip animation="">
-                <a editable-text="vm.node.title" ng-bind="vm.node.title" onaftersave="vm.node.onChange()" buttons="no">
+            <div class="center-controls" data-title="click to edit" bs-tooltip animation="">
+                <a editable-text="vm.node.title" ng-bind="vm.node.title" onaftersave="vm.node.save()övm.node.onChange();" buttons="no" e-placeholder="TL;DR">
 
                     <!--                     <a ng-href="{{::vm.href}}" ui-draggable="true" drag="vm.node.encode ? vm.node.encode() : vm.node" drag-channel="{{(!vm.node.isLocal || vm.node.canSave) ? (vm.node.id === undefined ? 'create_connect' : 'connect') : 'move'}}" class="node" ng-class="::vm.css" ng-bind="vm.node.title || 'uiae'"></a> -->
                 </a>
             </div>
-            <!-- <div class="control_buttons"> -->
-            <!--     <div toggle-zen node="vm.node"></div> -->
-            <!--     <button class="btn btn-xs btn-success" ng-click="vm.node.save()" ng-disabled="!vm.node.canSave"><i class="fa fa-paper-plane-o"></i></button> -->
-            <!-- </div> -->
             <div class="pull-right right-controls">
-                <i ng-if="vm.node.isLocal" class="fa fa-asterisk text-danger"></i>
+                <i ng-if="vm.node.isLocal" class="fa fa-asterisk modified-indicator" data-title="this post contains unsaved changes" bs-tooltip animation=""></i>
             </div>
-            <button class="close" ng-click="vm.node.remove()" type="button" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <button class="close" ng-click="vm.node.remove()" type="button" aria-label="Close "data-title="remove from scratchpad (not delete)" bs-tooltip animation=""><span aria-hidden="true">&times;</span></button>
         </div>
-        <div collapse="!vm.node.expandedEditor">
+        <div class="panel-body" collapse="!vm.node.expandedEditor">
             <div edit-post node="vm.node"></div>
         </div>
     </div>

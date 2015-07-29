@@ -6,8 +6,8 @@ function toggleZen(ZenService) {
     return {
         restrict: "A",
         template:
-            "<button ng-if='zen.node !== node' class='btn btn-xs btn-primary' ng-click='zen.show(node)'><i class='fa fa-eye'></i></button>" +
-            "<button ng-if='zen.node === node' class='btn btn-xs btn-primary' ng-click='zen.hide()'><i class='fa fa-eye-slash'></i></button>",
+            "<div ng-if='zen.node !== node' class='fa fa-eye-slash text-muted' style='cursor:pointer' ng-click='zen.show(node)' data-title='activate distraction free writing' bs-tooltip animation=''></div>" +
+            "<div ng-if='zen.node === node' class='fa fa-eye' style='cursor:pointer' ng-click='zen.hide()' data-title='deactivate distraction free writing' bs-tooltip animation=''></div>",
         scope: {
             node: "=",
         },
