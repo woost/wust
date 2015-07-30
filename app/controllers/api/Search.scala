@@ -29,9 +29,9 @@ object Search extends Controller {
     val discourse = Try(
       Discourse(
         db.queryGraph(Query(s"""
-          match (${nodeDef.toQuery})
-          where n.title =~ {term} ${if(withDescr) "or n.description =~ {term}" else ""}
-          return n limit 15""",
+          match ${nodeDef.toQuery}
+          where ${nodeDef.name}.title =~ {term} ${if(withDescr) s"or ${nodeDef.name}.description =~ {term}" else ""}
+          return ${nodeDef.name} limit 15""",
           Map("term" -> titleRegex) ++ nodeDef.parameterMap)))
     ).getOrElse(Discourse.empty)
     Ok(Json.toJson(discourse.contentNodes))
