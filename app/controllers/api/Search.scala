@@ -1,6 +1,7 @@
 package controllers.api
 
 import modules.db.Database._
+import modules.db.LabelNodeDefinition
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
 import renesca.Query
@@ -17,20 +18,21 @@ object Search extends Controller {
       case Some(title) => "(?i).*" + title.replace(" ", ".*") + ".*"
       case None        => ""
     }
-    val nodeMatch = label match {
-      case Some(label) => s"n:`${ Label(label) }`"
-      case None        => "n"
-    }
+
+    // white list, so only exposed nodes can be searched
+    val labels = ContentNode.labels ++ label.map(Label(_))
+    val nodeDef = LabelNodeDefinition(labels)
+
     val withDescr = searchDescriptions.getOrElse(false)
 
     // When Neo4j throws an error because the regexp is incorrect, return an empty Discourse instead
     val discourse = Try(
       Discourse(
         db.queryGraph(Query(s"""
-          match ($nodeMatch)
+          match (${nodeDef.toQuery})
           where n.title =~ {term} ${if(withDescr) "or n.description =~ {term}" else ""}
           return n limit 15""",
-          Map("term" -> titleRegex))))
+          Map("term" -> titleRegex) ++ nodeDef.parameterMap)))
     ).getOrElse(Discourse.empty)
     Ok(Json.toJson(discourse.contentNodes))
   }
