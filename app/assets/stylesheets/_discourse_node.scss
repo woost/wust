@@ -39,14 +39,7 @@
         }
         margin: 5px;
     }
-    // icons
-    &.node, &.discourse_tag, &.panel .panel-heading .node, &.btn {
-        &:before {
-            font-family: FontAwesome;
-            content: $icon;
-            padding-right: 9px;
-        }
-    }
+
     // branch graph
     &.branch_node {
         fill: $bgcolor;
