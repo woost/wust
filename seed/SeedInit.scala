@@ -9,6 +9,9 @@ object SeedInit extends Task with SeedTools {
   dbContext { implicit db =>
     setupDbConstraints(db)
 
+    //TODO: not only unique constraints in renesca, also support normal indices
+    db.query("CREATE INDEX ON TIMESTAMP(timestamp)")
+
     modifyDiscourse { implicit discourse =>
       discourse.add(
         mergeTag("Problem", isType = true),
