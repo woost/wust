@@ -15,3 +15,5 @@ GET /components/:uuid controllers.api.ConnectedComponents.show(uuid: String)
 GET /graph controllers.api.Graphs.show
 
 GET /search controllers.api.Search.index(label: Option[String], title: Option[String], searchDescriptions: Option[Boolean])
+
+GET /recent controllers.api.Recent.index(label: Option[String])

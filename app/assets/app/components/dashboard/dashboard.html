@@ -1,8 +1,14 @@
 <div id="dashboard_component">
     <div id="posts_view" class="widget">
         <button class="pull-right btn btn-xs btn-default" type="button" animation="am-fade-and-slide-top" ng-click="vm.showModal()"><i class="fa fa-plus"></i></button>
-        <h2>streams</h2>
+        <h2>Streams</h2>
         <div class="stream_list">
+            <div class="node_list col-md-4">
+                <div class="well">
+                    <label>Recent posts</label>
+                    <div ng-repeat="post in vm.recentPosts track by post.id" small-post node="post"></div>
+                </div>
+            </div>
             <div class="node_list col-md-4" ng-repeat="stream in vm.streams">
                 <div class="well">
                     <span ng-repeat="tag in stream.tags track by tag.id" ng-class="::vm.nodeInfo.css" class="{{::vm.nodeInfo.tagCss(tag)}}" ng-bind="tag.title"></span>

@@ -1,8 +1,8 @@
 angular.module("wust.components").controller("DashboardCtrl", DashboardCtrl);
 
-DashboardCtrl.$inject = ["$modal", "DiscourseNode", "StreamService"];
+DashboardCtrl.$inject = ["$modal", "DiscourseNode", "StreamService", "Recent"];
 
-function DashboardCtrl($modal, DiscourseNode, StreamService) {
+function DashboardCtrl($modal, DiscourseNode, StreamService, Recent) {
     let vm = this;
 
     let modalInstance = $modal({
@@ -15,6 +15,9 @@ function DashboardCtrl($modal, DiscourseNode, StreamService) {
 
     vm.nodeInfo = DiscourseNode.Tag;
     vm.streams = StreamService.streams;
+    vm.recentPosts = Recent.$search({
+        label: DiscourseNode.Post.label
+    });
     vm.showModal = showModal;
     vm.hideModal = hideModal;
 
