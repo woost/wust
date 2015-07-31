@@ -15,11 +15,12 @@ function staticEditPost() {
     };
 }
 
-staticEditPostCtrl.$inject = [];
+staticEditPostCtrl.$inject = ["ZenService"];
 
 // expects scope.node to be a session.
 // used by the scratchpad which retrieves a list of sessions from the EditService.
-function staticEditPostCtrl() {
+function staticEditPostCtrl(ZenService) {
     let vm = this;
 
+    vm.previewService = ZenService.create();
 }

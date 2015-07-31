@@ -5,16 +5,21 @@ toggleZen.$inject = ["ZenService"];
 function toggleZen(ZenService) {
     return {
         restrict: "A",
-        template:
-            "<div ng-if='zen.node !== node' class='fa fa-eye-slash text-muted' style='cursor:pointer' ng-click='zen.show(node)' data-title='activate distraction free writing' bs-tooltip animation=''></div>" +
-            "<div ng-if='zen.node === node' class='fa fa-eye' style='cursor:pointer' ng-click='zen.hide()' data-title='deactivate distraction free writing' bs-tooltip animation=''></div>",
+        templateUrl: "assets/app/elements/zen/toggle_zen.html",
         scope: {
             node: "=",
+            service: "="
         },
         link
     };
 
     function link(scope) {
-        scope.zen = ZenService;
+        scope.service = scope.service || ZenService;
+        scope.preview = {
+            active: false
+        };
+        scope.$watch("service.visible", val => {
+            scope.preview.active = (val && scope.node === scope.service.node);
+        });
     }
 }
