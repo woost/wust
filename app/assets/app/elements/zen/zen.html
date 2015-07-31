@@ -1,4 +1,4 @@
 <div ng-if="vm.zen.visible" class="ng-trans ng-trans-fade ease" id="zen_component">
-    <button class="btn btn-primary fa fa-eye-slash pull-right" ng-click="vm.zen.hide()"></button>
+        <button class="close view_close_button pull-right" ng-click="vm.zen.hide()" type="button" aria-label="Close " data-title="hide scratchpad" bs-tooltip animation=""><span aria-hidden="true">&times;</span></button>
     <div preview node="vm.zen.node" class="zenetized_preview"></div>
 </div>
