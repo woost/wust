@@ -3,6 +3,10 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3 class="modal-title">Post</h3>
+                <span ng-if="vm.reference.node !== undefined">
+                    <label>Replies to</label>
+                    <span small-post node="vm.reference.node"></span>
+                </span>
             </div>
             <div class="modal-body">
                 <span ng-if="!vm.previewEnabled" static-edit-post node="vm.node"></span>

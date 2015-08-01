@@ -720,12 +720,13 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             }
 
             replyToNode(existingNode) {
-                ModalEditService.onSave(rawNewNode => {
+                ModalEditService.onSave(existingNode, rawNewNode => {
                     this.graph.addNode(rawNewNode);
                     this.graph.commit();
                     let newNode = this.graph.nodeById(rawNewNode.id);
                     this.connectNodes(newNode, existingNode);
                 });
+
                 ModalEditService.show();
             }
 
