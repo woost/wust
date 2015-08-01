@@ -14,9 +14,9 @@ function search() {
     };
 }
 
-searchCtrl.$inject = ["SearchService", "$rootScope"];
+searchCtrl.$inject = ["$scope", "SearchService", "$rootScope"];
 
-function searchCtrl(SearchService, $rootScope) {
+function searchCtrl($scope, SearchService, $rootScope) {
     let vm = this;
 
     vm.search = SearchService.search;

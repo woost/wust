@@ -1,8 +1,8 @@
 angular.module("wust.services").service("StreamService", StreamService);
 
-StreamService.$inject = ["Tag", "store"];
+StreamService.$inject = ["Search", "DiscourseNode", "store"];
 
-function StreamService(Tag, store) {
+function StreamService(Search, DiscourseNode, store) {
     let streamStore = store.getNamespacedStore("stream");
     let self = this;
 
@@ -10,6 +10,7 @@ function StreamService(Tag, store) {
     restoreList();
     this.push = pushList;
     this.persist = storeList;
+    this.remove = removeList;
     this.forget = clearList;
 
     function restoreList() {
@@ -20,14 +21,21 @@ function StreamService(Tag, store) {
         if (!_.isArray(tags) || _.isEmpty(tags))
             return;
 
-        console.log(tags);
         let stream = {
             //TODO: search posts with all tags anstead of only first one
-            posts: Tag.$buildRaw(tags[0]).posts.$search(),
+            posts: Search.$search({
+                label: DiscourseNode.Post.label,
+                tags: tags.map(t => t.id)
+            }),
             tags: _.map(tags, t => t.encode ? t.encode() : t)
         };
 
         self.streams.push(stream);
+        storeList();
+    }
+
+    function removeList(index) {
+        self.streams.splice(index, 1);
         storeList();
     }
 

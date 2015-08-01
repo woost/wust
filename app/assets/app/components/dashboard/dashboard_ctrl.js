@@ -15,6 +15,7 @@ function DashboardCtrl($modal, DiscourseNode, StreamService, Recent) {
 
     vm.nodeInfo = DiscourseNode.Tag;
     vm.streams = StreamService.streams;
+    vm.removeStream = StreamService.remove;
     vm.recentPosts = Recent.$search({
         label: DiscourseNode.Post.label
     });

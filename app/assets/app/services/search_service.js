@@ -8,6 +8,7 @@ function SearchService(Search, DiscourseNode) {
         query: "",
         results: Search.$collection(),
         searchDescriptions: false,
+        selectedTags: [],
         waiting: true,
         triggerSearch
     };
@@ -17,7 +18,8 @@ function SearchService(Search, DiscourseNode) {
         this.results.$refresh({
             label: DiscourseNode.Post.label,
             title: this.query,
-            searchDescriptions: this.searchDescriptions
+            searchDescriptions: this.searchDescriptions,
+            tags: this.selectedTags.map(t => t.id)
         });
         let self = this;
         this.results.$then(() => self.waiting = false, () => self.waiting = false);
