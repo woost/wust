@@ -1,8 +1,13 @@
 .loading_indicator {
-    position: absolute;
+    position: relative;
+    height: 0px;
+    width: 0px;
     top: 50%;
     left: 50%;
-    width: 150px;
-    height: 150px;
-    margin: -100px 0px 0px -75px;
+    .lodium {
+        position: absolute;
+        width: 150px;
+        height: 150px;
+        margin: -100px 0px 0px -75px;
+    }
 }
