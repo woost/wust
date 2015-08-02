@@ -8,9 +8,6 @@ main {
         @include flex-direction(columns);
         #left_hand_side, #right_hand_side {
             height: inherit;
-            #content_view {
-                height: inherit;
-            }
         }
         #left_hand_side {
             @include flex-grow(0);
@@ -31,6 +28,10 @@ main {
 
         }
         #right_hand_side {
+            #content_view {
+                height: inherit;
+                padding-left: 40px;
+            }
             #left_side_toggle {
                 position: fixed;
                 top: 200px;
