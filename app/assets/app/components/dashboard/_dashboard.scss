@@ -1,6 +1,8 @@
 @import "compass/css3/flexbox";
 
 #dashboard_component {
+    //TODO: why is the height scrollable with 100%?
+    //only here in dashboard...
     height: 100%;
     #posts_view {
         #stream_list {
@@ -13,17 +15,16 @@
             .stream_box {
                 border: $stream_border;
                 border-radius: 5px;
-                height: 400px;
-                max-height: 400px;
-                width: 350px;
                 padding: 5px;
                 margin: 5px;
                 .tag_title {
                     margin-bottom: 10px;
                 }
-                //TODO: this should go into .node_list to keep the title when scrolling, but does not work :/
-                overflow: auto;
                 .node_list {
+                    height: 400px;
+                    max-height: 400px;
+                    width: 330px;
+                    overflow: auto;
                     .node {
                         margin: 3px;
                     }
