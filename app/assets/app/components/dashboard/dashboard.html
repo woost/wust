@@ -1,23 +1,27 @@
 <div id="dashboard_component">
     <div id="posts_view" class="widget">
-        <button class="pull-right btn btn-xs btn-default" type="button" animation="am-fade-and-scale-down" ng-click="vm.showModal()"><i class="fa fa-plus"></i></button>
+        <button class="pull-right btn btn-default" type="button" animation="am-fade-and-scale-down" ng-click="vm.showModal()"><i class="fa fa-plus"></i></button>
         <h2>Streams</h2>
-        <div class="stream_list">
-            <div class="node_list col-md-4">
-                <div class="well">
+        <div id="stream_list">
+            <div class="stream_box">
+                <div class="tag_title">
                     <label>Recent posts</label>
+                </div>
+                <hr>
+                <div class="node_list">
                     <div ng-repeat="post in vm.recentPosts track by post.id" small-post node="post"></div>
                 </div>
             </div>
-            <div class="node_list col-md-4 ng-trans ng-trans-scale-up ease" ng-animate-children ng-repeat="stream in vm.streams">
-                <div class="well">
-                    <div class="tag_title">
-                        <div>
-                            <label>Tagged posts</label>
-                            <button class="close" ng-click="vm.removeStream($index)" type="button" aria-label="Close " data-title="remove stream" bs-tooltip animation=""><span aria-hidden="true">&times;</span></button>
-                        </div>
-                        <div ng-repeat="tag in stream.tags track by tag.id" ng-class="::vm.nodeInfo.css" class="{{::vm.nodeInfo.tagCss(tag)}}" ng-bind="tag.title"></div>
+            <div class="stream_box ng-trans ng-trans-scale-up ease" ng-animate-children ng-repeat="stream in vm.streams">
+                <div class="tag_title">
                     <div>
+                        <label>Tagged posts</label>
+                        <button class="close" ng-click="vm.removeStream($index)" type="button" aria-label="Close " data-title="remove stream" bs-tooltip animation=""><span aria-hidden="true">&times;</span></button>
+                    </div>
+                    <div ng-repeat="tag in stream.tags track by tag.id" ng-class="::vm.nodeInfo.css" class="{{::vm.nodeInfo.tagCss(tag)}}" ng-bind="tag.title"></div>
+                </div>
+                <hr>
+                <div class="node_list">
                     <div ng-repeat="post in stream.posts track by post.id" small-post node="post"></div>
                 </div>
             </div>
