@@ -5,7 +5,7 @@
     @include justify-content(space-between);
     padding: 20px;
     text-align: center;
-    #center_view {
+    #root_node_view {
         @include flex-grow(1);
     }
 }

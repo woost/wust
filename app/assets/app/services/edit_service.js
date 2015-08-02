@@ -155,7 +155,7 @@ function EditService(Post, HistoryService, store, DiscourseNode) {
     }
 
     function findNode(localId) {
-        return _.find(this.list, {
+        return _.find(self.list, {
             localId
         });
     }

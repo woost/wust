@@ -3,8 +3,8 @@
         <div class="panel-heading">
             <span small-post node="vm.node"></span>
             <span class="pull-right">
-                <button class="btn btn-xs btn-success" ng-click="vm.updateFocused()"><i class="fa fa-pencil"></i></button>
-                <span toggle-zen node="vm.node"></span>
+                <div class='fa fa-pencil' style='cursor:pointer' ng-click='vm.updateFocused()' data-title='edit post' bs-tooltip animation=''></div>
+                <div toggle-zen node="vm.node"></div>
             </span>
         </div>
         <div ng-show="vm.node.description" class="panel-body">

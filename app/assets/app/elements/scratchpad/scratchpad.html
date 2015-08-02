@@ -2,7 +2,7 @@
     <button ng-click="vm.edit()" type="submit" class="btn btn-default"><i class="fa fa-file-o"></i> New post</button>
     <button class="close view_close_button pull-right" ng-click="vm.leftSide.visible = false" aria-label="Close " data-title="hide scratchpad" bs-tooltip animation=""><span aria-hidden="true">&times;</span></button>
     <div id="edit_list" class="discourse_post_list">
-        <div ng-repeat="node in vm.editList">
+        <div ng-repeat="node in vm.editList" class="ng-trans ng-trans-scale-up ease">
             <div class="drop_post_container" drop-channel="create_connect,connect,move" ui-on-Drop="vm.edit($data, $index)"></div>
             <div collapse-edit-post node="node"></div>
         </div>

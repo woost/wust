@@ -47,7 +47,6 @@ main {
     }
     // make transitions a bit faster
     .ng-trans {
-        @include transition(200ms all);
     }
 }
 

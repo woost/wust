@@ -40,6 +40,14 @@
             }
         }
     }
+    #navigation_sign_forms {
+        form {
+            margin-right: 0px;
+        }
+        form.ng-leave {
+            display: none;
+        }
+    }
     #edit_modal_toggle {
         margin-right: 10px;
         margin-left: -6px;

@@ -2,14 +2,14 @@
 <main role="main">
     <div id="main_view">
         <div id="left_hand_side" visible-left-side>
-            <div scratchpad ng-cloak></div>
+            <div scratchpad></div>
         </div>
         <div id="right_hand_side">
             <button id="left_side_toggle" type="button" class="btn btn-default fa" ng-class="{'fa-arrow-right':!vm.leftSide.visible, 'fa-arrow-left':vm.leftSide.visible}" onclick="this.blur()" ng-click="vm.leftSide.visible = !vm.leftSide.visible"></button>
             <div zen></div>
             <div search></div>
             <div route-loading-indicator></div>
-            <div id="content_view" ng-hide='isRouteLoading' ui-view ng-cloak></div>
+            <div id="content_view" ng-hide='isRouteLoading' ui-view></div>
         </div>
     </div>
 </main>
