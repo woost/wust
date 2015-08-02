@@ -1,17 +1,9 @@
 @import "compass/css3/flexbox";
 @import "compass/css3";
 
-h1 {
-    text-align: center;
-    text-transform: uppercase;
-    font-size: 30px;
-    line-height: 45px;
-}
-
-h2 {
-    text-align: center;
-    font-size: 24px;
-    line-height: 36px;
+h1,h2 {
+    margin: 0px;
+    padding: 20px 0px;
 }
 
 html, body {

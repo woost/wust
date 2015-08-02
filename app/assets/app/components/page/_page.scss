@@ -1,6 +1,6 @@
 main {
     height: inherit;
-    padding-top: 50px;
+    margin-top: 50px;
     overflow: hidden;
     #main_view {
         height: inherit;
@@ -30,7 +30,7 @@ main {
         #right_hand_side {
             #content_view {
                 height: inherit;
-                padding-left: 40px;
+                padding: 0px 0px 0px 40px;
             }
             #left_side_toggle {
                 position: fixed;
