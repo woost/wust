@@ -1,15 +1,15 @@
 @mixin animation($type) {
-    -webkit-animation: $type;
+    // -webkit-animation: $type;
     -moz-animation: $type;
-    -ms-animation: $type;
+    // -ms-animation: $type;
     -o-animation: $type;
     animation: $type;
 }
 
 @mixin transition($type) {
-    -webkit-transition: $type;
+    // -webkit-transition: $type;
     -moz-transition: $type;
-    -ms-transition: $type;
+    // -ms-transition: $type;
     -o-transition: $type;
     transition: $type;
 }
