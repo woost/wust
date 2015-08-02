@@ -10,30 +10,37 @@
     right: 20px;
     bottom: 20px;
     top: 50px;
+    height: 100%;
     z-index: $zindex_search;
-    @include display-flex(flex);
-    #search_results {
-        overflow: auto;
-        padding: 30px;
-        height: 100%;
-        width: 100%;
-        .discourse_post.node {
-            margin: 3px;
-        }
+    & > button {
+        padding: 5px;
     }
-    #search_options {
-        label {
-            line-height: 30px;
-        }
-        background: #eee;
-        width: 220px;
+    #search_content {
         height: 100%;
-        padding: 10px;
-        border-bottom-left-radius: 10px;
-    }
-    .search_status {
-        font-size: 30px;
-        color: #aaa;
-        margin-left: 20px;
+        @include display-flex(flex);
+        #search_results {
+            overflow: auto;
+            padding: 30px;
+            height: 100%;
+            width: 100%;
+            .discourse_post.node {
+                margin: 3px;
+            }
+        }
+        #search_options {
+            label {
+                line-height: 30px;
+            }
+            background: #eee;
+            width: 220px;
+            height: 100%;
+            padding: 10px;
+            border-bottom-left-radius: 10px;
+        }
+        .search_status {
+            font-size: 30px;
+            color: #aaa;
+            margin-left: 20px;
+        }
     }
 }
