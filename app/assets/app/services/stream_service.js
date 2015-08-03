@@ -12,7 +12,7 @@ function StreamService(Search, DiscourseNode, store) {
     this.persist = storeList;
     this.remove = removeList;
     this.forget = clearList;
-    this.refreshEditStream = refreshEditStream;
+    this.refreshStream = refreshStream;
     this.currentEditStream = undefined;
 
     function restoreList() {
@@ -36,20 +36,16 @@ function StreamService(Search, DiscourseNode, store) {
         storeList();
     }
 
-    function refreshEditStream(tags) {
-        if (self.currentEditStream === undefined)
-            return;
-
+    function refreshStream(stream, tags) {
         if (_.isEmpty(tags)) {
-            _.remove(self.streams, self.currentEditStream);
+            _.remove(self.streams, stream);
         } else {
-            self.currentEditStream.tags = tags;
-            self.currentEditStream.posts.$refresh({
+            stream.tags = tags;
+            stream.posts.$refresh({
                 tags: tags.map(t => t.id)
             });
         }
 
-        self.currentEditStream = undefined;
         storeList();
     }
 

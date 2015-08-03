@@ -8,15 +8,17 @@ function NewStreamCtrl(Search, DiscourseNode, StreamService) {
     vm.save = save;
     vm.nodeInfo = DiscourseNode.Tag;
 
-    if (StreamService.currentEditStream) {
-        vm.selectedTags = angular.copy(StreamService.currentEditStream.tags);
+    let currentEditStream = StreamService.currentEditStream;
+    StreamService.currentEditStream = undefined;
+    if (currentEditStream) {
+        vm.selectedTags = angular.copy(currentEditStream.tags);
     } else {
         vm.selectedTags = [];
     }
 
     function save() {
-        if (StreamService.currentEditStream) {
-            StreamService.refreshEditStream(vm.selectedTags);
+        if (currentEditStream) {
+            StreamService.refreshStream(currentEditStream, vm.selectedTags);
         } else {
             StreamService.push(vm.selectedTags);
         }
