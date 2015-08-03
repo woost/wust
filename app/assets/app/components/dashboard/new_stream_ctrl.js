@@ -9,14 +9,14 @@ function NewStreamCtrl(Search, DiscourseNode, StreamService) {
     vm.nodeInfo = DiscourseNode.Tag;
 
     if (StreamService.currentEditStream) {
-        vm.selectedTags = StreamService.currentEditStream.tags;
+        vm.selectedTags = angular.copy(StreamService.currentEditStream.tags);
     } else {
         vm.selectedTags = [];
     }
 
     function save() {
         if (StreamService.currentEditStream) {
-            StreamService.refreshEditStream();
+            StreamService.refreshEditStream(vm.selectedTags);
         } else {
             StreamService.push(vm.selectedTags);
         }

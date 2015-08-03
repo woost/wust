@@ -36,15 +36,16 @@ function StreamService(Search, DiscourseNode, store) {
         storeList();
     }
 
-    function refreshEditStream() {
+    function refreshEditStream(tags) {
         if (self.currentEditStream === undefined)
             return;
 
-        if (_.isEmpty(self.currentEditStream.tags)) {
+        if (_.isEmpty(tags)) {
             _.remove(self.streams, self.currentEditStream);
         } else {
+            self.currentEditStream.tags = tags;
             self.currentEditStream.posts.$refresh({
-                tags: self.currentEditStream.tags.map(t => t.id)
+                tags: tags.map(t => t.id)
             });
         }
 
