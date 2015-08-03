@@ -12,23 +12,52 @@
             @include justify-content(flex-start);
             width: 90%;
             margin: 0 auto;
-            .stream_box {
+            .container {
                 border: $stream_border;
                 border-radius: 5px;
                 padding: 5px;
                 margin: 5px;
-                .tag_title {
+                height: 400px;
+                max-height: 400px;
+                width: 330px;
+                @include display-flex(flex);
+                @include flex-wrap(wrap);
+                @include flex-direction(columns);
+                .header {
                     margin-bottom: 10px;
                 }
-                .node_list {
-                    height: 400px;
-                    max-height: 400px;
-                    width: 330px;
+                .body {
                     overflow: auto;
-                    .node {
-                        margin: 3px;
+                    height: 100%;
+                    max-height: 100%;
+                    .body-content-wrapper {
+                        height: 100%;
+                        position: relative;
+                        overflow: auto;
+                        .body-content {
+                            position: absolute;
+                            top: 0;
+                            bottom: 0;
+                            left: 0;
+                            right: 0;
+                            .node {
+                                margin: 3px;
+                            }
+                        }
                     }
                 }
+            }
+            // http://blogs.msdn.com/b/kurlak/archive/2015/02/20/filling-the-remaining-height-of-a-container-while-handling-overflow-in-css.aspx
+            .table {
+                display: table;
+            }
+
+            .table-row {
+                display: table-row;
+            }
+
+            .table-cell {
+                display: table-cell;
             }
         }
     }
