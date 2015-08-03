@@ -40,7 +40,7 @@ class UserServiceDB extends UserService {
     Future.successful(auth.users.headOption)
   }
 
-  def retrieve: Future[Set[User]] = {
+  def retrieve: Future[Seq[User]] = {
     val auth = Auth(Database.db.queryGraph(s"match (u:`${User.label}`) return u"))
     Future.successful(auth.users)
   }

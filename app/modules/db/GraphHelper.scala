@@ -10,7 +10,7 @@ object GraphHelper {
     case None       => None
   }
 
-  def nodesWithType[NODE <: Node](nodes: Set[Node]) = nodes.map(_.asInstanceOf[NODE])
+  def nodesWithType[NODE <: Node](nodes: Seq[Node]) = nodes.map(_.asInstanceOf[NODE])
 
   def findNodes[NODE <: UuidNode](discourse: Discourse, factory: NodeFactory[NODE], uuids: String*): Seq[NODE] = {
     if(uuids.isEmpty)

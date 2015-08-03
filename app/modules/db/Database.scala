@@ -70,7 +70,7 @@ object Database {
     Discourse(db.queryGraphs(queries: _*).fold(Graph.empty)(_ merge _))
   }
 
-  def startConnectedDiscourseNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinitions: NodeAndFixedRelationDefinition[START, RELATION, END]*): Set[END] = {
+  def startConnectedDiscourseNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinitions: NodeAndFixedRelationDefinition[START, RELATION, END]*): Seq[END] = {
     val discourse = startConnectedDiscourseGraph(relationDefinitions: _*)
     nodesWithType[END](discourse.nodes)
   }
@@ -84,7 +84,7 @@ object Database {
     Discourse(db.queryGraphs(queries: _*).fold(Graph.empty)(_ merge _))
   }
 
-  def endConnectedDiscourseNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinitions: FixedAndNodeRelationDefinition[START, RELATION, END]*): Set[START] = {
+  def endConnectedDiscourseNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinitions: FixedAndNodeRelationDefinition[START, RELATION, END]*): Seq[START] = {
     val discourse = endConnectedDiscourseGraph(relationDefinitions: _*)
     nodesWithType[START](discourse.nodes)
   }
