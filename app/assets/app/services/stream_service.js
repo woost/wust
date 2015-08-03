@@ -12,6 +12,8 @@ function StreamService(Search, DiscourseNode, store) {
     this.persist = storeList;
     this.remove = removeList;
     this.forget = clearList;
+    this.refreshEditStream = refreshEditStream;
+    this.currentEditStream = undefined;
 
     function restoreList() {
         _.each(streamStore.get("streams") || [], pushList);
@@ -27,10 +29,26 @@ function StreamService(Search, DiscourseNode, store) {
                 label: DiscourseNode.Post.label,
                 tags: tags.map(t => t.id)
             }),
-            tags: _.map(tags, t => t.encode ? t.encode() : t)
+            tags: tags
         };
 
         self.streams.push(stream);
+        storeList();
+    }
+
+    function refreshEditStream() {
+        if (self.currentEditStream === undefined)
+            return;
+
+        if (_.isEmpty(self.currentEditStream.tags)) {
+            _.remove(self.streams, self.currentEditStream);
+        } else {
+            self.currentEditStream.posts.$refresh({
+                tags: self.currentEditStream.tags.map(t => t.id)
+            });
+        }
+
+        self.currentEditStream = undefined;
         storeList();
     }
 
@@ -45,6 +63,6 @@ function StreamService(Search, DiscourseNode, store) {
     }
 
     function storeList() {
-        streamStore.set("streams", _.map(self.streams, t => t.tags));
+        streamStore.set("streams", _.map(self.streams, s => s.tags.map(t => t.encode ? t.encode() : t)));
     }
 }

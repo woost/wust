@@ -7,9 +7,18 @@ function NewStreamCtrl(Search, DiscourseNode, StreamService) {
 
     vm.save = save;
     vm.nodeInfo = DiscourseNode.Tag;
-    vm.selectedTags = [];
+
+    if (StreamService.currentEditStream) {
+        vm.selectedTags = StreamService.currentEditStream.tags;
+    } else {
+        vm.selectedTags = [];
+    }
 
     function save() {
-        StreamService.push(vm.selectedTags);
+        if (StreamService.currentEditStream) {
+            StreamService.refreshEditStream();
+        } else {
+            StreamService.push(vm.selectedTags);
+        }
     }
 }

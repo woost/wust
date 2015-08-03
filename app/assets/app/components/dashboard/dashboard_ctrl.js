@@ -17,6 +17,7 @@ function DashboardCtrl($modal, DiscourseNode, StreamService, Recent) {
     vm.streams = StreamService.streams;
     vm.removeStream = StreamService.remove;
 
+    vm.editModal = editModal;
     vm.showModal = showModal;
     vm.hideModal = hideModal;
 
@@ -28,6 +29,11 @@ function DashboardCtrl($modal, DiscourseNode, StreamService, Recent) {
     vm.recentPosts = Recent.$search({
         label: DiscourseNode.Post.label
     });
+
+    function editModal(stream) {
+        StreamService.currentEditStream = stream;
+        showModal();
+    }
 
     function showModal() {
         modalInstance.$promise.then(modalInstance.show);
