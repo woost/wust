@@ -31,6 +31,7 @@ lazy val wust = (project in file(".")).settings(
     "org.webjars.bower" % "angular-motion" % "0.4.2", // animations for angular-strap
     "org.webjars.bower" % "ng-trans-css" % "0.9.1",
     "org.webjars.bower" % "angular-native-dragdrop" % "1.1.0",
+    "org.webjars.bower" % "ng-sortable" % "1.3.0",
     "org.webjars.bower" % "angular-restmod" % "1.1.8",
     "org.webjars.bower" % "angular-xeditable" % "0.1.9",
     "org.webjars.bower" % "angular-storage-no-cookies" % "0.0.13",

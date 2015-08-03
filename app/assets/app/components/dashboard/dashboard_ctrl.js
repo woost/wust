@@ -16,11 +16,18 @@ function DashboardCtrl($modal, DiscourseNode, StreamService, Recent) {
     vm.nodeInfo = DiscourseNode.Tag;
     vm.streams = StreamService.streams;
     vm.removeStream = StreamService.remove;
+
+    vm.showModal = showModal;
+    vm.hideModal = hideModal;
+
+    vm.sortableOptions = {
+        containment: "#sortable-container",
+        orderChanged: StreamService.persist
+    };
+
     vm.recentPosts = Recent.$search({
         label: DiscourseNode.Post.label
     });
-    vm.showModal = showModal;
-    vm.hideModal = hideModal;
 
     function showModal() {
         modalInstance.$promise.then(modalInstance.show);

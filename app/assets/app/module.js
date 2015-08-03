@@ -8,6 +8,8 @@ angular.module("wust", [
     "template/tabs/tab.html",
     "template/tabs/tabset.html",
     "mgcrea.ngStrap",
+    "ang-drag-drop",
+    "as.sortable",
     "ngSanitize",
     "uiSwitch",
     "xeditable",
@@ -33,13 +35,11 @@ angular.module("wust.api", [
 ]);
 
 angular.module("wust.components", [
-    "ang-drag-drop",
     "ui.ace",
     "wust.services"
 ]);
 
 angular.module("wust.elements", [
-    "ang-drag-drop",
     "wust.services"
 ]);
 
