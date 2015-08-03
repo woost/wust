@@ -10,12 +10,15 @@
             // @include flex-wrap(wrap);
             // @include flex-direction(rows);
             @include justify-content(space-between);
-            width: 90%;
+            width: 100%;
             margin: 0 auto;
             .container {
+                border: $stream_border;
+                border-radius: 5px;
                 height: 200px;
                 max-height: 200px;
                 width: 60%;
+                margin: 20px;
             }
         }
         #stream_list {
@@ -26,16 +29,13 @@
             width: 90%;
             margin: 0 auto;
             .container {
+                width: 330px;
                 height: 400px;
                 max-height: 400px;
-                width: 330px;
             }
         }
         .container {
-            border: $stream_border;
-            border-radius: 5px;
             padding: 5px;
-            margin: 5px;
             @include display-flex(flex);
             @include flex-wrap(wrap);
             @include flex-direction(columns);
@@ -80,3 +80,17 @@
     }
 }
 
+//TODO: this is globally valid...
+//should report: because the readem says container should have this class
+//https://github.com/a5hik/ng-sortable#dragging-element-css
+.as-sortable-dragging {
+    height: 0px !important;
+    max-height: 0px !important;
+    .container {
+        .body {
+            height: 0px !important;
+            max-height: 0px !important;
+            overflow: hidden !important;
+        }
+    }
+}
