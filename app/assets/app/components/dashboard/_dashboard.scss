@@ -80,12 +80,7 @@
     }
 }
 
-//TODO: this is globally valid...
-//should report: because the readem says container should have this class
-//https://github.com/a5hik/ng-sortable#dragging-element-css
 .as-sortable-dragging {
-    height: 0px !important;
-    max-height: 0px !important;
     .container {
         .body {
             height: 0px !important;

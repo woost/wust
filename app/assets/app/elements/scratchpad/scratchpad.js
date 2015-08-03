@@ -22,4 +22,19 @@ function scratchpadCtrl(EditService, LeftSideService) {
     vm.leftSide = LeftSideService;
     vm.editList = EditService.list;
     vm.edit = EditService.edit;
+
+    vm.sortableOptions = {
+        containment: "#edit_list",
+        orderChanged: EditService.persist,
+        accept: acceptDrop
+    };
+
+    function acceptDrop(sourceItemHandleScope, destSortableScope, destItemScope) {
+        // it might happen that someone is dragging an element from another list.
+        // this check is only true in our setup, there might be other scopes in between.
+        // so if you are here, because the accept function stopped working, it
+        // probably is because you added another scope between the
+        // sortableScope and itemhandleScope.
+        return sourceItemHandleScope.$parent.$parent.$id === destSortableScope.$id;
+    }
 }

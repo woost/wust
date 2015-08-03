@@ -137,9 +137,17 @@ function EditService(Post, HistoryService, store, DiscourseNode) {
     this.edit = edit;
     this.updateNode = updateNode;
     this.findNode = findNode;
+    this.persist = storeEditList;
+    this.forget = clearEditList;
 
     function restoreEditList() {
-        return _.map(editStore.get("list", self.list) || [], s => new Session(s));
+        //compact if something is really wrong and we have nulls in the localstorage. be forgiving.
+        return _.map(_.compact(editStore.get("list", self.list) || []), s => new Session(s));
+    }
+
+    function clearEditList() {
+        self.list = [];
+        storeEditList();
     }
 
     function storeEditList() {

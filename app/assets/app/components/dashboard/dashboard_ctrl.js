@@ -22,8 +22,9 @@ function DashboardCtrl($modal, DiscourseNode, StreamService, Recent) {
     vm.hideModal = hideModal;
 
     vm.sortableOptions = {
-        containment: "#sortable-container",
-        orderChanged: StreamService.persist
+        containment: "#stream_list",
+        orderChanged: StreamService.persist,
+        accept: acceptDrop
     };
 
     vm.recentPosts = Recent.$search({
@@ -33,6 +34,10 @@ function DashboardCtrl($modal, DiscourseNode, StreamService, Recent) {
     function editModal(stream) {
         StreamService.currentEditStream = stream;
         showModal();
+    }
+
+    function acceptDrop(sourceItemHandleScope, destSortableScope, destItemScope) {
+        return sourceItemHandleScope.$parent.$parent.$id === destSortableScope.$id;
     }
 
     function showModal() {

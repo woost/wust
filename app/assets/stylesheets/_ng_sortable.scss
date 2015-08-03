@@ -24,3 +24,9 @@
 
 .as-sortable-hidden {
 }
+
+// this lets draggables move accross scroll borders, which is much nicer than being bound by our own initial size.  on drag start, the dimensions of the dragged object are copied to the draggable and regardless of whether we change the size later, this old size will persist. with this, the height is always set to zero which somehow works, as the child dimensions are taken.
+.as-sortable-dragging {
+    height: 0px !important;
+    max-height: 0px !important;
+}
