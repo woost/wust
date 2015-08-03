@@ -12,8 +12,10 @@
                 </div>
                 <div class="table-row body">
                     <div class="table-cell body-content-wrapper">
-                        <div class="table-cell body-content">
-                            <span ng-repeat="post in vm.recentPosts track by post.id" small-post node="post"></spanm>
+                        <div class="body-content-inner-wrapper">
+                            <div class="body-content">
+                                <span ng-repeat="post in vm.recentPosts track by post.id" small-post node="post"></spanm>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -33,8 +35,10 @@
                 </div>
                 <div class="table-row body">
                     <div class="table-cell body-content-wrapper">
-                        <div class="table-cell body-content">
-                            <div ng-repeat="post in stream.posts track by post.id" small-post node="post"></div>
+                        <div class="body-content-inner-wrapper">
+                            <div class="body-content">
+                                <div ng-repeat="post in stream.posts track by post.id" small-post node="post"></div>
+                            </div>
                         </div>
                     </div>
                 </div>

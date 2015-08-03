@@ -50,16 +50,19 @@
                 max-height: 100%;
                 .body-content-wrapper {
                     height: 100%;
-                    position: relative;
-                    overflow: auto;
-                    .body-content {
-                        position: absolute;
-                        top: 0;
-                        bottom: 0;
-                        left: 0;
-                        right: 0;
-                        .node {
-                            margin: 3px;
+                    .body-content-inner-wrapper {
+                        height: 100%;
+                        position: relative;
+                        .body-content {
+                            position: absolute;
+                            overflow: auto;
+                            top: 0;
+                            bottom: 0;
+                            left: 0;
+                            right: 0;
+                            .node {
+                                margin: 3px;
+                            }
                         }
                     }
                 }
@@ -76,16 +79,6 @@
 
         .table-cell {
             display: table-cell;
-        }
-    }
-}
-
-.as-sortable-dragging {
-    .container {
-        .body {
-            height: 0px !important;
-            max-height: 0px !important;
-            overflow: hidden !important;
         }
     }
 }
