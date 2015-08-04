@@ -20,7 +20,7 @@ object Recent extends Controller {
     val userDef = ConcreteFactoryNodeDefinition(User)
     val relationDef = RelationDefinition(userDef, CreatedAction, nodeDef)
 
-   val returnStatement = s"with ${relationDef.name}, ${relationDef.endDefinition.name} return ${relationDef.endDefinition.name} order by ${relationDef.name}.timestamp "
+   val returnStatement = s"with ${relationDef.name}, ${relationDef.endDefinition.name} return ${relationDef.endDefinition.name} order by ${relationDef.name}.timestamp desc"
    val query = s"match ${ relationDef.toQuery } $returnStatement"
    val discourse = Discourse(db.queryGraph(Query(query, relationDef.parameterMap)))
 
