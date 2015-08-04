@@ -10,10 +10,13 @@
             <span switch class="col-md-4" ng-model="vm.search.tagOr" ng-change="vm.search.triggerSearch()"></span>
             <span edit-static-taglist tags="vm.search.selectedTags" on-change="vm.search.triggerSearch()"></span>
         </div>
-        <div id="search_results">
+        <div id="search_results" infinite-scroll="vm.search.loadMore()">
             <!-- TODO: this does break the animation of the search overlay. but the ng-if here would be good, as the small-post would then not trigger any watchers. -->
             <!-- <div ng-if="vm.search.resultsVisible"> -->
-                <div ng-repeat="result in vm.search.results track by result.id" small-post node="result"></div>
+                <div ng-show="vm.search.results.length > 0">
+                    <div ng-repeat="result in vm.search.results track by result.id" small-post node="result"></div>
+                    <button class="btn btn-default pull-right" ng-click="vm.search.loadMore()" ng-disabled="vm.search.noMore">More</button>
+                </div>
                 <!-- </div> -->
             <span ng-show="vm.search.results.length === 0">
                 <span ng-show="vm.search.waiting" class="search_status">Searching…</span>
