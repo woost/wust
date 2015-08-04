@@ -14,7 +14,7 @@ main {
             width: 0px;
             min-width: 0px;
             overflow-y: auto;
-            @include transition(all 200ms ease);
+            @include transition(all 100ms ease);
             border-right: $sidebar_border;
             &.visible {
                 width: 400px;
@@ -31,11 +31,12 @@ main {
             #content_view {
                 height: inherit;
                 padding: 0px 0px 0px 40px;
+                overflow: auto;
             }
             #left_side_toggle {
                 position: fixed;
                 top: 200px;
-                @include transition(all 200ms ease);
+                @include transition(all 100ms ease);
                 z-index: $zindex_left_side_toggle;
                 border-radius: 0 4px 4px 0;
                 border-left: 0;
@@ -43,12 +44,12 @@ main {
             }
             @include flex-grow(1);
             min-width: 600px;
-            @include transition(width 200ms ease);
-            overflow: auto;
+            @include transition(width 100ms ease);
         }
     }
     // make transitions a bit faster
     .ng-trans {
+        @include transition(180ms all);
     }
 }
 
