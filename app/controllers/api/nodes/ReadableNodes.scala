@@ -3,7 +3,7 @@ package controllers.api.nodes
 import formatters.json.ApiNodeFormat._
 import model.WustSchema._
 import modules.requests._
-import play.api.libs.json.Json
+import play.api.libs.json._
 import play.api.mvc.Action
 import renesca.schema.Node
 
@@ -17,8 +17,9 @@ trait ReadableNodes[NODE <: UuidNode] extends NodesBase {
     getResult(nodeSchema.op.read(uuid))(jsonNode)
   }
 
-  override def index = Action {
-    getResult(nodeSchema.op.read)(jsonNodes)
+  override def index = Action { request =>
+    val page = request.queryString.get("page").flatMap(_.headOption).map(_.toInt)
+    getResult(nodeSchema.op.read(page))(jsonNodes)
   }
 
   override def showMembers(path: String, uuid: String) = Action {

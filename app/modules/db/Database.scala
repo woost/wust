@@ -46,6 +46,12 @@ object Database {
     Discourse(db.queryGraph(Query(query, params)))
   }
 
+  def limitedDiscourseNodes[NODE <: UuidNode](factory: NodeFactory[NODE], skip: Int, limit: Int): (Discourse, Seq[NODE]) = {
+    val nodeDef = ConcreteFactoryNodeDefinition(factory)
+    val discourse = discourseGraphWithReturn(s"${nodeDef.name} skip $skip limit $limit", nodeDef)
+    (discourse, nodesWithType[NODE](discourse.nodes))
+  }
+
   def discourseNodes[NODE <: UuidNode](factory: NodeFactory[NODE], uuids: String*): (Discourse, Seq[NODE]) = {
     val discourse = nodeDiscourseGraph(factory, uuids: _*)
     (discourse, findNodes(discourse, factory, uuids: _*))
