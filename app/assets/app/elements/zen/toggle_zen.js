@@ -20,7 +20,6 @@ function toggleZen(ZenService) {
         };
         scope.$watch("service.visible", val => {
             // we have a session here from the edit_service, so that is ok.
-            console.log("mullar", scope.node, scope.service.node);
             scope.preview.active = (val && ((scope.node.id === undefined && scope.node.localId === scope.service.node.localId) || scope.node.id === scope.service.node.id));
         });
     }
