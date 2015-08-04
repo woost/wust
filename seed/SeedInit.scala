@@ -10,7 +10,7 @@ object SeedInit extends Task with SeedTools {
     setupDbConstraints(db)
 
     //TODO: not only unique constraints in renesca, also support normal indices
-    db.query("CREATE INDEX ON TIMESTAMP(timestamp)")
+    db.query("CREATE INDEX ON :TIMESTAMP(timestamp)")
 
     modifyDiscourse { implicit discourse =>
       discourse.add(
