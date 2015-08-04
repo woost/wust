@@ -325,9 +325,9 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.d3Node/*.on("click", this.ignoreHyperEdge(node => {
                         this.onClick(node);
                     }))*/
-                    .on("mouseover", d => scope.$applyAsync(() => {this.setNodeOffset(d); vm.state.hoveredNode = d;}))
+                    .on("mouseover", d => scope.$apply(() => {this.setNodeOffset(d); vm.state.hoveredNode = d;}))
                     .on("mouseout", d => {
-                        scope.$applyAsync(() => vm.state.hoveredNode = undefined);
+                        scope.$apply(() => vm.state.hoveredNode = undefined);
                         d.d3NodeContainer.classed({
                             "selected": false
                         });
