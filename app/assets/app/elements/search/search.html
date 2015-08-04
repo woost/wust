@@ -4,7 +4,10 @@
         <div id="search_options">
             <label class="col-md-8">Description</label>
             <span switch class="col-md-4" ng-model="vm.search.searchDescriptions" ng-change="vm.search.triggerSearch()"></span>
+            <hr>
             <label class="col-md-8">Tags</label>
+            <span class="label_like col-md-8">Disjunction</span>
+            <span switch class="col-md-4" ng-model="vm.search.tagOr" ng-change="vm.search.triggerSearch()"></span>
             <span edit-static-taglist tags="vm.search.selectedTags" on-change="vm.search.triggerSearch()"></span>
         </div>
         <div id="search_results">

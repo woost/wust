@@ -126,14 +126,23 @@ END <: Node,
     case r                                     => (None, r.toQuery)
   }
 
+  private def nodeReferencer(nodeDefinition: NodeDefinition[_]) = s"(${ nodeDefinition.name })"
+
   override def parameterMap = startDefinition.parameterMap ++ endDefinition.parameterMap
 
-  def toQuery: String = {
-    val (startPre, startNode) = nodeMatcher(startDefinition)
-    val (endPre, endNode) = nodeMatcher(endDefinition)
-    val preMatcher = List(startPre, endPre).flatten.map(_ + ",").mkString
+  def toQuery: String = toQuery(true)
 
-    s"$preMatcher$startNode-$relationMatcher->$endNode"
+  def toQuery(matchNodes: Boolean): String = {
+    if (matchNodes) {
+      val (startPre, startNode) = nodeMatcher(startDefinition)
+      val (endPre, endNode) = nodeMatcher(endDefinition)
+      val preMatcher = List(startPre, endPre).flatten.map(_ + ",").mkString
+      s"$preMatcher$startNode-$relationMatcher->$endNode"
+    } else {
+      val startNode = nodeReferencer(startDefinition)
+      val endNode = nodeReferencer(endDefinition)
+      s"$startNode-$relationMatcher->$endNode"
+    }
   }
 }
 

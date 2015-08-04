@@ -1,7 +1,7 @@
 package controllers.api
 
 import modules.db.Database._
-import modules.db.{LabelNodeDefinition,ConcreteFactoryNodeDefinition,RelationDefinition}
+import modules.db._
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
 import renesca.Query
@@ -14,7 +14,7 @@ import scala.util.Try
 
 object Search extends Controller {
   //TODO: yeah.
-  def index(label: Option[String], title: Option[String], searchDescriptions:Option[Boolean], tags: List[String]) = Action {
+  def index(label: Option[String], title: Option[String], searchDescriptions:Option[Boolean], tags: List[String], tagOr: Option[Boolean]) = Action {
     // white list, so only exposed nodes can be searched
     val labels = ContentNode.labels ++ label.map(Label(_))
     val nodeDef = LabelNodeDefinition(labels)
@@ -40,21 +40,38 @@ object Search extends Controller {
           Map("term" -> titleRegex.getOrElse("")) ++ nodeDef.parameterMap))
       )
     } else {
-      val tagDef = ConcreteFactoryNodeDefinition(Tag)
-      val relationDef = RelationDefinition(tagDef, Categorizes, nodeDef)
-      val condition = if (termMatcher.isEmpty) "" else s"and ${termMatcher}"
+      if (tagOr.getOrElse(false)) {
+        val tagDef = ConcreteFactoryNodeDefinition(Tag)
+        val relationDef = RelationDefinition(tagDef, Categorizes, nodeDef)
+        val condition = if (termMatcher.isEmpty) "" else s"and ${termMatcher}"
 
-      Discourse(
-        db.queryGraph(Query(s"""
-          match ${relationDef.toQuery}
-          where (${tagDef.name}.uuid in {tagUuids})
-          $condition
-          return ${nodeDef.name} limit 15""",
-          Map("term" -> titleRegex.getOrElse(""), "tagUuids" -> tags)
+        Discourse(
+          db.queryGraph(Query(s"""
+            match ${relationDef.toQuery}
+            where (${tagDef.name}.uuid in {tagUuids})
+            $condition
+            return ${nodeDef.name} limit 15""",
+            Map("term" -> titleRegex.getOrElse(""), "tagUuids" -> tags)
             ++ relationDef.parameterMap
             ++ tagDef.parameterMap
             ++ nodeDef.parameterMap))
-      )
+        )
+      } else {
+        val tagDefs = tags.map(uuid => FactoryUuidNodeDefinition(Tag, uuid))
+        val relationDefs = tagDefs.map(tagDef => RelationDefinition(tagDef, Categorizes, nodeDef))
+        val condition = if (termMatcher.isEmpty) "" else s"where ${termMatcher}"
+
+        Discourse(
+          db.queryGraph(Query(s"""
+            match ${nodeDef.toQuery}, ${tagDefs.map(_.toQuery).mkString(",")}, ${relationDefs.map(_.toQuery(false)).mkString(",")}
+            $condition
+            return ${nodeDef.name} limit 15""",
+            Map("term" -> titleRegex.getOrElse(""), "tagUuids" -> tags)
+            ++ relationDefs.flatMap(_.parameterMap)
+            ++ tagDefs.flatMap(_.parameterMap)
+            ++ nodeDef.parameterMap))
+        )
+      }
     }).getOrElse(Discourse.empty)
 
     Ok(Json.toJson(discourse.contentNodes))

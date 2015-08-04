@@ -8,6 +8,7 @@ function SearchService(Search, DiscourseNode) {
         query: "",
         results: Search.$collection(),
         searchDescriptions: false,
+        tagOr: false,
         selectedTags: [],
         waiting: true,
         triggerSearch
@@ -19,6 +20,7 @@ function SearchService(Search, DiscourseNode) {
             label: DiscourseNode.Post.label,
             title: this.query,
             searchDescriptions: this.searchDescriptions,
+            tagOr: this.tagOr,
             tags: this.selectedTags.map(t => t.id)
         });
         let self = this;
