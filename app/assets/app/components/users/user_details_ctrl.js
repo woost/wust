@@ -13,7 +13,7 @@ function UserDetailsCtrl($stateParams, User, Auth, $q) {
     let page = 0;
     vm.loadMore = loadMore;
     vm.noMore = false;
-    vm.users = vm.user.contributions.$search({page, size}).$then(val => {
+    vm.contributions = vm.user.contributions.$search({page, size}).$then(val => {
         vm.noMore = val.length < size;
     });
 
