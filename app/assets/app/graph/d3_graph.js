@@ -861,7 +861,11 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     if (vm.state.hoveredNode !== undefined) {
                         let startNode = this.dragStartNode; // always normal node
                         let endNode = vm.state.hoveredNode;
-                        this.connectNodes(startNode, endNode);
+                        if(startNode !== endNode) { // no self loop
+                            this.connectNodes(startNode, endNode);
+                        } else {
+                            humane.error("Self loops are not allowed.");
+                        }
                     }
                 }
                 // TODO: else { connect without dragging only by clicking }
