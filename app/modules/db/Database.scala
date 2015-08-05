@@ -46,7 +46,7 @@ object Database {
     Discourse(db.queryGraph(Query(query, params)))
   }
 
-  def limitedDiscourseNodes[NODE <: UuidNode](factory: NodeFactory[NODE], skip: Int, limit: Int): (Discourse, Seq[NODE]) = {
+  def limitedDiscourseNodes[NODE <: UuidNode](skip: Int, limit: Int, factory: NodeFactory[NODE]): (Discourse, Seq[NODE]) = {
     val nodeDef = ConcreteFactoryNodeDefinition(factory)
     val discourse = discourseGraphWithReturn(s"${nodeDef.name} skip $skip limit $limit", nodeDef)
     (discourse, nodesWithType[NODE](discourse.nodes))
@@ -81,6 +81,21 @@ object Database {
     nodesWithType[END](discourse.nodes)
   }
 
+  //TODO: need ordering for limit search, otherwise we get duplicates
+  def limitedStartConnectedDiscourseGraph[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](skip: Int, limit: Int, relationDefinitions: NodeAndFixedRelationDefinition[START, RELATION, END]*): Discourse = {
+    val queries = relationDefinitions.map { relationDefinition =>
+      val query = s"match ${ relationDefinition.toQuery } return ${ relationDefinition.endDefinition.name } skip $skip limit $limit"
+      val params = relationDefinition.parameterMap
+      Query(query, params)
+    }
+    Discourse(db.queryGraphs(queries: _*).fold(Graph.empty)(_ merge _))
+  }
+
+  def limitedStartConnectedDiscourseNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](skip: Int, limit: Int, relationDefinitions: NodeAndFixedRelationDefinition[START, RELATION, END]*): Seq[END] = {
+    val discourse = limitedStartConnectedDiscourseGraph(skip, limit, relationDefinitions: _*)
+    nodesWithType[END](discourse.nodes)
+  }
+
   def endConnectedDiscourseGraph[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinitions: FixedAndNodeRelationDefinition[START, RELATION, END]*): Discourse = {
     val queries = relationDefinitions.map { relationDefinition =>
       val query = s"match ${ relationDefinition.toQuery } return ${ relationDefinition.startDefinition.name }"
@@ -92,6 +107,20 @@ object Database {
 
   def endConnectedDiscourseNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinitions: FixedAndNodeRelationDefinition[START, RELATION, END]*): Seq[START] = {
     val discourse = endConnectedDiscourseGraph(relationDefinitions: _*)
+    nodesWithType[START](discourse.nodes)
+  }
+
+  def limitedEndConnectedDiscourseGraph[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](skip: Int, limit: Int, relationDefinitions: FixedAndNodeRelationDefinition[START, RELATION, END]*): Discourse = {
+    val queries = relationDefinitions.map { relationDefinition =>
+      val query = s"match ${ relationDefinition.toQuery } return ${ relationDefinition.startDefinition.name } skip $skip limit $limit"
+      val params = relationDefinition.parameterMap
+      Query(query, params)
+    }
+    Discourse(db.queryGraphs(queries: _*).fold(Graph.empty)(_ merge _))
+  }
+
+  def limitedEndConnectedDiscourseNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](skip: Int, limit: Int, relationDefinitions: FixedAndNodeRelationDefinition[START, RELATION, END]*): Seq[START] = {
+    val discourse = limitedEndConnectedDiscourseGraph(skip, limit, relationDefinitions: _*)
     nodesWithType[START](discourse.nodes)
   }
 

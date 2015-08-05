@@ -26,7 +26,7 @@ class NodeRead[NODE <: UuidNode](val factory: UuidNodeMatchesFactory[NODE]) exte
     pageOpt.map { page =>
       val limit = 30
       val skip = page * limit;
-      Left(limitedDiscourseNodes(factory, skip, limit)._2)
+      Left(limitedDiscourseNodes(skip, limit, factory)._2)
     }.getOrElse(Left(discourseNodes(factory)._2))
   }
 
