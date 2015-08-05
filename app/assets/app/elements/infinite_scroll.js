@@ -11,16 +11,21 @@ function infiniteScroll() {
     };
 
     function link(scope, elem, attrs) {
-        var rawElem = elem[0];
         var atPercent = attrs.atPercent || 80;
+        var targetElement = attrs.scrollTarget ? document.getElementById(attrs.scrollTarget) : elem[0];
+        var lastScrollTop = 0;
 
-        elem.bind("scroll", function () {
-            var remainingHeight = rawElem.offsetHeight - rawElem.scrollHeight;
-            var scrollTop = rawElem.scrollTop;
-            var percent = Math.abs((scrollTop / remainingHeight) * 100);
-            if (percent >= atPercent) {
-                scope.infiniteScroll();
+        targetElement.addEventListener("scroll", function () {
+            var remainingHeight = targetElement.offsetHeight - targetElement.scrollHeight;
+            var scrollTop = targetElement.scrollTop;
+            if (scrollTop > lastScrollTop) {
+                var percent = Math.abs((scrollTop / remainingHeight) * 100);
+                if (percent >= atPercent) {
+                    scope.infiniteScroll();
+                }
             }
+
+            lastScrollTop = scrollTop;
         });
     }
 }
