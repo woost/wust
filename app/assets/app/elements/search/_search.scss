@@ -28,8 +28,16 @@
             }
         }
         #search_options {
+            .input_option {
+                margin-top: 4px;
+                margin-left: -15px;
+            }
             .label_like,label {
                 line-height: 30px;
+            }
+            .edit_tags {
+                //TODO: why so much...
+                padding-top: 110px;
             }
             background: #eee;
             width: 220px;
