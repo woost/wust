@@ -14,7 +14,7 @@ import scala.util.Try
 
 object Search extends Controller {
   //TODO: yeah.
-  def index(page: Option[Int], label: Option[String], title: Option[String], searchDescriptions:Option[Boolean], tags: List[String], tagOr: Option[Boolean]) = Action {
+  def index(page: Option[Int], size: Option[Int], label: Option[String], title: Option[String], searchDescriptions:Option[Boolean], tags: List[String], tagOr: Option[Boolean]) = Action {
     // white list, so only exposed nodes can be searched
     val labels = ContentNode.labels ++ label.map(Label(_))
     val nodeDef = LabelNodeDefinition(labels)
@@ -28,7 +28,7 @@ object Search extends Controller {
     val titleMatcher = title.map(_ => s"${nodeDef.name}.title =~ {term}")
     val termMatcher = Seq(titleMatcher, descrMatcher).flatten.mkString(" or ")
 
-    val limit = 30
+    val limit = size.getOrElse(15)
     val skip = page.getOrElse(0) * limit;
     val returnStatement = s"return ${ nodeDef.name } order by ${ nodeDef.name }.title skip $skip limit $limit"
 

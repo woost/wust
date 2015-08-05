@@ -12,8 +12,9 @@ trait ReadableNodes[NODE <: UuidNode] extends NodesBase {
 
   private def jsonNode(node: Node) = Ok(Json.toJson(node))
   private def jsonNodes(nodes: Iterable[Node]) = Ok(Json.toJson(nodes))
-  private def getPage(request: Request[AnyContent]): Option[Int] = {
-    request.queryString.get("page").flatMap(_.headOption).map(_.toInt)
+  private def getPage(request: Request[AnyContent]) = {
+    (request.queryString.get("page").flatMap(_.headOption).map(_.toInt),
+      request.queryString.get("size").flatMap(_.headOption).map(_.toInt))
   }
 
   override def show(uuid: String) = Action {
@@ -21,31 +22,31 @@ trait ReadableNodes[NODE <: UuidNode] extends NodesBase {
   }
 
   override def index = Action { request =>
-    val page = getPage(request)
-    getResult(nodeSchema.op.read(page))(jsonNodes)
+    val (page,size) = getPage(request)
+    getResult(nodeSchema.op.read(page, size))(jsonNodes)
   }
 
   override def showMembers(path: String, uuid: String) = Action { request =>
     val baseNode = nodeSchema.op.toNodeDefinition(uuid)
-    val page = getPage(request)
+    val (page,size) = getPage(request)
     getSchema(nodeSchema.connectSchemas, path)(connectSchema => {
-      getResult(connectSchema.op.read(baseNode, page))(jsonNodes)
+      getResult(connectSchema.op.read(baseNode, page, size))(jsonNodes)
     })
   }
 
   override def showNestedMembers(path: String, nestedPath: String, uuid: String, otherUuid: String) = Action { request =>
     val baseNode = nodeSchema.op.toNodeDefinition(uuid)
-    val page = getPage(request)
+    val (page,size) = getPage(request)
     getHyperSchema(nodeSchema.connectSchemas, path)({
       case c@StartHyperConnectSchema(_, _, connectSchemas) =>
         val hyperRel = c.toNodeDefinition(baseNode, otherUuid)
         getSchema(connectSchemas, nestedPath)(schema =>
-          getResult(schema.op.read(hyperRel, page))(jsonNodes)
+          getResult(schema.op.read(hyperRel, page, size))(jsonNodes)
         )
       case c@EndHyperConnectSchema(_, _, connectSchemas)   =>
         val hyperRel = c.toNodeDefinition(baseNode, otherUuid)
         getSchema(connectSchemas, nestedPath)(schema =>
-          getResult(schema.op.read(hyperRel, page))(jsonNodes)
+          getResult(schema.op.read(hyperRel, page, size))(jsonNodes)
         )
     })
   }

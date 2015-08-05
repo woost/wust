@@ -11,7 +11,7 @@ import renesca.schema._
 trait RelationAccess[-NODE <: UuidNode, +OTHER <: UuidNode] {
   //TODO: switch left/right...left should be errors
   //TODO: no nodedefinitions as args
-  def read(baseDef: FixedNodeDefinition[NODE], page: Option[Int]): Either[Iterable[OTHER], String] = Right("No read access on Relation")
+  def read(baseDef: FixedNodeDefinition[NODE], page: Option[Int], size: Option[Int]): Either[Iterable[OTHER], String] = Right("No read access on Relation")
   def delete(baseDef: FixedNodeDefinition[NODE], uuid: String): Either[Boolean, String] = Right("No delete access on Relation")
   def deleteHyper(baseDef: HyperNodeDefinitionBase[NODE with AbstractRelation[_, _]], uuid: String): Either[Boolean, String] = Right("No delete access on HyperRelation")
   def create(uuid: String, user: User, json: JsValue): Either[ConnectResponse[OTHER], String]
@@ -48,9 +48,9 @@ END <: UuidNode
   def toNodeDefinition = ConcreteFactoryNodeDefinition(nodeFactory)
   def toNodeDefinition(uuid: String) = FactoryUuidNodeDefinition(nodeFactory, uuid)
 
-  protected def pageAwareRead(relDefs: Seq[NodeAndFixedRelationDefinition[START,RELATION,END]], pageOpt: Option[Int]) = {
+  protected def pageAwareRead(relDefs: Seq[NodeAndFixedRelationDefinition[START,RELATION,END]], pageOpt: Option[Int], sizeOpt: Option[Int]) = {
     pageOpt.map { page =>
-      val limit = 30
+      val limit = sizeOpt.getOrElse(15)
       val skip = page * limit;
       Left(limitedStartConnectedDiscourseNodes(skip, limit, relDefs: _*))
     }.getOrElse(Left(startConnectedDiscourseNodes(relDefs: _*)))
@@ -67,9 +67,9 @@ END <: UuidNode
   def toNodeDefinition = ConcreteFactoryNodeDefinition(nodeFactory)
   def toNodeDefinition(uuid: String) = FactoryUuidNodeDefinition(nodeFactory, uuid)
 
-  protected def pageAwareRead(relDefs: Seq[FixedAndNodeRelationDefinition[START,RELATION,END]], pageOpt: Option[Int]) = {
+  protected def pageAwareRead(relDefs: Seq[FixedAndNodeRelationDefinition[START,RELATION,END]], pageOpt: Option[Int], sizeOpt: Option[Int]) = {
     pageOpt.map { page =>
-      val limit = 30
+      val limit = sizeOpt.getOrElse(15)
       val skip = page * limit;
       Left(limitedEndConnectedDiscourseNodes(skip, limit, relDefs: _*))
     }.getOrElse(Left(endConnectedDiscourseNodes(relDefs: _*)))
@@ -84,8 +84,8 @@ END <: UuidNode
 )(
   val nodeFactory: NodeFactory[END]
 ) extends StartRelationAccess[START,AbstractRelation[START,END],END] {
-  override def read(baseDef: FixedNodeDefinition[START], pageOpt: Option[Int]) = {
-    pageAwareRead(factories.map(RelationDefinition(baseDef, _, toNodeDefinition)), pageOpt)
+  override def read(baseDef: FixedNodeDefinition[START], pageOpt: Option[Int], sizeOpt: Option[Int]) = {
+    pageAwareRead(factories.map(RelationDefinition(baseDef, _, toNodeDefinition)), pageOpt, sizeOpt)
   }
 }
 
@@ -97,8 +97,8 @@ END <: UuidNode
 )(
   val nodeFactory: NodeFactory[START]
 ) extends EndRelationAccess[START,AbstractRelation[START,END],END] {
-  override def read(baseDef: FixedNodeDefinition[END], pageOpt: Option[Int]) = {
-    pageAwareRead(factories.map(RelationDefinition(toNodeDefinition, _, baseDef)), pageOpt)
+  override def read(baseDef: FixedNodeDefinition[END], pageOpt: Option[Int], sizeOpt: Option[Int]) = {
+    pageAwareRead(factories.map(RelationDefinition(toNodeDefinition, _, baseDef)), pageOpt, sizeOpt)
   }
 }
 
@@ -112,8 +112,8 @@ END <: UuidNode
   val nodeFactory: NodeFactory[END]
   ) extends StartRelationAccess[START, RELATION, END] {
 
-  override def read(baseDef: FixedNodeDefinition[START], pageOpt: Option[Int]) = {
-    pageAwareRead(Seq(RelationDefinition(baseDef, factory, toNodeDefinition)), pageOpt)
+  override def read(baseDef: FixedNodeDefinition[START], pageOpt: Option[Int], sizeOpt: Option[Int]) = {
+    pageAwareRead(Seq(RelationDefinition(baseDef, factory, toNodeDefinition)), pageOpt, sizeOpt)
   }
 }
 
@@ -139,8 +139,8 @@ END <: UuidNode
   val nodeFactory: NodeFactory[START]
   ) extends EndRelationAccess[START, RELATION, END] {
 
-  override def read(baseDef: FixedNodeDefinition[END], pageOpt: Option[Int]) = {
-    pageAwareRead(Seq(RelationDefinition(toNodeDefinition, factory, baseDef)), pageOpt)
+  override def read(baseDef: FixedNodeDefinition[END], pageOpt: Option[Int], sizeOpt: Option[Int]) = {
+    pageAwareRead(Seq(RelationDefinition(toNodeDefinition, factory, baseDef)), pageOpt, sizeOpt)
   }
 }
 

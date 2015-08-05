@@ -12,6 +12,7 @@ function SearchService(Search, DiscourseNode) {
         selectedTags: [],
         waiting: true,
         page: 0,
+        size: 30,
         noMore: false,
         triggerSearch,
         loadMore
@@ -22,7 +23,12 @@ function SearchService(Search, DiscourseNode) {
         this.page = 0;
         this.waiting = true;
         this.results.$refresh(getParams.apply(this));
-        this.results.$then(() => this.waiting = false, () => this.waiting = false);
+        this.results.$then(searchFinished.bind(this), searchFinished.bind(this));
+
+        function searchFinished(val) {
+            this.waiting = false;
+            this.noMore = val.length < this.size;
+        }
     }
 
     function loadMore() {
@@ -32,7 +38,8 @@ function SearchService(Search, DiscourseNode) {
         this.page++;
         let prevLength = this.results.length;
         this.results.$fetch(getParams.apply(this)).$then(val => {
-            this.noMore = val.length === prevLength;
+            let diff = val.length - prevLength;
+            this.noMore = diff < this.size;
         });
     }
 
@@ -43,7 +50,8 @@ function SearchService(Search, DiscourseNode) {
             searchDescriptions: this.searchDescriptions,
             tagOr: this.tagOr,
             tags: this.selectedTags.map(t => t.id),
-            page: this.page
+            page: this.page,
+            size: this.size
         };
     }
 }

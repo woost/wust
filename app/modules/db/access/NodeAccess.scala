@@ -12,7 +12,7 @@ trait NodeAccess[+NODE <: UuidNode] {
   val name = factory.getClass.getSimpleName.dropRight(1)
   val label = factory.label
 
-  def read(page: Option[Int]): Either[Iterable[NODE],String] = Right("No read access on Node collection")
+  def read(page: Option[Int], size: Option[Int]): Either[Iterable[NODE],String] = Right("No read access on Node collection")
   def read(uuid: String): Either[NODE, String] = Right("No read access on Node")
   def create(user: User, json: JsValue): Either[NODE, String] = Right("No create access on Node")
   def update(uuid: String, user: User, nodeAdd: JsValue): Either[NODE,String] = Right("No update access on Node")
@@ -22,9 +22,9 @@ trait NodeAccess[+NODE <: UuidNode] {
 }
 
 class NodeRead[NODE <: UuidNode](val factory: UuidNodeMatchesFactory[NODE]) extends NodeAccess[NODE] {
-  override def read(pageOpt: Option[Int]) = {
+  override def read(pageOpt: Option[Int], sizeOpt: Option[Int]) = {
     pageOpt.map { page =>
-      val limit = 30
+      val limit = sizeOpt.getOrElse(15)
       val skip = page * limit;
       Left(limitedDiscourseNodes(skip, limit, factory)._2)
     }.getOrElse(Left(discourseNodes(factory)._2))
