@@ -1,7 +1,6 @@
 main {
     height: 100%;
     padding-top: 50px;
-    overflow: hidden;
     #main_view {
         height: inherit;
         @include display-flex(flex);
@@ -30,7 +29,7 @@ main {
         #right_hand_side {
             #content_view {
                 height: inherit;
-                padding: 0px 0px 0px 40px;
+                padding: 5px 5px 5px 40px;
                 overflow: auto;
             }
             #left_side_toggle {
