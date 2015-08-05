@@ -70,7 +70,9 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 // react on graph changes
                 this.graph.onCommit(this.updateGraph.bind(this));
 
-                this.updateGraph({ newNodes: this.graph.nodes });
+                this.updateGraph({
+                    newNodes: this.graph.nodes
+                });
 
                 this.converge();
             }
@@ -187,8 +189,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.d3Node
                     .append("span")
                     .text(d => d.title);
-                    // .style("border-width", n => Math.abs(n.verticalForce) + "px")
-                    // .style("border-color", n => n.verticalForce < 0 ? "#3CBAFF" : "#FFA73C")
+                // .style("border-width", n => Math.abs(n.verticalForce) + "px")
+                // .style("border-color", n => n.verticalForce < 0 ? "#3CBAFF" : "#FFA73C")
 
                 // add relations
                 this.d3LinkPathWithData.enter()
@@ -263,7 +265,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             // from: http://stackoverflow.com/a/17111220/793909
             dragStartWithButton(button, func) {
                 return d => {
-                    if(d3.event.sourceEvent.which === button) {
+                    if (d3.event.sourceEvent.which === button) {
                         this.dragInitiated = true;
                         func(d);
                     }
@@ -272,7 +274,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             }
             dragWithButton(button, func) {
                 return d => {
-                    if(d3.event.sourceEvent.which === button && this.dragInitiated) {
+                    if (d3.event.sourceEvent.which === button && this.dragInitiated) {
                         func(d);
                     }
                     d3.event.sourceEvent.stopPropagation();
@@ -280,7 +282,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             }
             dragEndWithButton(button, func) {
                 return d => {
-                    if(d3.event.sourceEvent.which === button && this.dragInitiated) {
+                    if (d3.event.sourceEvent.which === button && this.dragInitiated) {
                         func(d);
                         this.dragInitiated = false;
                     }
@@ -307,12 +309,12 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
                 this.d3Html.call(this.zoom)
                     .on("dblclick.zoom", null)
-                     .on("mousedown", () => {
-                         this.force.stop();
-                     })
-                     .on("dblclick", () => {
+                    .on("mousedown", () => {
+                        this.force.stop();
+                    })
+                    .on("dblclick", () => {
                         this.force.resume();
-                     });
+                    });
 
                 this.d3Svg.on("dblclick.zoom", null);
 
@@ -322,10 +324,14 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
             registerUIEvents() {
                 //TODO: register only on added d3Nodes
-                this.d3Node/*.on("click", this.ignoreHyperEdge(node => {
-                        this.onClick(node);
-                    }))*/
-                    .on("mouseover", d => scope.$apply(() => {this.setNodeOffset(d); vm.state.hoveredNode = d;}))
+                this.d3Node
+                    /*.on("click", this.ignoreHyperEdge(node => {
+                                            this.onClick(node);
+                                        }))*/
+                    .on("mouseover", d => scope.$apply(() => {
+                        this.setNodeOffset(d);
+                        vm.state.hoveredNode = d;
+                    }))
                     .on("mouseout", d => {
                         scope.$apply(() => vm.state.hoveredNode = undefined);
                         d.d3NodeContainer.classed({
@@ -411,18 +417,22 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
             initConverge() {
                 // focusMarkedNodes needs visible/marked nodes and edges
-                this.graph.nodes.forEach( n => {
+                this.graph.nodes.forEach(n => {
                     n.marked = true;
                     n.visible = true;
                 });
-                this.graph.edges.forEach( e => {
+                this.graph.edges.forEach(e => {
                     e.visible = true;
                 });
                 if (this.visibleConvergence) {
                     this.recalculateNodeDimensions(this.graph.nodes);
                     this.focusMarkedNodes(0);
-                    this.d3HtmlContainer.classed({"converged": true});
-                    this.d3SvgContainer.classed({"converged": true});
+                    this.d3HtmlContainer.classed({
+                        "converged": true
+                    });
+                    this.d3SvgContainer.classed({
+                        "converged": true
+                    });
                 }
 
             }
@@ -440,8 +450,12 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     this.focusMarkedNodes(0);
 
 
-                this.d3HtmlContainer.classed({"converged": true});
-                this.d3SvgContainer.classed({"converged": true});
+                this.d3HtmlContainer.classed({
+                    "converged": true
+                });
+                this.d3SvgContainer.classed({
+                    "converged": true
+                });
             }
 
             updateGraphRefs() {
@@ -458,14 +472,14 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     n.d3NodeTools = d3.select(n.domNodeTools);
                 });
 
-                this.graph.edges.forEach( (r, i) => {
+                this.graph.edges.forEach((r, i) => {
                     r.domPath = this.d3LinkPathWithData[0][i];
                     r.d3Path = d3.select(r.domPath);
                 });
             }
 
             recalculateNodeDimensions(nodes) {
-                nodes.forEach( n => {
+                nodes.forEach(n => {
                     n.rect = {
                         width: n.domNode.offsetWidth,
                         height: n.domNode.offsetHeight
@@ -519,13 +533,13 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             }
 
             drawNodes() {
-                this.graph.nodes.forEach( (node) => {
+                this.graph.nodes.forEach((node) => {
                     node.domNodeContainer.style[this.transformCompat] = `translate(${node.x - node.rect.width / 2}px, ${node.y - node.rect.height / 2}px)`;
                 });
             }
 
             drawRelations() {
-                this.graph.edges.forEach( (relation) => {
+                this.graph.edges.forEach((relation) => {
                     // clamp every edge line to the intersections with its incident node rectangles
                     let line = Helpers.clampLineByRects(relation, relation.source.rect, relation.target.rect);
                     if (isNaN(line.x1) || isNaN(line.y1) || isNaN(line.x2) || isNaN(line.y2))
@@ -606,20 +620,20 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             filter(matchingNodes) {
                 let component = _(matchingNodes).map(node => node.component).flatten().uniq().value();
 
-                this.graph.nodes.forEach( node => {
+                this.graph.nodes.forEach(node => {
                     node.marked = _(matchingNodes).contains(node);
                     node.visible = node.marked || _(component).contains(node);
 
                 });
 
-                this.graph.nodes.forEach( node => {
+                this.graph.nodes.forEach(node => {
                     if (node.hyperEdge) {
                         //TODO: mark chains of hyperedges
                         node.marked = node.marked || node.source.marked && node.target.marked;
                     }
                 });
 
-                this.graph.edges.forEach( edge => {
+                this.graph.edges.forEach(edge => {
                     edge.visible = _(component).contains(edge.source) && _(component).contains(edge.target);
                 });
 
@@ -631,7 +645,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             setVisibility() {
                 let notMarkedOpacity = 0.3;
                 // set node visibility
-                this.graph.nodes.forEach( node => {
+                this.graph.nodes.forEach(node => {
                     let opacity = (node.marked) ? 1.0 : notMarkedOpacity;
                     let visibility = node.visible ? "inherit" : "hidden";
                     node.domNode.style.opacity = opacity;
@@ -641,7 +655,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 });
 
                 // set edge visibility
-                this.graph.edges.forEach( (edge, i) => {
+                this.graph.edges.forEach((edge, i) => {
                     edge.domPath.style.visibility = edge.visible ? "inherit" : "hidden";
                     edge.domPath.style.opacity = (edge.source.marked === true && edge.target.marked === true) ? 1.0 : notMarkedOpacity;
                 });
@@ -691,8 +705,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     referenceNode = start.connectsTo.$buildRaw(endNode.encode());
                 }
                 referenceNode.$save({}).$then(response => {
-                    response.graph.nodes.forEach( n => this.graph.addNode(n));
-                    response.graph.edges.forEach( r => this.graph.addRelation(r));
+                    response.graph.nodes.forEach(n => this.graph.addNode(n));
+                    response.graph.edges.forEach(r => this.graph.addRelation(r));
                     this.graph.commit();
                 });
             }
@@ -702,8 +716,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     id: d.startId
                 }).connectsTo.$buildRaw({
                     id: d.endId
-                }).$destroy().$then(response => {
-                }, response => humane.error("Server error:\n" + response));
+                }).$destroy().$then(response => {}, response => humane.error("Server error:\n" + response));
                 this.graph.removeNode(d.id);
                 this.graph.commit();
                 this.force.stop();
@@ -712,8 +725,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             removeNode(d) {
                 Post.$buildRaw({
                     id: d.id
-                }).$destroy().$then(response => {
-                }, response => humane.error("Server error:\n" + response));
+                }).$destroy().$then(response => {}, response => humane.error("Server error:\n" + response));
                 this.graph.removeNode(d.id);
                 this.graph.commit();
                 this.force.stop();
@@ -861,11 +873,16 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     if (vm.state.hoveredNode !== undefined) {
                         let startNode = this.dragStartNode; // always normal node
                         let endNode = vm.state.hoveredNode;
-                        if(startNode !== endNode) { // no self loop
-                            this.connectNodes(startNode, endNode);
-                        } else {
+                        // starting on hypernodes is also forbidden,
+                        // but we don't need to handle this, because
+                        // the connect button does not exist on hyperRelations.
+                        if (startNode !== endNode) { // no self loop
+                            if (endNode.hyperNode && endNode.startNode !== startNode && endNode.endNode !== startNode) { // no connection to an incident HyperRelation
+                                this.connectNodes(startNode, endNode);
+                            } else
+                                humane.error("Connections to incident HyperRelations are not allowed.");
+                        } else
                             humane.error("Self loops are not allowed.");
-                        }
                     }
                 }
                 // TODO: else { connect without dragging only by clicking }
