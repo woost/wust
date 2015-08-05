@@ -9,11 +9,25 @@ function UserDetailsCtrl($stateParams, User, Auth, $q) {
     vm.isCurrentUser = $stateParams.id === Auth.current.userId;
     vm.saveUser = saveUser;
 
-    vm.contributions = vm.user.contributions.$search();
+    let page = 0;
+    vm.contributions = vm.user.contributions.$search({page});
+    vm.loadMore = loadMore;
+    vm.noMore = false;
 
     function saveUser() {
         return vm.user.$save().$then(() => {
             humane.success("Updated user profile");
         }, () => humane.error("Error updating user profile")).$asPromise();
+    }
+
+    function loadMore() {
+        if (vm.noMore)
+            return;
+
+        page++;
+        let prevLength = vm.contributions.length;
+        vm.contributions.$fetch({page}).$then(val => {
+            vm.noMore = val.length === prevLength;
+        });
     }
 }

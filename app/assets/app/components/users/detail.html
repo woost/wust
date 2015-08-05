@@ -32,10 +32,11 @@
 
     </form>
 
-    <h2>Contributions</h2>
-    <ul class="list-group">
-        <li ng-repeat="contribution in vm.contributions" class="list-group-item">
-            <div class="show_value" small-post node="contribution"></span>
-        </li>
-    </ul>
+    <div ng-if="vm.contributions.length > 0" infinite-scroll="vm.loadMore()">
+        <h2>Contributions</h2>
+        <div>
+            <div ng-repeat="contribution in vm.contributions track by contribution.id" small-post node="contribution"></span>
+        </div>
+        <button class="btn btn-default pull-right" ng-click="vm.loadMore()" ng-disabled="vm.noMore">More</button>
+    </div>
 </div>

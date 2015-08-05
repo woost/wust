@@ -1,5 +1,4 @@
-<div id="user_list_component">
-    <div class="list-group">
-        <a ng-repeat="user in vm.users track by user.id" ui-sref="users.details({id: user.id})" class="list-group-item" ng-bind="::user.name"></a>
-    </div>
+<div id="user_list_component" class="list-group" infinite-scroll="vm.loadMore()">
+    <a ng-repeat="user in vm.users track by user.id" ui-sref="users.details({id: user.id})" class="list-group-item" ng-bind="::user.name"></a>
+    <button class="btn btn-default pull-right" ng-click="vm.loadMore()" ng-disabled="vm.noMore">More</button>
 </div>

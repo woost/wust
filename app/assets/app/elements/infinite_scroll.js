@@ -15,7 +15,6 @@ function infiniteScroll() {
         var atPercent = attrs.atPercent || 80;
 
         elem.bind("scroll", function () {
-            console.log(arguments);
             var remainingHeight = rawElem.offsetHeight - rawElem.scrollHeight;
             var scrollTop = rawElem.scrollTop;
             var percent = Math.abs((scrollTop / remainingHeight) * 100);
