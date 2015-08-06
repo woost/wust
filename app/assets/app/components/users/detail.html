@@ -1,42 +1,45 @@
 <div id="user_detail_component">
-    <form editable-form name="userForm" onaftersave="vm.saveUser()">
-        <ul class="list-group">
-            <li class="list-group-item">
-                <div class="badge">
-                    Name
-                </div>
-                <div class="show_value" ng-bind="::vm.user.name"></span>
-            </li>
-            <li class="list-group-item">
-                <div class="badge">
-                    Email
-                </div>
-                <div class="show_value" editable-email="vm.user.email" ng-bind="vm.user.email"></span>
-            </li>
-        </ul>
-        <div ng-if="vm.isCurrentUser" class="buttons">
-        <!-- button to show form -->
-        <button type="button" class="btn btn-default" ng-click="userForm.$show()" ng-show="!userForm.$visible">
-            Edit
-        </button>
-        <!-- buttons to submit / cancel form -->
-        <span ng-show="userForm.$visible">
-            <button type="button" class="btn btn-default" ng-disabled="userForm.$waiting" ng-click="userForm.$cancel()">
-            Cancel
+    <h2>Profile</h2>
+    <div id="user_detail_box">
+        <form editable-form name="userForm" onaftersave="vm.saveUser()">
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <div class="badge">
+                        Name
+                    </div>
+                    <div class="show_value" ng-bind="::vm.user.name"></span>
+                </li>
+                <li class="list-group-item">
+                    <div class="badge">
+                        Email
+                    </div>
+                    <div class="show_value" editable-email="vm.user.email" ng-bind="vm.user.email"></span>
+                </li>
+            </ul>
+            <div ng-if="vm.isCurrentUser" class="buttons">
+            <!-- button to show form -->
+            <button type="button" class="btn btn-default" ng-click="userForm.$show()" ng-show="!userForm.$visible">
+                Edit
             </button>
-            <button type="submit" class="btn btn-primary" ng-disabled="userForm.$waiting">
-            Save
-            </button>
-        </span>
-        </div>
+            <!-- buttons to submit / cancel form -->
+            <span ng-show="userForm.$visible">
+                <button type="button" class="btn btn-default" ng-disabled="userForm.$waiting" ng-click="userForm.$cancel()">
+                Cancel
+                </button>
+                <button type="submit" class="btn btn-primary" ng-disabled="userForm.$waiting">
+                Save
+                </button>
+            </span>
+            </div>
 
-    </form>
+        </form>
 
-    <div ng-if="vm.contributions.length > 0" class="contributions" infinite-scroll="vm.loadMore()" infinite="infinite" promise="vm.contributions" scroll-target="content_view">
-        <h2>Contributions</h2>
-        <div>
-            <div ng-repeat="contribution in vm.contributions | unique:'id' track by contribution.id" small-post node="contribution"></span>
+        <div ng-if="vm.contributions.length > 0" class="contributions" infinite-scroll="vm.loadMore()" infinite="infinite" promise="vm.contributions" scroll-target="content_view">
+            <label>Contributions</label>
+            <div>
+                <div ng-repeat="contribution in vm.contributions | unique:'id' track by contribution.id" small-post node="contribution"></span>
+            </div>
+            <button class="btn btn-default pull-right" ng-click="infinite.manualLoad()" ng-disabled="infinite.loading" ng-hide="infinite.noMore">More</button>
         </div>
-        <button class="btn btn-default pull-right" ng-click="infinite.manualLoad()" ng-disabled="infinite.loading" ng-hide="infinite.noMore">More</button>
     </div>
 </div>
