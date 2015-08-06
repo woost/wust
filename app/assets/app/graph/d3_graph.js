@@ -186,7 +186,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     .attr("class", d => d.isHyperRelation ? "hyperrelation" : `node ${DiscourseNode.get(d.label).css}`);
 
                 this.d3Node
-                    .append("span")
+                    .append("div")
                     .text(d => d.title);
                 // .style("border-width", n => Math.abs(n.verticalForce) + "px")
                 // .style("border-color", n => n.verticalForce < 0 ? "#3CBAFF" : "#FFA73C")
@@ -334,7 +334,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
         registerUIEvents() {
             //TODO: register only on added d3Nodes
-            this.d3Node
+            this.d3Node.select("div")
                 /*.on("click", this.ignoreHyperRelation(node => {
                                         this.onClick(node);
                                     }))*/
