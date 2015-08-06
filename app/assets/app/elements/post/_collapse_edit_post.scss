@@ -59,7 +59,10 @@
             .form-control {
                 margin: initial;
             }
-
+            //faster collapse
+            &.collapsing {
+                transition-duration: 200ms;
+            }
         }
     }
 }
