@@ -3,3 +3,21 @@
         padding: 2pt;
     }
 }
+
+.discourse_node_list_horizontal {
+    .discourse_node_list {
+        .node_model_list {
+            padding: 6px;
+            @include display-flex(flex);
+            @include flex-wrap(wrap);
+            @include justify-content(center);
+        }
+    }
+}
+.discourse_node_list_vertical {
+    .discourse_node_list {
+        .node_model_list {
+            padding: 6px;
+        }
+    }
+}

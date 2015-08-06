@@ -1,13 +1,9 @@
-@import "compass/css3/flexbox";
-@import "compass/css3/box-shadow";
-@import "compass/css3/transform";
-
 @mixin discourse_node($color, $icon: "") {
     $bgcolor: lighten(desaturate($color, 0), 10);
     $bordercolor: bordercolor($bgcolor);
     $bgcolor-highlight: highlightbgcolor($bgcolor);
 
-    &.node, &.discourse_tag {
+    &.node, &.discourse_taglike {
         display: inline-block;
         background-color: $bgcolor;
         border: 1px solid $bordercolor;
@@ -46,171 +42,7 @@
     }
 }
 
-.connectorline {
-    fill: none;
-    stroke: #3B85FF;
-    stroke-width: 5;
-    stroke-linecap: round;
-    stroke-dasharray: 10 10;
-    visibility: hidden;
-    &.moving {
-        visibility: visible;
-    }
-}
-marker path.connectorlinearrow {
-    fill: #3B85FF !important;
-}
-
-.nodecontainer {
-    .nodeframe {
-        z-index: 95;
-    }
-    .fixed.nodeframe {
-        z-index: 100;
-    }
-    .moving.nodeframe {
-        z-index: 110;
-    }
-
-    .fixed .node, .fixed .hyperrelation {
-        // blue glow
-        // @include box-shadow(0 0 40px 5px #7dbaff);
-        border-color: #000;
-        border-width: 2px;
-        padding: 0.5px 14px 0px 11px; // -1px in width/height because of 1px more border
-    }
-
-    .moving .node {
-        // dark shadow
-        @include box-shadow(0 5px 20px #333);
-        border-color: #000;
-        border-width: 2px;
-        padding: 0.5px 14px 0px 11px; // -1px in width/height because of 1px more border //TODO: use border-box instead
-    }
-    .selected .node {
-        background-color: #BCEFFF;
-    }
-    .selected .hyperrelation {
-        background-color: #BCEFFF;
-    }
-    .nodetags {
-        position: absolute;
-        top: 5px;
-        left: 140px;
-    }
-    .nodetools {
-        position: absolute;
-        top: -32px;
-        left: -6px;
-        width: 120px; // to not break line of tool symbols
-        // z-index: -1;
-
-        // $bgcolor: #C3E8FF;
-        // background: rgba($bgcolor, 0.2);
-        // border: 1px solid bordercolor($bgcolor);
-        // border-radius: $border_radius;
-        // .nodetool:hover {
-        //     background-color: highlightbgcolor($bgcolor)
-        // }
-
-        .nodetool {
-            padding: 8px;
-            display: inline-block;
-            // display: inline-block;
-            // border: 1px solid #EEE;
-        }
-        .pintool {
-            @include transform(translate(0px, 0px) rotate(45deg));
-            cursor: pointer;
-        }
-
-        .connecttool {
-            @include transform(rotate(-45deg));
-            font-size: 130%; // larger symbol
-            padding: 5px;
-            cursor: crosshair;
-        }
-
-        .disconnecttool {
-            cursor: pointer;
-            display: none;
-        }
-
-        .replytool {
-            cursor: pointer;
-        }
-
-        .deletetool {
-            cursor: pointer;
-        }
-
-    }
-    .nodeframe-hyperrelation {
-        .connecttool, .deletetool {
-            display: none;
-        }
-        .disconnecttool, .replytool {
-            display: inline-block;
-        }
-    }
-    .fixed {
-        .pintool {
-            @include transform(translate(0px, 0px) rotate(0deg));
-            opacity: 1 !important;
-        }
-    }
-}
-
-.nodeframe {
-    position: absolute; // needed for z-index (moving/fixed have higher z-index)
-    pointer-events: all;
-    max-width: 150px;
-    .node {
-        word-wrap: break-word;
-        cursor: pointer;
-    }
-}
-
-// no hover
-.nodeframe {
-    .nodetools {
-        .nodetool {
-            opacity: 0.2;
-        }
-    }
-}
-// node hover
-.nodeframe:hover {
-    .nodetools {
-        .nodetool {
-            opacity: 1;
-        }
-        // single tool hover
-        .nodetool:hover {
-            opacity: 1;
-        }
-    }
-}
-
-.hyperrelation {
-    // font-size: 9px;
-    // line-height: 16px;
-    background-color: $graph_relation_label_bg;
-    fill: $graph_relation_label_bg;
-    display: inline-block;
-    border: 1px solid $graph_relation_color;
-    color: $graph_relation_color;
-    border-radius: $border_radius;
-    padding: 1px 15px 1px 12px;
-
-    .discourse_node_list & {
-        padding: 5px 15px 0px 12px;
-        display: block;
-        height: 34px;
-    }
-}
-
-.discourse_tag {
+.discourse_taglike {
     &.tag__none {
         @include discourse_node(white, ""); //tag
     }
@@ -240,22 +72,4 @@ marker path.connectorlinearrow {
 
 .discourse_user {
     @include discourse_node($discourse_user_color, ""); // user
-}
-
-.discourse_node_list_horizontal {
-    .discourse_node_list {
-        .node_model_list {
-            padding: 6px;
-            @include display-flex(flex);
-            @include flex-wrap(wrap);
-            @include justify-content(center);
-        }
-    }
-}
-.discourse_node_list_vertical {
-    .discourse_node_list {
-        .node_model_list {
-            padding: 6px;
-        }
-    }
 }
