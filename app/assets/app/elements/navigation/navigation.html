@@ -14,8 +14,8 @@
             <ul class="nav navbar-nav navbar-left">
                 <li><a ui-sref="dashboard" ui-sref-active="active" ng-click="vm.search.resultsVisible = false"><i class="fa fa-newspaper-o"></i> Dashboard</a></li>
                 <li><a ui-sref="vote" ui-sref-active="active" ng-click="vm.search.resultsVisible = false"><i class="fa fa-sort"></i> Vote</a></li>
-                <!-- <li><a ui-sref="users.list" ng-class="{active: vm.$state.includes('users.*')}"><i class="fa fa-users"></i> Users</a></li> -->
-                <li><a ui-sref="users.list" ui-sref-active="active" ng-click="vm.search.resultsVisible = false"><i class="fa fa-users"></i> Users</a></li>
+                <li><a ui-sref="users.list" ng-class="{active: vm.$state.includes('users.*')}" ng-click="vm.search.resultsVisible = false"><i class="fa fa-users"></i> Users</a></li>
+                <!-- <li><a ui-sref="users.list" ui-sref-active="active" ng-click="vm.search.resultsVisible = false"><i class="fa fa-users"></i> Users</a></li> -->
             </ul>
 
             <form id="node_search_form" class="navbar-form navbar-left" ng-submit='vm.onSearchBoxChange()'>

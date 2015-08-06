@@ -14,9 +14,9 @@ function navigation() {
     };
 }
 
-navigationCtrl.$inject = ["Auth", "SearchService", "ModalEditService"];
+navigationCtrl.$inject = ["$state", "Auth", "SearchService", "ModalEditService"];
 
-function navigationCtrl(Auth, SearchService, ModalEditService) {
+function navigationCtrl($state, Auth, SearchService, ModalEditService) {
     let vm = this;
 
     vm.navbarCollapsed = true;
@@ -35,6 +35,7 @@ function navigationCtrl(Auth, SearchService, ModalEditService) {
     vm.logout = Auth.logout;
     vm.search = SearchService.search;
     vm.modalEdit = ModalEditService;
+    vm.$state = $state;
 
     function authenticate(register) {
         let func = register ? Auth.register : Auth.login;
