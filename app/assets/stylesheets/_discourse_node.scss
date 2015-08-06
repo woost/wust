@@ -93,6 +93,11 @@ marker path.connectorlinearrow {
     .selected .hyperrelation {
         background-color: #BCEFFF;
     }
+    .nodetags {
+        position: absolute;
+        top: 5px;
+        left: 140px;
+    }
     .nodetools {
         position: absolute;
         top: -32px;

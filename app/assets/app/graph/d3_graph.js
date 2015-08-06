@@ -203,6 +203,28 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                         }
                     });
 
+                // tags
+                this.d3NodeTags = this.d3NodeContainerWithData.append("div")
+                    .attr("class", "nodetags")
+                    .html(d =>
+                        _.values(d.tags).map(t => {
+                            //TODO: do it with d3 data-joins, or directly with the angular-port
+                            //TODO FIXME: XSS
+                            let color;
+                            if(t.isType) {
+                                //TODO: display fixed specialized Tag Color
+                                color = Helpers.hashToHsl(t.id,57,50);
+                            } else {
+                                color = Helpers.hashToHsl(t.id,57,50);
+                            }
+                            return `<span class="label nodetag" style="background: ${color};">${t.title}</span><br>`;
+                        }).join("")
+                    );
+
+
+
+
+                // tool buttons
                 this.d3NodeTools = this.d3NodeContainerWithData.append("div")
                     .attr("class", "nodetools");
 

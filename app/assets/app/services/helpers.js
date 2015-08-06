@@ -1,6 +1,7 @@
 angular.module("wust.services").value("Helpers", {
     mapFind,
     hashCode,
+    hashToHsl,
     cssCompat,
     lineIntersection,
     lineRectIntersection,
@@ -26,6 +27,10 @@ function hashCode(string) {
         hash = hash & hash; // Convert to 32bit integer
     }
     return hash;
+}
+
+function hashToHsl(string, saturation, brightness) {
+    return `hsl(${Math.abs(hashCode(string)) % 360}, ${saturation}%, ${brightness}%)`;
 }
 
 function cssCompat(original, jsSuffix, cssSuffix) {
