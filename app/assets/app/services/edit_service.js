@@ -180,8 +180,6 @@ function EditService(Post, HistoryService, store, DiscourseNode) {
             if (existingIdx >= 0) {
                 existing = self.list[existingIdx];
                 self.list.splice(existingIdx, 1);
-                if (existingIdx < index)
-                    index -= 1;
             } else {
                 existing = new Session(node);
             }
@@ -192,7 +190,7 @@ function EditService(Post, HistoryService, store, DiscourseNode) {
         return existing;
     }
 
-    function edit(maybeNodes, index = self.list.length) {
+    function edit(maybeNodes, index = 0) {
         //TODO: we get an array if multiple nodes were in completion and enter was pressed
         let node = _.isArray(maybeNodes) ? maybeNodes[0] : maybeNodes;
         return assureSessionExists(node, index);

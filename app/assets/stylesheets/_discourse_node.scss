@@ -244,16 +244,34 @@ marker path.connectorlinearrow {
 
 
 .drop_post_container {
+    border: 1px dashed white;
+    box-sizing: border-box;
+    border-radius: 5px;
+    min-height: 15px;
+}
+
+.drop_post_container.on-drag-enter {
+    border: 1px dashed #008DFF;
+    transition: border 0.3s;
+}
+.drop_post_container.on-drag-hover {
+    border: 1px dashed #008DFF;
+    background-color: #73C0FF;
+    transition: background-color 0.3s;
+}
+
+.drop_post_box {
     border-radius: 15px;
     min-height: 15px;
 }
 
-.graph_network.on-drag-enter, .drop_post_container.on-drag-enter {
+.graph_network.on-drag-enter, .drop_post_box.on-drag-enter {
     background-color: #008DFF;
-    transition: background-color 0.5s;
+    transition: background-color 0.3s;
 }
-.graph_network.on-drag-hover, .drop_post_container.on-drag-hover {
+.graph_network.on-drag-hover, .drop_post_box.on-drag-hover {
     background-color: #73C0FF;
+    transition: background-color 0.3s;
 }
 
 .discourse_node_list_horizontal {
