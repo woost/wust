@@ -487,9 +487,9 @@ object GraphSpec extends TestSuite {
 }
 
 object TestHelpers {
-  implicit def n(id: String) = new RawNode(id, "", "", None, hyperEdge = false, None, None)
+  implicit def n(id: String) = new RawNode(id, "", "", None, hyperEdge = false, None, None, js.Array())
   implicit def r(t: (String, String)) = new RawRelation(t._1, t._2)
-  def h(startId: String, id: String, endId: String) = new RawNode(id, "", "", None, hyperEdge = true, Some(startId), Some(endId))
+  def h(startId: String, id: String, endId: String) = new RawNode(id, "", "", None, hyperEdge = true, Some(startId), Some(endId), js.Array())
   def graph(nodes: Set[RawNode], relations: Set[RawRelation]) = new RawGraph(nodes, relations, nodes.head.id)
 
   val A = n("A")
