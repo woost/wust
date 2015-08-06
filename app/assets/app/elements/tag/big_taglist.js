@@ -20,7 +20,7 @@ bigTaglistCtrl.$inject = ["Post", "DiscourseNode"];
 function bigTaglistCtrl(Post, DiscourseNode) {
     let vm = this;
 
-    vm.nodeInfo = DiscourseNode.Tag;
+    vm.nodeInfo = DiscourseNode.TagLike;
 
     vm.upvote = upvote;
     vm.downvote = downvote;

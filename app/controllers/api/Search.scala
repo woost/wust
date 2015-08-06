@@ -44,7 +44,7 @@ object Search extends Controller {
       )))
     } else {
       if (tagOr.getOrElse(false)) {
-        val tagDef = ConcreteFactoryNodeDefinition(Tag)
+        val tagDef = ConcreteFactoryNodeDefinition(TagLikeMatches)
         val relationDef = RelationDefinition(tagDef, Categorizes, nodeDef)
         val condition = if (termMatcher.isEmpty) "" else s"and ${termMatcher}"
 
@@ -59,7 +59,7 @@ object Search extends Controller {
           ++ nodeDef.parameterMap
         )))
       } else {
-        val tagDefs = tags.map(uuid => FactoryUuidNodeDefinition(Tag, uuid))
+        val tagDefs = tags.map(uuid => FactoryUuidNodeDefinition(TagLikeMatches, uuid))
         val relationDefs = tagDefs.map(tagDef => RelationDefinition(tagDef, Categorizes, nodeDef))
         val condition = if (termMatcher.isEmpty) "" else s"where ${termMatcher}"
 

@@ -63,7 +63,7 @@ object ImportReddit extends Task with SeedTools {
             val content = (post \ "data" \ "selftext").as[String]
             val startPost = createPost(title, content)
             print(s"thread: $title")
-            discourse.add(startPost, belongsTo(startPost, subredditScope), tag(startPost, startPostTag), commentTag, replyTag, subredditScope)
+            discourse.add(startPost, tag(startPost, subredditScope), tag(startPost, startPostTag), commentTag, replyTag, subredditScope)
 
             val jsonComments = getJson(s"http://www.reddit.com/r/$subreddit/comments/$id.json").as[List[JsValue]].apply(1)
             var commentCount = 0

@@ -55,7 +55,7 @@ object WustSchema {
   @Node trait Inheritable
   @HyperRelation class Inherits(startNode: Inheritable, endNode: Inheritable) extends ContentRelation with HyperConnection with UuidNode
 
-  @Node class Post extends ContentNode with Connectable with Inheritable with ScopeChild with Taggable {
+  @Node class Post extends ContentNode with Connectable with Inheritable with Taggable {
     var title: String
     var description: Option[String]
 
@@ -87,29 +87,28 @@ object WustSchema {
   //TODO: multidimesional voting?
 
 
-  // Tags
+  // generic Tags (base for Tags, Scopes)
   @Node trait TagLike extends ContentNode with Inheritable {
     @unique val title: String
     var description: Option[String]
     var isType: Boolean = false
   }
-  @Node class Tag extends TagLike
-
   @Node trait Taggable extends UuidNode
-  @HyperRelation class Categorizes(startNode: Tag, endNode: Taggable) extends ContentRelation with HyperConnection with UuidNode
+  @HyperRelation class Categorizes(startNode: TagLike, endNode: Taggable) extends ContentRelation with HyperConnection with UuidNode
   @Relation class TaggingAction(startNode: User, endNode: Categorizes)
   @Relation class Votes(startNode: User, endNode: Categorizes) {
     val weight: Long
   }
+
+  // Tags
+  @Node class Tag extends TagLike
+
 
   // Scopes
   @Node class Scope extends TagLike
   @Relation class HasReadAccess(startNode: UserGroup, endNode: Scope)
   @Relation class HasWriteAccess(startNode: UserGroup, endNode: Scope)
   @Relation class Owns(startNode: UserGroup, endNode: Scope)
-
-  @Node trait ScopeChild extends UuidNode
-  @Relation class BelongsTo(startNode: ScopeChild, endNode: Scope)
 
   //TODO: Node trait ownable?
   //

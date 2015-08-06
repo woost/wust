@@ -14,12 +14,8 @@ trait SeedTools {
     Scope.merge(title = title, description = description, merge = Set("title"))
   }
 
-  def tag(item: Taggable, tag: Tag) = {
+  def tag(item: Taggable, tag: TagLike) = {
     Categorizes.create(tag, item)
-  }
-
-  def belongsTo(item: ScopeChild, scope: Scope) = {
-    BelongsTo.create(item, scope)
   }
 
   def shorten(str: String, maxlength: Int = maxTitleLength) = {

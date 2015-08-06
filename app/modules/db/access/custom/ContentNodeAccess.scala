@@ -79,8 +79,8 @@ object PostAccess {
   def apply = new PostAccess
 }
 
-class TagAccess extends NodeRead(Tag) {
-  override def create(user: User, json: JsValue): Either[Tag, String] = {
+class TagAccess extends NodeRead(TagLike) {
+  override def create(user: User, json: JsValue): Either[TagLike, String] = {
     json.validate[TagAddRequest].map(request => {
 
       val node = Tag.merge(title = request.title, merge = Set("title"))
@@ -94,9 +94,9 @@ class TagAccess extends NodeRead(Tag) {
     }).getOrElse(Right("Error parsing create request for Tag"))
   }
 
-  override def update(uuid: String, user: User, json: JsValue): Either[Tag, String] = {
+  override def update(uuid: String, user: User, json: JsValue): Either[TagLike, String] = {
     json.validate[TagUpdateRequest].map(request => {
-      val node = Tag.matchesOnUuid(uuid)
+      val node = TagLike.matchesOnUuid(uuid)
       //TODO: normally we would want to set it back to None instead of ""
       if (request.description.isDefined) {
         node.description = request.description

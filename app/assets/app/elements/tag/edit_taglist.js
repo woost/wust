@@ -21,14 +21,14 @@ editTaglistCtrl.$inject = ["Search", "DiscourseNode"];
 function editTaglistCtrl(Search, DiscourseNode) {
     let vm = this;
 
-    vm.nodeInfo = DiscourseNode.Tag;
+    vm.nodeInfo = DiscourseNode.TagLike;
 
     vm.searchTags = searchTags;
 
     function searchTags(title) {
         return Search.$search({
             title: title,
-            label: DiscourseNode.Tag.label
+            label: DiscourseNode.TagLike.label
         });
     }
 }

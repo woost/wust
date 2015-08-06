@@ -28,7 +28,7 @@ class VotesAccess(
 
 
 object VotesAccess {
-  def apply(weight: Long): UuidNodeFactory[Categorizes] => VotesAccess = {
+  def apply(weight: Long): UuidNodeMatchesFactory[Categorizes] => VotesAccess = {
     _ => new VotesAccess(weight)
   }
 }

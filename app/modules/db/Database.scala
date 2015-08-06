@@ -215,7 +215,7 @@ object Database {
     val query = s"""
       match ${ focusNode.toQuery }
       match (${ focusNode.name })-[rel:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(all:POST)
-      optional match (tag:TAG)-[categorizesRel1:`${ Categorizes.startRelationType }`]->(:`${ Categorizes.label }`)-[categorizesRel2:`${ Categorizes.endRelationType }`]->(all)
+      optional match (tag:TAGLIKE)-[categorizesRel1:`${ Categorizes.startRelationType }`]->(:`${ Categorizes.label }`)-[categorizesRel2:`${ Categorizes.endRelationType }`]->(all)
       return distinct all,rel,tag,categorizesRel1,categorizesRel2
     """
     val params = focusNode.parameterMap

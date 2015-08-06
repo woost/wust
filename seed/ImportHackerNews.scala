@@ -78,7 +78,7 @@ object ImportHackerNews extends Task with SeedTools {
       val replyTag = mergeTag("repliesTo")
       discourse.add(
         tag(startPost, mergeTag(s"HN-${ hnItem.itemType }")),
-        belongsTo(startPost, hackerNewsScope),
+        tag(startPost, hackerNewsScope),
         commentTag
       )
       addDeepChildItems(hnItem, startPost)

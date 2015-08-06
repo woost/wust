@@ -23,10 +23,11 @@ object GraphFormat {
   implicit object NodeFormat extends Format[Connectable] {
     def reads(json: JsValue) = ???
 
-    implicit def tagWrites = new Writes[Tag] {
-      def writes(tag: Tag) = JsObject(Seq(
+    implicit def tagWrites = new Writes[TagLike] {
+      def writes(tag: TagLike) = JsObject(Seq(
         ("id", JsString(tag.uuid)),
-        ("label", JsString(tag.label)),
+        //TODO: meh
+        ("label", JsString(TagLike.label)),
         ("title", JsString(tag.title)),
         ("description", JsString(tag.description.getOrElse(""))),
         ("isType", JsBoolean(tag.isType))

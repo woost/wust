@@ -20,13 +20,10 @@ object ApiNodeFormat {
         ("description", JsString(n.description.getOrElse(""))),
         ("tags", Json.toJson(n.rev_categorizes))
       )
-      case n: Scope => Seq(
+      case n: TagLike => Seq(
         ("id", JsString(n.uuid)),
-        ("label", JsString(n.label))
-      )
-      case n: Tag => Seq(
-        ("id", JsString(n.uuid)),
-        ("label", JsString(n.label)),
+        //TODO: meh, same as in graphofmrat
+        ("label", JsString(TagLike.label)),
         ("title", JsString(n.title)),
         ("description", JsString(n.description.getOrElse(""))),
         ("isType", JsBoolean(n.isType))
@@ -36,7 +33,7 @@ object ApiNodeFormat {
         ("name", JsString(n.name)),
         ("email", JsString(n.email.getOrElse("")))
       )
-      case _              => Seq.empty
+      case _              => throw new RuntimeException("You did not define a formatter for the api: " + node)
     })
   }
 }

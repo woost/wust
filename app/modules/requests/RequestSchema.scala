@@ -70,12 +70,12 @@ object dsl {
   START <: UuidNode,
   RELATION <: AbstractRelation[START, END] with UuidNode,
   END <: UuidNode
-  ](factory: HyperConnectionFactory[START,RELATION,END] with UuidNodeFactory[RELATION]) {
-    def >(op: UuidNodeFactory[START] => StartRelationAccess[START, RELATION, END], connectSchemas: (String, (HyperConnectionFactory[START,RELATION,END] with UuidNodeFactory[RELATION]) => ConnectSchema[RELATION])*): UuidNodeFactory[START] => StartHyperConnectSchema[START, RELATION, END] = {
+  ](factory: HyperConnectionFactory[START,RELATION,END] with UuidNodeMatchesFactory[RELATION]) {
+    def >(op: UuidNodeMatchesFactory[START] => StartRelationAccess[START, RELATION, END], connectSchemas: (String, (HyperConnectionFactory[START,RELATION,END] with UuidNodeMatchesFactory[RELATION]) => ConnectSchema[RELATION])*): UuidNodeMatchesFactory[START] => StartHyperConnectSchema[START, RELATION, END] = {
       baseFactory => StartHyperConnectSchema(factory, op(baseFactory), connectSchemas.toMap.mapValues(_(factory)))
     }
 
-    def >(op: StartRelationAccess[START, RELATION, END], connectSchemas: (String, (HyperConnectionFactory[START,RELATION,END] with UuidNodeFactory[RELATION]) => ConnectSchema[RELATION])*): UuidNodeFactory[START] => StartHyperConnectSchema[START, RELATION, END] = {
+    def >(op: StartRelationAccess[START, RELATION, END], connectSchemas: (String, (HyperConnectionFactory[START,RELATION,END] with UuidNodeMatchesFactory[RELATION]) => ConnectSchema[RELATION])*): UuidNodeMatchesFactory[START] => StartHyperConnectSchema[START, RELATION, END] = {
       baseFactory => StartHyperConnectSchema(factory, op, connectSchemas.toMap.mapValues(_(factory)))
     }
   }
@@ -84,12 +84,12 @@ object dsl {
   START <: UuidNode,
   RELATION <: AbstractRelation[START, END] with UuidNode,
   END <: UuidNode
-  ](factory: HyperConnectionFactory[START,RELATION,END] with UuidNodeFactory[RELATION]) {
-    def <(op: UuidNodeFactory[END] => EndRelationAccess[START, RELATION, END], connectSchemas: (String, (HyperConnectionFactory[START,RELATION,END] with UuidNodeFactory[RELATION]) => ConnectSchema[RELATION])*): UuidNodeFactory[END] => EndHyperConnectSchema[START, RELATION, END] = {
+  ](factory: HyperConnectionFactory[START,RELATION,END] with UuidNodeMatchesFactory[RELATION]) {
+    def <(op: UuidNodeMatchesFactory[END] => EndRelationAccess[START, RELATION, END], connectSchemas: (String, (HyperConnectionFactory[START,RELATION,END] with UuidNodeMatchesFactory[RELATION]) => ConnectSchema[RELATION])*): UuidNodeMatchesFactory[END] => EndHyperConnectSchema[START, RELATION, END] = {
       baseFactory => EndHyperConnectSchema(factory, op(baseFactory), connectSchemas.toMap.mapValues(_(factory)))
     }
 
-    def <(op: EndRelationAccess[START, RELATION, END], connectSchemas: (String, (HyperConnectionFactory[START,RELATION,END] with UuidNodeFactory[RELATION]) => ConnectSchema[RELATION])*): UuidNodeFactory[END] => EndHyperConnectSchema[START, RELATION, END] = {
+    def <(op: EndRelationAccess[START, RELATION, END], connectSchemas: (String, (HyperConnectionFactory[START,RELATION,END] with UuidNodeMatchesFactory[RELATION]) => ConnectSchema[RELATION])*): UuidNodeMatchesFactory[END] => EndHyperConnectSchema[START, RELATION, END] = {
       baseFactory => EndHyperConnectSchema(factory, op, connectSchemas.toMap.mapValues(_(factory)))
     }
   }
@@ -140,8 +140,8 @@ object dsl {
   START <: UuidNode,
   RELATION <: AbstractRelation[START, END],
   END <: UuidNode
-  ](val accessFunc: (HyperConnectionFactory[ISTART,START with AbstractRelation[ISTART,IEND],IEND] with UuidNodeFactory[START]) => StartRelationAccess[START,RELATION,END]) {
-    def +(nodeAccess: NodeAccess[END]): (HyperConnectionFactory[ISTART,START with AbstractRelation[ISTART,IEND],IEND] with UuidNodeFactory[START]) => StartRelationAccess[START,RELATION,END] = {
+  ](val accessFunc: (HyperConnectionFactory[ISTART,START with AbstractRelation[ISTART,IEND],IEND] with UuidNodeMatchesFactory[START]) => StartRelationAccess[START,RELATION,END]) {
+    def +(nodeAccess: NodeAccess[END]): (HyperConnectionFactory[ISTART,START with AbstractRelation[ISTART,IEND],IEND] with UuidNodeMatchesFactory[START]) => StartRelationAccess[START,RELATION,END] = {
       factory => {
         val access = accessFunc(factory)
         access.withCreate(nodeAccess)
@@ -156,7 +156,7 @@ object dsl {
   START <: UuidNode,
   RELATION <: AbstractRelation[START, END],
   END <: UuidNode
-  ](access: (HyperConnectionFactory[ISTART,START with AbstractRelation[ISTART,IEND],IEND] with UuidNodeFactory[START]) => StartRelationAccess[START,RELATION,END]): StartHyperRelationAccessHolder[ISTART,IEND,START,RELATION,END] = new StartHyperRelationAccessHolder(access)
+  ](access: (HyperConnectionFactory[ISTART,START with AbstractRelation[ISTART,IEND],IEND] with UuidNodeMatchesFactory[START]) => StartRelationAccess[START,RELATION,END]): StartHyperRelationAccessHolder[ISTART,IEND,START,RELATION,END] = new StartHyperRelationAccessHolder(access)
 
   class EndHyperRelationAccessHolder[
   ISTART <: UuidNode,
@@ -164,8 +164,8 @@ object dsl {
   START <: UuidNode,
   RELATION <: AbstractRelation[START, END],
   END <: UuidNode
-  ](val accessFunc: (HyperConnectionFactory[ISTART,END with AbstractRelation[ISTART,IEND],IEND] with UuidNodeFactory[END]) => EndRelationAccess[START,RELATION,END]) {
-    def +(nodeAccess: NodeAccess[START]): (HyperConnectionFactory[ISTART,END with AbstractRelation[ISTART,IEND],IEND] with UuidNodeFactory[END]) => EndRelationAccess[START,RELATION,END] = {
+  ](val accessFunc: (HyperConnectionFactory[ISTART,END with AbstractRelation[ISTART,IEND],IEND] with UuidNodeMatchesFactory[END]) => EndRelationAccess[START,RELATION,END]) {
+    def +(nodeAccess: NodeAccess[START]): (HyperConnectionFactory[ISTART,END with AbstractRelation[ISTART,IEND],IEND] with UuidNodeMatchesFactory[END]) => EndRelationAccess[START,RELATION,END] = {
       factory => {
         val access = accessFunc(factory)
         access.withCreate(nodeAccess)
@@ -180,10 +180,10 @@ object dsl {
   START <: UuidNode,
   RELATION <: AbstractRelation[START, END],
   END <: UuidNode
-  ](access: (HyperConnectionFactory[ISTART,END with AbstractRelation[ISTART,IEND],IEND] with UuidNodeFactory[END]) => EndRelationAccess[START,RELATION,END]): EndHyperRelationAccessHolder[ISTART,IEND,START,RELATION,END] = new EndHyperRelationAccessHolder(access)
+  ](access: (HyperConnectionFactory[ISTART,END with AbstractRelation[ISTART,IEND],IEND] with UuidNodeMatchesFactory[END]) => EndRelationAccess[START,RELATION,END]): EndHyperRelationAccessHolder[ISTART,IEND,START,RELATION,END] = new EndHyperRelationAccessHolder(access)
 
   object NodeDef {
-    def apply[NODE <: UuidNode](factory: UuidNodeFactory[NODE], op: NodeAccess[NODE], connectSchemas: (String, UuidNodeFactory[NODE] => ConnectSchema[NODE])*): (String) => NodeSchema[NODE] = {
+    def apply[NODE <: UuidNode](factory: UuidNodeMatchesFactory[NODE], op: NodeAccess[NODE], connectSchemas: (String, UuidNodeMatchesFactory[NODE] => ConnectSchema[NODE])*): (String) => NodeSchema[NODE] = {
       path => NodeSchema(path, op, connectSchemas.toMap.mapValues(_(factory)))
     }
   }
@@ -193,7 +193,7 @@ object dsl {
     START <: UuidNode,
     RELATION <: AbstractRelation[START, END],
     END <: UuidNode
-    ](op: UuidNodeFactory[START] => StartRelationAccess[START, RELATION, END]): UuidNodeFactory[START] => StartConnectSchema[START, RELATION, END] = {
+    ](op: UuidNodeMatchesFactory[START] => StartRelationAccess[START, RELATION, END]): UuidNodeMatchesFactory[START] => StartConnectSchema[START, RELATION, END] = {
       baseFactory => StartConnectSchema(op(baseFactory))
     }
 
@@ -201,7 +201,7 @@ object dsl {
     START <: UuidNode,
     RELATION <: AbstractRelation[START, END],
     END <: UuidNode
-    ](op: UuidNodeFactory[END] => EndRelationAccess[START, RELATION, END]): UuidNodeFactory[END] => EndConnectSchema[START, RELATION, END] = {
+    ](op: UuidNodeMatchesFactory[END] => EndRelationAccess[START, RELATION, END]): UuidNodeMatchesFactory[END] => EndConnectSchema[START, RELATION, END] = {
       baseFactory => EndConnectSchema(op(baseFactory))
     }
 
@@ -209,7 +209,7 @@ object dsl {
     START <: UuidNode,
     RELATION <: AbstractRelation[START, END],
     END <: UuidNode
-    ](op: StartRelationAccess[START, RELATION, END]): UuidNodeFactory[START] => StartConnectSchema[START, RELATION, END] = {
+    ](op: StartRelationAccess[START, RELATION, END]): UuidNodeMatchesFactory[START] => StartConnectSchema[START, RELATION, END] = {
       baseFactory => StartConnectSchema(op)
     }
 
@@ -217,7 +217,7 @@ object dsl {
     START <: UuidNode,
     RELATION <: AbstractRelation[START, END],
     END <: UuidNode
-    ](op: EndRelationAccess[START, RELATION, END]): UuidNodeFactory[END] => EndConnectSchema[START, RELATION, END] = {
+    ](op: EndRelationAccess[START, RELATION, END]): UuidNodeMatchesFactory[END] => EndConnectSchema[START, RELATION, END] = {
       baseFactory => EndConnectSchema(op)
     }
 
@@ -225,7 +225,7 @@ object dsl {
     START <: UuidNode,
     RELATION <: AbstractRelation[START, END] with UuidNode,
     END <: UuidNode
-    ](factory: HyperConnectionFactory[START, RELATION, END] with UuidNodeFactory[RELATION]) = {
+    ](factory: HyperConnectionFactory[START, RELATION, END] with UuidNodeMatchesFactory[RELATION]) = {
       new RightHyperFactoryHolder(factory)
     }
 
@@ -233,7 +233,7 @@ object dsl {
     START <: UuidNode,
     RELATION <: AbstractRelation[START, END] with UuidNode,
     END <: UuidNode
-    ](factory: HyperConnectionFactory[START, RELATION, END] with UuidNodeFactory[RELATION]) = {
+    ](factory: HyperConnectionFactory[START, RELATION, END] with UuidNodeMatchesFactory[RELATION]) = {
       new LeftHyperFactoryHolder(factory)
     }
   }
@@ -245,7 +245,7 @@ object dsl {
     START <: UuidNode,
     RELATION <: AbstractRelation[START, END],
     END <: UuidNode
-    ](op: (HyperConnectionFactory[ISTART,START with AbstractRelation[ISTART,IEND],IEND] with UuidNodeFactory[START]) => StartRelationAccess[START, RELATION, END]): (HyperConnectionFactory[ISTART,START with AbstractRelation[ISTART,IEND],IEND] with UuidNodeFactory[START]) => StartConnectSchema[START, RELATION, END] = {
+    ](op: (HyperConnectionFactory[ISTART,START with AbstractRelation[ISTART,IEND],IEND] with UuidNodeMatchesFactory[START]) => StartRelationAccess[START, RELATION, END]): (HyperConnectionFactory[ISTART,START with AbstractRelation[ISTART,IEND],IEND] with UuidNodeMatchesFactory[START]) => StartConnectSchema[START, RELATION, END] = {
       baseFactory => StartConnectSchema(op(baseFactory))
     }
 
@@ -255,7 +255,7 @@ object dsl {
     START <: UuidNode,
     RELATION <: AbstractRelation[START, END],
     END <: UuidNode
-    ](op: (HyperConnectionFactory[ISTART,END with AbstractRelation[ISTART,IEND],IEND] with UuidNodeFactory[END]) => EndRelationAccess[START, RELATION, END]): (HyperConnectionFactory[ISTART,END with AbstractRelation[ISTART,IEND],IEND] with UuidNodeFactory[END]) => EndConnectSchema[START, RELATION, END] = {
+    ](op: (HyperConnectionFactory[ISTART,END with AbstractRelation[ISTART,IEND],IEND] with UuidNodeMatchesFactory[END]) => EndRelationAccess[START, RELATION, END]): (HyperConnectionFactory[ISTART,END with AbstractRelation[ISTART,IEND],IEND] with UuidNodeMatchesFactory[END]) => EndConnectSchema[START, RELATION, END] = {
       baseFactory => EndConnectSchema(op(baseFactory))
     }
   }

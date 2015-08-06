@@ -21,7 +21,7 @@ editStaticTaglistCtrl.$inject = ["Search", "DiscourseNode"];
 function editStaticTaglistCtrl(Search, DiscourseNode) {
     let vm = this;
 
-    vm.nodeInfo = DiscourseNode.Tag;
+    vm.nodeInfo = DiscourseNode.TagLike;
 
     vm.searchTags = searchTags;
     vm.onChange = vm.onChange || _.noop;
@@ -45,7 +45,7 @@ function editStaticTaglistCtrl(Search, DiscourseNode) {
     function searchTags(title) {
         return Search.$search({
             title: title,
-            label: DiscourseNode.Tag.label
+            label: DiscourseNode.TagLike.label
         });
     }
 }

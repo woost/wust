@@ -6,7 +6,7 @@ function NewStreamCtrl(Search, DiscourseNode, StreamService) {
     let vm = this;
 
     vm.save = save;
-    vm.nodeInfo = DiscourseNode.Tag;
+    vm.nodeInfo = DiscourseNode.TagLike;
 
     let currentEditStream = StreamService.currentEditStream;
     StreamService.currentEditStream = undefined;
