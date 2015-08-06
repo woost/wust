@@ -107,8 +107,6 @@ function infiniteScroll($rootScope) {
                 else
                     break;
             }
-
-            console.log(pageInfos, scope.infinite.currentPage);
         }
 
         function addPage(pos) {
