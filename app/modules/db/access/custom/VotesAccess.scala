@@ -14,7 +14,7 @@ class VotesAccess(
   val nodeFactory = User
 
   override def createHyper(startUuid: String, endUuid: String, user: User, json: JsValue) = {
-    val start = Tag.matches(uuid = Some(startUuid), matches = Set("uuid"))
+    val start = TagLikeMatches.matches(uuid = Some(startUuid), matches = Set("uuid"))
     val end = Taggable.matches(uuid = Some(endUuid), matches = Set("uuid"))
     val hyper = Categorizes.matches(start, end)
     val votes = Votes.merge(user, hyper, weight = weight, onMatch = Set("weight"))
@@ -28,7 +28,5 @@ class VotesAccess(
 
 
 object VotesAccess {
-  def apply(weight: Long): UuidNodeMatchesFactory[Categorizes] => VotesAccess = {
-    _ => new VotesAccess(weight)
-  }
+  def apply(weight: Long) = new VotesAccess(weight)
 }
