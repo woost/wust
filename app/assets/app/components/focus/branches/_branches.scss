@@ -5,9 +5,9 @@
     width: 100%;
     .branch_view {
         line, path {
-            &.svglink {
+            &.svgrelation {
                 fill: none;
-                stroke: $graph_link_color;
+                stroke: $graph_relation_color;
                 stroke-width: 1;
                 stroke-linecap: round;
             }

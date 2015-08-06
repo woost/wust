@@ -56,7 +56,7 @@ function branchGraph(DiscourseNode) {
             return relation;
         }).reject((relation) => relation.source._hidden).value();
 
-        let linksvg = svg.append("g").attr("id", "group_links")
+        let relationsvg = svg.append("g").attr("id", "group_relations")
             .selectAll()
             .data(relationsWithSquashedHyperRelations).enter()
             .append("path");
@@ -92,24 +92,24 @@ function branchGraph(DiscourseNode) {
             .style("stroke-dasharray", d => d.isHyperRelation ? "4 3" : "");
 
         // create relations in the svg
-        let link = linksvg
-            .each(function(link) {
-                let thisLink = d3.select(this);
+        let relation = relationsvg
+            .each(function(relation) {
+                let thisRelation = d3.select(this);
 
-                // if link is startRelation of a Hypernode
+                // if relation is startRelation of a Hypernode
                 // if( target.isHyperRelation && target.startId === source.id ) {
-                //     thisLink.attr("class", "svglink");
+                //     thisRelation.attr("class", "svgrelation");
                 // } else {
-                thisLink.attr("class", "svglink branch_arrow");
+                thisRelation.attr("class", "svgrelation branch_arrow");
                 // }
 
-                thisLink.style("stroke-width", border);
-                thisLink.style("stroke", branchColor(link.source.branch));
-                // thisLink.style("stroke-dasharray", d => link.source.newBranch !== undefined ? ""+(3+link.source.newBranch/3)+" 5 5 5" : "");
+                thisRelation.style("stroke-width", border);
+                thisRelation.style("stroke", branchColor(relation.source.branch));
+                // thisRelation.style("stroke-dasharray", d => relation.source.newBranch !== undefined ? ""+(3+relation.source.newBranch/3)+" 5 5 5" : "");
             })
-            .attr("d", (link) => {
-                let a = link.target; // top
-                let b = link.source; // bottom
+            .attr("d", (relation) => {
+                let a = relation.target; // top
+                let b = relation.source; // bottom
                 let r = 50;
 
                 function sgn(x) {
@@ -119,7 +119,7 @@ function branchGraph(DiscourseNode) {
                 function abs(x) {
                     return Math.abs(x);
                 }
-                return link.source === link.target ? // if self loop
+                return relation.source === relation.target ? // if self loop
                     `
                     M ${a.x} ${a.y}
                     m -20, 0

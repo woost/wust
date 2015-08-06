@@ -16,7 +16,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
         class D3Graph {
             //TODO: rename onClick -> onNodeClick
-            //TODO: rename relation, link, ... -> relation
             constructor(graph, rootDomElement, onClick = _.noop, onDraw = _.noop) {
                 this.graph = graph;
                 this.rootDomElement = rootDomElement;
@@ -104,7 +103,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     .attr("orient", "auto")
                     .append("svg:path")
                     .attr("d", "M 0,-3 L 10,-0.5 L 10,0.5 L0,3")
-                    .attr("class", "svglink"); // for the stroke color
+                    .attr("class", "svgrelation"); // for the stroke color
 
                 // svg-marker for connector line arrow
                 this.d3SvgDefs.append("svg:marker")
@@ -148,7 +147,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     .attr("class", "nodecontainer");
 
                 // contains all relations
-                this.d3LinkPath = this.d3SvgContainer.append("g").attr("id", "linkContainer");
+                this.d3RelationPath = this.d3SvgContainer.append("g").attr("id", "relationContainer");
 
                 this.d3ConnectorLine = this.d3SvgContainer.append("line").classed({
                     "connectorline": true
@@ -175,7 +174,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     .selectAll("div")
                     .data(this.graph.nodes, (d) => d.id);
 
-                this.d3LinkPathWithData = this.d3LinkPath
+                this.d3RelationPathWithData = this.d3RelationPath
                     .selectAll("path")
                     .data(this.graph.relations, (d) => d.startId + " --> " + d.endId);
 
@@ -193,12 +192,12 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 // .style("border-color", n => n.verticalForce < 0 ? "#3CBAFF" : "#FFA73C")
 
                 // add relations
-                this.d3LinkPathWithData.enter()
+                this.d3RelationPathWithData.enter()
                     .append("path")
-                    .attr("class", "svglink")
-                    .each(function(link) {
-                        // if link is startRelation of a Hypernode
-                        if (!(link.target.isHyperRelation && link.target.startId === link.source.id)) {
+                    .attr("class", "svgrelation")
+                    .each(function(relation) {
+                        // if relation is startRelation of a Hypernode
+                        if (!(relation.target.isHyperRelation && relation.target.startId === relation.source.id)) {
                             d3.select(this).style("marker-end", "url(" + $location.absUrl() + "#graph_arrow)");
                         }
                     });
@@ -245,23 +244,11 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
                 /// remove nodes and relations
                 this.d3NodeContainerWithData.exit().remove();
-                this.d3LinkPathWithData.exit().remove(); //
+                this.d3RelationPathWithData.exit().remove(); //
 
                 // console.log(graph.nodes.map(n => n.id.slice(0,3)),d3NodeContainer.node());
-                // console.log(graph.relations,d3LinkPath.node());
+                // console.log(graph.relations,d3RelationPath.node());
 
-                // TODO: non-hyper-relation-links are broken
-                // let linkText = svgContainer.append("div").attr("id", "group_link_labels")
-                //     .selectAll()
-                //     .data(graph.relations).enter()
-                //     .append("div");
-                // let linktextHtml = linkText.append("div")
-                //     .attr("class", "hyperrelation")
-                //     .html(d => connectsHyperRelation(d) ? "" : d.title);
-                // check whether a link connects to a hyperrelation-node
-                // function connectsHyperRelation(link) {
-                //     return link.source.isHyperRelation || link.target.isHyperRelation;
-                // }
 
                 this.updateGraphRefs();
                 //TODO: take care of nodes where the title/description was changed
@@ -495,7 +482,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 });
 
                 this.graph.relations.forEach((r, i) => {
-                    r.domPath = this.d3LinkPathWithData[0][i];
+                    r.domPath = this.d3RelationPathWithData[0][i];
                     r.d3Path = d3.select(r.domPath);
                 });
             }

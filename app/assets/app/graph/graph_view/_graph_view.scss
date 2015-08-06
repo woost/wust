@@ -39,15 +39,15 @@
         margin: 0px;
     }
     line, path {
-        &.svglink {
+        &.svgrelation {
             fill: none;
-            stroke: $graph_link_color;
+            stroke: $graph_relation_color;
             stroke-width: 1;
             stroke-linecap: round;
         }
     }
-    marker path.svglink {
-        fill: $graph_link_color !important;
+    marker path.svgrelation {
+        fill: $graph_relation_color !important;
     }
 
     .post-preview-frame {
