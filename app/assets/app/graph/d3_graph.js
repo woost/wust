@@ -901,7 +901,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                         // TODO: check in backend: self loops
                         if (startNode !== endNode) { // no self loop
                             // TODO: check in backend: connection to incident hyperrelation
-                            if (endNode.hyperNode && endNode.startNode !== startNode && endNode.endNode !== startNode) { // no connection to an incident HyperRelation
+                            if (!endNode.hyperEdge || (endNode.startNode !== startNode && endNode.endNode !== startNode)) { // no connection to an incident HyperRelation
                                 this.connectNodes(startNode, endNode);
                             } else
                                 humane.error("Connections to incident HyperRelations are not allowed.");
