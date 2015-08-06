@@ -28,7 +28,7 @@ object Search extends Controller {
     val titleMatcher = title.map(_ => s"${nodeDef.name}.title =~ {term}")
     val termMatcher = Seq(titleMatcher, descrMatcher).flatten.mkString(" or ")
 
-    val limit = size.getOrElse(15)
+    val limit = size.getOrElse(20)
     val skip = page.getOrElse(0) * limit;
     val returnStatement = s"return ${ nodeDef.name } order by ${ nodeDef.name }.title skip $skip limit $limit"
 

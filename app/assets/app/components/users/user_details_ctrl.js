@@ -12,10 +12,7 @@ function UserDetailsCtrl($stateParams, User, Auth, $q) {
     let size = 20;
     let page = 0;
     vm.loadMore = loadMore;
-    vm.noMore = false;
-    vm.contributions = vm.user.contributions.$search({page, size}).$then(val => {
-        vm.noMore = val.length < size;
-    });
+    vm.contributions = vm.user.contributions.$search({page, size});
 
     function saveUser() {
         return vm.user.$save().$then(() => {
@@ -24,14 +21,7 @@ function UserDetailsCtrl($stateParams, User, Auth, $q) {
     }
 
     function loadMore() {
-        if (vm.noMore)
-            return;
-
         page++;
-        let prevLength = vm.contributions.length;
-        vm.contributions.$fetch({page}).$then(val => {
-            let diff = val.length - prevLength;
-            vm.noMore = diff < size;
-        });
+        return vm.contributions.$fetch({page, size});
     }
 }

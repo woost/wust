@@ -2,26 +2,40 @@
     <button class="close view_close_button pull-right" ng-click="vm.search.resultsVisible = false" type="button" aria-label="Close " data-title="hide scratchpad" bs-tooltip animation=""><span aria-hidden="true">&times;</span></button>
     <div id="search_content">
         <div id="search_options">
-            <label class="col-md-8">Description</label>
-            <span switch class="col-md-4" ng-model="vm.search.searchDescriptions" ng-change="vm.search.triggerSearch()"></span>
-            <label class="col-md-8">Page size</label>
-            <span class="input_option col-md-4">
-                <input type="number" class="input" min="1" max="500" ng-model="vm.search.size" ng-change="vm.search.triggerSearch()">
-            </span>
+            <div class="row">
+                <label class="col-md-8">Description</label>
+                <span switch class="col-md-4" ng-model="vm.search.searchDescriptions" ng-change="vm.search.triggerSearch();infinite.initialize()"></span>
+            </div>
             <hr>
-            <label class="col-md-8">Tags</label>
-            <span class="label_like col-md-8">Disjunction</span>
-            <span switch class="col-md-4" ng-model="vm.search.tagOr" ng-change="vm.search.triggerSearch()"></span>
-            <div edit-static-taglist tags="vm.search.selectedTags" class="edit_tags" on-change="vm.search.triggerSearch()"></div>
+            <div class="row">
+                <label class="col-md-8">Tags</label>
+            </div>
+            <div class="row">
+                <span class="label_like col-md-8">Disjunction</span>
+                <span switch class="col-md-4" ng-model="vm.search.tagOr" ng-change="vm.search.triggerSearch();infinite.initialize()"></span>
+            </div>
+            <div edit-static-taglist tags="vm.search.selectedTags" class="row edit_tags" on-change="vm.search.triggerSearch();infinite.initialize()"></div>
+            <div id="search_options_bottom">
+                <div class="row">
+                    <label class="col-md-5">Page</label>
+                    <span class="label_like col-md-7">{{infinite.currentPage}} / {{infinite.maxPage == -1 ? '&infin;' : infinite.maxPage}}</span>
+                </div>
+                <div class="row">
+                    <span class="label_like col-md-5">Size</span>
+                    <span class="col-md-7">
+                        <input type="number" class="input" min="1" max="500" ng-model="vm.search.size" ng-change="vm.search.triggerSearch();infinite.initialize()">
+                    </span>
+                </div>
+            </div>
         </div>
-        <div id="search_results" infinite-scroll="vm.search.loadMore()">
+        <div id="search_results_view">
             <!-- TODO: this does break the animation of the search overlay. but the ng-if here would be good, as the small-post would then not trigger any watchers. -->
             <!-- <div ng-if="vm.search.resultsVisible"> -->
-                <div ng-show="vm.search.results.length > 0">
-                    <div ng-repeat="result in vm.search.results track by result.id" small-post node="result"></div>
-                    <button class="btn btn-default pull-right" ng-click="vm.search.loadMore()" ng-disabled="vm.search.noMore">More</button>
-                </div>
-                <!-- </div> -->
+            <div id="search_results" infinite-scroll="vm.search.loadMore()" infinite="infinite" promise="vm.search.results">
+                <div ng-repeat="result in vm.search.results track by result.id" small-post node="result"></div>
+                <button class="btn btn-default pull-right" ng-click="infinite.manualLoad()" ng-disabled="infinite.loading" ng-hide="infinite.noMore">More</button>
+            </div>
+            <!-- </div> -->
             <span ng-show="vm.search.results.length === 0">
                 <span ng-show="vm.search.waiting" class="search_status">Searching…</span>
                 <span ng-hide="vm.search.waiting" class="search_status">No results.</span>

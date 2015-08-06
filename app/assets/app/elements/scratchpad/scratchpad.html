@@ -3,7 +3,8 @@
     <button class="close view_close_button pull-right" ng-click="vm.leftSide.visible = false" aria-label="Close " data-title="hide scratchpad" bs-tooltip animation=""><span aria-hidden="true">&times;</span></button>
     <div id="edit_list" class="discourse_post_list" as-sortable="vm.sortableOptions" ng-model="vm.editList">
         <div ng-repeat="node in vm.editList" as-sortable-item class="as-sortable-item ng-trans ng-trans-scale-up ease">
-            <div as-sortable-item-handle class="as-sortable-item-handle">
+            <!-- <div as-sortable-item-handle class="as-sortable-item-handle" ui-draggable="!vm.node.isLocal || vm.node.canSave" drag="node.encode ? node.encode() : node" drag-channel="{{vm.isLocal ? 'create_connect' : 'connect'}}"> -->
+            <div ui-draggable="!vm.node.isLocal || vm.node.canSave" drag="node.encode ? node.encode() : node" drag-channel="{{vm.isLocal ? 'scratch_create_connect' : 'scratch_connect'}}">
                 <div collapse-edit-post node="node" ></div>
             </div>
         </div>

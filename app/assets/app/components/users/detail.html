@@ -32,11 +32,11 @@
 
     </form>
 
-    <div ng-if="vm.contributions.length > 0" class="contributions" infinite-scroll="vm.loadMore()" scroll-target="content_view">
+    <div ng-if="vm.contributions.length > 0" class="contributions" infinite-scroll="vm.loadMore()" infinite="infinite" promise="vm.contributions" scroll-target="content_view">
         <h2>Contributions</h2>
         <div>
             <div ng-repeat="contribution in vm.contributions track by contribution.id" small-post node="contribution"></span>
         </div>
-        <button class="btn btn-default pull-right" ng-click="vm.loadMore()" ng-disabled="vm.noMore">More</button>
+        <button class="btn btn-default pull-right" ng-click="infinite.manualLoad()" ng-disabled="infinite.loading" ng-hide="infinite.noMore">More</button>
     </div>
 </div>
