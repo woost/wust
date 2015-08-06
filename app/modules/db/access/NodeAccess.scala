@@ -1,5 +1,6 @@
 package modules.db.access
 
+import controllers.api.nodes.RequestContext
 import model.WustSchema._
 import modules.db.Database._
 import modules.db._
@@ -12,25 +13,24 @@ trait NodeAccess[+NODE <: UuidNode] {
   val name = factory.getClass.getSimpleName.dropRight(1)
   val label = factory.label
 
-  def read(page: Option[Int], size: Option[Int]): Either[Iterable[NODE],String] = Right("No read access on Node collection")
-  def read(uuid: String): Either[NODE, String] = Right("No read access on Node")
-  def create(user: User, json: JsValue): Either[NODE, String] = Right("No create access on Node")
-  def update(uuid: String, user: User, nodeAdd: JsValue): Either[NODE,String] = Right("No update access on Node")
-  def delete(uuid: String): Either[Boolean,String] = Right("No delete access on Node")
+  def read(context: RequestContext): Either[Iterable[NODE],String] = Right("No read access on Node collection")
+  def read(context: RequestContext, uuid: String): Either[NODE, String] = Right("No read access on Node")
+  def create(context: RequestContext): Either[NODE, String] = Right("No create access on Node")
+  def update(context: RequestContext, uuid: String): Either[NODE,String] = Right("No update access on Node")
+  def delete(context: RequestContext, uuid: String): Either[Boolean,String] = Right("No delete access on Node")
 
   def toNodeDefinition(uuid: String) = FactoryUuidNodeDefinition(factory, uuid)
 }
 
 class NodeRead[NODE <: UuidNode](val factory: UuidNodeMatchesFactory[NODE]) extends NodeAccess[NODE] {
-  override def read(pageOpt: Option[Int], sizeOpt: Option[Int]) = {
-    pageOpt.map { page =>
-      val limit = sizeOpt.getOrElse(15)
-      val skip = page * limit;
-      Left(limitedDiscourseNodes(skip, limit, factory)._2)
+  override def read(context: RequestContext) = {
+    context.page.map { page =>
+      val skip = page * context.limit
+      Left(limitedDiscourseNodes(skip, context.limit, factory)._2)
     }.getOrElse(Left(discourseNodes(factory)._2))
   }
 
-  override def read(uuid: String) = {
+  override def read(context: RequestContext, uuid: String) = {
     //TODO possibility to resolve nodes directly without graph?
     val discourse = Discourse.empty
     val node = factory.matchesOnUuid(uuid)
@@ -48,7 +48,7 @@ object NodeRead {
 }
 
 class NodeReadDelete[NODE <: UuidNode](factory: UuidNodeMatchesFactory[NODE]) extends NodeRead(factory) {
-  override def delete(uuid: String) = {
+  override def delete(context: RequestContext, uuid: String) = {
     // TODO: use matches... and remove...
     deleteNodes(FactoryUuidNodeDefinition(factory, uuid))
     // TODO: create Deleted action relation

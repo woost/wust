@@ -1,5 +1,6 @@
 package modules.db.access.custom
 
+import controllers.api.nodes.RequestContext
 import formatters.json.RequestFormat._
 import model.WustSchema._
 import modules.db.Database.db
@@ -25,15 +26,15 @@ class PostAccess extends NodeReadDelete(Post) {
   }
 
   //TODO: should create/update be nested?
-  override def create(user: User, json: JsValue): Either[Post, String] = {
-    json.validate[TaggedPostAddRequest].map(request => {
+  override def create(context: RequestContext): Either[Post, String] = {
+    context.jsonAs[TaggedPostAddRequest].map(request => {
       val discourse = tagDefGraph(request.addedTags)
 
       val node = Post.create(title = request.title, description = request.description)
-      val contribution = Created.create(user, node)
+      val contribution = Created.create(context.user, node)
       discourse.add(node, contribution)
 
-      addTagsToGraph(discourse, user, node)
+      addTagsToGraph(discourse, context.user, node)
 
       db.transaction(_.persistChanges(discourse)) match {
         case Some(err) => Right(s"Cannot create Post: $err'")
@@ -42,8 +43,8 @@ class PostAccess extends NodeReadDelete(Post) {
     }).getOrElse(Right("Error parsing create request for Tag"))
   }
 
-  override def update(uuid: String, user: User, json: JsValue): Either[Post, String] = {
-    json.validate[TaggedPostUpdateRequest].map(request => {
+  override def update(context: RequestContext, uuid: String): Either[Post, String] = {
+    context.jsonAs[TaggedPostUpdateRequest].map(request => {
       val discourse = tagDefGraph(request.addedTags)
 
       val node = Post.matchesOnUuid(uuid)
@@ -61,11 +62,11 @@ class PostAccess extends NodeReadDelete(Post) {
         node.title = request.title.get
 
       if(request.title.isDefined || request.description.isDefined) {
-        val contribution = Updated.create(user, node)
+        val contribution = Updated.create(context.user, node)
         discourse.add(contribution)
       }
 
-      addTagsToGraph(discourse, user, node)
+      addTagsToGraph(discourse, context.user, node)
 
       db.transaction(_.persistChanges(discourse)) match {
         case Some(err) => Right(s"Cannot update Post with uuid '$uuid': $err'")
@@ -80,11 +81,10 @@ object PostAccess {
 }
 
 class TagAccess extends NodeRead(TagLike) {
-  override def create(user: User, json: JsValue): Either[TagLike, String] = {
-    json.validate[TagAddRequest].map(request => {
-
+  override def create(context: RequestContext): Either[TagLike, String] = {
+    context.jsonAs[TagAddRequest].map(request => {
       val node = Tag.merge(title = request.title, merge = Set("title"))
-      val contribution = Created.create(user, node)
+      val contribution = Created.create(context.user, node)
 
       val discourse = Discourse(node, contribution)
       db.transaction(_.persistChanges(discourse)) match {
@@ -94,15 +94,15 @@ class TagAccess extends NodeRead(TagLike) {
     }).getOrElse(Right("Error parsing create request for Tag"))
   }
 
-  override def update(uuid: String, user: User, json: JsValue): Either[TagLike, String] = {
-    json.validate[TagUpdateRequest].map(request => {
+  override def update(context: RequestContext, uuid: String): Either[TagLike, String] = {
+    context.jsonAs[TagUpdateRequest].map(request => {
       val node = TagLike.matchesOnUuid(uuid)
       //TODO: normally we would want to set it back to None instead of ""
       if (request.description.isDefined) {
         node.description = request.description
       }
 
-      val contribution = Updated.create(user, node)
+      val contribution = Updated.create(context.user, node)
 
       val discourse = Discourse(contribution)
       db.transaction(_.persistChanges(discourse)) match {
@@ -118,15 +118,16 @@ object TagAccess {
 }
 
 class UserAccess extends NodeRead(User) {
-  override def update(uuid: String, user: User, json: JsValue): Either[User, String] = {
-  json.validate[UserUpdateRequest].map(request => {
+  override def update(context: RequestContext, uuid: String): Either[User, String] = {
+    //TODO: restrict to normal users...
+  context.jsonAs[UserUpdateRequest].map(request => {
       //TODO: sanity check + welcome mail
       if (request.email.isDefined)
-        user.email = request.email
+        context.user.email = request.email
 
-      db.transaction(_.persistChanges(user)) match {
+      db.transaction(_.persistChanges(context.user)) match {
         case Some(err) => Right(s"Cannot update User: $err'")
-        case _         => Left(user)
+        case _         => Left(context.user)
       }
     }).getOrElse(Right("Error parsing update request for User"))
   }

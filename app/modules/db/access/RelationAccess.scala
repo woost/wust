@@ -1,5 +1,6 @@
 package modules.db.access
 
+import controllers.api.nodes.RequestContext
 import model.WustSchema._
 import modules.db.Database._
 import modules.db._
@@ -11,13 +12,13 @@ import renesca.schema._
 trait RelationAccess[-NODE <: UuidNode, +OTHER <: UuidNode] {
   //TODO: switch left/right...left should be errors
   //TODO: no nodedefinitions as args
-  def read(baseDef: FixedNodeDefinition[NODE], page: Option[Int], size: Option[Int]): Either[Iterable[OTHER], String] = Right("No read access on Relation")
-  def delete(baseDef: FixedNodeDefinition[NODE], uuid: String): Either[Boolean, String] = Right("No delete access on Relation")
-  def deleteHyper(baseDef: HyperNodeDefinitionBase[NODE with AbstractRelation[_, _]], uuid: String): Either[Boolean, String] = Right("No delete access on HyperRelation")
-  def create(uuid: String, user: User, json: JsValue): Either[ConnectResponse[OTHER], String]
-  def create(uuid: String, user: User, otherUuid: String): Either[ConnectResponse[OTHER], String] = Right("No create access on Relation")
-  def createHyper(startUuid: String, endUuid: String, user: User, json: JsValue): Either[ConnectResponse[OTHER], String]
-  def createHyper(startUuid: String, endUuid: String, user: User, nestedUuid: String): Either[ConnectResponse[OTHER], String] = Right("No create access on HyperRelation")
+  def read(context: RequestContext, baseDef: FixedNodeDefinition[NODE]): Either[Iterable[OTHER], String] = Right("No read access on Relation")
+  def delete(context: RequestContext, baseDef: FixedNodeDefinition[NODE], uuid: String): Either[Boolean, String] = Right("No delete access on Relation")
+  def deleteHyper(context: RequestContext, baseDef: HyperNodeDefinitionBase[NODE with AbstractRelation[_, _]], uuid: String): Either[Boolean, String] = Right("No delete access on HyperRelation")
+  def create(context: RequestContext, uuid: String): Either[ConnectResponse[OTHER], String]
+  def create(context: RequestContext, uuid: String, nestedUuid: String): Either[ConnectResponse[OTHER], String] = Right("No create access on Relation")
+  def createHyper(context: RequestContext, startUuid: String, endUuid: String): Either[ConnectResponse[OTHER], String]
+  def createHyper(context: RequestContext, startUuid: String, endUuid: String, nestedUuid: String): Either[ConnectResponse[OTHER], String] = Right("No create access on HyperRelation")
 }
 
 trait NodeAwareRelationAccess[NODE <: UuidNode, OTHER <: UuidNode] extends RelationAccess[NODE, OTHER] {
@@ -26,15 +27,15 @@ trait NodeAwareRelationAccess[NODE <: UuidNode, OTHER <: UuidNode] extends Relat
     nodeAccess = Some(access)
   }
 
-  private def createNode(user: User, js: JsValue): Either[OTHER, String] = {
-    nodeAccess.map(_.create(user, js)).getOrElse(Right("No factory defined on connect path"))
+  private def createNode(context: RequestContext): Either[OTHER, String] = {
+    nodeAccess.map(_.create(context)).getOrElse(Right("No factory defined on connect path"))
   }
 
-  def create(uuid: String, user: User, json: JsValue): Either[ConnectResponse[OTHER], String] = {
-    createNode(user, json).left.toOption.map(n => create(uuid, user, n.uuid)).getOrElse(Right("Cannot create node on connect path"))
+  def create(context: RequestContext, uuid: String): Either[ConnectResponse[OTHER], String] = {
+    createNode(context).left.toOption.map(n => create(context, uuid, n.uuid)).getOrElse(Right("Cannot create node on connect path"))
   }
-  def createHyper(startUuid: String, endUuid: String, user: User, json: JsValue): Either[ConnectResponse[OTHER], String] = {
-    createNode(user, json).left.toOption.map(n => createHyper(startUuid, endUuid, user, n.uuid)).getOrElse(Right("Cannot create node on connect path"))
+  def createHyper(context: RequestContext, startUuid: String, endUuid: String): Either[ConnectResponse[OTHER], String] = {
+    createNode(context).left.toOption.map(n => createHyper(context, startUuid, endUuid, n.uuid)).getOrElse(Right("Cannot create node on connect path"))
   }
 }
 
@@ -48,11 +49,10 @@ END <: UuidNode
   def toNodeDefinition = ConcreteFactoryNodeDefinition(nodeFactory)
   def toNodeDefinition(uuid: String) = FactoryUuidNodeDefinition(nodeFactory, uuid)
 
-  protected def pageAwareRead(relDefs: Seq[NodeAndFixedRelationDefinition[START,RELATION,END]], pageOpt: Option[Int], sizeOpt: Option[Int]) = {
-    pageOpt.map { page =>
-      val limit = sizeOpt.getOrElse(15)
-      val skip = page * limit;
-      Left(limitedStartConnectedDiscourseNodes(skip, limit, relDefs: _*))
+  protected def pageAwareRead(context: RequestContext, relDefs: Seq[NodeAndFixedRelationDefinition[START,RELATION,END]]) = {
+    context.page.map { page =>
+      val skip = page * context.limit
+      Left(limitedStartConnectedDiscourseNodes(skip, context.limit, relDefs: _*))
     }.getOrElse(Left(startConnectedDiscourseNodes(relDefs: _*)))
   }
 }
@@ -67,11 +67,10 @@ END <: UuidNode
   def toNodeDefinition = ConcreteFactoryNodeDefinition(nodeFactory)
   def toNodeDefinition(uuid: String) = FactoryUuidNodeDefinition(nodeFactory, uuid)
 
-  protected def pageAwareRead(relDefs: Seq[FixedAndNodeRelationDefinition[START,RELATION,END]], pageOpt: Option[Int], sizeOpt: Option[Int]) = {
-    pageOpt.map { page =>
-      val limit = sizeOpt.getOrElse(15)
-      val skip = page * limit;
-      Left(limitedEndConnectedDiscourseNodes(skip, limit, relDefs: _*))
+  protected def pageAwareRead(context: RequestContext, relDefs: Seq[FixedAndNodeRelationDefinition[START,RELATION,END]]) = {
+    context.page.map { page =>
+      val skip = page * context.limit
+      Left(limitedEndConnectedDiscourseNodes(skip, context.limit, relDefs: _*))
     }.getOrElse(Left(endConnectedDiscourseNodes(relDefs: _*)))
   }
 }
@@ -84,8 +83,8 @@ END <: UuidNode
 )(
   val nodeFactory: NodeFactory[END]
 ) extends StartRelationAccess[START,AbstractRelation[START,END],END] {
-  override def read(baseDef: FixedNodeDefinition[START], pageOpt: Option[Int], sizeOpt: Option[Int]) = {
-    pageAwareRead(factories.map(RelationDefinition(baseDef, _, toNodeDefinition)), pageOpt, sizeOpt)
+  override def read(context: RequestContext, baseDef: FixedNodeDefinition[START]) = {
+    pageAwareRead(context, factories.map(RelationDefinition(baseDef, _, toNodeDefinition)))
   }
 }
 
@@ -97,8 +96,8 @@ END <: UuidNode
 )(
   val nodeFactory: NodeFactory[START]
 ) extends EndRelationAccess[START,AbstractRelation[START,END],END] {
-  override def read(baseDef: FixedNodeDefinition[END], pageOpt: Option[Int], sizeOpt: Option[Int]) = {
-    pageAwareRead(factories.map(RelationDefinition(toNodeDefinition, _, baseDef)), pageOpt, sizeOpt)
+  override def read(context: RequestContext, baseDef: FixedNodeDefinition[END]) = {
+    pageAwareRead(context, factories.map(RelationDefinition(toNodeDefinition, _, baseDef)))
   }
 }
 
@@ -112,8 +111,8 @@ END <: UuidNode
   val nodeFactory: NodeFactory[END]
   ) extends StartRelationAccess[START, RELATION, END] {
 
-  override def read(baseDef: FixedNodeDefinition[START], pageOpt: Option[Int], sizeOpt: Option[Int]) = {
-    pageAwareRead(Seq(RelationDefinition(baseDef, factory, toNodeDefinition)), pageOpt, sizeOpt)
+  override def read(context: RequestContext, baseDef: FixedNodeDefinition[START]) = {
+    pageAwareRead(context, Seq(RelationDefinition(baseDef, factory, toNodeDefinition)))
   }
 }
 
@@ -139,8 +138,8 @@ END <: UuidNode
   val nodeFactory: NodeFactory[START]
   ) extends EndRelationAccess[START, RELATION, END] {
 
-  override def read(baseDef: FixedNodeDefinition[END], pageOpt: Option[Int], sizeOpt: Option[Int]) = {
-    pageAwareRead(Seq(RelationDefinition(toNodeDefinition, factory, baseDef)), pageOpt, sizeOpt)
+  override def read(context: RequestContext, baseDef: FixedNodeDefinition[END]) = {
+    pageAwareRead(context, Seq(RelationDefinition(toNodeDefinition, factory, baseDef)))
   }
 }
 
@@ -167,13 +166,13 @@ END <: UuidNode
   nodeFactory: NodeFactory[END]
   ) extends StartRelationRead(factory, nodeFactory) {
 
-  override def delete(baseDef: FixedNodeDefinition[START], uuid: String) = {
+  override def delete(context: RequestContext, baseDef: FixedNodeDefinition[START], uuid: String) = {
     val relationDefinition = RelationDefinition(baseDef, factory, toNodeDefinition(uuid))
     disconnectNodes(relationDefinition)
     Left(true)
   }
 
-  override def deleteHyper(baseDef: HyperNodeDefinitionBase[START with AbstractRelation[_, _]], uuid: String) = {
+  override def deleteHyper(context: RequestContext, baseDef: HyperNodeDefinitionBase[START with AbstractRelation[_, _]], uuid: String) = {
     val relationDefinition = RelationDefinition(baseDef, factory, toNodeDefinition(uuid))
     disconnectNodes(relationDefinition)
     Left(true)
@@ -202,13 +201,13 @@ END <: UuidNode
   nodeFactory: NodeFactory[START]
   ) extends EndRelationRead(factory, nodeFactory) {
 
-  override def delete(baseDef: FixedNodeDefinition[END], uuid: String) = {
+  override def delete(context: RequestContext, baseDef: FixedNodeDefinition[END], uuid: String) = {
     val relationDefinition = RelationDefinition(toNodeDefinition(uuid), factory, baseDef)
     disconnectNodes(relationDefinition)
     Left(true)
   }
 
-  override def deleteHyper(baseDef: HyperNodeDefinitionBase[END with AbstractRelation[_, _]], uuid: String) = {
+  override def deleteHyper(context: RequestContext, baseDef: HyperNodeDefinitionBase[END with AbstractRelation[_, _]], uuid: String) = {
     val relationDefinition = RelationDefinition(toNodeDefinition(uuid), factory, baseDef)
     disconnectNodes(relationDefinition)
     Left(true)

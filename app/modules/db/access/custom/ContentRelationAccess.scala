@@ -1,5 +1,6 @@
 package modules.db.access.custom
 
+import controllers.api.nodes.RequestContext
 import formatters.json.RequestFormat._
 import model.WustSchema._
 import modules.db.Database.db
@@ -34,7 +35,7 @@ END <: UuidNode
   nodeFactory: UuidNodeMatchesFactory[END],
   baseFactory: UuidNodeMatchesFactory[START]) extends StartRelationReadDelete(factory, nodeFactory) with ContentRelationHelper {
 
-  override def create(uuid: String, user: User, otherUuid: String) = {
+  override def create(context: RequestContext, uuid: String, otherUuid: String) = {
       val discourse = Discourse.empty
       val base = baseFactory.matchesOnUuid(uuid)
       val node = nodeFactory.matchesOnUuid(otherUuid)
@@ -67,7 +68,7 @@ END <: UuidNode
   endFactory: UuidNodeMatchesFactory[IEND]
   ) extends StartRelationReadDelete(factory, nodeFactory) with ContentRelationHelper {
 
-  override def createHyper(startUuid: String, endUuid: String, user: User, nestedUuid: String) = {
+  override def createHyper(context: RequestContext, startUuid: String, endUuid: String, nestedUuid: String) = {
       val discourse = Discourse.empty
       val start = startFactory.matchesOnUuid(startUuid)
       val end = endFactory.matchesOnUuid(endUuid)
@@ -108,7 +109,7 @@ END <: UuidNode
   nodeFactory: UuidNodeMatchesFactory[START],
   baseFactory: UuidNodeMatchesFactory[END]) extends EndRelationReadDelete(factory, nodeFactory) with ContentRelationHelper {
 
-  override def create(uuid: String, user: User, otherUuid: String) = {
+  override def create(context: RequestContext, uuid: String, otherUuid: String) = {
     val discourse = Discourse.empty
     val base = baseFactory.matchesOnUuid(uuid)
     val node = nodeFactory.matchesOnUuid(otherUuid)
@@ -141,7 +142,7 @@ END <: UuidNode
   endFactory: UuidNodeMatchesFactory[IEND]
   ) extends EndRelationReadDelete(factory, nodeFactory) with ContentRelationHelper {
 
-  override def createHyper(startUuid: String, endUuid: String, user: User, nestedUuid: String) = {
+  override def createHyper(context: RequestContext, startUuid: String, endUuid: String, nestedUuid: String) = {
       val discourse = Discourse.empty
       val start = startFactory.matchesOnUuid(startUuid)
       val end = endFactory.matchesOnUuid(endUuid)

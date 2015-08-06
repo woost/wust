@@ -5,12 +5,24 @@ import com.mohiva.play.silhouette.impl.authenticators.JWTAuthenticator
 import controllers.api.router.{DefaultNestedResourceController, NestedResourceRouter}
 import model.WustSchema.{User, UuidNode}
 import modules.auth.HeaderEnvironmentModule
-import modules.requests.{NodeSchema, ConnectSchema, HyperConnectSchema}
-import play.api.mvc.Result
-import renesca.schema.Node
+import modules.requests.{ConnectSchema, HyperConnectSchema, NodeSchema}
+import play.api.libs.json.{JsResult, JsValue}
+import play.api.mvc.{AnyContent, Result}
 import renesca.parameter.implicits._
 
+case class RequestContext(user: User, json: Option[JsValue], query: Map[String, String]) {
+  def page = query.get("page").map(_.toInt)
+  def size = query.get("size").map(_.toInt)
+  def limit = size.getOrElse(15)
+  def jsonAs[T](implicit rds : play.api.libs.json.Reads[T]) = json.flatMap(_.validate[T].asOpt)
+  val skip = page * limit
+}
+
 trait NodesBase extends NestedResourceRouter with DefaultNestedResourceController with Silhouette[User, JWTAuthenticator] with HeaderEnvironmentModule {
+  protected def context(request: UserAwareRequest[AnyContent]) = {
+    RequestContext(getUser(request.identity), request.body.asJson, request.queryString.flatMap { case (k,v) => v.headOption.map((k, _)) })
+  }
+
   protected def unauthorized = Unauthorized("Only logged-in users allowed")
   protected def pathNotFound = NotFound("No defined path")
 
@@ -51,19 +63,10 @@ trait NodesBase extends NestedResourceRouter with DefaultNestedResourceControlle
     }
   }
 
-  protected def getUser(identity: Option[User])(handler: User => Result): Result = {
-    identity match {
-      case Some(user) => handler(user)
-      //case None => unauthorized
-      //TODO: devel: just the devel user
-      case None =>
-        if (play.api.Play.isDev(play.api.Play.current)) {
-          val user = User.merge(name = "devel", merge = Set("name"))
-          handler(user)
-        } else
-          unauthorized
-
-    }
+  protected def getUser(identity: Option[User]): User = {
+    //TODO: resolve user
+    //TODO: rename to anonymous, only match + seedinit
+    identity.getOrElse(User.merge(name = "devel", merge = Set("name")))
   }
 
   protected def validateConnect(uuid: String, otherUuid: String)(handler: () => Result): Result = {

@@ -14,29 +14,29 @@ trait DeletableNodes[NODE <: UuidNode] extends NodesBase {
     else
       BadRequest("Cannot delete Node")
 
-  override def destroy(uuid: String) = Action { request =>
-      getResult(nodeSchema.op.delete(uuid))(deleteResult)
+  override def destroy(uuid: String) = UserAwareAction { request =>
+      getResult(nodeSchema.op.delete(context(request), uuid))(deleteResult)
   }
 
-  override def disconnectMember(path: String, uuid: String, otherUuid: String) = Action {
+  override def disconnectMember(path: String, uuid: String, otherUuid: String) = UserAwareAction { request =>
     val baseNode = nodeSchema.op.toNodeDefinition(uuid)
     getSchema(nodeSchema.connectSchemas, path)(connectSchema => {
-      getResult(connectSchema.op.delete(baseNode, otherUuid))(deleteResult)
+      getResult(connectSchema.op.delete(context(request), baseNode, otherUuid))(deleteResult)
     })
   }
 
-  override def disconnectNestedMember(path: String, nestedPath: String, uuid: String, otherUuid: String, nestedUuid: String) = Action {
+  override def disconnectNestedMember(path: String, nestedPath: String, uuid: String, otherUuid: String, nestedUuid: String) = UserAwareAction { request =>
     val baseNode = nodeSchema.op.toNodeDefinition(uuid)
     getHyperSchema(nodeSchema.connectSchemas, path)({
       case c@StartHyperConnectSchema(factory,op,connectSchemas) =>
         val hyperRel = c.toNodeDefinition(baseNode, otherUuid)
         getSchema(connectSchemas, nestedPath)(schema =>
-          getResult(schema.op.deleteHyper(hyperRel, nestedUuid))(deleteResult)
+          getResult(schema.op.deleteHyper(context(request), hyperRel, nestedUuid))(deleteResult)
         )
       case c@EndHyperConnectSchema(factory,op,connectSchemas) =>
         val hyperRel = c.toNodeDefinition(baseNode, otherUuid)
         getSchema(connectSchemas, nestedPath)(schema =>
-          getResult(schema.op.deleteHyper(hyperRel, nestedUuid))(deleteResult)
+          getResult(schema.op.deleteHyper(context(request), hyperRel, nestedUuid))(deleteResult)
         )
     })
   }
