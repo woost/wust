@@ -179,7 +179,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     .data(this.graph.relations, (d) => d.startId + " --> " + d.endId);
 
                 // add nodes
-                let d3NodeFrame = this.d3NodeContainerWithData.enter()
+                this.d3NodeFrame = this.d3NodeContainerWithData.enter()
                     .append("div").attr("class", d => "nodeframe" + (d.isHyperRelation ? " nodeframe-hyperrelation" : ""));
 
                 this.d3Node = this.d3NodeContainerWithData.append("div")
@@ -477,8 +477,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     n.domNode = this.d3Node[0][i];
                     n.d3Node = d3.select(n.domNode);
 
-                    n.domNodeTools = this.d3NodeTools[0][i];
-                    n.d3NodeTools = d3.select(n.domNodeTools);
+                    n.domNodeFrame = this.d3NodeFrame[0][i];
+                    n.d3NodeFrame = d3.select(n.domNodeFrame);
                 });
 
                 this.graph.relations.forEach((r, i) => {
@@ -657,10 +657,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.graph.nodes.forEach(node => {
                     let opacity = (node.marked) ? 1.0 : notMarkedOpacity;
                     let visibility = node.visible ? "inherit" : "hidden";
-                    node.domNode.style.opacity = opacity;
-                    node.domNode.style.visibility = visibility;
-                    node.domNodeTools.style.opacity = opacity;
-                    node.domNodeTools.style.visibility = visibility;
+                    node.domNodeFrame.style.opacity = opacity;
+                    node.domNodeFrame.style.visibility = visibility;
                 });
 
                 // set relation visibility
