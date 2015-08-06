@@ -18,14 +18,15 @@
                 width: 100%;
                 display: block;
                 padding-right: 10px;
-                line-height: $line-height; // vertical center
                 a, a:active, a:visited, a:focus {
                     &.editable-click {
                         padding-left: 6px;
                         color: inherit;
                         border: 0;
                         display:block;
-                        height:$line-height;
+                        min-height:$line-height;
+                        padding-top: 7px;
+                        padding-bottom: 7px;
                         cursor: pointer;
                     }
                 }
