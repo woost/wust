@@ -49,7 +49,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.force = d3.layout.force()
                     .size([this.width, this.height])
                     .nodes(graph.nodes)
-                    .links(graph.edges)
+                    .links(graph.relations)
                     .linkStrength(0.9) // rigidity
                     .friction(0.92)
                     .linkDistance(100) // weak geometric constraint. Pushes nodes to achieve this distance
@@ -78,7 +78,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             }
 
             initDom() {
-                // svg will stay in background and only render the edges
+                // svg will stay in background and only render the relations
                 this.d3Svg = d3.select(this.rootDomElement)
                     .append("svg")
                     .attr("width", this.width)
@@ -177,7 +177,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
                 this.d3LinkPathWithData = this.d3LinkPath
                     .selectAll("path")
-                    .data(this.graph.edges, (d) => d.startId + " --> " + d.endId);
+                    .data(this.graph.relations, (d) => d.startId + " --> " + d.endId);
 
                 // add nodes
                 let d3NodeFrame = this.d3NodeContainerWithData.enter()
@@ -248,12 +248,12 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.d3LinkPathWithData.exit().remove(); //
 
                 // console.log(graph.nodes.map(n => n.id.slice(0,3)),d3NodeContainer.node());
-                // console.log(graph.edges,d3LinkPath.node());
+                // console.log(graph.relations,d3LinkPath.node());
 
                 // TODO: non-hyper-relation-links are broken
                 // let linkText = svgContainer.append("div").attr("id", "group_link_labels")
                 //     .selectAll()
-                //     .data(graph.edges).enter()
+                //     .data(graph.relations).enter()
                 //     .append("div");
                 // let linktextHtml = linkText.append("div")
                 //     .attr("class", "hyperrelation")
@@ -268,8 +268,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.recalculateNodeDimensions(changes.newNodes);
 
                 this.registerUIEvents();
-                this.force.nodes(this.graph.nodes); // nodes and edges get replaced instead of just changed by scalajs
-                this.force.links(this.graph.edges); // that's why we need to set the new references
+                this.force.nodes(this.graph.nodes); // nodes and relations get replaced instead of just changed by scalajs
+                this.force.links(this.graph.relations); // that's why we need to set the new references
                 // force.tick();
                 // drawGraph(graph, transformCompat);
                 this.force.start();
@@ -371,10 +371,10 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
 
             // executes specified function only for normal nodes, i.e.,
-            // ignores hyperedges
+            // ignores hyperrelations
             ignoreHyperEdge(func) {
                 return d => {
-                    // do nothing for hyperedges
+                    // do nothing for hyperrelations
                     if (d.isHyperRelation)
                         return;
 
@@ -438,12 +438,12 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             }
 
             initConverge() {
-                // focusMarkedNodes needs visible/marked nodes and edges
+                // focusMarkedNodes needs visible/marked nodes and relations
                 this.graph.nodes.forEach(n => {
                     n.marked = true;
                     n.visible = true;
                 });
-                this.graph.edges.forEach(e => {
+                this.graph.relations.forEach(e => {
                     e.visible = true;
                 });
                 if (this.visibleConvergence) {
@@ -494,7 +494,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     n.d3NodeTools = d3.select(n.domNodeTools);
                 });
 
-                this.graph.edges.forEach((r, i) => {
+                this.graph.relations.forEach((r, i) => {
                     r.domPath = this.d3LinkPathWithData[0][i];
                     r.d3Path = d3.select(r.domPath);
                 });
@@ -561,7 +561,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             }
 
             drawRelations() {
-                this.graph.edges.forEach((relation) => {
+                this.graph.relations.forEach((relation) => {
                     // clamp every edge line to the intersections with its incident node rectangles
                     let line = Helpers.clampLineByRects(relation, relation.source.rect, relation.target.rect);
                     if (isNaN(line.x1) || isNaN(line.y1) || isNaN(line.x2) || isNaN(line.y2))
@@ -650,12 +650,12 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
                 this.graph.nodes.forEach(node => {
                     if (node.isHyperRelation) {
-                        //TODO: mark chains of hyperedges
+                        //TODO: mark chains of hyperrelations
                         node.marked = node.marked || node.source.marked && node.target.marked;
                     }
                 });
 
-                this.graph.edges.forEach(edge => {
+                this.graph.relations.forEach(edge => {
                     edge.visible = _(component).contains(edge.source) && _(component).contains(edge.target);
                 });
 
@@ -677,7 +677,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 });
 
                 // set edge visibility
-                this.graph.edges.forEach((edge, i) => {
+                this.graph.relations.forEach((edge, i) => {
                     edge.domPath.style.visibility = edge.visible ? "inherit" : "hidden";
                     edge.domPath.style.opacity = (edge.source.marked === true && edge.target.marked === true) ? 1.0 : notMarkedOpacity;
                 });
@@ -728,7 +728,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 }
                 referenceNode.$save({}).$then(response => {
                     response.graph.nodes.forEach(n => this.graph.addNode(n));
-                    response.graph.edges.forEach(r => this.graph.addRelation(r));
+                    response.graph.relations.forEach(r => this.graph.addRelation(r));
                     this.graph.commit();
                 });
             }

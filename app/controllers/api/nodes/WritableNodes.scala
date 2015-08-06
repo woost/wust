@@ -60,7 +60,7 @@ trait WritableNodes[NODE <: UuidNode] extends NodesBase {
     })
   }
 
-  //TODO: forbid self loop of hyperedges
+  //TODO: forbid self loop of hyperrelations
   // at this point, we do not know whether nestedUuid = HyperRelation(uuid, otherUuid).uuid
   override def connectNestedMember(path: String, nestedPath: String, uuid: String, otherUuid: String, nestedUuid: String) = UserAwareAction { request =>
     getUser(request.identity)(user => {

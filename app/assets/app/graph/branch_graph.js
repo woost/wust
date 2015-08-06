@@ -44,12 +44,12 @@ function branchGraph(DiscourseNode) {
             .attr("height", height)
             .on("dblclick.zoom", null);
 
-        let edgesWithSquashedHyperEdges = _(graph.edges).reject(
-            // remove edges between hidden nodes
+        let relationsWithSquashedHyperRelations = _(graph.relations).reject(
+            // remove relations between hidden nodes
             (edge) => edge.target._hidden && edge.source._hidden
         ).map((edge) => {
-            // point startHyperEdges to the hypernode target
-            // then remove endHyperEdges
+            // point startHyperRelations to the hypernode target
+            // then remove endHyperRelations
             let target = edge.target;
             if (target._hidden)
                 edge.target = target.successors[0];
@@ -58,7 +58,7 @@ function branchGraph(DiscourseNode) {
 
         let linksvg = svg.append("g").attr("id", "group_links")
             .selectAll()
-            .data(edgesWithSquashedHyperEdges).enter()
+            .data(relationsWithSquashedHyperRelations).enter()
             .append("path");
         // .style("marker-end", "url(" + window.location.href + "#branch_arrow)")
 
@@ -91,7 +91,7 @@ function branchGraph(DiscourseNode) {
             .style("stroke-width", border)
             .style("stroke-dasharray", d => d.isHyperRelation ? "4 3" : "");
 
-        // create edges in the svg
+        // create relations in the svg
         let link = linksvg
             .each(function(link) {
                 let thisLink = d3.select(this);

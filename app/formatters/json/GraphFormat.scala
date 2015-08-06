@@ -58,7 +58,7 @@ object GraphFormat {
     def writes(discourseGraph: Discourse) = {
       JsObject(Seq(
         ("nodes", Json.toJson(discourseGraph.posts ++ discourseGraph.connects)),
-        ("edges", Json.toJson(discourseGraph.connects.flatMap(r => List(r.startRelationOpt, r.endRelationOpt).flatten.map(_.asInstanceOf[Relation[Connectable, Connectable]]))))
+        ("relations", Json.toJson(discourseGraph.connects.flatMap(r => List(r.startRelationOpt, r.endRelationOpt).flatten.map(_.asInstanceOf[Relation[Connectable, Connectable]]))))
       ))
     }
   }

@@ -316,12 +316,11 @@ class Graph(private[js] val rawGraph: RawGraph) extends WrappedGraph[Relation] {
   var hyperRelations: mutable.Set[HyperRelation] = _
   @JSExport("hyperRelations") var hyperRelationsJs: js.Array[HyperRelation] = _
   @JSExport("relations") def _relationsJs = relationsJs
-  @JSExport def edges = relationsJs
   @JSExport("nodes") def _nodesJs = nodesJs
   @JSExport("nonHyperRelationNodes") def _nonHyperRelationNodes = nonHyperRelationNodes
   @JSExport("rootNode") def _rootNode = rootNode
 
-  //TODO: d3_graph needs to sort the nodes: first hyperedges, then nodes...
+  //TODO: d3_graph needs to sort the nodes: first hyperrelations, then nodes...
   @JSExport def setNodes(newNodes: js.Array[NodeBase]) = nodesJs = newNodes
 
   override def wrapRawChanges(rawChanges: RawGraphChanges): GraphChanges[Relation] = {
@@ -512,7 +511,7 @@ trait RecordRelation extends js.Object {
 
 trait RecordGraph extends js.Object {
   def nodes: js.Array[RecordNode] = js.native
-  def edges: js.Array[RecordRelation] = js.native
+  def relations: js.Array[RecordRelation] = js.native
 
   def $pk: String = js.native // rootNodeId
 }
@@ -525,7 +524,7 @@ object GraphFactory {
   def fromRecord(record: RecordGraph): RawGraph = {
     fromTraversable(
       record.nodes.map(n => new RawNode(n)),
-      record.edges.map(r => new RawRelation(r)),
+      record.relations.map(r => new RawRelation(r)),
       record.$pk // rootNodeId
     )
   }
