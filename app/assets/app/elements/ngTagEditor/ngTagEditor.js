@@ -26,8 +26,8 @@ angular.module("wust.elements")
                 getSuggestions: "&"
             },
             templateUrl: "assets/app/elements/ngTagEditor/ngTagEditor.html",
-            controller: ["$scope", "$attrs", "$element", "$filter", "Tag",
-                function($scope, $attrs, $element, $filter, Tag) {
+            controller: ["$scope", "$attrs", "$element", "$filter", "TagLike",
+                function($scope, $attrs, $element, $filter, TagLike) {
                     $scope.suggestions = [];
                     $scope.search = "";
 
@@ -56,7 +56,7 @@ angular.module("wust.elements")
                                 $scope.search = "";
                             } else {
                                 //TODO: we should not create a tag here.
-                                Tag.$create(newTag).$then(tag => {
+                                TagLike.$create(newTag).$then(tag => {
                                     $scope.add(tag);
                                 });
                             }
