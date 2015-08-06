@@ -44,7 +44,7 @@ function DiscourseNodeList() {
                 let self = this;
                 this.component.onCommit(changes => {
                     changes.newNodes.forEach(r => {
-                        if (r.hyperEdge) {
+                        if (r.isHyperRelation) {
                             if (self.connectorType === SUCCESSORS && r.startId === self.node.id)
                                 self.applyAllNested(r.endNode, r);
                             else if (self.connectorType === PREDECESSORS && r.endId === self.node.id)
@@ -110,7 +110,7 @@ function DiscourseNodeList() {
 
             // the parentList is used in order to construct the correct url for
             // the api call. The reference node is needed as this.node is a
-            // hyperEdge for all nested lists, but the api refers to hyperEdge
+            // isHyperRelation for all nested lists, but the api refers to isHyperRelation
             // via their start and endnode.
             setParent(parentList, referenceNode) {
                 // TODO: we actually could construct ReadNodeModels with a

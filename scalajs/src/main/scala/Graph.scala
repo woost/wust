@@ -65,7 +65,7 @@ sealed trait NodeDelegates extends NodeLike {
   @JSExport
   val label = rawNode.label
   @JSExport
-  val hyperEdge = rawNode.hyperEdge
+  val isHyperRelation = rawNode.isHyperRelation
   @JSExport
   def title = rawNode.title
   @JSExport
@@ -243,7 +243,7 @@ case class HyperRelation(rawNode: RawNode) extends NodeBase with RelationLike {
 
 object Node {
   def apply(node: RawNode) = {
-    if(node.hyperEdge)
+    if(node.isHyperRelation)
       new HyperRelation(node)
     else
       new Node(node)
@@ -269,7 +269,7 @@ class HyperGraph(val rawGraph: RawGraph) extends WrappedGraph[HyperRelation] {
       rawChanges.newNodes.map(n => nodeById(n.id)).toSet,
       //TODO: this should be the general solution and can be implemented in WrappedGraph
       rawChanges.newRelations.flatMap(r => relationByIds.get(r.startId -> r.endId)).toSet ++
-        rawChanges.newNodes.filter(_.hyperEdge).map(n => relationByIds(n.startId.get -> n.endId.get))
+        rawChanges.newNodes.filter(_.isHyperRelation).map(n => relationByIds(n.startId.get -> n.endId.get))
     )
   }
 
@@ -281,7 +281,7 @@ class HyperGraph(val rawGraph: RawGraph) extends WrappedGraph[HyperRelation] {
 
   def add(n: RawNode) {
     rawGraph.add(n)
-    if(n.hyperEdge) {
+    if(n.isHyperRelation) {
       if(n.startId.isEmpty || n.endId.isEmpty)
         console.warn(s"Adding HyperRelation ${ n.id } with empty startId or endId.")
       rawGraph.add(new RawRelation(n.startId.get, n.id))
@@ -298,13 +298,13 @@ class HyperGraph(val rawGraph: RawGraph) extends WrappedGraph[HyperRelation] {
   private[js] def rawAdd(rawNode: RawNode) {
     val node = Node(rawNode)
     nodes += node
-    if(node.hyperEdge)
+    if(node.isHyperRelation)
       hyperRelations += node.asInstanceOf[HyperRelation]
   }
   private[js] def rawAdd(relation: RawRelation) {}
   private[js] def rawRemove(node: RawNode) {
     nodes -= nodeById(node.id)
-    if(node.hyperEdge)
+    if(node.isHyperRelation)
       relations -= relationByIds(node.startId.get -> node.endId.get)
   }
   private[js] def rawRemove(relation: RawRelation) {}
@@ -368,8 +368,8 @@ class Graph(private[js] val rawGraph: RawGraph) extends WrappedGraph[Relation] {
 @JSExport
 @JSExportAll
 //TODO: maybe give a concrete type for tags
-class RawNode(val id: String, val label: String, var title: String, var description: Option[String], val hyperEdge: Boolean, val startId: Option[String], val endId: Option[String], val tags: js.Array[js.Object]) {
-  def this(n: RecordNode) = this(n.id, n.label, n.title.getOrElse(n.label), n.description.toOption, n.hyperEdge.getOrElse(false), n.startId.toOption, n.endId.toOption, n.tags)
+class RawNode(val id: String, val label: String, var title: String, var description: Option[String], val isHyperRelation: Boolean, val startId: Option[String], val endId: Option[String], val tags: js.Array[js.Object]) {
+  def this(n: RecordNode) = this(n.id, n.label, n.title.getOrElse(n.label), n.description.toOption, n.isHyperRelation.getOrElse(false), n.startId.toOption, n.endId.toOption, n.tags)
   override def toString = s"RawNode($id)"
 
   def canEqual(other: Any): Boolean = other.isInstanceOf[RawNode]
@@ -478,14 +478,14 @@ class RawGraph(private[js] var nodes: Set[RawNode], private[js] var relations: S
   }
 
   //TODO: cache lookup maps/sets
-  def hyperRelations = nodes.filter(_.hyperEdge)
+  def hyperRelations = nodes.filter(_.isHyperRelation)
 
   def incidentRelations(node: RawNode): Set[RawRelation] = {
     relations.filter(r => r.startId == node.id || r.endId == node.id)
   }
 
   def incidentHyperRelations(node: RawNode): Set[RawNode] = {
-    nodes.filter(n => n.hyperEdge && (n.startId.get == node.id || n.endId.get == node.id))
+    nodes.filter(n => n.isHyperRelation && (n.startId.get == node.id || n.endId.get == node.id))
   }
 
 
@@ -498,7 +498,7 @@ trait RecordNode extends js.Object {
   def title: js.UndefOr[String] = js.native
   def description: js.UndefOr[String] = js.native
 
-  def hyperEdge: js.UndefOr[Boolean] = js.native
+  def isHyperRelation: js.UndefOr[Boolean] = js.native
   def startId: js.UndefOr[String] = js.native
   def endId: js.UndefOr[String] = js.native
 

@@ -44,7 +44,7 @@ object GraphFormat {
         )
       case h: HyperRelation[Connectable @unchecked, _, _, _, Connectable @unchecked] =>
         Seq(
-          ("hyperEdge", JsBoolean(true)),
+          ("isHyperRelation", JsBoolean(true)),
           ("startId", JsString(h.startNodeOpt.map(_.uuid).getOrElse(""))),
           ("endId", JsString(h.endNodeOpt.map(_.uuid).getOrElse("")))
         )

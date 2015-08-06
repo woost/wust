@@ -37,7 +37,7 @@ function graphViewCtrl($scope, DiscourseNode, $filter, EditService) {
             return;
         }
 
-        let matchingNodes = $filter("fuzzyFilter")(_.reject(vm.graph.nodes, { hyperEdge: true }), vm.search);
+        let matchingNodes = $filter("fuzzyFilter")(_.reject(vm.graph.nodes, { isHyperRelation: true }), vm.search);
         vm.d3Graph.filter(matchingNodes);
     }
 

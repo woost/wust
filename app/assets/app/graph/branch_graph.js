@@ -86,10 +86,10 @@ function branchGraph(DiscourseNode) {
                 return d.y;
             })
             .attr("r", radius)
-            .attr("class", d => d.hyperEdge ? "hyperrelation" : "branch_node " + DiscourseNode.get(d.label).css)
+            .attr("class", d => d.isHyperRelation ? "hyperrelation" : "branch_node " + DiscourseNode.get(d.label).css)
             .style("stroke", n => n.leaf === true ? "black" : (n.directSuccessor === true ? "#666" : branchColor(n.branch)))
             .style("stroke-width", border)
-            .style("stroke-dasharray", d => d.hyperEdge ? "4 3" : "");
+            .style("stroke-dasharray", d => d.isHyperRelation ? "4 3" : "");
 
         // create edges in the svg
         let link = linksvg
@@ -97,7 +97,7 @@ function branchGraph(DiscourseNode) {
                 let thisLink = d3.select(this);
 
                 // if link is startRelation of a Hypernode
-                // if( target.hyperEdge && target.startId === source.id ) {
+                // if( target.isHyperRelation && target.startId === source.id ) {
                 //     thisLink.attr("class", "svglink");
                 // } else {
                 thisLink.attr("class", "svglink branch_arrow");
@@ -283,7 +283,7 @@ function branchGraph(DiscourseNode) {
             }
 
             function hideLonelyHyperNodes() {
-                _.each(graph.nodes, (node) => node._hidden = node._hidden || (node.hyperEdge && node.degree <= 2));
+                _.each(graph.nodes, (node) => node._hidden = node._hidden || (node.isHyperRelation && node.degree <= 2));
             }
 
             let rootNode = graph.rootNode;

@@ -162,7 +162,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             updateGraph(changes) {
                 //add nodes to svg, first hypernodes then nodes, so the normal
                 //nodes are drawn on top of the hypernodes in the svg
-                this.graph.setNodes(_.sortBy(this.graph.nodes, n => !n.hyperEdge));
+                this.graph.setNodes(_.sortBy(this.graph.nodes, n => !n.isHyperRelation));
 
                 this.calculateNodeVerticalForce();
                 this.setInitialNodePositions();
@@ -181,10 +181,10 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
                 // add nodes
                 let d3NodeFrame = this.d3NodeContainerWithData.enter()
-                    .append("div").attr("class", d => "nodeframe" + (d.hyperEdge ? " nodeframe-hyperrelation" : ""));
+                    .append("div").attr("class", d => "nodeframe" + (d.isHyperRelation ? " nodeframe-hyperrelation" : ""));
 
                 this.d3Node = this.d3NodeContainerWithData.append("div")
-                    .attr("class", d => d.hyperEdge ? "hyperrelation" : `node ${DiscourseNode.get(d.label).css}`);
+                    .attr("class", d => d.isHyperRelation ? "hyperrelation" : `node ${DiscourseNode.get(d.label).css}`);
 
                 this.d3Node
                     .append("span")
@@ -198,7 +198,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     .attr("class", "svglink")
                     .each(function(link) {
                         // if link is startRelation of a Hypernode
-                        if (!(link.target.hyperEdge && link.target.startId === link.source.id)) {
+                        if (!(link.target.isHyperRelation && link.target.startId === link.source.id)) {
                             d3.select(this).style("marker-end", "url(" + $location.absUrl() + "#graph_arrow)");
                         }
                     });
@@ -260,7 +260,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 //     .html(d => connectsHyperEdge(d) ? "" : d.title);
                 // check whether a link connects to a hyperedge-node
                 // function connectsHyperEdge(link) {
-                //     return link.source.hyperEdge || link.target.hyperEdge;
+                //     return link.source.isHyperRelation || link.target.isHyperRelation;
                 // }
 
                 this.updateGraphRefs();
@@ -375,7 +375,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             ignoreHyperEdge(func) {
                 return d => {
                     // do nothing for hyperedges
-                    if (d.hyperEdge)
+                    if (d.isHyperRelation)
                         return;
 
                     func(d);
@@ -649,7 +649,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 });
 
                 this.graph.nodes.forEach(node => {
-                    if (node.hyperEdge) {
+                    if (node.isHyperRelation) {
                         //TODO: mark chains of hyperedges
                         node.marked = node.marked || node.source.marked && node.target.marked;
                     }
@@ -714,7 +714,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
             connectNodes(startNode, endNode) {
                 let referenceNode;
-                if (endNode.hyperEdge) {
+                if (endNode.isHyperRelation) {
                     let start = Post.$buildRaw({
                         id: endNode.startId
                     });
@@ -901,7 +901,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                         // TODO: check in backend: self loops
                         if (startNode !== endNode) { // no self loop
                             // TODO: check in backend: connection to incident hyperrelation
-                            if (!endNode.hyperEdge || (endNode.startNode !== startNode && endNode.endNode !== startNode)) { // no connection to an incident HyperRelation
+                            if (!endNode.isHyperRelation || (endNode.startNode !== startNode && endNode.endNode !== startNode)) { // no connection to an incident HyperRelation
                                 this.connectNodes(startNode, endNode);
                             } else
                                 humane.error("Connections to incident HyperRelations are not allowed.");
