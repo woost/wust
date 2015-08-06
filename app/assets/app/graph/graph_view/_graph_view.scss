@@ -222,24 +222,24 @@
             fill: $graph_relation_color !important;
         }
 
-        .post-preview-frame {
-            position: absolute;
-            width: 30%;
-            z-index: $zindex_post_preview_frame;
-            background: #FEFEFE;
+    }
+    .post-preview-frame {
+        position: absolute;
+        width: 300px;
+        z-index: $zindex_post_preview_frame;
+        background: #FEFEFE;
 
-            &.right { right: 0; }
-            &.left { left: 0; }
-            &.top { top: 0; }
-            &.bottom { bottom: 0; }
+        &.right { right: 0; }
+        &.left { left: 0; }
+        &.top { top: 0; }
+        &.bottom { bottom: 0; }
 
-            .post-preview {
-                margin: 15px;
-                @include box-shadow(0 0 20px #555);
-                border: 1px solid #DDD;
-                border-radius: 5px;
-                padding: 10px;
-            }
+        .post-preview {
+            margin: 15px;
+            @include box-shadow(0 0 20px #555);
+            border: 1px solid #DDD;
+            border-radius: 5px;
+            padding: 10px;
         }
     }
 }
