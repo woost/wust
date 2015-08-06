@@ -46,15 +46,15 @@ function branchGraph(DiscourseNode) {
 
         let relationsWithSquashedHyperRelations = _(graph.relations).reject(
             // remove relations between hidden nodes
-            (edge) => edge.target._hidden && edge.source._hidden
-        ).map((edge) => {
+            (relation) => relation.target._hidden && relation.source._hidden
+        ).map((relation) => {
             // point startHyperRelations to the hypernode target
             // then remove endHyperRelations
-            let target = edge.target;
+            let target = relation.target;
             if (target._hidden)
-                edge.target = target.successors[0];
-            return edge;
-        }).reject((edge) => edge.source._hidden).value();
+                relation.target = target.successors[0];
+            return relation;
+        }).reject((relation) => relation.source._hidden).value();
 
         let linksvg = svg.append("g").attr("id", "group_links")
             .selectAll()

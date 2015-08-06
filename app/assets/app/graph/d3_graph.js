@@ -16,7 +16,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
         class D3Graph {
             //TODO: rename onClick -> onNodeClick
-            //TODO: rename edge, link, ... -> relation
+            //TODO: rename relation, link, ... -> relation
             constructor(graph, rootDomElement, onClick = _.noop, onDraw = _.noop) {
                 this.graph = graph;
                 this.rootDomElement = rootDomElement;
@@ -257,9 +257,9 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 //     .append("div");
                 // let linktextHtml = linkText.append("div")
                 //     .attr("class", "hyperrelation")
-                //     .html(d => connectsHyperEdge(d) ? "" : d.title);
-                // check whether a link connects to a hyperedge-node
-                // function connectsHyperEdge(link) {
+                //     .html(d => connectsHyperRelation(d) ? "" : d.title);
+                // check whether a link connects to a hyperrelation-node
+                // function connectsHyperRelation(link) {
                 //     return link.source.isHyperRelation || link.target.isHyperRelation;
                 // }
 
@@ -347,7 +347,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             registerUIEvents() {
                 //TODO: register only on added d3Nodes
                 this.d3Node
-                    /*.on("click", this.ignoreHyperEdge(node => {
+                    /*.on("click", this.ignoreHyperRelation(node => {
                                             this.onClick(node);
                                         }))*/
                     .on("mouseover", d => scope.$apply(() => {
@@ -372,7 +372,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
             // executes specified function only for normal nodes, i.e.,
             // ignores hyperrelations
-            ignoreHyperEdge(func) {
+            ignoreHyperRelation(func) {
                 return d => {
                     // do nothing for hyperrelations
                     if (d.isHyperRelation)
@@ -562,7 +562,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
             drawRelations() {
                 this.graph.relations.forEach((relation) => {
-                    // clamp every edge line to the intersections with its incident node rectangles
+                    // clamp every relation line to the intersections with its incident node rectangles
                     let line = Helpers.clampLineByRects(relation, relation.source.rect, relation.target.rect);
                     if (isNaN(line.x1) || isNaN(line.y1) || isNaN(line.x2) || isNaN(line.y2))
                         console.warn("invalid coordinates for relation");
@@ -655,8 +655,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     }
                 });
 
-                this.graph.relations.forEach(edge => {
-                    edge.visible = _(component).contains(edge.source) && _(component).contains(edge.target);
+                this.graph.relations.forEach(relation => {
+                    relation.visible = _(component).contains(relation.source) && _(component).contains(relation.target);
                 });
 
                 this.setVisibility();
@@ -676,10 +676,10 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     node.domNodeTools.style.visibility = visibility;
                 });
 
-                // set edge visibility
-                this.graph.relations.forEach((edge, i) => {
-                    edge.domPath.style.visibility = edge.visible ? "inherit" : "hidden";
-                    edge.domPath.style.opacity = (edge.source.marked === true && edge.target.marked === true) ? 1.0 : notMarkedOpacity;
+                // set relation visibility
+                this.graph.relations.forEach((relation, i) => {
+                    relation.domPath.style.visibility = relation.visible ? "inherit" : "hidden";
+                    relation.domPath.style.opacity = (relation.source.marked === true && relation.target.marked === true) ? 1.0 : notMarkedOpacity;
                 });
             }
 
