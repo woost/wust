@@ -32,13 +32,12 @@ class NodeRead[NODE <: UuidNode](val factory: UuidNodeMatchesFactory[NODE]) exte
 
   override def read(context: RequestContext, uuid: String) = {
     //TODO possibility to resolve nodes directly without graph?
-    val discourse = Discourse.empty
     val node = factory.matchesOnUuid(uuid)
-    discourse.add(node)
     //TODO method for only resolving matches...
-    db.transaction(_.persistChanges(discourse)) match {
+    db.transaction(_.persistChanges(node)) match {
       case Some(err) => Right(s"Cannot find node with uuid '$uuid'': $err")
-      case None => Left(node)
+      case None =>
+        Left(node)
     }
   }
 }

@@ -21,10 +21,16 @@ object WustSchema {
 
   // Authentification
   @Graph trait Auth {Nodes(User, LoginInfo, PasswordInfo) }
-  @Node class User extends UuidNode with Identity {
-    var name: String
+  @Node trait User extends UuidNode {
+    @unique val name: String
+  }
+  @Node class RealUser extends User with Identity {
     var email: Option[String]
     var karma: Long = 0
+    def isDummy = false
+  }
+  @Node class DummyUser extends User {
+    def isDummy = true
   }
   @Node class LoginInfo {
     val providerID: String
@@ -36,7 +42,7 @@ object WustSchema {
     val password: String
     val salt: Option[String]
   }
-  @Relation class HasLogin(startNode: User, endNode: LoginInfo)
+  @Relation class HasLogin(startNode: RealUser, endNode: LoginInfo)
   @Relation class HasPassword(startNode: LoginInfo, endNode: PasswordInfo)
   @Node class UserGroup extends UuidNode {
     @unique val name: String

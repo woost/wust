@@ -119,17 +119,18 @@ object TagAccess {
 
 class UserAccess extends NodeRead(User) {
   override def update(context: RequestContext, uuid: String): Either[User, String] = {
-    //TODO: restrict to normal users...
-  context.jsonAs[UserUpdateRequest].map(request => {
-      //TODO: sanity check + welcome mail
-      if (request.email.isDefined)
-        context.user.email = request.email
+    context.realUser.map { user =>
+      context.jsonAs[UserUpdateRequest].map { request =>
+        //TODO: sanity check + welcome mail
+        if (request.email.isDefined)
+          user.email = request.email
 
-      db.transaction(_.persistChanges(context.user)) match {
-        case Some(err) => Right(s"Cannot update User: $err'")
-        case _         => Left(context.user)
-      }
-    }).getOrElse(Right("Error parsing update request for User"))
+        db.transaction(_.persistChanges(user)) match {
+          case Some(err) => Right(s"Cannot update User: $err'")
+          case _         => Left(user)
+        }
+      }.getOrElse(Right("Error parsing update request for User"))
+    }.getOrElse(Right("Cannot edit user"))
   }
 }
 

@@ -3,7 +3,7 @@ package controllers.api.nodes
 import com.mohiva.play.silhouette.api.Silhouette
 import com.mohiva.play.silhouette.impl.authenticators.JWTAuthenticator
 import controllers.api.router.{DefaultNestedResourceController, NestedResourceRouter}
-import model.WustSchema.{User, UuidNode}
+import model.WustSchema._
 import modules.auth.HeaderEnvironmentModule
 import modules.requests.{ConnectSchema, HyperConnectSchema, NodeSchema}
 import play.api.libs.json.{JsResult, JsValue}
@@ -15,10 +15,16 @@ case class RequestContext(user: User, json: Option[JsValue], query: Map[String, 
   def size = query.get("size").map(_.toInt)
   def limit = size.getOrElse(15)
   def jsonAs[T](implicit rds : play.api.libs.json.Reads[T]) = json.flatMap(_.validate[T].asOpt)
-  val skip = page * limit
+  def realUser = user match {
+    case u: RealUser => Some(u)
+    case _ => None
+  }
 }
 
-trait NodesBase extends NestedResourceRouter with DefaultNestedResourceController with Silhouette[User, JWTAuthenticator] with HeaderEnvironmentModule {
+trait NodesBase extends NestedResourceRouter with DefaultNestedResourceController with Silhouette[RealUser, JWTAuthenticator] with HeaderEnvironmentModule {
+
+  object SchemaWrapper extends RootNodeTraitFactory[UuidNode]
+
   protected def context(request: UserAwareRequest[AnyContent]) = {
     RequestContext(getUser(request.identity), request.body.asJson, request.queryString.flatMap { case (k,v) => v.headOption.map((k, _)) })
   }
@@ -66,7 +72,7 @@ trait NodesBase extends NestedResourceRouter with DefaultNestedResourceControlle
   protected def getUser(identity: Option[User]): User = {
     //TODO: resolve user
     //TODO: rename to anonymous, only match + seedinit
-    identity.getOrElse(User.merge(name = "devel", merge = Set("name")))
+    identity.getOrElse(DummyUser.matchesOnName("anonymous"))
   }
 
   protected def validateConnect(uuid: String, otherUuid: String)(handler: () => Result): Result = {

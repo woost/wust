@@ -10,7 +10,6 @@ object UserFormats {
 
     def writes(user: User) = JsObject(Seq(
       ("name", JsString(user.name)),
-      ("email", JsString(user.email.getOrElse(""))),
       ("id", JsString(user.uuid))
     ))
   }

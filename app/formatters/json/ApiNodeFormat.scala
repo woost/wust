@@ -28,12 +28,23 @@ object ApiNodeFormat {
         ("description", JsString(n.description.getOrElse(""))),
         ("isType", JsBoolean(n.isType))
       )
-      case n: User        => Seq(
+      case n: RealUser        => Seq(
         ("id", JsString(n.uuid)),
         ("name", JsString(n.name)),
         ("email", JsString(n.email.getOrElse("")))
       )
-      case _              => throw new RuntimeException("You did not define a formatter for the api: " + node)
+      case n: DummyUser        => Seq(
+        ("id", JsString(n.uuid)),
+        ("name", JsString(n.name))
+      )
+      case n              =>
+        println("wht")
+        println(n.labels)
+        println(n.rawItem.labels)
+        println(n.rawItem.properties)
+        println(n.rawItem)
+        println(n.rawItem.origin)
+        throw new RuntimeException("You did not define a formatter for the api: " + node)
     })
   }
 }

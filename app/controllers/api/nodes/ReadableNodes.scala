@@ -10,8 +10,10 @@ import renesca.schema.Node
 trait ReadableNodes[NODE <: UuidNode] extends NodesBase {
   def nodeSchema: NodeSchema[NODE]
 
-  private def jsonNode(node: Node) = Ok(Json.toJson(node))
-  private def jsonNodes(nodes: Iterable[Node]) = Ok(Json.toJson(nodes))
+  //TODO: we need to rewrap the node in order to instantiate with the correct type
+  // the factory could be a matches-factory (for traits). Then this won't have the actual type of the node
+  private def jsonNode(node: Node) = Ok(Json.toJson(SchemaWrapper.wrap(node.rawItem)))
+  private def jsonNodes(nodes: Iterable[Node]) = Ok(Json.toJson(nodes.map(n => SchemaWrapper.wrap(n.rawItem))))
 
   override def show(uuid: String) = UserAwareAction { request =>
     getResult(nodeSchema.op.read(context(request), uuid))(jsonNode)
