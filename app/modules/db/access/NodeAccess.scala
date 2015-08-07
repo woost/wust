@@ -18,11 +18,9 @@ trait NodeAccess[+NODE <: UuidNode] {
   def create(context: RequestContext): Either[NODE, String] = Right("No create access on Node")
   def update(context: RequestContext, uuid: String): Either[NODE,String] = Right("No update access on Node")
   def delete(context: RequestContext, uuid: String): Either[Boolean,String] = Right("No delete access on Node")
-
-  def toNodeDefinition(uuid: String) = FactoryUuidNodeDefinition(factory, uuid)
 }
 
-class NodeRead[NODE <: UuidNode](val factory: UuidNodeMatchesFactory[NODE]) extends NodeAccess[NODE] {
+trait NodeReadBase[NODE <: UuidNode] extends NodeAccess[NODE] {
   override def read(context: RequestContext) = {
     context.page.map { page =>
       val skip = page * context.limit
@@ -42,11 +40,7 @@ class NodeRead[NODE <: UuidNode](val factory: UuidNodeMatchesFactory[NODE]) exte
   }
 }
 
-object NodeRead {
-  def apply[NODE <: UuidNode](factory: UuidNodeMatchesFactory[NODE]) = new NodeRead(factory)
-}
-
-class NodeReadDelete[NODE <: UuidNode](factory: UuidNodeMatchesFactory[NODE]) extends NodeRead(factory) {
+trait NodeDeleteBase[NODE <: UuidNode] extends NodeAccess[NODE] {
   override def delete(context: RequestContext, uuid: String) = {
     // TODO: use matches... and remove...
     deleteNodes(FactoryUuidNodeDefinition(factory, uuid))
@@ -55,6 +49,6 @@ class NodeReadDelete[NODE <: UuidNode](factory: UuidNodeMatchesFactory[NODE]) ex
   }
 }
 
-object NodeReadDelete {
-  def apply[NODE <: UuidNode](factory: UuidNodeMatchesFactory[NODE]) = new NodeReadDelete(factory)
-}
+case class NodeRead[NODE <: UuidNode](factory: UuidNodeMatchesFactory[NODE]) extends NodeReadBase[NODE]
+case class NodeDelete[NODE <: UuidNode](factory: UuidNodeMatchesFactory[NODE]) extends NodeDeleteBase[NODE]
+case class NodeReadDelete[NODE <: UuidNode](factory: UuidNodeMatchesFactory[NODE]) extends NodeReadBase[NODE] with NodeDeleteBase[NODE]

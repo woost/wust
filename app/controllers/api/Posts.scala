@@ -9,12 +9,12 @@ import modules.requests.dsl._
 object Posts extends Nodes[Post] {
   val node = NodeDef(Post, PostAccess.apply,
     ("connects-from", N < Connects < (EndContentRelationAccess(Connects, Post) + PostAccess.apply,
-      ("connects-to", HR > StartContentRelationPostHyperAccess(Connects, Post) + PostAccess.apply),
-      ("connects-from", HR < EndContentRelationPostHyperAccess(Connects, Post) + PostAccess.apply)
+      ("connects-to", N > StartContentRelationAccess(Connects, Post) + PostAccess.apply),
+      ("connects-from", N < EndContentRelationAccess(Connects, Post) + PostAccess.apply)
     )),
     ("connects-to", N > Connects > (StartContentRelationAccess(Connects, Post) + PostAccess.apply,
-      ("connects-to", HR > StartContentRelationPostHyperAccess(Connects, Post) + PostAccess.apply),
-      ("connects-from", HR < EndContentRelationPostHyperAccess(Connects, Post) + PostAccess.apply)
+      ("connects-to", N > StartContentRelationAccess(Connects, Post) + PostAccess.apply),
+      ("connects-from", N < EndContentRelationAccess(Connects, Post) + PostAccess.apply)
     )),
     ("tags", N < Categorizes < (EndRelationRead(Categorizes, Tag),
       ("voters", N < EndRelationRead(Votes, User)),

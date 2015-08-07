@@ -9,6 +9,7 @@ import modules.requests.{ConnectSchema, HyperConnectSchema, NodeSchema}
 import play.api.libs.json.{JsResult, JsValue}
 import play.api.mvc.{AnyContent, Result}
 import renesca.parameter.implicits._
+import renesca.schema._
 
 case class RequestContext(user: User, json: Option[JsValue], query: Map[String, String]) {
   def page = query.get("page").map(_.toInt)
@@ -20,6 +21,19 @@ case class RequestContext(user: User, json: Option[JsValue], query: Map[String, 
     case _ => None
   }
 }
+
+case class ConnectParameter[BASE <: UuidNode](
+  baseFactory: UuidNodeMatchesFactory[BASE],
+  baseUuid: String
+)
+
+case class HyperConnectParameter[START <: UuidNode, BASE <: UuidNode with AbstractRelation[START,END], END <: UuidNode](
+  startFactory: UuidNodeMatchesFactory[START],
+  startUuid: String,
+  baseFactory: HyperConnectionFactory[START, BASE, END] with UuidNodeMatchesFactory[BASE],
+  endFactory: UuidNodeMatchesFactory[END],
+  endUuid: String
+)
 
 trait NodesBase extends NestedResourceRouter with DefaultNestedResourceController with Silhouette[RealUser, JWTAuthenticator] with HeaderEnvironmentModule {
 

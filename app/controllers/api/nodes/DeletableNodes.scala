@@ -20,22 +20,19 @@ trait DeletableNodes[NODE <: UuidNode] extends NodesBase {
 
   override def disconnectMember(path: String, uuid: String, otherUuid: String) = UserAwareAction { request =>
     getSchema(nodeSchema.connectSchemas, path)(connectSchema => {
-      getResult(connectSchema.op.delete(context(request), uuid, otherUuid))(deleteResult)
+      getResult(connectSchema.inv.op.delete(context(request), ConnectParameter(nodeSchema.op.factory, uuid), otherUuid))(deleteResult)
     })
   }
 
   override def disconnectNestedMember(path: String, nestedPath: String, uuid: String, otherUuid: String, nestedUuid: String) = UserAwareAction { request =>
-    val baseNode = nodeSchema.op.toNodeDefinition(uuid)
     getHyperSchema(nodeSchema.connectSchemas, path)({
       case c@StartHyperConnectSchema(factory,op,connectSchemas) =>
-        val hyperRel = c.toNodeDefinition(baseNode, otherUuid)
         getSchema(connectSchemas, nestedPath)(schema =>
-          getResult(schema.op.deleteHyper(context(request), hyperRel, nestedUuid))(deleteResult)
+          getResult(schema.inv.op.delete(context(request), HyperConnectParameter(nodeSchema.op.factory, uuid, c.factory, c.op.nodeFactory, otherUuid), nestedUuid))(deleteResult)
         )
       case c@EndHyperConnectSchema(factory,op,connectSchemas) =>
-        val hyperRel = c.toNodeDefinition(baseNode, otherUuid)
         getSchema(connectSchemas, nestedPath)(schema =>
-          getResult(schema.op.deleteHyper(context(request), hyperRel, nestedUuid))(deleteResult)
+          getResult(schema.inv.op.delete(context(request), HyperConnectParameter(c.op.nodeFactory, otherUuid, c.factory, nodeSchema.op.factory, uuid), nestedUuid))(deleteResult)
         )
     })
   }

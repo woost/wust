@@ -25,22 +25,19 @@ trait ReadableNodes[NODE <: UuidNode] extends NodesBase {
 
   override def showMembers(path: String, uuid: String) = UserAwareAction { request =>
     getSchema(nodeSchema.connectSchemas, path)(connectSchema => {
-      getResult(connectSchema.op.read(context(request), uuid))(jsonNodes)
+      getResult(connectSchema.inv.op.read(context(request), ConnectParameter(nodeSchema.op.factory, uuid)))(jsonNodes)
     })
   }
 
   override def showNestedMembers(path: String, nestedPath: String, uuid: String, otherUuid: String) = UserAwareAction { request =>
-    val baseNode = nodeSchema.op.toNodeDefinition(uuid)
     getHyperSchema(nodeSchema.connectSchemas, path)({
-      case c@StartHyperConnectSchema(_, _, connectSchemas) =>
-        val hyperRel = c.toNodeDefinition(baseNode, otherUuid)
+      case c@StartHyperConnectSchema(factory,op,connectSchemas) =>
         getSchema(connectSchemas, nestedPath)(schema =>
-          getResult(schema.op.readHyper(context(request), hyperRel))(jsonNodes)
+          getResult(schema.inv.op.read(context(request), HyperConnectParameter(nodeSchema.op.factory, uuid, c.factory, c.op.nodeFactory, otherUuid)))(jsonNodes)
         )
-      case c@EndHyperConnectSchema(_, _, connectSchemas)   =>
-        val hyperRel = c.toNodeDefinition(baseNode, otherUuid)
+      case c@EndHyperConnectSchema(factory,op,connectSchemas) =>
         getSchema(connectSchemas, nestedPath)(schema =>
-          getResult(schema.op.readHyper(context(request), hyperRel))(jsonNodes)
+          getResult(schema.inv.op.read(context(request), HyperConnectParameter(c.op.nodeFactory, otherUuid, c.factory, nodeSchema.op.factory, uuid)))(jsonNodes)
         )
     })
   }

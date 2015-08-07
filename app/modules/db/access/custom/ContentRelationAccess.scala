@@ -1,11 +1,11 @@
 package modules.db.access.custom
 
-import controllers.api.nodes.RequestContext
+import controllers.api.nodes.{HyperConnectParameter, ConnectParameter, RequestContext}
 import formatters.json.RequestFormat._
 import model.WustSchema._
 import modules.db.Database.db
 import modules.db.HyperNodeDefinitionBase
-import modules.db.access.{NodeAccess, EndRelationReadDelete, StartRelationReadDelete}
+import modules.db.access._
 import modules.requests.{ConnectResponse, PostAddRequest}
 import play.api.libs.json.JsValue
 import renesca.parameter.implicits._
@@ -26,150 +26,58 @@ trait ContentRelationHelper {
 }
 
 //TODO: track what the user did here
-class StartContentRelationAccess[
+case class StartContentRelationAccess[
 START <: UuidNode,
 RELATION <: AbstractRelation[START, END],
 END <: UuidNode
 ](
-  override val factory: ContentRelationFactory[START, RELATION, END],
-  nodeFactory: UuidNodeMatchesFactory[END],
-  baseFactory: UuidNodeMatchesFactory[START]) extends StartRelationReadDelete(factory, nodeFactory, baseFactory) with ContentRelationHelper {
+  factory: ContentRelationFactory[START, RELATION, END],
+  nodeFactory: UuidNodeMatchesFactory[END]) extends StartRelationReadBase[START,RELATION,END] with StartRelationDeleteBase[START,RELATION,END] with ContentRelationHelper {
 
-  override def create(context: RequestContext, uuid: String, otherUuid: String) = {
+  override def create(context: RequestContext, param: ConnectParameter[START], otherUuid: String) = {
       val discourse = Discourse.empty
-      val base = baseFactory.matchesOnUuid(uuid)
+      val base = param.baseFactory.matchesOnUuid(param.baseUuid)
       val node = nodeFactory.matchesOnUuid(otherUuid)
       discourse.add(factory.mergeContentRelation(base, node))
       persistRelation(discourse, node)
   }
-}
 
-object StartContentRelationAccess {
-  def apply[
-  START <: UuidNode,
-  RELATION <: AbstractRelation[START, END],
-  END <: UuidNode
-  ](factory: ContentRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[END]): UuidNodeMatchesFactory[START] => StartContentRelationAccess[START, RELATION, END] = {
-    baseFactory => new StartContentRelationAccess(factory, nodeFactory, baseFactory)
-  }
-}
-
-class StartContentRelationHyperAccess[
-ISTART <: UuidNode,
-IEND <: UuidNode,
-START <: UuidNode,
-RELATION <: AbstractRelation[START, END],
-END <: UuidNode
-](
-  override val factory: ContentRelationFactory[START, RELATION, END],
-  nodeFactory: UuidNodeMatchesFactory[END],
-  startFactory: UuidNodeMatchesFactory[ISTART],
-  baseFactory: HyperConnectionFactory[ISTART, START with AbstractRelation[ISTART, IEND], IEND] with UuidNodeMatchesFactory[START],
-  endFactory: UuidNodeMatchesFactory[IEND]
-  ) extends StartRelationReadDelete(factory, nodeFactory, baseFactory) with ContentRelationHelper {
-
-  override def createHyper(context: RequestContext, startUuid: String, endUuid: String, nestedUuid: String) = {
+  override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,START with AbstractRelation[S,E], E], uuid: String) = {
       val discourse = Discourse.empty
-      val start = startFactory.matchesOnUuid(startUuid)
-      val end = endFactory.matchesOnUuid(endUuid)
-      val base = baseFactory.matchesHyperConnection(start, end)
-      val node = nodeFactory.matchesOnUuid(nestedUuid)
+      val start = param.startFactory.matchesOnUuid(param.startUuid)
+      val end = param.endFactory.matchesOnUuid(param.endUuid)
+      val base = param.baseFactory.matchesHyperConnection(start, end)
+      val node = nodeFactory.matchesOnUuid(uuid)
       val relation = factory.mergeContentRelation(base, node)
       discourse.add(base, relation)
       persistRelation(discourse, node)
   }
 }
 
-object StartContentRelationHyperAccess {
-  def apply[
-  START <: UuidNode,
-  RELATION <: AbstractRelation[START, END],
-  END <: UuidNode
-  ](factory: ContentRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[END], startFactory: UuidNodeMatchesFactory[Connectable], endFactory: UuidNodeMatchesFactory[Connectable]): (HyperConnectionFactory[Connectable, START with AbstractRelation[Connectable, Connectable], Connectable] with UuidNodeMatchesFactory[START]) => StartContentRelationHyperAccess[Connectable, Connectable, START, RELATION, END] = {
-    baseFactory => new StartContentRelationHyperAccess(factory, nodeFactory, Connectable, baseFactory, Connectable)
-  }
-}
-
-object StartContentRelationPostHyperAccess {
-  def apply[
-  START <: UuidNode,
-  RELATION <: AbstractRelation[START, END],
-  END <: UuidNode
-  ](factory: ContentRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[END]): (HyperConnectionFactory[Connectable, START with AbstractRelation[Connectable, Connectable], Connectable] with UuidNodeMatchesFactory[START]) => StartContentRelationHyperAccess[Connectable, Connectable, START, RELATION, END] = {
-    baseFactory => new StartContentRelationHyperAccess(factory, nodeFactory, Post, baseFactory, Post)
-  }
-}
-
-class EndContentRelationAccess[
+case class EndContentRelationAccess[
 START <: UuidNode,
 RELATION <: AbstractRelation[START, END],
 END <: UuidNode
 ](
-  override val factory: ContentRelationFactory[START, RELATION, END],
-  nodeFactory: UuidNodeMatchesFactory[START],
-  baseFactory: UuidNodeMatchesFactory[END]) extends EndRelationReadDelete(factory, nodeFactory, baseFactory) with ContentRelationHelper {
+  factory: ContentRelationFactory[START, RELATION, END],
+  nodeFactory: UuidNodeMatchesFactory[START]) extends EndRelationReadBase[START,RELATION,END] with EndRelationDeleteBase[START,RELATION,END] with ContentRelationHelper {
 
-  override def create(context: RequestContext, uuid: String, otherUuid: String) = {
+  override def create(context: RequestContext, param: ConnectParameter[END], otherUuid: String) = {
     val discourse = Discourse.empty
-    val base = baseFactory.matchesOnUuid(uuid)
+    val base = param.baseFactory.matchesOnUuid(param.baseUuid)
     val node = nodeFactory.matchesOnUuid(otherUuid)
     discourse.add(factory.mergeContentRelation(node, base))
     persistRelation(discourse, node)
   }
-}
 
-object EndContentRelationAccess {
-  def apply[
-  START <: UuidNode,
-  RELATION <: AbstractRelation[START, END],
-  END <: UuidNode
-  ](factory: ContentRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[START]): UuidNodeMatchesFactory[END] => EndContentRelationAccess[START, RELATION, END] = {
-    baseFactory => new EndContentRelationAccess(factory, nodeFactory, baseFactory)
-  }
-}
-
-class EndContentRelationHyperAccess[
-ISTART <: UuidNode,
-IEND <: UuidNode,
-START <: UuidNode,
-RELATION <: AbstractRelation[START, END],
-END <: UuidNode
-](
-  override val factory: ContentRelationFactory[START, RELATION, END],
-  nodeFactory: UuidNodeMatchesFactory[START],
-  startFactory: UuidNodeMatchesFactory[ISTART],
-  baseFactory: HyperConnectionFactory[ISTART, END with AbstractRelation[ISTART, IEND], IEND] with UuidNodeMatchesFactory[END],
-  endFactory: UuidNodeMatchesFactory[IEND]
-  ) extends EndRelationReadDelete(factory, nodeFactory, baseFactory) with ContentRelationHelper {
-
-  override def createHyper(context: RequestContext, startUuid: String, endUuid: String, nestedUuid: String) = {
+  override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,END with AbstractRelation[S,E], E], uuid: String) = {
       val discourse = Discourse.empty
-      val start = startFactory.matchesOnUuid(startUuid)
-      val end = endFactory.matchesOnUuid(endUuid)
-      val base = baseFactory.matchesHyperConnection(start, end)
-      val node = nodeFactory.matchesOnUuid(nestedUuid)
+      val start = param.startFactory.matchesOnUuid(param.startUuid)
+      val end = param.endFactory.matchesOnUuid(param.endUuid)
+      val base = param.baseFactory.matchesHyperConnection(start, end)
+      val node = nodeFactory.matchesOnUuid(uuid)
       val relation = factory.mergeContentRelation(node, base)
       discourse.add(base, relation)
       persistRelation(discourse, node)
-  }
-}
-
-object EndContentRelationHyperAccess {
-  def apply[
-  START <: UuidNode,
-  RELATION <: AbstractRelation[START, END],
-  END <: UuidNode
-  ](factory: ContentRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[START], startFactory: UuidNodeMatchesFactory[Connectable], endFactory: UuidNodeMatchesFactory[Connectable]): (HyperConnectionFactory[Connectable, END with AbstractRelation[Connectable, Connectable], Connectable] with UuidNodeMatchesFactory[END]) => EndContentRelationHyperAccess[Connectable, Connectable, START, RELATION, END] = {
-    baseFactory => new EndContentRelationHyperAccess(factory, nodeFactory, Connectable, baseFactory, Connectable)
-  }
-}
-
-object EndContentRelationPostHyperAccess {
-  def apply[
-  START <: UuidNode,
-  RELATION <: AbstractRelation[START, END],
-  END <: UuidNode
-  ](factory: ContentRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[START]): (HyperConnectionFactory[Connectable, END with AbstractRelation[Connectable, Connectable], Connectable] with UuidNodeMatchesFactory[END]) => EndContentRelationHyperAccess[Connectable, Connectable, START, RELATION, END] = {
-    baseFactory => new EndContentRelationHyperAccess(factory, nodeFactory, Post, baseFactory, Post)
   }
 }

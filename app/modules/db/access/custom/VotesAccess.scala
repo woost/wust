@@ -1,24 +1,24 @@
 package modules.db.access.custom
 
-import controllers.api.nodes.RequestContext
+import controllers.api.nodes.{HyperConnectParameter, RequestContext}
 import model.WustSchema._
 import modules.db.Database._
 import modules.db.access.EndRelationAccess
 import modules.requests.ConnectResponse
 import play.api.libs.json.JsValue
 import renesca.parameter.implicits._
+import renesca.schema._
 
-class VotesAccess(
+case class VotesAccess(
   weight: Long
   ) extends EndRelationAccess[User, Votes, Categorizes] {
-  val factory = Votes
   val nodeFactory = User
-  val baseFactory = Categorizes
 
-  override def createHyper(context: RequestContext, startUuid: String, endUuid: String) = {
-    val start = TagLikeMatches.matches(uuid = Some(startUuid), matches = Set("uuid"))
-    val end = Taggable.matches(uuid = Some(endUuid), matches = Set("uuid"))
-    val hyper = Categorizes.matches(start, end)
+  //TODO: nicer interface for custom access, here we know more...
+  override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,Categorizes with AbstractRelation[S,E],E], uuid: String) = {
+    val start = param.startFactory.matchesOnUuid(param.startUuid)
+    val end = param.endFactory.matchesOnUuid(param.endUuid)
+    val hyper = param.baseFactory.matchesHyperConnection(start, end)
     val votes = Votes.merge(context.user, hyper, weight = weight, onMatch = Set("weight"))
     val failure = db.transaction(_.persistChanges(start, end, hyper, votes))
     if(failure.isDefined)
@@ -26,9 +26,4 @@ class VotesAccess(
     else
       Left(ConnectResponse(Discourse.empty, Some(context.user)))
   }
-}
-
-
-object VotesAccess {
-  def apply(weight: Long) = new VotesAccess(weight)
 }
