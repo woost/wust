@@ -82,9 +82,10 @@
                 background-color: #BCEFFF;
             }
             .node .nodetags {
+                width: 100px;
                 position: absolute;
                 top: 5px;
-                left: 140px;
+                right: -90px;
             }
             .hyperrelation .nodetags {
             }
@@ -165,10 +166,12 @@
         .nodeframe {
             position: absolute; // needed for z-index (moving/fixed have higher z-index)
             pointer-events: all;
-            max-width: 150px;
             .node {
-                word-wrap: break-word;
                 cursor: pointer;
+                .nodecontent {
+                    max-width: 150px;
+                    word-wrap: break-word;
+                }
             }
         }
 
@@ -224,7 +227,9 @@
     }
     .post-preview-frame {
         position: absolute;
-        width: 300px;
+        width: 30%;
+        min-width: 300px;
+        max-width: 500px;
         z-index: $zindex_post_preview_frame;
         background: #FEFEFE;
 
@@ -239,6 +244,7 @@
             border: 1px solid #DDD;
             border-radius: 5px;
             padding: 10px;
+            word-wrap: break-word;
         }
     }
 }
