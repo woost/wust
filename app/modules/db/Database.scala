@@ -48,7 +48,7 @@ object Database {
 
   def limitedDiscourseNodes[NODE <: UuidNode](skip: Int, limit: Int, factory: NodeFactory[NODE]): (Discourse, Seq[NODE]) = {
     val nodeDef = ConcreteFactoryNodeDefinition(factory)
-    val discourse = discourseGraphWithReturn(s"${nodeDef.name} skip $skip limit $limit", nodeDef)
+    val discourse = discourseGraphWithReturn(s"${ nodeDef.name } skip $skip limit $limit", nodeDef)
     (discourse, nodesWithType[NODE](discourse.nodes))
   }
 
@@ -127,7 +127,7 @@ object Database {
   def deleteNodes[NODE <: UuidNode](definitions: NodeDefinition[NODE]*) {
     val discourse = discourseGraph(definitions: _*)
     discourse.graph.nodes.clear()
-    db.transaction{ tx =>
+    db.transaction { tx =>
       tx.persistChanges(discourse.graph)
       model.WustSchema.deleteConnectsGarbage(tx)
     }
@@ -214,10 +214,10 @@ object Database {
     // depth * 2 because hyperrelation depth
     val query = s"""
       match ${ focusNode.toQuery }
-      match (${ focusNode.name })-[rel:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(posts:`${Post.label}`)
-      match (posts)-[:`${ Connects.startRelationType }`]->(connects:`${Connects.label}`)-[:`${ Connects.endRelationType }`]->(:`${Post.label}`)
-      optional match (nodetag:`${TagLike.label}`)-[nodetagtocat:`${ Categorizes.startRelationType }`]->(nodecat:`${ Categorizes.label }`)-[cattopost:`${ Categorizes.endRelationType }`]->(posts)
-      optional match (relationtag:`${TagLike.label}`)-[relationtagtocat:`${ Categorizes.startRelationType }`]->(relationcat:`${ Categorizes.label }`)-[cattoconnects:`${ Categorizes.endRelationType }`]->(connects)
+      match (${ focusNode.name })-[rel:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(posts:`${ Post.label }`)
+      match (posts)-[:`${ Connects.startRelationType }`]->(connects:`${ Connects.label }`)-[:`${ Connects.endRelationType }`]->(:`${ Post.label }`)
+      optional match (nodetag:`${ TagLike.label }`)-[nodetagtocat:`${ Categorizes.startRelationType }`]->(nodecat:`${ Categorizes.label }`)-[cattopost:`${ Categorizes.endRelationType }`]->(posts)
+      optional match (relationtag:`${ TagLike.label }`)-[relationtagtocat:`${ Categorizes.startRelationType }`]->(relationcat:`${ Categorizes.label }`)-[cattoconnects:`${ Categorizes.endRelationType }`]->(connects)
       return distinct posts,rel,nodetag,relationtag,nodecat,relationcat,nodetagtocat,cattopost,cattoconnects,relationtagtocat
     """
 

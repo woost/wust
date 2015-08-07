@@ -80,7 +80,7 @@ lazy val schema = (project in file("schema")).
     scalaVersion := scalaV,
     scalacOptions ++= scalacOpts,
     libraryDependencies ++= Seq(
-      "com.github.renesca" %% "renesca" % "0.3.2",
+      "com.github.renesca" %% "renesca" % "0.3.2-1",
       "com.github.renesca" %% "renesca-magic" % "0.3.2-1",
       // for external inheritance and default value code
       "com.mohiva" %% "play-silhouette" % "2.0"

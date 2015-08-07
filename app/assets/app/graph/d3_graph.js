@@ -186,8 +186,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     .attr("class", d => d.isHyperRelation ? "hyperrelation" : `node ${DiscourseNode.get(d.label).css}`);
 
                 this.d3Node
-                    .append("div")
-                    .text(d => d.title);
+                    .append("div").attr("class", "nodecontent")
+                    .text(d => (d.isHyperRelation && d.tags.length > 0) ? "" : d.title);
                 // .style("border-width", n => Math.abs(n.verticalForce) + "px")
                 // .style("border-color", n => n.verticalForce < 0 ? "#3CBAFF" : "#FFA73C")
 
@@ -203,7 +203,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     });
 
                 // tags
-                this.d3NodeTags = this.d3NodeContainerWithData.append("div")
+                this.d3NodeTags = this.d3Node.append("div")
                     .attr("class", "nodetags")
                     .html(d =>
                         _.values(d.tags).map(t => {

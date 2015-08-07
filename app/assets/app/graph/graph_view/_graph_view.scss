@@ -81,11 +81,14 @@
             .selected .hyperrelation {
                 background-color: #BCEFFF;
             }
-            .nodetags {
+            .node .nodetags {
                 position: absolute;
                 top: 5px;
                 left: 140px;
             }
+            .hyperrelation .nodetags {
+            }
+
             .nodetools {
                 position: absolute;
                 top: -32px;
@@ -191,20 +194,16 @@
         }
 
         .hyperrelation {
-            // font-size: 9px;
-            // line-height: 16px;
-            background-color: $graph_relation_label_bg;
-            fill: $graph_relation_label_bg;
             display: inline-block;
-            border: 1px solid $graph_relation_color;
+            border: 0;
             color: $graph_relation_color;
-            border-radius: $border_radius;
-            padding: 1px 15px 1px 12px;
+            padding: 0;
+            margin: 0;
 
-            .discourse_node_list & {
-                padding: 5px 15px 0px 12px;
-                display: block;
-                height: 34px;
+            .nodecontent {
+                display:block;
+                width:100%;
+                height:100%;
             }
         }
         .popover {
