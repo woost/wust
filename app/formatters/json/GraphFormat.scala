@@ -43,11 +43,12 @@ object GraphFormat {
           ("description", JsString(n.description.getOrElse(""))),
           ("tags", Json.toJson(n.rev_categorizes))
         )
-      case h: HyperRelation[Connectable @unchecked, _, _, _, Connectable @unchecked] =>
+      case h: Connects  =>
         Seq(
           ("isHyperRelation", JsBoolean(true)),
           ("startId", JsString(h.startNodeOpt.map(_.uuid).getOrElse(""))),
-          ("endId", JsString(h.endNodeOpt.map(_.uuid).getOrElse("")))
+          ("endId", JsString(h.endNodeOpt.map(_.uuid).getOrElse(""))),
+          ("tags", Json.toJson(h.rev_categorizes))
         )
       case _                                      => Seq.empty
       }))

@@ -57,7 +57,7 @@ object WustSchema {
 
   // Content
   @Node trait Connectable extends UuidNode with Taggable
-  @HyperRelation class Connects(startNode: Connectable, endNode: Connectable) extends Connectable with ContentRelation with HyperConnection with UuidNode
+  @HyperRelation class Connects(startNode: Connectable, endNode: Connectable) extends Connectable with Taggable with ContentRelation with HyperConnection with UuidNode
   @Node trait Inheritable
   @HyperRelation class Inherits(startNode: Inheritable, endNode: Inheritable) extends ContentRelation with HyperConnection with UuidNode
 
