@@ -12,8 +12,9 @@ import renesca.schema._
 trait RelationAccess[-NODE <: UuidNode, +OTHER <: UuidNode] {
   //TODO: switch left/right...left should be errors
   //TODO: no nodedefinitions as args
-  def read(context: RequestContext, baseDef: FixedNodeDefinition[NODE]): Either[Iterable[OTHER], String] = Right("No read access on Relation")
-  def delete(context: RequestContext, baseDef: FixedNodeDefinition[NODE], uuid: String): Either[Boolean, String] = Right("No delete access on Relation")
+  def read(context: RequestContext, uuid: String): Either[Iterable[OTHER], String] = Right("No read access on Relation")
+  def readHyper(context: RequestContext, baseDef: HyperNodeDefinitionBase[NODE with AbstractRelation[_, _]]): Either[Iterable[OTHER], String] = Right("No read access on HyperRelation")
+  def delete(context: RequestContext, uuid: String, nestedUuid: String): Either[Boolean, String] = Right("No delete access on Relation")
   def deleteHyper(context: RequestContext, baseDef: HyperNodeDefinitionBase[NODE with AbstractRelation[_, _]], uuid: String): Either[Boolean, String] = Right("No delete access on HyperRelation")
   def create(context: RequestContext, uuid: String): Either[ConnectResponse[OTHER], String]
   def create(context: RequestContext, uuid: String, nestedUuid: String): Either[ConnectResponse[OTHER], String] = Right("No create access on Relation")
@@ -44,10 +45,12 @@ START <: UuidNode,
 RELATION <: AbstractRelation[START, END],
 END <: UuidNode
 ] extends NodeAwareRelationAccess[START,END] {
-  val nodeFactory: NodeFactory[END]
+  val nodeFactory: UuidNodeMatchesFactory[END]
+  val baseFactory: UuidNodeMatchesFactory[START]
 
   def toNodeDefinition = ConcreteFactoryNodeDefinition(nodeFactory)
   def toNodeDefinition(uuid: String) = FactoryUuidNodeDefinition(nodeFactory, uuid)
+  def toBaseNodeDefinition(uuid: String) = FactoryUuidNodeDefinition(baseFactory, uuid)
 
   protected def pageAwareRead(context: RequestContext, relDefs: Seq[NodeAndFixedRelationDefinition[START,RELATION,END]]) = {
     context.page.map { page =>
@@ -62,10 +65,12 @@ START <: UuidNode,
 RELATION <: AbstractRelation[START, END],
 END <: UuidNode
 ] extends NodeAwareRelationAccess[END,START] {
-  val nodeFactory: NodeFactory[START]
+  val nodeFactory: UuidNodeMatchesFactory[START]
+  val baseFactory: UuidNodeMatchesFactory[END]
 
   def toNodeDefinition = ConcreteFactoryNodeDefinition(nodeFactory)
   def toNodeDefinition(uuid: String) = FactoryUuidNodeDefinition(nodeFactory, uuid)
+  def toBaseNodeDefinition(uuid: String) = FactoryUuidNodeDefinition(baseFactory, uuid)
 
   protected def pageAwareRead(context: RequestContext, relDefs: Seq[FixedAndNodeRelationDefinition[START,RELATION,END]]) = {
     context.page.map { page =>
@@ -75,32 +80,71 @@ END <: UuidNode
   }
 }
 
-case class StartMultiRelationRead[
+class StartMultiRelationRead[
 START <: UuidNode,
 END <: UuidNode
 ](
   factories: AbstractRelationFactory[START,AbstractRelation[START,END],END]*
 )(
-  val nodeFactory: NodeFactory[END]
+  val nodeFactory: UuidNodeMatchesFactory[END],
+  val baseFactory: UuidNodeMatchesFactory[START]
 ) extends StartRelationAccess[START,AbstractRelation[START,END],END] {
-  override def read(context: RequestContext, baseDef: FixedNodeDefinition[START]) = {
+
+  override def read(context: RequestContext, uuid: String) = {
+    pageAwareRead(context, factories.map(RelationDefinition(toBaseNodeDefinition(uuid), _, toNodeDefinition)))
+  }
+
+  override def readHyper(context: RequestContext, baseDef: HyperNodeDefinitionBase[START with AbstractRelation[_, _]]) = {
     pageAwareRead(context, factories.map(RelationDefinition(baseDef, _, toNodeDefinition)))
   }
 }
 
-case class EndMultiRelationRead[
+object StartMultiRelationRead {
+  def apply[
+  START <: UuidNode,
+  RELATION <: AbstractRelation[START, END],
+  END <: UuidNode
+  ](
+    factories: AbstractRelationFactory[START, RELATION, END]*
+    )(
+    nodeFactory: UuidNodeMatchesFactory[END]
+    ): UuidNodeMatchesFactory[START] => StartMultiRelationRead[START, END] = {
+    baseFactory => new StartMultiRelationRead(factories: _*)(nodeFactory, baseFactory)
+  }
+}
+
+class EndMultiRelationRead[
 START <: UuidNode,
 END <: UuidNode
 ](
   factories: AbstractRelationFactory[START,AbstractRelation[START,END],END]*
 )(
-  val nodeFactory: NodeFactory[START]
+  val nodeFactory: UuidNodeMatchesFactory[START],
+  val baseFactory: UuidNodeMatchesFactory[END]
 ) extends EndRelationAccess[START,AbstractRelation[START,END],END] {
-  override def read(context: RequestContext, baseDef: FixedNodeDefinition[END]) = {
+
+  override def read(context: RequestContext, uuid: String) = {
+    pageAwareRead(context, factories.map(RelationDefinition(toNodeDefinition, _, toBaseNodeDefinition(uuid))))
+  }
+
+  override def readHyper(context: RequestContext, baseDef: HyperNodeDefinitionBase[END with AbstractRelation[_, _]]) = {
     pageAwareRead(context, factories.map(RelationDefinition(toNodeDefinition, _, baseDef)))
   }
 }
 
+object EndMultiRelationRead {
+  def apply[
+  START <: UuidNode,
+  RELATION <: AbstractRelation[START, END],
+  END <: UuidNode
+  ](
+    factories: AbstractRelationFactory[START, RELATION, END]*
+    )(
+    nodeFactory: UuidNodeMatchesFactory[START]
+    ): UuidNodeMatchesFactory[END] => EndMultiRelationRead[START, END] = {
+    baseFactory => new EndMultiRelationRead(factories: _*)(nodeFactory, baseFactory)
+  }
+}
 
 class StartRelationRead[
 START <: UuidNode,
@@ -108,10 +152,15 @@ RELATION <: AbstractRelation[START, END],
 END <: UuidNode
 ](
   val factory: AbstractRelationFactory[START, RELATION, END],
-  val nodeFactory: NodeFactory[END]
+  val nodeFactory: UuidNodeMatchesFactory[END],
+  val baseFactory: UuidNodeMatchesFactory[START]
   ) extends StartRelationAccess[START, RELATION, END] {
 
-  override def read(context: RequestContext, baseDef: FixedNodeDefinition[START]) = {
+  override def read(context: RequestContext, uuid: String) = {
+    pageAwareRead(context, Seq(RelationDefinition(toBaseNodeDefinition(uuid), factory, toNodeDefinition)))
+  }
+
+  override def readHyper(context: RequestContext, baseDef: HyperNodeDefinitionBase[START with AbstractRelation[_, _]]) = {
     pageAwareRead(context, Seq(RelationDefinition(baseDef, factory, toNodeDefinition)))
   }
 }
@@ -123,9 +172,9 @@ object StartRelationRead {
   END <: UuidNode
   ](
     factory: AbstractRelationFactory[START, RELATION, END],
-    nodeFactory: NodeFactory[END]
+    nodeFactory: UuidNodeMatchesFactory[END]
     ): UuidNodeMatchesFactory[START] => StartRelationRead[START, RELATION, END] = {
-    _ => new StartRelationRead(factory, nodeFactory)
+    baseFactory => new StartRelationRead(factory, nodeFactory, baseFactory)
   }
 }
 
@@ -135,10 +184,15 @@ RELATION <: AbstractRelation[START, END],
 END <: UuidNode
 ](
   val factory: AbstractRelationFactory[START, RELATION, END],
-  val nodeFactory: NodeFactory[START]
+  val nodeFactory: UuidNodeMatchesFactory[START],
+  val baseFactory: UuidNodeMatchesFactory[END]
   ) extends EndRelationAccess[START, RELATION, END] {
 
-  override def read(context: RequestContext, baseDef: FixedNodeDefinition[END]) = {
+  override def read(context: RequestContext, uuid: String) = {
+    pageAwareRead(context, Seq(RelationDefinition(toNodeDefinition, factory, toBaseNodeDefinition(uuid))))
+  }
+
+  override def readHyper(context: RequestContext, baseDef: HyperNodeDefinitionBase[END with AbstractRelation[_, _]]) = {
     pageAwareRead(context, Seq(RelationDefinition(toNodeDefinition, factory, baseDef)))
   }
 }
@@ -150,9 +204,9 @@ object EndRelationRead {
   END <: UuidNode
   ](
     factory: AbstractRelationFactory[START, RELATION, END],
-    nodeFactory: NodeFactory[START]
+    nodeFactory: UuidNodeMatchesFactory[START]
     ): UuidNodeMatchesFactory[END] => EndRelationRead[START, RELATION, END] = {
-    _ => new EndRelationRead(factory, nodeFactory)
+    baseFactory => new EndRelationRead(factory, nodeFactory, baseFactory)
   }
 }
 
@@ -163,11 +217,12 @@ RELATION <: AbstractRelation[START, END],
 END <: UuidNode
 ](
   factory: AbstractRelationFactory[START, RELATION, END],
-  nodeFactory: NodeFactory[END]
-  ) extends StartRelationRead(factory, nodeFactory) {
+  nodeFactory: UuidNodeMatchesFactory[END],
+  baseFactory: UuidNodeMatchesFactory[START]
+  ) extends StartRelationRead(factory, nodeFactory, baseFactory) {
 
-  override def delete(context: RequestContext, baseDef: FixedNodeDefinition[START], uuid: String) = {
-    val relationDefinition = RelationDefinition(baseDef, factory, toNodeDefinition(uuid))
+  override def delete(context: RequestContext, uuid: String, nestedUuid: String) = {
+    val relationDefinition = RelationDefinition(toBaseNodeDefinition(uuid), factory, toNodeDefinition(nestedUuid))
     disconnectNodes(relationDefinition)
     Left(true)
   }
@@ -186,9 +241,9 @@ object StartRelationReadDelete {
   END <: UuidNode
   ](
     factory: AbstractRelationFactory[START, RELATION, END],
-    nodeFactory: NodeFactory[END]
-    ): UuidNodeDefinition[START] => StartRelationReadDelete[START, RELATION, END] = {
-    _ => new StartRelationReadDelete(factory, nodeFactory)
+    nodeFactory: UuidNodeMatchesFactory[END]
+    ): UuidNodeMatchesFactory[START] => StartRelationReadDelete[START, RELATION, END] = {
+    baseFactory => new StartRelationReadDelete(factory, nodeFactory, baseFactory)
   }
 }
 
@@ -198,11 +253,12 @@ RELATION <: AbstractRelation[START, END],
 END <: UuidNode
 ](
   factory: AbstractRelationFactory[START, RELATION, END],
-  nodeFactory: NodeFactory[START]
-  ) extends EndRelationRead(factory, nodeFactory) {
+  nodeFactory: UuidNodeMatchesFactory[START],
+  baseFactory: UuidNodeMatchesFactory[END]
+  ) extends EndRelationRead(factory, nodeFactory, baseFactory) {
 
-  override def delete(context: RequestContext, baseDef: FixedNodeDefinition[END], uuid: String) = {
-    val relationDefinition = RelationDefinition(toNodeDefinition(uuid), factory, baseDef)
+  override def delete(context: RequestContext, uuid: String, nestedUuid: String) = {
+    val relationDefinition = RelationDefinition(toNodeDefinition(nestedUuid), factory, toBaseNodeDefinition(uuid))
     disconnectNodes(relationDefinition)
     Left(true)
   }
@@ -221,8 +277,8 @@ object EndRelationReadDelete {
   END <: UuidNode
   ](
     factory: AbstractRelationFactory[START, RELATION, END],
-    nodeFactory: NodeFactory[START]
+    nodeFactory: UuidNodeMatchesFactory[START]
     ): UuidNodeMatchesFactory[END] => EndRelationReadDelete[START, RELATION, END] = {
-    _ => new EndRelationReadDelete(factory, nodeFactory)
+    baseFactory => new EndRelationReadDelete(factory, nodeFactory, baseFactory)
   }
 }

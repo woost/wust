@@ -13,6 +13,7 @@ class VotesAccess(
   ) extends EndRelationAccess[User, Votes, Categorizes] {
   val factory = Votes
   val nodeFactory = User
+  val baseFactory = Categorizes
 
   override def createHyper(context: RequestContext, startUuid: String, endUuid: String) = {
     val start = TagLikeMatches.matches(uuid = Some(startUuid), matches = Set("uuid"))

@@ -24,9 +24,8 @@ trait ReadableNodes[NODE <: UuidNode] extends NodesBase {
   }
 
   override def showMembers(path: String, uuid: String) = UserAwareAction { request =>
-    val baseNode = nodeSchema.op.toNodeDefinition(uuid)
     getSchema(nodeSchema.connectSchemas, path)(connectSchema => {
-      getResult(connectSchema.op.read(context(request), baseNode))(jsonNodes)
+      getResult(connectSchema.op.read(context(request), uuid))(jsonNodes)
     })
   }
 
@@ -36,12 +35,12 @@ trait ReadableNodes[NODE <: UuidNode] extends NodesBase {
       case c@StartHyperConnectSchema(_, _, connectSchemas) =>
         val hyperRel = c.toNodeDefinition(baseNode, otherUuid)
         getSchema(connectSchemas, nestedPath)(schema =>
-          getResult(schema.op.read(context(request), hyperRel))(jsonNodes)
+          getResult(schema.op.readHyper(context(request), hyperRel))(jsonNodes)
         )
       case c@EndHyperConnectSchema(_, _, connectSchemas)   =>
         val hyperRel = c.toNodeDefinition(baseNode, otherUuid)
         getSchema(connectSchemas, nestedPath)(schema =>
-          getResult(schema.op.read(context(request), hyperRel))(jsonNodes)
+          getResult(schema.op.readHyper(context(request), hyperRel))(jsonNodes)
         )
     })
   }

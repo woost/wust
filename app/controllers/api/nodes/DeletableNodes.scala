@@ -19,9 +19,8 @@ trait DeletableNodes[NODE <: UuidNode] extends NodesBase {
   }
 
   override def disconnectMember(path: String, uuid: String, otherUuid: String) = UserAwareAction { request =>
-    val baseNode = nodeSchema.op.toNodeDefinition(uuid)
     getSchema(nodeSchema.connectSchemas, path)(connectSchema => {
-      getResult(connectSchema.op.delete(context(request), baseNode, otherUuid))(deleteResult)
+      getResult(connectSchema.op.delete(context(request), uuid, otherUuid))(deleteResult)
     })
   }
 

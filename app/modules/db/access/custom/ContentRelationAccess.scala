@@ -33,7 +33,7 @@ END <: UuidNode
 ](
   override val factory: ContentRelationFactory[START, RELATION, END],
   nodeFactory: UuidNodeMatchesFactory[END],
-  baseFactory: UuidNodeMatchesFactory[START]) extends StartRelationReadDelete(factory, nodeFactory) with ContentRelationHelper {
+  baseFactory: UuidNodeMatchesFactory[START]) extends StartRelationReadDelete(factory, nodeFactory, baseFactory) with ContentRelationHelper {
 
   override def create(context: RequestContext, uuid: String, otherUuid: String) = {
       val discourse = Discourse.empty
@@ -66,7 +66,7 @@ END <: UuidNode
   startFactory: UuidNodeMatchesFactory[ISTART],
   baseFactory: HyperConnectionFactory[ISTART, START with AbstractRelation[ISTART, IEND], IEND] with UuidNodeMatchesFactory[START],
   endFactory: UuidNodeMatchesFactory[IEND]
-  ) extends StartRelationReadDelete(factory, nodeFactory) with ContentRelationHelper {
+  ) extends StartRelationReadDelete(factory, nodeFactory, baseFactory) with ContentRelationHelper {
 
   override def createHyper(context: RequestContext, startUuid: String, endUuid: String, nestedUuid: String) = {
       val discourse = Discourse.empty
@@ -107,7 +107,7 @@ END <: UuidNode
 ](
   override val factory: ContentRelationFactory[START, RELATION, END],
   nodeFactory: UuidNodeMatchesFactory[START],
-  baseFactory: UuidNodeMatchesFactory[END]) extends EndRelationReadDelete(factory, nodeFactory) with ContentRelationHelper {
+  baseFactory: UuidNodeMatchesFactory[END]) extends EndRelationReadDelete(factory, nodeFactory, baseFactory) with ContentRelationHelper {
 
   override def create(context: RequestContext, uuid: String, otherUuid: String) = {
     val discourse = Discourse.empty
@@ -140,7 +140,7 @@ END <: UuidNode
   startFactory: UuidNodeMatchesFactory[ISTART],
   baseFactory: HyperConnectionFactory[ISTART, END with AbstractRelation[ISTART, IEND], IEND] with UuidNodeMatchesFactory[END],
   endFactory: UuidNodeMatchesFactory[IEND]
-  ) extends EndRelationReadDelete(factory, nodeFactory) with ContentRelationHelper {
+  ) extends EndRelationReadDelete(factory, nodeFactory, baseFactory) with ContentRelationHelper {
 
   override def createHyper(context: RequestContext, startUuid: String, endUuid: String, nestedUuid: String) = {
       val discourse = Discourse.empty
