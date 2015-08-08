@@ -2,8 +2,11 @@ package modules.db.access
 
 import controllers.api.nodes.RequestContext
 
-trait AccessDecoratorControl {
+trait AccessDecoratorControlMethods {
   def acceptRequest(context: RequestContext): Option[String]
+}
+
+trait AccessDecoratorControl extends AccessDecoratorControlMethods {
 }
 
 trait AccessDecoratorControlDefault extends AccessDecoratorControl {

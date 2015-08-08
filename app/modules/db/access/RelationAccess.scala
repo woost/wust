@@ -203,8 +203,10 @@ case class EndRelationDelete[START <: UuidNode, RELATION <: AbstractRelation[STA
 case class StartRelationReadDelete[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factory: AbstractRelationFactory[START,RELATION,END], nodeFactory: UuidNodeMatchesFactory[END]) extends StartRelationDeleteBase[START,RELATION,END] with StartRelationReadBase[START,RELATION,END]
 case class EndRelationReadDelete[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factory: AbstractRelationFactory[START,RELATION,END], nodeFactory: UuidNodeMatchesFactory[START]) extends EndRelationDeleteBase[START,RELATION,END] with EndRelationReadBase[START,RELATION,END]
 
-trait RelationAccessDecorator[NODE <: UuidNode, +OTHER <: UuidNode] extends RelationAccess[NODE, OTHER] with AccessDecoratorControlDefault {
+trait RelationAccessDecorator[NODE <: UuidNode, +OTHER <: UuidNode] extends RelationAccess[NODE, OTHER] with AccessDecoratorControlMethods {
   val self: RelationAccess[NODE, OTHER]
+
+  override def acceptRequest(context: RequestContext): Option[String] = None
 
   override def read(context: RequestContext, param: ConnectParameter[NODE]): Either[String, Iterable[OTHER]] = {
     acceptRequest(context).map(Left(_)).getOrElse(self.read(context, param))
@@ -239,10 +241,16 @@ trait NodeAwareRelationAccess[NODE <: UuidNode, OTHER <: UuidNode] extends Relat
   val nodeAccess: NodeAccess[OTHER]
 
   override def create(context: RequestContext, param: ConnectParameter[NODE]): Either[String, ConnectResponse[OTHER]] = {
-    nodeAccess.create(context).right.toOption.map(n => self.create(context, param, n.uuid)).getOrElse(Left("Cannot create node on connect path"))
+    nodeAccess.create(context) match {
+      case Left(err) => Left(err)
+      case Right(node) => self.create(context, param, node.uuid)
+    }
   }
   override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,NODE with AbstractRelation[S,E], E]): Either[String, ConnectResponse[OTHER]] = {
-    nodeAccess.create(context).right.toOption.map(n => self.create(context, param, n.uuid)).getOrElse(Left("Cannot create node on connect path"))
+    nodeAccess.create(context) match {
+      case Left(err) => Left(err)
+      case Right(node) => self.create(context, param, node.uuid)
+    }
   }
 }
 

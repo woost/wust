@@ -90,7 +90,7 @@ object dsl {
     }
   }
 
-  implicit def StartRelationAccessToCreatable[
+  implicit def StartRelationAccessPlus[
   START <: UuidNode,
   RELATION <: AbstractRelation[START, END],
   END <: UuidNode
@@ -112,22 +112,24 @@ object dsl {
     }
   }
 
-  implicit def EndRelationAccessToCreatable[
+  implicit def EndRelationAccessPlus[
   START <: UuidNode,
   RELATION <: AbstractRelation[START, END],
   END <: UuidNode
   ](access: EndRelationAccess[START,RELATION,END]): EndRelationAccessHolder[START,RELATION,END] = new EndRelationAccessHolder(access)
 
-  class NodeDefContainer[NODE <: UuidNode](schema: String => NodeAccess[NODE]) {
-    def apply(path: String) = schema(path)
-
+  class NodeAccessHolder[NODE <: UuidNode](access: NodeAccess[NODE]) {
     def +(decorate: NodeAccess[NODE] => NodeAccess[NODE]) = {
-      new NodeDefContainer(path => decorate(schema(path)))
+      decorate(access)
     }
     def +(control: AccessDecoratorControl) = {
-      new NodeDefContainer(path => new NodeAccessDecoration(schema(path), control))
+      new NodeAccessDecoration(access, control)
     }
   }
+
+  implicit def NodeAccessPlus[
+  NODE <: UuidNode
+  ](access: NodeAccess[NODE]): NodeAccessHolder[NODE] = new NodeAccessHolder(access)
 
   object NodeDef {
     def apply[NODE <: UuidNode](factory: UuidNodeMatchesFactory[NODE], op: NodeAccess[NODE], connectSchemas: (String, ConnectSchema[NODE])*): (String) => NodeSchema[NODE] = {

@@ -65,8 +65,10 @@ case class NodeRead[NODE <: UuidNode](factory: UuidNodeMatchesFactory[NODE]) ext
 case class NodeDelete[NODE <: UuidNode](factory: UuidNodeMatchesFactory[NODE]) extends NodeDeleteBase[NODE]
 case class NodeReadDelete[NODE <: UuidNode](factory: UuidNodeMatchesFactory[NODE]) extends NodeReadBase[NODE] with NodeDeleteBase[NODE]
 
-trait NodeAccessDecorator[NODE <: UuidNode] extends NodeAccess[NODE] with AccessDecoratorControlDefault {
+trait NodeAccessDecorator[NODE <: UuidNode] extends NodeAccess[NODE] with AccessDecoratorControlMethods {
   val self: NodeAccess[NODE]
+
+  override def acceptRequest(context: RequestContext): Option[String] = None
 
   override def read(context: RequestContext): Either[String, Iterable[NODE]] = {
     acceptRequest(context).map(Left(_)).getOrElse(self.read(context))
