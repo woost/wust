@@ -19,3 +19,11 @@ class CheckUser extends AccessDecoratorControl {
 object CheckUser {
   def apply = new CheckUser
 }
+
+class CheckUserWrite extends CheckUser {
+  override def acceptRequestRead(context: RequestContext) = None
+}
+
+object CheckUserWrite {
+  def apply = new CheckUserWrite
+}

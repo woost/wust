@@ -70,21 +70,23 @@ trait NodeAccessDecorator[NODE <: UuidNode] extends NodeAccess[NODE] with Access
   val self: NodeAccess[NODE]
 
   override def acceptRequest(context: RequestContext): Option[Result] = None
+  override def acceptRequestWrite(context: RequestContext): Option[Result] = acceptRequest(context)
+  override def acceptRequestRead(context: RequestContext): Option[Result] = acceptRequest(context)
 
   override def read(context: RequestContext) = {
-    acceptRequest(context).map(Left(_)).getOrElse(self.read(context))
+    acceptRequestRead(context).map(Left(_)).getOrElse(self.read(context))
   }
   override def read(context: RequestContext, uuid: String) = {
-    acceptRequest(context).map(Left(_)).getOrElse(self.read(context, uuid))
+    acceptRequestRead(context).map(Left(_)).getOrElse(self.read(context, uuid))
   }
   override def create(context: RequestContext) = {
-    acceptRequest(context).map(Left(_)).getOrElse(self.create(context))
+    acceptRequestWrite(context).map(Left(_)).getOrElse(self.create(context))
   }
   override def update(context: RequestContext, uuid: String) = {
-    acceptRequest(context).map(Left(_)).getOrElse(self.update(context, uuid))
+    acceptRequestWrite(context).map(Left(_)).getOrElse(self.update(context, uuid))
   }
   override def delete(context: RequestContext, uuid: String) = {
-    acceptRequest(context).map(Left(_)).getOrElse(self.delete(context, uuid))
+    acceptRequestWrite(context).map(Left(_)).getOrElse(self.delete(context, uuid))
   }
 
   val factory = self.factory
@@ -92,6 +94,4 @@ trait NodeAccessDecorator[NODE <: UuidNode] extends NodeAccess[NODE] with Access
   val label = self.label
 }
 
-case class NodeAccessDecoration[NODE <: UuidNode](self: NodeAccess[NODE], control: AccessDecoratorControl) extends NodeAccessDecorator[NODE] {
-  override def acceptRequest(context: RequestContext) = control.acceptRequest(context)
-}
+case class NodeAccessDecoration[NODE <: UuidNode](self: NodeAccess[NODE], control: AccessDecoratorControl) extends NodeAccessDecorator[NODE] with AccessDecoratorControlForward

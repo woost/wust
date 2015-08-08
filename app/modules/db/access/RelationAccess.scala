@@ -209,30 +209,32 @@ trait RelationAccessDecorator[NODE <: UuidNode, +OTHER <: UuidNode] extends Rela
   val self: RelationAccess[NODE, OTHER]
 
   override def acceptRequest(context: RequestContext): Option[Result] = None
+  override def acceptRequestRead(context: RequestContext): Option[Result] = acceptRequest(context)
+  override def acceptRequestWrite(context: RequestContext): Option[Result] = acceptRequest(context)
 
   override def read(context: RequestContext, param: ConnectParameter[NODE]) = {
-    acceptRequest(context).map(Left(_)).getOrElse(self.read(context, param))
+    acceptRequestRead(context).map(Left(_)).getOrElse(self.read(context, param))
   }
   override def read[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,NODE with AbstractRelation[S,E], E]) = {
-    acceptRequest(context).map(Left(_)).getOrElse(self.read(context, param))
+    acceptRequestRead(context).map(Left(_)).getOrElse(self.read(context, param))
   }
   override def delete(context: RequestContext, param: ConnectParameter[NODE], uuid: String) = {
-    acceptRequest(context).map(Left(_)).getOrElse(self.delete(context, param, uuid))
+    acceptRequestWrite(context).map(Left(_)).getOrElse(self.delete(context, param, uuid))
   }
   override def delete[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,NODE with AbstractRelation[S,E],E], uuid: String) = {
-    acceptRequest(context).map(Left(_)).getOrElse(self.delete(context, param, uuid))
+    acceptRequestWrite(context).map(Left(_)).getOrElse(self.delete(context, param, uuid))
   }
   override def create(context: RequestContext, param: ConnectParameter[NODE]) = {
-    acceptRequest(context).map(Left(_)).getOrElse(self.create(context, param))
+    acceptRequestWrite(context).map(Left(_)).getOrElse(self.create(context, param))
   }
   override def create(context: RequestContext, param: ConnectParameter[NODE], uuid: String) = {
-    acceptRequest(context).map(Left(_)).getOrElse(self.create(context, param, uuid))
+    acceptRequestWrite(context).map(Left(_)).getOrElse(self.create(context, param, uuid))
   }
   override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, NODE with AbstractRelation[S,E], E]) = {
-    acceptRequest(context).map(Left(_)).getOrElse(self.create(context, param))
+    acceptRequestWrite(context).map(Left(_)).getOrElse(self.create(context, param))
   }
   override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, NODE with AbstractRelation[S,E], E], uuid: String) = {
-    acceptRequest(context).map(Left(_)).getOrElse(self.create(context, param, uuid))
+    acceptRequestWrite(context).map(Left(_)).getOrElse(self.create(context, param, uuid))
   }
 
   val nodeFactory = self.nodeFactory
@@ -258,10 +260,5 @@ trait NodeAwareRelationAccess[NODE <: UuidNode, OTHER <: UuidNode] extends Relat
 
 case class StartNodeAwareRelationAccess[START <: UuidNode, RELATION <: AbstractRelation[START,END], END <: UuidNode](self: StartRelationAccess[START,RELATION,END], nodeAccess: NodeAccess[END]) extends NodeAwareRelationAccess[START,END] with StartRelationAccess[START,RELATION,END]
 case class EndNodeAwareRelationAccess[START <: UuidNode, RELATION <: AbstractRelation[START,END], END <: UuidNode](self: EndRelationAccess[START,RELATION,END], nodeAccess: NodeAccess[START]) extends NodeAwareRelationAccess[END,START] with EndRelationAccess[START,RELATION,END]
-
-case class StartRelationAccessDecoration[START <: UuidNode, RELATION <: AbstractRelation[START,END], END <: UuidNode](self: StartRelationAccess[START,RELATION,END], control: AccessDecoratorControl) extends RelationAccessDecorator[START,END] with StartRelationAccess[START,RELATION,END] {
-  override def acceptRequest(context: RequestContext) = control.acceptRequest(context)
-}
-case class EndRelationAccessDecoration[START <: UuidNode, RELATION <: AbstractRelation[START,END], END <: UuidNode](self: EndRelationAccess[START,RELATION,END], control: AccessDecoratorControl) extends RelationAccessDecorator[END,START] with EndRelationAccess[START,RELATION,END] {
-  override def acceptRequest(context: RequestContext) = control.acceptRequest(context)
-}
+case class StartRelationAccessDecoration[START <: UuidNode, RELATION <: AbstractRelation[START,END], END <: UuidNode](self: StartRelationAccess[START,RELATION,END], control: AccessDecoratorControl) extends RelationAccessDecorator[START,END] with StartRelationAccess[START,RELATION,END] with AccessDecoratorControlForward
+case class EndRelationAccessDecoration[START <: UuidNode, RELATION <: AbstractRelation[START,END], END <: UuidNode](self: EndRelationAccess[START,RELATION,END], control: AccessDecoratorControl) extends RelationAccessDecorator[END,START] with EndRelationAccess[START,RELATION,END] with AccessDecoratorControlForward
