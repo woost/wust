@@ -13,7 +13,6 @@ function DashboardCtrl($modal, DiscourseNode, StreamService, Recent) {
             animation: "am-fade-and-slide-top"
     });
 
-    vm.nodeInfo = DiscourseNode.TagLike;
     vm.streams = StreamService.streams;
     vm.removeStream = StreamService.remove;
 

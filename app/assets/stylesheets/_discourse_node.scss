@@ -42,10 +42,7 @@
     }
 }
 
-.discourse_taglike {
-    display: inline-block;
-}
-
+//TODO: neeeded?
 .discourse_post {
     @include discourse_node($discourse_post_color, ""); // comment
 }

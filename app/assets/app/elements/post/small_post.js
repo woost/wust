@@ -27,5 +27,4 @@ function smallPostCtrl(DiscourseNode) {
     // and gets an id: you need to update the href when the id changes with a
     // watcher. as long as we do not need this, we just do this once.
     vm.href = DiscourseNode.Post.getHref(vm.node.id);
-    vm.css = DiscourseNode.Post.css;
 }

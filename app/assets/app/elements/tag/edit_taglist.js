@@ -7,7 +7,8 @@ function editTaglist() {
         restrict: "A",
         templateUrl: "assets/app/elements/tag/edit_taglist.html",
         scope: {
-            node: "="
+            tags: "=",
+            onChange: "&"
         },
         controller: editTaglistCtrl,
         controllerAs: "vm",
@@ -17,13 +18,11 @@ function editTaglist() {
 
 editTaglistCtrl.$inject = ["Search", "DiscourseNode"];
 
-// like edit_post: expects the node to be a session
 function editTaglistCtrl(Search, DiscourseNode) {
     let vm = this;
 
-    vm.nodeInfo = DiscourseNode.TagLike;
-
     vm.searchTags = searchTags;
+    vm.onChange = vm.onChange || _.noop;
 
     function searchTags(title) {
         return Search.$search({

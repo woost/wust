@@ -27,7 +27,6 @@ function SchemaConfig(SchemaProvider, DiscourseNodeProvider, DiscourseNodeListPr
 
     _.each(schema.models, model => {
         DiscourseNodeProvider.setLabel(model.name, model.label);
-        DiscourseNodeProvider.setCss(model.name, `discourse_${model.name.toLowerCase()}`);
         DiscourseNodeListProvider.setList(model.name, model.path);
     });
 

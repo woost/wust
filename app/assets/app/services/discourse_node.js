@@ -5,7 +5,6 @@ DiscourseNode.$inject = [];
 function DiscourseNode() {
     let discourseMap = {};
     this.setLabel = _.wrap("label", set);
-    this.setCss = _.wrap("css", set);
     this.setState = _.wrap("state", set);
     this.$get = get;
 
@@ -28,7 +27,6 @@ function DiscourseNode() {
         }).reduce(_.merge);
 
         let defaultNode = {
-            css: "hyperrelation",
             getHref: _.constant("#"),
             getState: _.constant("."),
             gotoState: _.noop

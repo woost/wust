@@ -38,9 +38,12 @@ angular.module("wust.elements")
                     });
                     $scope.add = function(tag) {
                         tag = tag.encode ? tag.encode() : tag;
-                        $scope.tags.push(tag);
+                        if (!_.any($scope.tags, tag)) {
+                            $scope.tags.push(tag);
+                            $scope.onChange();
+                        }
+
                         $scope.search = "";
-                        $scope.onChange();
                     };
                     $scope.remove = function(index) {
                         $scope.tags.splice(index, 1);
@@ -57,12 +60,9 @@ angular.module("wust.elements")
                                 e.preventDefault();
                             }
                         } else if (e.which === 32 || e.which === 13) { /* space & enter */
-                            var newTag = {title: $scope.search};
-                            if (_.any($scope.tags, newTag)) {
-                                $scope.search = "";
-                            } else {
-                                $scope.add(newTag);
-                            }
+                            $scope.$apply(function() {
+                                $scope.add({ title: $scope.search });
+                            });
                             e.preventDefault();
                         }
                     });

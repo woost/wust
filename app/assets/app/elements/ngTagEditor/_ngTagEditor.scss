@@ -23,19 +23,6 @@
     .tag-suggestions {
         display: block;
     }
-    .tag-editor .tag {
-        display: inline-block;
-        height: 24px;
-        margin: 0 7px 0 0;
-        padding: 0 5px;
-        border-radius: 2px;
-        font-size: 14px;
-        line-height: 24px;
-        cursor: default;
-    }
-    .tag-editor .tag:hover {
-        box-shadow: 0 3px 3px rgba(0, 0, 0, 0.2);
-    }
     .tag-editor .tag .remove {
         margin: 0 0 0 5px;
         font-weight: bold;

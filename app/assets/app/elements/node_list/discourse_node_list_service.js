@@ -19,13 +19,12 @@ function DiscourseNodeList() {
         const SUCCESSORS = Symbol("successors");
 
         class NodeModel {
-            constructor(component, node, connectorType, title, writable, listCss) {
+            constructor(component, node, connectorType, title, writable) {
                 this.component = component;
                 this.node = node;
                 this.connectorType = connectorType;
                 this.title = title;
                 this.writable = writable;
-                this.listCss = listCss;
                 this.isNested = false;
                 this.nestedNodeLists = [];
                 this.listId = _.uniqueId();
@@ -103,7 +102,7 @@ function DiscourseNodeList() {
 
         class WriteNodeModel extends NodeModel {
             constructor(component, node, connectorType, title, modelProperty, nodeInfo) {
-                super(component, node, connectorType, title, true, `${nodeInfo.css}_list`);
+                super(component, node, connectorType, title, true);
                 this.modelProperty = modelProperty;
                 this.service = nodeInfo.service;
             }
@@ -178,7 +177,7 @@ function DiscourseNodeList() {
 
         class ReadNodeModel extends NodeModel {
             constructor(component, node, connectorType, title) {
-                super(component, node, connectorType, title, false, "read_node_list");
+                super(component, node, connectorType, title, false);
             }
 
             setParent() {}

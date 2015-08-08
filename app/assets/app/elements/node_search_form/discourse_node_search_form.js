@@ -32,9 +32,7 @@ function discourseNodeSearchCtrl(attrs, DiscourseNode) {
 
     function getNodes(term) {
         return vm.searchNodes({term: term}).$then(response => {
-            vm.lastSearchResult = _.map(response, item => _.merge(item, {
-                css: DiscourseNode.get(item.label).css
-            }));
+            vm.lastSearchResult = response;
         }).$asPromise();
     }
 }
