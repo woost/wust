@@ -205,12 +205,8 @@ case class EndRelationDelete[START <: UuidNode, RELATION <: AbstractRelation[STA
 case class StartRelationReadDelete[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factory: AbstractRelationFactory[START,RELATION,END], nodeFactory: UuidNodeMatchesFactory[END]) extends StartRelationDeleteBase[START,RELATION,END] with StartRelationReadBase[START,RELATION,END]
 case class EndRelationReadDelete[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factory: AbstractRelationFactory[START,RELATION,END], nodeFactory: UuidNodeMatchesFactory[START]) extends EndRelationDeleteBase[START,RELATION,END] with EndRelationReadBase[START,RELATION,END]
 
-trait RelationAccessDecorator[NODE <: UuidNode, +OTHER <: UuidNode] extends RelationAccess[NODE, OTHER] with AccessDecoratorControlMethods {
+trait RelationAccessDecorator[NODE <: UuidNode, +OTHER <: UuidNode] extends RelationAccess[NODE, OTHER] with AccessDecoratorControlDefault {
   val self: RelationAccess[NODE, OTHER]
-
-  override def acceptRequest(context: RequestContext): Option[Result] = None
-  override def acceptRequestRead(context: RequestContext): Option[Result] = acceptRequest(context)
-  override def acceptRequestWrite(context: RequestContext): Option[Result] = acceptRequest(context)
 
   override def read(context: RequestContext, param: ConnectParameter[NODE]) = {
     acceptRequestRead(context).map(Left(_)).getOrElse(self.read(context, param))

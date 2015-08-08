@@ -2,11 +2,11 @@ package modules.db.access.custom
 
 import controllers.api.nodes.{HyperConnectParameter, RequestContext}
 import modules.db.Database._
-import modules.db.access.{AccessDecoratorControl, EndRelationAccessDefault}
+import modules.db.access.{AccessDecoratorControlDefault, AccessDecoratorControl, EndRelationAccessDefault}
 import modules.requests.ConnectResponse
 import play.api.mvc.Results._
 
-class CheckUser extends AccessDecoratorControl {
+class CheckUser extends AccessDecoratorControl with AccessDecoratorControlDefault {
   override def acceptRequest(context: RequestContext) = {
     if (context.user.isDummy)
       //TODO: status

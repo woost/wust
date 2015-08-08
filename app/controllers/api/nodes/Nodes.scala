@@ -8,6 +8,7 @@ import modules.auth.HeaderEnvironmentModule
 import modules.requests.{ConnectSchema, HyperConnectSchema, NodeSchema}
 import play.api.libs.json.{JsResult, JsValue}
 import play.api.mvc.{Controller, AnyContent, Result}
+import play.api.mvc.Results._
 import renesca.parameter.implicits._
 import renesca.schema._
 
@@ -15,10 +16,22 @@ case class RequestContext(controller: NodesBase with Controller, user: User, jso
   def page = query.get("page").map(_.toInt)
   def size = query.get("size").map(_.toInt)
   def limit = size.getOrElse(15)
-  def jsonAs[T](implicit rds : play.api.libs.json.Reads[T]) = json.flatMap(_.validate[T].asOpt)
+
+  def jsonAs[T](implicit rds : play.api.libs.json.Reads[T]) = {
+    json.flatMap(_.validate[T].asOpt)
+  }
+
+  def withJson[S,T](handler: S => Either[Result,T])(implicit rds : play.api.libs.json.Reads[S]) = {
+    jsonAs[S].map(handler(_)).getOrElse(Left(UnprocessableEntity("Cannot parse json body")))
+  }
+
   def realUser = user match {
     case u: RealUser => Some(u)
     case _ => None
+  }
+
+  def withRealUser[T](handler: RealUser => Either[Result,T]) = {
+    realUser.map(handler(_)).getOrElse(Left(Forbidden("Only for users")))
   }
 }
 

@@ -9,10 +9,12 @@ trait AccessDecoratorControlMethods {
   def acceptRequestWrite(context: RequestContext): Option[Result]
 }
 
-trait AccessDecoratorControl extends AccessDecoratorControlMethods {
-  override def acceptRequest(context: RequestContext): Option[Result] = None
-  override def acceptRequestRead(context: RequestContext): Option[Result] = acceptRequest(context)
-  override def acceptRequestWrite(context: RequestContext): Option[Result] = acceptRequest(context)
+trait AccessDecoratorControl extends AccessDecoratorControlMethods
+
+trait AccessDecoratorControlDefault extends AccessDecoratorControlMethods {
+  def acceptRequest(context: RequestContext): Option[Result] = None
+  def acceptRequestRead(context: RequestContext): Option[Result] = acceptRequest(context)
+  def acceptRequestWrite(context: RequestContext): Option[Result] = acceptRequest(context)
 }
 
 trait AccessDecoratorControlForward extends AccessDecoratorControlMethods {

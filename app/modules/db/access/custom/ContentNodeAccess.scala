@@ -28,7 +28,7 @@ class PostAccess extends NodeReadDelete(Post) {
 
   //TODO: should create/update be nested?
   override def create(context: RequestContext) = {
-    context.jsonAs[TaggedPostAddRequest].map(request => {
+    context.withJson { (request: TaggedPostAddRequest) =>
       val discourse = tagDefGraph(request.addedTags)
 
       val node = Post.create(title = request.title, description = request.description)
@@ -41,11 +41,11 @@ class PostAccess extends NodeReadDelete(Post) {
         case Some(err) => Left(BadRequest(s"Cannot create Post: $err'"))
         case _         => Right(node)
       }
-    }).getOrElse(Left(UnprocessableEntity("Error parsing create request for Tag")))
+    }
   }
 
   override def update(context: RequestContext, uuid: String) = {
-    context.jsonAs[TaggedPostUpdateRequest].map(request => {
+    context.withJson { (request: TaggedPostUpdateRequest) =>
       val discourse = tagDefGraph(request.addedTags)
 
       val node = Post.matchesOnUuid(uuid)
@@ -73,7 +73,7 @@ class PostAccess extends NodeReadDelete(Post) {
         case Some(err) => Left(BadRequest(s"Cannot update Post with uuid '$uuid': $err'"))
         case _         => Right(node)
       }
-    }).getOrElse(Left(UnprocessableEntity("Error parsing update request for Tag")))
+    }
   }
 }
 
@@ -83,7 +83,7 @@ object PostAccess {
 
 class TagAccess extends NodeRead(TagLike) {
   override def create(context: RequestContext) = {
-    context.jsonAs[TagAddRequest].map(request => {
+    context.withJson { (request: TagAddRequest) =>
       val node = Tag.merge(title = request.title, merge = Set("title"))
       val contribution = SchemaCreated.create(context.user, node)
 
@@ -91,11 +91,11 @@ class TagAccess extends NodeRead(TagLike) {
         case Some(err) => Left(BadRequest(s"Cannot create Tag: $err'"))
         case _         => Right(node)
       }
-    }).getOrElse(Left(UnprocessableEntity("Error parsing create request for Tag")))
+    }
   }
 
   override def update(context: RequestContext, uuid: String) = {
-    context.jsonAs[TagUpdateRequest].map(request => {
+    context.withJson { (request: TagUpdateRequest) =>
       val node = TagLike.matchesOnUuid(uuid)
       //TODO: normally we would want to set it back to None instead of ""
       if (request.description.isDefined) {
@@ -109,7 +109,7 @@ class TagAccess extends NodeRead(TagLike) {
         case Some(err) => Left(BadRequest(s"Cannot update Tag with uuid '$uuid': $err'"))
         case _         => Right(node)
       }
-    }).getOrElse(Left(UnprocessableEntity("Error parsing update request for Tag")))
+    }
   }
 }
 
@@ -119,8 +119,8 @@ object TagAccess {
 
 class UserAccess extends NodeRead(User) {
   override def update(context: RequestContext, uuid: String) = {
-    context.realUser.map { user =>
-      context.jsonAs[UserUpdateRequest].map { request =>
+    context.withRealUser { user =>
+      context.withJson { (request: UserUpdateRequest) =>
         //TODO: sanity check + welcome mail
         if (request.email.isDefined)
           user.email = request.email
@@ -129,8 +129,8 @@ class UserAccess extends NodeRead(User) {
           case Some(err) => Left(BadRequest(s"Cannot update User: $err'"))
           case _         => Right(user)
         }
-      }.getOrElse(Left(UnprocessableEntity("Error parsing update request for User")))
-    }.getOrElse(Left(Forbidden("Cannot edit dummy user")))
+      }
+    }
   }
 }
 
