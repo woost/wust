@@ -28,6 +28,8 @@ sealed trait InvConnectSchema[NODE <: UuidNode] extends ConnectSchema[NODE] {
 sealed trait PlainConnectSchema[BASE <: UuidNode] extends InvConnectSchema[BASE]
 sealed trait HyperConnectSchema[BASE <: UuidNode] extends InvConnectSchema[BASE]
 
+case class RelatedConnectSchema(op: RelationAccess[UuidNode, UuidNode]) extends PlainConnectSchema[UuidNode]
+
 case class StartConnectSchema[
 START <: UuidNode,
 RELATION <: AbstractRelation[START, END],
@@ -138,6 +140,10 @@ object dsl {
   }
 
   object N {
+    def <>(op: RelationAccess[UuidNode, UuidNode]) = {
+      RelatedConnectSchema(op)
+    }
+
     def >[
     START <: UuidNode,
     RELATION <: AbstractRelation[START, END],
