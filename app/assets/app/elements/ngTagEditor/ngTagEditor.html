@@ -1,7 +1,7 @@
 <div class="tag-editor-directive">
     <div class="tag-editor" ng-class="{active:focus}" ng-init="focus = false" ng-click="setFocus = true">
         <div class="tag-draft">
-            <span class="tag" ng-repeat="tag in node.tags track by tag.id" colored-tag="tag">
+            <span class="tag" ng-repeat="tag in tags track by tag.id" colored-tag="tag">
                 <span ng-bind="tag.title"></span>
                 <span class="remove" ng-click="remove($index)">x</span>
             </span>

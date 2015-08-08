@@ -18,47 +18,50 @@ angular.module("wust.elements")
             };
         }
     ]).directive("tagEditor", function() {
-        // this directive relies on the node being a session from the editservice
         return {
             restrict: "AE",
             scope: {
-                node: "=",
-                getSuggestions: "&"
+                tags: "=",
+                getSuggestions: "&",
+                onChange: "&"
             },
             templateUrl: "assets/app/elements/ngTagEditor/ngTagEditor.html",
-            controller: ["$scope", "$attrs", "$element", "$filter", "TagLike",
-                function($scope, $attrs, $element, $filter, TagLike) {
+            controller: ["$scope", "$attrs", "$element", "$filter",
+                function($scope, $attrs, $element, $filter) {
                     $scope.suggestions = [];
                     $scope.search = "";
+                    $scope.onChange = $scope.onChange ? $scope.onChange : function() {};
+                    $scope.getSuggestions = $scope.getSuggestions ? $scope.getSuggestions : function() { return []; };
 
                     $scope.$watch("search", function(value) {
                         $scope.suggestions = $scope.getSuggestions({search: value});
                     });
                     $scope.add = function(tag) {
                         tag = tag.encode ? tag.encode() : tag;
-                        $scope.node.addTag(tag);
+                        $scope.tags.push(tag);
                         $scope.search = "";
+                        $scope.onChange();
                     };
                     $scope.remove = function(index) {
-                        // $scope.tags.splice(index, 1);
+                        $scope.tags.splice(index, 1);
+                        $scope.onChange();
                     };
 
                     $element.find("input").on("keydown", function(e) {
                         if (e.which === 8) { /* backspace */
-                            // if ($scope.search.length === 0 &&
-                            //     $scope.tags.length) {
-                            //     $scope.tags.pop();
-                            //     e.preventDefault();
-                            // }
+                            if ($scope.search.length === 0 &&
+                                $scope.tags.length) {
+                                $scope.$apply(function() {
+                                    $scope.remove($scope.tags.length -1);
+                                });
+                                e.preventDefault();
+                            }
                         } else if (e.which === 32 || e.which === 13) { /* space & enter */
-                            let newTag = {title: $scope.search};
-                            if (_.any($scope.node.tags, newTag)) {
+                            var newTag = {title: $scope.search};
+                            if (_.any($scope.tags, newTag)) {
                                 $scope.search = "";
                             } else {
-                                //TODO: we should not create a tag here.
-                                TagLike.$create(newTag).$then(tag => {
-                                    $scope.add(tag);
-                                });
+                                $scope.add(newTag);
                             }
                             e.preventDefault();
                         }

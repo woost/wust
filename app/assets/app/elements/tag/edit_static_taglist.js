@@ -25,22 +25,6 @@ function editStaticTaglistCtrl(Search, DiscourseNode) {
 
     vm.searchTags = searchTags;
     vm.onChange = vm.onChange || _.noop;
-    vm.selectTag = selectTag;
-    vm.deselectTag = deselectTag;
-
-    function selectTag(maybeTags) {
-        let tag = _.isArray(maybeTags) ? maybeTags[0] : maybeTags;
-        if (!maybeTags)
-            return;
-
-        vm.tags.push(tag);
-        vm.onChange();
-    }
-
-    function deselectTag(tag) {
-        _.remove(vm.tags, tag);
-        vm.onChange();
-    }
 
     function searchTags(title) {
         return Search.$search({

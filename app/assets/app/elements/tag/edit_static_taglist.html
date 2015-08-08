@@ -1,7 +1,3 @@
 <div class="edit_static_taglist_directive">
-    <span ng-repeat="tag in vm.tags track by tag.id" colored-tag="tag" ng-class="::vm.nodeInfo.css">
-        <span ng-bind="tag.title"></span>
-        <button class="close" ng-click="vm.deselectTag(tag)" type="button" aria-label="Close " data-title="uncheck tag" bs-tooltip animation=""><span aria-hidden="true">&times;</span></button>
-    </span>
-    <div discourse-node-search-form ng-model='vm.tagTyped' on-select="vm.selectTag(item)" on-submit="vm.selectTag(items)" search-nodes='vm.searchTags(term)' icon-class="fa fa-search"></div>
+    <div tag-editor tags="vm.tags" on-change="vm.onChange()" get-suggestions="vm.searchTags(search)"></div>
 </div>
