@@ -17,8 +17,7 @@ NODE <: UuidNode
 
 sealed trait ConnectSchema[-NODE <: UuidNode] {
   val cardinality = "hasMany"
-  //TODO: yes, i am ugly, but i will be gone some day.
-  // also it is funny that it works :D
+  //TODO: we need to access the invariantly typed connectschema to get the correct type
   def inv[N <: NODE] = this.asInstanceOf[InvConnectSchema[N]]
 }
 
@@ -27,9 +26,7 @@ sealed trait InvConnectSchema[NODE <: UuidNode] extends ConnectSchema[NODE] {
 }
 
 sealed trait PlainConnectSchema[BASE <: UuidNode] extends InvConnectSchema[BASE]
-sealed trait HyperConnectSchema[BASE <: UuidNode] extends InvConnectSchema[BASE] {
-  val connectSchemas: Map[String, ConnectSchema[_]]
-}
+sealed trait HyperConnectSchema[BASE <: UuidNode] extends InvConnectSchema[BASE]
 
 case class StartConnectSchema[
 START <: UuidNode,
