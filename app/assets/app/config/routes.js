@@ -31,6 +31,19 @@ function RoutesConfig($stateProvider, $urlRouterProvider, $locationProvider, Dis
         url: "/details/:id",
         templateUrl: `${templateBase}/users/detail.html`,
         controller: "UserDetailsCtrl as vm",
+    }).state("tags", {
+        abstract: true,
+        parent: "page",
+        url: "/tags",
+        templateUrl: `${templateBase}/tags/tag.html`,
+    }).state("tags.list", {
+        url: "/list",
+        templateUrl: `${templateBase}/tags/list.html`,
+        controller: "TagListsCtrl as vm",
+    }).state(DiscourseNodeProvider.setState("TagLike", "tags.details"), {
+        url: "/details/:id",
+        templateUrl: `${templateBase}/tags/detail.html`,
+        controller: "TagDetailsCtrl as vm",
     }).state(DiscourseNodeProvider.setState("Post", "focus"), {
         parent: "page",
         url: "/focus/:id",

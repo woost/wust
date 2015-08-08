@@ -16,8 +16,8 @@ function coloredTag(Helpers) {
         if (scope.coloredTag.id) {
             setColors();
         } else {
-            let deregister = scope.$watch("coloredTag", val => {
-                if (val.id) {
+            let deregister = scope.$watch("coloredTag.id", () => {
+                if (scope.coloredTag.id) {
                     setColors();
                     deregister();
                 }
