@@ -884,15 +884,9 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     // starting on hypernodes is also forbidden,
                     // but we don't need to handle this, because
                     // the connect button does not exist on hyperRelations.
-                    // TODO: check in backend: self loops
-                    if (startNode !== endNode) { // no self loop
-                        // TODO: check in backend: connection to incident hyperrelation
-                        if (!endNode.isHyperRelation || (endNode.startNode !== startNode && endNode.endNode !== startNode)) { // no connection to an incident HyperRelation
-                            this.connectNodes(startNode, endNode);
-                        } else
-                            humane.error("Connections to incident HyperRelations are not allowed.");
-                    } else
-                        humane.error("Self loops are not allowed.");
+                    //TODO: we need to make it impossible to drag on self loops and incident relations,
+                    //is assured by backend.
+                    this.connectNodes(startNode, endNode);
                 }
             }
             // TODO: else { connect without dragging only by clicking }

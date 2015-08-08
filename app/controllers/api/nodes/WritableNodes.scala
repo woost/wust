@@ -39,29 +39,29 @@ trait WritableNodes[NODE <: UuidNode] extends NodesBase {
 
   override def connectNestedMember(path: String, nestedPath: String, uuid: String, otherUuid: String) = UserAwareAction { request =>
     getHyperSchema(nodeSchema.connectSchemas, path)({
-      case c@StartHyperConnectSchema(factory,op,connectSchemas) =>
+      case c@StartHyperConnectSchema(factory, op, connectSchemas) =>
         getSchema(connectSchemas, nestedPath)(schema =>
           getResult(schema.inv.op.create(context(request), HyperConnectParameter(nodeSchema.op.factory, uuid, c.factory, c.op.nodeFactory, otherUuid)))(connectResponse)
         )
-      case c@EndHyperConnectSchema(factory,op,connectSchemas) =>
+      case c@EndHyperConnectSchema(factory, op, connectSchemas)   =>
         getSchema(connectSchemas, nestedPath)(schema =>
           getResult(schema.inv.op.create(context(request), HyperConnectParameter(c.op.nodeFactory, otherUuid, c.factory, nodeSchema.op.factory, uuid)))(connectResponse)
         )
     })
   }
 
-  //TODO: forbid self loop of hyperrelations
-  // at this point, we do not know whether nestedUuid = HyperRelation(uuid, otherUuid).uuid
   override def connectNestedMember(path: String, nestedPath: String, uuid: String, otherUuid: String, nestedUuid: String) = UserAwareAction { request =>
-    getHyperSchema(nodeSchema.connectSchemas, path)({
-      case c@StartHyperConnectSchema(factory,op,connectSchemas) =>
-        getSchema(connectSchemas, nestedPath)(schema =>
-          getResult(schema.inv.op.create(context(request), HyperConnectParameter(nodeSchema.op.factory, uuid, c.factory, c.op.nodeFactory, otherUuid), nestedUuid))(connectResponse)
-        )
-      case c@EndHyperConnectSchema(factory,op,connectSchemas) =>
-        getSchema(connectSchemas, nestedPath)(schema =>
-          getResult(schema.inv.op.create(context(request), HyperConnectParameter(c.op.nodeFactory, otherUuid, c.factory, nodeSchema.op.factory, uuid), nestedUuid))(connectResponse)
-        )
+    validateHyperConnect(uuid, otherUuid, nestedUuid)(() => {
+      getHyperSchema(nodeSchema.connectSchemas, path)({
+        case c@StartHyperConnectSchema(factory, op, connectSchemas) =>
+          getSchema(connectSchemas, nestedPath)(schema =>
+            getResult(schema.inv.op.create(context(request), HyperConnectParameter(nodeSchema.op.factory, uuid, c.factory, c.op.nodeFactory, otherUuid), nestedUuid))(connectResponse)
+          )
+        case c@EndHyperConnectSchema(factory, op, connectSchemas)   =>
+          getSchema(connectSchemas, nestedPath)(schema =>
+            getResult(schema.inv.op.create(context(request), HyperConnectParameter(c.op.nodeFactory, otherUuid, c.factory, nodeSchema.op.factory, uuid), nestedUuid))(connectResponse)
+          )
+      })
     })
   }
 }

@@ -95,6 +95,13 @@ trait NodesBase extends NestedResourceRouter with DefaultNestedResourceControlle
     else
       handler()
   }
+
+  protected def validateHyperConnect(uuid: String, otherUuid: String, nestedUuid: String)(handler: () => Result): Result = validateConnect(uuid, otherUuid) { () =>
+    if (uuid == nestedUuid || otherUuid == nestedUuid)
+      BadRequest("Incident loops are not allowed")
+    else
+      handler()
+  }
 }
 
 trait Nodes[NODE <: UuidNode] extends ReadableNodes[NODE] with DeletableNodes[NODE] with WritableNodes[NODE] {

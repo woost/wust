@@ -11,7 +11,6 @@ import renesca.graph.Label
 import renesca.parameter.PropertyKey
 
 object Recent extends Controller {
-  //FIXME: white list labels!!
   def index(label: Option[String]) = Action {
     // white list, so only exposed nodes can be searched
     val labels = ContentNode.labels ++ label.map(Label(_))
