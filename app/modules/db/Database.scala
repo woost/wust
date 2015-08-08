@@ -215,7 +215,7 @@ object Database {
     val query = s"""
       match ${ focusNode.toQuery }
       match (${ focusNode.name })-[rel:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(posts:`${ Post.label }`)
-      match (posts)-[:`${ Connects.startRelationType }`]->(connects:`${ Connects.label }`)-[:`${ Connects.endRelationType }`]->(:`${ Post.label }`)
+      optional match (posts)-[:`${ Connects.startRelationType }`]->(connects:`${ Connects.label }`)-[:`${ Connects.endRelationType }`]->(:`${ Post.label }`)
       optional match (nodetag:`${ TagLike.label }`)-[nodetagtocat:`${ Categorizes.startRelationType }`]->(nodecat:`${ Categorizes.label }`)-[cattopost:`${ Categorizes.endRelationType }`]->(posts)
       optional match (relationtag:`${ TagLike.label }`)-[relationtagtocat:`${ Categorizes.startRelationType }`]->(relationcat:`${ Categorizes.label }`)-[cattoconnects:`${ Categorizes.endRelationType }`]->(connects)
       return distinct posts,rel,nodetag,relationtag,nodecat,relationcat,nodetagtocat,cattopost,cattoconnects,relationtagtocat
