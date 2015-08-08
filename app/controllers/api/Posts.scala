@@ -18,8 +18,8 @@ object Posts extends Nodes[Post] {
     )),
     ("tags", N < Categorizes < (EndRelationRead(Categorizes, Tag),
       ("voters", N < EndRelationRead(Votes, User)),
-      ("up", N < VotesAccess(1)),
-      ("down", N < VotesAccess(-1))
+      ("up", N < VotesAccess(1) + CheckUser.apply),
+      ("down", N < VotesAccess(-1) + CheckUser.apply)
     ))
   )
 }

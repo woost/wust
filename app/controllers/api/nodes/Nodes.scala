@@ -7,11 +7,11 @@ import model.WustSchema._
 import modules.auth.HeaderEnvironmentModule
 import modules.requests.{ConnectSchema, HyperConnectSchema, NodeSchema}
 import play.api.libs.json.{JsResult, JsValue}
-import play.api.mvc.{AnyContent, Result}
+import play.api.mvc.{Controller, AnyContent, Result}
 import renesca.parameter.implicits._
 import renesca.schema._
 
-case class RequestContext(user: User, json: Option[JsValue], query: Map[String, String]) {
+case class RequestContext(controller: NodesBase with Controller, user: User, json: Option[JsValue], query: Map[String, String]) {
   def page = query.get("page").map(_.toInt)
   def size = query.get("size").map(_.toInt)
   def limit = size.getOrElse(15)
@@ -40,7 +40,7 @@ trait NodesBase extends NestedResourceRouter with DefaultNestedResourceControlle
   object SchemaWrapper extends RootNodeTraitFactory[UuidNode]
 
   protected def context(request: UserAwareRequest[AnyContent]) = {
-    RequestContext(getUser(request.identity), request.body.asJson, request.queryString.flatMap { case (k,v) => v.headOption.map((k, _)) })
+    RequestContext(this, getUser(request.identity), request.body.asJson, request.queryString.flatMap { case (k,v) => v.headOption.map((k, _)) })
   }
 
   protected def unauthorized = Unauthorized("Only logged-in users allowed")

@@ -23,15 +23,15 @@ object WustSchema {
   @Graph trait Auth {Nodes(User, LoginInfo, PasswordInfo) }
   @Node trait User extends UuidNode {
     @unique val name: String
+    //TODO: cannot have abstract methods...renesca magic
+    def isDummy = true
   }
   @Node class RealUser extends User with Identity {
     var email: Option[String]
     var karma: Long = 0
-    def isDummy = false
+    override def isDummy = false
   }
-  @Node class DummyUser extends User {
-    def isDummy = true
-  }
+  @Node class DummyUser extends User
   @Node class LoginInfo {
     val providerID: String
     @unique val providerKey: String

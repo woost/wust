@@ -10,6 +10,18 @@ import renesca.parameter.implicits._
 
 trait NodeAccess[+NODE <: UuidNode] {
   val factory: UuidNodeMatchesFactory[NODE]
+  val name: String
+  val label: Label
+
+  //TODO: return proper status
+  def read(context: RequestContext): Either[String, Iterable[NODE]]
+  def read(context: RequestContext, uuid: String): Either[String, NODE]
+  def create(context: RequestContext): Either[String, NODE]
+  def update(context: RequestContext, uuid: String): Either[String, NODE]
+  def delete(context: RequestContext, uuid: String): Either[String, Boolean]
+}
+
+trait NodeAccessDefault[NODE <: UuidNode] extends NodeAccess[NODE] {
   val name = factory.getClass.getSimpleName.dropRight(1)
   val label = factory.label
 
@@ -20,7 +32,7 @@ trait NodeAccess[+NODE <: UuidNode] {
   def delete(context: RequestContext, uuid: String): Either[String, Boolean] = Left("No delete access on Node")
 }
 
-trait NodeReadBase[NODE <: UuidNode] extends NodeAccess[NODE] {
+trait NodeReadBase[NODE <: UuidNode] extends NodeAccessDefault[NODE] {
   override def read(context: RequestContext) = {
     context.page.map { page =>
       val skip = page * context.limit
@@ -40,7 +52,7 @@ trait NodeReadBase[NODE <: UuidNode] extends NodeAccess[NODE] {
   }
 }
 
-trait NodeDeleteBase[NODE <: UuidNode] extends NodeAccess[NODE] {
+trait NodeDeleteBase[NODE <: UuidNode] extends NodeAccessDefault[NODE] {
   override def delete(context: RequestContext, uuid: String) = {
     // TODO: use matches... and remove...
     deleteNodes(FactoryUuidNodeDefinition(factory, uuid))
@@ -52,3 +64,31 @@ trait NodeDeleteBase[NODE <: UuidNode] extends NodeAccess[NODE] {
 case class NodeRead[NODE <: UuidNode](factory: UuidNodeMatchesFactory[NODE]) extends NodeReadBase[NODE]
 case class NodeDelete[NODE <: UuidNode](factory: UuidNodeMatchesFactory[NODE]) extends NodeDeleteBase[NODE]
 case class NodeReadDelete[NODE <: UuidNode](factory: UuidNodeMatchesFactory[NODE]) extends NodeReadBase[NODE] with NodeDeleteBase[NODE]
+
+trait NodeAccessDecorator[NODE <: UuidNode] extends NodeAccess[NODE] with AccessDecoratorControlDefault {
+  val self: NodeAccess[NODE]
+
+  override def read(context: RequestContext): Either[String, Iterable[NODE]] = {
+    acceptRequest(context).map(Left(_)).getOrElse(self.read(context))
+  }
+  override def read(context: RequestContext, uuid: String): Either[String, NODE] = {
+    acceptRequest(context).map(Left(_)).getOrElse(self.read(context, uuid))
+  }
+  override def create(context: RequestContext): Either[String, NODE] = {
+    acceptRequest(context).map(Left(_)).getOrElse(self.create(context))
+  }
+  override def update(context: RequestContext, uuid: String): Either[String, NODE] = {
+    acceptRequest(context).map(Left(_)).getOrElse(self.update(context, uuid))
+  }
+  override def delete(context: RequestContext, uuid: String): Either[String, Boolean] = {
+    acceptRequest(context).map(Left(_)).getOrElse(self.delete(context, uuid))
+  }
+
+  val factory = self.factory
+  val name = self.name
+  val label = self.label
+}
+
+case class NodeAccessDecoration[NODE <: UuidNode](self: NodeAccess[NODE], control: AccessDecoratorControl) extends NodeAccessDecorator[NODE] {
+  override def acceptRequest(context: RequestContext): Option[String] = control.acceptRequest(context)
+}
