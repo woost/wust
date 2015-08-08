@@ -12,13 +12,13 @@ import renesca.parameter.implicits._
 import renesca.schema._
 
 trait ContentRelationHelper {
-  protected def persistRelation[T <: UuidNode](discourse: Discourse, result: T): Either[ConnectResponse[T], String] = {
+  protected def persistRelation[T <: UuidNode](discourse: Discourse, result: T): Either[String, ConnectResponse[T]] = {
     db.transaction(_.persistChanges(discourse)).map(err =>
-      Right(s"Cannot create ContentRelation: $err'")
+      Left(s"Cannot create ContentRelation: $err'")
     ).getOrElse({
       //TODO: Only send partial graph: the created relations!
       //TODO: should only send node if the node was newly created
-      Left(ConnectResponse[T](discourse, Some(result)))
+      Right(ConnectResponse[T](discourse, Some(result)))
     })
   }
 

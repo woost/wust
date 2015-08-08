@@ -63,10 +63,10 @@ trait NodesBase extends NestedResourceRouter with DefaultNestedResourceControlle
     }
   }
 
-  protected def getResult[T](result: Either[T,String])(handler: T => Result): Result = {
+  protected def getResult[T](result: Either[String, T])(handler: T => Result): Result = {
     result match {
-      case Left(value) => handler(value)
-      case Right(msg)  => BadRequest(msg)
+      case Left(msg)  => BadRequest(msg)
+      case Right(value) => handler(value)
     }
   }
 

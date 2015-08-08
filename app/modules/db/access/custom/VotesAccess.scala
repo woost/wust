@@ -22,8 +22,8 @@ case class VotesAccess(
     val votes = Votes.merge(context.user, hyper, weight = weight, onMatch = Set("weight"))
     val failure = db.transaction(_.persistChanges(start, end, hyper, votes))
     if(failure.isDefined)
-      Right("No vote :/")
+      Left("No vote :/")
     else
-      Left(ConnectResponse(Discourse.empty, Some(context.user)))
+      Right(ConnectResponse(Discourse.empty, Some(context.user)))
   }
 }

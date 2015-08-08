@@ -26,7 +26,7 @@ class PostAccess extends NodeReadDelete(Post) {
   }
 
   //TODO: should create/update be nested?
-  override def create(context: RequestContext): Either[Post, String] = {
+  override def create(context: RequestContext) = {
     context.jsonAs[TaggedPostAddRequest].map(request => {
       val discourse = tagDefGraph(request.addedTags)
 
@@ -37,13 +37,13 @@ class PostAccess extends NodeReadDelete(Post) {
       addTagsToGraph(discourse, context.user, node)
 
       db.transaction(_.persistChanges(discourse)) match {
-        case Some(err) => Right(s"Cannot create Post: $err'")
-        case _         => Left(node)
+        case Some(err) => Left(s"Cannot create Post: $err'")
+        case _         => Right(node)
       }
-    }).getOrElse(Right("Error parsing create request for Tag"))
+    }).getOrElse(Left("Error parsing create request for Tag"))
   }
 
-  override def update(context: RequestContext, uuid: String): Either[Post, String] = {
+  override def update(context: RequestContext, uuid: String) = {
     context.jsonAs[TaggedPostUpdateRequest].map(request => {
       val discourse = tagDefGraph(request.addedTags)
 
@@ -69,10 +69,10 @@ class PostAccess extends NodeReadDelete(Post) {
       addTagsToGraph(discourse, context.user, node)
 
       db.transaction(_.persistChanges(discourse)) match {
-        case Some(err) => Right(s"Cannot update Post with uuid '$uuid': $err'")
-        case _         => Left(node)
+        case Some(err) => Left(s"Cannot update Post with uuid '$uuid': $err'")
+        case _         => Right(node)
       }
-    }).getOrElse(Right("Error parsing update request for Tag"))
+    }).getOrElse(Left("Error parsing update request for Tag"))
   }
 }
 
@@ -81,20 +81,20 @@ object PostAccess {
 }
 
 class TagAccess extends NodeRead(TagLike) {
-  override def create(context: RequestContext): Either[TagLike, String] = {
+  override def create(context: RequestContext) = {
     context.jsonAs[TagAddRequest].map(request => {
       val node = Tag.merge(title = request.title, merge = Set("title"))
       val contribution = Created.create(context.user, node)
 
       val discourse = Discourse(node, contribution)
       db.transaction(_.persistChanges(discourse)) match {
-        case Some(err) => Right(s"Cannot create Tag: $err'")
-        case _         => Left(node)
+        case Some(err) => Left(s"Cannot create Tag: $err'")
+        case _         => Right(node)
       }
-    }).getOrElse(Right("Error parsing create request for Tag"))
+    }).getOrElse(Left("Error parsing create request for Tag"))
   }
 
-  override def update(context: RequestContext, uuid: String): Either[TagLike, String] = {
+  override def update(context: RequestContext, uuid: String) = {
     context.jsonAs[TagUpdateRequest].map(request => {
       val node = TagLike.matchesOnUuid(uuid)
       //TODO: normally we would want to set it back to None instead of ""
@@ -106,10 +106,10 @@ class TagAccess extends NodeRead(TagLike) {
 
       val discourse = Discourse(contribution)
       db.transaction(_.persistChanges(discourse)) match {
-        case Some(err) => Right(s"Cannot update Tag with uuid '$uuid': $err'")
-        case _         => Left(node)
+        case Some(err) => Left(s"Cannot update Tag with uuid '$uuid': $err'")
+        case _         => Right(node)
       }
-    }).getOrElse(Right("Error parsing update request for Tag"))
+    }).getOrElse(Left("Error parsing update request for Tag"))
   }
 }
 
@@ -118,7 +118,7 @@ object TagAccess {
 }
 
 class UserAccess extends NodeRead(User) {
-  override def update(context: RequestContext, uuid: String): Either[User, String] = {
+  override def update(context: RequestContext, uuid: String) = {
     context.realUser.map { user =>
       context.jsonAs[UserUpdateRequest].map { request =>
         //TODO: sanity check + welcome mail
@@ -126,11 +126,11 @@ class UserAccess extends NodeRead(User) {
           user.email = request.email
 
         db.transaction(_.persistChanges(user)) match {
-          case Some(err) => Right(s"Cannot update User: $err'")
-          case _         => Left(user)
+          case Some(err) => Left(s"Cannot update User: $err'")
+          case _         => Right(user)
         }
-      }.getOrElse(Right("Error parsing update request for User"))
-    }.getOrElse(Right("Cannot edit user"))
+      }.getOrElse(Left("Error parsing update request for User"))
+    }.getOrElse(Left("Cannot edit user"))
   }
 }
 

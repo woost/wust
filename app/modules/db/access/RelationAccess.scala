@@ -11,15 +11,14 @@ import renesca.schema._
 
 trait RelationAccess[NODE <: UuidNode, +OTHER <: UuidNode] {
   //TODO: switch left/right...left should be errors
-  //TODO: no nodedefinitions as args
-  def read(context: RequestContext, param: ConnectParameter[NODE]): Either[Iterable[OTHER], String] = Right("No read access on Relation")
-  def read[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,NODE with AbstractRelation[S,E], E]): Either[Iterable[OTHER], String] = Right("No read access on HyperRelation")
-  def delete(context: RequestContext, param: ConnectParameter[NODE], uuid: String): Either[Boolean, String] = Right("No delete access on Relation")
-  def delete[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,NODE with AbstractRelation[S,E],E], uuid: String): Either[Boolean, String] = Right("No delete access on HyperRelation")
-  def create(context: RequestContext, param: ConnectParameter[NODE]): Either[ConnectResponse[OTHER], String]
-  def create(context: RequestContext, param: ConnectParameter[NODE], uuid: String): Either[ConnectResponse[OTHER], String] = Right("No create access on Relation")
-  def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, NODE with AbstractRelation[S,E], E]): Either[ConnectResponse[OTHER], String]
-  def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, NODE with AbstractRelation[S,E], E], uuid: String): Either[ConnectResponse[OTHER], String] = Right("No create access on HyperRelation")
+  def read(context: RequestContext, param: ConnectParameter[NODE]): Either[String, Iterable[OTHER]] = Left("No read access on Relation")
+  def read[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,NODE with AbstractRelation[S,E], E]): Either[String, Iterable[OTHER]] = Left("No read access on HyperRelation")
+  def delete(context: RequestContext, param: ConnectParameter[NODE], uuid: String): Either[String, Boolean] = Left("No delete access on Relation")
+  def delete[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,NODE with AbstractRelation[S,E],E], uuid: String): Either[String, Boolean] = Left("No delete access on HyperRelation")
+  def create(context: RequestContext, param: ConnectParameter[NODE]): Either[String, ConnectResponse[OTHER]]
+  def create(context: RequestContext, param: ConnectParameter[NODE], uuid: String): Either[String, ConnectResponse[OTHER]] = Left("No create access on Relation")
+  def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, NODE with AbstractRelation[S,E], E]): Either[String, ConnectResponse[OTHER]]
+  def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, NODE with AbstractRelation[S,E], E], uuid: String): Either[String, ConnectResponse[OTHER]] = Left("No create access on HyperRelation")
 
   val nodeFactory: UuidNodeMatchesFactory[OTHER]
 }
@@ -30,15 +29,15 @@ trait NodeAwareRelationAccess[NODE <: UuidNode, OTHER <: UuidNode] extends Relat
     nodeAccess = Some(access)
   }
 
-  private def createNode(context: RequestContext): Either[OTHER, String] = {
-    nodeAccess.map(_.create(context)).getOrElse(Right("No factory defined on connect path"))
+  private def createNode(context: RequestContext): Either[String, OTHER] = {
+    nodeAccess.map(_.create(context)).getOrElse(Left("No factory defined on connect path"))
   }
 
-  def create(context: RequestContext, param: ConnectParameter[NODE]): Either[ConnectResponse[OTHER], String] = {
-    createNode(context).left.toOption.map(n => create(context, param, n.uuid)).getOrElse(Right("Cannot create node on connect path"))
+  def create(context: RequestContext, param: ConnectParameter[NODE]): Either[String, ConnectResponse[OTHER]] = {
+    createNode(context).right.toOption.map(n => create(context, param, n.uuid)).getOrElse(Left("Cannot create node on connect path"))
   }
-  def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,NODE with AbstractRelation[S,E], E]): Either[ConnectResponse[OTHER], String] = {
-    createNode(context).left.toOption.map(n => create(context, param, n.uuid)).getOrElse(Right("Cannot create node on connect path"))
+  def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,NODE with AbstractRelation[S,E], E]): Either[String, ConnectResponse[OTHER]] = {
+    createNode(context).right.toOption.map(n => create(context, param, n.uuid)).getOrElse(Left("Cannot create node on connect path"))
   }
 }
 
@@ -60,8 +59,8 @@ END <: UuidNode
   protected def pageAwareRead(context: RequestContext, relDefs: Seq[NodeAndFixedRelationDefinition[START,RELATION,END]]) = {
     context.page.map { page =>
       val skip = page * context.limit
-      Left(limitedStartConnectedDiscourseNodes(skip, context.limit, relDefs: _*))
-    }.getOrElse(Left(startConnectedDiscourseNodes(relDefs: _*)))
+      Right(limitedStartConnectedDiscourseNodes(skip, context.limit, relDefs: _*))
+    }.getOrElse(Right(startConnectedDiscourseNodes(relDefs: _*)))
   }
 }
 
@@ -83,8 +82,8 @@ END <: UuidNode
   protected def pageAwareRead(context: RequestContext, relDefs: Seq[FixedAndNodeRelationDefinition[START,RELATION,END]]) = {
     context.page.map { page =>
       val skip = page * context.limit
-      Left(limitedEndConnectedDiscourseNodes(skip, context.limit, relDefs: _*))
-    }.getOrElse(Left(endConnectedDiscourseNodes(relDefs: _*)))
+      Right(limitedEndConnectedDiscourseNodes(skip, context.limit, relDefs: _*))
+    }.getOrElse(Right(endConnectedDiscourseNodes(relDefs: _*)))
   }
 }
 
@@ -161,13 +160,13 @@ END <: UuidNode
   override def delete(context: RequestContext, param: ConnectParameter[START], uuid: String) = {
     val relationDefinition = RelationDefinition(toBaseNodeDefinition(param), factory, toNodeDefinition(uuid))
     disconnectNodes(relationDefinition)
-    Left(true)
+    Right(true)
   }
 
   override def delete[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,START with AbstractRelation[S,E],E], uuid: String) = {
     val relationDefinition = RelationDefinition(toBaseNodeDefinition(param), factory, toNodeDefinition(uuid))
     disconnectNodes(relationDefinition)
-    Left(true)
+    Right(true)
   }
 }
 
@@ -181,13 +180,13 @@ END <: UuidNode
   override def delete(context: RequestContext, param: ConnectParameter[END], uuid: String) = {
     val relationDefinition = RelationDefinition(toNodeDefinition(uuid), factory, toBaseNodeDefinition(param))
     disconnectNodes(relationDefinition)
-    Left(true)
+    Right(true)
   }
 
   override def delete[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,END with AbstractRelation[S,E],E], uuid: String) = {
     val relationDefinition = RelationDefinition(toNodeDefinition(uuid), factory, toHyperBaseNodeDefinition(param))
     disconnectNodes(relationDefinition)
-    Left(true)
+    Right(true)
   }
 }
 
