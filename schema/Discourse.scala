@@ -98,6 +98,8 @@ object WustSchema {
     @unique val title: String
     var description: Option[String]
     var isType: Boolean = false
+    var color:Option[String]
+    var symbol:Option[String]
   }
   @Node trait Taggable extends UuidNode
   @HyperRelation class Categorizes(startNode: TagLike, endNode: Taggable) extends ContentRelation with HyperConnection with UuidNode

@@ -1,5 +1,5 @@
 <div class="edit_static_taglist_directive">
-    <span ng-repeat="tag in vm.tags track by tag.id" class="{{::vm.nodeInfo.css}} {{::vm.nodeInfo.tagCss(tag)}}">
+    <span ng-repeat="tag in vm.tags track by tag.id" ng-class="::vm.nodeInfo.css">
         <span ng-bind="tag.title"></span>
         <button class="close" ng-click="vm.deselectTag(tag)" type="button" aria-label="Close " data-title="uncheck tag" bs-tooltip animation=""><span aria-hidden="true">&times;</span></button>
     </span>

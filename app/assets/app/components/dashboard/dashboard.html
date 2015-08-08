@@ -29,7 +29,7 @@
                         <i class="as-sortable-item-handle fa fa-arrows" as-sortable-item-handle></i>
                         <button class="close" ng-click="vm.removeStream($index)" type="button" aria-label="Close " data-title="remove stream" bs-tooltip animation=""><span aria-hidden="true">&times;</span></button>
                     </div>
-                    <span ng-repeat="tag in stream.tags track by tag.id" ng-class="::vm.nodeInfo.css" class="{{::vm.nodeInfo.tagCss(tag)}}" ng-bind="tag.title"></span>
+                    <span ng-repeat="tag in stream.tags track by tag.id" ng-class="::vm.nodeInfo.css" ng-bind="tag.title"></span>
                     <i class="fa fa-pencil pull-right" style="cursor: pointer;" ng-click="vm.editModal(stream)"></i>
                     <hr>
                 </div>

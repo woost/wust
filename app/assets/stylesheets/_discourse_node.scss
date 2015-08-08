@@ -3,7 +3,7 @@
     $bordercolor: bordercolor($bgcolor);
     $bgcolor-highlight: highlightbgcolor($bgcolor);
 
-    &.node, &.discourse_taglike {
+    &.node {
         display: inline-block;
         background-color: $bgcolor;
         border: 1px solid $bordercolor;
@@ -43,27 +43,7 @@
 }
 
 .discourse_taglike {
-    &.tag__none {
-        @include discourse_node(white, ""); //tag
-    }
-    &.tag_Goal {
-        @include discourse_node($discourse_goal_color, ""); //navigation arrow
-    }
-    &.tag_Problem {
-        @include discourse_node($discourse_problem_color, ""); // flask
-    }
-
-    &.tag_Idea {
-        @include discourse_node($discourse_idea_color, ""); // light bulb
-    }
-
-    &.tag_Pro {
-        @include discourse_node($discourse_proargument_color, ""); // thumbsup
-    }
-
-    &.tag_Con {
-        @include discourse_node($discourse_conargument_color, ""); // thumbsdown
-    }
+    display: inline-block;
 }
 
 .discourse_post {

@@ -30,7 +30,9 @@ object GraphFormat {
         ("label", JsString(TagLike.label)),
         ("title", JsString(tag.title)),
         ("description", JsString(tag.description.getOrElse(""))),
-        ("isType", JsBoolean(tag.isType))
+        ("isType", JsBoolean(tag.isType)),
+        ("color", tag.color.map(JsString(_)).getOrElse(JsNull)),
+        ("symbol", tag.symbol.map(JsString(_)).getOrElse(JsNull))
       ))
     }
 
@@ -46,6 +48,7 @@ object GraphFormat {
       case h: Connects  =>
         Seq(
           ("isHyperRelation", JsBoolean(true)),
+          //TODO: jsNull oder besser garnicht senden, aus der Seq rausnehmen und flatten
           ("startId", JsString(h.startNodeOpt.map(_.uuid).getOrElse(""))),
           ("endId", JsString(h.endNodeOpt.map(_.uuid).getOrElse(""))),
           ("tags", Json.toJson(h.rev_categorizes))

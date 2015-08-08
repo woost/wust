@@ -18,8 +18,7 @@ function DiscourseNode() {
             // check wether a state is defined. If it isn't stay on the current page.
             getState: id => node.state && (id !== undefined) ? `${node.state}({id: "${id}"})` : ".",
             gotoState: id => { if (node.state && (id !== undefined)) $state.go(node.state, {id: id}); },
-            service: $injector.get(node.name),
-            tagCss: tag => tag.isType ? `tag_${tag.title}` : `tag__none`
+            service: $injector.get(node.name)
         }));
 
         let mappings = _(_.values(discourseMap)).map(node => {
@@ -30,7 +29,6 @@ function DiscourseNode() {
 
         let defaultNode = {
             css: "hyperrelation",
-            tagCss: _.constant(""),
             getHref: _.constant("#"),
             getState: _.constant("."),
             gotoState: _.noop

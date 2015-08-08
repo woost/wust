@@ -2,10 +2,13 @@ angular.module("wust.services").value("Helpers", {
     mapFind,
     hashCode,
     hashToHsl,
+    hashToHslBorder,
+    hashToHslBackground,
     cssCompat,
     lineIntersection,
     lineRectIntersection,
-    clampLineByRects
+    clampLineByRects,
+    coloredBorderWidth: "3px"
 });
 
 function mapFind(arr, mapFunc, findFunc) {
@@ -29,8 +32,16 @@ function hashCode(string) {
     return hash;
 }
 
-function hashToHsl(string, saturation, brightness) {
-    return `hsl(${Math.abs(hashCode(string)) % 360}, ${saturation}%, ${brightness}%)`;
+function hashToHslBorder(tag) {
+    return hashToHsl(tag, 57, 25);
+}
+
+function hashToHslBackground(tag) {
+    return hashToHsl(tag, 57, 50);
+}
+
+function hashToHsl(tag, saturation, brightness) {
+    return tag.color || `hsl(${Math.abs(hashCode(tag.id)) % 360}, ${saturation}%, ${brightness}%)`;
 }
 
 function cssCompat(original, jsSuffix, cssSuffix) {

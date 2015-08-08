@@ -183,13 +183,13 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     .append("div").attr("class", d => "nodeframe" + (d.isHyperRelation ? " nodeframe-hyperrelation" : ""));
 
                 this.d3Node = this.d3NodeContainerWithData.append("div")
-                    .attr("class", d => d.isHyperRelation ? "hyperrelation" : `node ${DiscourseNode.get(d.label).css}`);
+                .attr("class", d => d.isHyperRelation ? "hyperrelation" : `node ${DiscourseNode.get(d.label).css}`)
+                .style("border-width", Helpers.coloredBorderWidth)
+                .style("border-color", n => n.tags.length > 0 ? Helpers.hashToHslBorder(n.tags[0]) : undefined);
 
                 this.d3Node
                     .append("div").attr("class", "nodecontent")
                     .text(d => (d.isHyperRelation && d.tags.length > 0) ? "" : d.title);
-                // .style("border-width", n => Math.abs(n.verticalForce) + "px")
-                // .style("border-color", n => n.verticalForce < 0 ? "#3CBAFF" : "#FFA73C")
 
                 // add relations
                 this.d3RelationPathWithData.enter()
@@ -212,9 +212,9 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                             let color;
                             if (t.isType) {
                                 //TODO: display fixed specialized Tag Color
-                                color = Helpers.hashToHsl(t.id, 57, 50);
+                                color = Helpers.hashToHslBackground(t);
                             } else {
-                                color = Helpers.hashToHsl(t.id, 57, 50);
+                                color = Helpers.hashToHslBackground(t);
                             }
                             return `<span class="label nodetag" style="background: ${color};">${t.title}</span><br>`;
                         }).join("")
