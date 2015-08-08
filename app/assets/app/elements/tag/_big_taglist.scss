@@ -2,4 +2,7 @@
     .vote_button:hover {
         color: $vote_button_hover_color;
     }
+    .vote_button {
+        cursor: pointer;
+    }
 }
