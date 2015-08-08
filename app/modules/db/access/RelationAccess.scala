@@ -8,29 +8,31 @@ import modules.db.types._
 import modules.requests.ConnectResponse
 import play.api.libs.json.JsValue
 import renesca.schema._
+import play.api.mvc.Results._
+import play.api.mvc.Result
 
 trait RelationAccess[NODE <: UuidNode, +OTHER <: UuidNode] {
-  def read(context: RequestContext, param: ConnectParameter[NODE]): Either[String, Iterable[OTHER]]
-  def read[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,NODE with AbstractRelation[S,E], E]): Either[String, Iterable[OTHER]]
-  def delete(context: RequestContext, param: ConnectParameter[NODE], uuid: String): Either[String, Boolean]
-  def delete[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,NODE with AbstractRelation[S,E],E], uuid: String): Either[String, Boolean]
-  def create(context: RequestContext, param: ConnectParameter[NODE]): Either[String, ConnectResponse[OTHER]]
-  def create(context: RequestContext, param: ConnectParameter[NODE], uuid: String): Either[String, ConnectResponse[OTHER]]
-  def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, NODE with AbstractRelation[S,E], E]): Either[String, ConnectResponse[OTHER]]
-  def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, NODE with AbstractRelation[S,E], E], uuid: String): Either[String, ConnectResponse[OTHER]]
+  def read(context: RequestContext, param: ConnectParameter[NODE]): Either[Result, Iterable[OTHER]]
+  def read[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,NODE with AbstractRelation[S,E], E]): Either[Result, Iterable[OTHER]]
+  def delete(context: RequestContext, param: ConnectParameter[NODE], uuid: String): Either[Result, Boolean]
+  def delete[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,NODE with AbstractRelation[S,E],E], uuid: String): Either[Result, Boolean]
+  def create(context: RequestContext, param: ConnectParameter[NODE]): Either[Result, ConnectResponse[OTHER]]
+  def create(context: RequestContext, param: ConnectParameter[NODE], uuid: String): Either[Result, ConnectResponse[OTHER]]
+  def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, NODE with AbstractRelation[S,E], E]): Either[Result, ConnectResponse[OTHER]]
+  def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, NODE with AbstractRelation[S,E], E], uuid: String): Either[Result, ConnectResponse[OTHER]]
 
   val nodeFactory: UuidNodeMatchesFactory[OTHER]
 }
 
 trait RelationAccessDefault[NODE <: UuidNode, OTHER <: UuidNode] extends RelationAccess[NODE, OTHER]{
-  def read(context: RequestContext, param: ConnectParameter[NODE]): Either[String, Iterable[OTHER]] = Left("No read access on Relation")
-  def read[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,NODE with AbstractRelation[S,E], E]): Either[String, Iterable[OTHER]] = Left("No read access on HyperRelation")
-  def delete(context: RequestContext, param: ConnectParameter[NODE], uuid: String): Either[String, Boolean] = Left("No delete access on Relation")
-  def delete[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,NODE with AbstractRelation[S,E],E], uuid: String): Either[String, Boolean] = Left("No delete access on HyperRelation")
-  def create(context: RequestContext, param: ConnectParameter[NODE]): Either[String, ConnectResponse[OTHER]] = Left("No json create access on Relation")
-  def create(context: RequestContext, param: ConnectParameter[NODE], uuid: String): Either[String, ConnectResponse[OTHER]] = Left("No create access on Relation")
-  def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, NODE with AbstractRelation[S,E], E]): Either[String, ConnectResponse[OTHER]] = Left("No json create access on HyperRelation")
-  def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, NODE with AbstractRelation[S,E], E], uuid: String): Either[String, ConnectResponse[OTHER]] = Left("No create access on HyperRelation")
+  def read(context: RequestContext, param: ConnectParameter[NODE]): Either[Result, Iterable[OTHER]] = Left(NotFound("No read access on Relation"))
+  def read[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,NODE with AbstractRelation[S,E], E]): Either[Result, Iterable[OTHER]] = Left(NotFound("No read access on HyperRelation"))
+  def delete(context: RequestContext, param: ConnectParameter[NODE], uuid: String): Either[Result, Boolean] = Left(NotFound("No delete access on Relation"))
+  def delete[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,NODE with AbstractRelation[S,E],E], uuid: String): Either[Result, Boolean] = Left(NotFound("No delete access on HyperRelation"))
+  def create(context: RequestContext, param: ConnectParameter[NODE]): Either[Result, ConnectResponse[OTHER]] = Left(NotFound("No json create access on Relation"))
+  def create(context: RequestContext, param: ConnectParameter[NODE], uuid: String): Either[Result, ConnectResponse[OTHER]] = Left(NotFound("No create access on Relation"))
+  def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, NODE with AbstractRelation[S,E], E]): Either[Result, ConnectResponse[OTHER]] = Left(NotFound("No json create access on HyperRelation"))
+  def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, NODE with AbstractRelation[S,E], E], uuid: String): Either[Result, ConnectResponse[OTHER]] = Left(NotFound("No create access on HyperRelation"))
 }
 
 trait StartRelationAccess[
@@ -206,30 +208,30 @@ case class EndRelationReadDelete[START <: UuidNode, RELATION <: AbstractRelation
 trait RelationAccessDecorator[NODE <: UuidNode, +OTHER <: UuidNode] extends RelationAccess[NODE, OTHER] with AccessDecoratorControlMethods {
   val self: RelationAccess[NODE, OTHER]
 
-  override def acceptRequest(context: RequestContext): Option[String] = None
+  override def acceptRequest(context: RequestContext): Option[Result] = None
 
-  override def read(context: RequestContext, param: ConnectParameter[NODE]): Either[String, Iterable[OTHER]] = {
+  override def read(context: RequestContext, param: ConnectParameter[NODE]) = {
     acceptRequest(context).map(Left(_)).getOrElse(self.read(context, param))
   }
-  override def read[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,NODE with AbstractRelation[S,E], E]): Either[String, Iterable[OTHER]] = {
+  override def read[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,NODE with AbstractRelation[S,E], E]) = {
     acceptRequest(context).map(Left(_)).getOrElse(self.read(context, param))
   }
-  override def delete(context: RequestContext, param: ConnectParameter[NODE], uuid: String): Either[String, Boolean] = {
+  override def delete(context: RequestContext, param: ConnectParameter[NODE], uuid: String) = {
     acceptRequest(context).map(Left(_)).getOrElse(self.delete(context, param, uuid))
   }
-  override def delete[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,NODE with AbstractRelation[S,E],E], uuid: String): Either[String, Boolean] = {
+  override def delete[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,NODE with AbstractRelation[S,E],E], uuid: String) = {
     acceptRequest(context).map(Left(_)).getOrElse(self.delete(context, param, uuid))
   }
-  override def create(context: RequestContext, param: ConnectParameter[NODE]): Either[String, ConnectResponse[OTHER]] = {
+  override def create(context: RequestContext, param: ConnectParameter[NODE]) = {
     acceptRequest(context).map(Left(_)).getOrElse(self.create(context, param))
   }
-  override def create(context: RequestContext, param: ConnectParameter[NODE], uuid: String): Either[String, ConnectResponse[OTHER]] = {
+  override def create(context: RequestContext, param: ConnectParameter[NODE], uuid: String) = {
     acceptRequest(context).map(Left(_)).getOrElse(self.create(context, param, uuid))
   }
-  override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, NODE with AbstractRelation[S,E], E]): Either[String, ConnectResponse[OTHER]] = {
+  override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, NODE with AbstractRelation[S,E], E]) = {
     acceptRequest(context).map(Left(_)).getOrElse(self.create(context, param))
   }
-  override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, NODE with AbstractRelation[S,E], E], uuid: String): Either[String, ConnectResponse[OTHER]] = {
+  override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, NODE with AbstractRelation[S,E], E], uuid: String) = {
     acceptRequest(context).map(Left(_)).getOrElse(self.create(context, param, uuid))
   }
 
@@ -240,13 +242,13 @@ trait NodeAwareRelationAccess[NODE <: UuidNode, OTHER <: UuidNode] extends Relat
   val self: RelationAccess[NODE, OTHER]
   val nodeAccess: NodeAccess[OTHER]
 
-  override def create(context: RequestContext, param: ConnectParameter[NODE]): Either[String, ConnectResponse[OTHER]] = {
+  override def create(context: RequestContext, param: ConnectParameter[NODE]) = {
     nodeAccess.create(context) match {
       case Left(err) => Left(err)
       case Right(node) => self.create(context, param, node.uuid)
     }
   }
-  override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,NODE with AbstractRelation[S,E], E]): Either[String, ConnectResponse[OTHER]] = {
+  override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,NODE with AbstractRelation[S,E], E]) = {
     nodeAccess.create(context) match {
       case Left(err) => Left(err)
       case Right(node) => self.create(context, param, node.uuid)
@@ -258,8 +260,8 @@ case class StartNodeAwareRelationAccess[START <: UuidNode, RELATION <: AbstractR
 case class EndNodeAwareRelationAccess[START <: UuidNode, RELATION <: AbstractRelation[START,END], END <: UuidNode](self: EndRelationAccess[START,RELATION,END], nodeAccess: NodeAccess[START]) extends NodeAwareRelationAccess[END,START] with EndRelationAccess[START,RELATION,END]
 
 case class StartRelationAccessDecoration[START <: UuidNode, RELATION <: AbstractRelation[START,END], END <: UuidNode](self: StartRelationAccess[START,RELATION,END], control: AccessDecoratorControl) extends RelationAccessDecorator[START,END] with StartRelationAccess[START,RELATION,END] {
-  override def acceptRequest(context: RequestContext): Option[String] = control.acceptRequest(context)
+  override def acceptRequest(context: RequestContext) = control.acceptRequest(context)
 }
 case class EndRelationAccessDecoration[START <: UuidNode, RELATION <: AbstractRelation[START,END], END <: UuidNode](self: EndRelationAccess[START,RELATION,END], control: AccessDecoratorControl) extends RelationAccessDecorator[END,START] with EndRelationAccess[START,RELATION,END] {
-  override def acceptRequest(context: RequestContext): Option[String] = control.acceptRequest(context)
+  override def acceptRequest(context: RequestContext) = control.acceptRequest(context)
 }

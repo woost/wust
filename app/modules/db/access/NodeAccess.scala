@@ -5,6 +5,8 @@ import model.WustSchema._
 import modules.db.Database._
 import modules.db._
 import play.api.libs.json.JsValue
+import play.api.mvc.Results._
+import play.api.mvc.Result
 import renesca.graph.Label
 import renesca.parameter.implicits._
 
@@ -14,22 +16,22 @@ trait NodeAccess[+NODE <: UuidNode] {
   val label: Label
 
   //TODO: return proper status
-  def read(context: RequestContext): Either[String, Iterable[NODE]]
-  def read(context: RequestContext, uuid: String): Either[String, NODE]
-  def create(context: RequestContext): Either[String, NODE]
-  def update(context: RequestContext, uuid: String): Either[String, NODE]
-  def delete(context: RequestContext, uuid: String): Either[String, Boolean]
+  def read(context: RequestContext): Either[Result, Iterable[NODE]]
+  def read(context: RequestContext, uuid: String): Either[Result, NODE]
+  def create(context: RequestContext): Either[Result, NODE]
+  def update(context: RequestContext, uuid: String): Either[Result, NODE]
+  def delete(context: RequestContext, uuid: String): Either[Result, Boolean]
 }
 
 trait NodeAccessDefault[NODE <: UuidNode] extends NodeAccess[NODE] {
   val name = factory.getClass.getSimpleName.dropRight(1)
   val label = factory.label
 
-  def read(context: RequestContext): Either[String, Iterable[NODE]] = Left("No read access on Node collection")
-  def read(context: RequestContext, uuid: String): Either[String, NODE] = Left("No read access on Node")
-  def create(context: RequestContext): Either[String, NODE] = Left("No create access on Node")
-  def update(context: RequestContext, uuid: String): Either[String, NODE] = Left("No update access on Node")
-  def delete(context: RequestContext, uuid: String): Either[String, Boolean] = Left("No delete access on Node")
+  def read(context: RequestContext): Either[Result, Iterable[NODE]] = Left(NotFound("No read access on Node"))
+  def read(context: RequestContext, uuid: String): Either[Result, NODE] = Left(NotFound("No read access on Node"))
+  def create(context: RequestContext): Either[Result, NODE] = Left(NotFound("No create access on Node"))
+  def update(context: RequestContext, uuid: String): Either[Result, NODE] = Left(NotFound("No update access on Node"))
+  def delete(context: RequestContext, uuid: String): Either[Result, Boolean] = Left(NotFound("No delete access on Node"))
 }
 
 trait NodeReadBase[NODE <: UuidNode] extends NodeAccessDefault[NODE] {
@@ -42,12 +44,11 @@ trait NodeReadBase[NODE <: UuidNode] extends NodeAccessDefault[NODE] {
 
   override def read(context: RequestContext, uuid: String) = {
     //TODO possibility to resolve nodes directly without graph?
-    val node = factory.matchesOnUuid(uuid)
+    val node: NODE = factory.matchesOnUuid(uuid)
     //TODO method for only resolving matches...
     db.transaction(_.persistChanges(node)) match {
-      case Some(err) => Left(s"Cannot find node with uuid '$uuid'': $err")
-      case None =>
-        Right(node)
+      case Some(err) => Left(BadRequest(s"Cannot find node with uuid '$uuid'': $err"))
+      case None => Right(node)
     }
   }
 }
@@ -68,21 +69,21 @@ case class NodeReadDelete[NODE <: UuidNode](factory: UuidNodeMatchesFactory[NODE
 trait NodeAccessDecorator[NODE <: UuidNode] extends NodeAccess[NODE] with AccessDecoratorControlMethods {
   val self: NodeAccess[NODE]
 
-  override def acceptRequest(context: RequestContext): Option[String] = None
+  override def acceptRequest(context: RequestContext): Option[Result] = None
 
-  override def read(context: RequestContext): Either[String, Iterable[NODE]] = {
+  override def read(context: RequestContext) = {
     acceptRequest(context).map(Left(_)).getOrElse(self.read(context))
   }
-  override def read(context: RequestContext, uuid: String): Either[String, NODE] = {
+  override def read(context: RequestContext, uuid: String) = {
     acceptRequest(context).map(Left(_)).getOrElse(self.read(context, uuid))
   }
-  override def create(context: RequestContext): Either[String, NODE] = {
+  override def create(context: RequestContext) = {
     acceptRequest(context).map(Left(_)).getOrElse(self.create(context))
   }
-  override def update(context: RequestContext, uuid: String): Either[String, NODE] = {
+  override def update(context: RequestContext, uuid: String) = {
     acceptRequest(context).map(Left(_)).getOrElse(self.update(context, uuid))
   }
-  override def delete(context: RequestContext, uuid: String): Either[String, Boolean] = {
+  override def delete(context: RequestContext, uuid: String) = {
     acceptRequest(context).map(Left(_)).getOrElse(self.delete(context, uuid))
   }
 
@@ -92,5 +93,5 @@ trait NodeAccessDecorator[NODE <: UuidNode] extends NodeAccess[NODE] with Access
 }
 
 case class NodeAccessDecoration[NODE <: UuidNode](self: NodeAccess[NODE], control: AccessDecoratorControl) extends NodeAccessDecorator[NODE] {
-  override def acceptRequest(context: RequestContext): Option[String] = control.acceptRequest(context)
+  override def acceptRequest(context: RequestContext) = control.acceptRequest(context)
 }

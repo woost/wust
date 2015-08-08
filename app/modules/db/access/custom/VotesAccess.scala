@@ -8,6 +8,7 @@ import modules.requests.ConnectResponse
 import play.api.libs.json.JsValue
 import renesca.parameter.implicits._
 import renesca.schema._
+import play.api.mvc.Results._
 
 case class VotesAccess(
   weight: Long
@@ -22,7 +23,7 @@ case class VotesAccess(
     val votes = Votes.merge(context.user, hyper, weight = weight, onMatch = Set("weight"))
     val failure = db.transaction(_.persistChanges(start, end, hyper, votes))
     if(failure.isDefined)
-      Left("No vote :/")
+      Left(BadRequest("No vote :/"))
     else
       Right(ConnectResponse(Discourse.empty, Some(context.user)))
   }

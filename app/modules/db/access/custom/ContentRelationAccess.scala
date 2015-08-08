@@ -8,13 +8,15 @@ import modules.db.HyperNodeDefinitionBase
 import modules.db.access._
 import modules.requests.{ConnectResponse, PostAddRequest}
 import play.api.libs.json.JsValue
+import play.api.mvc.Result
+import play.api.mvc.Results._
 import renesca.parameter.implicits._
 import renesca.schema._
 
 trait ContentRelationHelper {
-  protected def persistRelation[T <: UuidNode](discourse: Discourse, result: T): Either[String, ConnectResponse[T]] = {
+  protected def persistRelation[T <: UuidNode](discourse: Discourse, result: T): Either[Result, ConnectResponse[T]] = {
     db.transaction(_.persistChanges(discourse)).map(err =>
-      Left(s"Cannot create ContentRelation: $err'")
+      Left(BadRequest(s"Cannot create ContentRelation: $err'"))
     ).getOrElse({
       //TODO: Only send partial graph: the created relations!
       //TODO: should only send node if the node was newly created

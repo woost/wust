@@ -2,12 +2,13 @@ package modules.db.access.custom
 
 import controllers.api.nodes.RequestContext
 import formatters.json.RequestFormat._
-import model.WustSchema._
+import model.WustSchema.{Created => SchemaCreated, _}
 import modules.db.Database.db
 import modules.db.access.{NodeRead, NodeReadDelete}
 import modules.requests._
 import play.api.libs.json.JsValue
 import renesca.parameter.implicits._
+import play.api.mvc.Results._
 
 class PostAccess extends NodeReadDelete(Post) {
   private def tagDefGraph(addedTags: List[String]): Discourse = {
@@ -31,16 +32,16 @@ class PostAccess extends NodeReadDelete(Post) {
       val discourse = tagDefGraph(request.addedTags)
 
       val node = Post.create(title = request.title, description = request.description)
-      val contribution = Created.create(context.user, node)
+      val contribution = SchemaCreated.create(context.user, node)
       discourse.add(node, contribution)
 
       addTagsToGraph(discourse, context.user, node)
 
       db.transaction(_.persistChanges(discourse)) match {
-        case Some(err) => Left(s"Cannot create Post: $err'")
+        case Some(err) => Left(BadRequest(s"Cannot create Post: $err'"))
         case _         => Right(node)
       }
-    }).getOrElse(Left("Error parsing create request for Tag"))
+    }).getOrElse(Left(UnprocessableEntity("Error parsing create request for Tag")))
   }
 
   override def update(context: RequestContext, uuid: String) = {
@@ -69,10 +70,10 @@ class PostAccess extends NodeReadDelete(Post) {
       addTagsToGraph(discourse, context.user, node)
 
       db.transaction(_.persistChanges(discourse)) match {
-        case Some(err) => Left(s"Cannot update Post with uuid '$uuid': $err'")
+        case Some(err) => Left(BadRequest(s"Cannot update Post with uuid '$uuid': $err'"))
         case _         => Right(node)
       }
-    }).getOrElse(Left("Error parsing update request for Tag"))
+    }).getOrElse(Left(UnprocessableEntity("Error parsing update request for Tag")))
   }
 }
 
@@ -84,14 +85,13 @@ class TagAccess extends NodeRead(TagLike) {
   override def create(context: RequestContext) = {
     context.jsonAs[TagAddRequest].map(request => {
       val node = Tag.merge(title = request.title, merge = Set("title"))
-      val contribution = Created.create(context.user, node)
+      val contribution = SchemaCreated.create(context.user, node)
 
-      val discourse = Discourse(node, contribution)
-      db.transaction(_.persistChanges(discourse)) match {
-        case Some(err) => Left(s"Cannot create Tag: $err'")
+      db.transaction(_.persistChanges(node, contribution)) match {
+        case Some(err) => Left(BadRequest(s"Cannot create Tag: $err'"))
         case _         => Right(node)
       }
-    }).getOrElse(Left("Error parsing create request for Tag"))
+    }).getOrElse(Left(UnprocessableEntity("Error parsing create request for Tag")))
   }
 
   override def update(context: RequestContext, uuid: String) = {
@@ -106,10 +106,10 @@ class TagAccess extends NodeRead(TagLike) {
 
       val discourse = Discourse(contribution)
       db.transaction(_.persistChanges(discourse)) match {
-        case Some(err) => Left(s"Cannot update Tag with uuid '$uuid': $err'")
+        case Some(err) => Left(BadRequest(s"Cannot update Tag with uuid '$uuid': $err'"))
         case _         => Right(node)
       }
-    }).getOrElse(Left("Error parsing update request for Tag"))
+    }).getOrElse(Left(UnprocessableEntity("Error parsing update request for Tag")))
   }
 }
 
@@ -126,11 +126,11 @@ class UserAccess extends NodeRead(User) {
           user.email = request.email
 
         db.transaction(_.persistChanges(user)) match {
-          case Some(err) => Left(s"Cannot update User: $err'")
+          case Some(err) => Left(BadRequest(s"Cannot update User: $err'"))
           case _         => Right(user)
         }
-      }.getOrElse(Left("Error parsing update request for User"))
-    }.getOrElse(Left("Cannot edit user"))
+      }.getOrElse(Left(UnprocessableEntity("Error parsing update request for User")))
+    }.getOrElse(Left(Forbidden("Cannot edit dummy user")))
   }
 }
 

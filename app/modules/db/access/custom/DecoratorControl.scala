@@ -4,12 +4,13 @@ import controllers.api.nodes.{HyperConnectParameter, RequestContext}
 import modules.db.Database._
 import modules.db.access.{AccessDecoratorControl, EndRelationAccessDefault}
 import modules.requests.ConnectResponse
+import play.api.mvc.Results._
 
 class CheckUser extends AccessDecoratorControl {
   override def acceptRequest(context: RequestContext) = {
     if (context.user.isDummy)
       //TODO: status
-      Some("Not Authorized")
+      Some(Unauthorized("Not Authorized"))
     else
       None
   }
