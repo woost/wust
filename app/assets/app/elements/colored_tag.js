@@ -13,13 +13,16 @@ function coloredTag(Helpers) {
 
     function link(scope, elem) {
         let rawElem = elem[0];
-        //TODO: may watching here is too expensive? we only need it in the tags view
-        //should work with one-time binding for the others?
-        scope.$watch("coloredTag", () => {
-            if (scope.coloredTag && scope.coloredTag.id) {
-                setColors();
-            }
-        });
+        if (scope.coloredTag.id) {
+            setColors();
+        } else {
+            let deregister = scope.$watch("coloredTag.id", () => {
+                if (scope.coloredTag.id) {
+                    setColors();
+                    deregister();
+                }
+            });
+        }
 
         function setColors() {
             rawElem.style.backgroundColor = Helpers.hashToHslBackground(scope.coloredTag);

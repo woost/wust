@@ -67,7 +67,7 @@ function infiniteScroll($rootScope) {
         function initialize() {
             scope.infinite.currentPage = 0;
             scope.infinite.maxPage = -1;
-            scope.infinite.noMore = false;
+            scope.infinite.noMore = true;
             scope.infinite.loading = true;
             pageInfos = [];
 
@@ -85,7 +85,6 @@ function infiniteScroll($rootScope) {
                     }
                 }, () => scope.infinite.loading = false);
             } else {
-                scope.infinite.noMore = true;
                 scope.infinite.loading = false;
             }
         }

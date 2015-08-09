@@ -31,11 +31,15 @@ function RoutesConfig($stateProvider, $urlRouterProvider, $locationProvider, Dis
         url: "/details/:id",
         templateUrl: `${templateBase}/users/detail.html`,
         controller: "UserDetailsCtrl as vm",
-    }).state(DiscourseNodeProvider.setState("TagLike", "tags"), {
+    }).state("tags", {
         parent: "page",
-        url: "/tags/:id",
+        url: "/tags",
         templateUrl: `${templateBase}/tags/tag.html`,
         controller: "TagsCtrl as vm",
+    }).state(DiscourseNodeProvider.setState("TagLike", "tags.details"), {
+        url: "/:id",
+        templateUrl: `${templateBase}/tags/tag_detail.html`,
+        controller: "TagDetailsCtrl as vm",
     }).state(DiscourseNodeProvider.setState("Post", "focus"), {
         parent: "page",
         url: "/focus/:id",
