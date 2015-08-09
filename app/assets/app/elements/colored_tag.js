@@ -13,8 +13,10 @@ function coloredTag(Helpers) {
 
     function link(scope, elem) {
         let rawElem = elem[0];
+        //TODO: may watching here is too expensive? we only need it in the tags view
+        //should work with one-time binding for the others?
         scope.$watch("coloredTag", () => {
-            if (scope.coloredTag.id) {
+            if (scope.coloredTag && scope.coloredTag.id) {
                 setColors();
             }
         });
