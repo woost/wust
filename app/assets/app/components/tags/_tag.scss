@@ -1,0 +1,12 @@
+#tag_component {
+    height: 100%;
+    #tag_list_box {
+        height: 80px;
+        overflow: auto;
+        margin: 0px auto;
+        width: 80%;
+    }
+    .tag {
+        cursor: pointer;
+    }
+}
