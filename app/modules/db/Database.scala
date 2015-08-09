@@ -219,12 +219,39 @@ object Database {
     // depth * 2 because hyperrelation depth
     val query = s"""
       match ${ focusNode.toQuery }
-      match (${ focusNode.name })-[rel:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(posts:`${ Post.label }`)
-      optional match (posts)-[:`${ Connects.startRelationType }`]->(connects:`${ Connects.label }`)-[:`${ Connects.endRelationType }`]->(:`${ Post.label }`)
+      match (${ focusNode.name })-[:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(posts:`${ Post.label }`)
+      with distinct posts
+      optional match (posts)-[rel1:`${ Connects.startRelationType }`]->(connects:`${ Connects.label }`)-[rel2:`${ Connects.endRelationType }`]->(:`${ Post.label }`)
+      with posts, rel1, rel2, connects
       optional match (nodetag:`${ TagLike.label }`)-[nodetagtocat:`${ Categorizes.startRelationType }`]->(nodecat:`${ Categorizes.label }`)-[cattopost:`${ Categorizes.endRelationType }`]->(posts)
       optional match (relationtag:`${ TagLike.label }`)-[relationtagtocat:`${ Categorizes.startRelationType }`]->(relationcat:`${ Categorizes.label }`)-[cattoconnects:`${ Categorizes.endRelationType }`]->(connects)
-      return distinct posts,rel,nodetag,relationtag,nodecat,relationcat,nodetagtocat,cattopost,cattoconnects,relationtagtocat
+      return posts,rel1, rel2,nodetag,relationtag,nodecat,relationcat,nodetagtocat,cattopost,cattoconnects,relationtagtocat
     """
+
+    println(query)
+
+// more efficient on cycles:
+//
+// match (V9Z8urq6SoyEu65XySG9tQ :`POST`:`TAGGABLE`:`INHERITABLE`:`CONNECTABLE`:`UUIDNODE`:`CONTENTNODE` {uuid:  "sAZ_luzHQByVarlrmc9KHA"})
+// match (V9Z8urq6SoyEu65XySG9tQ)-[:`CONNECTABLETOCONNECTS`|`CONNECTSTOCONNECTABLE` *0..10]-(posts:`POST`)
+// with distinct posts
+// optional match (posts)-[rel1:`CONNECTABLETOCONNECTS`]->(connects:`CONNECTS`)-[rel2:`CONNECTSTOCONNECTABLE`]->(:`POST`)
+// with posts, rel1, rel2, connects
+// optional match (nodetag:`TAGLIKE`)-[nodetagtocat:`TAGLIKETOCATEGORIZES`]->(nodecat:`CATEGORIZES`)-[cattopost:`CATEGORIZESTOTAGGABLE`]->(posts)
+// optional match (relationtag:`TAGLIKE`)-[relationtagtocat:`TAGLIKETOCATEGORIZES`]->(relationcat:`CATEGORIZES`)-[cattoconnects:`CATEGORIZESTOTAGGABLE`]->(connects)
+// return posts,rel1, rel2,nodetag,relationtag,nodecat,relationcat,nodetagtocat,cattopost,cattoconnects,relationtagtocat
+
+
+// query for getting the weight per post per tag:
+// TODO: use formula by "how to not sort by average rating"
+//
+// match (V9Z8urq6SoyEu65XySG9tQ :`POST`:`TAGGABLE`:`INHERITABLE`:`CONNECTABLE`:`UUIDNODE`:`CONTENTNODE` {uuid:  "75DpgSwoTX2eRuDl6G_DxQ"})
+// match (V9Z8urq6SoyEu65XySG9tQ)-[rel:`CONNECTABLETOCONNECTS`|`CONNECTSTOCONNECTABLE` *0..10]-(posts:`POST`)
+// with distinct posts
+// match (nodetag:`TAGLIKE`)-[nodetagtocat:`TAGLIKETOCATEGORIZES`]->(nodecat:`CATEGORIZES`)-[cattopost:`CATEGORIZESTOTAGGABLE`]->(posts)
+// match (nodecat)<-[nodetagvote:VOTES]-()
+// return posts.uuid, nodetag.uuid, sum(nodetagvote.weight)
+
 
     val params = focusNode.parameterMap
     Discourse(db.queryGraph(Query(query, params)))
