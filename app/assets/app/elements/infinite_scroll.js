@@ -71,18 +71,23 @@ function infiniteScroll($rootScope) {
             scope.infinite.loading = true;
             pageInfos = [];
 
-            scope.promise.$then(({$response}) => {
-                scope.infinite.loading = false;
-                if ($response === undefined)
-                    return;
+            if (scope.promise.$then) {
+                scope.promise.$then(({$response}) => {
+                    scope.infinite.loading = false;
+                    if ($response === undefined)
+                        return;
 
-                let config = $response.config;
-                let data = $response.data;
-                scope.infinite.noMore = data.length === 0 || data.length < config.params.size;
-                if (scope.infinite.noMore) {
-                    scope.infinite.maxPage = 0;
-                }
-            }, () => scope.infinite.loading = false);
+                    let config = $response.config;
+                    let data = $response.data;
+                    scope.infinite.noMore = data.length === 0 || data.length < config.params.size;
+                    if (scope.infinite.noMore) {
+                        scope.infinite.maxPage = 0;
+                    }
+                }, () => scope.infinite.loading = false);
+            } else {
+                scope.infinite.noMore = true;
+                scope.infinite.loading = false;
+            }
         }
 
         function assurePageInfo() {

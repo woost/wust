@@ -13,16 +13,11 @@ function coloredTag(Helpers) {
 
     function link(scope, elem) {
         let rawElem = elem[0];
-        if (scope.coloredTag.id) {
-            setColors();
-        } else {
-            let deregister = scope.$watch("coloredTag.id", () => {
-                if (scope.coloredTag.id) {
-                    setColors();
-                    deregister();
-                }
-            });
-        }
+        scope.$watch("coloredTag", () => {
+            if (scope.coloredTag.id) {
+                setColors();
+            }
+        });
 
         function setColors() {
             rawElem.style.backgroundColor = Helpers.hashToHslBackground(scope.coloredTag);
