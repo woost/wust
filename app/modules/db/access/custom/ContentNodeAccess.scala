@@ -11,9 +11,17 @@ import renesca.parameter.implicits._
 import play.api.mvc.Results._
 
 class PostAccess extends NodeReadDelete(Post) {
-  private def tagDefGraph(addedTags: List[String]): Discourse = {
+  private def tagDefGraph(addedTags: List[TagConnectRequest]): Discourse = {
     val discourse = Discourse.empty
-    val nodes = addedTags.map(tag => Tag.matches(uuid = Some(tag), matches = Set("uuid")))
+    val nodes = addedTags.flatMap { tag =>
+      if (tag.id.isDefined)
+        Some(Tag.matchesOnUuid(tag.id.get))
+      else if (tag.title.isDefined)
+        Some(Tag.merge(title = tag.title.get, merge = Set("title")))
+      else
+        None
+    }
+
     discourse.add(nodes: _*)
     discourse
   }
@@ -26,7 +34,7 @@ class PostAccess extends NodeReadDelete(Post) {
     })
   }
 
-  //TODO: should create/update be nested?
+  //TODO: removed tags
   override def create(context: RequestContext) = {
     context.withJson { (request: TaggedPostAddRequest) =>
       val discourse = tagDefGraph(request.addedTags)
@@ -84,6 +92,8 @@ object PostAccess {
 class TagAccess extends NodeRead(TagLike) {
   override def create(context: RequestContext) = {
     context.withJson { (request: TagAddRequest) =>
+      //TODO: should accept description, too.
+      //currently only handled by update.
       val node = Tag.merge(title = request.title, merge = Set("title"))
       val contribution = SchemaCreated.create(context.user, node)
 

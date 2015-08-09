@@ -43,8 +43,9 @@ function EditService(Post, HistoryService, store, DiscourseNode) {
             let dirtyModel = _.omit(_.pick(this, _.keys(this.original)), (v, k) => this.original[k] === v);
             delete dirtyModel.tags;
             //TODO: handle new tags...
-            let addedTags = _.reject(this.tags, t => _.any(this.original.tags, _.pick(t, "id"))).map(t => t.id);
-            let removedTags = _.reject(this.original.tags, t => _.any(this.tags, _.pick(t, "id"))).map(t => t.id);
+            let addedTags = _.reject(this.tags, t => t.id && _.any(this.original.tags, _.pick(t, "id"))).map(t => t.id ? _.pick(t, "id") : _.pick(t, "title"));
+            let removedTags = _.reject(this.original.tags, t => !t.id || _.any(this.tags, _.pick(t, "id"))).map(t => t.id ? _.pick(t, "id") : _.pick(t, "title"));
+
             if (addedTags.length > 0)
                 dirtyModel.addedTags = addedTags;
             if (removedTags.length > 0)

@@ -5,6 +5,11 @@ import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
 object RequestFormat {
+  implicit val tagConnectFormat = (
+    (__ \ "id").readNullable[String] and
+      (__ \ "title").readNullable[String]
+    )(TagConnectRequest)
+
   implicit val postAddFormat = (
     (__ \ "description").readNullable[String] and
       (__ \ "title").read[String]
@@ -13,7 +18,7 @@ object RequestFormat {
   implicit val taggedPostAddFormat = (
     (__ \ "description").readNullable[String] and
       (__ \ "title").read[String] and
-      (__ \ "addedTags").readNullable[List[String]]
+      (__ \ "addedTags").readNullable[List[TagConnectRequest]]
     )(TaggedPostAddRequest)
 
   implicit val postUpdateFormat = (
@@ -24,7 +29,7 @@ object RequestFormat {
   implicit val taggedPostUpdateFormat = (
     (__ \ "description").readNullable[String] and
       (__ \ "title").readNullable[String] and
-      (__ \ "addedTags").readNullable[List[String]]
+      (__ \ "addedTags").readNullable[List[TagConnectRequest]]
     )(TaggedPostUpdateRequest)
 
   implicit val tagAddFormat = (__ \ "title").read[String].map(TagAddRequest(_))
