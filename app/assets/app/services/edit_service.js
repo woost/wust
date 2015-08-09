@@ -14,7 +14,7 @@ function EditService(Post, HistoryService, store, DiscourseNode) {
         }
 
         apply({
-            id, title, description, label, addedTags, original, tags, localId
+            id, title, description, label, original, tags, localId
         }) {
             tags = tags || [];
             this.id = id;
@@ -35,26 +35,20 @@ function EditService(Post, HistoryService, store, DiscourseNode) {
             // initally only show editor if node has description
             this.expandedEditor = !_.isEmpty(description);
 
-            //TODO: why nulls?
-            this.addedTags = _.map(_.compact(addedTags) || [], t => {
-                if (_.isNumber(t))
-                    return t;
-                else
-                    return t.id;
-            });
-
             this.setValidityProperties();
         }
 
         //TODO: we should rewrite the whole logic here, it is weird and hacky, but it works so i leave it as is :)
         dirtyModel() {
             let dirtyModel = _.omit(_.pick(this, _.keys(this.original)), (v, k) => this.original[k] === v);
-            if (_.any(this.addedTags))
-            //TODO: why do we have nulls here?
-                dirtyModel.addedTags = _.compact(this.addedTags);
-
-            // no tags array
             delete dirtyModel.tags;
+            //TODO: handle new tags...
+            let addedTags = _.reject(this.tags, t => _.any(this.original.tags, _.pick(t, "id"))).map(t => t.id);
+            let removedTags = _.reject(this.original.tags, t => _.any(this.tags, _.pick(t, "id"))).map(t => t.id);
+            if (addedTags.length > 0)
+                dirtyModel.addedTags = addedTags;
+            if (removedTags.length > 0)
+                dirtyModel.removedTags = removedTags;
 
             return dirtyModel;
         }
@@ -71,17 +65,20 @@ function EditService(Post, HistoryService, store, DiscourseNode) {
             return Post.$buildRaw(model).$update(dirtyModel).$then(data => {
                 // DiscourseNode.Post.gotoState(data.id);
                 humane.success(message);
-                this.apply(data);
+                this.apply(_.merge(data, {
+                    tags: this.tags
+                }));
                 storeEditList();
                 //TODO: weird update
-                let updateNode = angular.copy(this.tags);
+                let updateNode = _.merge(data, {
+                    tags: angular.copy(this.tags)
+                });
                 HistoryService.updateCurrentView(updateNode);
             });
         }
 
         discard() {
             this.apply(this.original);
-            this.addedTags = [];
             this.onChange();
         }
 
@@ -89,6 +86,7 @@ function EditService(Post, HistoryService, store, DiscourseNode) {
             return this.id === undefined ? _.pick(this, _.keys(this.original)) : this.original;
         }
 
+        //TODO: needed?
         addTag(maybeTags) {
             let tag = _.isArray(maybeTags) ? maybeTags[0] : maybeTags;
             if (!tag || _.any(this.tags, {
@@ -98,7 +96,6 @@ function EditService(Post, HistoryService, store, DiscourseNode) {
 
             let encoded = tag.encode ? tag.encode() : tag;
             this.tags.push(encoded);
-            this.addedTags.push(encoded.id);
 
             this.onChange();
         }
