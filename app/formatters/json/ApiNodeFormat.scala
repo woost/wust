@@ -12,6 +12,7 @@ object ApiNodeFormat {
     def reads(json: JsValue) = ???
 
     //TODO: this should be multiple formats...code dup
+    //TODO: same as in graphofmrat
     def writes(node: Node) = JsObject(node match {
       case n: Post => Seq(
         ("id", JsString(n.uuid)),
@@ -22,7 +23,6 @@ object ApiNodeFormat {
       )
       case n: TagLike => Seq(
         ("id", JsString(n.uuid)),
-        //TODO: meh, same as in graphofmrat
         ("label", JsString(TagLike.label)),
         ("title", JsString(n.title)),
         ("description", JsString(n.description.getOrElse(""))),
@@ -38,12 +38,6 @@ object ApiNodeFormat {
         ("name", JsString(n.name))
       )
       case n              =>
-        println("wht")
-        println(n.labels)
-        println(n.rawItem.labels)
-        println(n.rawItem.properties)
-        println(n.rawItem)
-        println(n.rawItem.origin)
         throw new RuntimeException("You did not define a formatter for the api: " + node)
     })
   }
