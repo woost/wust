@@ -79,7 +79,10 @@ class PostAccess extends NodeReadDelete(Post) {
 
       db.transaction(_.persistChanges(discourse)) match {
         case Some(err) => Left(BadRequest(s"Cannot update Post with uuid '$uuid': $err'"))
-        case _         => Right(node)
+        //FIXME: why the fuck do i need to do this???
+        //otherwise node.rev_categorizes is empty? something is messed up here.
+        case _         => Right(discourse.posts.find(_.uuid == node.uuid).get)
+        // case _         => Right(node)
       }
     }
   }
