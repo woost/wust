@@ -11,6 +11,9 @@ function EditService(Post, HistoryService, store, DiscourseNode) {
             // local id to identify nodes without an id
             this.localId = _.uniqueId();
             this.apply(other);
+
+            // initally only show editor if node has description
+            this.expandedEditor = !_.isEmpty(this.description);
         }
 
         apply({
@@ -31,9 +34,6 @@ function EditService(Post, HistoryService, store, DiscourseNode) {
                 label: this.label,
                 tags: tags
             };
-
-            // initally only show editor if node has description
-            this.expandedEditor = !_.isEmpty(description);
 
             this.setValidityProperties();
         }
@@ -56,9 +56,11 @@ function EditService(Post, HistoryService, store, DiscourseNode) {
 
         save() {
             let dirtyModel = this.dirtyModel();
-            this.setValidityProperties();
             if (!this.canSave)
                 return;
+
+            // we do this in order to disable the form until we saved the node.
+            this.unsetValidityProperties();
 
             let model = _.pick(this, "id");
             let message = model.id === undefined ? "Added new node" : "Updated now";
@@ -66,16 +68,16 @@ function EditService(Post, HistoryService, store, DiscourseNode) {
             return Post.$buildRaw(model).$update(dirtyModel).$then(data => {
                 // DiscourseNode.Post.gotoState(data.id);
                 humane.success(message);
-                this.apply(_.merge(data, {
-                    tags: this.tags
-                }));
+
+                // the response only holds newly added tags
+                data.tags = this.original.tags.concat(data.tags).map(t => t.encode ? t.encode() : t);
+                this.apply(data);
                 storeEditList();
+
                 //TODO: weird update
-                let updateNode = _.merge(data, {
-                    tags: angular.copy(this.tags)
-                });
+                let updateNode = angular.copy(data);
                 HistoryService.updateCurrentView(updateNode);
-            });
+            }, () => this.setValidityProperties());
         }
 
         discard() {
@@ -112,6 +114,12 @@ function EditService(Post, HistoryService, store, DiscourseNode) {
             this.isValid = !_.isEmpty(this.title);
             this.canSave = this.isValid && !this.isPristine;
             this.isLocal = this.id === undefined;
+        }
+
+        unsetValidityProperties() {
+            let dirtyModel = {};
+            this.isPristine = true;
+            this.canSave = false;
         }
 
         remove() {
