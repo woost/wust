@@ -22,7 +22,7 @@ function TagDetailsCtrl($stateParams, TagLike, StreamService) {
             return false;
 
         postPage++;
-        return vm.tag.posts.$fetch({
+        return vm.contributions.$fetch({
             page: postPage,
             size: postSize
         });
