@@ -209,7 +209,7 @@ function EditService(Post, HistoryService, store, DiscourseNode) {
                 //that the user already added a new tag before we got the
                 //result, but somehow this does not work?
                 // session.tags.concat(encoded);
-                session.tags = encoded;
+                session.tags = angular.copy(encoded);
                 session.onChange();
             });
         }
