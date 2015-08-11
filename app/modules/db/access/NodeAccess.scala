@@ -43,11 +43,10 @@ trait NodeReadBase[NODE <: UuidNode] extends NodeAccessDefault[NODE] {
   }
 
   override def read(context: RequestContext, uuid: String) = {
-    //TODO possibility to resolve nodes directly without graph?
-    val node: NODE = factory.matchesOnUuid(uuid)
+    val node = factory.matchesOnUuid(uuid)
     //TODO method for only resolving matches...
     db.transaction(_.persistChanges(node)) match {
-      case Some(err) => Left(BadRequest(s"Cannot find node with uuid '$uuid'': $err"))
+      case Some(err) => Left(BadRequest(s"Cannot find node with uuid '$uuid': $err"))
       case None => Right(node)
     }
   }

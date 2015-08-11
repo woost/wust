@@ -9,7 +9,6 @@ import play.api.mvc.Results._
 class CheckUser extends AccessDecoratorControl with AccessDecoratorControlDefault {
   override def acceptRequest(context: RequestContext) = {
     if (context.user.isDummy)
-      //TODO: status
       Some(Unauthorized("Not Authorized"))
     else
       None

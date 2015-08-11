@@ -10,7 +10,7 @@ trait DeletableNodes[NODE <: UuidNode] extends NodesBase {
   def nodeSchema: NodeSchema[NODE]
 
   private def deleteResult(deleted: Boolean) = if (deleted)
-      Ok(JsObject(Seq()))
+      NoContent
     else
       BadRequest("Cannot delete Node")
 

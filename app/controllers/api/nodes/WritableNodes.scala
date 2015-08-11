@@ -12,11 +12,11 @@ trait WritableNodes[NODE <: UuidNode] extends NodesBase {
   def nodeSchema: NodeSchema[NODE]
 
   private def jsonNode(node: UuidNode) = Ok(Json.toJson(node))
+  private def createdJsonNode(node: UuidNode) = Ok(Json.toJson(node))
   private def connectResponse(response: ConnectResponse[UuidNode]) = Ok(Json.toJson(response))
 
   override def create = UserAwareAction { request =>
-    // TODO: HTTP status Created
-    getResult(nodeSchema.op.create(context(request)))(jsonNode)
+    getResult(nodeSchema.op.create(context(request)))(createdJsonNode)
   }
 
   override def update(uuid: String) = UserAwareAction { request =>
