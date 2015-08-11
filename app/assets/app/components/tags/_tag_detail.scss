@@ -1,8 +1,8 @@
 #tag_detail_component {
+    height: 100%;
     #tag_detail_box {
-        max-height: 400px;
+        width: 100%;
+        height: 100%;
         overflow: auto;
-        margin: 0px auto;
-        width: 60%;
     }
 }
