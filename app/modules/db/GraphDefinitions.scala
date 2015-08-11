@@ -9,7 +9,6 @@ import renesca.schema._
 
 package object types {
 
-  // TODO: assure relationdefinition of specific relation type, see database connectNodes methods...
   type ContentRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _, _, _ <: ContentRelationFactory[START, RELATION, END]]
   type VotesRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _, _, _ <: Votes.type]
 
