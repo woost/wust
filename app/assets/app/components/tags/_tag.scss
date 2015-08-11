@@ -1,14 +1,17 @@
 #tag_component {
     height: 100%;
     #tag_list_box {
-        height: 140px;
+        height: 100px;
         overflow: auto;
     }
     #tag_ui_view {
         //TODO: this is probably not the right way to achieve this...
-        height: -moz-calc(100% - 250px);
-        height: -webkit-calc(100% - 250px);
-        height: calc(100% - 250px);
+        height: -moz-calc(100% - 210px);
+        height: -webkit-calc(100% - 210px);
+        height: calc(100% - 210px);
+    }
+    #tag_list_more {
+        margin-top: 20px;
     }
     .tag {
         cursor: pointer;
