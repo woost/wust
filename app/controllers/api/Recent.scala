@@ -16,12 +16,9 @@ object Recent extends Controller {
     val labels = ContentNode.labels ++ label.map(Label(_))
     val nodeDef = LabelNodeDefinition(labels)
 
-    val userDef = ConcreteFactoryNodeDefinition(User)
-    val relationDef = RelationDefinition(userDef, CreatedAction, nodeDef)
-
-   val returnStatement = s"with ${relationDef.name}, ${relationDef.endDefinition.name} return ${relationDef.endDefinition.name} order by ${relationDef.name}.timestamp desc"
-   val query = s"match ${ relationDef.toQuery } $returnStatement"
-   val discourse = Discourse(db.queryGraph(Query(query, relationDef.parameterMap)))
+   val returnStatement = s"return ${nodeDef.name} order by ${nodeDef.name}.timestamp desc limit 30"
+   val query = s"match ${ nodeDef.toQuery } $returnStatement"
+   val discourse = Discourse(db.queryGraph(Query(query)))
 
     Ok(Json.toJson(discourse.nodes))
   }
