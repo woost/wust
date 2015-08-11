@@ -1,11 +1,7 @@
 @import "compass/css3/flexbox";
 
 #neighbours_component {
-    @include display-flex(flex);
-    @include justify-content(space-between);
+    width: 100%;
     padding: 20px;
     text-align: center;
-    #root_node_view {
-        @include flex-grow(1);
-    }
 }
