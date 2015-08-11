@@ -43,7 +43,7 @@ class PostAccess extends NodeReadDelete(Post) {
     val discourse = Discourse(node)
 
     removedTags.foreach { tagUuid =>
-      val tag = Tag.matchesOnUuid(tagUuid)
+      val tag = TagLike.matchesOnUuid(tagUuid)
       discourse.add(tag)
       val categorizes = Categorizes.matches(tag, node)
       discourse.add(categorizes)

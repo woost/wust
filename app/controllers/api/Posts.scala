@@ -16,7 +16,7 @@ object Posts extends Nodes[Post] {
       ("connects-to", N > StartContentRelationAccess(Connects, Post) + PostAccess.apply),
       ("connects-from", N < EndContentRelationAccess(Connects, Post) + PostAccess.apply)
     )),
-    ("tags", N < Categorizes < (EndRelationRead(Categorizes, Tag),
+    ("tags", N < Categorizes < (EndRelationRead(Categorizes, TagLike),
       ("voters", N < EndRelationRead(Votes, User)),
       ("up", N < VotesAccess(1) + CheckUser.apply),
       ("down", N < VotesAccess(-1) + CheckUser.apply)

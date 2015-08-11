@@ -195,9 +195,25 @@ function EditService(Post, HistoryService, store, DiscourseNode) {
         return existing;
     }
 
-    function edit(maybeNodes, index = 0) {
-        //TODO: we get an array if multiple nodes were in completion and enter was pressed
-        let node = _.isArray(maybeNodes) ? maybeNodes[0] : maybeNodes;
-        return assureSessionExists(node, index);
+    function edit(node, index = 0) {
+        let session = assureSessionExists(node, index);
+        //TODO: it might happen that we get a node without tags, for example it
+        //happens when a node is dropped because encoding a node does not
+        //return nested resources like tags.
+        //in that case we load them
+        if (node.tags === undefined) {
+            Post.$buildRaw(_.pick(node, "id")).tags.$search().$then(val => {
+                let encoded = val.$encode();
+                session.original.tags = encoded;
+                //TODO: we should concat, it might actually be the case
+                //that the user already added a new tag before we got the
+                //result, but somehow this does not work?
+                // session.tags.concat(encoded);
+                session.tags = encoded;
+                session.onChange();
+            });
+        }
+
+        return session;
     }
 }
