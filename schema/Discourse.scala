@@ -61,7 +61,9 @@ object WustSchema {
   @Node trait Inheritable
   @HyperRelation class Inherits(startNode: Inheritable, endNode: Inheritable) extends ContentRelation with HyperConnection with UuidNode
 
-  @Node class Post extends ContentNode with Connectable with Inheritable with Taggable {
+  // post explicitly inherits timestamp to make it cheap to query recent posts
+  // otherwise we would need to take include the created relation every time
+  @Node class Post extends ContentNode with Connectable with Inheritable with Taggable with Timestamp {
     var title: String
     var description: Option[String]
 

@@ -4,6 +4,8 @@ SearchService.$inject = ["Search", "DiscourseNode"];
 
 function SearchService(Search, DiscourseNode) {
     let defaultSize = 30;
+    let reloadHandler;
+
     this.search = {
         resultsVisible: false,
         query: "",
@@ -14,8 +16,10 @@ function SearchService(Search, DiscourseNode) {
         waiting: true,
         page: 0,
         size: defaultSize,
+        unlimited: false,
         triggerSearch,
-        loadMore
+        loadMore,
+        onReload
     };
 
     _.bindAll(this.search);
@@ -27,11 +31,22 @@ function SearchService(Search, DiscourseNode) {
         this.page = 0;
         this.waiting = true;
         this.results.$refresh(getParams.apply(this));
+        callReloadHandler();
         return this.results.$then(searchFinished.bind(this), searchFinished.bind(this));
 
         function searchFinished(val) {
             this.waiting = false;
         }
+    }
+
+    function callReloadHandler() {
+        if (reloadHandler)
+            reloadHandler();
+    }
+
+    function onReload(handler) {
+        if (handler)
+            reloadHandler = handler;
     }
 
     function loadMore() {
@@ -43,14 +58,21 @@ function SearchService(Search, DiscourseNode) {
     }
 
     function getParams() {
-        return {
+        let params = {
             label: DiscourseNode.Post.label,
             title: this.query,
             searchDescriptions: this.searchDescriptions,
             tagOr: this.tagOr,
             tags: this.selectedTags.map(t => t.id),
-            page: this.page,
-            size: this.size
         };
+
+        if (this.unlimited) {
+            return params;
+        } else {
+            return _.merge(params, {
+                page: this.page,
+                size: this.size
+            });
+        }
     }
 }

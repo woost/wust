@@ -51,7 +51,7 @@ function infiniteScroll($rootScope) {
                     } else {
                         addPage(height);
                         setPage(targetElement.scrollTop + targetElement.offsetHeight);
-                        scope.infinite.noMore = data.length < config.params.size;
+                        scope.infinite.noMore = (config.params.size === undefined) || (data.length < config.params.size);
                     }
 
                     if (scope.infinite.noMore) {
@@ -66,10 +66,13 @@ function infiniteScroll($rootScope) {
         function initialize() {
             scope.infinite.currentPage = 0;
             scope.infinite.maxPage = -1;
-            scope.infinite.noMore = true;
+            scope.infinite.noMore = false;
             scope.infinite.loading = true;
             pageInfos = [];
 
+            targetElement.scrollTop = 0;
+
+            //TODO: when does it happen? debug!
             if (scope.promise.$then) {
                 scope.promise.$then(({$response}) => {
                     scope.infinite.loading = false;
@@ -78,7 +81,7 @@ function infiniteScroll($rootScope) {
 
                     let config = $response.config;
                     let data = $response.data;
-                    scope.infinite.noMore = data.length === 0 || data.length < config.params.size;
+                    scope.infinite.noMore = (config.params.size === undefined) || (data.length === 0) || (data.length < config.params.size);
                     if (scope.infinite.noMore) {
                         scope.infinite.maxPage = 0;
                     }
@@ -94,7 +97,7 @@ function infiniteScroll($rootScope) {
         }
 
         function manualLoad() {
-            if (scope.infinite.noMore)
+            if (scope.infinite.noMore || scope.infinite.loading)
                 return;
 
             assurePageInfo();

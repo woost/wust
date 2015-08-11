@@ -19,11 +19,12 @@
         height: 100%;
         @include display-flex(flex);
         #search_results_view {
+            padding-top: 30px;
             height: 100%;
             width: 100%;
             #search_results {
+                padding-left: 20px;
                 overflow: auto;
-                padding: 30px;
                 width: 100%;
                 max-height: 100%;
                 .discourse_post.node {
@@ -44,19 +45,25 @@
                 padding: 5px;
             }
             #search_options_bottom {
+                width: inherit;
                 position: absolute;
                 bottom: 10px;
             }
+            .inactive {
+                color: #aaa;
+            }
             background: #eee;
-            width: 220px;
+            width: 190px;
             height: 100%;
             padding: 10px;
             border-bottom-left-radius: 10px;
         }
-        .search_status {
-            font-size: 30px;
-            color: #aaa;
-            margin-left: 20px;
+        .search_indicator {
+            padding: 30px;
+            .search_status {
+                font-size: 30px;
+                color: #aaa;
+            }
         }
     }
 }

@@ -27,9 +27,11 @@ object Search extends Controller {
     val titleMatcher = title.map(_ => s"${nodeDef.name}.title =~ {term}")
     val termMatcher = Seq(titleMatcher, descrMatcher).flatten.mkString(" or ")
 
-    val limit = size.getOrElse(20)
-    val skip = page.getOrElse(0) * limit;
-    val returnStatement = s"return ${ nodeDef.name } order by ${ nodeDef.name }.title skip $skip limit $limit"
+    val returnPostfix = size.map { limit =>
+      val skip = page.getOrElse(0) * limit;
+      s"skip $skip limit $limit"
+    }.getOrElse("")
+    val returnStatement = s"return ${ nodeDef.name } order by ${ nodeDef.name }.timestamp desc $returnPostfix"
 
     // When Neo4j throws an error because the regexp is incorrect, return an empty Discourse instead
     val discourse = Try(if (tags.isEmpty) {

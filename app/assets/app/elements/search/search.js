@@ -20,6 +20,11 @@ function searchCtrl($scope, SearchService, $rootScope) {
     let vm = this;
 
     vm.search = SearchService.search;
+    vm.search.onReload(() => {
+        console.log("penos", arguments);
+        if (vm.infinite)
+            vm.infinite.initialize();
+    });
 
     $rootScope.$on("$stateChangeStart", () => {
         vm.search.resultsVisible = false;
