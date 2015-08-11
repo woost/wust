@@ -12,7 +12,6 @@ object ApiNodeFormat {
     def reads(json: JsValue) = ???
 
     //TODO: this should be multiple formats...code dup
-    //TODO: same as in graphofmrat
     def writes(node: Node) = JsObject(node match {
       case n: Post => Seq(
         ("id", JsString(n.uuid)),

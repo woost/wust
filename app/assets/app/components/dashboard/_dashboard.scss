@@ -1,14 +1,10 @@
 @import "compass/css3/flexbox";
 
 #dashboard_component {
-    //TODO: why is the height scrollable with 100%?
-    //only here in dashboard...
     height: 100%;
     #posts_view {
         #header_list {
             @include display-flex(flex);
-            // @include flex-wrap(wrap);
-            // @include flex-direction(rows);
             @include justify-content(space-between);
             width: 100%;
             margin: 0 auto;

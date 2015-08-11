@@ -133,14 +133,12 @@ object Database {
     }
   }
 
-  //TODO: unique connections?
   def connectNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](discourse: Discourse, start: START, factory: ContentRelationFactory[START, RELATION, END], end: END): (START, END) = {
-    discourse.add(factory.createContentRelation(start, end))
+    discourse.add(factory.mergeContentRelation(start, end))
     db.transaction(_.persistChanges(discourse.graph))
     (start, end)
   }
 
-  //TODO: merge with previous
   def connectNodes(discourse: Discourse, start: User, factory: Votes.type, end: Categorizes, weight: Long): (User, Categorizes) = {
     discourse.add(factory.merge(start, end, weight = weight, onMatch = Set("weight")))
     db.transaction(_.persistChanges(discourse.graph))
@@ -189,24 +187,31 @@ object Database {
       Some(connectNodes(discourse, nodesOpt.get._2, factory, nodesOpt.get._1))
   }
 
-  def disconnectNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinition: FixedRelationDefinition[START, RELATION, END]) {
+  def disconnectNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinition: FixedRelationDefinition[START, RELATION, END]) = {
     val tx = db.newTransaction()
     val discourse = itemDiscourseGraph(relationDefinition)
     if(discourse.relations.isEmpty && discourse.hyperRelations.size == 1) {
       val label = discourse.hyperRelations.head.label
       discourse.graph.nodes -= discourse.hyperRelations.head.rawItem
-      tx.persistChanges(discourse.graph)
-      // here we disconnect a hyperrelation
-      // therefore we garbage collect broken hyperrelations
-      // in our case, only CONNECTS is recursive
-      // TODO: challenge, this is a workaround
-      if(label == Connects.label)
-        model.WustSchema.deleteConnectsGarbage(tx)
-      tx.commit()
+      val failure = tx.persistChanges(discourse.graph)
+      if (failure.isEmpty) {
+        // here we disconnect a hyperrelation
+        // therefore we garbage collect broken hyperrelations
+        // in our case, only CONNECTS is recursive
+        // TODO: challenge, this is a workaround
+        if(label == Connects.label)
+          model.WustSchema.deleteConnectsGarbage(tx)
+
+        tx.commit()
+        true
+      } else {
+        false
+      }
     }
     else {
       discourse.graph.relations.clear()
-      tx.commit.persistChanges(discourse.graph)
+      val failure = tx.commit.persistChanges(discourse.graph)
+      failure.isEmpty
     }
   }
 

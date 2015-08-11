@@ -88,20 +88,6 @@ function EditService(Post, HistoryService, store, DiscourseNode) {
             return this.id === undefined ? _.pick(this, _.keys(this.original)) : this.original;
         }
 
-        //TODO: needed?
-        addTag(maybeTags) {
-            let tag = _.isArray(maybeTags) ? maybeTags[0] : maybeTags;
-            if (!tag || _.any(this.tags, {
-                id: tag.id
-            }))
-                return;
-
-            let encoded = tag.encode ? tag.encode() : tag;
-            this.tags.push(encoded);
-
-            this.onChange();
-        }
-
         onChange() {
             this.setValidityProperties();
             storeEditList();

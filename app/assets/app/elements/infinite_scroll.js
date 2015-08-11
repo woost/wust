@@ -12,7 +12,6 @@ function infiniteScroll($rootScope) {
         link
     };
 
-    //TODO: refactor
     function link(scope, elem, attrs) {
         scope.infinite = {
             manualLoad, initialize

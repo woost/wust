@@ -24,7 +24,6 @@ function StreamService(Search, DiscourseNode, store) {
             return;
 
         let stream = {
-            //TODO: search posts with all tags anstead of only first one
             posts: Search.$search({
                 label: DiscourseNode.Post.label,
                 tags: tags.map(t => t.id)

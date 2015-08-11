@@ -94,7 +94,6 @@ function DiscourseNodeList() {
                 let nestedNodeListDef = node => nodeListCreate(this.component, node, title, modelProperty);
                 this.nestedNodeLists.push(nestedNodeListDef);
                 _.each(this.list, node => {
-                    //TODO: do not caclulate here, use graph wrapper
                     this.applyNested(node, this.getHyperRelationTo(node), nestedNodeListDef);
                 });
             }

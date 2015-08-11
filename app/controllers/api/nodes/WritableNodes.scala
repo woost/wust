@@ -8,7 +8,6 @@ import play.api.libs.json.Json
 import play.api.mvc.Action
 
 trait WritableNodes[NODE <: UuidNode] extends NodesBase {
-  //TODO: use transactions instead of db
   def nodeSchema: NodeSchema[NODE]
 
   private def jsonNode(node: UuidNode) = Ok(Json.toJson(node))

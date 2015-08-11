@@ -155,7 +155,6 @@ END <: UuidNode
   }
 }
 
-//TODO: correct results for delete....
 trait StartRelationDeleteBase[
 START <: UuidNode,
 RELATION <: AbstractRelation[START, END],
@@ -165,14 +164,12 @@ END <: UuidNode
 
   override def delete(context: RequestContext, param: ConnectParameter[START], uuid: String) = {
     val relationDefinition = RelationDefinition(toBaseNodeDefinition(param), factory, toNodeDefinition(uuid))
-    disconnectNodes(relationDefinition)
-    Right(true)
+    Right(disconnectNodes(relationDefinition))
   }
 
   override def delete[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,START with AbstractRelation[S,E],E], uuid: String) = {
     val relationDefinition = RelationDefinition(toBaseNodeDefinition(param), factory, toNodeDefinition(uuid))
-    disconnectNodes(relationDefinition)
-    Right(true)
+    Right(disconnectNodes(relationDefinition))
   }
 }
 
@@ -185,14 +182,12 @@ END <: UuidNode
 
   override def delete(context: RequestContext, param: ConnectParameter[END], uuid: String) = {
     val relationDefinition = RelationDefinition(toNodeDefinition(uuid), factory, toBaseNodeDefinition(param))
-    disconnectNodes(relationDefinition)
-    Right(true)
+    Right(disconnectNodes(relationDefinition))
   }
 
   override def delete[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,END with AbstractRelation[S,E],E], uuid: String) = {
     val relationDefinition = RelationDefinition(toNodeDefinition(uuid), factory, toHyperBaseNodeDefinition(param))
-    disconnectNodes(relationDefinition)
-    Right(true)
+    Right(disconnectNodes(relationDefinition))
   }
 }
 

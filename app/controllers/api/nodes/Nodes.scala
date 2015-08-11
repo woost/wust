@@ -84,8 +84,6 @@ trait NodesBase extends NestedResourceRouter with DefaultNestedResourceControlle
   }
 
   protected def getUser(identity: Option[User]): User = {
-    //TODO: resolve user
-    //TODO: rename to anonymous, only match + seedinit
     identity.getOrElse(DummyUser.matchesOnName("anonymous"))
   }
 

@@ -15,7 +15,6 @@ trait NodeAccess[+NODE <: UuidNode] {
   val name: String
   val label: Label
 
-  //TODO: return proper status
   def read(context: RequestContext): Either[Result, Iterable[NODE]]
   def read(context: RequestContext, uuid: String): Either[Result, NODE]
   def create(context: RequestContext): Either[Result, NODE]

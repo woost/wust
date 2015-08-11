@@ -1,3 +1,4 @@
+//TODO: neeeded?
 @mixin discourse_node($color, $icon: "") {
     $bgcolor: lighten(desaturate($color, 0), 10);
     $bordercolor: bordercolor($bgcolor);
@@ -42,11 +43,6 @@
     }
 }
 
-//TODO: neeeded?
 .discourse_post {
     @include discourse_node($discourse_post_color, ""); // comment
-}
-
-.discourse_user {
-    @include discourse_node($discourse_user_color, ""); // user
 }

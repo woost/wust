@@ -97,15 +97,12 @@ trait ResourceRouter extends Router.Routes with ResourceController {
 
   protected def routePath = path.split("/").last
 
-  //TODO should be used in NestedResourceRouter?
-  protected def withId(id: String, action: String => EssentialAction)(implicit idBindable: PathBindable[String]) = idBindable.bind("id", id).fold(badRequest, action)
-
   private val mapRequestToAction: PartialFunction[(String,String),EssentialAction] = {
     case ("GET", MaybeSlash()) => index
     case ("POST", MaybeSlash()) => create
-    case ("GET", Id(id)) => withId(id, show)
-    case ("PUT", Id(id)) => withId(id, update)
-    case ("DELETE", Id(id)) => withId(id, destroy)
+    case ("GET", Id(id)) => show(id)
+    case ("PUT", Id(id)) => update(id)
+    case ("DELETE", Id(id)) => destroy(id)
   }
 
   private val isOwnRoute: PartialFunction[(String,String),(String,String)] = {
