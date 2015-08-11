@@ -201,7 +201,7 @@ function EditService(Post, HistoryService, store, DiscourseNode) {
         //happens when a node is dropped because encoding a node does not
         //return nested resources like tags.
         //in that case we load them
-        if (node.tags === undefined) {
+        if (node && node.id !== undefined && node.tags === undefined) {
             Post.$buildRaw(_.pick(node, "id")).tags.$search().$then(val => {
                 let encoded = val.$encode();
                 session.original.tags = encoded;
