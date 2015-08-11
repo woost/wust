@@ -139,7 +139,6 @@ function DiscourseNodeList() {
 
             remove(elem) {
                 let self = this;
-                // TODO: handle addition/removal on graph, not on apilist!
                 this.apiList.$buildRaw(elem.encode()).$destroy().$then(() => {
                     humane.success("Disconnected node");
                     //TODO: response should include the deleted relation
