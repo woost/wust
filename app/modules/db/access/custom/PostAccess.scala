@@ -34,7 +34,28 @@ class PostAccess extends NodeReadDelete(Post) {
     })
   }
 
-  //TODO: removed tags
+  //TODO: this is two extra requests...
+  private def deleteTagsFromGraph(removedTags: List[String], uuid: String) {
+    if (removedTags.isEmpty)
+      return
+
+    val node = Post.matchesOnUuid(uuid)
+    val discourse = Discourse(node)
+
+    removedTags.foreach { tagUuid =>
+      val tag = Tag.matchesOnUuid(tagUuid)
+      discourse.add(tag)
+      val categorizes = Categorizes.matches(tag, node)
+      discourse.add(categorizes)
+    }
+
+    //TODO: we need to resolve matches here, otherwise deletion of local nodes does not work
+    //TODO: persisting might fail if there is a concurrent request, as matches nodes will fail when they cannot be resolved
+    db.persistChanges(discourse)
+    discourse.remove(discourse.categorizes: _*)
+    db.persistChanges(discourse)
+  }
+
   override def create(context: RequestContext) = {
     context.withJson { (request: TaggedPostAddRequest) =>
       val discourse = tagDefGraph(request.addedTags)
@@ -54,9 +75,11 @@ class PostAccess extends NodeReadDelete(Post) {
 
   override def update(context: RequestContext, uuid: String) = {
     context.withJson { (request: TaggedPostUpdateRequest) =>
+      deleteTagsFromGraph(request.removedTags, uuid)
       val discourse = tagDefGraph(request.addedTags)
 
       val node = Post.matchesOnUuid(uuid)
+      discourse.add(node)
       if(request.description.isDefined) {
         //TODO: normally we would want to set it back to None instead of ""
         // but matches nodes currently cannot save deletions of properties as long

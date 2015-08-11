@@ -29,7 +29,8 @@ object RequestFormat {
   implicit val taggedPostUpdateFormat = (
     (__ \ "description").readNullable[String] and
       (__ \ "title").readNullable[String] and
-      (__ \ "addedTags").readNullable[List[TagConnectRequest]]
+      (__ \ "addedTags").readNullable[List[TagConnectRequest]] and
+      (__ \ "removedTags").readNullable[List[String]]
     )(TaggedPostUpdateRequest)
 
   implicit val tagAddFormat = (__ \ "title").read[String].map(TagAddRequest(_))
