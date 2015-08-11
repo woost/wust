@@ -21,7 +21,6 @@ function searchCtrl($scope, SearchService, $rootScope) {
 
     vm.search = SearchService.search;
     vm.search.onReload(() => {
-        console.log("penos", arguments);
         if (vm.infinite)
             vm.infinite.initialize();
     });

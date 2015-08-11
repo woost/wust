@@ -26,13 +26,14 @@ function SearchService(Search, DiscourseNode) {
 
     function triggerSearch() {
         if (!this.size)
-            return;
+            return false;
 
         this.page = 0;
         this.waiting = true;
         this.results.$refresh(getParams.apply(this));
+        this.results.$then(searchFinished.bind(this), searchFinished.bind(this));
         callReloadHandler();
-        return this.results.$then(searchFinished.bind(this), searchFinished.bind(this));
+        return true;
 
         function searchFinished(val) {
             this.waiting = false;

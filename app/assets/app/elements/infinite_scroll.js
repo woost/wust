@@ -20,6 +20,7 @@ function infiniteScroll($rootScope) {
         let atPercent = attrs.atPercent || 80;
         let targetElement = attrs.scrollTarget ? document.getElementById(attrs.scrollTarget) : elem[0];
         let lastScrollTop = 0;
+        let lastResultLength = 0;
         let pageInfos;
         initialize();
 
@@ -45,6 +46,7 @@ function infiniteScroll($rootScope) {
             let result = scope.infiniteScroll();
             if (result) {
                 scope.promise.$then(({$response: {config, data}}) => {
+                    lastResultLength = data.length;
                     scope.infinite.loading = false;
                     if (data.length === 0) {
                         scope.infinite.noMore = true;
@@ -64,23 +66,28 @@ function infiniteScroll($rootScope) {
         }
 
         function initialize() {
+            //TODO: we should calculate the page size if we get less results
+            //than  before and expected no more results, we actually have some
+            //information to display instead of counting from the beginning
             scope.infinite.currentPage = 0;
             scope.infinite.maxPage = -1;
             scope.infinite.noMore = false;
             scope.infinite.loading = true;
             pageInfos = [];
 
-            targetElement.scrollTop = 0;
-
             //TODO: when does it happen? debug!
             if (scope.promise.$then) {
                 scope.promise.$then(({$response}) => {
                     scope.infinite.loading = false;
-                    if ($response === undefined)
+                    if (!$response)
                         return;
 
                     let config = $response.config;
                     let data = $response.data;
+                    if (lastResultLength && lastResultLength > data.length)
+                        targetElement.scrollTop = 0;
+
+                    lastResultLength = data.length;
                     scope.infinite.noMore = (config.params.size === undefined) || (data.length === 0) || (data.length < config.params.size);
                     if (scope.infinite.noMore) {
                         scope.infinite.maxPage = 0;
