@@ -32,6 +32,7 @@ function HistoryService(Post, DiscourseNode, store) {
         });
         if (existing !== undefined) {
             _.assign(existing, node);
+            this.currentViewComponent.commit();
         }
     }
 
