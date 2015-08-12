@@ -4,7 +4,7 @@ import controllers.api.nodes.Nodes
 import model.WustSchema.ContentNodeMatches
 import model.{WustSchema => schema}
 import modules.db.access.{StartRelationRead,StartMultiRelationRead}
-import modules.db.access.custom.{CheckUserWrite, UserAccess}
+import modules.db.access.custom.{CheckUserWrite, UserAccess, TaggedTaggable}
 import modules.requests.dsl._
 
 object Users extends Nodes[schema.User] {
@@ -12,6 +12,6 @@ object Users extends Nodes[schema.User] {
     ("created", N > StartRelationRead(schema.Created, ContentNodeMatches)),
     ("updated", N > StartRelationRead(schema.Updated, ContentNodeMatches)),
     ("deleted", N > StartRelationRead(schema.Deleted, ContentNodeMatches)),
-    ("contributions", N > StartMultiRelationRead(schema.Created, schema.Updated, schema.Deleted)(ContentNodeMatches))
+    ("contributions", N > StartMultiRelationRead(schema.Created, schema.Updated, schema.Deleted)(ContentNodeMatches) + TaggedTaggable.apply[schema.ContentNode])
   )
 }

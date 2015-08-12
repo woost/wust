@@ -40,10 +40,10 @@ object CheckUserWrite {
 // relationaccess and include the tags in the read queries.
 // Still, this solution is very flexible as we can add decorators to other
 // accesses easily: PostAccess.apply + TaggedTaggable(Post)
-class TaggedTaggable[NODE <: Taggable](factory: UuidNodeMatchesFactory[NODE]) extends AccessNodeDecoratorControl[NODE] with AccessNodeDecoratorControlDefault[NODE] {
+class TaggedTaggable[NODE <: UuidNode] extends AccessNodeDecoratorControl[NODE] with AccessNodeDecoratorControlDefault[NODE] {
   override def shapeResponse(response: NODE) = {
     val tagDef = ConcreteFactoryNodeDefinition(TagLike)
-    val nodeDef = FactoryUuidNodeDefinition(factory, response.uuid)
+    val nodeDef = FactoryUuidNodeDefinition(Taggable, response.uuid)
     val relDef = RelationDefinition(tagDef, Categorizes, nodeDef)
     val query = s"match ${relDef.toQuery} return *"
     val params = nodeDef.parameterMap ++ tagDef.parameterMap ++ relDef.parameterMap
@@ -56,7 +56,7 @@ class TaggedTaggable[NODE <: Taggable](factory: UuidNodeMatchesFactory[NODE]) ex
   override def shapeResponse(response: Iterable[NODE]) = {
     if (!response.isEmpty) {
       val tagDef = ConcreteFactoryNodeDefinition(TagLike)
-      val nodeDef = ConcreteFactoryNodeDefinition(factory)
+      val nodeDef = ConcreteFactoryNodeDefinition(Taggable)
       val relDef = RelationDefinition(tagDef, Categorizes, nodeDef)
 
       val query = s"match ${relDef.toQuery} where ${nodeDef.name}.uuid in {nodeUuids} return *"
@@ -71,5 +71,5 @@ class TaggedTaggable[NODE <: Taggable](factory: UuidNodeMatchesFactory[NODE]) ex
 }
 
 object TaggedTaggable {
-  def apply[NODE <: Taggable](factory: UuidNodeMatchesFactory[NODE]) = new TaggedTaggable(factory)
+  def apply[NODE <: UuidNode] = new TaggedTaggable[NODE]
 }

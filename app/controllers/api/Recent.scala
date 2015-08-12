@@ -11,7 +11,7 @@ import renesca.graph.Label
 import renesca.parameter.PropertyKey
 import modules.db.access.custom.TaggedTaggable
 
-object Recent extends TaggedTaggable(Taggable) with Controller {
+object Recent extends TaggedTaggable[UuidNode] with Controller {
   def index(label: Option[String]) = Action {
     // white list, so only exposed nodes can be searched
     val labels = ContentNode.labels ++ label.map(Label(_))
@@ -21,6 +21,6 @@ object Recent extends TaggedTaggable(Taggable) with Controller {
    val query = s"match ${ nodeDef.toQuery } $returnStatement"
    val discourse = Discourse(db.queryGraph(Query(query)))
 
-    Ok(Json.toJson(shapeResponse(discourse.taggables)))
+    Ok(Json.toJson(shapeResponse(discourse.uuidNodes)))
   }
 }

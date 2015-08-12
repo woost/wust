@@ -13,7 +13,7 @@ import modules.db.access.custom.TaggedTaggable
 
 import scala.util.Try
 
-object Search extends TaggedTaggable(Taggable) with Controller {
+object Search extends TaggedTaggable[UuidNode] with Controller {
   def index(page: Option[Int], size: Option[Int], label: Option[String], title: Option[String], searchDescriptions:Option[Boolean], tags: List[String], tagOr: Option[Boolean]) = Action {
     // white list, so only exposed nodes can be searched
     val labels = ContentNode.labels ++ label.map(Label(_))
@@ -77,6 +77,6 @@ object Search extends TaggedTaggable(Taggable) with Controller {
       }
     }).getOrElse(Discourse.empty)
 
-    Ok(Json.toJson(shapeResponse(discourse.taggables)))
+    Ok(Json.toJson(shapeResponse(discourse.uuidNodes)))
   }
 }
