@@ -4,13 +4,13 @@ import controllers.api.nodes.RequestContext
 import formatters.json.RequestFormat._
 import model.WustSchema.{Created => SchemaCreated, _}
 import modules.db.Database.db
-import modules.db.access.NodeDeleteBase
+import modules.db.access.{NodeReadBase, NodeDeleteBase}
 import modules.requests._
 import play.api.libs.json.JsValue
 import renesca.parameter.implicits._
 import play.api.mvc.Results._
 
-case class PostAccess() extends NodeDeleteBase[Post] {
+case class PostAccess() extends NodeReadBase[Post] with NodeDeleteBase[Post] {
   val factory = Post
 
   private def tagDefGraph(addedTags: List[TagConnectRequest]): Discourse = {

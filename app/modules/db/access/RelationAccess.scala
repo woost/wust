@@ -200,14 +200,14 @@ case class EndRelationDelete[START <: UuidNode, RELATION <: AbstractRelation[STA
 case class StartRelationReadDelete[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factory: AbstractRelationFactory[START,RELATION,END], nodeFactory: UuidNodeMatchesFactory[END]) extends StartRelationDeleteBase[START,RELATION,END] with StartRelationReadBase[START,RELATION,END]
 case class EndRelationReadDelete[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factory: AbstractRelationFactory[START,RELATION,END], nodeFactory: UuidNodeMatchesFactory[START]) extends EndRelationDeleteBase[START,RELATION,END] with EndRelationReadBase[START,RELATION,END]
 
-trait RelationAccessDecorator[NODE <: UuidNode, +OTHER <: UuidNode] extends RelationAccess[NODE, OTHER] with AccessDecoratorControlDefault {
+trait RelationAccessDecorator[NODE <: UuidNode, OTHER <: UuidNode] extends RelationAccess[NODE, OTHER] with AccessDecoratorControlDefault with AccessNodeDecoratorControlDefault[OTHER] {
   val self: RelationAccess[NODE, OTHER]
 
   override def read(context: RequestContext, param: ConnectParameter[NODE]) = {
-    acceptRequestRead(context).map(Left(_)).getOrElse(self.read(context, param))
+    acceptRequestRead(context).map(Left(_)).getOrElse(self.read(context, param).right.map(shapeResponse(_)))
   }
   override def read[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,NODE with AbstractRelation[S,E], E]) = {
-    acceptRequestRead(context).map(Left(_)).getOrElse(self.read(context, param))
+    acceptRequestRead(context).map(Left(_)).getOrElse(self.read(context, param).right.map(shapeResponse(_)))
   }
   override def delete(context: RequestContext, param: ConnectParameter[NODE], uuid: String) = {
     acceptRequestWrite(context).map(Left(_)).getOrElse(self.delete(context, param, uuid))
@@ -255,6 +255,9 @@ trait RelatedAccess extends RelationAccessDefault[UuidNode, UuidNode] {
 
 case class StartNodeAwareRelationAccess[START <: UuidNode, RELATION <: AbstractRelation[START,END], END <: UuidNode](self: StartRelationAccess[START,RELATION,END], nodeAccess: NodeAccess[END]) extends NodeAwareRelationAccess[START,END] with StartRelationAccess[START,RELATION,END]
 case class EndNodeAwareRelationAccess[START <: UuidNode, RELATION <: AbstractRelation[START,END], END <: UuidNode](self: EndRelationAccess[START,RELATION,END], nodeAccess: NodeAccess[START]) extends NodeAwareRelationAccess[END,START] with EndRelationAccess[START,RELATION,END]
+
 case class StartRelationAccessDecoration[START <: UuidNode, RELATION <: AbstractRelation[START,END], END <: UuidNode](self: StartRelationAccess[START,RELATION,END], control: AccessDecoratorControl) extends RelationAccessDecorator[START,END] with StartRelationAccess[START,RELATION,END] with AccessDecoratorControlForward
 case class EndRelationAccessDecoration[START <: UuidNode, RELATION <: AbstractRelation[START,END], END <: UuidNode](self: EndRelationAccess[START,RELATION,END], control: AccessDecoratorControl) extends RelationAccessDecorator[END,START] with EndRelationAccess[START,RELATION,END] with AccessDecoratorControlForward
 
+case class StartRelationAccessNodeDecoration[START <: UuidNode, RELATION <: AbstractRelation[START,END], END <: UuidNode](self: StartRelationAccess[START,RELATION,END], control: AccessNodeDecoratorControl[END]) extends RelationAccessDecorator[START,END] with StartRelationAccess[START,RELATION,END] with AccessNodeDecoratorControlForward[END]
+case class EndRelationAccessNodeDecoration[START <: UuidNode, RELATION <: AbstractRelation[START,END], END <: UuidNode](self: EndRelationAccess[START,RELATION,END], control: AccessNodeDecoratorControl[START]) extends RelationAccessDecorator[END,START] with EndRelationAccess[START,RELATION,END] with AccessNodeDecoratorControlForward[START]

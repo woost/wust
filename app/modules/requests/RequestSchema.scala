@@ -82,13 +82,16 @@ object dsl {
   END <: UuidNode
   ](val access: StartRelationAccess[START,RELATION,END]) {
     def +(nodeAccess: NodeAccess[END]) = {
-      new StartNodeAwareRelationAccess(access, nodeAccess)
+      StartNodeAwareRelationAccess(access, nodeAccess)
     }
     def +(decorate: StartRelationAccess[START,RELATION,END] => StartRelationAccess[START,RELATION,END]) = {
       decorate(access)
     }
     def +(control: AccessDecoratorControl) = {
       StartRelationAccessDecoration(access, control)
+    }
+    def +(control: AccessNodeDecoratorControl[END]) = {
+      StartRelationAccessNodeDecoration(access, control)
     }
   }
 
@@ -104,13 +107,16 @@ object dsl {
   END <: UuidNode
   ](val access: EndRelationAccess[START,RELATION,END]) {
     def +(nodeAccess: NodeAccess[START]) = {
-      new EndNodeAwareRelationAccess(access, nodeAccess)
+      EndNodeAwareRelationAccess(access, nodeAccess)
     }
     def +(decorate: EndRelationAccess[START,RELATION,END] => EndRelationAccess[START,RELATION,END]) = {
       decorate(access)
     }
     def +(control: AccessDecoratorControl) = {
       EndRelationAccessDecoration(access, control)
+    }
+    def +(control: AccessNodeDecoratorControl[START]) = {
+      EndRelationAccessNodeDecoration(access, control)
     }
   }
 
@@ -125,7 +131,10 @@ object dsl {
       decorate(access)
     }
     def +(control: AccessDecoratorControl) = {
-      new NodeAccessDecoration(access, control)
+      NodeAccessDecoration(access, control)
+    }
+    def +(control: AccessNodeDecoratorControl[NODE]) = {
+      NodeAccessNodeDecoration(access, control)
     }
   }
 

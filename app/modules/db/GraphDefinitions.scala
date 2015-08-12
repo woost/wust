@@ -115,9 +115,12 @@ END <: Node,
   val factory: AbstractRelationFactory[START, RELATION, END] with FACTORY
   val endDefinition: ENDDEF
 
+  final val startRelationName = randomVariable
+  final val endRelationName = randomVariable
+
   private def relationMatcher = factory match {
     case r: RelationFactory[_, RELATION, _]            => s"[$name :`${ r.relationType }`]"
-    case r: HyperRelationFactory[_, _, RELATION, _, _] => s"[:`${ r.startRelationType }`]->($name ${ r.labels.map(l => s":`$l`").mkString })-[:`${ r.endRelationType }`]"
+    case r: HyperRelationFactory[_, _, RELATION, _, _] => s"[$startRelationName:`${ r.startRelationType }`]->($name ${ r.labels.map(l => s":`$l`").mkString })-[$endRelationName:`${ r.endRelationType }`]"
   }
 
   private def nodeMatcher(nodeDefinition: NodeDefinition[_]) = nodeDefinition match {

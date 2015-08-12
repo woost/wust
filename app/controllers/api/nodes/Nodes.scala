@@ -48,9 +48,9 @@ case class HyperConnectParameter[START <: UuidNode, BASE <: UuidNode with Abstra
   endUuid: String
 )
 
-trait NodesBase extends NestedResourceRouter with DefaultNestedResourceController with Silhouette[RealUser, JWTAuthenticator] with HeaderEnvironmentModule {
+object SchemaWrapper extends RootNodeTraitFactory[UuidNode]
 
-  object SchemaWrapper extends RootNodeTraitFactory[UuidNode]
+trait NodesBase extends NestedResourceRouter with DefaultNestedResourceController with Silhouette[RealUser, JWTAuthenticator] with HeaderEnvironmentModule {
 
   protected def context(request: UserAwareRequest[AnyContent]) = {
     RequestContext(this, getUser(request.identity), request.body.asJson, request.queryString.flatMap { case (k,v) => v.headOption.map((k, _)) })
