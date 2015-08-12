@@ -72,13 +72,14 @@ sealed trait NodeDelegates extends NodeLike {
   def title = rawNode.title
   @JSExport
   def title_=(newTitle: String) = rawNode.title = newTitle
+  //FIXME: need to set tags, in order to update the graph from outside
   @JSExport
   def tags = rawNode.tags
 
   def description = rawNode.description
   def description_=(newDescription: Option[String]) = { rawNode.description = newDescription }
 
-
+  //FIXME: set does not work
   @JSExport("description")
   def descriptionJs = description.orUndefined
   @JSExport("description_=")
