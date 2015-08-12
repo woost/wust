@@ -8,8 +8,13 @@
             </span>
         </div>
         <div class="panel-body">
-            <div ng-show="vm.node.description" markdown="vm.node.description" class="post_description"></div>
-            <div big-taglist node="vm.node" class="taglist"></div>
+            <div class="post_details">
+                <div ng-show="vm.node.description" markdown="vm.node.description" class="post_description"></div>
+                <div big-taglist node="vm.node" class="taglist"></div>
+            </div>
+            <div class="post_stats">
+                <span show-timestamp node="vm.node"></span>
+            </div>
         </div>
     </div>
 </div>

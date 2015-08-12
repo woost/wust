@@ -2,13 +2,19 @@
 
 .big_post_directive {
     .panel-body {
-        @include display-flex(flex);
-        @include flex-direction(row);
-        .post_description {
-            width: 70%;
+        .post_details {
+            @include display-flex(flex);
+            @include flex-direction(row);
+            .post_description {
+                width: 70%;
+            }
+            .taglist {
+                width: 30%;
+            }
         }
-        .taglist {
-            width: 30%;
+        .post_stats {
+            text-align: right;
+            color: #aaa;
         }
     }
 }

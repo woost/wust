@@ -42,7 +42,8 @@ object GraphFormat {
         case n: Post                         => Seq(
           ("title", JsString(n.title)),
           ("description", JsString(n.description.getOrElse(""))),
-          ("tags", Json.toJson(n.rev_categorizes))
+          ("tags", Json.toJson(n.rev_categorizes)),
+          ("timestamp", Json.toJson(JsNumber(n.timestamp)))
         )
       case h: Connects  =>
         Seq(

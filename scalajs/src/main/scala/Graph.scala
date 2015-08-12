@@ -67,6 +67,8 @@ sealed trait NodeDelegates extends NodeLike {
   @JSExport
   val isHyperRelation = rawNode.isHyperRelation
   @JSExport
+  val timestamp = rawNode.timestamp
+  @JSExport
   def title = rawNode.title
   @JSExport
   def title_=(newTitle: String) = rawNode.title = newTitle
@@ -133,7 +135,7 @@ trait NodeBase extends NodeDelegates {
 
 @JSExport
 class Node(val rawNode: RawNode) extends NodeBase {
-  @JSExport def encode() = js.Dynamic.literal(id = id, label = label, title = title, description = description.orUndefined)
+  @JSExport def encode() = js.Dynamic.literal(id = id, label = label, title = title, description = description.orUndefined, timestamp = timestamp)
 }
 
 sealed trait RelationLike {
@@ -367,8 +369,8 @@ class Graph(private[js] val rawGraph: RawGraph) extends WrappedGraph[Relation] {
 @JSExport
 @JSExportAll
 //TODO: maybe give a concrete type for tags
-class RawNode(val id: String, val label: String, var title: String, var description: Option[String], val isHyperRelation: Boolean, val startId: Option[String], val endId: Option[String], val tags: js.Array[js.Object]) {
-  def this(n: RecordNode) = this(n.id, n.label, n.title.getOrElse(n.label), n.description.toOption, n.isHyperRelation.getOrElse(false), n.startId.toOption, n.endId.toOption, n.tags)
+class RawNode(val id: String, val label: String, var title: String, var description: Option[String], val isHyperRelation: Boolean, val startId: Option[String], val endId: Option[String], val tags: js.Array[js.Object], val timestamp: js.Any) {
+  def this(n: RecordNode) = this(n.id, n.label, n.title.getOrElse(n.label), n.description.toOption, n.isHyperRelation.getOrElse(false), n.startId.toOption, n.endId.toOption, n.tags, n.timestamp.getOrElse(0))
   override def toString = s"RawNode($id)"
 
   def canEqual(other: Any): Boolean = other.isInstanceOf[RawNode]
@@ -502,6 +504,9 @@ trait RecordNode extends js.Object {
   def endId: js.UndefOr[String] = js.native
 
   def tags: js.Array[js.Object] = js.native
+
+  //TODO: why can't this be Long?
+  def timestamp: js.UndefOr[js.Any] = js.native
 }
 
 trait RecordRelation extends js.Object {
