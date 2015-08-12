@@ -3,4 +3,10 @@
         max-width: 75%;
         word-wrap: break-word;
     }
+    .tag_circle {
+        border-radius: 50%;
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+    }
 }
