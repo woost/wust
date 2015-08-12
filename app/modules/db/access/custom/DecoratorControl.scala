@@ -1,6 +1,6 @@
 package modules.db.access.custom
 
-import controllers.api.nodes.{HyperConnectParameter, RequestContext,SchemaWrapper}
+import controllers.api.nodes.{HyperConnectParameter, RequestContext}
 import modules.db.Database._
 import modules.db.access._
 import modules.db._

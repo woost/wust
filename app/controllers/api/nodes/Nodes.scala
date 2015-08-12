@@ -48,7 +48,14 @@ case class HyperConnectParameter[START <: UuidNode, BASE <: UuidNode with Abstra
   endUuid: String
 )
 
-object SchemaWrapper extends RootNodeTraitFactory[UuidNode]
+object SchemaWrapper extends RootNodeTraitFactory[UuidNode] {
+  def wrapNode[N <: Node](node: N) = {
+    val discourse = Discourse(node.graph)
+    val newNode = super.wrap(node.rawItem)
+    discourse.add(newNode)
+    newNode
+  }
+}
 
 trait NodesBase extends NestedResourceRouter with DefaultNestedResourceController with Silhouette[RealUser, JWTAuthenticator] with HeaderEnvironmentModule {
 
