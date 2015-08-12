@@ -6,6 +6,7 @@ import modules.db.access.{AccessDecoratorControlDefault, AccessDecoratorControl,
 import modules.requests.ConnectResponse
 import play.api.mvc.Results._
 
+// does not allow dummy users for any request
 class CheckUser extends AccessDecoratorControl with AccessDecoratorControlDefault {
   override def acceptRequest(context: RequestContext) = {
     if (context.user.isDummy)
@@ -19,6 +20,7 @@ object CheckUser {
   def apply = new CheckUser
 }
 
+// only allows read requests
 class CheckUserWrite extends CheckUser {
   override def acceptRequestRead(context: RequestContext) = None
 }
