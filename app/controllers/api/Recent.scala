@@ -9,8 +9,9 @@ import play.api.mvc.{Action, Controller}
 import renesca.Query
 import renesca.graph.Label
 import renesca.parameter.PropertyKey
+import modules.db.access.custom.TaggedTaggable
 
-object Recent extends Controller {
+object Recent extends TaggedTaggable(Taggable) with Controller {
   def index(label: Option[String]) = Action {
     // white list, so only exposed nodes can be searched
     val labels = ContentNode.labels ++ label.map(Label(_))
@@ -20,6 +21,6 @@ object Recent extends Controller {
    val query = s"match ${ nodeDef.toQuery } $returnStatement"
    val discourse = Discourse(db.queryGraph(Query(query)))
 
-    Ok(Json.toJson(discourse.nodes))
+    Ok(Json.toJson(shapeResponse(discourse.taggables)))
   }
 }

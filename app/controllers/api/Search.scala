@@ -9,10 +9,11 @@ import renesca.graph.Label
 import renesca.parameter.implicits._
 import model.WustSchema._
 import formatters.json.ApiNodeFormat._
+import modules.db.access.custom.TaggedTaggable
 
 import scala.util.Try
 
-object Search extends Controller {
+object Search extends TaggedTaggable(Taggable) with Controller {
   def index(page: Option[Int], size: Option[Int], label: Option[String], title: Option[String], searchDescriptions:Option[Boolean], tags: List[String], tagOr: Option[Boolean]) = Action {
     // white list, so only exposed nodes can be searched
     val labels = ContentNode.labels ++ label.map(Label(_))
@@ -76,6 +77,6 @@ object Search extends Controller {
       }
     }).getOrElse(Discourse.empty)
 
-    Ok(Json.toJson(discourse.contentNodes))
+    Ok(Json.toJson(shapeResponse(discourse.taggables)))
   }
 }
