@@ -5,7 +5,7 @@ TagDetailsCtrl.$inject = ["$stateParams", "TagLike", "StreamService"];
 function TagDetailsCtrl($stateParams, TagLike, StreamService) {
     let vm = this;
 
-    let postSize = 20;
+    let postSize = 30;
     let postPage = 0;
 
     vm.loadMorePosts = loadMorePosts;
