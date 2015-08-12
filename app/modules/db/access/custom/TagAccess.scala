@@ -4,13 +4,15 @@ import controllers.api.nodes.RequestContext
 import formatters.json.RequestFormat._
 import model.WustSchema.{Created => SchemaCreated, _}
 import modules.db.Database.db
-import modules.db.access.{NodeRead, NodeReadDelete}
+import modules.db.access.NodeReadBase
 import modules.requests._
 import play.api.libs.json.JsValue
 import renesca.parameter.implicits._
 import play.api.mvc.Results._
 
-class TagAccess extends NodeRead(TagLike) {
+class TagAccess extends NodeReadBase[TagLike] {
+  val factory = TagLike
+
   override def create(context: RequestContext) = {
     context.withJson { (request: TagAddRequest) =>
       //TODO: should accept description, too.

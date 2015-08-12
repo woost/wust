@@ -4,13 +4,15 @@ import controllers.api.nodes.RequestContext
 import formatters.json.RequestFormat._
 import model.WustSchema.{Created => SchemaCreated, _}
 import modules.db.Database.db
-import modules.db.access.{NodeRead, NodeReadDelete}
+import modules.db.access.NodeReadBase
 import modules.requests._
 import play.api.libs.json.JsValue
 import renesca.parameter.implicits._
 import play.api.mvc.Results._
 
-class UserAccess extends NodeRead(User) {
+class UserAccess extends NodeReadBase[User] {
+  val factory = User
+
   override def update(context: RequestContext, uuid: String) = {
     context.withRealUser { user =>
       context.withJson { (request: UserUpdateRequest) =>

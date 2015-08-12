@@ -4,13 +4,15 @@ import controllers.api.nodes.RequestContext
 import formatters.json.RequestFormat._
 import model.WustSchema.{Created => SchemaCreated, _}
 import modules.db.Database.db
-import modules.db.access.{NodeRead, NodeReadDelete}
+import modules.db.access.NodeDeleteBase
 import modules.requests._
 import play.api.libs.json.JsValue
 import renesca.parameter.implicits._
 import play.api.mvc.Results._
 
-class PostAccess extends NodeReadDelete(Post) {
+case class PostAccess() extends NodeDeleteBase[Post] {
+  val factory = Post
+
   private def tagDefGraph(addedTags: List[TagConnectRequest]): Discourse = {
     val discourse = Discourse.empty
     val nodes = addedTags.flatMap { tag =>
@@ -109,8 +111,4 @@ class PostAccess extends NodeReadDelete(Post) {
       }
     }
   }
-}
-
-object PostAccess {
-  def apply = new PostAccess
 }

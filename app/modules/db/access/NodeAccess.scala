@@ -23,8 +23,9 @@ trait NodeAccess[+NODE <: UuidNode] {
 }
 
 trait NodeAccessDefault[NODE <: UuidNode] extends NodeAccess[NODE] {
-  val name = factory.getClass.getSimpleName.dropRight(1)
-  val label = factory.label
+  // need to be lazy otherwise play crashes while initializing the routes (not sure why though)
+  lazy val name = factory.getClass.getSimpleName.dropRight(1)
+  lazy val label = factory.label
 
   def read(context: RequestContext): Either[Result, Iterable[NODE]] = Left(NotFound("No read access on Node"))
   def read(context: RequestContext, uuid: String): Either[Result, NODE] = Left(NotFound("No read access on Node"))
