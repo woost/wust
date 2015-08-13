@@ -1,8 +1,8 @@
 angular.module("wust.api").service("Auth", Auth);
 
-Auth.$inject = ["$rootScope", "$window", "restmod", "jwtHelper", "store"];
+Auth.$inject = ["$rootScope", "$window", "restmod", "jwtHelper", "store", "Session"];
 
-function Auth($rootScope, $window, restmod, jwtHelper, store) {
+function Auth($rootScope, $window, restmod, jwtHelper, store, Session) {
     let self = this;
 
     let authStore = store.getNamespacedStore("auth");
@@ -20,6 +20,8 @@ function Auth($rootScope, $window, restmod, jwtHelper, store) {
     this.checkLoggedIn = checkLoggedIn;
 
     checkLoggedIn();
+    if (self.current.token)
+        Session.update();
 
     // every time the window gets focused, clear the inMemoryCache of the store,
     // so all changes in store get propagated into our current angular session.
@@ -48,6 +50,7 @@ function Auth($rootScope, $window, restmod, jwtHelper, store) {
             self.current.token = response.token;
             self.current.userId = response.userId;
             authStore.set(userKey, self.current);
+            Session.update();
             humane.success(message);
         });
     }
@@ -66,5 +69,6 @@ function Auth($rootScope, $window, restmod, jwtHelper, store) {
         delete self.current.token;
         delete self.current.userId;
         authStore.remove(userKey);
+        Session.forget();
     }
 }

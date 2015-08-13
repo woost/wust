@@ -9,6 +9,7 @@ import renesca.schema._
 
 package object types {
 
+  type FixedHyperNodeDefinition[START <: Node, RELATION <: AbstractRelation[START, END] with Node, END <: Node] = HyperNodeDefinition[START, RELATION, END, _ <: FixedNodeDefinition[START], _ <: FixedNodeDefinition[END]]
   type ContentRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _, _, _ <: ContentRelationFactory[START, RELATION, END]]
   type VotesRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _, _, _ <: Votes.type]
 
@@ -148,14 +149,12 @@ END <: Node,
   }
 }
 
-// TODO: allow hypernodedefinitions with unfixed nodedefinitions as start and end node.
-// -> should be enforced with a typealias FixedHyperNodeDefinition
 case class HyperNodeDefinition[
 START <: Node,
 RELATION <: AbstractRelation[START, END] with Node,
 END <: Node,
-STARTDEF <: FixedNodeDefinition[START],
-ENDDEF <: FixedNodeDefinition[END]
+STARTDEF <: NodeDefinition[START],
+ENDDEF <: NodeDefinition[END]
 ](
   startDefinition: STARTDEF,
   factory: AbstractRelationFactory[START, RELATION, END] with NodeFactory[RELATION],

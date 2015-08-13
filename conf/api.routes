@@ -16,4 +16,7 @@ GET /graph controllers.api.Graphs.show
 
 GET /search controllers.api.Search.index(page: Option[Int], size: Option[Int], label: Option[String], title: Option[String], searchDescriptions: Option[Boolean], tags: List[String], tagOr: Option[Boolean])
 
+# TODO: search is actually more powerful, still makes sense?
 GET /recent controllers.api.Recent.index(label: Option[String])
+
+GET /session/votes controllers.api.Session.votes()
