@@ -216,6 +216,7 @@ object Database {
     }
   }
 
+  var defaultTagWeight: Double = _
   def connectedComponent(focusNode: UuidNodeDefinition[_], depth: Int = 5): Discourse = {
     // Tag weights
     // 1. Cypher does not support subqueries yet, so we have to do extra queries for the tag weights.
@@ -247,15 +248,24 @@ object Database {
     """
 
     // query for getting the weight per post per tag:
-    // TODO: use formula by "how to not sort by average rating"
+    // from paper:
+    // 2011 User-Rating based Ranking of Items from an Axiomatic Perspective
+    // Dirichlet Prior Smoothing: (up + u*p) / (down + up + u)
+    // p: probability for an upvote (needs to be calculated from all votes in the system, I set this to 0.5)
+    // u: influence of our prior (I set this to 10)
+    defaultTagWeight = 0.5
+    // IMPORTANT: we need to write the constancts as doubles to avoid integer arithmetic
+
     val tagWeightQuery = s"""
       match ${ focusNode.toQuery }
       match (${ focusNode.name })-[:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(posts:`${ Post.label }`)
       with distinct posts
       match (nodetag:`${ TagLike.label }`)-[nodetagtocat:`${ Categorizes.startRelationType }`]->(nodecat:`${ Categorizes.label }`)-[cattopost:`${ Categorizes.endRelationType }`]->(posts)
-      match (nodecat)<-[nodetagvote:${ Votes.relationType }]-()
-      return nodecat.uuid, sum(nodetagvote.weight) as weight
-    """
+      optional match (nodecat)<-[nodetagvoteup:${ Votes.relationType }]-() where nodetagvoteup.weight = 1
+      optional match (nodecat)<-[nodetagvotedown:${ Votes.relationType }]-() where nodetagvotedown.weight = -1
+      with nodecat, count(nodetagvoteup.weight) as up, count(nodetagvotedown.weight) as down
+      return nodecat.uuid, ((up + 5.0)/(up + down + 10.0)) as weight
+      """
 
     val params = focusNode.parameterMap
     implicit val componentRawGraph = db.queryGraph(Query(query, params))
@@ -265,7 +275,7 @@ object Database {
     // write tag weights into categorizes-hyperrelations
     for(tagweight <- tagweights.rows) {
       val catId = tagweight("nodecat.uuid").asInstanceOf[StringPropertyValue].value
-      val weight = tagweight("weight").asInstanceOf[LongPropertyValue].value
+      val weight = tagweight("weight").asInstanceOf[DoublePropertyValue].value
       val categorizes = component.categorizes.find(_.uuid == catId).get
       categorizes.rawItem.properties("weight") = weight
     }

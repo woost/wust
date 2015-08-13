@@ -1,6 +1,7 @@
 package formatters.json
 
 import model.WustSchema._
+import modules.db.Database
 import modules.requests._
 import play.api.libs.json._
 import renesca.graph.{Label, RelationType}
@@ -41,6 +42,7 @@ object GraphFormat {
       def writes(cat: Categorizes) = {
         // the same as tagWrites but with voting weight
         val tag: TagLike = cat.startNodeOpt.get
+        val weight: Double = cat.rawItem.properties.get("weight").map(_.asInstanceOf[DoublePropertyValue].value).getOrElse(Database.defaultTagWeight)
         JsObject(Seq(
           ("id", JsString(tag.uuid)),
           ("label", JsString(TagLike.label)),
@@ -49,8 +51,8 @@ object GraphFormat {
           ("isType", JsBoolean(tag.isType)),
           ("color", tag.color.map(JsString(_)).getOrElse(JsNull)),
           ("symbol", tag.symbol.map(JsString(_)).getOrElse(JsNull)),
-          ("weight", JsNumber(cat.rawItem.properties("weight").asInstanceOf[LongPropertyValue].value))
-        ))
+          ("weight", JsNumber(weight))
+            ))
       }
     }
 
