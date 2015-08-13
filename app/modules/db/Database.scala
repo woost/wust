@@ -238,14 +238,12 @@ object Database {
     // depth * 2 because hyperrelation depth
     val query = s"""
       match ${ focusNode.toQuery }
-      match (${ focusNode.name })-[:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(posts:`${ Post.label }`)
-      with distinct posts
-      optional match (posts)-[rel1:`${ Connects.startRelationType }`]->(connects:`${ Connects.label }`)-[rel2:`${ Connects.endRelationType }`]->(:`${ Post.label }`)
-      with posts, rel1, rel2, connects
-      optional match (nodetag:`${ TagLike.label }`)-[nodetagtocat:`${ Categorizes.startRelationType }`]->(nodecat:`${ Categorizes.label }`)-[cattopost:`${ Categorizes.endRelationType }`]->(posts)
-      optional match (relationtag:`${ TagLike.label }`)-[relationtagtocat:`${ Categorizes.startRelationType }`]->(relationcat:`${ Categorizes.label }`)-[cattoconnects:`${ Categorizes.endRelationType }`]->(connects)
-      return posts,rel1, rel2,nodetag,relationtag,nodecat,relationcat,nodetagtocat,cattopost,cattoconnects,relationtagtocat
+      match (${ focusNode.name })-[rel:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(postsandconnects) where (postsandconnects:`${ Post.label }`) or (postsandconnects:`${ Connects.label }`)
+      with distinct postsandconnects, rel
+      optional match (tag:`${ TagLike.label }`)-[tagtocat:`${ Categorizes.startRelationType }`]->(cat:`${ Categorizes.label }`)-[cattotaggable:`${ Categorizes.endRelationType }`]->(postsandconnects)
+      return postsandconnects,rel,tag,cat,tagtocat,cattotaggable
     """
+
 
     // query for getting the weight per post per tag:
     // from paper:
