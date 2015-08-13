@@ -5,15 +5,17 @@ import modules.requests._
 import play.api.libs.json._
 import renesca.graph.{Label, RelationType}
 import renesca.schema._
+import renesca.parameter._
+import renesca.parameter.implicits._
 
 object GraphFormat {
   implicit def LabelToString(label: Label): String = label.name
   implicit def RelationTypeToString(relationType: RelationType): String = relationType.name
 
-  implicit object ConnectsFormat extends Format[Relation[Connectable,Connectable]] {
+  implicit object ConnectsFormat extends Format[Relation[Connectable, Connectable]] {
     def reads(json: JsValue) = ???
 
-    def writes(relation: Relation[Connectable,Connectable]) = JsObject(Seq(
+    def writes(relation: Relation[Connectable, Connectable]) = JsObject(Seq(
       ("startId", JsString(relation.startNode.uuid)),
       ("label", JsString(relation.relationType)),
       ("endId", JsString(relation.endNode.uuid))
@@ -35,26 +37,43 @@ object GraphFormat {
       ))
     }
 
+    implicit def categorizesWrites = new Writes[Categorizes] {
+      def writes(cat: Categorizes) = {
+        // the same as tagWrites but with voting weight
+        val tag: TagLike = cat.startNodeOpt.get
+        JsObject(Seq(
+          ("id", JsString(tag.uuid)),
+          ("label", JsString(TagLike.label)),
+          ("title", JsString(tag.title)),
+          ("description", JsString(tag.description.getOrElse(""))),
+          ("isType", JsBoolean(tag.isType)),
+          ("color", tag.color.map(JsString(_)).getOrElse(JsNull)),
+          ("symbol", tag.symbol.map(JsString(_)).getOrElse(JsNull)),
+          ("weight", JsNumber(cat.rawItem.properties("weight").asInstanceOf[LongPropertyValue].value))
+        ))
+      }
+    }
+
     def writes(node: Connectable) = JsObject(Seq(
       ("id", JsString(node.uuid)),
       ("label", JsString(node.label))
-      ) ++ (node match {
-        case n: Post                         => Seq(
-          ("title", JsString(n.title)),
-          ("description", JsString(n.description.getOrElse(""))),
-          ("tags", Json.toJson(n.rev_categorizes)),
-          ("timestamp", Json.toJson(JsNumber(n.timestamp)))
-        )
-      case h: Connects  =>
+    ) ++ (node match {
+      case post: Post         => Seq(
+        ("title", JsString(post.title)),
+        ("description", JsString(post.description.getOrElse(""))),
+        ("tags", Json.toJson(post.inRelationsAs(Categorizes))),
+        ("timestamp", Json.toJson(JsNumber(post.timestamp)))
+      )
+      case connects: Connects =>
         Seq(
           ("isHyperRelation", JsBoolean(true)),
           //TODO: jsNull oder besser garnicht senden, aus der Seq rausnehmen und flatten
-          ("startId", JsString(h.startNodeOpt.map(_.uuid).getOrElse(""))),
-          ("endId", JsString(h.endNodeOpt.map(_.uuid).getOrElse(""))),
-          ("tags", Json.toJson(h.rev_categorizes))
+          ("startId", JsString(connects.startNodeOpt.map(_.uuid).getOrElse(""))),
+          ("endId", JsString(connects.endNodeOpt.map(_.uuid).getOrElse(""))),
+          ("tags", Json.toJson(connects.inRelationsAs(Categorizes)))
         )
-      case _                                      => Seq.empty
-      }))
+      case _                  => Seq.empty
+    }))
   }
 
   implicit object DiscourseFormat extends Format[Discourse] {

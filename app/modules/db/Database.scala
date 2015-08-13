@@ -8,6 +8,7 @@ import modules.db.GraphHelper._
 import modules.db.types._
 import play.api.Play.current
 import renesca._
+import renesca.parameter._
 import renesca.parameter.implicits._
 import renesca.schema._
 
@@ -194,7 +195,7 @@ object Database {
       val label = discourse.hyperRelations.head.label
       discourse.graph.nodes -= discourse.hyperRelations.head.rawItem
       val failure = tx.persistChanges(discourse.graph)
-      if (failure.isEmpty) {
+      if(failure.isEmpty) {
         // here we disconnect a hyperrelation
         // therefore we garbage collect broken hyperrelations
         // in our case, only CONNECTS is recursive
@@ -216,6 +217,23 @@ object Database {
   }
 
   def connectedComponent(focusNode: UuidNodeDefinition[_], depth: Int = 5): Discourse = {
+    // Tag weights
+    // 1. Cypher does not support subqueries yet, so we have to do extra queries for the tag weights.
+    // This is not very efficient, because the component is traversed in each query.
+    // We also cannot union :POST and :CONNECTS to take care of both tags at the same time.
+    // https://github.com/neo4j/neo4j/issues/2725
+    //
+    // 2. As we are calculating a new value in the query (the tag weight), and cypher does not support something like
+    // "implicit properties", we have to use a table.
+    // In this case we are writing the results from the table into the discourse graph:
+    // (post)<-[:CATEGORIZES]-(tag)
+    //              ^
+    //            weight
+    //
+    // https://groups.google.com/forum/#!topic/neo4j/s1GnCkzINYY
+
+
+    // query undirected connected component of posts with maximum depth
     // depth * 2 because hyperrelation depth
     val query = s"""
       match ${ focusNode.toQuery }
@@ -228,32 +246,30 @@ object Database {
       return posts,rel1, rel2,nodetag,relationtag,nodecat,relationcat,nodetagtocat,cattopost,cattoconnects,relationtagtocat
     """
 
-    println(query)
-
-// more efficient on cycles:
-//
-// match (V9Z8urq6SoyEu65XySG9tQ :`POST`:`TAGGABLE`:`INHERITABLE`:`CONNECTABLE`:`UUIDNODE`:`CONTENTNODE` {uuid:  "sAZ_luzHQByVarlrmc9KHA"})
-// match (V9Z8urq6SoyEu65XySG9tQ)-[:`CONNECTABLETOCONNECTS`|`CONNECTSTOCONNECTABLE` *0..10]-(posts:`POST`)
-// with distinct posts
-// optional match (posts)-[rel1:`CONNECTABLETOCONNECTS`]->(connects:`CONNECTS`)-[rel2:`CONNECTSTOCONNECTABLE`]->(:`POST`)
-// with posts, rel1, rel2, connects
-// optional match (nodetag:`TAGLIKE`)-[nodetagtocat:`TAGLIKETOCATEGORIZES`]->(nodecat:`CATEGORIZES`)-[cattopost:`CATEGORIZESTOTAGGABLE`]->(posts)
-// optional match (relationtag:`TAGLIKE`)-[relationtagtocat:`TAGLIKETOCATEGORIZES`]->(relationcat:`CATEGORIZES`)-[cattoconnects:`CATEGORIZESTOTAGGABLE`]->(connects)
-// return posts,rel1, rel2,nodetag,relationtag,nodecat,relationcat,nodetagtocat,cattopost,cattoconnects,relationtagtocat
-
-
-// query for getting the weight per post per tag:
-// TODO: use formula by "how to not sort by average rating"
-//
-// match (V9Z8urq6SoyEu65XySG9tQ :`POST`:`TAGGABLE`:`INHERITABLE`:`CONNECTABLE`:`UUIDNODE`:`CONTENTNODE` {uuid:  "75DpgSwoTX2eRuDl6G_DxQ"})
-// match (V9Z8urq6SoyEu65XySG9tQ)-[rel:`CONNECTABLETOCONNECTS`|`CONNECTSTOCONNECTABLE` *0..10]-(posts:`POST`)
-// with distinct posts
-// match (nodetag:`TAGLIKE`)-[nodetagtocat:`TAGLIKETOCATEGORIZES`]->(nodecat:`CATEGORIZES`)-[cattopost:`CATEGORIZESTOTAGGABLE`]->(posts)
-// match (nodecat)<-[nodetagvote:VOTES]-()
-// return posts.uuid, nodetag.uuid, sum(nodetagvote.weight)
-
+    // query for getting the weight per post per tag:
+    // TODO: use formula by "how to not sort by average rating"
+    val tagWeightQuery = s"""
+      match ${ focusNode.toQuery }
+      match (${ focusNode.name })-[:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(posts:`${ Post.label }`)
+      with distinct posts
+      match (nodetag:`${ TagLike.label }`)-[nodetagtocat:`${ Categorizes.startRelationType }`]->(nodecat:`${ Categorizes.label }`)-[cattopost:`${ Categorizes.endRelationType }`]->(posts)
+      match (nodecat)<-[nodetagvote:${ Votes.relationType }]-()
+      return nodecat.uuid, sum(nodetagvote.weight) as weight
+    """
 
     val params = focusNode.parameterMap
-    Discourse(db.queryGraph(Query(query, params)))
+    implicit val componentRawGraph = db.queryGraph(Query(query, params))
+    val component = Discourse(componentRawGraph)
+    val tagweights = db.queryTable(Query(tagWeightQuery, params))
+
+    // write tag weights into categorizes-hyperrelations
+    for(tagweight <- tagweights.rows) {
+      val catId = tagweight("nodecat.uuid").asInstanceOf[StringPropertyValue].value
+      val weight = tagweight("weight").asInstanceOf[LongPropertyValue].value
+      val categorizes = component.categorizes.find(_.uuid == catId).get
+      categorizes.rawItem.properties("weight") = weight
+    }
+
+    component
   }
 }
