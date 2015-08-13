@@ -15,27 +15,41 @@ function bigTaglist() {
     };
 }
 
-bigTaglistCtrl.$inject = ["Post", "DiscourseNode"];
+bigTaglistCtrl.$inject = ["Post", "Session"];
 
-function bigTaglistCtrl(Post, DiscourseNode) {
+function bigTaglistCtrl(Post, Session) {
     let vm = this;
-
-    vm.nodeInfo = DiscourseNode.TagLike;
 
     vm.upvote = upvote;
     vm.downvote = downvote;
+    vm.getVote = getVote;
+
+    let tagCache = {};
 
     function wrapResource(tag) {
         let model = Post.$buildRaw(_.pick(vm.node, "id"));
         return model.tags.$buildRaw(tag).$reveal();
     }
 
+    function getVote(tag) {
+        if (tagCache[tag.id] === undefined)
+            tagCache[tag.id] = Session.getVote(tag.id, vm.node.id);
+
+        return tagCache[tag.id];
+    }
+
     function upvote(tag) {
         let resource = wrapResource(tag);
-        resource.up.$create().$then(() => humane.success("Up voted"));
+        resource.up.$create().$then(val => {
+            Session.addVote(tag.id, vm.node.id, val);
+            humane.success("Up voted");
+        });
     }
     function downvote(tag) {
         let resource = wrapResource(tag);
-        resource.down.$create().$then(() => humane.success("Down voted"));
+        resource.down.$create().$then(val => {
+            Session.addVote(tag.id, vm.node.id, val);
+            humane.success("Down voted");
+        });
     }
 }

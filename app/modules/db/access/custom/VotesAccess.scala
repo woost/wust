@@ -5,7 +5,7 @@ import model.WustSchema._
 import modules.db.Database._
 import modules.db.access.{EndRelationAccessDefault, EndRelationAccess}
 import modules.requests.ConnectResponse
-import play.api.libs.json.JsValue
+import play.api.libs.json._
 import renesca.parameter.implicits._
 import renesca.schema._
 import play.api.mvc.Results._
@@ -25,6 +25,8 @@ case class VotesAccess(
     if(failure.isDefined)
       Left(BadRequest("No vote :/"))
     else
-      Right(ConnectResponse(Discourse.empty, Some(context.user)))
+      Left(Ok(JsObject(Seq(
+        ("weight", JsNumber(weight))
+      ))))
   }
 }

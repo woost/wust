@@ -1,7 +1,7 @@
 <div class="big_taglist_directive">
     <span ng-repeat="tag in vm.node.tags track by tag.id" class="tag" colored-tag="tag">
         <span ng-bind="tag.title"></span>
-        <i ng-click="vm.downvote(tag)" class="vote_button fa fa-chevron-down"></i>
-        <i ng-click="vm.upvote(tag)" class="vote_button fa fa-chevron-up"></i>
+        <i ng-click="vm.downvote(tag)" ng-class="{active: vm.getVote(tag).weight < 0}" class="vote_button fa fa-chevron-down"></i>
+        <i ng-click="vm.upvote(tag)" ng-class="{active: vm.getVote(tag).weight > 0}" class="vote_button fa fa-chevron-up"></i>
     </span>
 </div>
