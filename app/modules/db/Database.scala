@@ -256,13 +256,13 @@ object Database {
 
     val tagWeightQuery = s"""
       match ${ focusNode.toQuery }
-      match (${ focusNode.name })-[:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(posts:`${ Post.label }`)
-      with distinct posts
-      match (nodetag:`${ TagLike.label }`)-[nodetagtocat:`${ Categorizes.startRelationType }`]->(nodecat:`${ Categorizes.label }`)-[cattopost:`${ Categorizes.endRelationType }`]->(posts)
-      optional match (nodecat)<-[nodetagvoteup:${ Votes.relationType }]-() where nodetagvoteup.weight = 1
-      optional match (nodecat)<-[nodetagvotedown:${ Votes.relationType }]-() where nodetagvotedown.weight = -1
-      with nodecat, count(nodetagvoteup.weight) as up, count(nodetagvotedown.weight) as down
-      return nodecat.uuid, ((up + 5.0)/(up + down + 10.0)) as weight
+      match (${ focusNode.name })-[:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(postsandconnects) where (postsandconnects:`${ Post.label }`) or (postsandconnects:`${ Connects.label }`)
+      with distinct postsandconnects
+      match (:`${ TagLike.label }`)-[:`${ Categorizes.startRelationType }`]->(cat:`${ Categorizes.label }`)-[:`${ Categorizes.endRelationType }`]->(postsandconnects)
+      optional match (cat)<-[nodetagvoteup:${ Votes.relationType }]-() where nodetagvoteup.weight = 1
+      optional match (cat)<-[nodetagvotedown:${ Votes.relationType }]-() where nodetagvotedown.weight = -1
+      with cat, count(nodetagvoteup.weight) as up, count(nodetagvotedown.weight) as down
+      return cat.uuid, ((up + 5.0)/(up + down + 10.0)) as weight
       """
 
     val params = focusNode.parameterMap
@@ -272,7 +272,7 @@ object Database {
 
     // write tag weights into categorizes-hyperrelations
     for(tagweight <- tagweights.rows) {
-      val catId = tagweight("nodecat.uuid").asInstanceOf[StringPropertyValue].value
+      val catId = tagweight("cat.uuid").asInstanceOf[StringPropertyValue].value
       val weight = tagweight("weight").asInstanceOf[DoublePropertyValue].value
       val categorizes = component.categorizes.find(_.uuid == catId).get
       categorizes.rawItem.properties("weight") = weight
