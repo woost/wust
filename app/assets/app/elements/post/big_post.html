@@ -1,20 +1,13 @@
 <div class="big_post_directive">
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <span small-post node="vm.node"></span>
-            <span class="pull-right">
-                <div class='fa fa-pencil' style='cursor:pointer' ng-click='vm.updateFocused()' data-title='edit post' bs-tooltip animation=''></div>
-                <div toggle-zen node="vm.node"></div>
-            </span>
+    <div class="post_details">
+        <div class="post_description">
+            <div preview node="vm.node"></div>
         </div>
-        <div class="panel-body">
-            <div class="post_details">
-                <div ng-show="vm.node.description" markdown="vm.node.description" class="post_description"></div>
-                <div big-taglist node="vm.node" class="taglist"></div>
-            </div>
-            <div class="post_stats">
-                <span show-timestamp node="vm.node"></span>
-            </div>
-        </div>
+        <div big-taglist node="vm.node" class="taglist"></div>
+    </div>
+    <div class="post_stats">
+        <span toggle-zen node="vm.node"></span>
+        <span class='fa fa-pencil' style='cursor:pointer' ng-click='vm.updateFocused()' data-title='edit post' bs-tooltip animation=''></span>
+        <span show-timestamp node="vm.node"></span>
     </div>
 </div>

@@ -15,15 +15,16 @@ function bigPost() {
     };
 }
 
-bigPostCtrl.$inject = ["$state", "LeftSideService", "EditService", "Session"];
+bigPostCtrl.$inject = ["LeftSideService", "EditService", "Session", "DiscourseNode"];
 
 //TODO: we are using the markdown directive directly and also allow to enter zen
 //mode. both directives will lead to parsing the markdown description, which is
 //not needed. zen mode should reuse the parsed description here.
-function bigPostCtrl($state, LeftSideService, EditService, Session) {
+function bigPostCtrl(LeftSideService, EditService, Session, DiscourseNode) {
     let vm = this;
 
     vm.updateFocused = updateFocused;
+    vm.href = DiscourseNode.Post.getHref(vm.node.id);
 
     function updateFocused() {
         EditService.edit(vm.node);

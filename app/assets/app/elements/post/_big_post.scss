@@ -1,20 +1,21 @@
 @import "compass/css3/flexbox";
 
 .big_post_directive {
-    .panel-body {
-        .post_details {
-            @include display-flex(flex);
-            @include flex-direction(row);
-            .post_description {
-                width: 70%;
-            }
-            .taglist {
-                width: 30%;
-            }
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 5px;
+    .post_details {
+        @include display-flex(flex);
+        @include flex-direction(row);
+        .post_description {
+            width: 70%;
         }
-        .post_stats {
-            text-align: right;
-            color: #aaa;
+        .taglist {
+            width: 30%;
         }
+    }
+    .post_stats {
+        text-align: right;
+        color: #aaa;
     }
 }
