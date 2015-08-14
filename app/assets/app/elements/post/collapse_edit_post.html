@@ -15,6 +15,10 @@
             <button class="close" ng-click="vm.node.remove()" type="button" aria-label="Close " data-title="remove from scratchpad (not delete)" bs-tooltip animation=""><span aria-hidden="true">&times;</span></button>
         </div>
         <div class="panel-body" collapse="!vm.node.expandedEditor">
+            <div ng-if="vm.node.referenceNode !== undefined">
+                <label>Replies to</label>
+                <span small-post node="vm.node.referenceNode"></span>
+            </div>
             <div edit-post node="vm.node"></div>
             <button class="pull-left btn btn-xs btn-danger" ng-click="vm.node.deleteNode();" ng-hide="vm.node.isLocal" data-title="delete" bs-tooltip animation=""><i class="fa fa-trash-o"></i></button>
             <button class="pull-left btn btn-xs btn-warning" ng-click="vm.node.discard()" ng-hide="vm.node.isPristine" data-title="discard changes" bs-tooltip animation=""><i class="fa fa-undo"></i></button>
