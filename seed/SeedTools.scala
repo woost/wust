@@ -2,6 +2,7 @@ package tasks
 
 import model.WustSchema._
 import renesca.parameter.implicits._
+import org.unbescape.html.HtmlEscape.unescapeHtml
 
 trait SeedTools {
   val maxTitleLength = 140
@@ -33,12 +34,19 @@ trait SeedTools {
       str.take(maxlength - 3) + "..."
   }
 
-  def createPost(title: String, description: String) = {
-    Post.create(title = shorten(title), description = if(description.nonEmpty) Some(description) else None)
+  def createPost(title: String, description: String, url: Option[String]) = {
+    Post.create(
+      title = shorten(unescapeHtml(title)),
+      description = if(description.nonEmpty) Some(url.map(_ + "\n\n").getOrElse("") + unescapeHtml(description)) else url
+    )
   }
 
-  def createPost(content: String) = {
-    Post.create(title = shorten(content), description = if(content.length <= maxTitleLength) None else Some(content))
+  def createPost(rawContent: String) = {
+    val content = unescapeHtml(rawContent)
+    Post.create(
+      title = shorten(content),
+      description = if(content.length <= maxTitleLength) None else Some(content)
+    )
   }
 }
 

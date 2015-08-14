@@ -48,7 +48,9 @@ object ImportReddit extends Task with SeedTools {
             val id = (post \ "data" \ "id").as[String]
             val title = (post \ "data" \ "title").as[String]
             val content = (post \ "data" \ "selftext").as[String]
-            val startPost = createPost(title, content)
+            val url = (post \ "data" \ "url").as[String]
+            val permalink = (post \ "data" \ "permalink").as[String]
+            val startPost = createPost(title, content, if(url.endsWith(permalink)) None else Some(url))
             print(s"thread: $title")
             discourse.add(startPost, tag(startPost, subredditScope), tag(startPost, startPostTag), commentTag, replyTag, subredditScope)
 

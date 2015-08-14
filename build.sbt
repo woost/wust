@@ -119,7 +119,11 @@ lazy val scalajsSharedJs = scalajsShared.js
 lazy val seed = (project in file("seed")).settings(
   scalaVersion := scalaV,
   scalacOptions ++= scalacOpts,
-  libraryDependencies += "com.github.seratch" %% "hackernews4s" % "0.5.0"
+  libraryDependencies ++= Seq(
+    "com.github.seratch" %% "hackernews4s" % "0.5.0",
+    // escape and unescape operations (html, json, css, ...)
+    "org.unbescape" % "unbescape" % "1.1.1.RELEASE"
+  )
 ).dependsOn(schema, wust)
 
 val scalacOpts = Seq(
