@@ -7,6 +7,5 @@ function ModalEditCtrl(ModalEditService) {
 
     vm.previewEnabled = false;
     vm.node = ModalEditService.currentNode;
-    vm.reference = ModalEditService.reference;
     vm.save = ModalEditService.save;
 }

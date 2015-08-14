@@ -19,6 +19,7 @@ function HistoryService(Post, DiscourseNode, store) {
     this.changeActiveView = changeActiveView;
 
     this.updateCurrentView = updateCurrentView;
+    this.addConnectToCurrentView = addConnectToCurrentView;
 
     this.currentViewComponent = undefined;
 
@@ -32,8 +33,21 @@ function HistoryService(Post, DiscourseNode, store) {
         });
         if (existing !== undefined) {
             _.assign(existing, node);
-            this.currentViewComponent.commit();
+            current.commit();
         }
+    }
+
+    function addConnectToCurrentView(refId, response) {
+        if (this.currentViewComponent === undefined)
+            return;
+
+        let current = this.currentViewComponent.getWrap("graph");
+        if (!_.any(current.nodes, {id: refId}))
+            return;
+
+        response.graph.nodes.forEach(n => current.addNode(n));
+        response.graph.relations.forEach(r => current.addRelation(r));
+        current.commit();
     }
 
     function restoreNode(id) {

@@ -17,7 +17,7 @@ function EditService(Post, HistoryService, store, DiscourseNode) {
         }
 
         apply({
-            id, title, description, label, original, tags, localId
+            id, title, description, label, original, tags, localId, referenceNode
         }) {
             tags = tags || [];
             this.id = id;
@@ -26,6 +26,7 @@ function EditService(Post, HistoryService, store, DiscourseNode) {
             this.description = description || "";
             this.label = label;
             this.tags = angular.copy(tags);
+            this.referenceNode = referenceNode;
             this.original = original || {
                 id: this.id,
                 localId: this.localId,
@@ -36,6 +37,10 @@ function EditService(Post, HistoryService, store, DiscourseNode) {
             };
 
             this.setValidityProperties();
+        }
+
+        setReference(reference) {
+            this.referenceNode = reference.encode ? reference.encode() : reference;
         }
 
         //TODO: we should rewrite the whole logic here, it is weird and hacky, but it works so i leave it as is :)
@@ -64,7 +69,11 @@ function EditService(Post, HistoryService, store, DiscourseNode) {
             let model = _.pick(this, "id");
             let message = model.id === undefined ? "Added new node" : "Updated now";
 
-            return Post.$buildRaw(model).$update(dirtyModel).$then(data => {
+            Post.$buildRaw(model).$update(dirtyModel).$then(data => {
+                if (this.referenceNode !== undefined) {
+                    connectNodes(data, this.referenceNode);
+                }
+
                 humane.success(message);
 
                 // the response only holds newly added tags
@@ -72,7 +81,7 @@ function EditService(Post, HistoryService, store, DiscourseNode) {
                 this.apply(data);
                 storeEditList();
 
-                //TODO: weird update
+                //TODO: weird update//same needs to be done after connect
                 let updateNode = angular.copy(data);
                 HistoryService.updateCurrentView(updateNode);
             }, () => this.setValidityProperties());
@@ -178,6 +187,28 @@ function EditService(Post, HistoryService, store, DiscourseNode) {
         self.list.splice(index, 0, existing);
         storeEditList();
         return existing;
+    }
+
+    //TODO should create+connect in one go...
+    //TODO: codedup with d3_graph
+    function connectNodes(startNode, endNode) {
+        let ref;
+        if (endNode.isHyperRelation) {
+            let start = Post.$buildRaw({
+                id: endNode.startId
+            });
+            let hyper = start.connectsTo.$buildRaw({
+                id: endNode.endId
+            });
+            ref = hyper.connectsFrom.$buildRaw(_.pick(startNode, "id"));
+        } else {
+            let start = Post.$buildRaw(_.pick(startNode, "id"));
+            ref = start.connectsTo.$buildRaw(_.pick(endNode, "id"));
+        }
+        ref.$save({}).$then(response => {
+            humane.success("Connected node");
+            HistoryService.addConnectToCurrentView(endNode.id, response);
+        });
     }
 
     function edit(node, index = 0) {
