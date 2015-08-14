@@ -4,6 +4,7 @@ angular.module("wust.services").value("Helpers", {
     hashToHsl,
     hashToHslBorder,
     hashToHslBackground,
+    hashToHslFill,
     cssCompat,
     lineIntersection,
     lineRectIntersection,
@@ -33,11 +34,15 @@ function hashCode(string) {
 }
 
 function hashToHslBorder(tag) {
-    return hashToHsl(tag, 57, 25);
+    return hashToHsl(tag, 40, 45);
 }
 
 function hashToHslBackground(tag) {
-    return hashToHsl(tag, 57, 50);
+    return hashToHsl(tag, 90, 95);
+}
+
+function hashToHslFill(tag) {
+    return hashToHsl(tag, 57, 55);
 }
 
 function hashToHsl(tag, saturation, brightness) {

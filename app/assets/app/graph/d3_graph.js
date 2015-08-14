@@ -184,7 +184,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
                 this.d3Node = this.d3NodeContainerWithData.append("div")
                 .attr("class", d => d.isHyperRelation ? "hyperrelation" : `node discourse_post`)
-                .style("border-width", Helpers.coloredBorderWidth)
+                .style("background-color", n => n.tags.length > 0 ? Helpers.hashToHslBackground(n.tags[0]) : undefined)
                 .style("border-color", n => n.tags.length > 0 ? Helpers.hashToHslBorder(n.tags[0]) : undefined);
 
                 this.d3Node
@@ -212,9 +212,9 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                             let color;
                             if (t.isClassification) {
                                 //TODO: display fixed specialized Tag Color
-                                color = Helpers.hashToHslBackground(t);
+                                color = Helpers.hashToHslFill(t);
                             } else {
-                                color = Helpers.hashToHslBackground(t);
+                                color = Helpers.hashToHslFill(t);
                             }
                             return `<span class="label nodetag" style="background: ${color};">${t.title}</span><br>`;
                         }).join("")
