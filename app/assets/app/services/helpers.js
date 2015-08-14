@@ -5,6 +5,7 @@ angular.module("wust.services").value("Helpers", {
     hashToHslBorder,
     hashToHslBackground,
     hashToHslFill,
+    sortTags,
     cssCompat,
     lineIntersection,
     lineRectIntersection,
@@ -43,6 +44,13 @@ function hashToHslBackground(tag) {
 
 function hashToHslFill(tag) {
     return hashToHsl(tag, 57, 55);
+}
+
+function sortTags(tags) {
+    return _.sortByOrder(tags,
+            ["isClassification", "weight"],
+            ["desc","desc"]
+            );
 }
 
 function hashToHsl(tag, saturation, brightness) {
