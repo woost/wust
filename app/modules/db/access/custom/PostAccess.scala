@@ -29,7 +29,9 @@ case class PostAccess() extends NodeReadBase[Post] with NodeDeleteBase[Post] {
   }
 
   private def addTagsToGraph(discourse: Discourse, user: User, node: Post) {
-    discourse.tagLikes.foreach(tag => {
+    //FIXME: bug in renesca-magic #22
+    // discourse.tagLikes.foreach(tag => {
+    discourse.nodesAs(TagLike).foreach(tag => {
       val tags = Tags.merge(tag, node)
       //TODO initial votes
       discourse.add(tags)
