@@ -60,12 +60,17 @@
                 z-index: 110;
             }
 
-            .fixed .node, .fixed .hyperrelation {
+            .fixed .node {
                 @include box-shadow(0 0 0 5px #9A9A9A);
                 // outline: 5px solid #DDD;
                 // border-color: #000 !important; // important, because of the colored borders set for every element
                 border-width: 2px;
                 padding: 0.5px 14px 0px 11px; // -1px in width/height because of 1px more border
+            }
+
+            .fixed .hyperrelation {
+                border-radius: $border_radius;
+                @include box-shadow(0 0 0 7px #9A9A9A);
             }
 
             .moving .node {
@@ -74,6 +79,10 @@
                 border-color: #000;
                 border-width: 2px;
                 padding: 0.5px 14px 0px 11px; // -1px in width/height because of 1px more border //TODO: use border-box instead
+            }
+            .moving .hyperrelation {
+                // dark shadow
+                @include box-shadow(0 5px 20px #333);
             }
             .selected .node {
                 background-color: #BCEFFF;
@@ -86,8 +95,13 @@
                 position: absolute;
                 top: 5px;
                 right: -90px;
+                cursor: default;
             }
             .hyperrelation .nodetags {
+                // bootstrap labels have strange surrounding spaces
+                // this fixes the box-shadow when fixed
+                margin-top: -2px;
+                margin-right: -2px;
             }
 
             .nodetools {
@@ -165,7 +179,6 @@
 
         .nodeframe {
             position: absolute; // needed for z-index (moving/fixed have higher z-index)
-            pointer-events: all;
             .node {
                 cursor: pointer;
                 .nodecontent {
@@ -202,6 +215,7 @@
             color: $graph_relation_color;
             padding: 0;
             margin: 0;
+            cursor: pointer;
 
             .nodecontent {
                 display:block;
