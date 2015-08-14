@@ -16,6 +16,7 @@ function coloredTag(Helpers) {
         if (scope.coloredTag.id) {
             setColors();
         } else {
+            rawElem.style.color = "black";
             let deregister = scope.$watch("coloredTag.id", () => {
                 if (scope.coloredTag.id) {
                     setColors();
@@ -27,6 +28,7 @@ function coloredTag(Helpers) {
         function setColors() {
             rawElem.style.backgroundColor = Helpers.hashToHslFill(scope.coloredTag);
             rawElem.style.borderColor = Helpers.hashToHslBorder(scope.coloredTag);
+            rawElem.style.color = "white";
         }
     }
 }
