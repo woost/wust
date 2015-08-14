@@ -3,6 +3,10 @@
 #dashboard_component {
     height: 100%;
     #posts_view {
+        hr {
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
         #header_list {
             @include display-flex(flex);
             @include justify-content(space-between);
@@ -11,17 +15,15 @@
             .container {
                 border: $stream_border;
                 border-radius: 5px;
-                height: 200px;
-                max-height: 200px;
+                height: 250px;
+                max-height: 250px;
                 width: 60%;
                 margin: 20px;
             }
             .recent_container {
                 padding: 0px;
-                border-color: $dashboard_recent_header_bg;
+                border-color: $dashboard_recent_header_border;
                 .header {
-                    background-color: $dashboard_recent_header_bg;
-                    color: $dashboard_recent_header_fg;
                 }
                 .body {
                 }
@@ -35,9 +37,9 @@
             width: 90%;
             margin: 0 auto;
             .container {
-                width: 330px;
-                height: 400px;
-                max-height: 400px;
+                width: 48%;
+                height: 500px;
+                max-height: 500px;
             }
         }
         .container {
