@@ -16,6 +16,9 @@
         </div>
         <div class="panel-body" collapse="!vm.node.expandedEditor">
             <div edit-post node="vm.node"></div>
+            <button class="pull-left btn btn-xs btn-danger" ng-click="vm.node.deleteNode();" ng-hide="vm.node.isLocal" data-title="delete" bs-tooltip animation=""><i class="fa fa-trash-o"></i></button>
+            <button class="pull-left btn btn-xs btn-warning" ng-click="vm.node.discard()" ng-hide="vm.node.isPristine" data-title="discard changes" bs-tooltip animation=""><i class="fa fa-undo"></i></button>
+            <button class="btn btn-xs btn-success pull-right" ng-click="vm.node.save()" ng-hide="!vm.node.canSave" data-title="save" bs-tooltip animation=""><i class="fa fa-check"></i></button>
             <div toggle-zen node="vm.node" class="text-center"></div>
         </div>
     </div>

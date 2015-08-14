@@ -1,5 +1,13 @@
 .modal_edit {
     .modal-body {
         height: 350px;
+        .panel {
+            margin: 0px;
+            .panel-heading {
+                min-height: 55px;
+            }
+            .panel-body {
+            }
+        }
     }
 }

@@ -7,14 +7,13 @@ function toggleZen(ZenService) {
         restrict: "A",
         templateUrl: "assets/app/elements/zen/toggle_zen.html",
         scope: {
-            node: "=",
-            service: "="
+            node: "="
         },
         link
     };
 
     function link(scope) {
-        scope.service = scope.service || ZenService;
+        scope.service = ZenService;
         scope.preview = {
             active: false
         };

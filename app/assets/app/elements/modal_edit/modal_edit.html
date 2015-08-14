@@ -8,10 +8,19 @@
                     <span small-post node="vm.reference.node"></span>
                 </span>
             </div>
-            <div class="modal-body">
-                <span ng-if="!vm.previewEnabled" static-edit-post node="vm.node"></span>
+            <div ng-switch="vm.previewEnabled" class="modal-body">
+                <div ng-switch-when="true" preview node="vm.node" class="panel panel-default"></div>
+                <div ng-switch-default class="panel panel-default">
+                    <div class="panel-heading">
+                        <input type="text" class="form-control" ng-model="vm.node.title" ng-blur="vm.node.onChange()" placeholder="TL,DR">
+                    </div>
+                    <div class="panel-body">
+                        <div edit-post node="vm.node"></div>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
+                <button class="pull-left btn btn-default" style='cursor:pointer' ng-click='vm.previewEnabled = !vm.previewEnabled' data-title='distraction free writing' bs-tooltip animation=''><i class="fa" ng-class="{'fa-eye-slash': vm.previewEnabled, 'fa-eye': !vm.previewEnabled}"></i></button>
                 <button class="btn btn-default" ng-click="$hide()">Close</button>
                 <button class="btn btn-success" ng-click="vm.save();$hide()" ng-disabled="!vm.node.canSave"><i class="fa fa-paper-plane-o"></i></button>
             </div>
