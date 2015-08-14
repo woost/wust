@@ -17,7 +17,7 @@ object Recent extends TaggedTaggable[UuidNode] with Controller {
     val labels = ContentNode.labels ++ label.map(Label(_))
     val nodeDef = LabelNodeDefinition(labels)
 
-   val returnStatement = s"return ${nodeDef.name} order by ${nodeDef.name}.timestamp desc limit 30"
+   val returnStatement = s"return ${nodeDef.name} order by ${nodeDef.name}.timestamp desc limit 20"
    val query = s"match ${ nodeDef.toQuery } $returnStatement"
    val discourse = Discourse(db.queryGraph(Query(query)))
 
