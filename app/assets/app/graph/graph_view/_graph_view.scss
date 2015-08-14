@@ -61,9 +61,9 @@
             }
 
             .fixed .node, .fixed .hyperrelation {
-                // blue glow
-                // @include box-shadow(0 0 40px 5px #7dbaff);
-                border-color: #000;
+                @include box-shadow(0 0 0 5px #9A9A9A);
+                // outline: 5px solid #DDD;
+                // border-color: #000 !important; // important, because of the colored borders set for every element
                 border-width: 2px;
                 padding: 0.5px 14px 0px 11px; // -1px in width/height because of 1px more border
             }
