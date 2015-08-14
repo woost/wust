@@ -75,6 +75,8 @@ sealed trait NodeDelegates extends NodeLike {
   //FIXME: need to set tags, in order to update the graph from outside
   @JSExport
   def tags = rawNode.tags
+  @JSExport
+  def tags_=(newTags: js.Array[js.Object]) = rawNode.tags = newTags
 
   def description = rawNode.description
   def description_=(newDescription: Option[String]) = { rawNode.description = newDescription }
@@ -370,7 +372,7 @@ class Graph(private[js] val rawGraph: RawGraph) extends WrappedGraph[Relation] {
 @JSExport
 @JSExportAll
 //TODO: maybe give a concrete type for tags
-class RawNode(val id: String, val label: String, var title: String, var description: Option[String], val isHyperRelation: Boolean, val startId: Option[String], val endId: Option[String], val tags: js.Array[js.Object], val timestamp: js.Any) {
+class RawNode(val id: String, val label: String, var title: String, var description: Option[String], val isHyperRelation: Boolean, val startId: Option[String], val endId: Option[String], var tags: js.Array[js.Object], val timestamp: js.Any) {
   def this(n: RecordNode) = this(n.id, n.label, n.title.getOrElse(n.label), n.description.toOption, n.isHyperRelation.getOrElse(false), n.startId.toOption, n.endId.toOption, n.tags, n.timestamp.getOrElse(0))
   override def toString = s"RawNode($id)"
 

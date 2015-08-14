@@ -81,9 +81,7 @@ function EditService(Post, HistoryService, store, DiscourseNode) {
                 this.apply(data);
                 storeEditList();
 
-                //TODO: weird update//same needs to be done after connect
-                let updateNode = angular.copy(data);
-                HistoryService.updateCurrentView(updateNode);
+                HistoryService.updateCurrentView(this);
             }, () => this.setValidityProperties());
         }
 
