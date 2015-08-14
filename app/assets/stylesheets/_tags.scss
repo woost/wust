@@ -8,9 +8,14 @@
     font-size: 14px;
     line-height: 24px;
     cursor: default;
+    color: white;
+    * {
+        color: inherit;
+    }
 }
 
 .tag:hover {
     box-shadow: 0 3px 3px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
 }
 

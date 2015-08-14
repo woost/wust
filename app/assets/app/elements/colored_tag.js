@@ -27,7 +27,6 @@ function coloredTag(Helpers) {
         function setColors() {
             rawElem.style.backgroundColor = Helpers.hashToHslBackground(scope.coloredTag);
             rawElem.style.borderColor = Helpers.hashToHslBorder(scope.coloredTag);
-            rawElem.style.color = "white";
         }
     }
 }
