@@ -81,7 +81,7 @@ function EditService(Post, HistoryService, store, DiscourseNode) {
                 this.apply(data);
                 storeEditList();
 
-                HistoryService.updateCurrentView(this);
+                HistoryService.updateCurrentView(this.encode());
             }, () => this.setValidityProperties());
         }
 
