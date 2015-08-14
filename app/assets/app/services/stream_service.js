@@ -26,7 +26,9 @@ function StreamService(Search, DiscourseNode, store) {
         let stream = {
             posts: Search.$search({
                 label: DiscourseNode.Post.label,
-                tags: tags.map(t => t.id)
+                tags: tags.map(t => t.id),
+                size: 20,
+                page: 0
             }),
             tags: tags
         };

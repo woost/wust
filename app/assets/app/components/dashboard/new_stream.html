@@ -1,11 +1,11 @@
-<div class="modal">
+<div class="new_stream_modal modal">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h3 class="modal-title">Select tag:</h3>
             </div>
             <div class="modal-body">
-                <div edit-taglist tags="vm.selectedTags"></div>
+                <div edit-taglist tags="vm.selectedTags" existing-only="true"></div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-default" ng-click="$hide()">Cancel</button>

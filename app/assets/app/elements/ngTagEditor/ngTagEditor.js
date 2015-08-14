@@ -23,7 +23,8 @@ angular.module("wust.elements")
             scope: {
                 tags: "=",
                 getSuggestions: "&",
-                onChange: "&"
+                onChange: "&",
+                existingOnly: "@"
             },
             templateUrl: "assets/app/elements/ngTagEditor/ngTagEditor.html",
             controller: ["$scope", "$attrs", "$element", "$filter",
@@ -37,6 +38,9 @@ angular.module("wust.elements")
                         $scope.suggestions = $scope.getSuggestions({search: value});
                     });
                     $scope.add = function(tag) {
+                        if ($scope.existingOnly && tag.id === undefined)
+                            return;
+
                         tag = tag.encode ? tag.encode() : tag;
                         if (!_.any($scope.tags, tag)) {
                             $scope.tags.push(tag);

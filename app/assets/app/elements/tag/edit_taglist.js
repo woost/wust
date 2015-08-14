@@ -8,7 +8,8 @@ function editTaglist() {
         templateUrl: "assets/app/elements/tag/edit_taglist.html",
         scope: {
             tags: "=",
-            onChange: "&"
+            onChange: "&",
+            existingOnly: "@"
         },
         controller: editTaglistCtrl,
         controllerAs: "vm",
@@ -27,7 +28,9 @@ function editTaglistCtrl(Search, DiscourseNode) {
     function searchTags(title) {
         return Search.$search({
             title: title,
-            label: DiscourseNode.TagLike.label
+            label: DiscourseNode.TagLike.label,
+            size: 8,
+            page: 0
         });
     }
 }
