@@ -16,9 +16,9 @@ function graphView() {
     };
 }
 
-graphViewCtrl.$inject = ["$scope", "DiscourseNode", "$filter", "EditService"];
+graphViewCtrl.$inject = ["$scope", "$filter", "EditService", "$state"];
 
-function graphViewCtrl($scope, DiscourseNode, $filter, EditService) {
+function graphViewCtrl($scope, $filter, EditService, $state) {
     let vm = this;
 
     vm.addNodeToGraph = addNodeToGraph;
@@ -63,6 +63,6 @@ function graphViewCtrl($scope, DiscourseNode, $filter, EditService) {
     }
 
     function onClick(node) {
-        DiscourseNode.get(node.label).gotoState(node.id);
+        $state.goto("focus", {id: node.id});
     }
 }

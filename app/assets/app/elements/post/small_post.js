@@ -16,15 +16,10 @@ function smallPost() {
     };
 }
 
-smallPostCtrl.$inject = ["DiscourseNode"];
+smallPostCtrl.$inject = [];
 
-function smallPostCtrl(DiscourseNode) {
+function smallPostCtrl() {
     let vm = this;
 
     vm.valid = vm.valid === undefined ? true : vm.valid;
-
-    // If you are here because the link does not update, when a node is created
-    // and gets an id: you need to update the href when the id changes with a
-    // watcher. as long as we do not need this, we just do this once.
-    vm.href = DiscourseNode.Post.getHref(vm.node.id);
 }

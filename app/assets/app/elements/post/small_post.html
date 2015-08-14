@@ -1,5 +1,5 @@
 <span class="small_post_directive node discourse_post">
-    <a ng-href="{{::vm.href}}" ui-draggable="vm.valid" drag="vm.node.encode ? vm.node.encode() : vm.node" drag-channel="{{vm.node.id === undefined ? 'create_connect' : 'connect'}}" ng-bind="vm.node.title"></a>
+    <a ui-sref="focus({id: vm.node.id})" ui-draggable="vm.valid" drag="vm.node.encode ? vm.node.encode() : vm.node" drag-channel="{{vm.node.id === undefined ? 'create_connect' : 'connect'}}" ng-bind="vm.node.title"></a>
     <div ng-repeat="tag in vm.node.tags" colored-tag="tag" class="tag_circle">
         <div class="tag_circle" data-title="{{tag.title}}" bs-tooltip animation=""></div>
     </div>

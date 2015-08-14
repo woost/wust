@@ -1,8 +1,8 @@
 angular.module("wust.config").config(RoutesConfig);
 
-RoutesConfig.$inject = ["$stateProvider", "$urlRouterProvider", "$locationProvider", "DiscourseNodeProvider"];
+RoutesConfig.$inject = ["$stateProvider", "$urlRouterProvider", "$locationProvider"];
 
-function RoutesConfig($stateProvider, $urlRouterProvider, $locationProvider, DiscourseNodeProvider) {
+function RoutesConfig($stateProvider, $urlRouterProvider, $locationProvider) {
     const templateBase = "assets/app/components";
     $stateProvider.state("page", {
         abstract: true,
@@ -27,7 +27,7 @@ function RoutesConfig($stateProvider, $urlRouterProvider, $locationProvider, Dis
         url: "/list",
         templateUrl: `${templateBase}/users/list.html`,
         controller: "UserListsCtrl as vm",
-    }).state(DiscourseNodeProvider.setState("User", "users.details"), {
+    }).state("users.details", {
         url: "/details/:id",
         templateUrl: `${templateBase}/users/detail.html`,
         controller: "UserDetailsCtrl as vm",
@@ -36,11 +36,11 @@ function RoutesConfig($stateProvider, $urlRouterProvider, $locationProvider, Dis
         url: "/tags",
         templateUrl: `${templateBase}/tags/tag.html`,
         controller: "TagsCtrl as vm",
-    }).state(DiscourseNodeProvider.setState("TagLike", "tags.details"), {
+    }).state("tags.details", {
         url: "/:id",
         templateUrl: `${templateBase}/tags/tag_detail.html`,
         controller: "TagDetailsCtrl as vm",
-    }).state(DiscourseNodeProvider.setState("Post", "focus"), {
+    }).state("focus", {
         parent: "page",
         url: "/focus/:id",
         templateUrl: `${templateBase}/focus/focus.html`,

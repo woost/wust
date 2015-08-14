@@ -65,7 +65,6 @@ function EditService(Post, HistoryService, store, DiscourseNode) {
             let message = model.id === undefined ? "Added new node" : "Updated now";
 
             return Post.$buildRaw(model).$update(dirtyModel).$then(data => {
-                // DiscourseNode.Post.gotoState(data.id);
                 humane.success(message);
 
                 // the response only holds newly added tags
