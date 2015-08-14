@@ -15,12 +15,15 @@ object SeedInit extends Task with SeedTools {
     modifyDiscourse { implicit discourse =>
       discourse.add(
         DummyUser.create(name = "anonymous"),
-        mergeTag("Problem", isType = true),
-        mergeTag("Goal", isType = true),
-        mergeTag("Idea", isType = true),
-        mergeTag("Pro", isType = true),
-        mergeTag("Con", isType = true),
-        mergeTag("Comment")
+
+        mergeClassification("Problem"),
+        mergeClassification("Goal"),
+        mergeClassification("Idea"),
+        mergeClassification("Pro"),
+        mergeClassification("Con"),
+        mergeClassification("Comment"),
+        mergeClassification("StartPost"),
+        mergeClassification("repliesTo")
       )
 
       discourse.add(UserGroup.merge(name = "everyone", merge = Set("name")))

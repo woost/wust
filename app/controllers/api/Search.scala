@@ -7,7 +7,7 @@ import play.api.mvc.{Action, Controller}
 import renesca.Query
 import renesca.graph.Label
 import renesca.parameter.implicits._
-import model.WustSchema._
+import model.WustSchema.{Tags => SchemaTags, _}
 import formatters.json.ApiNodeFormat._
 import modules.db.access.custom.TaggedTaggable
 
@@ -47,7 +47,7 @@ object Search extends TaggedTaggable[UuidNode] with Controller {
     } else {
       if (tagOr.getOrElse(false)) {
         val tagDef = ConcreteFactoryNodeDefinition(TagLikeMatches)
-        val relationDef = RelationDefinition(tagDef, Categorizes, nodeDef)
+        val relationDef = RelationDefinition(tagDef, SchemaTags, nodeDef)
         val condition = if (termMatcher.isEmpty) "" else s"and ${termMatcher}"
 
         Discourse(db.queryGraph(Query(
@@ -62,7 +62,7 @@ object Search extends TaggedTaggable[UuidNode] with Controller {
         )))
       } else {
         val tagDefs = tags.map(uuid => FactoryUuidNodeDefinition(TagLikeMatches, uuid))
-        val relationDefs = tagDefs.map(tagDef => RelationDefinition(tagDef, Categorizes, nodeDef))
+        val relationDefs = tagDefs.map(tagDef => RelationDefinition(tagDef, SchemaTags, nodeDef))
         val condition = if (termMatcher.isEmpty) "" else s"where ${termMatcher}"
 
         Discourse(db.queryGraph(Query(

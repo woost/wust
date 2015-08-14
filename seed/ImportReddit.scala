@@ -22,26 +22,13 @@ object ImportReddit extends Task with SeedTools {
   def getJson(url: String): JsValue = Await.result(ws.url(url).get(), 10.seconds).json
 
   val redditScope = mergeScope("Reddit")
-  val commentTag = mergeTag("Reddit-Comment")
-  val startPostTag = mergeTag("Reddit-StartPost")
-  val replyTag = mergeTag("repliesTo")
-
-  def mergeTags()(implicit db: DbService) {
-    println("merging Reddit tags...")
-    modifyDiscourse { implicit discourse =>
-      discourse.add(
-        Inherits.merge(startPostTag, redditScope),
-        Inherits.merge(commentTag, redditScope),
-        Inherits.merge(commentTag, mergeTag("Comment"))
-      )
-    }
-  }
+  val commentTag = mergeClassification("Comment")
+  val startPostTag = mergeClassification("StartPost")
+  val replyTag = mergeClassification("repliesTo")
 
   dbContext { implicit db =>
     val subreddits = List("lifeprotips", "scala", "neo4j")
     val limit = 10
-
-    mergeTags()
 
     for(subreddit <- subreddits) {
       println(s"importing comments from subreddit /r/$subreddit")
@@ -78,7 +65,7 @@ object ImportReddit extends Task with SeedTools {
                   commentCount += 1
                   val commentPost = createPost((comment \ "data" \ "body").as[String])
                   val connects = Connects.create(commentPost, parent)
-                  discourse.add(commentPost, connects, tag(commentPost, commentTag), tag(connects, replyTag))
+                  discourse.add(commentPost, connects, tag(commentPost, subredditScope), tag(commentPost, commentTag), tag(connects, replyTag))
 
                   val replies = (comment \ "data" \ "replies": @unchecked) match {
                     case JsString("")     =>

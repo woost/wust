@@ -140,12 +140,6 @@ object Database {
     (start, end)
   }
 
-  def connectNodes(discourse: Discourse, start: User, factory: Votes.type, end: Categorizes, weight: Long): (User, Categorizes) = {
-    discourse.add(factory.merge(start, end, weight = weight, onMatch = Set("weight")))
-    db.transaction(_.persistChanges(discourse.graph))
-    (start, end)
-  }
-
   def connectUuidNodes[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](relationDefinition: UuidRelationDefinition[START, RELATION, END] with ContentRelationDefinition[START, RELATION, END]): Option[(START, END)] = {
     import relationDefinition._
     val (discourse, (startOpt, endOpt)) = discourseNodes(startDefinition, endDefinition)
@@ -227,7 +221,7 @@ object Database {
     // 2. As we are calculating a new value in the query (the tag weight), and cypher does not support something like
     // "implicit properties", we have to use a table.
     // In this case we are writing the results from the table into the discourse graph:
-    // (post)<-[:CATEGORIZES]-(tag)
+    // (post)<-[:TAGS]-(tag)
     //              ^
     //            weight
     //
@@ -240,7 +234,7 @@ object Database {
       match ${ focusNode.toQuery }
       match (${ focusNode.name })-[rel:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(postsandconnects) where (postsandconnects:`${ Post.label }`) or (postsandconnects:`${ Connects.label }`)
       with distinct postsandconnects, rel
-      optional match (tag:`${ TagLike.label }`)-[tagtocat:`${ Categorizes.startRelationType }`]->(cat:`${ Categorizes.label }`)-[cattotaggable:`${ Categorizes.endRelationType }`]->(postsandconnects)
+      optional match (tag:`${ TagLike.label }`)-[tagtocat:`${ Tags.startRelationType }`]->(cat:`${ Tags.label }`)-[cattotaggable:`${ Tags.endRelationType }`]->(postsandconnects)
       return postsandconnects,rel,tag,cat,tagtocat,cattotaggable
     """
 
@@ -258,7 +252,7 @@ object Database {
       match ${ focusNode.toQuery }
       match (${ focusNode.name })-[:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(postsandconnects) where (postsandconnects:`${ Post.label }`) or (postsandconnects:`${ Connects.label }`)
       with distinct postsandconnects
-      match (:`${ TagLike.label }`)-[:`${ Categorizes.startRelationType }`]->(cat:`${ Categorizes.label }`)-[:`${ Categorizes.endRelationType }`]->(postsandconnects)
+      match (:`${ TagLike.label }`)-[:`${ Tags.startRelationType }`]->(cat:`${ Tags.label }`)-[:`${ Tags.endRelationType }`]->(postsandconnects)
       optional match (cat)<-[nodetagvoteup:${ Votes.relationType }]-() where nodetagvoteup.weight = 1
       optional match (cat)<-[nodetagvotedown:${ Votes.relationType }]-() where nodetagvotedown.weight = -1
       with cat, count(nodetagvoteup.weight) as up, count(nodetagvotedown.weight) as down
@@ -270,12 +264,12 @@ object Database {
     val component = Discourse(componentRawGraph)
     val tagweights = db.queryTable(Query(tagWeightQuery, params))
 
-    // write tag weights into categorizes-hyperrelations
+    // write tag weights into tags-hyperrelations
     for(tagweight <- tagweights.rows) {
       val catId = tagweight("cat.uuid").asInstanceOf[StringPropertyValue].value
       val weight = tagweight("weight").asInstanceOf[DoublePropertyValue].value
-      val categorizes = component.categorizes.find(_.uuid == catId).get
-      categorizes.rawItem.properties("weight") = weight
+      val tags = component.tags.find(_.uuid == catId).get
+      tags.rawItem.properties("weight") = weight
     }
 
     component

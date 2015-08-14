@@ -32,14 +32,15 @@ object GraphFormat {
         ("label", JsString(TagLike.label)),
         ("title", JsString(tag.title)),
         ("description", JsString(tag.description.getOrElse(""))),
-        ("isType", JsBoolean(tag.isType)),
+        ("isVotable", JsBoolean(tag.isInstanceOf[VoteDimension])),
+        ("isClassification", JsBoolean(tag.isInstanceOf[Classification])),
         ("color", tag.color.map(JsString(_)).getOrElse(JsNull)),
         ("symbol", tag.symbol.map(JsString(_)).getOrElse(JsNull))
       ))
     }
 
-    implicit def categorizesWrites = new Writes[Categorizes] {
-      def writes(cat: Categorizes) = {
+    implicit def tagsWrites = new Writes[Tags] {
+      def writes(cat: Tags) = {
         // the same as tagWrites but with voting weight
         val tag: TagLike = cat.startNodeOpt.get
         val weight: Double = cat.rawItem.properties.get("weight").map(_.asInstanceOf[DoublePropertyValue].value).getOrElse(Database.defaultTagWeight)
@@ -48,7 +49,8 @@ object GraphFormat {
           ("label", JsString(TagLike.label)),
           ("title", JsString(tag.title)),
           ("description", JsString(tag.description.getOrElse(""))),
-          ("isType", JsBoolean(tag.isType)),
+          ("isVotable", JsBoolean(tag.isInstanceOf[VoteDimension])),
+          ("isClassification", JsBoolean(tag.isInstanceOf[Classification])),
           ("color", tag.color.map(JsString(_)).getOrElse(JsNull)),
           ("symbol", tag.symbol.map(JsString(_)).getOrElse(JsNull)),
           ("weight", JsNumber(weight))
@@ -63,7 +65,7 @@ object GraphFormat {
       case post: Post         => Seq(
         ("title", JsString(post.title)),
         ("description", JsString(post.description.getOrElse(""))),
-        ("tags", Json.toJson(post.inRelationsAs(Categorizes))),
+        ("tags", Json.toJson(post.inRelationsAs(Tags))),
         ("timestamp", Json.toJson(JsNumber(post.timestamp)))
       )
       case connects: Connects =>
@@ -72,7 +74,7 @@ object GraphFormat {
           //TODO: jsNull oder besser garnicht senden, aus der Seq rausnehmen und flatten
           ("startId", JsString(connects.startNodeOpt.map(_.uuid).getOrElse(""))),
           ("endId", JsString(connects.endNodeOpt.map(_.uuid).getOrElse(""))),
-          ("tags", Json.toJson(connects.inRelationsAs(Categorizes)))
+          ("tags", Json.toJson(connects.inRelationsAs(Tags)))
         )
       case _                  => Seq.empty
     }))

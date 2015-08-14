@@ -6,8 +6,16 @@ import renesca.parameter.implicits._
 trait SeedTools {
   val maxTitleLength = 140
 
-  def mergeTag(title: String, description: Option[String] = None, isType: Boolean = false) = {
-    Tag.merge(title = title, description = description, isType = isType, merge = Set("title"))
+  def mergeClassification(title: String, description: Option[String] = None) = {
+    Classification.merge(title = title, description = description, merge = Set("title"))
+  }
+
+  def mergeCategorization(title: String, description: Option[String] = None) = {
+    Categorization.merge(title = title, description = description, merge = Set("title"))
+  }
+
+  def mergeStaticTag(title: String, description: Option[String] = None) = {
+    StaticTag.merge(title = title, description = description, merge = Set("title"))
   }
 
   def mergeScope(title: String, description: Option[String] = None) = {
@@ -15,7 +23,7 @@ trait SeedTools {
   }
 
   def tag(item: Taggable, tag: TagLike) = {
-    Categorizes.create(tag, item)
+    Tags.create(tag, item)
   }
 
   def shorten(str: String, maxlength: Int = maxTitleLength) = {

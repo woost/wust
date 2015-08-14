@@ -19,14 +19,15 @@ object ApiNodeFormat {
         ("label", JsString(n.label)),
         ("title", JsString(n.title)),
         ("description", JsString(n.description.getOrElse(""))),
-        ("tags", Json.toJson(n.rev_categorizes))
+        ("tags", Json.toJson(n.rev_tags))
       )
       case n: TagLike => Seq(
         ("id", JsString(n.uuid)),
         ("label", JsString(TagLike.label)),
         ("title", JsString(n.title)),
         ("description", JsString(n.description.getOrElse(""))),
-        ("isType", JsBoolean(n.isType))
+        ("isVotable", JsBoolean(n.isInstanceOf[VoteDimension])),
+        ("isClassification", JsBoolean(n.isInstanceOf[Classification]))
       )
       case n: RealUser        => Seq(
         ("id", JsString(n.uuid)),

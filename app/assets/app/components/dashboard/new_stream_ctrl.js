@@ -1,12 +1,11 @@
 angular.module("wust.components").controller("NewStreamCtrl", NewStreamCtrl);
 
-NewStreamCtrl.$inject = ["Search", "DiscourseNode", "StreamService"];
+NewStreamCtrl.$inject = ["Search", "StreamService"];
 
-function NewStreamCtrl(Search, DiscourseNode, StreamService) {
+function NewStreamCtrl(Search, StreamService) {
     let vm = this;
 
     vm.save = save;
-    vm.nodeInfo = DiscourseNode.TagLike;
 
     let currentEditStream = StreamService.currentEditStream;
     StreamService.currentEditStream = undefined;

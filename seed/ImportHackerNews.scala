@@ -11,9 +11,6 @@ object ImportHackerNews extends Task with SeedTools {
 
   val hackerNewsScope = mergeScope(s"HackerNews")
   dbContext { implicit db =>
-    println("merging HackerNews Tags...")
-    mergeTags()
-
     println("merging HackerNews Scope...")
     modifyDiscourse { discourse =>
       discourse.add(hackerNewsScope)
@@ -24,19 +21,6 @@ object ImportHackerNews extends Task with SeedTools {
     else {
       importTopQuestions()
       importTopStories()
-    }
-  }
-
-  def mergeTags()(implicit db: DbService) {
-    modifyDiscourse { implicit discourse =>
-      discourse.add(
-        Inherits.merge(mergeTag("HN-Story"), hackerNewsScope),
-        Inherits.merge(mergeTag("HN-Show"), hackerNewsScope),
-        Inherits.merge(mergeTag("HN-Ask"), hackerNewsScope),
-        Inherits.merge(mergeTag("HN-Ask"), mergeTag("Question")),
-        Inherits.merge(mergeTag("HN-Comment"), hackerNewsScope),
-        Inherits.merge(mergeTag("HN-Comment"), mergeTag("Comment"))
-      )
     }
   }
 
@@ -74,13 +58,18 @@ object ImportHackerNews extends Task with SeedTools {
     modifyDiscourse { discourse =>
       println(s"importing ${ hnItem.itemType }: ${ hnItem.title.get }")
       val startPost = createPost(hnItem.title.get, hnItem.url.map(_ + "\n\n").getOrElse("") + hnItem.text)
-      val commentTag = mergeTag("HN-Comment")
-      val replyTag = mergeTag("repliesTo")
+      val commentTag = mergeClassification("Comment")
+      val replyTag = mergeClassification("repliesTo")
+      val hackerNewsScope = mergeScope("HackerNews")
       discourse.add(
-        tag(startPost, mergeTag(s"HN-${ hnItem.itemType }")),
+        tag(startPost, mergeStaticTag(s"HN-${ hnItem.itemType }")),
         tag(startPost, hackerNewsScope),
-        commentTag
+        commentTag,
+        Inherits.merge(mergeStaticTag(s"HN-${ hnItem.itemType }"), hackerNewsScope)
       )
+      if(hnItem.itemType == "Ask")
+        discourse.add(tag(startPost, mergeClassification("Question")))
+
       addDeepChildItems(hnItem, startPost)
       println()
 
@@ -94,7 +83,7 @@ object ImportHackerNews extends Task with SeedTools {
               println("item: " + hnItem)
             } else {
               val connects = Connects.create(commentPost, parentPost)
-              discourse.add(commentPost, connects, tag(commentPost, commentTag), tag(connects, replyTag))
+              discourse.add(commentPost, connects, tag(commentPost, hackerNewsScope), tag(commentPost, commentTag), tag(connects, replyTag))
               print(".")
               addDeepChildItems(hnItem, commentPost)
             }

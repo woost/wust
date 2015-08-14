@@ -210,7 +210,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                             //TODO: do it with d3 data-joins, or directly with the angular-port
                             //TODO FIXME: XSS
                             let color;
-                            if (t.isType) {
+                            if (t.isClassification) {
                                 //TODO: display fixed specialized Tag Color
                                 color = Helpers.hashToHslBackground(t);
                             } else {

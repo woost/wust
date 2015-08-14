@@ -44,7 +44,7 @@ class TaggedTaggable[NODE <: UuidNode] extends AccessNodeDecoratorControl[NODE] 
   override def shapeResponse(response: NODE) = {
     val tagDef = ConcreteFactoryNodeDefinition(TagLike)
     val nodeDef = FactoryUuidNodeDefinition(Taggable, response.uuid)
-    val relDef = RelationDefinition(tagDef, Categorizes, nodeDef)
+    val relDef = RelationDefinition(tagDef, Tags, nodeDef)
     val query = s"match ${relDef.toQuery} return *"
     val params = nodeDef.parameterMap ++ tagDef.parameterMap ++ relDef.parameterMap
 
@@ -57,7 +57,7 @@ class TaggedTaggable[NODE <: UuidNode] extends AccessNodeDecoratorControl[NODE] 
     if (!response.isEmpty) {
       val tagDef = ConcreteFactoryNodeDefinition(TagLike)
       val nodeDef = ConcreteFactoryNodeDefinition(Taggable)
-      val relDef = RelationDefinition(tagDef, Categorizes, nodeDef)
+      val relDef = RelationDefinition(tagDef, Tags, nodeDef)
 
       val query = s"match ${relDef.toQuery} where ${nodeDef.name}.uuid in {nodeUuids} return *"
       val params = nodeDef.parameterMap ++ tagDef.parameterMap ++ relDef.parameterMap ++ Map("nodeUuids" -> response.map(_.uuid).toSeq)

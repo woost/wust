@@ -15,7 +15,11 @@ object WustSchema {
     @unique val uuid: String = Helpers.uuidBase64
   }
 
+  //TODO: @Item trait in renesca-magic
   @Node trait Timestamp {
+    val timestamp: Long = System.currentTimeMillis
+  }
+  @Relation trait RelationTimestamp {
     val timestamp: Long = System.currentTimeMillis
   }
 
@@ -50,9 +54,11 @@ object WustSchema {
   @Relation class MemberOf(startNode: User, endNode: UserGroup)
 
   //TODO: rename
-  @Graph trait Discourse {Nodes(User, UserGroup, Post, Tag, Scope) }
+  @Graph trait Discourse {Nodes(User, UserGroup, Post, TagLike) }
   @Relation trait ContentRelation
+  //TODO: is HyperConnection really necessary?
   @Relation trait HyperConnection
+  //TODO: rename to ExposedNode
   @Node trait ContentNode extends UuidNode
 
   // Content
@@ -63,7 +69,7 @@ object WustSchema {
 
   // post explicitly inherits timestamp to make it cheap to query recent posts
   // otherwise we would need to take include the created relation every time
-  @Node class Post extends ContentNode with Connectable with Inheritable with Taggable with Timestamp {
+  @Node class Post extends ContentNode with Connectable with Inheritable with Taggable with Votable with Timestamp {
     var title: String
     var description: Option[String]
 
@@ -85,7 +91,7 @@ object WustSchema {
 
   // Action
   @Node trait Action extends Timestamp
-  //TODO: store content of action in action
+  //TODO: store content of action in action, for example the new description and title
   @HyperRelation class Created(startNode: User, endNode: ContentNode) extends Action
   @HyperRelation class Updated(startNode: User, endNode: ContentNode) extends Action
   // TODO: should be a node? as the to be deleted node will deleted and we cannot connect there?
@@ -95,30 +101,35 @@ object WustSchema {
   //TODO: multidimesional voting?
 
 
-  // generic Tags (base for Tags, Scopes)
-  @Node trait TagLike extends ContentNode with Inheritable {
-    @unique val title: String
-    var description: Option[String]
-    var isType: Boolean = false
-    var color:Option[String]
-    var symbol:Option[String]
-  }
-  @Node trait Taggable extends UuidNode
-  @HyperRelation class Categorizes(startNode: TagLike, endNode: Taggable) extends ContentRelation with HyperConnection with UuidNode
-  @Relation class TaggingAction(startNode: User, endNode: Categorizes)
-  @Relation class Votes(startNode: User, endNode: Categorizes) {
-    val weight: Long
+  @Node trait VoteDimension extends UuidNode
+  @Node trait Votable extends UuidNode
+  @HyperRelation class Dimensionizes(startNode: VoteDimension, endNode: Votable) extends HyperConnection with UuidNode
+  @Relation class Votes(startNode: User, endNode: Dimensionizes) extends RelationTimestamp {
+    val weight: Long // Up:+1 or Down:-1
   }
 
+  // generic Tags (base for Tags, Scopes)
+  @Node trait TagLike extends ContentNode with Inheritable {
+    //TODO: catch db constraint error when creating new tag, and return the already existing tag.
+    @unique val title: String
+    var description: Option[String]
+    var color: Option[String]
+    var symbol: Option[String]
+  }
+  @Node trait Taggable extends UuidNode
+  @HyperRelation class Tags(startNode: TagLike, endNode: Taggable) extends ContentRelation with HyperConnection with UuidNode
+
   // Tags
-  @Node class Tag extends TagLike
+  @Node class Categorization extends TagLike with VoteDimension
+  @Node class Classification extends TagLike with VoteDimension
+  @Node class StaticTag extends TagLike
 
 
   // Scopes
   @Node class Scope extends TagLike
-  @Relation class HasReadAccess(startNode: UserGroup, endNode: Scope)
-  @Relation class HasWriteAccess(startNode: UserGroup, endNode: Scope)
-  @Relation class Owns(startNode: UserGroup, endNode: Scope)
+  //  @Relation class HasReadAccess(startNode: UserGroup, endNode: Scope)
+  //  @Relation class HasWriteAccess(startNode: UserGroup, endNode: Scope)
+  //  @Relation class Owns(startNode: UserGroup, endNode: Scope)
 
   //TODO: Node trait ownable?
   //

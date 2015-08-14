@@ -19,7 +19,7 @@ class TagAccess extends NodeReadBase[TagLike] {
       //currently only handled by update.
       //TODO: what about scopes here? we are only merging tags not taglike, but
       //it is not possible to merge on taglike, as they are traits
-      val node = Tag.merge(title = request.title, merge = Set("title"))
+      val node = Categorization.merge(title = request.title, merge = Set("title"))
       val contribution = SchemaCreated.create(context.user, node)
 
       db.transaction(_.persistChanges(node, contribution)) match {

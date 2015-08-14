@@ -17,9 +17,9 @@ case class PostAccess() extends NodeReadBase[Post] with NodeDeleteBase[Post] {
     val discourse = Discourse.empty
     val nodes = addedTags.flatMap { tag =>
       if (tag.id.isDefined)
-        Some(Tag.matchesOnUuid(tag.id.get))
+        Some(TagLike.matchesOnUuid(tag.id.get))
       else if (tag.title.isDefined)
-        Some(Tag.merge(title = tag.title.get, merge = Set("title")))
+        Some(Categorization.merge(title = tag.title.get, merge = Set("title")))
       else
         None
     }
@@ -29,10 +29,10 @@ case class PostAccess() extends NodeReadBase[Post] with NodeDeleteBase[Post] {
   }
 
   private def addTagsToGraph(discourse: Discourse, user: User, node: Post) {
-    discourse.tags.foreach(tag => {
-      val categorizes = Categorizes.merge(tag, node)
-      val action = TaggingAction.merge(user, categorizes)
-      discourse.add(categorizes, action)
+    discourse.tagLikes.foreach(tag => {
+      val tags = Tags.merge(tag, node)
+      //TODO initial votes
+      discourse.add(tags)
     })
   }
 
@@ -47,14 +47,14 @@ case class PostAccess() extends NodeReadBase[Post] with NodeDeleteBase[Post] {
     removedTags.foreach { tagUuid =>
       val tag = TagLike.matchesOnUuid(tagUuid)
       discourse.add(tag)
-      val categorizes = Categorizes.matches(tag, node)
-      discourse.add(categorizes)
+      val tagging = Tags.matches(tag, node)
+      discourse.add(tagging)
     }
 
     //TODO: we need to resolve matches here, otherwise deletion of local nodes does not work
     //TODO: persisting might fail if there is a concurrent request, as matches nodes will fail when they cannot be resolved
     db.persistChanges(discourse)
-    discourse.remove(discourse.categorizes: _*)
+    discourse.remove(discourse.tags: _*)
     db.persistChanges(discourse)
   }
 
@@ -105,7 +105,7 @@ case class PostAccess() extends NodeReadBase[Post] with NodeDeleteBase[Post] {
       db.transaction(_.persistChanges(discourse)) match {
         case Some(err) => Left(BadRequest(s"Cannot update Post with uuid '$uuid': $err'"))
         //FIXME: why the fuck do i need to do this???
-        //otherwise node.rev_categorizes is empty? something is messed up here.
+        //otherwise node.rev_tags is empty? something is messed up here.
         case _         => Right(discourse.posts.find(_.uuid == node.uuid).get)
         // case _         => Right(node)
       }

@@ -1,7 +1,7 @@
 package controllers.api
 
 import controllers.api.nodes.Nodes
-import model.WustSchema._
+import model.WustSchema.{Tags => SchemaTags, _}
 import modules.db.access._
 import modules.db.access.custom._
 import modules.requests.dsl._
@@ -17,8 +17,7 @@ object Posts extends Nodes[Post] {
       ("connects-to", N > StartContentRelationAccess(Connects, Post) + PostAccess.apply + TaggedTaggable.apply[Connectable]),
       ("connects-from", N < EndContentRelationAccess(Connects, Post) + PostAccess.apply + TaggedTaggable.apply[Connectable])
     )),
-    ("tags", N < Categorizes < (EndRelationRead(Categorizes, TagLike),
-      ("voters", N < EndRelationRead(Votes, User)),
+    ("tags", N < Dimensionizes < (EndRelationRead(Dimensionizes, VoteDimension),
       ("up", N < VotesAccess(1) + CheckUser.apply),
       ("down", N < VotesAccess(-1) + CheckUser.apply)
     ))
