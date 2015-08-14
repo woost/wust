@@ -1,8 +1,8 @@
 <div id="sidebar">
-    <div id="sidebar_content" ng-if="vm.sidebarActive" class="ng-trans ng-trans-slide-up ease">
-        <span ng-repeat="visited in vm.visited track by visited.id" small-post node="visited"></span>
-    </div>
     <div id="sidebar_toggle">
-        <button class="btn btn-xs btn-default" ng-click="vm.sidebarActive = !vm.sidebarActive"><i class="fa fa-history"></i></button>
+        <button class="btn btn-xs btn-default pull-right" ng-click="vm.sidebarActive = !vm.sidebarActive"><i class="fa fa-history"></i></button>
+    </div>
+    <div id="sidebar_content" ng-if="vm.sidebarActive" class="ng-trans ng-trans-slide-right ease">
+        <div ng-repeat="visited in vm.visited track by visited.id" small-post node="visited"></div>
     </div>
 </div>
