@@ -134,18 +134,20 @@ END <: Node,
   override def parameterMap = startDefinition.parameterMap ++ endDefinition.parameterMap
 
   def toQuery: String = toQuery(true)
+  def toQuery(matchNodes: Boolean): String = toQuery(matchNodes, matchNodes)
+  def toQuery(matchStart: Boolean, matchEnd: Boolean): String = {
+    val (startPre, startNode) = if (matchStart)
+      nodeMatcher(startDefinition)
+    else
+      (None, nodeReferencer(startDefinition))
 
-  def toQuery(matchNodes: Boolean): String = {
-    if (matchNodes) {
-      val (startPre, startNode) = nodeMatcher(startDefinition)
-      val (endPre, endNode) = nodeMatcher(endDefinition)
-      val preMatcher = List(startPre, endPre).flatten.map(_ + ",").mkString
-      s"$preMatcher$startNode-$relationMatcher->$endNode"
-    } else {
-      val startNode = nodeReferencer(startDefinition)
-      val endNode = nodeReferencer(endDefinition)
-      s"$startNode-$relationMatcher->$endNode"
-    }
+    val (endPre, endNode) = if (matchEnd)
+      nodeMatcher(endDefinition)
+    else
+      (None, nodeReferencer(endDefinition))
+
+    val preMatcher = List(startPre, endPre).flatten.map(_ + ",").mkString
+    s"$preMatcher$startNode-$relationMatcher->$endNode"
   }
 }
 
