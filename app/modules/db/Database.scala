@@ -252,12 +252,13 @@ object Database {
       match ${ focusNode.toQuery }
       match (${ focusNode.name })-[:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(postsandconnects) where (postsandconnects:`${ Post.label }`) or (postsandconnects:`${ Connects.label }`)
       with distinct postsandconnects
-      match (:`${ TagLike.label }`)-[:`${ Tags.startRelationType }`]->(cat:`${ Tags.label }`)-[:`${ Tags.endRelationType }`]->(postsandconnects)
-      optional match (cat)<-[nodetagvoteup:${ Votes.relationType }]-() where nodetagvoteup.weight = 1
-      optional match (cat)<-[nodetagvotedown:${ Votes.relationType }]-() where nodetagvotedown.weight = -1
+      match (tag:`${ TagLike.label }`)-[:`${ Tags.startRelationType }`]->(cat:`${ Tags.label }`)-[:`${ Tags.endRelationType }`]->(postsandconnects)
+      optional match (tag)-[:`${ Dimensionizes.startRelationType }`]->(dim:`${ Dimensionizes.label }`)-[:`${ Dimensionizes.endRelationType }`]->(postsandconnects)
+      optional match (dim)<-[nodetagvoteup:${ Votes.relationType }]-() where nodetagvoteup.weight = 1
+      optional match (dim)<-[nodetagvotedown:${ Votes.relationType }]-() where nodetagvotedown.weight = -1
       with cat, count(nodetagvoteup.weight) as up, count(nodetagvotedown.weight) as down
       return cat.uuid, ((up + 5.0)/(up + down + 10.0)) as weight
-      """
+    """
 
     val params = focusNode.parameterMap
     implicit val componentRawGraph = db.queryGraph(Query(query, params))
