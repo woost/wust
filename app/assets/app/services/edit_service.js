@@ -70,6 +70,7 @@ function EditService(Post, HistoryService, store, DiscourseNode) {
             let message = model.id === undefined ? "Added new node" : "Updated now";
 
             Post.$buildRaw(model).$update(dirtyModel).$then(data => {
+                //TODO should create+connect in one go...
                 if (this.referenceNode !== undefined) {
                     connectNodes(data, this.referenceNode);
                 }
@@ -136,6 +137,7 @@ function EditService(Post, HistoryService, store, DiscourseNode) {
     this.findNode = findNode;
     this.persist = storeEditList;
     this.forget = clearEditList;
+    this.connectNodes = connectNodes;
 
     function restoreEditList() {
         //compact if something is really wrong and we have nulls in the localstorage. be forgiving.
@@ -187,8 +189,6 @@ function EditService(Post, HistoryService, store, DiscourseNode) {
         return existing;
     }
 
-    //TODO should create+connect in one go...
-    //TODO: codedup with d3_graph
     function connectNodes(startNode, endNode) {
         let ref;
         if (endNode.isHyperRelation) {

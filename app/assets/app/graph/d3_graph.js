@@ -1,8 +1,8 @@
 angular.module("wust.graph").directive("d3Graph", d3Graph);
 
-d3Graph.$inject = ["$window", "DiscourseNode", "Helpers", "$location", "$filter", "Post", "ModalEditService"];
+d3Graph.$inject = ["$window", "DiscourseNode", "Helpers", "$location", "$filter", "Post", "ModalEditService", "EditService"];
 
-function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, ModalEditService) {
+function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, ModalEditService, EditService) {
     return {
         restrict: "A",
         scope: false,
@@ -696,28 +696,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             this.force.resume();
         }
 
-        //TODO: code dup, same function in edit service
-        connectNodes(startNode, endNode) {
-            let referenceNode;
-            if (endNode.isHyperRelation) {
-                let start = Post.$buildRaw({
-                    id: endNode.startId
-                });
-                let hyper = start.connectsTo.$buildRaw({
-                    id: endNode.endId
-                });
-                referenceNode = hyper.connectsFrom.$buildRaw(startNode.encode());
-            } else {
-                let start = Post.$buildRaw(startNode.encode());
-                referenceNode = start.connectsTo.$buildRaw(endNode.encode());
-            }
-            referenceNode.$save({}).$then(response => {
-                response.graph.nodes.forEach(n => this.graph.addNode(n));
-                response.graph.relations.forEach(r => this.graph.addRelation(r));
-                this.graph.commit();
-            });
-        }
-
         disconnectHyperRelation(d) {
             Post.$buildRaw({
                 id: d.startId
@@ -880,7 +858,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     // the connect button does not exist on hyperRelations.
                     //TODO: we need to make it impossible to drag on self loops and incident relations,
                     //is assured by backend.
-                    this.connectNodes(startNode, endNode);
+                    EditService.connectNodes(startNode, endNode);
                 }
             }
             // TODO: else { connect without dragging only by clicking }
