@@ -8,6 +8,7 @@ import modules.requests.ConnectResponse
 import play.api.mvc.Results._
 import model.WustSchema._
 import renesca.Query
+import renesca.parameter._
 import renesca.parameter.implicits._
 
 // does not allow dummy users for any request
@@ -42,28 +43,55 @@ object CheckUserWrite {
 // accesses easily: PostAccess.apply + TaggedTaggable(Post)
 class TaggedTaggable[NODE <: UuidNode] extends AccessNodeDecoratorControl[NODE] with AccessNodeDecoratorControlDefault[NODE] {
   override def shapeResponse(response: NODE) = {
-    val tagDef = ConcreteFactoryNodeDefinition(TagLike)
-    val nodeDef = FactoryUuidNodeDefinition(Taggable, response.uuid)
-    val tagsDef = RelationDefinition(tagDef, Tags, nodeDef)
-    // val dimDef = HyperNodeDefinition(tagDef, Dimensionizes, nodeDef)
-    val query = s"match ${tagsDef.toQuery} return *"
-    val params = nodeDef.parameterMap ++ tagDef.parameterMap ++ tagsDef.parameterMap
-
-    val discourse = Discourse(db.queryGraph(Query(query, params)))
-    discourse.add(response)
-    response
+    shapeResponse(List(response)).head
   }
 
   override def shapeResponse(response: Iterable[NODE]) = {
     if (!response.isEmpty) {
-      val tagDef = ConcreteFactoryNodeDefinition(TagLike)
-      val nodeDef = ConcreteFactoryNodeDefinition(Taggable)
-      val relDef = RelationDefinition(tagDef, Tags, nodeDef)
+      val tagDef = LabelNodeDefinition[VoteDimension with TagLike](TagLike.labels)
+      val nodeDef = LabelNodeDefinition[Votable with Taggable](Taggable.labels)
+      val tagsDef = HyperNodeDefinition(tagDef, Tags, nodeDef)
 
-      val query = s"match ${relDef.toQuery} where ${nodeDef.name}.uuid in {nodeUuids} return *"
-      val params = nodeDef.parameterMap ++ tagDef.parameterMap ++ relDef.parameterMap ++ Map("nodeUuids" -> response.map(_.uuid).toSeq)
+      val query = s"""
+      match ${tagsDef.toQuery} where ${nodeDef.name}.uuid in {nodeUuids}
+      return *
+      """
+      val params = nodeDef.parameterMap ++ tagDef.parameterMap ++ tagsDef.parameterMap ++ Map("nodeUuids" -> response.map(_.uuid).toSeq)
 
-      val discourse = Discourse(db.queryGraph(Query(query, params.toMap)))
+      val dimDef = HyperNodeDefinition(tagDef, Dimensionizes, nodeDef)
+      val userUpDef = ConcreteFactoryNodeDefinition(User)
+      val votesUpDef = RelationDefinition(userUpDef, Votes, dimDef)
+      val userDownDef = ConcreteFactoryNodeDefinition(User)
+      val votesDownDef = RelationDefinition(userDownDef, Votes, dimDef)
+      //TODO: only get the tags with votes, the rest will get default values anyways
+      val tagWeightQuery = s"""
+      match ${tagsDef.toQuery} where ${nodeDef.name}.uuid in {nodeUuids}
+      optional match ${dimDef.toQuery(false, false)}
+      optional match ${votesDownDef.toQuery(true, false)} where ${votesDownDef.name}.weight = -1
+      optional match ${votesUpDef.toQuery(true, false)} where ${votesUpDef.name}.weight = 1
+      with ${tagDef.name}, count(${votesUpDef.name}.weight) as up, count(${votesDownDef.name}.weight) as down
+      return ${tagDef.name}.uuid, ${tagweight("up","down")} as weight
+      """
+
+      val tagWeightParams = params ++ dimDef.parameterMap ++ userDownDef.parameterMap ++ userUpDef.parameterMap ++ votesDownDef.parameterMap ++ votesUpDef.parameterMap
+
+      // val discourse = Discourse(db.queryGraph(Query(query, params.toMap)))
+
+      // val params = focusNode.parameterMap
+      implicit val discourseRawGraph = db.queryGraph(Query(query, params))
+      val discourse = Discourse(discourseRawGraph)
+      val tagweights = db.queryTable(Query(tagWeightQuery, tagWeightParams))
+
+      // build hashmap weights: Map tags-hyperrelation.uuid -> weight
+      val weights = tagweights.rows.map { tagweight =>
+        tagweight(s"${tagDef.name}.uuid").asString -> tagweight("weight").asInstanceOf[DoublePropertyValue]
+      }.toMap
+
+      // write weights in to tags-hyperrelations
+      for(tags <- discourse.tags) {
+        tags.rawItem.properties("weight") = weights.getOrElse(tags.uuid, tagweight_p)
+      }
+
       discourse.add(response.toSeq: _*)
     }
 

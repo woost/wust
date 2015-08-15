@@ -27,8 +27,6 @@ object SeedInit extends Task with SeedTools {
       )
 
       discourse.add(UserGroup.merge(name = "everyone", merge = Set("name")))
-
-      discourse.add(Connects.create(Post.create("hello"), Post.create("moon")))
     }
   }
 }

@@ -210,7 +210,9 @@ object Database {
     }
   }
 
-  var defaultTagWeight: Double = _
+  val tagweight_p = 0.5
+  val tagweight_u = 10
+  def tagweight(up:String, down:String) = s"(($up + ${tagweight_p*tagweight_u})/($up + $down + $tagweight_u))"
   def connectedComponent(focusNode: UuidNodeDefinition[_], depth: Int = 5): Discourse = {
     // Tag weights
     // 1. Cypher does not support subqueries yet, so we have to do extra queries for the tag weights.
@@ -230,6 +232,7 @@ object Database {
 
     // query undirected connected component of posts with maximum depth
     // depth * 2 because hyperrelation depth
+    // TODO: postandconnects: CONNECTABLE instead of POST or CONNECTS
     val query = s"""
       match ${ focusNode.toQuery }
       match (${ focusNode.name })-[rel:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(postsandconnects) where (postsandconnects:`${ Post.label }`) or (postsandconnects:`${ Connects.label }`)
@@ -245,7 +248,6 @@ object Database {
     // Dirichlet Prior Smoothing: (up + u*p) / (down + up + u)
     // p: probability for an upvote (needs to be calculated from all votes in the system, I set this to 0.5)
     // u: influence of our prior (I set this to 10)
-    defaultTagWeight = 0.5 // == p
     // IMPORTANT: we need to write the constancts as doubles to avoid integer arithmetic
 
     //TODO: only get the tags with votes, the rest will get default values anyways
@@ -258,7 +260,7 @@ object Database {
       optional match (dim)<-[nodetagvoteup:${ Votes.relationType }]-() where nodetagvoteup.weight = 1
       optional match (dim)<-[nodetagvotedown:${ Votes.relationType }]-() where nodetagvotedown.weight = -1
       with tags, count(nodetagvoteup.weight) as up, count(nodetagvotedown.weight) as down
-      return tags.uuid, ((up + 5.0)/(up + down + 10.0)) as weight
+      return tags.uuid, ${tagweight("up","down")} as weight
     """
 
     val params = focusNode.parameterMap
@@ -273,7 +275,7 @@ object Database {
 
     // write weights in to tags-hyperrelations
     for(tags <- component.tags) {
-      tags.rawItem.properties("weight") = weights.getOrElse(tags.uuid, defaultTagWeight)
+      tags.rawItem.properties("weight") = weights.getOrElse(tags.uuid, tagweight_p)
     }
 
     component
