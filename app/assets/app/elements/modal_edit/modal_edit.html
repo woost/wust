@@ -12,7 +12,7 @@
                 <div ng-switch-when="true" preview node="vm.node" class="panel panel-default"></div>
                 <div ng-switch-default class="panel panel-default">
                     <div class="panel-heading">
-                        <input type="text" class="form-control" ng-model="vm.node.title" ng-blur="vm.node.onChange()" placeholder="TL,DR">
+                        <input type="text" class="form-control" ng-model="vm.node.title" ng-change="vm.node.onChange()" placeholder="TL,DR">
                     </div>
                     <div class="panel-body">
                         <div edit-post node="vm.node"></div>
