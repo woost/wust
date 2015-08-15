@@ -6,9 +6,6 @@
     @return lighten(saturate($bgcolor, 10), 10);
 }
 
-$node_border: 1px solid black;
-$node_border_radius: 4px;
-
 $graph_relation_color: #666;
 $graph_relation_label_bg: white;
 

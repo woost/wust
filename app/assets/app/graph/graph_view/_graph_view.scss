@@ -60,6 +60,9 @@
                 z-index: 110;
             }
 
+            .node {
+            }
+
             .fixed .node {
                 @include box-shadow(0 0 0 5px #9A9A9A);
                 // outline: 5px solid #DDD;
@@ -69,7 +72,7 @@
             }
 
             .fixed .hyperrelation {
-                border-radius: $node_border_radius;
+                border-radius: 4px;
                 @include box-shadow(0 0 0 7px #9A9A9A);
             }
 
