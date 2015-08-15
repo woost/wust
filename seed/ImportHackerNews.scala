@@ -26,14 +26,14 @@ object ImportHackerNews extends Task with SeedTools {
 
   def importTopStories()(implicit db: DbService) {
     println("importing top Stories...")
-    HackerNews.getItemIdsForTopStories().foreach { id =>
+    HackerNews.getItemIdsForTopStories().take(10).foreach { id =>
       importItem(forceGetItem(id))
     }
   }
 
   def importTopQuestions()(implicit db: DbService) {
     println("importing top Questions...")
-    HackerNews.getItemIdsForAskStories().foreach { id =>
+    HackerNews.getItemIdsForAskStories().take(10).foreach { id =>
       importItem(forceGetItem(id))
     }
   }
