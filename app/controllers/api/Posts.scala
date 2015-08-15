@@ -17,9 +17,10 @@ object Posts extends Nodes[Post] {
       ("connects-to", N > StartContentRelationAccess(Connects, Post) + PostAccess.apply + TaggedTaggable.apply[Connectable]),
       ("connects-from", N < EndContentRelationAccess(Connects, Post) + PostAccess.apply + TaggedTaggable.apply[Connectable])
     )),
-    ("tags", N < Dimensionizes < (EndRelationRead(Dimensionizes, VoteDimension),
+    ("votes", N < Dimensionizes < (EndRelationRead(Dimensionizes, VoteDimension),
       ("up", N < VotesAccess(1) + CheckUser.apply),
       ("down", N < VotesAccess(-1) + CheckUser.apply)
-    ))
+    )),
+    ("tags", N < SchemaTags < (EndRelationRead(SchemaTags, TagLike)))
   )
 }

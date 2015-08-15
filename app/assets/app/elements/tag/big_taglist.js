@@ -28,7 +28,7 @@ function bigTaglistCtrl(Post, Session) {
 
     function wrapResource(tag) {
         let model = Post.$buildRaw(_.pick(vm.node, "id"));
-        return model.tags.$buildRaw(tag).$reveal();
+        return model.votes.$buildRaw(tag).$reveal();
     }
 
     function getVote(tag) {
