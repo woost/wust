@@ -245,19 +245,19 @@ object Database {
     // Dirichlet Prior Smoothing: (up + u*p) / (down + up + u)
     // p: probability for an upvote (needs to be calculated from all votes in the system, I set this to 0.5)
     // u: influence of our prior (I set this to 10)
-    defaultTagWeight = 0.5
+    defaultTagWeight = 0.5 // == p
     // IMPORTANT: we need to write the constancts as doubles to avoid integer arithmetic
 
     val tagWeightQuery = s"""
       match ${ focusNode.toQuery }
       match (${ focusNode.name })-[:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(postsandconnects) where (postsandconnects:`${ Post.label }`) or (postsandconnects:`${ Connects.label }`)
       with distinct postsandconnects
-      match (tag:`${ TagLike.label }`)-[:`${ Tags.startRelationType }`]->(cat:`${ Tags.label }`)-[:`${ Tags.endRelationType }`]->(postsandconnects)
+      match (tag:`${ TagLike.label }`)-[:`${ Tags.startRelationType }`]->(tags:`${ Tags.label }`)-[:`${ Tags.endRelationType }`]->(postsandconnects)
       optional match (tag)-[:`${ Dimensionizes.startRelationType }`]->(dim:`${ Dimensionizes.label }`)-[:`${ Dimensionizes.endRelationType }`]->(postsandconnects)
       optional match (dim)<-[nodetagvoteup:${ Votes.relationType }]-() where nodetagvoteup.weight = 1
       optional match (dim)<-[nodetagvotedown:${ Votes.relationType }]-() where nodetagvotedown.weight = -1
-      with cat, count(nodetagvoteup.weight) as up, count(nodetagvotedown.weight) as down
-      return cat.uuid, ((up + 5.0)/(up + down + 10.0)) as weight
+      with tags, count(nodetagvoteup.weight) as up, count(nodetagvotedown.weight) as down
+      return tags.uuid, ((up + 5.0)/(up + down + 10.0)) as weight
     """
 
     val params = focusNode.parameterMap
@@ -265,12 +265,14 @@ object Database {
     val component = Discourse(componentRawGraph)
     val tagweights = db.queryTable(Query(tagWeightQuery, params))
 
-    // write tag weights into tags-hyperrelations
-    for(tagweight <- tagweights.rows) {
-      val catId = tagweight("cat.uuid").asInstanceOf[StringPropertyValue].value
-      val weight = tagweight("weight").asInstanceOf[DoublePropertyValue].value
-      val tags = component.tags.find(_.uuid == catId).get
-      tags.rawItem.properties("weight") = weight
+    // build hashmap weights: Map tags-hyperrelation.uuid -> weight
+    val weights = tagweights.rows.map { tagweight =>
+      tagweight("tags.uuid").asString -> tagweight("weight").asInstanceOf[DoublePropertyValue]
+    }.toMap
+
+    // write weights in to tags-hyperrelations
+    for(tags <- component.tags) {
+      tags.rawItem.properties("weight") = weights.getOrElse(tags.uuid, defaultTagWeight)
     }
 
     component

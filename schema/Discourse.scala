@@ -142,6 +142,6 @@ object WustSchema {
           WHERE NOT (()-[:CONNECTABLETOCONNECTS]->(c) AND (c)-[:CONNECTSTOCONNECTABLE]->())
           OPTIONAL MATCH (c)-[r]-()
           DELETE c,r
-          RETURN COUNT(c)""").rows.head.cells.head.asInstanceOf[LongPropertyValue].value > 0) {}
+          RETURN COUNT(c)""").rows.head.cells.head.asLong > 0) {}
   }
 }

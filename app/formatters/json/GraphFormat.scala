@@ -43,7 +43,7 @@ object GraphFormat {
       def writes(cat: Tags) = {
         // the same as tagWrites but with voting weight
         val tag: TagLike = cat.startNodeOpt.get
-        val weight: Double = cat.rawItem.properties.get("weight").map(_.asInstanceOf[DoublePropertyValue].value).getOrElse(Database.defaultTagWeight)
+        val weight: Double = cat.rawItem.properties("weight").asDouble
         JsObject(Seq(
           ("id", JsString(tag.uuid)),
           ("label", JsString(TagLike.label)),
