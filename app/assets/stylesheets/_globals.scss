@@ -6,16 +6,9 @@
     @return lighten(saturate($bgcolor, 10), 10);
 }
 
-$border_radius: 4px;
+$node_border: 1px solid black;
+$node_border_radius: 4px;
 
-$discourse_goal_color: #6DFFCA;
-$discourse_problem_color: #ffdc6d;
-$discourse_idea_color: #6db5ff;
-$discourse_proargument_color: #9AFF78;
-$discourse_conargument_color: #ff6d6f;
-$discourse_post_color: #D8D8D8;
-
-$discourse_node_font_color: black;
 $graph_relation_color: #666;
 $graph_relation_label_bg: white;
 

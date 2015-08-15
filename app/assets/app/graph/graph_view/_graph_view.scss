@@ -69,7 +69,7 @@
             }
 
             .fixed .hyperrelation {
-                border-radius: $border_radius;
+                border-radius: $node_border_radius;
                 @include box-shadow(0 0 0 7px #9A9A9A);
             }
 

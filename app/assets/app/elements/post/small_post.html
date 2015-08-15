@@ -1,4 +1,4 @@
-<span class="small_post_directive node discourse_post" colored-tag="vm.node.tags[0]">
+<span class="small_post_directive node" colored-tag="vm.node.tags[0]">
     <a ui-sref="focus({id: vm.node.id})" ui-draggable="vm.valid" drag="vm.node.encode ? vm.node.encode() : vm.node" drag-channel="{{vm.node.id === undefined ? 'create_connect' : 'connect'}}" ng-bind="vm.node.title"></a>
     <div class="tag_circle_container">
     <div ng-repeat="tag in vm.node.tags" class="tag_circle_title" data-title="{{tag.title}}" bs-tooltip animation="">

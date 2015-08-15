@@ -248,6 +248,7 @@ object Database {
     defaultTagWeight = 0.5 // == p
     // IMPORTANT: we need to write the constancts as doubles to avoid integer arithmetic
 
+    //TODO: only get the tags with votes, the rest will get default values anyways
     val tagWeightQuery = s"""
       match ${ focusNode.toQuery }
       match (${ focusNode.name })-[:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(postsandconnects) where (postsandconnects:`${ Post.label }`) or (postsandconnects:`${ Connects.label }`)

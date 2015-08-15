@@ -183,7 +183,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     .append("div").attr("class", d => "nodeframe" + (d.isHyperRelation ? " nodeframe-hyperrelation" : ""));
 
                 this.d3Node = this.d3NodeContainerWithData.append("div")
-                .attr("class", d => d.isHyperRelation ? "hyperrelation" : `node discourse_post`)
+                .attr("class", d => d.isHyperRelation ? "hyperrelation" : "node")
                 .style("background-color", n => (n.tags.length > 0 && !n.isHyperRelation) ? Helpers.hashToHslBackground(n.tags[0]) : undefined)
                 .style("border-color", n => n.tags.length > 0 ? Helpers.hashToHslBorder(n.tags[0]) : undefined);
 

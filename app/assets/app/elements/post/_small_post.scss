@@ -2,6 +2,14 @@
     .node {
         max-width: 75%;
         word-wrap: break-word;
+        display: inline-block;
+        border: $node_border;
+        border-radius: $node_border_radius;
+        padding: 1px 7px 1px 7px;
+        text-decoration: none;
+        a:hover, .btn:hover, .panel a:hover .panel-heading {
+            text-decoration: none;
+        }
     }
     .tag_circle_container {
         display: inline-block;
