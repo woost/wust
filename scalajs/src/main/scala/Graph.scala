@@ -79,13 +79,10 @@ sealed trait NodeDelegates extends NodeLike {
   def tags_=(newTags: js.Array[js.Object]) = rawNode.tags = newTags
 
   def description = rawNode.description
-  def description_=(newDescription: Option[String]) = { rawNode.description = newDescription }
-
-  //FIXME: set does not work
+  @JSExport
+  def description_=(newDescription: js.UndefOr[String]) = rawNode.description = newDescription.toOption
   @JSExport("description")
   def descriptionJs = description.orUndefined
-  @JSExport("description_=")
-  def descriptionJs_=(newDescription: js.UndefOr[String]) = { description = newDescription.toOption }
 
   @JSExport def startId = rawNode.startId.get
   @JSExport def endId = rawNode.endId.get
