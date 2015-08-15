@@ -135,7 +135,7 @@ trait NodeBase extends NodeDelegates {
 
 @JSExport
 class Node(val rawNode: RawNode) extends NodeBase {
-  @JSExport def encode() = js.Dynamic.literal(id = id, label = label, title = title, description = description.orUndefined, timestamp = timestamp)
+  @JSExport def encode() = js.Dynamic.literal(id = id, label = label, title = title, description = description.orUndefined, timestamp = timestamp, isHyperRelation = isHyperRelation)
 }
 
 sealed trait RelationLike {
@@ -240,7 +240,7 @@ case class HyperRelation(rawNode: RawNode) extends NodeBase with RelationLike {
   @JSExport def source = startNode
   @JSExport def target = endNode
 
-  @JSExport def encode() = js.Dynamic.literal(id = id, label = label, title = title, description.orUndefined, startId = startId, endId = endId)
+  @JSExport def encode() = js.Dynamic.literal(id = id, label = label, title = title, description.orUndefined, startId = startId, endId = endId, isHyperRelation = isHyperRelation)
 }
 
 object Node {
