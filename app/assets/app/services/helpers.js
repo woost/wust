@@ -35,15 +35,22 @@ function hashCode(string) {
 }
 
 function hashToHslBorder(tag) {
+    if(tag.color === -1) return "hsl(0, 0%, 45%)";
     return hashToHsl(tag, 40, 45);
 }
 
 function hashToHslBackground(tag) {
+    if(tag.color === -1) return "hsl(0, 0%, 98%)";
     return hashToHsl(tag, 90, 95);
 }
 
 function hashToHslFill(tag) {
+    if(tag.color === -1) return "hsl(0, 0%, 55%)";
     return hashToHsl(tag, 57, 55);
+}
+
+function hashToHsl(tag, saturation, brightness) {
+    return `hsl(${tag.color || Math.abs(hashCode(tag.id)) % 360}, ${saturation}%, ${brightness}%)`;
 }
 
 function sortTags(tags) {
@@ -51,10 +58,6 @@ function sortTags(tags) {
             ["isClassification", "weight"],
             ["desc","desc"]
             );
-}
-
-function hashToHsl(tag, saturation, brightness) {
-    return tag.color || `hsl(${Math.abs(hashCode(tag.id)) % 360}, ${saturation}%, ${brightness}%)`;
 }
 
 function cssCompat(original, jsSuffix, cssSuffix) {

@@ -7,8 +7,8 @@ import org.unbescape.html.HtmlEscape.unescapeHtml
 trait SeedTools {
   val maxTitleLength = 140
 
-  def mergeClassification(title: String, description: Option[String] = None) = {
-    Classification.merge(title = title, description = description, merge = Set("title"))
+  def mergeClassification(title: String, description: Option[String] = None, color:Option[Long] = None) = {
+    Classification.merge(title = title, description = description, color = color, merge = Set("title"))
   }
 
   def mergeCategorization(title: String, description: Option[String] = None) = {

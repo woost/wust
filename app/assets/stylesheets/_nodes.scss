@@ -1,11 +1,13 @@
 .node {
     display: inline-block;
-    border: 1px solid black;
+    border: 1px solid;
     border-radius: 4px;
     padding: 1px 7px 1px 7px;
     text-decoration: none;
     a:hover, .btn:hover {
         text-decoration: none;
     }
-}
 
+    border-color: hsl(0, 0%, 45%);
+    background-color: hsl(0, 0%, 98%);
+}

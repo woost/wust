@@ -16,12 +16,12 @@ object SeedInit extends Task with SeedTools {
       discourse.add(
         DummyUser.create(name = "anonymous"),
 
-        mergeClassification("Problem"),
-        mergeClassification("Goal"),
-        mergeClassification("Idea"),
-        mergeClassification("Pro"),
-        mergeClassification("Con"),
-        mergeClassification("Comment"),
+        mergeClassification("Problem", color = Some(46)),
+        mergeClassification("Goal", color = Some(158)),
+        mergeClassification("Idea", color = Some(210)),
+        mergeClassification("Pro", color = Some(105)),
+        mergeClassification("Con", color = Some(359)),
+        mergeClassification("Comment", color = Some(-1)),
         mergeClassification("StartPost"),
         mergeClassification("repliesTo")
       )

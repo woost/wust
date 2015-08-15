@@ -209,14 +209,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                         _.values(d.tags).map(t => {
                             //TODO: do it with d3 data-joins, or directly with the angular-port
                             //TODO FIXME: XSS
-                            let color;
-                            if (t.isClassification) {
-                                //TODO: display fixed specialized Tag Color
-                                color = Helpers.hashToHslFill(t);
-                            } else {
-                                color = Helpers.hashToHslFill(t);
-                            }
-                            return `<span class="label nodetag" style="background: ${color};">${t.title}</span><br>`;
+                            return `<span class="label nodetag" style="background: ${Helpers.hashToHslFill(t)};">${t.title}</span><br>`;
                         }).join("")
                     );
 

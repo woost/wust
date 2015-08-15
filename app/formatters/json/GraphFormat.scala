@@ -34,7 +34,7 @@ object GraphFormat {
         ("description", JsString(tag.description.getOrElse(""))),
         ("isVotable", JsBoolean(tag.isInstanceOf[VoteDimension])),
         ("isClassification", JsBoolean(tag.isInstanceOf[Classification])),
-        ("color", tag.color.map(JsString(_)).getOrElse(JsNull)),
+        ("color", tag.color.map(JsNumber(_)).getOrElse(JsNull)),
         ("symbol", tag.symbol.map(JsString(_)).getOrElse(JsNull))
       ))
     }
@@ -51,7 +51,7 @@ object GraphFormat {
           ("description", JsString(tag.description.getOrElse(""))),
           ("isVotable", JsBoolean(tag.isInstanceOf[VoteDimension])),
           ("isClassification", JsBoolean(tag.isInstanceOf[Classification])),
-          ("color", tag.color.map(JsString(_)).getOrElse(JsNull)),
+          ("color", tag.color.map(JsNumber(_)).getOrElse(JsNull)),
           ("symbol", tag.symbol.map(JsString(_)).getOrElse(JsNull)),
           ("weight", JsNumber(weight))
             ))

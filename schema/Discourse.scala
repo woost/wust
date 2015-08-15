@@ -113,7 +113,7 @@ object WustSchema {
     //TODO: catch db constraint error when creating new tag, and return the already existing tag.
     @unique val title: String
     var description: Option[String]
-    var color: Option[String]
+    var color: Option[Long] // Hue 0..360, -1 is gray
     var symbol: Option[String]
   }
   @Node trait Taggable extends UuidNode
