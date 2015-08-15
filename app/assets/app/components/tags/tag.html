@@ -1,6 +1,6 @@
 <div id="tag_component">
     <h2 id="tag_list_box" infinite-scroll="vm.loadMoreTags()" infinite="infiniteTags" promise="vm.tags">Tags
-        <a ng-repeat="tag in vm.tags track by tag.id" ui-sref="tags.details({id: tag.id})" class="tag" colored-tag="tag" ng-bind="tag.title"></a>
+        <a ng-repeat="tag in vm.tags track by tag.id" ui-sref="tags.details({id: tag.id})" class="tag" colored-tag-fill="tag" ng-bind="tag.title"></a>
         <div id="tag_list_more">
             <button class="btn btn-default pull-right" ng-click="infiniteTags.manualLoad()" ng-disabled="infiniteTags.loading" ng-hide="infiniteTags.noMore">More</button>
         </div>
