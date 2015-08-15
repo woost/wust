@@ -1,8 +1,6 @@
 .small_post_directive {
-    &.node {
-        max-width: 75%;
-        word-wrap: break-word;
-    }
+    max-width: 75%;
+    word-wrap: break-word;
     .tag_circle_container {
         display: inline-block;
         margin-left: 5px;
