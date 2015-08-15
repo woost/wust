@@ -69,12 +69,8 @@ function EditService(Post, HistoryService, store, DiscourseNode) {
             let model = _.pick(this, "id");
             let message = model.id === undefined ? "Added new node" : "Updated now";
 
+            let referenceNode = this.referenceNode;
             Post.$buildRaw(model).$update(dirtyModel).$then(data => {
-                //TODO should create+connect in one go...
-                if (this.referenceNode !== undefined) {
-                    connectNodes(data, this.referenceNode);
-                }
-
                 humane.success(message);
 
                 // the response only holds newly added tags
@@ -82,7 +78,12 @@ function EditService(Post, HistoryService, store, DiscourseNode) {
                 this.apply(data);
                 storeEditList();
 
-                HistoryService.updateCurrentView(this.encode());
+                //TODO should create+connect in one go...
+                if (referenceNode === undefined) {
+                    HistoryService.updateCurrentView(this.encode());
+                } else {
+                    connectNodes(this.encode(), referenceNode);
+                }
             }, () => this.setValidityProperties());
         }
 
@@ -205,6 +206,11 @@ function EditService(Post, HistoryService, store, DiscourseNode) {
         }
         ref.$save({}).$then(response => {
             humane.success("Connected node");
+            // add the infos we got from the node parameter
+            let startResponse = _.find(response.graph.nodes, _.pick(startNode, "id"));
+            _.assign(startResponse, startNode);
+            _.assign(response.node, startNode);
+
             HistoryService.addConnectToCurrentView(endNode.id, response);
         });
     }

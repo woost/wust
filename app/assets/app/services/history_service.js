@@ -27,8 +27,8 @@ function HistoryService(Post, DiscourseNode, store) {
         if (this.currentViewComponent === undefined)
             return;
 
-        let current = this.currentViewComponent.getWrap("focus");
-        let existing = _.find(current, {
+        let current = this.currentViewComponent.getWrap("graph");
+        let existing = _.find(current.nodes, {
             id: node.id
         });
         if (existing !== undefined) {
