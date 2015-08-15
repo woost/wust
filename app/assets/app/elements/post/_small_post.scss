@@ -3,10 +3,25 @@
         max-width: 75%;
         word-wrap: break-word;
     }
-    .tag_circle {
-        border-radius: 50%;
+    .tag_circle_container {
         display: inline-block;
-        width: 20px;
-        height: 20px;
+        margin-left: 5px;
+        // adjust vertical center
+        padding-bottom: 3px;
+        .tag_circle_title {
+            display: inline-block;
+            padding-left: 1px;
+            padding-right: 1px;
+
+            //vertical center
+            font-size: 0;
+            vertical-align: middle;
+            .tag_circle {
+                display: inline-block;
+                border-radius: 50%;
+                width: 12px;
+                height: 12px;
+            }
+        }
     }
 }
