@@ -1,8 +1,8 @@
 angular.module("wust.components").controller("FocusCtrl", FocusCtrl);
 
-FocusCtrl.$inject = ["$stateParams", "HistoryService", "component"];
+FocusCtrl.$inject = ["Helpers", "$stateParams", "HistoryService", "component"];
 
-function FocusCtrl($stateParams, HistoryService, component) {
+function FocusCtrl(Helpers, $stateParams, HistoryService, component) {
     let vm = this;
 
     class Tab {
@@ -37,4 +37,12 @@ function FocusCtrl($stateParams, HistoryService, component) {
     // we are viewing details about a node, so add it to the nodehistory
     HistoryService.add(vm.neighboursComponent.rootNode);
     HistoryService.currentViewComponent = component;
+
+    // keep tags sorted by weight
+    sortTagsOnGraph(vm.graphComponent);
+    vm.graphComponent.onCommit(() => sortTagsOnGraph(vm.graphComponent));
+
+    function sortTagsOnGraph(graph) {
+        graph.nodes.forEach(n => n.tags = Helpers.sortTags(n.tags));
+    }
 }

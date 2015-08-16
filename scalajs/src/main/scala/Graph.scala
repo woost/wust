@@ -476,7 +476,12 @@ class RawGraph(private[js] var nodes: Set[RawNode], private[js] var relations: S
     wrappers.values.foreach(_.rawCommit(changes))
     currentNewNodes = Set.empty[RawNode]
     currentNewRelations = Set.empty[RawRelation]
+    onCommitActions.foreach(_(changes))
   }
+
+  @JSExport
+  def onCommit(f: js.Function1[RawGraphChanges, Any]) { onCommitActions += f }
+  val onCommitActions: mutable.ArrayBuffer[Function[RawGraphChanges, Any]] = mutable.ArrayBuffer.empty
 
   //TODO: cache lookup maps/sets
   def hyperRelations = nodes.filter(_.isHyperRelation)
