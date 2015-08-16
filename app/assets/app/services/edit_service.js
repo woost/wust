@@ -1,8 +1,8 @@
 angular.module("wust.services").service("EditService", EditService);
 
-EditService.$inject = ["Post", "HistoryService", "store", "DiscourseNode"];
+EditService.$inject = ["Post", "HistoryService", "store", "DiscourseNode", "ZenService"];
 
-function EditService(Post, HistoryService, store, DiscourseNode) {
+function EditService(Post, HistoryService, store, DiscourseNode, ZenService) {
     let editStore = store.getNamespacedStore("edit");
     let self = this;
 
@@ -99,6 +99,11 @@ function EditService(Post, HistoryService, store, DiscourseNode) {
         onChange() {
             this.setValidityProperties();
             storeEditList();
+
+            //TODO: workaround, it might be the case that we have the preview with this node. but if it is not the same instance as the edit post, we will not see any changes. so we'll check here and replace the zenservice node with our node.
+            if (ZenService.visible && this.id !== undefined && ZenService.node.id === this.id && ZenService.node !== this) {
+                ZenService.show(this);
+            }
         }
 
         setValidityProperties() {
