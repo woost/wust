@@ -97,7 +97,7 @@
                 width: 100px;
                 position: absolute;
                 top: 5px;
-                right: -90px;
+                right: -90px; // overlap of 10px
                 cursor: default;
             }
             .hyperrelation .nodetags {
@@ -185,7 +185,8 @@
             .node {
                 cursor: pointer;
                 .nodecontent {
-                    max-width: 150px;
+                    max-width: 170px;
+                    padding-right: 5px;
                     word-wrap: break-word;
                 }
             }
