@@ -29,7 +29,7 @@ function editPostCtrl(DiscourseNode) {
             mode: "markdown",
             require: ["ace/ext/language_tools"],
             onLoad: onEditorLoad,
-            onBlur: onEditorBlur,
+            // onBlur: onEditorBlur,
             advanced: {
                 highlightActiveLine: false,
                 printMarginColumn: false,
