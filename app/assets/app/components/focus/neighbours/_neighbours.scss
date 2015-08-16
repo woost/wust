@@ -3,5 +3,12 @@
 #neighbours_component {
     width: 100%;
     padding: 20px;
-    text-align: center;
+    @include display-flex(flex);
+    @include justify-content(space-between);
+    @include flex-direction(rows);
+    .neighbours_box {
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        padding: 5px;
+    }
 }

@@ -3,7 +3,6 @@ angular.module("wust.elements").provider("DiscourseNodeList", DiscourseNodeList)
 DiscourseNodeList.$inject = [];
 
 function DiscourseNodeList() {
-    //TODO: move title out of discourse_node_list, should be individually set by the caller: but what about nesting?
     let nodeListDefs = {};
     this.setList = setList;
     this.$get = get;
@@ -19,11 +18,10 @@ function DiscourseNodeList() {
         const SUCCESSORS = Symbol("successors");
 
         class NodeModel {
-            constructor(component, node, connectorType, title, writable) {
+            constructor(component, node, connectorType, writable) {
                 this.component = component;
                 this.node = node;
                 this.connectorType = connectorType;
-                this.title = title;
                 this.writable = writable;
                 this.isNested = false;
                 this.nestedNodeLists = [];
@@ -89,9 +87,9 @@ function DiscourseNodeList() {
                 }
             }
 
-            nested(nodeListCreate, title, modelProperty) {
+            nested(nodeListCreate, modelProperty) {
                 this.isNested = true;
-                let nestedNodeListDef = node => nodeListCreate(this.component, node, title, modelProperty);
+                let nestedNodeListDef = node => nodeListCreate(this.component, node, modelProperty);
                 this.nestedNodeLists.push(nestedNodeListDef);
                 _.each(this.list, node => {
                     this.applyNested(node, this.getHyperRelationTo(node), nestedNodeListDef);
@@ -100,8 +98,8 @@ function DiscourseNodeList() {
         }
 
         class WriteNodeModel extends NodeModel {
-            constructor(component, node, connectorType, title, modelProperty, nodeInfo) {
-                super(component, node, connectorType, title, true);
+            constructor(component, node, connectorType, modelProperty, nodeInfo) {
+                super(component, node, connectorType, true);
                 this.modelProperty = modelProperty;
                 this.service = nodeInfo.service;
             }
@@ -174,8 +172,8 @@ function DiscourseNodeList() {
         }
 
         class ReadNodeModel extends NodeModel {
-            constructor(component, node, connectorType, title) {
-                super(component, node, connectorType, title, false);
+            constructor(component, node, connectorType) {
+                super(component, node, connectorType, false);
             }
 
             setParent() {}
@@ -186,8 +184,8 @@ function DiscourseNodeList() {
                 this.model = nodeModel;
             }
 
-            nested(nodeListCreate, title, modelProperty) {
-                this.model.nested(nodeListCreate, title, modelProperty);
+            nested(nodeListCreate, modelProperty) {
+                this.model.nested(nodeListCreate, modelProperty);
                 return this;
             }
         }
@@ -195,17 +193,17 @@ function DiscourseNodeList() {
         return {
             write: _.mapValues(nodeListDefs, (v, k) => {
                 return {
-                    predecessors: (component, node, title, modelProperty) => {
-                        return new NodeList(new WriteNodeModel(component, node, PREDECESSORS, title, modelProperty, DiscourseNode[k]));
+                    predecessors: (component, node, modelProperty) => {
+                        return new NodeList(new WriteNodeModel(component, node, PREDECESSORS, modelProperty, DiscourseNode[k]));
                     },
-                    successors: (component, node, title, modelProperty) => {
-                        return new NodeList(new WriteNodeModel(component, node, SUCCESSORS, title, modelProperty, DiscourseNode[k]));
+                    successors: (component, node, modelProperty) => {
+                        return new NodeList(new WriteNodeModel(component, node, SUCCESSORS, modelProperty, DiscourseNode[k]));
                     }
                 };
             }),
             read: {
-                predecessors: (component, node, title) => new NodeList(new ReadNodeModel(component, node, PREDECESSORS, title)),
-                successors: (component, node, title) => new NodeList(new ReadNodeModel(component, node, SUCCESSORS, title))
+                predecessors: (component, node) => new NodeList(new ReadNodeModel(component, node, PREDECESSORS)),
+                successors: (component, node) => new NodeList(new ReadNodeModel(component, node, SUCCESSORS))
             }
         };
     }

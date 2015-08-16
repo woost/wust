@@ -1,9 +1,6 @@
 @import "compass/css3/flexbox";
 
 .big_post_directive {
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    padding: 5px;
     .post_details {
         @include display-flex(flex);
         @include flex-direction(row);
