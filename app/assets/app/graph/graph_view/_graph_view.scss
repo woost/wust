@@ -88,10 +88,12 @@
                 @include box-shadow(0 5px 20px #333);
             }
             .selected .node {
-                background-color: #BCEFFF;
+                // important to override tag bg colors on post
+                background-color: #BCEFFF !important;
             }
             .selected .hyperrelation {
-                background-color: #BCEFFF;
+                // important to override tag bg colors on post
+                background-color: #BCEFFF !important;
             }
             .node .nodetags {
                 width: 100px;
