@@ -22,4 +22,14 @@ function scratchpadCtrl(EditService, LeftSideService) {
     vm.leftSide = LeftSideService;
     vm.editList = EditService.list;
     vm.edit = EditService.edit;
+    vm.editNewPost = editNewPost;
+
+    vm.newPost = {
+        title: ""
+    };
+
+    function editNewPost() {
+        EditService.edit(vm.newPost);
+        vm.newPost.title = "";
+    }
 }

@@ -183,11 +183,11 @@ function EditService(Post, HistoryService, store, DiscourseNode, ZenService) {
     }
 
     function assureSessionExists(node, index) {
-        let existingIdx;
+        let existingIdx = -1;
         if (node === undefined) {
             node = {};
             existingIdx = _.findIndex(self.list, elem => elem.isLocal && elem.isPristine);
-        } else {
+        } else if (node.id !== undefined || node.localId !== undefined) {
             let searchFor = node.id === undefined ? "localId" : "id";
             existingIdx = _.findIndex(self.list, _.pick(node, searchFor));
         }
