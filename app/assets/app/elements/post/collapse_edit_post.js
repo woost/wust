@@ -22,4 +22,10 @@ collapseEditPostCtrl.$inject = [];
 function collapseEditPostCtrl() {
     let vm = this;
 
+    vm.editableChange = editableChange;
+
+    function editableChange(data) {
+        vm.node.title = data;
+        vm.node.onChange();
+    }
 }
