@@ -7,6 +7,9 @@
     .editable-click {
         border-bottom: 1px solid #ccc;
     }
+    .editable-click.is_invalid {
+        border-bottom: 1px solid red;
+    }
     #scratch_end_drop_post_container {
         height: 50px;
     }
