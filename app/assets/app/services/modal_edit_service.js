@@ -20,9 +20,9 @@ function ModalEditService($rootScope, $modal, EditService) {
     let currentNode;
     Object.defineProperty(this, "currentNode", {
         get: () => {
-            if (currentNode === undefined || !currentNode.isLocal) {
-                currentNode = EditService.edit();
-            }
+            // if (currentNode === undefined || !currentNode.isLocal) {
+            //     currentNode = EditService.edit();
+            // }
 
             return currentNode;
         }
@@ -36,6 +36,7 @@ function ModalEditService($rootScope, $modal, EditService) {
     }
 
     function showModal() {
+        currentNode = EditService.createSession();
         modalInstance.$promise.then(modalInstance.show);
     }
 

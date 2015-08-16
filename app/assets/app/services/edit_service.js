@@ -7,13 +7,15 @@ function EditService(Post, HistoryService, store, DiscourseNode, ZenService) {
     let self = this;
 
     class Session {
-        constructor(other) {
+        constructor(other, lazyAdd = false) {
             // local id to identify nodes without an id
             this.localId = _.uniqueId();
             this.apply(other);
 
             // initally only show editor if node has description
             this.expandedEditor = !_.isEmpty(this.description);
+
+            this.lazyAdd = lazyAdd;
         }
 
         apply({
@@ -98,6 +100,12 @@ function EditService(Post, HistoryService, store, DiscourseNode, ZenService) {
 
         onChange() {
             this.setValidityProperties();
+
+            if (this.lazyAdd) {
+                this.lazyAdd = false;
+                editSession(this);
+            }
+
             storeEditList();
 
             //TODO: workaround, it might be the case that we have the preview with this node. but if it is not the same instance as the edit post, we will not see any changes. so we'll check here and replace the zenservice node with our node.
@@ -139,6 +147,7 @@ function EditService(Post, HistoryService, store, DiscourseNode, ZenService) {
 
     this.list = restoreEditList();
     this.edit = edit;
+    this.createSession = createSession;
     this.updateNode = updateNode;
     this.findNode = findNode;
     this.persist = storeEditList;
@@ -174,20 +183,21 @@ function EditService(Post, HistoryService, store, DiscourseNode, ZenService) {
     }
 
     function assureSessionExists(node, index) {
-        let existing;
+        let existingIdx;
         if (node === undefined) {
-            // fresh session
-            existing = new Session({});
+            node = {};
+            existingIdx = _.findIndex(self.list, elem => elem.isLocal && elem.isPristine);
         } else {
             let searchFor = node.id === undefined ? "localId" : "id";
-            // add existing node for editing
-            let existingIdx = _.findIndex(self.list, _.pick(node, searchFor));
-            if (existingIdx >= 0) {
-                existing = self.list[existingIdx];
-                self.list.splice(existingIdx, 1);
-            } else {
-                existing = new Session(node);
-            }
+            existingIdx = _.findIndex(self.list, _.pick(node, searchFor));
+        }
+
+        let existing;
+        if (existingIdx >= 0) {
+            existing = self.list[existingIdx];
+            self.list.splice(existingIdx, 1);
+        } else {
+            existing = new Session(node);
         }
 
         self.list.splice(index, 0, existing);
@@ -218,6 +228,14 @@ function EditService(Post, HistoryService, store, DiscourseNode, ZenService) {
 
             HistoryService.addConnectToCurrentView(endNode.id, response);
         });
+    }
+
+    function createSession() {
+        return new Session({}, true);
+    }
+
+    function editSession(session, index = 0) {
+        self.list.splice(index, 0, session);
     }
 
     function edit(node, index = 0) {
