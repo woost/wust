@@ -18,7 +18,7 @@ object ApiNodeFormat {
       def writes(cat: Tags) = {
         // the same as tagWrites but with voting weight
         val tag: TagLike = cat.startNodeOpt.get
-        val weight: Double = cat.rawItem.properties("weight").asDouble
+        val weight: Double = cat.rawItem.properties.get("weight").map(_.asDouble).getOrElse(0)
         JsObject(Seq(
           ("id", JsString(tag.uuid)),
           ("label", JsString(TagLike.label)),
