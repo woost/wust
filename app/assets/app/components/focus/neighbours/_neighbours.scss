@@ -6,9 +6,27 @@
     @include display-flex(flex);
     @include justify-content(space-between);
     @include flex-direction(rows);
-    .neighbours_box {
-        border: 1px solid #ccc;
-        border-radius: 10px;
-        padding: 5px;
+    @include align-items(flex-start);
+    .neighbours_attachedto {
+        width: 20%;
+        max-width: 20%;
+        min-width: 200px;
+        // @include flex-grow(1);
+        // background: red;
     }
+    .neighbours_content {
+        width: 60%;
+        max-width: 60%;
+        min-width: 600px;
+        // @include flex-grow(3);
+        // background: green;
+    }
+    .neighbours_followers {
+        width: 20%;
+        max-width: 20%;
+        min-width: 200px;
+        // @include flex-grow(1);
+        // background: blue;
+    }
+
 }

@@ -1,21 +1,24 @@
 @import "compass/css3/flexbox";
 
 .big_post_directive {
-    .post_details {
-        @include display-flex(flex);
-        @include flex-direction(row);
-        .post_description {
-            width: 70%;
-            .taglist {
-                width: 100%;
-            }
-        }
-        .taglist {
-            width: 30%;
-        }
+    border: 1px solid;
+    border-radius: 4px;
+    padding: 15px;
+    h2 {
+        padding-top: 0px;
+        padding-bottom: 0px;
+    }
+    .timestamp {
+        padding-bottom: 15px;
+    }
+    .post_description {
+        padding-top: 15px;
+        width: 95%;
+    }
+    .taglist {
+        width: 100%;
     }
     .post_stats {
-        text-align: right;
         color: #aaa;
     }
 }
