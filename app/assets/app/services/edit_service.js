@@ -46,8 +46,13 @@ function EditService(Post, HistoryService, store, DiscourseNode, ZenService) {
         }
 
         //TODO: we should rewrite the whole logic here, it is weird and hacky, but it works so i leave it as is :)
-        dirtyModel() {
-            let dirtyModel = _.omit(_.pick(this, _.keys(this.original)), (v, k) => this.original[k] === v);
+        dirtyModel(saveModel = false) {
+            let dirtyModel;
+            if (saveModel && this.id === undefined)
+                dirtyModel = _.omit(_.pick(this, _.keys(this.original)), v => _.isEmpty(v));
+            else
+                dirtyModel = _.omit(_.pick(this, _.keys(this.original)), (v, k) => this.original[k] === v);
+
             delete dirtyModel.tags;
             let addedTags = _.reject(this.tags, t => t.id && _.any(this.original.tags, _.pick(t, "id"))).map(t => t.id ? _.pick(t, "id") : _.pick(t, "title"));
             let removedTags = _.reject(this.original.tags, t => !t.id || _.any(this.tags, _.pick(t, "id"))).map(t => t.id);
@@ -61,7 +66,7 @@ function EditService(Post, HistoryService, store, DiscourseNode, ZenService) {
         }
 
         save() {
-            let dirtyModel = this.dirtyModel();
+            let dirtyModel = this.dirtyModel(true);
             if (!this.canSave)
                 return;
 
@@ -117,9 +122,9 @@ function EditService(Post, HistoryService, store, DiscourseNode, ZenService) {
         setValidityProperties() {
             let dirtyModel = this.dirtyModel();
             this.isPristine = _.isEmpty(dirtyModel);
-            this.isValid = !_.isEmpty(this.title);
-            this.canSave = this.isValid && !this.isPristine;
             this.isLocal = this.id === undefined;
+            this.isValid = !_.isEmpty(this.title);
+            this.canSave = this.isValid && (this.isLocal || !this.isPristine);
         }
 
         unsetValidityProperties() {

@@ -1,5 +1,5 @@
 <div class="modal_edit modal">
-    <div class="modal-dialog">
+    <form class="wust_form modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h3 class="modal-title">Post</h3>
@@ -12,7 +12,7 @@
                 <div ng-switch-when="true" preview node="vm.node" class="panel panel-default"></div>
                 <div ng-switch-default class="panel panel-default">
                     <div class="panel-heading">
-                        <input type="text" class="form-control" ng-model="vm.node.title" ng-change="vm.node.onChange()" placeholder="TL,DR">
+                        <input type="text" class="form-control" ng-model="vm.node.title" ng-change="vm.node.onChange()" placeholder="TL,DR" required>
                     </div>
                     <div class="panel-body">
                         <div edit-post node="vm.node"></div>
@@ -20,10 +20,10 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="pull-left btn btn-default" style='cursor:pointer' ng-click='vm.previewEnabled = !vm.previewEnabled' data-title='distraction free writing' bs-tooltip animation=''><i class="fa" ng-class="{'fa-eye-slash': vm.previewEnabled, 'fa-eye': !vm.previewEnabled}"></i></button>
+                <button class="pull-left btn btn-default" style='cursor:pointer' ng-click='vm.previewEnabled = !vm.previewEnabled' data-title='distraction free writing' bs-tooltip animation=''><i class="fa" ng-class="{'fa-eye-slash': !vm.previewEnabled, 'fa-eye': vm.previewEnabled}"></i></button>
                 <button class="btn btn-default" ng-click="$hide()">Close</button>
-                <button class="btn btn-success" ng-click="vm.save();$hide()" ng-disabled="!vm.node.canSave"><i class="fa fa-paper-plane-o"></i></button>
+                <button class="btn btn-success" type="submit" ng-click="vm.save();$hide()" ng-disabled="!vm.node.canSave"><i class="fa fa-paper-plane-o"></i></button>
             </div>
         </div>
-    </div>
+    </form>
 </div>
