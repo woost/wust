@@ -10,7 +10,7 @@
             padding: 6px;
             @include display-flex(flex);
             @include flex-wrap(wrap);
-            @include justify-content(center);
+            @include justify-content(left);
         }
     }
 }
