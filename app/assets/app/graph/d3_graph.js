@@ -189,7 +189,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
                 this.d3Node
                     .append("div").attr("class", "nodecontent")
-                    .text(d => (d.isHyperRelation && d.tags.length > 0) ? "" : d.title);
+                    .text(d => (d.isHyperRelation) ? "" : d.title);
 
                 // add relations
                 this.d3RelationPathWithData.enter()
