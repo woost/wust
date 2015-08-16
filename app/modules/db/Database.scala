@@ -210,15 +210,20 @@ object Database {
     }
   }
 
-  val tagweight_p = 0.5
+  // from paper:
+  // 2011 User-Rating based Ranking of Items from an Axiomatic Perspective
+  // Dirichlet Prior Smoothing: (up + u*p) / (down + up + u)
+  // p: probability for an upvote (needs to be calculated from all votes in the system, I set this to 0.5)
+  // u: influence of our prior (I set this to 10)
+  // IMPORTANT: we need to write the constancts as doubles to avoid integer arithmetic
+
+  val tagweight_p = 0.5 // this is also the default weight, if we have up=0 and down=0
   val tagweight_u = 10
   def tagweight(up:String, down:String) = s"(($up + ${tagweight_p*tagweight_u})/($up + $down + $tagweight_u))"
   def connectedComponent(focusNode: UuidNodeDefinition[_], depth: Int = 5): Discourse = {
     // Tag weights
     // 1. Cypher does not support subqueries yet, so we have to do extra queries for the tag weights.
     // This is not very efficient, because the component is traversed in each query.
-    // We also cannot union :POST and :CONNECTS to take care of both tags at the same time.
-    // https://github.com/neo4j/neo4j/issues/2725
     //
     // 2. As we are calculating a new value in the query (the tag weight), and cypher does not support something like
     // "implicit properties", we have to use a table.
@@ -232,7 +237,6 @@ object Database {
 
     // query undirected connected component of posts with maximum depth
     // depth * 2 because hyperrelation depth
-    // TODO: postandconnects: CONNECTABLE instead of POST or CONNECTS
     val query = s"""
       match ${ focusNode.toQuery }
       match (${ focusNode.name })-[rel:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(postsandconnects:${Connectable.label})
@@ -243,20 +247,13 @@ object Database {
 
 
     // query for getting the weight per post per tag:
-    // from paper:
-    // 2011 User-Rating based Ranking of Items from an Axiomatic Perspective
-    // Dirichlet Prior Smoothing: (up + u*p) / (down + up + u)
-    // p: probability for an upvote (needs to be calculated from all votes in the system, I set this to 0.5)
-    // u: influence of our prior (I set this to 10)
-    // IMPORTANT: we need to write the constancts as doubles to avoid integer arithmetic
-
-    //TODO: only get the tags with votes, the rest will get default values anyways
+    // only returns weights when voted
     val tagWeightQuery = s"""
       match ${ focusNode.toQuery }
       match (${ focusNode.name })-[:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(postsandconnects:${Connectable.label})
       with distinct postsandconnects
       match (tag:`${ TagLike.label }`)-[:`${ Tags.startRelationType }`]->(tags:`${ Tags.label }`)-[:`${ Tags.endRelationType }`]->(postsandconnects)
-      optional match (tag)-[:`${ Dimensionizes.startRelationType }`]->(dim:`${ Dimensionizes.label }`)-[:`${ Dimensionizes.endRelationType }`]->(postsandconnects)
+      match (tag)-[:`${ Dimensionizes.startRelationType }`]->(dim:`${ Dimensionizes.label }`)-[:`${ Dimensionizes.endRelationType }`]->(postsandconnects)
       optional match (dim)<-[nodetagvoteup:${ Votes.relationType }]-() where nodetagvoteup.weight = 1
       optional match (dim)<-[nodetagvotedown:${ Votes.relationType }]-() where nodetagvotedown.weight = -1
       with tags, count(nodetagvoteup.weight) as up, count(nodetagvotedown.weight) as down

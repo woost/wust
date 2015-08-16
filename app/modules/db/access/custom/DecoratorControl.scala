@@ -64,10 +64,10 @@ class TaggedTaggable[NODE <: UuidNode] extends AccessNodeDecoratorControl[NODE] 
       val votesUpDef = RelationDefinition(userUpDef, Votes, dimDef)
       val userDownDef = ConcreteFactoryNodeDefinition(User)
       val votesDownDef = RelationDefinition(userDownDef, Votes, dimDef)
-      //TODO: only get the tags with votes, the rest will get default values anyways
+
       val tagWeightQuery = s"""
       match ${tagsDef.toQuery} where ${nodeDef.name}.uuid in {nodeUuids}
-      optional match ${dimDef.toQuery(false, false)}
+      match ${dimDef.toQuery(false, false)}
       optional match ${votesDownDef.toQuery(true, false)} where ${votesDownDef.name}.weight = -1
       optional match ${votesUpDef.toQuery(true, false)} where ${votesUpDef.name}.weight = 1
       with ${tagDef.name}, count(${votesUpDef.name}.weight) as up, count(${votesDownDef.name}.weight) as down
