@@ -28,12 +28,15 @@ function HistoryService(Post, DiscourseNode, store) {
             return;
 
         let current = this.currentViewComponent.getWrap("graph");
-        let existing = _.find(current.nodes, {
-            id: node.id
-        });
+        let existing = _.find(current.nodes, _.pick(node, "id"));
         if (existing !== undefined) {
             _.assign(existing, node);
             current.commit();
+        }
+
+        let existingVisit = _.find(self.visited, _.pick(node, "id"));
+        if (existingVisit !== undefined) {
+            _.assign(existingVisit, node);
         }
     }
 
