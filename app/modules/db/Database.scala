@@ -235,7 +235,7 @@ object Database {
     // TODO: postandconnects: CONNECTABLE instead of POST or CONNECTS
     val query = s"""
       match ${ focusNode.toQuery }
-      match (${ focusNode.name })-[rel:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(postsandconnects) where (postsandconnects:`${ Post.label }`) or (postsandconnects:`${ Connects.label }`)
+      match (${ focusNode.name })-[rel:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(postsandconnects:${Connectable.label})
       with distinct postsandconnects, rel
       optional match (tag:`${ TagLike.label }`)-[tagtocat:`${ Tags.startRelationType }`]->(cat:`${ Tags.label }`)-[cattotaggable:`${ Tags.endRelationType }`]->(postsandconnects)
       return postsandconnects,rel,tag,cat,tagtocat,cattotaggable
@@ -253,7 +253,7 @@ object Database {
     //TODO: only get the tags with votes, the rest will get default values anyways
     val tagWeightQuery = s"""
       match ${ focusNode.toQuery }
-      match (${ focusNode.name })-[:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(postsandconnects) where (postsandconnects:`${ Post.label }`) or (postsandconnects:`${ Connects.label }`)
+      match (${ focusNode.name })-[:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(postsandconnects:${Connectable.label})
       with distinct postsandconnects
       match (tag:`${ TagLike.label }`)-[:`${ Tags.startRelationType }`]->(tags:`${ Tags.label }`)-[:`${ Tags.endRelationType }`]->(postsandconnects)
       optional match (tag)-[:`${ Dimensionizes.startRelationType }`]->(dim:`${ Dimensionizes.label }`)-[:`${ Dimensionizes.endRelationType }`]->(postsandconnects)
