@@ -7,7 +7,7 @@
             </span>
             <input type="text" class="tag-input" placeholder="Add Tags" ng-focus="focus = true" ng-blur="focus = false" focus-me="setFocus" ng-model="search"/>
         </div>
-        <div class="tag-suggestions" ng-show="suggestions && focus">
+        <div class="tag-suggestions" ng-show="suggestions">
             <span class="title">Suggestions:</span>
             <span class="tag" ng-repeat="tag in suggestions track by tag.id" colored-tag-fill="tag" ng-mousedown="add(tag)" ng-bind="tag.title"></span>
         </div>
