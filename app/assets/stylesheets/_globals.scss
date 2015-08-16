@@ -6,6 +6,8 @@
     @return lighten(saturate($bgcolor, 10), 10);
 }
 
+$graph_relation_color: #666;
+
 $dashboard_recent_header_border: #6db5ff;
 
 //TODO: use bootstrap variables
