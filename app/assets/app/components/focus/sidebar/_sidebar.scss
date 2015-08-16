@@ -5,6 +5,9 @@
     right: 0px;
     top: 50px;
     z-index: $zindex_sidebar;
+    .node {
+        max-width: 200px;
+    }
     #sidebar_toggle {
     }
     #sidebar_content {
