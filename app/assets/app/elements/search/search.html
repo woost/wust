@@ -17,24 +17,27 @@
             <div edit-taglist tags="vm.search.selectedTags" class="row edit_tags" existing-only="true" on-change="vm.search.triggerSearch()"></div>
             <div id="search_options_bottom">
                 <div ng-show="vm.infinite.noMore" class="row">
-                    <label class="col-md-5">#Results</label>
-                    <span class="col-md-7">{{vm.search.results.length}}</span>
+                    <label class="col-md-4">#Results</label>
+                    <span class="col-md-6">{{vm.search.results.length}}</span>
                 </div>
                 <div ng-class="{inactive: vm.search.unlimited}">
                     <div class="row">
-                        <label class="col-md-5">Page</label>
-                        <span class="number_value col-md-7">{{vm.infinite.currentPage}} / {{vm.infinite.maxPage == -1 ? vm.search.page + '…' : vm.infinite.maxPage}}</span>
+                        <label class="col-md-4">Page</label>
+                        <span class="number_value col-md-6">{{vm.infinite.currentPage}} / {{vm.infinite.maxPage == -1 ? vm.search.page + '…' : vm.infinite.maxPage}}</span>
                     </div>
                     <div class="row">
-                        <span class="label_like col-md-5">Size</span>
-                        <span class="col-md-7">
+                        <span class="label_like col-md-4">Size</span>
+                        <span class="col-md-6">
                             <input type="number" class="input" min="1" max="500" ng-model="vm.search.size" ng-change="vm.search.triggerSearch()" ng-disabled="vm.search.unlimited">
                         </span>
                     </div>
                 </div>
+                <!-- <div class="row"> -->
+                <!--     <span class="label_like col-md-6">Unlimited</span> -->
+                <!--     <span switch class="col-md-6" ng-model="vm.search.unlimited" ng-change="vm.search.triggerSearch()"></span> -->
+                <!-- </div> -->
                 <div class="row">
-                    <span class="label_like col-md-6">Unlimited</span>
-                    <span switch class="col-md-5" ng-model="vm.search.unlimited" ng-change="vm.search.triggerSearch()"></span>
+                    <button class="all_results pull-right btn btn-default" ng-click="vm.infinite.manualLoad(true)" ng-disabled="vm.infinite.loading || vm.infinite.noMore">All results</button>
                 </div>
             </div>
         </div>

@@ -41,7 +41,7 @@ function infiniteScroll($rootScope) {
             scope.$apply();
         });
 
-        function callLoader(height) {
+        function callLoader(height, recurse = false) {
             scope.infinite.loading = true;
             let result = scope.infiniteScroll();
             if (result) {
@@ -58,6 +58,8 @@ function infiniteScroll($rootScope) {
 
                     if (scope.infinite.noMore) {
                         scope.infinite.maxPage = pageInfos.length - 1;
+                    } else if (recurse) {
+                        callLoader(height, recurse);
                     }
                 }, () => scope.infinite.loading = false);
             } else {
@@ -103,12 +105,12 @@ function infiniteScroll($rootScope) {
                 addPage(targetElement.scrollTop);
         }
 
-        function manualLoad() {
+        function manualLoad(all = false) {
             if (scope.infinite.noMore || scope.infinite.loading)
                 return;
 
             assurePageInfo();
-            callLoader(targetElement.scrollHeight);
+            callLoader(targetElement.scrollHeight, all);
         }
 
         function setPage(pos) {
