@@ -28,12 +28,33 @@ case class Line(
   @JSExport def x2 = end.x
   @JSExport def y2 = end.y
 
+  @JSExport def vector = end - start
+
   @JSExport def isInside(r:Rect) = (start isInside r) && (end isInside r)
 
-  def intersect(that:Line):Option[Algorithms.LineIntersection] = Algorithms.intersection(this, that)
-  def intersectFirst(r:Rect):Either[Boolean,Vec2] = Algorithms.firstIntersection(r, this)
+  def intersect(that:Line):Option[Algorithms.LineIntersection] = Algorithms.intersect(this, that)
+  def intersect(r:Rect):Either[Boolean,Seq[Vec2]] = Algorithms.intersect(r, this)
+  def cutBy(r:Rect):Option[Line] = Algorithms.cutLineByRectAtStartOrEnd(this, r)
+  @JSExport("cutBy") def cutBy_js(r:Rect):js.UndefOr[Line] = cutBy(r).orUndefined
   def clampBy(r:Rect):Option[Line] = Algorithms.clampLineByRect(this, r)
   @JSExport("clampBy") def clampBy_js(r:Rect):js.UndefOr[Line] = clampBy(r).orUndefined
+
+  @JSExport def length = {
+    val dx = start.x - end.x
+    val dy = start.y - end.y
+    Math.sqrt(dx * dx + dy * dy)
+  }
+
+  def canEqual(other: Any): Boolean = other.isInstanceOf[Line]
+
+  override def equals(other: Any): Boolean = other match {
+    case that: Line => (that canEqual this) &&
+      (this.start == that.start && this.end == that.end) ||
+      (this.start == that.end && this.end == that.start)
+    case _             => false
+  }
+
+  override def hashCode = start.hashCode * end.hashCode // multiply to be commutative
 }
 
 @JSExport
@@ -68,12 +89,17 @@ case class Rect(
     Line(corners(3), corners(0))
   )
 
-  def intersectFirst(that:Line) = Algorithms.firstIntersection(this, that)
+  def intersect(that:Line) = Algorithms.intersect(this, that)
+
+  def isOverlapping(that:Rect) = {
+    ((this.x < that.x + that.width) && (this.x + this.width > that.x)) &&
+    ((this.y < that.y + that.width) && (this.y + this.width > that.y))
+  }
 }
 
 object Algorithms {
   case class LineIntersection(pos:Vec2, onLine1:Boolean, onLine2:Boolean)
-  def intersection(line1: Line, line2: Line):Option[LineIntersection] = {
+  def intersect(line1: Line, line2: Line):Option[LineIntersection] = {
     // if the lines intersect, the result contains the x and y of the intersection
     // (treating the lines as infinite) and booleans for
     // whether line segment 1 or line segment 2 contain the point
@@ -113,29 +139,52 @@ object Algorithms {
    return Some(LineIntersection(Vec2(resultX, resultY), resultOnLine1, resultOnLine2))
   }
 
-  def firstIntersection(rect:Rect, line:Line):Either[Boolean,Vec2] = {
+  def intersect(rect:Rect, line:Line):Either[Boolean,Seq[Vec2]] = {
     // Left(true) => line is completely inside
     // Left(fals) => line is completely outside
     // Right(pos) => one intersection point
-    for(edge <- rect.edges) {
-      (line intersect edge).foreach{ i => if(i.onLine1 && i.onLine2) return Right(i.pos) }
+    val intersections = rect.edges.flatMap { edge =>
+      (line intersect edge).filter( i => i.onLine1 && i.onLine2 ).map(_.pos)
     }
 
-    return Left(line isInside rect)
+    if( intersections.nonEmpty )
+      Right(intersections)
+    else Left(line isInside rect)
   }
 
-  def clampLineByRect(line:Line, rect:Rect):Option[Line] = {
+  def cutLineByRectAtStartOrEnd(line:Line, rect:Rect):Option[Line] = {
     // Assuming there is only one intersection.
     // Which means that one line end is inside the rect,
     // the other one outside.
     // If there are two intersections the resulting line
     // can be wrong
-    firstIntersection(rect, line) match {
-      case Left(true) => None
-      case Left(false) => Some(line)
-      case Right(intersection) =>
-        if(line.end isInside rect) Some(Line(line.start, intersection))
-        else Some(Line(intersection, line.end))
+    intersect(rect, line) match {
+      case Left(true) => None // line inside
+      case Left(false) => Some(line) // line outside
+      case Right(intersections) =>
+        // with the assumption that the rect covers one line end,
+        // we have exactly one intersection
+        if(line.end isInside rect)
+          Some(Line(line.start, intersections.head))
+        else
+          Some(Line(intersections.head, line.end))
     }
+  }
+
+  def clampLineByRect(line:Line, rect:Rect):Option[Line] = {
+    (line.start isInside rect, line.end isInside rect) match {
+      case (true, true) => Some(line)
+      case (true, false) => Some(Line(line.start, intersect(rect, line).right.get.head))
+      case (false, true) => Some(Line(intersect(rect, line).right.get.head, line.end))
+      case (false, false) =>
+        intersect(rect, line) match {
+          case Left(_) => None
+          case Right(intersections) =>
+            // rectangle is convex, line endpoints lie outside,
+            // so we have exactly two intersections
+            Some(Line(intersections(0), intersections(1)))
+        }
+    }
+
   }
 }

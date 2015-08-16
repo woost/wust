@@ -53,9 +53,9 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     .size([this.width, this.height])
                     .nodes(graph.nodes)
                     .links(graph.relations)
-                    .linkStrength(0.9) // rigidity
+                    .linkStrength(0.0) // rigidity, 0, because we handle this ourselves in tick()
                     .friction(0.92)
-                    .linkDistance(100) // weak geometric constraint. Pushes nodes to achieve this distance
+                    .linkDistance(50) // weak geometric constraint. Pushes nodes to achieve this distance
                     .charge(-1300)
                     .chargeDistance(1000)
                     .gravity(0.01)
@@ -456,6 +456,14 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.d3SvgContainer.classed({
                     "converged": true
                 });
+            } else {
+                // make sure we have the correct rect sizes for every node.
+                // we need this for our custom link length calculation in tick().
+
+                // give dimensions to svg and html container
+                // (important for node size calculation
+                this.resizeContainers();
+                this.recalculateNodeDimensions(this.graph.nodes);
             }
 
         }
@@ -516,9 +524,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             });
         }
 
-        // tick function, called in each step in the force calculation,
-        // maps elements to positions
-        tick(e) {
+        straightenHyperRelations(e) {
             // push hypernodes towards the center between its start/end node
             let pullStrength = e.alpha * this.hyperRelationAlignForce;
             this.graph.hyperRelations.forEach(node => {
@@ -549,13 +555,85 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     }
                 }
             });
+        }
 
+        applyVerticalNodeForce(e) {
             // pull nodes with more more children up
             this.graph.nonHyperRelationNodes.forEach(node => {
                 if (node.fixed !== true) {
                     node.y += (node.verticalForce - this.graph.nonHyperRelationNodes.length / 2) * e.alpha * this.nodeVerticalForceFactor;
                 }
             });
+        }
+
+        cutLineLength(relation) {
+            let line = this.relationLine(relation);
+            let source = relation.source;
+            let target = relation.target;
+            let sourceRect = this.nodeRect(source);
+            let targetRect = this.nodeRect(target);
+
+            let cut = this.cutByRects(line, sourceRect, targetRect);
+            if(cut) {
+                return [cut, cut.length];
+            } else {
+                // when cut is not defined, the nodes are overlapping.
+                // clamped is the line that is covered by the intersection of the nodes
+                // the length is negative to push the nodes away from each other
+                let clamped = line.clampBy(sourceRect).clampBy(targetRect);
+                return [clamped, -clamped.length];
+            }
+        }
+
+        constantEdgeLength(e) {
+            // maintain a constant edge length
+            // this.force.linkStrength is set to zero, to disable default d3 calculations.
+            // we do that ourselves, because we have rectangles instead of circles.
+            // if the distance only depends on the center of the rectangles,
+            // the distances are not correct after clamping.
+            this.graph.relations.forEach (relation => {
+                // cut every relation line to the intersections with its incident node rectangles
+
+                let source = relation.source;
+                let target = relation.target;
+                // gauss-seidel relaxation for links
+                // https://github.com/mbostock/d3/blob/78e0a4bb81a6565bf61e3ef1b898ef8377478766/src/layout/force.js#L77
+                let shouldDistance = this.force.linkDistance();
+                let [currentLine, currentDistance] = this.cutLineLength(relation); // can be negative
+                console.log(Math.round(currentDistance));
+
+                if( currentDistance > 0 )
+                    relation.line = currentLine;
+                else
+                    relation.line = undefined;
+
+                let vector = currentLine.vector;
+
+                // x/y distance
+                let x = vector.x;
+                let y = vector.y;
+
+                let alpha = this.force.alpha();
+                let strength = 0.99; // originally this.force.linkStrength
+
+                let currentForceDirection = alpha * strength * (currentDistance - shouldDistance) / currentDistance;
+                x *= currentForceDirection;
+                y *= currentForceDirection;
+                let currentForce = source.weight / (target.weight + source.weight);
+                target.x -= x * currentForce;
+                target.y -= y * currentForce;
+                currentForce = 1 - currentForce;
+                source.x += x * currentForce;
+                source.y += y * currentForce;
+            });
+        }
+
+        // tick function, called in each step in the force calculation,
+        // applies all kinds of additional forces
+        tick(e) {
+            this.straightenHyperRelations(e);
+            this.applyVerticalNodeForce(e);
+            this.constantEdgeLength(e);
 
             if (this.drawOnTick)
                 this.drawGraph();
@@ -582,20 +660,23 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     ).centered;
         }
 
-        drawRelations() {
-            this.graph.relations.forEach((relation) => {
-                // clamp every relation line to the intersections with its incident node rectangles
-                let line = this.relationLine(relation);
-                line = line.clampBy(this.nodeRect(relation.source));
-                line = line ? line.clampBy(this.nodeRect(relation.target)) : undefined;
+        cutByRects(line, rect1, rect2) {
+            let cut = line.cutBy(rect1);
+            cut = cut ? cut.cutBy(rect2) : undefined;
+            return cut;
+        }
 
-                if( line !== undefined ) {
-                    if (isNaN(line.x1) || isNaN(line.y1) || isNaN(line.x2) || isNaN(line.y2))
-                        console.warn("invalid coordinates for relation");
-                    else {
-                        let pathAttr = `M ${line.x1} ${line.y1} L ${line.x2} ${line.y2}`;
-                        relation.domPath.setAttribute("d", pathAttr);
-                    }
+        drawRelations() {
+            this.graph.relations.forEach(relation => {
+                let line = relation.line;
+
+                if( line === undefined ) return;
+
+                if (isNaN(line.x1) || isNaN(line.y1) || isNaN(line.x2) || isNaN(line.y2))
+                    console.warn("invalid coordinates for relation");
+                else {
+                    let pathAttr = `M ${line.x1} ${line.y1} L ${line.x2} ${line.y2}`;
+                    relation.domPath.setAttribute("d", pathAttr);
                 }
             });
         }
@@ -615,14 +696,19 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             this.d3HtmlContainer.style(this.transformCompat, "translate(" + translate[0] + "px, " + translate[1] + "px) scale(" + scale + ")");
         }
 
-        // resize graph according to the current element dimensions
-        resizeGraph(event, duration = 500) {
-            let oldWidth = this.width;
-            let oldHeight = this.height;
+        resizeContainers() {
             this.width = this.rootDomElement.offsetWidth;
             this.height = this.rootDomElement.offsetHeight;
             this.d3Svg.style("width", this.width + "px").style("height", this.height + "px");
             this.d3Html.style("width", this.width + "px").style("height", this.height + "px");
+        }
+
+        // resize graph according to the current element dimensions
+        resizeGraph(event, duration = 500) {
+            let oldWidth = this.width;
+            let oldHeight = this.height;
+
+            this.resizeContainers();
 
             // this is the first graph display,
             // so focus the rootNode
@@ -932,14 +1018,13 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
                 if(vm.state.hoveredNode) {
                     let line = geometry.Line(geometry.Vec2(endX, endY), geometry.Vec2(this.dragStartNodeX, this.dragStartNodeY));
-                    let clamped = line.clampBy(this.nodeRect(vm.state.hoveredNode));
-                    clamped = clamped ? clamped.clampBy(this.nodeRect(this.dragStartNode)) : undefined;
-                    if( clamped ) {
+                    let cut = this.cutByRects(line, this.nodeRect(vm.state.hoveredNode), this.nodeRect(this.dragStartNode));
+                    if( cut ) {
                         this.d3ConnectorLine
-                            .attr("x1", clamped.x1)
-                            .attr("y1", clamped.y1)
-                            .attr("x2", clamped.x2)
-                            .attr("y2", clamped.y2);
+                            .attr("x1", cut.x1)
+                            .attr("y1", cut.y1)
+                            .attr("x2", cut.x2)
+                            .attr("y2", cut.y2);
                     }
                     else {
                         this.d3ConnectorLine

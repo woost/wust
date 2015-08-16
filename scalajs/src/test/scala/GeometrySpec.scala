@@ -57,6 +57,29 @@ object GeometrySpec extends TestSuite {
           assert(l.x2 == 8)
           assert(l.y2 == 4)
         }
+
+        'vector {
+          val l = Line(Vec2(7,3), Vec2(8,5))
+          assert(l.vector == Vec2(1, 2))
+        }
+
+        'equals {
+          val l = Line(Vec2(7,3), Vec2(8,4))
+          val m = Line(Vec2(8,4), Vec2(7,3))
+          assert(l == l)
+          assert(l == m)
+        }
+
+        'hashCode {
+          val l = Line(Vec2(7,3), Vec2(8,4))
+          val m = Line(Vec2(8,4), Vec2(7,3))
+          assert(l.hashCode == m.hashCode)
+        }
+
+        'length {
+          val l = Line(Vec2(5, 5), Vec2(8, 9))
+          assert(l.length == 5)
+        }
       }
 
       'Rect {
@@ -109,6 +132,15 @@ object GeometrySpec extends TestSuite {
           assert((Line(Vec2(2.5,3.5), Vec2(5.5,3.5)) isInside r) == false)
           assert((Line(Vec2(4.5,3.5), Vec2(5.5,3.5)) isInside r) == false)
         }
+        'OverlappingRect {
+          val r1 = Rect(Vec2(2,3), Vec2(4,4))
+          val r2 = Rect(Vec2(1,4), Vec2(3,1))
+          val r3 = Rect(Vec2(10,10), Vec2(1,1))
+          assert(r1 isOverlapping r2)
+          assert(r2 isOverlapping r1)
+          assert(!(r1 isOverlapping r3))
+          assert(!(r3 isOverlapping r1))
+        }
       }
     }
     'Algorithms {
@@ -146,26 +178,26 @@ object GeometrySpec extends TestSuite {
         'Intersect {
           val r = Rect(Vec2(2,3), Vec2(2,1))
           val l = Line(Vec2(3,2), Vec2(3,3.5))
-          val i = (r intersectFirst l).right.get
-          val i2 = (l intersectFirst r).right.get
-          assert( i == Vec2(3, 3) )
-          assert( i2 == Vec2(3, 3) )
+          val i = (r intersect l).right.get
+          val i2 = (l intersect r).right.get
+          assert( i == Seq(Vec2(3, 3)) )
+          assert( i2 == Seq(Vec2(3, 3)) )
         }
         'NoIntersectInside {
           val r = Rect(Vec2(2,3), Vec2(2,1))
           val l = Line(Vec2(2.5,3.5), Vec2(3.5,3.5))
-          val i = (r intersectFirst l).left.get
+          val i = (r intersect l).left.get
           assert( i == true )
         }
         'NoIntersectOutside {
           val r = Rect(Vec2(2,3), Vec2(2,1))
           val l = Line(Vec2(2.5,2.5), Vec2(2.5,2.5))
-          val i = (r intersectFirst l).left.get
+          val i = (r intersect l).left.get
           assert( i == false )
         }
       }
 
-      'ClampLineByRect {
+      'CutLineByRect {
         // assuming there is only one intersection
         // which means that one line end is inside the rect
         // if there are two intersections the resulting line
@@ -173,20 +205,57 @@ object GeometrySpec extends TestSuite {
         'Intersect {
           val r = Rect(Vec2(2,3), Vec2(2,1))
           val l = Line(Vec2(3,2), Vec2(3,3.5))
-          val c = (l clampBy r).get
+          val c = (l cutBy r).get
           assert( c == Line(Vec2(3,2), Vec2(3,3)) )
         }
-        'NoClamp {
+        'NoCut {
           val r = Rect(Vec2(2,3), Vec2(2,1))
           val l = Line(Vec2(3,2), Vec2(4,2))
+          val c = (l cutBy r).get
+          assert( c == l )
+        }
+        'FullCut {
+          val r = Rect(Vec2(2,3), Vec2(2,1))
+          val l = Line(Vec2(2.5,3.5), Vec2(3.5,3.5))
+          val c = (l cutBy r)
+          assert( c == None )
+        }
+      }
+
+      'ClampLineByRect {
+        'Inside {
+          val r = Rect(Vec2(2,3), Vec2(4,4))
+          val l = Line(Vec2(3,4), Vec2(4,5))
           val c = (l clampBy r).get
           assert( c == l )
         }
-        'FullClamp {
-          val r = Rect(Vec2(2,3), Vec2(2,1))
-          val l = Line(Vec2(2.5,3.5), Vec2(3.5,3.5))
+
+        'StartOutside {
+          val r = Rect(Vec2(2,3), Vec2(4,4))
+          val l = Line(Vec2(1,4), Vec2(4,4))
+          val c = (l clampBy r).get
+          assert( c == Line(Vec2(2,4), Vec2(4,4)) )
+        }
+
+        'StartInside {
+          val r = Rect(Vec2(2,3), Vec2(4,4))
+          val l = Line(Vec2(4,4), Vec2(1,4))
+          val c = (l clampBy r).get
+          assert( c == Line(Vec2(4,4), Vec2(2,4)) )
+        }
+
+        'Outside {
+          val r = Rect(Vec2(2,3), Vec2(4,4))
+          val l = Line(Vec2(1,2), Vec2(-1,4))
           val c = (l clampBy r)
           assert( c == None )
+        }
+
+        'GoingThrough {
+          val r = Rect(Vec2(2,3), Vec2(4,4))
+          val l = Line(Vec2(1,4), Vec2(7,4))
+          val c = (l clampBy r).get
+          assert( c == Line(Vec2(2,4), Vec2(6,4)) )
         }
       }
     }
