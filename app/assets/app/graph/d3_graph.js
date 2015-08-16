@@ -710,8 +710,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
         }
 
         replyToNode(existingNode) {
-            ModalEditService.currentNode.setReference(existingNode);
             ModalEditService.show();
+            ModalEditService.currentNode.setReference(existingNode);
         }
 
         setNodePositionFromOffset(node, x, y) {
