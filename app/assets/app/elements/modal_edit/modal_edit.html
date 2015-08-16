@@ -20,9 +20,9 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="pull-left btn btn-default" style='cursor:pointer' ng-click='vm.previewEnabled = !vm.previewEnabled' data-title='distraction free writing' bs-tooltip animation=''><i class="fa" ng-class="{'fa-eye-slash': !vm.previewEnabled, 'fa-eye': vm.previewEnabled}"></i></button>
-                <button class="btn btn-default" ng-click="$hide()">Close</button>
-                <button class="btn btn-success" type="submit" ng-click="vm.save();$hide()" ng-disabled="!vm.node.canSave"><i class="fa fa-paper-plane-o"></i></button>
+                <span class="pull-left btn btn-default" style='cursor:pointer' ng-click='vm.previewEnabled = !vm.previewEnabled' data-title='distraction free writing' bs-tooltip animation=''><i class="fa" ng-class="{'fa-eye-slash': !vm.previewEnabled, 'fa-eye': vm.previewEnabled}"></i></span>
+                <span class="btn btn-default" ng-click="$hide()">Close</span>
+                <span class="btn btn-success" type="submit" ng-click="vm.save();$hide()" ng-disabled="!vm.node.canSave"><i class="fa fa-paper-plane-o"></i></span>
             </div>
         </div>
     </form>
