@@ -1,9 +1,10 @@
 <div class="big_post_directive">
     <div class="post_details">
         <div class="post_description">
-            <div preview node="vm.node"></div>
+            <h2 ng-bind="vm.node.title"></h2>
+            <div big-taglist node="vm.node" class="taglist"></div>
+            <div markdown="vm.node.description"></div>
         </div>
-        <div big-taglist node="vm.node" class="taglist"></div>
     </div>
     <div class="post_stats">
         <span toggle-zen node="vm.node"></span>

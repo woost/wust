@@ -6,6 +6,9 @@
         @include flex-direction(row);
         .post_description {
             width: 70%;
+            .taglist {
+                width: 100%;
+            }
         }
         .taglist {
             width: 30%;
