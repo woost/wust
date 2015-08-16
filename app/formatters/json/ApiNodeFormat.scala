@@ -4,12 +4,35 @@ import model.WustSchema._
 import play.api.libs.json._
 import renesca.graph.{Label, RelationType}
 import renesca.schema._
+import renesca.parameter._
+import renesca.parameter.implicits._
 
 object ApiNodeFormat {
   implicit def LabelToString(label: Label): String = label.name
 
   implicit object NodeFormat extends Format[Node] {
     def reads(json: JsValue) = ???
+
+    implicit def tagsWrites = new Writes[Tags] {
+      //TODO: this is a code dup from GraphForma.scala
+      def writes(cat: Tags) = {
+        // the same as tagWrites but with voting weight
+        val tag: TagLike = cat.startNodeOpt.get
+        val weight: Double = cat.rawItem.properties("weight").asDouble
+        JsObject(Seq(
+          ("id", JsString(tag.uuid)),
+          ("label", JsString(TagLike.label)),
+          ("title", JsString(tag.title)),
+          ("description", JsString(tag.description.getOrElse(""))),
+          ("isVotable", JsBoolean(tag.isInstanceOf[VoteDimension])),
+          ("isClassification", JsBoolean(tag.isInstanceOf[Classification])),
+          ("color", tag.color.map(JsNumber(_)).getOrElse(JsNull)),
+          ("symbol", tag.symbol.map(JsString(_)).getOrElse(JsNull)),
+          ("weight", JsNumber(weight))
+        ))
+      }
+    }
+
 
     //TODO: this should be multiple formats...code dup
     def writes(node: Node) = {
@@ -19,7 +42,7 @@ object ApiNodeFormat {
         ("label", JsString(n.label)),
         ("title", JsString(n.title)),
         ("description", JsString(n.description.getOrElse(""))),
-        ("tags", Json.toJson(n.rev_tags))
+        ("tags", Json.toJson(n.inRelationsAs(Tags).map(tagsWrites.writes))) // TODO: why do we have to call tagsWrites.writes explicitly?
       )
       case n: TagLike => Seq(
         ("id", JsString(n.uuid)),
