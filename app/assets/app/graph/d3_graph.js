@@ -788,6 +788,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             if (!this.isDragging) {
                 if (diff > tolerance) {
                     this.isDragging = true;
+                    // preview is reading isDragging, so angular needs to know that it changed
+                    scope.$apply();
                     onStartDragging();
                 }
             }
@@ -858,6 +860,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             // TODO: create self loops?
 
             this.isDragging = false;
+            // preview is reading isDragging, so angular needs to know that it changed
+            scope.$apply();
 
             this.d3ConnectorLine.classed({
                 "moving": false
@@ -880,6 +884,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             }
 
             this.isDragging = false;
+            // preview is reading isDragging, so angular needs to know that it changed
+            scope.$apply();
 
             d.d3NodeContainer.classed({
                 "moving": false
