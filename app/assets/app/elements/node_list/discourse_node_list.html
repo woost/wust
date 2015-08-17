@@ -2,6 +2,9 @@
 <div class='discourse_node_list'>
     <div class="drop_post_container" ui-on-Drop="vm.nodeModel.add($data)" drop-channel="scratch_create_connect,scratch_connect,create_connect,connect"></div>
 
+    <div ng-if="vm.isLoading" class="little_loading_indicator">
+        <div class="relative_spinner spinner"></div>
+    </div>
     <div ng-include="'show_discourse_node_list.html'"></div>
 </div>
 

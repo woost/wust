@@ -35,6 +35,7 @@ function FocusCtrl(Helpers, $stateParams, HistoryService, rootNode, ConnectedCom
     let component = renesca.js.GraphFactory().fromRecord(graph);
     vm.graphComponent = component.wrap("graph");
     vm.neighboursComponent = component.hyperWrap("neighbours");
+    vm.componentLoading = true;
 
     vm.tabViews = _.map([0, 1, 2, 3], i => new Tab(i));
     vm.tabViews[HistoryService.activeViewIndex]._active = true;
@@ -48,6 +49,7 @@ function FocusCtrl(Helpers, $stateParams, HistoryService, rootNode, ConnectedCom
     vm.graphComponent.onCommit(() => sortTagsOnGraph(vm.graphComponent));
 
     ConnectedComponents.$find($stateParams.id).$then(response => {
+        vm.componentLoading = false;
         response.nodes.forEach(n => vm.graphComponent.addNode(n));
         response.relations.forEach(r => vm.graphComponent.addRelation(r));
         vm.graphComponent.commit();

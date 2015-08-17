@@ -11,3 +11,94 @@
         margin: -100px 0px 0px -75px;
     }
 }
+
+@import "compass/css3";
+
+.absolute_spinner{
+   position: absolute;
+   left: 0;right: 0;top: 0;bottom: 0;
+   margin-top: 60px;
+   margin-left: auto;
+   margin-right: auto;
+   z-index: 999;
+}
+.relative_spinner{
+    margin: auto;
+}
+
+.little_loading_indicator {
+  .spinner{
+    width: 50px;
+    height: 50px;
+    @include border-radius(100%);
+    border:1px solid;
+    @include animation( rotate  1.3s linear 0s infinite, color-bubble 3s linear 0s infinite);
+     &:after{
+      content: '';
+      position: absolute;
+       width: 15px;
+       height: 15px;
+       background: #fff;
+       @include border-radius(100%);
+       @include animation(color-change 3s linear 0s infinite );
+       left: -5px;
+       top: 18px;
+     }
+  }
+}
+
+//======= Keyframes =======
+@include keyframes(spinner-bubble){
+  from{
+    width: 10px;
+    height: 10px;
+    opacity: .8;
+  }
+  to{
+     width: 50px;
+    height: 50px;
+    opacity: 0;
+  }
+}
+
+@include keyframes(color-bubble){
+  0%{color: #009DDC;}
+  33%{color: #50B949;}
+  66%{color: #EE2D24;}
+  100%{color: #FEB825;}
+}
+
+@include keyframes(color-change){
+  0%{background: #009DDC;}
+  33%{background: #50B949;}
+  66%{background: #EE2D24;}
+  100%{background: #FEB825;}
+}  
+@include keyframes(rotate){
+    from {@include rotate(0deg);}
+    to {@include rotate(360deg);}
+}
+@include keyframes (rotateRct) {
+  0% {@include transform(perspective(120px) rotateX(0deg) rotateY(0deg))}
+  50% {@include transform(perspective(120px) rotateX(-180.1deg) rotateY(0deg))}
+  100% {@include transform(perspective(120px) rotateX(-180deg) rotateY(-179.9deg)) }
+}
+
+@include keyframes(size){
+    from { width: 70px; height: 70px;}
+    to {width: 30px; height: 30px;}
+}
+
+@include keyframes(shadow){
+    from { @include box-shadow( 0px 0 0 1px  inset)}
+    to {@include box-shadow( 50px 0 0 1px  inset )}
+}
+
+@include keyframes(shadowSize){
+  0% { @include box-shadow(15px 0 0 0, 30px 0 0 0 ,45px 0 0 0, 60px 0 0 0, 75px 0 0 0);}
+  20% { @include box-shadow(15px 0 0 5px, 30px 0 0 0 ,45px 0 0 0, 60px 0 0 0, 75px 0 0 0);}
+  40% { @include box-shadow(15px 0 0 0, 30px 0 0 5px ,45px 0 0 0, 60px 0 0 0, 75px 0 0 0);}
+  60% { @include box-shadow(15px 0 0 0, 30px 0 0 0 ,45px 0 0 5px, 60px 0 0 0, 75px 0 0 0);}
+  80% { @include box-shadow(15px 0 0 0, 30px 0 0 0 ,45px 0 0 0, 60px 0 0 5px, 75px 0 0 0);}
+  100% { @include box-shadow(15px 0 0 0, 30px 0 0 0 ,45px 0 0 0, 60px 0 0 0, 75px 0 0 5px);}
+}

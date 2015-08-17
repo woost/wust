@@ -1,3 +1,6 @@
 <div id="graph_component">
+    <div ng-if="vm.isLoading" class="little_loading_indicator">
+        <div class="absolute_spinner spinner"></div>
+    </div>
     <div graph-view graph="vm.component"></div>
 </div>

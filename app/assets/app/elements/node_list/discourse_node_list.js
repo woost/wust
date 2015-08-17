@@ -8,6 +8,7 @@ function discourseNodeList() {
         templateUrl: "assets/app/elements/node_list/discourse_node_list.html",
         scope: {
             nodeModel: "=",
+            isLoading: "="
         },
         controller: discourseNodeListCtrl,
         controllerAs: "vm",

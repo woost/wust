@@ -7,7 +7,8 @@ function focusNeighbours() {
         restrict: "A",
         templateUrl: "assets/app/components/focus/neighbours/neighbours.html",
         scope: {
-            component: "="
+            component: "=",
+            isLoading: "="
         },
         controller: NeighboursCtrl,
         controllerAs: "vm",

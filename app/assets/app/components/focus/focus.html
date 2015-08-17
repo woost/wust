@@ -7,13 +7,13 @@
             <div tab-heading>
                 <i class="fa fa-sitemap"></i>
             </div>
-            <div focus-graph component="vm.graphComponent"></div>
+            <div focus-graph component="vm.graphComponent" is-loading="vm.componentLoading"></div>
         </div>
         <div tab active="vm.tabViews[1].active">
             <div tab-heading>
                 <i class="fa fa-th"></i>
             </div>
-            <div focus-neighbours component="vm.neighboursComponent"></div>
+            <div focus-neighbours component="vm.neighboursComponent" is-loading="vm.componentLoading"></div>
         </div>
         <div sidebar></div>
     </div>
