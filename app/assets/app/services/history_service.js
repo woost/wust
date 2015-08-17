@@ -11,8 +11,8 @@ function HistoryService(Post, DiscourseNode, store) {
     this.activeViewIndex = historyStore.get("activeViewIndex") || 0;
 
     this.visited = [];
-    storeVisited();
     _.each(historyStore.get("visited"), restoreNode);
+    storeVisited();
 
     this.add = addNode;
     this.remove = removeNode;
@@ -73,8 +73,8 @@ function HistoryService(Post, DiscourseNode, store) {
 
     function addNode(node) {
         _.remove(self.visited, n => node.id === n.id);
-        self.visited.push(node);
-        self.visited.splice(0, self.visited.length - maximum);
+        self.visited.splice(0, self.visited.length - maximum - 1);
+        self.visited.splice(0, 0, node);
         storeVisited();
     }
 }
