@@ -16,9 +16,7 @@
 .la-absolute {
     position: absolute !important;
     left: 0;right: 0;top: 0;bottom: 0;
-    margin-top: 60px;
-    margin-left: auto;
-    margin-right: auto;
+    margin: auto;
     z-index: 999;
 }
 .la-relative {
