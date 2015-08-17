@@ -3,6 +3,9 @@
     height: 100%;
     .node {
         max-width: 100%;
+        a:visited {
+            color: black;
+        }
     }
 }
 
