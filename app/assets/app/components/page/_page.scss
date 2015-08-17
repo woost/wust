@@ -31,9 +31,9 @@ main {
             width: 0px;
             min-width: 0px;
             @include transition(all 100ms ease);
-            overflow-y: auto;
             border-left: $sidebar_border;
             &.visible {
+                overflow-y: auto;
                 width: 200px;
                 min-width: 200px;
             }
