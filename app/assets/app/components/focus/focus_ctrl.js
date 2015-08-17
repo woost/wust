@@ -27,8 +27,12 @@ function FocusCtrl(Helpers, $stateParams, HistoryService, rootNode, ConnectedCom
         }
     }
 
+    let rawRootNode = rootNode.$encode();
+    //TODO: encode misses tags
+    rawRootNode.tags = rootNode.tags.$encode();
+
     let graph = {
-        nodes: [rootNode],
+        nodes: [rawRootNode],
         relations: [],
         $pk: rootNode.id
     };
