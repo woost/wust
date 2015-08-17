@@ -11,22 +11,12 @@
             @include display-flex(flex);
             @include justify-content(space-between);
             width: 100%;
-            margin: 0 auto;
             .container {
                 border: $stream_border;
                 border-radius: 5px;
                 height: 250px;
                 max-height: 250px;
-                width: 60%;
                 margin: 20px;
-            }
-            .recent_container {
-                padding: 0px;
-                border-color: $dashboard_recent_header_border;
-                .header {
-                }
-                .body {
-                }
             }
         }
         #stream_list {
@@ -34,13 +24,13 @@
             @include flex-wrap(wrap);
             @include flex-direction(rows);
             @include justify-content(flex-start);
-            width: 90%;
+            width: 100%;
             margin: 0 auto;
             .as-sortable-item {
                 margin: 10px;
             }
             .container {
-                width: 500px;
+                width: 30%;
                 height: 500px;
                 max-height: 500px;
             }
@@ -85,6 +75,19 @@
                         }
                     }
                 }
+            }
+        }
+
+        .recent_container {
+            margin-top:20px;
+            &.table, .table-cell {
+                height: 600px;
+            }
+            padding: 0px;
+            border-color: $dashboard_recent_header_border;
+            .header {
+            }
+            .body {
             }
         }
         // http://blogs.msdn.com/b/kurlak/archive/2015/02/20/filling-the-remaining-height-of-a-container-while-handling-overflow-in-css.aspx
