@@ -5,10 +5,10 @@
             <div scratchpad></div>
         </div>
         <div id="middle_content">
-            <button drop-channel="create_connect,connect" ui-on-Drop="vm.editNode($data)" id="left_side_toggle" type="button" class="drop_post_box btn btn-default fa" ng-class="{'fa-arrow-right':!vm.sidebar.left.visible, 'fa-arrow-left':vm.sidebar.left.visible}" onclick="this.blur()" ng-click="vm.sidebar.left.visible = !vm.sidebar.left.visible"></button>
+            <button drop-channel="create_connect,connect" ui-on-Drop="vm.editNode($data)" id="left_side_toggle" type="button" class="drop_post_box btn btn-default fa" ng-class="{'fa-arrow-right':!vm.sidebar.left.visible, 'fa-arrow-left':vm.sidebar.left.visible}" onclick="this.blur()" ng-click="vm.sidebar.left.visible = !vm.sidebar.left.visible" data-title="toggle scratchpad" bs-tooltip animation=""></button>
             <div zen></div>
             <div search></div>
-            <button id="right_side_toggle" type="button" class="btn btn-default fa" ng-class="{'fa-arrow-left':!vm.sidebar.right.visible, 'fa-arrow-right':vm.sidebar.right.visible, 'right_side_visible':vm.sidebar.right.visible}" onclick="this.blur()" ng-click="vm.sidebar.right.visible = !vm.sidebar.right.visible"></button>
+            <button id="right_side_toggle" type="button" class="btn btn-default fa" ng-class="{'fa-arrow-left':!vm.sidebar.right.visible, 'fa-arrow-right':vm.sidebar.right.visible, 'right_side_visible':vm.sidebar.right.visible}" onclick="this.blur()" ng-click="vm.sidebar.right.visible = !vm.sidebar.right.visible" data-title="toggle history" bs-tooltip animation=""></button>
             <div id="content_view" ui-view></div>
         </div>
         <div id="right_hand_side" ng-class="{visible: vm.sidebar.right.visible}">
