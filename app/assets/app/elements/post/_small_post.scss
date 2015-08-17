@@ -1,8 +1,12 @@
 .small_post_directive {
     a, a:link {
-        max-width: 75%;
         word-wrap: break-word;
         color: #3e3e3e;
+
+        // prevent multi line links to have space between the lines.
+        // else hover is flickering and you cannot click between the lines.
+        padding-top: 3px;
+        padding-bottom: 6px;
     }
 
     a:visited {
