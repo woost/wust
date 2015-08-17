@@ -10,7 +10,7 @@ import play.api.libs.json.JsValue
 import renesca.parameter.implicits._
 import play.api.mvc.Results._
 
-case class PostAccess() extends NodeReadBase[Post] with NodeDeleteBase[Post] {
+case class PostAccess() extends NodeReadBase[Connectable] with NodeDeleteBase[Connectable] {
   val factory = Post
 
   private def tagDefGraph(addedTags: List[TagConnectRequest]): Discourse = {
