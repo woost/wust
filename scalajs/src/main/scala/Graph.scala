@@ -106,6 +106,8 @@ trait NodeBase extends NodeDelegates {
   @JSExport("successors") def successorsJs = successors.toJSArray
   @JSExport("neighbours") def neighboursJs = neighbours.toJSArray
 
+  def encode(): js.Any
+
   import GraphAlgorithms._
 
   val _component = Cacher(() => calculateComponent(this))
@@ -240,7 +242,7 @@ case class HyperRelation(rawNode: RawNode) extends NodeBase with RelationLike {
   @JSExport def source = startNode
   @JSExport def target = endNode
 
-  @JSExport def encode() = js.Dynamic.literal(id = id, label = label, title = title, description.orUndefined, startId = startId, endId = endId, isHyperRelation = isHyperRelation)
+  @JSExport def encode() = js.Dynamic.literal(id = id, label = label, title = title, description.orUndefined, startId = startId, endId = endId, startNode = startNode.encode(), endNode = endNode.encode(), isHyperRelation = isHyperRelation)
 }
 
 object Node {
