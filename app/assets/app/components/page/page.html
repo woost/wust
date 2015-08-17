@@ -1,14 +1,18 @@
 <div navigation ng-cloak></div>
 <main role="main">
     <div id="main_view">
-        <div id="left_hand_side" visible-left-side>
+        <div id="left_hand_side" ng-class="{visible: vm.sidebar.left.visible}">
             <div scratchpad></div>
         </div>
-        <div id="right_hand_side">
-            <button drop-channel="create_connect,connect" ui-on-Drop="vm.editNode($data)" id="left_side_toggle" type="button" class="drop_post_box btn btn-default fa" ng-class="{'fa-arrow-right':!vm.leftSide.visible, 'fa-arrow-left':vm.leftSide.visible}" onclick="this.blur()" ng-click="vm.leftSide.visible = !vm.leftSide.visible"></button>
+        <div id="middle_content">
+            <button drop-channel="create_connect,connect" ui-on-Drop="vm.editNode($data)" id="left_side_toggle" type="button" class="drop_post_box btn btn-default fa" ng-class="{'fa-arrow-right':!vm.sidebar.left.visible, 'fa-arrow-left':vm.sidebar.left.visible}" onclick="this.blur()" ng-click="vm.sidebar.left.visible = !vm.sidebar.left.visible"></button>
             <div zen></div>
             <div search></div>
+            <button class="btn btn-xs btn-default pull-right" ng-click="vm.sidebar.right.visible = !vm.sidebar.right.visible"><i class="fa fa-history"></i></button>
             <div id="content_view" ui-view></div>
+        </div>
+        <div id="right_hand_side" ng-class="{visible: vm.sidebar.right.visible}">
+            <div history-list></div>
         </div>
     </div>
 </main>

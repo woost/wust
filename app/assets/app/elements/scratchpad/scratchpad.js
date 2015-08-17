@@ -14,12 +14,12 @@ function scratchpad() {
     };
 }
 
-scratchpadCtrl.$inject = ["EditService", "LeftSideService"];
+scratchpadCtrl.$inject = ["EditService", "SidebarService"];
 
-function scratchpadCtrl(EditService, LeftSideService) {
+function scratchpadCtrl(EditService, SidebarService) {
     let vm = this;
 
-    vm.leftSide = LeftSideService;
+    vm.sidebar = SidebarService;
     vm.editList = EditService.list;
     vm.edit = EditService.edit;
     vm.editNewPost = editNewPost;

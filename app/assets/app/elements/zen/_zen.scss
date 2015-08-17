@@ -1,7 +1,7 @@
 //TODO: challenge -> better idea?
 //the 400px width refers to the value set in _main.scss
 //cannot use a variable with calc :/
-#left_hand_side.visible + #right_hand_side #zen_component {
+#left_hand_side.visible + #middle_content #zen_component {
     left: 400px !important;
     width: -moz-calc(100% - 400px) !important;
     width: -webkit-calc(100% - 400px) !important;

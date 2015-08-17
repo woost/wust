@@ -5,7 +5,7 @@ main {
         height: inherit;
         @include display-flex(flex);
         @include flex-direction(columns);
-        #left_hand_side, #right_hand_side {
+        #left_hand_side, #middle_content, #right_hand_side {
             height: inherit;
         }
         #left_hand_side {
@@ -27,6 +27,17 @@ main {
 
         }
         #right_hand_side {
+            @include flex-grow(0);
+            width: 0px;
+            min-width: 0px;
+            @include transition(all 100ms ease);
+            border-left: $sidebar_border;
+            &.visible {
+                width: 200px;
+                min-width: 200px;
+            }
+        }
+        #middle_content {
             #content_view {
                 height: inherit;
                 padding: 5px 5px 5px 40px;

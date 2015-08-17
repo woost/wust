@@ -1,15 +1,15 @@
 angular.module("wust.components").controller("PageCtrl", PageCtrl);
 
-PageCtrl.$inject = ["LeftSideService", "EditService"];
+PageCtrl.$inject = ["SidebarService", "EditService"];
 
-function PageCtrl(LeftSideService, EditService) {
+function PageCtrl(SidebarService, EditService) {
     let vm = this;
 
-    vm.leftSide = LeftSideService;
+    vm.sidebar = SidebarService;
     vm.editNode = editNode;
 
     function editNode(data) {
-        LeftSideService.visible = true;
+        SidebarService.visible = true;
         EditService.edit(data);
     }
 }

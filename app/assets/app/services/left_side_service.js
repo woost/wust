@@ -1,18 +1,23 @@
-angular.module("wust.services").service("LeftSideService", LeftSideService);
+angular.module("wust.services").service("SidebarService", SidebarService);
 
-LeftSideService.$inject = ["store"];
+SidebarService.$inject = ["store"];
 
-function LeftSideService(store) {
-    let leftStore = store.getNamespacedStore("leftSide");
+function SidebarService(store) {
+    let sideStore = store.getNamespacedStore("sidebar");
 
-    let visible = leftStore.get("visible") || false;
-    Object.defineProperty(this, "visible", {
-        get: function() {
-            return visible;
-        },
-        set: function(val) {
-            visible = !!val;
-            leftStore.set("visible", visible);
-        }
-    });
+    this.left = new Sidebar("left");
+    this.right = new Sidebar("right");
+
+    function Sidebar(name) {
+        let visible = sideStore.get(name) || false;
+        Object.defineProperty(this, "visible", {
+            get: function() {
+                return visible;
+            },
+            set: function(val) {
+                visible = !!val;
+                sideStore.set(name, visible);
+            }
+        });
+    }
 }
