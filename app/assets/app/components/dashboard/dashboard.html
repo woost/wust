@@ -29,19 +29,9 @@
             </div>
         </div>
 
-        <div class="table container recent_container">
-            <div class="table-row header">
-                <h3>Recent posts</h3>
-            </div>
-            <div class="table-row body">
-                <div class="table-cell body-content-wrapper">
-                    <div class="body-content-inner-wrapper">
-                        <div class="body-content">
-                            <span ng-repeat="post in vm.recentPosts track by post.id" small-post node="post"></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="recent_container">
+            <h3>Recent posts</h3>
+            <span ng-repeat="post in vm.recentPosts track by post.id" small-post node="post"></span>
         </div>
     </div>
 </div>
