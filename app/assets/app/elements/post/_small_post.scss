@@ -1,8 +1,11 @@
 .small_post_directive {
     max-width: 75%;
     word-wrap: break-word;
+    .disconnect_tool {
+        padding-top: 3px;
+        padding-left: 5px;
+    }
     .tag_circle_container {
-        display: inline-block;
         margin-left: 5px;
         // adjust vertical center
         padding-bottom: 3px;
