@@ -46,7 +46,14 @@ function infiniteScroll($rootScope) {
             scope.infinite.loading = true;
             let result = scope.infiniteScroll();
             if (result) {
-                scope.promise.$then(({$response: {config, data}}) => {
+                scope.promise.$then(({$response}) => {
+                    scope.infinite.loading = false;
+                    if (!$response)
+                        return;
+
+                    let config = $response.config;
+                    let data = $response.data;
+
                     lastResultLength = data.length;
                     scope.infinite.loading = false;
                     let noMore = true;
