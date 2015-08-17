@@ -1,9 +1,24 @@
 .small_post_directive {
-    max-width: 75%;
-    word-wrap: break-word;
+    a, a:link {
+        max-width: 75%;
+        word-wrap: break-word;
+        color: #3e3e3e;
+    }
+
+    a:visited {
+        color: #7e7e7e;
+    }
+
+    a:hover, a:active {
+        color: black;
+        text-decoration: underline;
+    }
+
+
     .disconnect_tool {
         padding-top: 3px;
         padding-left: 5px;
+        cursor: pointer;
     }
     .tag_circle_container {
         margin-left: 5px;
