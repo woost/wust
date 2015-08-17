@@ -12,7 +12,7 @@
                 <div ng-switch-when="true" preview node="vm.node" class="panel panel-default"></div>
                 <div ng-switch-default class="panel panel-default">
                     <div class="panel-heading">
-                        <input type="text" class="form-control" focus-me="vm.hasFocus" ng-blur="vm.hasFocus = false"  ng-model="vm.node.title" ng-change="vm.node.onChange()" placeholder="TL,DR" required>
+                        <input type="text" class="form-control" focus-me="vm.hasFocus" ng-blur="vm.hasFocus = false"  ng-model="vm.node.title" ng-change="vm.node.onChange()" placeholder="TL;DR" required>
                     </div>
                     <div class="panel-body">
                         <div edit-post node="vm.node"></div>
@@ -20,9 +20,9 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <span class="pull-left btn btn-default" style='cursor:pointer' ng-click='vm.previewEnabled = !vm.previewEnabled' data-title='distraction free writing' bs-tooltip animation=''><i class="fa" ng-class="{'fa-eye-slash': !vm.previewEnabled, 'fa-eye': vm.previewEnabled}"></i></span>
-                <span class="btn btn-default" ng-click="$hide()">Close</span>
-                <span class="btn btn-success" type="submit" ng-click="vm.save();$hide()" ng-disabled="!vm.node.canSave"><i class="fa fa-paper-plane-o"></i></span>
+                <span class="pull-left btn btn-default" style='cursor:pointer' ng-click='vm.previewEnabled = !vm.previewEnabled' data-title='preview' bs-tooltip animation=''><i class="fa" ng-class="{'fa-eye-slash': !vm.previewEnabled, 'fa-eye': vm.previewEnabled}"></i></span>
+                <span class="btn btn-default" ng-click="$hide()">discard</span>
+                <span class="btn btn-success" type="submit" ng-click="vm.save();$hide()" ng-disabled="!vm.node.canSave"><i class="fa" ng-class="{'fa-reply': vm.node.referenceNode !== undefined, 'fa-paper-plane-o': vm.node.referenceNode === undefined}"></i></span>
             </div>
         </div>
     </form>
