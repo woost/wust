@@ -1,7 +1,7 @@
 <div class="graph_view_component">
     <div d3-graph class="graph_network" ui-on-Drop="vm.addNodeToGraph($data, $event)" drop-channel="create_connect,connect">
         <div id="filter_input">
-            <input type="text" class="form-control" ng-model="vm.d3Graph.isDragging" placeholder="filter">
+            <input type="text" class="form-control" ng-model="vm.search.title" placeholder="filter">
         </div>
     </div>
     <div class="post-preview-frame" ng-class="{left: !vm.state.hoveredNode.onLeftHalf, right: vm.state.hoveredNode.onLeftHalf, top: !vm.state.hoveredNode.onUpperHalf, bottom: vm.state.hoveredNode.onUpperHalf}" ng-show="vm.state.hoveredNode && !vm.state.hoveredNode.isHyperRelation && !vm.d3Graph.isDragging">
