@@ -159,6 +159,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             }
 
             updateGraph(changes) {
+                //TODO: this really is an unwanted side effect, we should not sort nodes here
                 //add nodes to svg, first hypernodes then nodes, so the normal
                 //nodes are drawn on top of the hypernodes in the svg
                 this.graph.setNodes(_.sortBy(this.graph.nodes, n => !n.isHyperRelation));
@@ -246,6 +247,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
                 this.updateGraphRefs();
                 //TODO: take care of nodes where the title/description was changed
+                // nodes where only the title/description changed, are not part of changes.newNodes
                 this.recalculateNodeDimensions(changes.newNodes);
 
                 this.registerUIEvents();
@@ -469,8 +471,10 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 n.domNode = this.d3Node[0][i];
                 n.d3Node = d3.select(n.domNode);
 
-                n.domNodeFrame = this.d3NodeFrame[0][i];
-                n.d3NodeFrame = d3.select(n.domNodeFrame);
+                //TODO: i am not sure whether the indices will be correct then,
+                //but the old nodes should be in the tail of the node list
+                n.domNodeFrame = n.domNodeFrame || this.d3NodeFrame[0][i];
+                n.d3NodeFrame = n.d3NodeFrame || d3.select(n.domNodeFrame);
             });
 
             this.graph.relations.forEach((r, i) => {
