@@ -36,6 +36,9 @@
             @include justify-content(flex-start);
             width: 90%;
             margin: 0 auto;
+            .as-sortable-item {
+                margin: 10px;
+            }
             .container {
                 width: 500px;
                 height: 500px;
@@ -43,13 +46,20 @@
             }
         }
         .container {
-            padding: 5px;
+            padding: 8px;
             @include display-flex(flex);
             @include flex-wrap(wrap);
             @include flex-direction(columns);
             .header {
                 .as-sortable-item-handle {
-                    padding-left: 10px;
+                    display:inline-block;
+                    width: 100%;
+                    padding-top: 5px;
+                }
+
+                .edit_button {
+                    padding: 5px;
+                    padding-right: 10px;
                 }
             }
             .body {
