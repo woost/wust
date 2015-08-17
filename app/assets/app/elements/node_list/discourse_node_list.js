@@ -17,4 +17,12 @@ function discourseNodeList() {
 
 discourseNodeListCtrl.$inject = [];
 
-function discourseNodeListCtrl() {}
+function discourseNodeListCtrl() {
+    let vm = this;
+
+    vm.remove = remove;
+
+    function remove(node) {
+        vm.nodeModel.remove(node);
+    }
+}
