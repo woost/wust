@@ -53,7 +53,7 @@ function FocusCtrl(Helpers, $stateParams, HistoryService, rootNode, ConnectedCom
         response.nodes.forEach(n => vm.graphComponent.addNode(n));
         response.relations.forEach(r => vm.graphComponent.addRelation(r));
         vm.graphComponent.commit();
-    });
+    }, () => vm.componentLoading = false);
 
     function sortTagsOnGraph(graph) {
         graph.nodes.forEach(n => n.tags = Helpers.sortTags(n.tags));
