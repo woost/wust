@@ -26,11 +26,11 @@
             @include justify-content(flex-start);
             width: 100%;
             margin: 0 auto;
-            .as-sortable-item {
+            .as-sortable-item, .as-sortable-placeholder {
                 margin: 10px;
             }
             .container {
-                width: 30%;
+                width: 400px;
                 height: 500px;
                 max-height: 500px;
             }
@@ -98,3 +98,4 @@
         }
     }
 }
+
