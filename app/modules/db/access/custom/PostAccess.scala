@@ -10,6 +10,7 @@ import play.api.libs.json.JsValue
 import renesca.parameter.implicits._
 import play.api.mvc.Results._
 
+//TODO: this should be about posts, we should separate the api here...or rename this access.
 case class PostAccess() extends NodeReadBase[Connectable] with NodeDeleteBase[Connectable] {
   val factory = Post
 
@@ -28,7 +29,7 @@ case class PostAccess() extends NodeReadBase[Connectable] with NodeDeleteBase[Co
     discourse
   }
 
-  private def addTagsToGraph(discourse: Discourse, user: User, node: Post) {
+  private def addTagsToGraph(discourse: Discourse, user: User, node: Connectable) {
     //FIXME: bug in renesca-magic #22
     // discourse.tagLikes.foreach(tag => {
     discourse.nodesAs(TagLike).foreach(tag => {
@@ -43,7 +44,7 @@ case class PostAccess() extends NodeReadBase[Connectable] with NodeDeleteBase[Co
     if (removedTags.isEmpty)
       return
 
-    val node = Post.matchesOnUuid(uuid)
+    val node = Connectable.matchesOnUuid(uuid)
     val discourse = Discourse(node)
 
     removedTags.foreach { tagUuid =>
@@ -82,33 +83,37 @@ case class PostAccess() extends NodeReadBase[Connectable] with NodeDeleteBase[Co
       deleteTagsFromGraph(request.removedTags, uuid)
       val discourse = tagDefGraph(request.addedTags)
 
-      val node = Post.matchesOnUuid(uuid)
-      discourse.add(node)
-      if(request.description.isDefined) {
-        //TODO: normally we would want to set it back to None instead of ""
-        // but matches nodes currently cannot save deletions of properties as long
-        // as they are local. this is also true for merge nodes!
-        // if(request.description.get.isEmpty)
-        //   node.description = None
-        // else
-        node.description = request.description
-      }
+      val node = if (request.title.isDefined || request.description.isDefined) {
+        val node = Post.matchesOnUuid(uuid)
+        discourse.add(node)
+        if(request.description.isDefined) {
+          //TODO: normally we would want to set it back to None instead of ""
+          // but matches nodes currently cannot save deletions of properties as long
+          // as they are local. this is also true for merge nodes!
+          // if(request.description.get.isEmpty)
+          //   node.description = None
+          // else
+          node.description = request.description
+        }
 
-      if(request.title.isDefined)
-        node.title = request.title.get
+        if(request.title.isDefined)
+          node.title = request.title.get
 
-      if(request.title.isDefined || request.description.isDefined) {
         val contribution = Updated.create(context.user, node)
         discourse.add(contribution)
+
+        node
+      } else {
+        Connectable.matchesOnUuid(uuid)
       }
 
       addTagsToGraph(discourse, context.user, node)
 
       db.transaction(_.persistChanges(discourse)) match {
-        case Some(err) => Left(BadRequest(s"Cannot update Post with uuid '$uuid': $err'"))
+        case Some(err) => Left(BadRequest(s"Cannot update Connectable with uuid '$uuid': $err'"))
         //FIXME: why the fuck do i need to do this???
         //otherwise node.rev_tags is empty? something is messed up here.
-        case _         => Right(discourse.posts.find(_.uuid == node.uuid).get)
+        case _         => Right(discourse.connectables.find(_.uuid == node.uuid).get)
         // case _         => Right(node)
       }
     }

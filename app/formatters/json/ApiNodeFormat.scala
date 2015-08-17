@@ -45,6 +45,13 @@ object ApiNodeFormat {
         ("tags", Json.toJson(n.inRelationsAs(Tags).map(tagsWrites.writes))), // TODO: why do we have to call tagsWrites.writes explicitly?
         ("timestamp", Json.toJson(JsNumber(n.timestamp)))
       )
+      case n: Connects => Seq(
+        ("id", JsString(n.uuid)),
+        ("startId", n.startNodeOpt.map(s => JsString(s.uuid)).getOrElse(JsNull)),
+        ("endId", n.endNodeOpt.map(e => JsString(e.uuid)).getOrElse(JsNull)),
+        ("label", JsString(n.label)),
+        ("tags", Json.toJson(n.inRelationsAs(Tags).map(tagsWrites.writes))) // TODO: why do we have to call tagsWrites.writes explicitly?
+      )
       case n: TagLike => Seq(
         ("id", JsString(n.uuid)),
         ("label", JsString(TagLike.label)),
