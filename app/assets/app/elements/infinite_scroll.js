@@ -32,7 +32,7 @@ function infiniteScroll($rootScope) {
             if (!scope.infinite.loading && !scope.infinite.noMore && scrollTop > lastScrollTop) {
                 let percent = Math.abs((scrollBottom / scrollHeight) * 100);
                 if (percent >= atPercent) {
-                    callLoader(scrollHeight);
+                    callLoader();
                 }
             }
 
@@ -41,25 +41,29 @@ function infiniteScroll($rootScope) {
             scope.$apply();
         });
 
-        function callLoader(height, recurse = false) {
+        function callLoader(recurse = false) {
+            let height = targetElement.scrollHeight;
             scope.infinite.loading = true;
             let result = scope.infiniteScroll();
             if (result) {
                 scope.promise.$then(({$response: {config, data}}) => {
                     lastResultLength = data.length;
                     scope.infinite.loading = false;
-                    if (data.length === 0) {
-                        scope.infinite.noMore = true;
-                    } else {
+                    let noMore = true;
+                    if (data.length > 0) {
                         addPage(height);
                         setPage(targetElement.scrollTop + targetElement.offsetHeight);
-                        scope.infinite.noMore = (config.params.size === undefined) || (data.length < config.params.size);
+                        noMore = ((config.params.size === undefined) || (data.length < config.params.size));
                     }
 
-                    if (scope.infinite.noMore) {
+                    if (noMore) {
                         scope.infinite.maxPage = pageInfos.length - 1;
-                    } else if (recurse) {
-                        callLoader(height, recurse);
+                    }
+
+                    scope.infinite.noMore = noMore || recurse;
+
+                    if (recurse) {
+                        _.defer(callLoader, recurse);
                     }
                 }, () => scope.infinite.loading = false);
             } else {
@@ -110,7 +114,7 @@ function infiniteScroll($rootScope) {
                 return;
 
             assurePageInfo();
-            callLoader(targetElement.scrollHeight, all);
+            callLoader(all);
         }
 
         function setPage(pos) {
