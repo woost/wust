@@ -10,16 +10,15 @@ import play.api.mvc.Action
 trait WritableNodes[NODE <: UuidNode] extends NodesBase {
   def nodeSchema: NodeSchema[NODE]
 
-  private def jsonNode(node: UuidNode) = Ok(Json.toJson(node))
-  private def createdJsonNode(node: UuidNode) = Ok(Json.toJson(node))
-  private def connectResponse(response: ConnectResponse[UuidNode]) = Ok(Json.toJson(response))
+  private def createdJsonNode(node: UuidNode) = Ok(Json.toJson(SchemaWrapper.wrapNode(node)))
+  private def connectResponse(response: ConnectResponse[UuidNode]) = Ok(Json.toJson(ConnectResponse(response.graph, response.node.map(SchemaWrapper.wrapNode(_)))))
 
   override def create = UserAwareAction { request =>
     getResult(nodeSchema.op.create(context(request)))(createdJsonNode)
   }
 
   override def update(uuid: String) = UserAwareAction { request =>
-    getResult(nodeSchema.op.update(context(request), uuid))(jsonNode)
+    getResult(nodeSchema.op.update(context(request), uuid))(createdJsonNode)
   }
 
   override def connectMember(path: String, uuid: String) = UserAwareAction { request =>
