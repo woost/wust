@@ -48,6 +48,11 @@ function EditService(Post, HistoryService, store, DiscourseNode, ZenService) {
 
         setReference(reference) {
             this.referenceNode = reference.encode ? reference.encode() : reference;
+            //TODO: encode does not support startnode/endnode...
+            if (this.referenceNode.isHyperRelation) {
+                this.referenceNode.startNode = reference.startNode.encode ? reference.startNode.encode() : reference.startNode;
+                this.referenceNode.endNode = reference.endNode.encode ? reference.endNode.encode() : reference.endNode;
+            }
         }
 
         //TODO: we should rewrite the whole logic here, it is weird and hacky, but it works so i leave it as is :)

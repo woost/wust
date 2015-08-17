@@ -1,0 +1,15 @@
+<div class="node_model_list">
+    <div ng-repeat='node in vm.nodeModel.list track by node.id' ng-switch="::vm.nodeModel.isNested" ng-animate-children class="ng-trans ng-trans-scale-up ease">
+        <div ng-switch-when="true">
+            <div class="btn-group" role="group">
+                <span small-post node="node" on-disconnect='vm.remove'></span>
+            </div>
+            <div>
+                <div ng-repeat="nested in node.nestedNodeLists[vm.nodeModel.listId]" discourse-node-list node-model='nested.model'></div>
+            </div>
+        </div>
+        <div ng-switch-default class="btn-group" role="group">
+                <span small-post node="node" on-disconnect='vm.remove'></span>
+        </div>
+    </div>
+</div>
