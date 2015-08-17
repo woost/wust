@@ -46,8 +46,8 @@ function RoutesConfig($stateProvider, $urlRouterProvider, $locationProvider) {
         templateUrl: `${templateBase}/focus/focus.html`,
         controller: "FocusCtrl as vm",
         resolve: {
-            component: ["ConnectedComponents","$stateParams", function(ConnectedComponents, $stateParams) {
-                return ConnectedComponents.$find($stateParams.id).$rawGraphPromise();
+            rootNode: ["Post","$stateParams", function(Post, $stateParams) {
+                return Post.$find($stateParams.id).$asPromise();
             }]
         }
     });

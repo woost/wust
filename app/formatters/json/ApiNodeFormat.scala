@@ -42,7 +42,8 @@ object ApiNodeFormat {
         ("label", JsString(n.label)),
         ("title", JsString(n.title)),
         ("description", JsString(n.description.getOrElse(""))),
-        ("tags", Json.toJson(n.inRelationsAs(Tags).map(tagsWrites.writes))) // TODO: why do we have to call tagsWrites.writes explicitly?
+        ("tags", Json.toJson(n.inRelationsAs(Tags).map(tagsWrites.writes))), // TODO: why do we have to call tagsWrites.writes explicitly?
+        ("timestamp", Json.toJson(JsNumber(n.timestamp)))
       )
       case n: TagLike => Seq(
         ("id", JsString(n.uuid)),

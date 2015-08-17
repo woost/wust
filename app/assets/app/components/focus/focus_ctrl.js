@@ -1,8 +1,8 @@
 angular.module("wust.components").controller("FocusCtrl", FocusCtrl);
 
-FocusCtrl.$inject = ["Helpers", "$stateParams", "HistoryService", "component"];
+FocusCtrl.$inject = ["Helpers", "$stateParams", "HistoryService", "rootNode", "ConnectedComponents", "$q"];
 
-function FocusCtrl(Helpers, $stateParams, HistoryService, component) {
+function FocusCtrl(Helpers, $stateParams, HistoryService, rootNode, ConnectedComponents, $q) {
     let vm = this;
 
     class Tab {
@@ -27,19 +27,31 @@ function FocusCtrl(Helpers, $stateParams, HistoryService, component) {
         }
     }
 
+    let graph = {
+        nodes: [rootNode],
+        relations: [],
+        $pk: rootNode.id
+    };
+    let component = renesca.js.GraphFactory().fromRecord(graph);
     vm.graphComponent = component.wrap("graph");
-    vm.neighboursComponent = component.hyperWrap("focus");
+    vm.neighboursComponent = component.hyperWrap("neighbours");
 
     vm.tabViews = _.map([0, 1, 2, 3], i => new Tab(i));
     vm.tabViews[HistoryService.activeViewIndex]._active = true;
 
     // we are viewing details about a node, so add it to the nodehistory
-    HistoryService.add(vm.neighboursComponent.rootNode);
+    HistoryService.add(vm.graphComponent.rootNode);
     HistoryService.currentViewComponent = component;
 
     // keep tags sorted by weight
     sortTagsOnGraph(vm.graphComponent);
     vm.graphComponent.onCommit(() => sortTagsOnGraph(vm.graphComponent));
+
+    ConnectedComponents.$find($stateParams.id).$then(response => {
+        response.nodes.forEach(n => vm.graphComponent.addNode(n));
+        response.relations.forEach(r => vm.graphComponent.addRelation(r));
+        vm.graphComponent.commit();
+    });
 
     function sortTagsOnGraph(graph) {
         graph.nodes.forEach(n => n.tags = Helpers.sortTags(n.tags));
