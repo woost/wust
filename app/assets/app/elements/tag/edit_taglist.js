@@ -9,7 +9,8 @@ function editTaglist() {
         scope: {
             tags: "=",
             onChange: "&",
-            existingOnly: "@"
+            existingOnly: "@",
+            alwaysShow: "@"
         },
         controller: editTaglistCtrl,
         controllerAs: "vm",

@@ -24,7 +24,8 @@ angular.module("wust.elements")
                 tags: "=",
                 getSuggestions: "&",
                 onChange: "&",
-                existingOnly: "@"
+                existingOnly: "@",
+                alwaysShow: "@"
             },
             templateUrl: "assets/app/elements/ngTagEditor/ngTagEditor.html",
             controller: ["$scope", "$attrs", "$element", "$filter",

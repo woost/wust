@@ -14,7 +14,7 @@
                 <span class="label_like col-md-8">Disjunction</span>
                 <span switch class="col-md-4" ng-model="vm.search.tagOr" ng-change="vm.search.triggerSearch()"></span>
             </div>
-            <div edit-taglist tags="vm.search.selectedTags" class="row edit_tags" existing-only="true" on-change="vm.search.triggerSearch()"></div>
+            <div edit-taglist tags="vm.search.selectedTags" class="row edit_tags" always-show="true" existing-only="true" on-change="vm.search.triggerSearch()"></div>
             <div id="search_options_bottom">
                 <div ng-show="vm.infinite.noMore" class="row">
                     <label class="col-md-4">#Results</label>
