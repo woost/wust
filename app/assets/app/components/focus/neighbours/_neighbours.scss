@@ -11,32 +11,33 @@
         width: 20%;
         max-width: 20%;
         min-width: 200px;
-        // @include flex-grow(1);
+        padding-right: 10px;
         // background: red;
-        text-align: right;
-        padding-right: 20px;
+        .node_model_list {
+            //right alignment of small posts
+            @include justify-content(flex-end);
+        }
     }
     .neighbours_content {
         width: 60%;
         max-width: 60%;
         min-width: 600px;
-        // @include flex-grow(3);
+
         // background: green;
     }
     .neighbours_followers {
         width: 20%;
         max-width: 20%;
         min-width: 200px;
-        // @include flex-grow(1);
+        padding-left: 10px;
         // background: blue;
-        padding-left: 20px;
     }
 
     .neighbours_followers, .neighbours_attachedto {
         .small_post_directive {
             text-align: left;
             margin-bottom: 5px;
-            max-width: 200px;
+            width: 200px;
         }
     }
 }
