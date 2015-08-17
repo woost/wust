@@ -10,7 +10,8 @@ function editTaglist() {
             tags: "=",
             onChange: "&",
             existingOnly: "@",
-            alwaysShow: "@"
+            alwaysShow: "@",
+            initialFocus: "@"
         },
         controller: editTaglistCtrl,
         controllerAs: "vm",

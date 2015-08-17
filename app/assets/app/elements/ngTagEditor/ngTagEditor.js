@@ -25,11 +25,13 @@ angular.module("wust.elements")
                 getSuggestions: "&",
                 onChange: "&",
                 existingOnly: "@",
-                alwaysShow: "@"
+                alwaysShow: "@",
+                initialFocus: "@"
             },
             templateUrl: "assets/app/elements/ngTagEditor/ngTagEditor.html",
             controller: ["$scope", "$attrs", "$element", "$filter",
                 function($scope, $attrs, $element, $filter) {
+                    $scope.setFocus = !!$scope.initialFocus;
                     $scope.suggestions = [];
                     $scope.search = "";
                     $scope.onChange = $scope.onChange ? $scope.onChange : function() {};
