@@ -1,4 +1,7 @@
 <div class="post-preview">
     <h2 ng-show="vm.displayTitle" ng-bind="vm.node.title"></h2>
-    <div ng-show="vm.node.description" markdown="vm.node.description"></div>
+    <div ng-show="vm.node.description" ng-switch="vm.trim">
+        <div ng-switch-when="undefined" markdown="vm.node.description"></div>
+        <div ng-switch-default markdown="vm.node.description | trim:true:vm.trim"></div>
+    </div>
 </div>

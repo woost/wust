@@ -8,7 +8,8 @@ function preview() {
         replace: true,
         templateUrl: "assets/app/elements/preview/preview.html",
         scope: {
-            node: "="
+            node: "=",
+            trim: "@"
         },
         controller: previewCtrl,
         controllerAs: "vm",
