@@ -72,7 +72,6 @@ function HistoryService(Post, DiscourseNode, store) {
     }
 
     function addNode(node) {
-        node = node.encode ? node.encode() : node;
         _.remove(self.visited, n => node.id === n.id);
         self.visited.push(node);
         self.visited.splice(0, self.visited.length - maximum);
