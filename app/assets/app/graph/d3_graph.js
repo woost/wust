@@ -1,8 +1,8 @@
 angular.module("wust.graph").directive("d3Graph", d3Graph);
 
-d3Graph.$inject = ["$window", "DiscourseNode", "Helpers", "$location", "$filter", "Post", "ModalEditService", "EditService"];
+d3Graph.$inject = ["$window", "DiscourseNode", "Helpers", "$location", "$filter", "Post", "ModalEditService", "EditService", "TagRelationEditService"];
 
-function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, ModalEditService, EditService) {
+function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, ModalEditService, EditService, TagRelationEditService) {
     return {
         restrict: "A",
         scope: false,
@@ -857,11 +857,19 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     // the connect button does not exist on hyperRelations.
                     //TODO: we need to make it impossible to drag on self loops and incident relations,
                     //is assured by backend.
-                    EditService.connectNodes(startNode, endNode);
+                    EditService.connectNodes(startNode, endNode).$then(response => {
+                        console.log(response);
+                        let connects = _.find(response.graph.nodes, n => n.isHyperRelation && startNode.id === n.startId && endNode.id === n.endId);
+                        if (connects === undefined) {
+                            console.warn(`cannot find connects relation for tag-modal: ${startNode} -> ${endNode}`);
+                            return;
+                        }
+
+                        TagRelationEditService.show(connects);
+                    });
                 }
             }
             // TODO: else { connect without dragging only by clicking }
-            // TODO: create self loops?
 
             this.isDragging = false;
             // preview is reading isDragging, so angular needs to know that it changed

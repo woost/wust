@@ -19,7 +19,7 @@ function EditService(Post, HistoryService, store, DiscourseNode, ZenService) {
         }
 
         apply({
-            id, title, description, label, original, tags, localId, referenceNode
+            id, title, description, label, original, tags, localId, referenceNode, isHyperRelation
         }) {
             tags = tags || [];
             this.id = id;
@@ -30,6 +30,7 @@ function EditService(Post, HistoryService, store, DiscourseNode, ZenService) {
             this.label = label;
             this.tags = angular.copy(tags);
             this.referenceNode = referenceNode;
+            this.isHyperRelation = isHyperRelation || false;
             this.original = original || {
                 id: this.id,
                 localId: this.localId,
@@ -72,6 +73,8 @@ function EditService(Post, HistoryService, store, DiscourseNode, ZenService) {
 
         save() {
             let dirtyModel = this.dirtyModel(true);
+            console.log("dirty model", dirtyModel);
+            this.setValidityProperties(dirtyModel);
             if (!this.canSave)
                 return;
 
@@ -82,7 +85,7 @@ function EditService(Post, HistoryService, store, DiscourseNode, ZenService) {
             let message = model.id === undefined ? "Added new node" : "Updated now";
 
             let referenceNode = this.referenceNode;
-            Post.$buildRaw(model).$update(dirtyModel).$then(data => {
+            return Post.$buildRaw(model).$update(dirtyModel).$then(data => {
                 humane.success(message);
 
                 // the response only holds newly added tags
@@ -124,11 +127,10 @@ function EditService(Post, HistoryService, store, DiscourseNode, ZenService) {
             }
         }
 
-        setValidityProperties() {
-            let dirtyModel = this.dirtyModel();
+        setValidityProperties(dirtyModel = this.dirtyModel()) {
             this.isPristine = _.isEmpty(dirtyModel);
             this.isLocal = this.id === undefined;
-            this.isValid = !_.isEmpty(this.title);
+            this.isValid = this.isHyperRelation || !_.isEmpty(this.title);
             this.canSave = this.isValid && (this.isLocal || !this.isPristine);
         }
 
@@ -229,7 +231,8 @@ function EditService(Post, HistoryService, store, DiscourseNode, ZenService) {
             let start = Post.$buildRaw(_.pick(startNode, "id"));
             ref = start.connectsTo.$buildRaw(_.pick(endNode, "id"));
         }
-        ref.$save({}).$then(response => {
+
+        return ref.$save({}).$then(response => {
             humane.success("Connected node");
             // add the infos we got from the node parameter
             let startResponse = _.find(response.graph.nodes, _.pick(startNode, "id"));
@@ -240,8 +243,8 @@ function EditService(Post, HistoryService, store, DiscourseNode, ZenService) {
         });
     }
 
-    function createSession() {
-        return new Session({}, true);
+    function createSession(node = {}, lazyAdd = true) {
+        return new Session(node, lazyAdd);
     }
 
     function editSession(session, index = 0) {
