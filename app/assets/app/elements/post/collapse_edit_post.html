@@ -2,7 +2,7 @@
     <div class="panel panel-default">
         <div class="panel-heading">
             <div class="pull-left left-controls">
-                <i ng-click="vm.node.expandedEditor = !vm.node.expandedEditor" class="accordion_toggle glyphicon" ng-class="{'glyphicon-chevron-down': vm.node.expandedEditor, 'glyphicon-chevron-right': !vm.node.expandedEditor}"></i>
+                <i ng-click="vm.node.expandedEditor = !vm.node.expandedEditor; vm.node.onChange()" class="accordion_toggle glyphicon" ng-class="{'glyphicon-chevron-down': vm.node.expandedEditor, 'glyphicon-chevron-right': !vm.node.expandedEditor}"></i>
             </div>
 
             <div class="center-controls" data-title="click to edit" bs-tooltip animation="" ui-draggable="true" drag="vm.node.encode ? vm.node.encode() : vm.node" drag-channel="{{(!vm.node.isLocal || vm.node.canSave) ? (vm.node.id === undefined ? 'scratch_create_connect' : 'scratch_connect') : 'move'}}" class="node">

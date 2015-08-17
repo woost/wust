@@ -10,10 +10,10 @@ function EditService(Post, HistoryService, store, DiscourseNode, ZenService) {
         constructor(other, lazyAdd = false) {
             // local id to identify nodes without an id
             this.localId = _.uniqueId();
+
             this.apply(other);
 
-            // initally only show editor if node has description
-            this.expandedEditor = !_.isEmpty(this.description);
+            this.expandedEditor = other.expandedEditor === undefined ? true : other.expandedEditor;
 
             this.lazyAdd = lazyAdd;
         }
@@ -24,6 +24,7 @@ function EditService(Post, HistoryService, store, DiscourseNode, ZenService) {
             tags = tags || [];
             this.id = id;
             this.localId = localId === undefined ? this.localId : localId;
+            this.title = title || "";
             this.title = title || "";
             this.description = description || "";
             this.label = label;
