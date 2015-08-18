@@ -16,9 +16,9 @@ function graphView() {
     };
 }
 
-graphViewCtrl.$inject = ["$scope", "DiscourseNode", "$filter", "EditService", "$state"];
+graphViewCtrl.$inject = ["$scope", "$stateParams", "FocusService", "$filter", "EditService", "$state"];
 
-function graphViewCtrl($scope, DiscourseNode, $filter, EditService, $state) {
+function graphViewCtrl($scope, $stateParams, FocusService, $filter, EditService, $state) {
     let vm = this;
 
     vm.addNodeToGraph = addNodeToGraph;
@@ -63,6 +63,9 @@ function graphViewCtrl($scope, DiscourseNode, $filter, EditService, $state) {
     }
 
     function onClick(node) {
-        $state.go("focus", _.pick(node, "id"));
+        if (node.id === $stateParams.id)
+            FocusService.activateTab(0); // show neighbours view
+        else
+            $state.go("focus", _.pick(node, "id"));
     }
 }
