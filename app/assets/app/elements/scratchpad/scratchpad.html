@@ -1,5 +1,5 @@
 <div id="scratchpad_component">
-    <button editable-text="vm.newPost.title" buttons="no" onaftersave="vm.editNewPost()" e-placeholder="TL,DR" e-required e-class="wust_form_input" class="new_post_button btn btn-default"><i class="fa fa-file-o"></i> New post</button>
+    <button editable-text="vm.newPost.title" buttons="no" onaftersave="vm.editNewPost()" e-placeholder="TL,DR" e-required e-class="wust_form_input" class="new_post_button btn btn-default">Add a Post</button>
     <button class="close view_close_button pull-right" ng-click="vm.sidebar.left.visible = false" aria-label="Close " data-title="hide scratchpad" bs-tooltip animation=""><span aria-hidden="true">&times;</span></button>
     <div id="edit_list">
         <div ng-repeat="node in vm.editList" class="ng-trans ng-trans-scale-up ease">
