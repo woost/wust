@@ -4,13 +4,13 @@
 }
 
 .wust_form {
-    input.ng-invalid/*.ng-touched*/ {
+    input.ng-invalid.ng-touched {
         border: 1px solid red;
     }
     input.ng-valid.ng-touched {
     }
 }
 
-input.wust_form_input.ng-invalid {
+input.wust_form_input.ng-invalid.ng-touched {
     border: 1px solid red;
 }
