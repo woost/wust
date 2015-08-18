@@ -21,7 +21,6 @@ object SeedInit extends Task with SeedTools {
         mergeClassification("Idea", color = Some(210)),
         mergeClassification("Pro", color = Some(105)),
         mergeClassification("Con", color = Some(359)),
-        mergeClassification("Comment", color = Some(-1)),
         mergeClassification("StartPost"),
         mergeClassification("repliesTo")
       )
