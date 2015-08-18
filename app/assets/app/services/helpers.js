@@ -1,4 +1,5 @@
 angular.module("wust.services").value("Helpers", {
+    fireWindowResizeEvent,
     mapFind,
     hashCode,
     hashToHsl,
@@ -12,6 +13,12 @@ angular.module("wust.services").value("Helpers", {
     clampLineByRects,
     coloredBorderWidth: "3px"
 });
+
+function fireWindowResizeEvent() {
+    var evt = document.createEvent("UIEvents");
+    evt.initUIEvent("resize", true, false,window,0);
+    window.dispatchEvent(evt);
+}
 
 function mapFind(arr, mapFunc, findFunc) {
     for (let i = 0; i < arr.length; i++) {

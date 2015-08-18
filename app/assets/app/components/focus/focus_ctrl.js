@@ -19,11 +19,7 @@ function FocusCtrl(Helpers, $stateParams, HistoryService, rootNode, ConnectedCom
 
             // fire window.resize event to recalculate d3 graph node dimensions.
             // they are 0x0 in some cases.
-            setTimeout( () => {
-                var evt = document.createEvent("UIEvents");
-                evt.initUIEvent("resize", true, false,window,0);
-                window.dispatchEvent(evt);
-            }, 200 );
+            setTimeout( () => Helpers.fireWindowResizeEvent(), 200 );
         }
     }
 

@@ -1,8 +1,8 @@
 angular.module("wust.services").service("SidebarService", SidebarService);
 
-SidebarService.$inject = ["store"];
+SidebarService.$inject = ["store", "Helpers"];
 
-function SidebarService(store) {
+function SidebarService(store, Helpers) {
     let sideStore = store.getNamespacedStore("sidebar");
 
     this.left = new Sidebar("left");
@@ -17,6 +17,7 @@ function SidebarService(store) {
             set: function(val) {
                 visible = !!val;
                 sideStore.set(name, visible);
+                setTimeout( () => Helpers.fireWindowResizeEvent(), 150 );
             }
         });
     }
