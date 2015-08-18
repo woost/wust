@@ -9,7 +9,7 @@ function PageCtrl(SidebarService, EditService) {
     vm.editNode = editNode;
 
     function editNode(data) {
-        SidebarService.visible = true;
+        SidebarService.left.visible = true;
         EditService.edit(data);
     }
 }
