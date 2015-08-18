@@ -8,7 +8,6 @@ function smallPost() {
         templateUrl: "assets/app/elements/post/small_post.html",
         scope: {
             node: "=",
-            valid: "=",
             onDisconnect: "="
         },
         controller: smallPostCtrl,
@@ -21,6 +20,4 @@ smallPostCtrl.$inject = [];
 
 function smallPostCtrl() {
     let vm = this;
-
-    vm.valid = vm.valid === undefined ? true : vm.valid;
 }
