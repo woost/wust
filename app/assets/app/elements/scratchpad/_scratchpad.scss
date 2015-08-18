@@ -1,6 +1,11 @@
 #scratchpad_component {
     height: 100%;
     padding: 5px;
+    .new_post_button {
+        font-style: normal;
+        text-decoration: none;
+        color: inherit;
+    }
     #edit_list {
         padding-top: 10px;
     }
