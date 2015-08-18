@@ -331,9 +331,9 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
         registerUIEvents() {
             //TODO: register only on added d3Nodes
             this.d3Node.select("div")
-                /*.on("click", this.ignoreHyperRelation(node => {
-                                        this.onClick(node);
-                                    }))*/
+                .on("click", this.ignoreHyperRelation(node => {
+                    this.onClick(node);
+                }))
                 .on("mouseover", d => scope.$apply(() => {
                     this.setNodeOffset(d);
                     vm.state.hoveredNode = d;
@@ -584,20 +584,20 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             this.d3Svg.style("width", this.width + "px").style("height", this.height + "px");
             this.d3Html.style("width", this.width + "px").style("height", this.height + "px");
 
-            // move old center to new center
-            let widthDiff = this.width - oldWidth;
-            let heightDiff = this.height - oldHeight;
-            let oldTranslate = this.zoom.translate();
-            let translate = [oldTranslate[0] + widthDiff/2, oldTranslate[1] + heightDiff/2];
+                // move old center to new center
+                let widthDiff = this.width - oldWidth;
+                let heightDiff = this.height - oldHeight;
+                let oldTranslate = this.zoom.translate();
+                let translate = [oldTranslate[0] + widthDiff/2, oldTranslate[1] + heightDiff/2];
 
-            if (duration > 0) {
-                this.d3HtmlContainer.transition().duration(duration).call(this.zoom.translate(translate).event);
-                this.d3SvgContainer.transition().duration(duration).call(this.zoom.translate(translate).event);
-            } else {
-                // skip animation if duration is zero
-                this.d3HtmlContainer.call(this.zoom.translate(translate).event);
-                this.d3SvgContainer.call(this.zoom.translate(translate).event);
-            }
+                if (duration > 0) {
+                    this.d3HtmlContainer.transition().duration(duration).call(this.zoom.translate(translate).event);
+                    this.d3SvgContainer.transition().duration(duration).call(this.zoom.translate(translate).event);
+                } else {
+                    // skip animation if duration is zero
+                    this.d3HtmlContainer.call(this.zoom.translate(translate).event);
+                    this.d3SvgContainer.call(this.zoom.translate(translate).event);
+                }
 
             this.drawGraph();
 
