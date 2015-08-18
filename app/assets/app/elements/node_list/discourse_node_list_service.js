@@ -146,8 +146,12 @@ function DiscourseNodeList() {
                 });
             }
 
+            canAdd(elem) {
+                return !this.exists(elem) && elem.id !== this.referenceNode.id;
+            }
+
             add(elem) {
-                if (this.exists(elem))
+                if (!this.canAdd(elem))
                     return;
 
                 let self = this;
