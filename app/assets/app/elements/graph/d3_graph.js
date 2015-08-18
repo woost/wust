@@ -450,8 +450,10 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             this.onDraw();
             if (this.visibleConvergence)
                 this.focusMarkedNodes();
-            else
+            else {
                 this.focusMarkedNodes(0);
+                setTimeout(() => this.focusRootNode(700), 0);
+            }
 
 
             this.d3HtmlContainer.classed({
@@ -622,6 +624,29 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             this.drawGraph();
         }
 
+        // focus the marked nodes and scale zoom accordingly
+        focusRootNode(duration = 500) {
+            if (this.width === 0 || this.height === 0) return;
+            if (!this.graph.rootNode) return;
+
+            let rootNode = this.graph.rootNode;
+
+            let center = [rootNode.x, rootNode.y];
+            let scale = Math.max(1, this.zoom.scale());
+
+            let translate = [this.width / 2 - center[0] * scale, this.height / 2 - center[1] * scale];
+
+            if (duration > 0) {
+                this.d3HtmlContainer.transition().duration(duration).call(this.zoom.translate(translate).scale(scale).event);
+                this.d3SvgContainer.transition().duration(duration).call(this.zoom.translate(translate).scale(scale).event);
+            } else {
+                // skip animation if duration is zero
+                this.d3HtmlContainer.call(this.zoom.translate(translate).scale(scale).event);
+                this.d3SvgContainer.call(this.zoom.translate(translate).scale(scale).event);
+            }
+
+            this.drawGraph();
+        }
 
         // filter the graph
         filter(matchingNodes) {
