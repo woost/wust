@@ -331,9 +331,11 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
         registerUIEvents() {
             //TODO: register only on added d3Nodes
             this.d3Node.select("div")
-                .on("click", this.ignoreHyperRelation(node => {
-                    this.onClick(node);
-                }))
+                // dragging will trigger onClick here,
+                // so register it in onDragMoveEnd
+                // .on("click", this.ignoreHyperRelation(node => {
+                //     this.onClick(node);
+                // }))
                 .on("mouseover", d => scope.$apply(() => {
                     this.setNodeOffset(d);
                     vm.state.hoveredNode = d;
@@ -584,6 +586,15 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             this.d3Svg.style("width", this.width + "px").style("height", this.height + "px");
             this.d3Html.style("width", this.width + "px").style("height", this.height + "px");
 
+            // this is the first graph display,
+            // so focus the rootNode
+            if(oldWidth === 0 && oldHeight === 0) {
+                this.focusMarkedNodes(0);
+                setTimeout(() => this.focusRootNode(), 200);
+            }
+
+            // only do this on a real resize. (not on tab changes etc)
+            if(oldWidth !== 0 && oldHeight !== 0) {
                 // move old center to new center
                 let widthDiff = this.width - oldWidth;
                 let heightDiff = this.height - oldHeight;
@@ -598,13 +609,15 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     this.d3HtmlContainer.call(this.zoom.translate(translate).event);
                     this.d3SvgContainer.call(this.zoom.translate(translate).event);
                 }
+            }
 
-            this.drawGraph();
 
             // if graph was hidden when initialized,
             // all foreign objects have size 0
             // this call recalculates the sizes
             this.recalculateNodeDimensions(this.graph.nodes);
+
+            this.drawGraph();
         }
 
 
@@ -936,6 +949,9 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 // if we were dragging before, the node should be fixed
                 this.setFixed(d);
             } else {
+                // onClick event on node is triggered here
+                this.onClick(d);
+
                 // if the user just clicked, the position should be reset.
                 // unsetFixed(graph, force, d);
                 // this is disabled, because we have the pin to unfix

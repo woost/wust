@@ -15,7 +15,7 @@ function FocusService(Helpers) {
             // we fire a resize event graph whenever the graph becomes active
             // we use our knowledge to know that index = 1 is the graph
             if (active && this.index === 1)
-                setTimeout( () => Helpers.fireWindowResizeEvent(), 200 );
+                _.defer(Helpers.fireWindowResizeEvent.bind(Helpers));
         }
     }
 
