@@ -239,8 +239,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.d3NodeReplyTool = this.d3NodeTools.append("div")
                     .attr("class", "nodetool replytool fa fa-reply");
 
-                this.d3NodeDeleteTool = this.d3NodeTools.append("div")
-                    .attr("class", "nodetool deletetool fa fa-trash");
+                // this.d3NodeDeleteTool = this.d3NodeTools.append("div")
+                //     .attr("class", "nodetool deletetool fa fa-trash");
 
                 /// remove nodes and relations
                 this.d3NodeContainerWithData.exit().remove();
@@ -350,7 +350,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             this.d3NodeConnectTool.call(this.dragConnect);
             this.d3NodeDisconnectTool.on("click", this.stopPropagationAfter(this.disconnectHyperRelation.bind(this))).call(this.disableDrag);
             this.d3NodeReplyTool.on("click", this.stopPropagationAfter(this.replyToNode.bind(this))).call(this.disableDrag);
-            this.d3NodeDeleteTool.on("click", this.stopPropagationAfter(this.removeNode.bind(this))).call(this.disableDrag);
+            // this.d3NodeDeleteTool.on("click", this.stopPropagationAfter(this.removeNode.bind(this))).call(this.disableDrag);
         }
 
 
