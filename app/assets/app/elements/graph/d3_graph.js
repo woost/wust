@@ -34,6 +34,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.width = rootDomElement.offsetWidth;
                 this.height = rootDomElement.offsetHeight;
                 this.dragInitiated = false; // if dragStart was triggered with the correct mouse button
+                this.commitCount = 0;
 
                 // state for drag+drop
                 this.isDragging = false;
@@ -72,8 +73,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.updateGraph({
                     newNodes: this.graph.nodes
                 });
-
-                this.converge();
             }
 
             initDom() {
@@ -159,6 +158,12 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             }
 
             updateGraph(changes) {
+                this.commitCount++;
+                // the first commit is only the rootNode
+                if(this.commitCount <= 1) return;
+                // the second commit brings the rest of the graph and triggers the convergence
+                if(this.commitCount === 2) this.converge();
+
                 //TODO: this really is an unwanted side effect, we should not sort nodes here
                 //add nodes to svg, first hypernodes then nodes, so the normal
                 //nodes are drawn on top of the hypernodes in the svg
@@ -246,15 +251,11 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
 
                 this.updateGraphRefs();
-                //TODO: take care of nodes where the title/description was changed
-                // nodes where only the title/description changed, are not part of changes.newNodes
-                this.recalculateNodeDimensions(changes.newNodes);
+                this.recalculateNodeDimensions(this.graph.nodes);
 
                 this.registerUIEvents();
                 this.force.nodes(this.graph.nodes); // nodes and relations get replaced instead of just changed by scalajs
                 this.force.links(this.graph.relations); // that's why we need to set the new references
-                // force.tick();
-                // drawGraph(graph, transformCompat);
                 this.force.start();
 
                 this.registerUIEvents();
@@ -485,10 +486,11 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
         recalculateNodeDimensions(nodes) {
             nodes.forEach(n => {
-                n.rect = {
-                    width: n.domNode.offsetWidth,
-                    height: n.domNode.offsetHeight
-                };
+                if(n.domNode)
+                    n.rect = {
+                        width: n.domNode.offsetWidth,
+                        height: n.domNode.offsetHeight
+                    };
             });
         }
 
