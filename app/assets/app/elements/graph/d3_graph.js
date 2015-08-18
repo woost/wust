@@ -10,8 +10,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
     };
 
     function link(scope, element) {
-        //TODO: ugly that we have to know that the embedding controller uses
-        //controllerAs 'vm', but we want to share the scope with it
         let vm = scope.vm;
 
         class D3Graph {
