@@ -1,27 +1,9 @@
 angular.module("wust.components").controller("FocusCtrl", FocusCtrl);
 
-FocusCtrl.$inject = ["Helpers", "$stateParams", "HistoryService", "rootNode", "ConnectedComponents", "$q"];
+FocusCtrl.$inject = ["Helpers", "FocusService", "$stateParams", "HistoryService", "rootNode", "ConnectedComponents", "$q"];
 
-function FocusCtrl(Helpers, $stateParams, HistoryService, rootNode, ConnectedComponents, $q) {
+function FocusCtrl(Helpers, FocusService, $stateParams, HistoryService, rootNode, ConnectedComponents, $q) {
     let vm = this;
-
-    class Tab {
-        constructor(index) {
-            this.index = index;
-        }
-        get active() {
-            return this._active;
-        }
-        set active(active) {
-            this._active = active;
-            // if (active)
-            //     HistoryService.changeActiveView(this.index);
-
-            // fire window.resize event to recalculate d3 graph node dimensions.
-            // they are 0x0 in some cases.
-            setTimeout( () => Helpers.fireWindowResizeEvent(), 200 );
-        }
-    }
 
     let rawRootNode = rootNode.$encode();
     //TODO: encode misses tags
@@ -37,8 +19,7 @@ function FocusCtrl(Helpers, $stateParams, HistoryService, rootNode, ConnectedCom
     vm.neighboursComponent = component.hyperWrap("neighbours");
     vm.componentLoading = true;
 
-    vm.tabViews = _.map([0, 1, 2, 3], i => new Tab(i));
-    // vm.tabViews[HistoryService.activeViewIndex]._active = true;
+    vm.tabViews = FocusService.tabViews;
     vm.tabViews[0]._active = true;
 
     // we are viewing details about a node, so add it to the nodehistory
