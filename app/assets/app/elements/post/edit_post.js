@@ -41,6 +41,21 @@ function editPostCtrl(DiscourseNode) {
         }
     };
 
+    function update(editor) {
+        var shouldShow = !editor.session.getValue().length;
+        var node = editor.renderer.emptyMessageNode;
+        if (!shouldShow && node) {
+            editor.renderer.scroller.removeChild(editor.renderer.emptyMessageNode);
+            editor.renderer.emptyMessageNode = null;
+        } else if (shouldShow && !node) {
+            node = editor.renderer.emptyMessageNode = document.createElement("div");
+            node.textContent = "Optional description";
+            node.className = "ace_invisible ace_emptyMessage";
+            node.style.padding = "0 9px";
+            editor.renderer.scroller.appendChild(node);
+        }
+    }
+
     function onEditorBlur() {
         vm.node.onChange();
     }
@@ -48,5 +63,7 @@ function editPostCtrl(DiscourseNode) {
     function onEditorLoad(editor) {
         // editor.setKeyboardHandler("ace/keyboard/vim");
         editor.$blockScrolling = Infinity;
+        update(editor);
+        editor.on("input", _.partial(update, editor));
     }
 }
