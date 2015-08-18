@@ -14,8 +14,8 @@ function FocusCtrl(Helpers, $stateParams, HistoryService, rootNode, ConnectedCom
         }
         set active(active) {
             this._active = active;
-            if (active)
-                HistoryService.changeActiveView(this.index);
+            // if (active)
+            //     HistoryService.changeActiveView(this.index);
 
             // fire window.resize event to recalculate d3 graph node dimensions.
             // they are 0x0 in some cases.
@@ -38,7 +38,8 @@ function FocusCtrl(Helpers, $stateParams, HistoryService, rootNode, ConnectedCom
     vm.componentLoading = true;
 
     vm.tabViews = _.map([0, 1, 2, 3], i => new Tab(i));
-    vm.tabViews[HistoryService.activeViewIndex]._active = true;
+    // vm.tabViews[HistoryService.activeViewIndex]._active = true;
+    vm.tabViews[0]._active = true;
 
     // we are viewing details about a node, so add it to the nodehistory
     HistoryService.add(vm.graphComponent.rootNode);
