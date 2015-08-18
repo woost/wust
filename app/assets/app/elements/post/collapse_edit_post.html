@@ -5,7 +5,7 @@
                 <i ng-click="vm.node.expandedEditor = !vm.node.expandedEditor; vm.node.onChange()" class="accordion_toggle glyphicon" ng-class="{'glyphicon-chevron-down': vm.node.expandedEditor, 'glyphicon-chevron-right': !vm.node.expandedEditor}"></i>
             </div>
 
-            <div class="center-controls" data-title="click to edit" bs-tooltip animation="" ui-draggable="true" drag="vm.node.encode ? vm.node.encode() : vm.node" drag-channel="{{(!vm.node.isLocal || vm.node.canSave) ? (vm.node.id === undefined ? 'scratch_create_connect' : 'scratch_connect') : 'move'}}" class="node">
+            <div class="center-controls" data-title="click to edit" bs-tooltip animation="" ui-draggable="true" drag="vm.node.encode ? vm.node.encode() : vm.node" drag-channel="{{vm.node.canSave ? 'scratch_node' : 'scratch_move'}}" class="node">
                 <a editable-text="vm.node.title" ng-bind="vm.node.title" onaftersave="vm.node.onChange()" e-ng-change="vm.editableChange($data)" blur="submit" buttons="no" e-placeholder="TL;DR" e-required ng-class="{'is_invalid': !vm.node.isValid}" e-class="wust_form_input">
                 </a>
             </div>
