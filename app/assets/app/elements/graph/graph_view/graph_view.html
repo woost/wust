@@ -5,6 +5,6 @@
         </div>
     </div>
     <div class="post-preview-frame" ng-class="{left: !vm.state.hoveredNode.onLeftHalf, right: vm.state.hoveredNode.onLeftHalf, top: !vm.state.hoveredNode.onUpperHalf, bottom: vm.state.hoveredNode.onUpperHalf}" ng-show="vm.state.hoveredNode && !vm.state.hoveredNode.isHyperRelation && !vm.d3Graph.isDragging">
-        <div preview node="vm.state.hoveredNode" trim="400"></div>
+        <div preview node="vm.state.hoveredNode"></div>
     </div>
 </div>

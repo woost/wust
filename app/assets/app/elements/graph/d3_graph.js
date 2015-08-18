@@ -960,6 +960,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             this.isDragging = false;
             // preview is reading isDragging, so angular needs to know that it changed
             scope.$apply();
+            this.setNodeOffset(d);
 
             d.d3NodeContainer.classed({
                 "moving": false

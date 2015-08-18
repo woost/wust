@@ -254,6 +254,8 @@
         width: 30%;
         min-width: 300px;
         max-width: 500px;
+        max-height: 100%;
+        overflow: hidden;
         z-index: $zindex_post_preview_frame;
         background: #FEFEFE;
 
