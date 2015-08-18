@@ -73,7 +73,6 @@ function EditService(Post, HistoryService, store, DiscourseNode, ZenService) {
 
         save() {
             let dirtyModel = this.dirtyModel(true);
-            console.log("dirty model", dirtyModel);
             this.setValidityProperties(dirtyModel);
             if (!this.canSave)
                 return;
