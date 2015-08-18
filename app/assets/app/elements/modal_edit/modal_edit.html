@@ -5,7 +5,7 @@
                 <h3 class="modal-title">Post</h3>
                 <span ng-if="vm.node.referenceNode !== undefined">
                     <label>Replies to</label>
-                    <span small-post node="vm.node.referenceNode"></span>
+                    <span small-post no-link="true" node="vm.node.referenceNode"></span>
                 </span>
             </div>
             <div ng-switch="vm.previewEnabled" class="modal-body">

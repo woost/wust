@@ -5,7 +5,7 @@
         <div small-post node="vm.node.startNode"></div>
         <div small-post node="vm.node.endNode"></div>
     </div>
-    <a ng-switch-default ng-bind="vm.node.title" ui-sref="focus({id: vm.node.id})"></a>
+    <a ng-switch-default ng-bind="vm.node.title" ui-sref="{{vm.noLink ? '.' : 'focus({id: vm.node.id})'}}"></a>
 </span>
 <span class="tag_circle_container pull-right">
     <span ng-repeat="tag in vm.node.tags | sorttags" class="tag_circle_title" data-title="{{tag.title}}" bs-tooltip animation="">
