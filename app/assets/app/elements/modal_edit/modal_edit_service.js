@@ -1,8 +1,8 @@
 angular.module("wust.elements").service("ModalEditService", ModalEditService);
 
-ModalEditService.$inject = ["$rootScope", "$modal", "EditService"];
+ModalEditService.$inject = ["$rootScope", "$modal", "EditService", "$state"];
 
-function ModalEditService($rootScope, $modal, EditService) {
+function ModalEditService($rootScope, $modal, EditService, $state) {
     let self = this;
 
     let modalInstance = $modal({
@@ -32,7 +32,7 @@ function ModalEditService($rootScope, $modal, EditService) {
         if (currentNode === undefined)
             return;
 
-        currentNode.save();
+        currentNode.save().$then(() => $state.go("focus", _.pick(currentNode, "id")));
     }
 
     function showModal() {
