@@ -22,11 +22,15 @@ angular.module("wust.elements").directive("tagEditor", function() {
                         $scope.suggestions = $scope.getSuggestions({search: value});
                     });
                     $scope.add = function(tag) {
-                        if ($scope.existingOnly && tag.id === undefined)
+                        if (_.trim(tag.title).length === 0)
                             return;
 
                         tag = tag.encode ? tag.encode() : tag;
-                        if (!_.any($scope.tags, tag)) {
+                        tag = _.find($scope.suggestions, _.pick(tag, "title")) || tag;
+                        if ($scope.existingOnly && tag.id === undefined)
+                            return;
+
+                        if (!_.any($scope.tags, _.pick(tag, "title"))) {
                             $scope.tags.push(tag);
                             $scope.onChange();
                         }
