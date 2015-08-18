@@ -9,7 +9,6 @@
 }
 #zen_component {
     padding: 5px;
-    text-align: center;
     left: 0px;
     background: white;
     width: 100%;
@@ -19,6 +18,8 @@
     z-index: $zindex_zen;
     overflow: auto;
     .zenetized_preview {
+        max-width: 650px;
+        margin: auto;
         padding: 10px 40px;
         min-height: 100%;
     }
