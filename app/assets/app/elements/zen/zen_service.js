@@ -1,4 +1,4 @@
-angular.module("wust.services").service("ZenService", ZenService);
+angular.module("wust.elements").service("ZenService", ZenService);
 
 ZenService.$inject = [];
 
