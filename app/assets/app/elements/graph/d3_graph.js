@@ -1,4 +1,4 @@
-angular.module("wust.graph").directive("d3Graph", d3Graph);
+angular.module("wust.elements").directive("d3Graph", d3Graph);
 
 d3Graph.$inject = ["$window", "DiscourseNode", "Helpers", "$location", "$filter", "Post", "ModalEditService", "EditService", "TagRelationEditService"];
 

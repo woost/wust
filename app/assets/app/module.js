@@ -9,6 +9,7 @@ angular.module("wust", [
     "template/tabs/tabset.html",
     "mgcrea.ngStrap",
     "ang-drag-drop",
+    "ui.ace",
     "as.sortable",
     "ngSanitize",
     "uiSwitch",
@@ -16,7 +17,6 @@ angular.module("wust", [
     "wust.config",
     "wust.filters",
     "wust.elements",
-    "wust.graph",
     "wust.components"
 ]);
 
@@ -35,7 +35,6 @@ angular.module("wust.api", [
 ]);
 
 angular.module("wust.components", [
-    "ui.ace",
     "wust.services"
 ]);
 
@@ -46,7 +45,5 @@ angular.module("wust.elements", [
 angular.module("wust.services", [
     "angular-storage"
 ]);
-
-angular.module("wust.graph", []);
 
 angular.module("wust.filters", []);

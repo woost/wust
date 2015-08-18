@@ -1,11 +1,11 @@
-angular.module("wust.graph").directive("graphView", graphView);
+angular.module("wust.elements").directive("graphView", graphView);
 
 graphView.$inject = [];
 
 function graphView() {
     return {
         restrict: "A",
-        templateUrl: "assets/app/graph/graph_view/graph_view.html",
+        templateUrl: "assets/app/elements/graph/graph_view/graph_view.html",
         replace: true,
         scope: {
             graph: "="
