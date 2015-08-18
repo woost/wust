@@ -1,3 +1,4 @@
+// TODO: please delete me
 angular.module("wust.components").controller("NewStreamCtrl", NewStreamCtrl);
 
 NewStreamCtrl.$inject = ["Search", "StreamService"];
@@ -17,7 +18,8 @@ function NewStreamCtrl(Search, StreamService) {
 
     function save() {
         if (currentEditStream) {
-            StreamService.refreshStream(currentEditStream, vm.selectedTags);
+            currentEditStream.tags = vm.selectedTags;
+            StreamService.refreshStream(currentEditStream);
         } else {
             StreamService.push(vm.selectedTags);
         }

@@ -20,7 +20,7 @@ function StreamService(Search, DiscourseNode, store, Helpers) {
     }
 
     function pushList(tags) {
-        if (!_.isArray(tags) || _.isEmpty(tags))
+        if (!_.isArray(tags))
             return;
 
         let stream = {
@@ -37,15 +37,10 @@ function StreamService(Search, DiscourseNode, store, Helpers) {
         storeList();
     }
 
-    function refreshStream(stream, tags) {
-        if (_.isEmpty(tags)) {
-            _.remove(self.streams, stream);
-        } else {
-            stream.tags = tags;
-            stream.posts.$refresh({
-                tags: tags.map(t => t.id)
-            });
-        }
+    function refreshStream(stream) {
+        stream.posts.$refresh({
+            tags: stream.tags.map(t => t.id)
+        });
 
         storeList();
     }

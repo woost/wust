@@ -15,10 +15,12 @@ function DashboardCtrl($modal, DiscourseNode, StreamService, Recent) {
 
     vm.streams = StreamService.streams;
     vm.removeStream = StreamService.remove;
+    vm.refreshStream = StreamService.refreshStream;
 
     vm.editModal = editModal;
     vm.showModal = showModal;
     vm.hideModal = hideModal;
+    vm.newStream = newStream;
 
     vm.sortableOptions = {
         containment: "#stream_list",
@@ -37,6 +39,10 @@ function DashboardCtrl($modal, DiscourseNode, StreamService, Recent) {
 
     function acceptDrop(sourceItemHandleScope, destSortableScope, destItemScope) {
         return sourceItemHandleScope.$parent.$parent.$id === destSortableScope.$id;
+    }
+
+    function newStream() {
+        StreamService.push([]);
     }
 
     function showModal() {
