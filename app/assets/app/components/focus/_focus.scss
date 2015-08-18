@@ -9,6 +9,11 @@
     .tabs-left, .nav, .tab-content, .tab-pane {
         height: inherit;
     }
+
+    .nav > li > a {
+        padding: 3px;
+    }
+
     .tab-content {
         overflow: auto;
     }
