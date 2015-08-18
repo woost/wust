@@ -576,15 +576,34 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
         }
 
         // resize graph according to the current element dimensions
-        resizeGraph() {
+        resizeGraph(event, duration = 500) {
+            let oldWidth = this.width;
+            let oldHeight = this.height;
             this.width = this.rootDomElement.offsetWidth;
             this.height = this.rootDomElement.offsetHeight;
             this.d3Svg.style("width", this.width + "px").style("height", this.height + "px");
             this.d3Html.style("width", this.width + "px").style("height", this.height + "px");
+
+            // move old center to new center
+            let widthDiff = this.width - oldWidth;
+            let heightDiff = this.height - oldHeight;
+            let oldTranslate = this.zoom.translate();
+            let translate = [oldTranslate[0] + widthDiff/2, oldTranslate[1] + heightDiff/2];
+
+            if (duration > 0) {
+                this.d3HtmlContainer.transition().duration(duration).call(this.zoom.translate(translate).event);
+                this.d3SvgContainer.transition().duration(duration).call(this.zoom.translate(translate).event);
+            } else {
+                // skip animation if duration is zero
+                this.d3HtmlContainer.call(this.zoom.translate(translate).event);
+                this.d3SvgContainer.call(this.zoom.translate(translate).event);
+            }
+
+            this.drawGraph();
+
             // if graph was hidden when initialized,
             // all foreign objects have size 0
             // this call recalculates the sizes
-            this.focusMarkedNodes();
             this.recalculateNodeDimensions(this.graph.nodes);
         }
 
