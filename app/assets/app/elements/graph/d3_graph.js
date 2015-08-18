@@ -24,7 +24,9 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.visibleConvergence = false;
                 this.debugDraw = false;
                 this.hyperRelationAlignForce = 0.5;
-                this.nodeVerticalForce = 1;
+                this.nodeVerticalForceFactor = 1;
+                this.stopForceOnPan = true;
+                this.stopForceAfterNodeDrag = true;
 
                 // state
                 this.drawOnTick = this.drawOnTick = this.visibleConvergence;
@@ -313,7 +315,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             this.d3Html.call(this.zoom)
                 .on("dblclick.zoom", null)
                 .on("mousedown", () => {
-                    this.force.stop();
+                    if(this.stopForceOnPan) this.force.stop();
                 })
                 .on("dblclick", () => {
                     this.force.resume();
@@ -527,7 +529,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             // pull nodes with more more children up
             this.graph.nonHyperRelationNodes.forEach(node => {
                 if (node.fixed !== true) {
-                    node.y += (node.verticalForce - this.graph.nonHyperRelationNodes.length / 2) * e.alpha * this.nodeVerticalForce;
+                    node.y += (node.verticalForce - this.graph.nonHyperRelationNodes.length / 2) * e.alpha * this.nodeVerticalForceFactor;
                 }
             });
 
@@ -676,7 +678,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
             // the fixed class could change the elements dimensions
             this.recalculateNodeDimensions([d]);
-            this.force.alpha(0);
+            if(this.stopForceAfterNodeDrag) this.force.alpha(0);
         }
 
         // unfix the position of a given node
