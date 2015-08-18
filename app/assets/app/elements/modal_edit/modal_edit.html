@@ -2,9 +2,8 @@
     <form class="wust_form modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title">Post</h3>
                 <span ng-if="vm.node.referenceNode !== undefined">
-                    <label>Replies to</label>
+                    <div>Replies to</div>
                     <span small-post no-link="true" node="vm.node.referenceNode"></span>
                 </span>
             </div>
@@ -12,7 +11,7 @@
                 <div ng-switch-when="true" preview node="vm.node" class="panel panel-default"></div>
                 <div ng-switch-default class="panel panel-default">
                     <div class="panel-heading">
-                        <input type="text" class="form-control" focus-me="vm.hasFocus" ng-blur="vm.hasFocus = false"  ng-model="vm.node.title" ng-change="vm.node.onChange()" placeholder="TL;DR" required>
+                        <input type="text" class="tldr_input form-control" focus-me="vm.hasFocus" ng-blur="vm.hasFocus = false"  ng-model="vm.node.title" ng-change="vm.node.onChange()" placeholder="TL;DR" required>
                     </div>
                     <div class="panel-body">
                         <div edit-post node="vm.node"></div>
