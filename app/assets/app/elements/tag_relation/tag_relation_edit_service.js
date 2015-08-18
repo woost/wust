@@ -1,4 +1,4 @@
-angular.module("wust.services").service("TagRelationEditService", TagRelationEditService);
+angular.module("wust.elements").service("TagRelationEditService", TagRelationEditService);
 
 TagRelationEditService.$inject = ["$rootScope", "$modal", "EditService"];
 
@@ -7,7 +7,7 @@ function TagRelationEditService($rootScope, $modal, EditService) {
 
     let modalInstance = $modal({
         show: false,
-        templateUrl: "assets/app/components/tags/tag_relation.html",
+        templateUrl: "assets/app/elements/tag_relation/tag_relation.html",
         controller: "TagRelationCtrl",
         controllerAs: "vm",
         animation: "am-fade-and-slide-top"

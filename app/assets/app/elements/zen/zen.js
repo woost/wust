@@ -1,4 +1,4 @@
-angular.module("wust.components").directive("zen", zen);
+angular.module("wust.elements").directive("zen", zen);
 
 zen.$inject = [];
 

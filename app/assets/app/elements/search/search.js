@@ -1,4 +1,4 @@
-angular.module("wust.components").directive("search", search);
+angular.module("wust.elements").directive("search", search);
 
 search.$inject = [];
 

@@ -1,4 +1,4 @@
-angular.module("wust.components").directive("scratchpad", scratchpad);
+angular.module("wust.elements").directive("scratchpad", scratchpad);
 
 scratchpad.$inject = [];
 

@@ -1,4 +1,4 @@
-angular.module("wust.components").controller("TagRelationCtrl", TagRelationCtrl);
+angular.module("wust.elements").controller("TagRelationCtrl", TagRelationCtrl);
 
 TagRelationCtrl.$inject = ["TagRelationEditService"];
 

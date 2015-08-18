@@ -1,4 +1,4 @@
-angular.module("wust.components").controller("ModalEditCtrl", ModalEditCtrl);
+angular.module("wust.elements").controller("ModalEditCtrl", ModalEditCtrl);
 
 ModalEditCtrl.$inject = ["ModalEditService"];
 

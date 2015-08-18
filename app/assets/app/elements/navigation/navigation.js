@@ -1,4 +1,4 @@
-angular.module("wust.components").directive("navigation", navigation);
+angular.module("wust.elements").directive("navigation", navigation);
 
 navigation.$inject = [];
 

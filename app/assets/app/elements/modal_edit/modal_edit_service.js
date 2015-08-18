@@ -1,4 +1,4 @@
-angular.module("wust.services").service("ModalEditService", ModalEditService);
+angular.module("wust.elements").service("ModalEditService", ModalEditService);
 
 ModalEditService.$inject = ["$rootScope", "$modal", "EditService"];
 
