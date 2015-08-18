@@ -22,9 +22,9 @@ lazy val wust = (project in file(".")).settings(
     // in case we need to export shared code to js:
     // https://stackoverflow.com/questions/28413266/how-to-export-properties-of-shared-case-classes
     // angular
-    "org.webjars.bower" % "angular" % "1.4.2",
-    "org.webjars.bower" % "angular-animate" % "1.4.2",
-    "org.webjars.bower" % "angular-sanitize" % "1.4.2",
+    "org.webjars.bower" % "angular" % "1.4.4",
+    "org.webjars.bower" % "angular-animate" % "1.4.4",
+    "org.webjars.bower" % "angular-sanitize" % "1.4.4",
     "org.webjars.bower" % "angular-ui-router" % "0.2.15",
     "org.webjars.bower" % "angular-bootstrap" % "0.13.1",
     "org.webjars.bower" % "angular-strap" % "2.3.1", //similar (maybe even better?) to angular-ui-bootstrap but with working popover
