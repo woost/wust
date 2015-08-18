@@ -21,7 +21,7 @@
             </div>
             <div class="modal-footer">
                 <span class="pull-left btn btn-default" style='cursor:pointer' ng-click='vm.previewEnabled = !vm.previewEnabled' data-title='preview' bs-tooltip animation=''><i class="fa" ng-class="{'fa-eye-slash': !vm.previewEnabled, 'fa-eye': vm.previewEnabled}"></i></span>
-                <span class="btn btn-default" ng-click="$hide()">discard</span>
+                <span class="btn btn-default" ng-click="$hide()">Discard</span>
                 <span class="btn btn-success" type="submit" ng-click="vm.save();$hide()" ng-disabled="!vm.node.canSave"><i class="fa" ng-class="{'fa-reply': vm.node.referenceNode !== undefined, 'fa-paper-plane-o': vm.node.referenceNode === undefined}"></i></span>
             </div>
         </div>
