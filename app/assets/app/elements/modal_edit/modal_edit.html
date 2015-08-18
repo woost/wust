@@ -3,8 +3,8 @@
         <div class="modal-content">
             <div class="modal-header">
                 <span ng-if="vm.node.referenceNode !== undefined">
-                    <div>Replies to</div>
-                    <span small-post no-link="true" node="vm.node.referenceNode"></span>
+                    <label>Replies to</label>
+                    <span small-post node="vm.node.referenceNode"></span>
                 </span>
             </div>
             <div ng-switch="vm.previewEnabled" class="modal-body">

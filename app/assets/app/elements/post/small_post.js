@@ -8,8 +8,7 @@ function smallPost() {
         templateUrl: "assets/app/elements/post/small_post.html",
         scope: {
             node: "=",
-            onDisconnect: "=",
-            noLink: "@"
+            onDisconnect: "="
         },
         controller: smallPostCtrl,
         controllerAs: "vm",
