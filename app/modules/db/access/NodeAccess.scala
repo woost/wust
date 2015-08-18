@@ -46,7 +46,7 @@ trait NodeReadBase[NODE <: UuidNode] extends NodeAccessDefault[NODE] {
     val node = factory.matchesOnUuid(uuid)
     //TODO method for only resolving matches...
     db.transaction(_.persistChanges(node)) match {
-      case Some(err) => Left(BadRequest(s"Cannot find node with uuid '$uuid': $err"))
+      case Some(err) => Left(NotFound(s"Cannot find node with uuid '$uuid': $err"))
       case None => Right(node)
     }
   }
