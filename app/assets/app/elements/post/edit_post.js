@@ -38,7 +38,9 @@ function editPostCtrl(DiscourseNode) {
                 showPrintMargin: false,
                 enableSnippets: false,
                 enableBasicAutocompletion: false,
-                enableLiveAutocompletion: false
+                enableLiveAutocompletion: false,
+                fontFamily: "inconsolata",
+                fontSize: "16px"
             }
         }
     };
@@ -53,7 +55,7 @@ function editPostCtrl(DiscourseNode) {
             node = editor.renderer.emptyMessageNode = document.createElement("div");
             node.textContent = "Optional description";
             node.className = "ace_invisible ace_emptyMessage";
-            node.style.padding = "0 9px";
+            node.style.padding = "5px 5px";
             editor.renderer.scroller.appendChild(node);
         }
     }
