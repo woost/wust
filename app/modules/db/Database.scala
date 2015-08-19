@@ -127,10 +127,14 @@ object Database {
 
   def deleteNodes[NODE <: UuidNode](definitions: NodeDefinition[NODE]*) {
     val discourse = discourseGraph(definitions: _*)
-    discourse.graph.nodes.clear()
-    db.transaction { tx =>
-      tx.persistChanges(discourse.graph)
-      model.WustSchema.deleteConnectsGarbage(tx)
+    if (!discourse.graph.nodes.isEmpty) {
+      //TODO clear does not emit changes
+      //discourse.graph.nodes.clear()
+      discourse.graph.nodes -= discourse.graph.nodes.head
+      db.transaction { tx =>
+        tx.persistChanges(discourse.graph)
+        model.WustSchema.deleteConnectsGarbage(tx)
+      }
     }
   }
 
