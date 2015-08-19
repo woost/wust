@@ -67,7 +67,7 @@ function EditService(Post, HistoryService, store, DiscourseNode, ZenService) {
             return dirtyModel;
         }
 
-        save() {
+        save(connectCallback = _.noop) {
             let dirtyModel = this.dirtyModel(true);
             this.setValidityProperties(dirtyModel);
             if (!this.canSave)
@@ -92,7 +92,7 @@ function EditService(Post, HistoryService, store, DiscourseNode, ZenService) {
                 if (referenceNode === undefined) {
                     HistoryService.updateCurrentView(this.encode());
                 } else {
-                    connectNodes(this.encode(), referenceNode);
+                    connectNodes(this.encode(), referenceNode).$then(connectCallback);
                 }
             }, () => this.setValidityProperties());
         }

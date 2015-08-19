@@ -24,11 +24,15 @@ function ModalEditService($rootScope, $modal, EditService, $state) {
         }
     });
 
-    function save() {
+    function save(connectCallback) {
         if (currentNode === undefined)
             return;
 
-        currentNode.save().$then(() => $state.go("focus", _.pick(currentNode, "id")));
+        let promise = currentNode.save(connectCallback);
+        if (currentNode.referenceNode === undefined)
+            promise.$then(() => $state.go("focus", _.pick(currentNode, "id")));
+
+        return promise;
     }
 
     function showModal() {
