@@ -1,10 +1,10 @@
 <div id="dashboard_component">
     <div id="posts_view">
         <div id="header_list">
-            <h2>
+            <h3>
                 Streams
                 <button class="btn btn-default" type="button" animation="am-fade-and-scale-down" ng-click="vm.newStream()"><i class="fa fa-plus"></i></button>
-            </h2>
+            </h3>
         </div>
         <div id="stream_list" as-sortable="vm.sortableOptions" ng-model="vm.streams">
             <div class="table container ng-trans ng-trans-scale-up ease as-sortable-item" ng-animate-children as-sortable-item ng-repeat="stream in vm.streams">
