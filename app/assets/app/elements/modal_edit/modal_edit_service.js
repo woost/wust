@@ -20,10 +20,6 @@ function ModalEditService($rootScope, $modal, EditService, $state) {
     let currentNode;
     Object.defineProperty(this, "currentNode", {
         get: () => {
-            // if (currentNode === undefined || !currentNode.isLocal) {
-            //     currentNode = EditService.edit();
-            // }
-
             return currentNode;
         }
     });
