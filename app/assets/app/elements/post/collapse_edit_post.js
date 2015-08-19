@@ -24,6 +24,17 @@ function collapseEditPostCtrl() {
 
     vm.editableChange = editableChange;
 
+    vm.save = save;
+
+    function save() {
+        if (vm.tagSearch) {
+            vm.node.tags.push({title: vm.tagSearch});
+            vm.tagSearch = "";
+        }
+
+        vm.node.save();
+    }
+
     function editableChange(data) {
         vm.node.title = data;
         vm.node.onChange();

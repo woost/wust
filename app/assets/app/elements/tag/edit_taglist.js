@@ -8,6 +8,7 @@ function editTaglist() {
         templateUrl: "assets/app/elements/tag/edit_taglist.html",
         scope: {
             tags: "=",
+            tagSearch: "=",
             onChange: "&",
             existingOnly: "@",
             alwaysShow: "@",

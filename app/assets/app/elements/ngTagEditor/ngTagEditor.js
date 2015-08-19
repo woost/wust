@@ -3,6 +3,7 @@ angular.module("wust.elements").directive("tagEditor", function() {
             restrict: "AE",
             scope: {
                 tags: "=",
+                tagSearch: "=",
                 getSuggestions: "&",
                 onChange: "&",
                 existingOnly: "@",
@@ -14,13 +15,13 @@ angular.module("wust.elements").directive("tagEditor", function() {
                 function($scope, $attrs, $element, $filter) {
                     $scope.setFocus = !!$scope.initialFocus;
                     $scope.suggestions = [];
-                    $scope.search = "";
+                    $scope.tagSearch = $scope.tagSearch || "";
                     $scope.onChange = $scope.onChange ? $scope.onChange : function() {};
 
                     let completeTabbing, ignoreNextSuggestion;
                     $scope.getSuggestions = $scope.getSuggestions ? $scope.getSuggestions : function() { return []; };
 
-                    $scope.$watch("search", function(value) {
+                    $scope.$watch("tagSearch", function(value) {
                         if (!ignoreNextSuggestion && completeTabbing === undefined) {
                             $scope.getSuggestions({search: value}).$then(val => $scope.suggestions = val);
                         }
@@ -43,7 +44,7 @@ angular.module("wust.elements").directive("tagEditor", function() {
                             $scope.onChange();
                         }
 
-                        $scope.search = "";
+                        $scope.tagSearch = "";
                     };
                     $scope.remove = function(index) {
                         $scope.tags.splice(index, 1);
@@ -54,18 +55,18 @@ angular.module("wust.elements").directive("tagEditor", function() {
                         if (e.which === 9) { /* tab */
                             if (completeTabbing === undefined) {
                                 if ($scope.suggestions.length > 0) {
-                                    completeTabbing = $scope.search;
-                                    $scope.search = $scope.suggestions[0].title;
+                                    completeTabbing = $scope.tagSearch;
+                                    $scope.tagSearch = $scope.suggestions[0].title;
                                     $scope.$apply();
                                     e.preventDefault();
                                 }
                             } else {
-                                let idx = _.findIndex($scope.suggestions, {title: $scope.search});
+                                let idx = _.findIndex($scope.suggestions, {title: $scope.tagSearch});
                                 if (idx >= 0) {
                                     if (idx < $scope.suggestions.length - 1) {
-                                        $scope.search = $scope.suggestions[idx + 1].title;
+                                        $scope.tagSearch = $scope.suggestions[idx + 1].title;
                                     } else {
-                                        $scope.search = completeTabbing;
+                                        $scope.tagSearch = completeTabbing;
                                         ignoreNextSuggestion = true;
                                         completeTabbing = undefined;
                                     }
@@ -74,7 +75,7 @@ angular.module("wust.elements").directive("tagEditor", function() {
                                 }
                             }
                         } else if (e.which === 8) { /* backspace */
-                            if ($scope.search.length === 0 &&
+                            if ($scope.tagSearch.length === 0 &&
                                 $scope.tags.length) {
                                 $scope.$apply(function() {
                                     $scope.remove($scope.tags.length -1);
@@ -83,7 +84,7 @@ angular.module("wust.elements").directive("tagEditor", function() {
                             }
                         } else if (e.which === 32 || e.which === 13) { /* space & enter */
                             $scope.$apply(function() {
-                                $scope.add({ title: $scope.search });
+                                $scope.add({ title: $scope.tagSearch });
                             });
                             e.preventDefault();
                         } else {
