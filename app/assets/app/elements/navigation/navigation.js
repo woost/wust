@@ -14,9 +14,9 @@ function navigation() {
     };
 }
 
-navigationCtrl.$inject = ["$state", "Auth", "SearchService", "ModalEditService"];
+navigationCtrl.$inject = ["$state", "Auth", "SearchService", "DiscourseNode", "Search", "ModalEditService"];
 
-function navigationCtrl($state, Auth, SearchService, ModalEditService) {
+function navigationCtrl($state, Auth, SearchService, DiscourseNode, Search, ModalEditService) {
     let vm = this;
 
     vm.navbarCollapsed = true;
@@ -34,7 +34,7 @@ function navigationCtrl($state, Auth, SearchService, ModalEditService) {
     vm.currentAuth = Auth.current;
     vm.logout = Auth.logout;
     vm.search = SearchService.search;
-    vm.modalEdit = ModalEditService;
+    vm.newDiscussion = newDiscussion;
     vm.$state = $state;
 
     function authenticate(register) {
@@ -42,6 +42,17 @@ function navigationCtrl($state, Auth, SearchService, ModalEditService) {
         func(angular.copy(vm.newUser));
         vm.newUser.identifier = "";
         vm.newUser.password = "";
+    }
+
+    function newDiscussion() {
+        ModalEditService.show();
+        //TODO: get tag by name
+        Search.$search({
+            title: "Startpost",
+            label: DiscourseNode.TagLike.label,
+            size: 1,
+            page: 0
+        }).$then(val => ModalEditService.currentNode.tags = val.$encode());
     }
 
     function onSearchBoxChange() {
