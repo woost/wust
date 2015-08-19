@@ -1,4 +1,4 @@
-<i ng-if="::vm.onDisconnect" ng-click='vm.onDisconnect(vm.node)' class='fa fa-scissors disconnect_tool pull-right text-default' data-title="disconnect" bs-tooltip animation=""></i>
+<i ng-if="::vm.symbolAction" ng-click='vm.symbolAction.handler(vm.node)' ng-class="vm.symbolAction.class" class='symbol_tool pull-right text-default' data-title="{{vm.symbolAction.title}}" bs-tooltip animation=""></i>
 
 <span ng-switch="::vm.node.isHyperRelation">
     <div class="node_dispatcher" ng-switch-when="true">

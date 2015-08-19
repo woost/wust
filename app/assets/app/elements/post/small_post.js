@@ -8,7 +8,7 @@ function smallPost() {
         templateUrl: "assets/app/elements/post/small_post.html",
         scope: {
             node: "=",
-            onDisconnect: "="
+            symbolAction: "="
         },
         controller: smallPostCtrl,
         controllerAs: "vm",

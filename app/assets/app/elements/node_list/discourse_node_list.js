@@ -21,7 +21,11 @@ discourseNodeListCtrl.$inject = [];
 function discourseNodeListCtrl() {
     let vm = this;
 
-    vm.remove = remove;
+    vm.symbolAction = {
+        handler: remove,
+        title: "disconnect",
+        class: "fa fa-scissors"
+    };
 
     function remove(node) {
         vm.nodeModel.remove(node);
