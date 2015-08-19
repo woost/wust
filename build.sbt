@@ -26,7 +26,7 @@ lazy val wust = (project in file(".")).settings(
     "org.webjars.bower" % "angular-animate" % "1.4.4",
     "org.webjars.bower" % "angular-sanitize" % "1.4.4",
     "org.webjars.bower" % "angular-ui-router" % "0.2.15",
-    "org.webjars.bower" % "angular-bootstrap" % "0.13.1",
+    "org.webjars.bower" % "angular-bootstrap" % "0.13.3",
     "org.webjars.bower" % "angular-strap" % "2.3.1", //similar (maybe even better?) to angular-ui-bootstrap but with working popover
     "org.webjars.bower" % "angular-motion" % "0.4.2", // animations for angular-strap
     "org.webjars.bower" % "ng-trans-css" % "0.9.1",
@@ -36,17 +36,17 @@ lazy val wust = (project in file(".")).settings(
     "org.webjars.bower" % "angular-xeditable" % "0.1.9",
     "org.webjars.bower" % "angular-storage-no-cookies" % "0.0.13",
     "org.webjars.bower" % "angular-ui-switch" % "0.1.0",
-    "org.webjars.bower" % "ace-builds" % "1.1.9",
+    "org.webjars.bower" % "ace-builds" % "1.2.0",
     "org.webjars.bower" % "angular-ui-ace" % "0.2.3",
     // styles and fonts
-    "org.webjars.bower" % "animate.css" % "3.3.0",
+    "org.webjars.bower" % "animate.css" % "3.4.0",
     "org.webjars.bower" % "bootstrap-css-only" % "3.3.4",
-    "org.webjars.bower" % "font-awesome" % "4.3.0",
+    "org.webjars.bower" % "font-awesome" % "4.4.0",
     "org.webjars.bower" % "lodium" % "0.1.2",
     // js auth
     "org.webjars.bower" % "angular-jwt" % "0.0.9",
     // basic js libraries
-    "org.webjars.bower" % "lodash" % "3.10.0",
+    "org.webjars.bower" % "lodash" % "3.10.1",
     "org.webjars.bower" % "d3" % "3.5.6",
     "org.webjars.bower" % "humane-js" % "3.2.2",
     // markdown parser
@@ -99,7 +99,7 @@ lazy val scalajs = (project in file("scalajs")).settings(
   persistLauncher := false, // run Main automatically
   sourceMapsDirectories += scalajsSharedJs.base / "..",
   libraryDependencies ++= Seq(
-    "org.scala-js" %%% "scalajs-dom" % "0.8.0",
+    "org.scala-js" %%% "scalajs-dom" % "0.8.1",
     "com.lihaoyi" %%% "utest" % "0.3.1"
   ),
   testFrameworks += new TestFramework("utest.runner.Framework"),
@@ -127,7 +127,7 @@ lazy val seed = (project in file("seed")).settings(
 ).dependsOn(schema, wust)
 
 // deploy to heroku
-herokuAppName in Compile := "wust"
+herokuAppName in Compile := "wustpr"
 
 val scalacOpts = Seq(
   "-encoding", "UTF-8",
