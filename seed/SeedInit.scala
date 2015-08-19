@@ -4,7 +4,7 @@ import model.WustSchema._
 import renesca.parameter.implicits._
 
 object SeedInit extends Task with SeedTools {
-  println("Seeding Database...")
+  println(s"Seeding Database ${db.restService.server}...")
 
   dbContext { implicit db =>
     setupDbConstraints(db)
@@ -21,6 +21,8 @@ object SeedInit extends Task with SeedTools {
         mergeClassification("Idea", color = Some(210)),
         mergeClassification("Pro", color = Some(105)),
         mergeClassification("Con", color = Some(359)),
+        mergeClassification("Bug", color = Some(22)),
+        mergeClassification("Question", color = Some(252)),
         mergeClassification("StartPost"),
         mergeClassification("repliesTo")
       )

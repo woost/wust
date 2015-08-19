@@ -4,7 +4,7 @@ import model.WustSchema._
 import renesca._
 
 trait Task extends App {
-  private val db = new DbService
+  val db = new DbService
   db.restService = new RestService(
     server = "http://localhost:7474",
     credentials = Some(spray.http.BasicHttpCredentials("neo4j", "neo4j"))
