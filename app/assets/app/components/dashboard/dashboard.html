@@ -19,7 +19,7 @@
                     <div class="table-cell body-content-wrapper">
                         <div class="body-content-inner-wrapper">
                             <div class="body-content">
-                                <div ng-repeat="post in stream.posts track by post.id" small-post node="post"></div>
+                                <div ng-repeat="post in stream.posts track by post.id" small-post node="post" ignore-tags="stream.tags"></div>
                             </div>
                         </div>
                     </div>

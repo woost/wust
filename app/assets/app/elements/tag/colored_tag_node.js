@@ -6,7 +6,8 @@ function coloredTagNode(Helpers) {
     return {
         restrict: "EA",
         scope: {
-            coloredTagNode: "="
+            coloredTagNode: "=",
+            ignoreTags: "="
         },
         link
     };
@@ -14,7 +15,7 @@ function coloredTagNode(Helpers) {
     function link(scope, elem) {
         let rawElem = elem[0];
         scope.$watch("coloredTagNode.tags", tags => {
-            setColors(Helpers.sortTags(tags)[0]);
+            return setColors(Helpers.sortTags(_.reject(tags, i => _.any(scope.ignoreTags, _.pick(i, "id"))))[0]);
         });
 
         function setColors(tag) {

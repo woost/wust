@@ -8,7 +8,8 @@ function smallPost() {
         templateUrl: "assets/app/elements/post/small_post.html",
         scope: {
             node: "=",
-            symbolAction: "="
+            symbolAction: "=",
+            ignoreTags: "="
         },
         controller: smallPostCtrl,
         controllerAs: "vm",
@@ -21,3 +22,4 @@ smallPostCtrl.$inject = [];
 function smallPostCtrl() {
     let vm = this;
 }
+
