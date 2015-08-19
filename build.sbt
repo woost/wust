@@ -96,7 +96,7 @@ import sbt.Project.projectToRef
 lazy val scalajs = (project in file("scalajs")).settings(
   scalaVersion := scalaV,
   scalacOptions ++= scalacOpts,
-  persistLauncher := false, // run Main automatically
+  persistLauncher := true, // run Main automatically
   sourceMapsDirectories += scalajsSharedJs.base / "..",
   libraryDependencies ++= Seq(
     "org.scala-js" %%% "scalajs-dom" % "0.8.1",
