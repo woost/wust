@@ -22,7 +22,7 @@ object ImportReddit extends Task with SeedTools {
   def getJson(url: String): JsValue = Await.result(ws.url(url).get(), 10.seconds).json
 
   val redditScope = mergeScope("Reddit")
-  val startPostTag = mergeClassification("StartPost")
+  val startPostTag = mergeStaticTag("StartPost")
   val replyTag = mergeClassification("repliesTo")
 
   dbContext { implicit db =>

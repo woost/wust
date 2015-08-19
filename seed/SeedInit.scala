@@ -23,7 +23,8 @@ object SeedInit extends Task with SeedTools {
         mergeClassification("Con", color = Some(359)),
         mergeClassification("Bug", color = Some(22)),
         mergeClassification("Question", color = Some(252)),
-        mergeClassification("StartPost"),
+        mergeClassification("Answer", color = Some(190)),
+        mergeStaticTag("StartPost"),
         mergeClassification("repliesTo")
       )
 

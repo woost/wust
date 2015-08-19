@@ -58,7 +58,7 @@ object ImportHackerNews extends Task with SeedTools {
     modifyDiscourse { discourse =>
       println(s"importing ${ hnItem.itemType }: ${ hnItem.title.get }")
       val startPost = createPost(hnItem.title.get, hnItem.text, hnItem.url)
-      val startPostTag = mergeClassification("StartPost")
+      val startPostTag = mergeStaticTag("StartPost")
       val replyTag = mergeClassification("repliesTo")
       val hackerNewsScope = mergeScope("HackerNews")
       discourse.add(
