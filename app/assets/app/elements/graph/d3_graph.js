@@ -189,32 +189,28 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     .append("div").attr("class", d => "nodeframe" + (d.isHyperRelation ? " nodeframe-hyperrelation" : ""));
 
                 this.d3Node = this.d3NodeContainerWithData.append("div")
-                .attr("class", d => d.isHyperRelation ? "hyperrelation" : "node")
+                .attr("class", d => d.isHyperRelation ? "hyperrelation" : "small_post_directive")
                 .style("background-color", n => (n.tags.length > 0 && !n.isHyperRelation) ? Helpers.hashToHslBackground(n.tags[0]) : undefined)
-                .style("border-color", n => n.tags.length > 0 ? Helpers.hashToHslBorder(n.tags[0]) : undefined);
-
-                this.d3Node
-                    .append("div").attr("class", "nodecontent small_post_directive")
-                    .text(d => (d.isHyperRelation) ? "" : d.title)
-                    .append("span")
-                    .html(d => {
-                        //TODO: do it with d3 data-joins, or directly with the angular-port
-                        //TODO FIXME: XSS
-                        if(d.isHyperRelation) {
-                            return _.values(d.tags).map(t => {
-                                return `<span class="label nodetag" style="background: ${Helpers.hashToHslFill(t)};">${t.title}</span><br>`;
-                            }).join("");
-                        } else {
-                            return `<span class="tag_circle_container pull-right">` +
-                                _.values(d.tags).map(t => {
-                                    return `<span class="tag_circle_title" data-title="${t.title}" bs-tooltip="" animation="" style="">
-                                        <span class="tag_circle" style="background-color: ${Helpers.hashToHslFill(t)};"></span>
-                                        </span>`;
-                                }).join("")+
-                            "</span>";
-                        }
+                .style("border-color", n => n.tags.length > 0 ? Helpers.hashToHslBorder(n.tags[0]) : undefined)
+                .html(d => {
+                    //TODO: do it with d3 data-joins, or directly with the angular-port
+                    //TODO FIXME: XSS
+                    if(d.isHyperRelation) {
+                        return _.values(d.tags).map(t => {
+                            return `<span class="label nodetag" style="background: ${Helpers.hashToHslFill(t)};">${t.title}</span><br>`;
+                        }).join("");
+                    } else {
+                        return `${d.title}
+                        <span class="tag_circle_container pull-right">` +
+                            _.values(d.tags).map(t => {
+                                return `<span class="tag_circle_title" title="${t.title}">
+                                    <span class="tag_circle" style="background-color: ${Helpers.hashToHslFill(t)};"></span>
+                                    </span>`;
+                            }).join("")+
+                        "</span>";
                     }
-                    );
+                }
+                );
 
                 // add relations
                 this.d3RelationPathWithData.enter()

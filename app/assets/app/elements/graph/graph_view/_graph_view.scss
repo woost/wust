@@ -60,10 +60,7 @@
                 z-index: 110;
             }
 
-            .node {
-            }
-
-            .fixed .node {
+            .fixed .small_post_directive {
                 @include box-shadow(0 0 0 5px #9A9A9A);
                 // outline: 5px solid #DDD;
                 // border-color: #000 !important; // important, because of the colored borders set for every element
@@ -76,7 +73,7 @@
                 @include box-shadow(0 0 0 7px #9A9A9A);
             }
 
-            .moving .node {
+            .moving .small_post_directive {
                 // dark shadow
                 @include box-shadow(0 5px 20px #333);
                 border-color: #000;
@@ -87,26 +84,13 @@
                 // dark shadow
                 @include box-shadow(0 5px 20px #333);
             }
-            .selected .node {
+            .selected .small_post_directive {
                 // important to override tag bg colors on post
                 background-color: #BCEFFF !important;
             }
             .selected .hyperrelation {
                 // important to override tag bg colors on post
                 background-color: #BCEFFF !important;
-            }
-            .node .nodetags {
-                width: 100px;
-                position: absolute;
-                top: 5px;
-                right: -90px; // overlap of 10px
-                cursor: default;
-            }
-            .hyperrelation .nodetags {
-                // bootstrap labels have strange surrounding spaces
-                // this fixes the box-shadow when fixed
-                margin-top: -2px;
-                margin-right: -2px;
             }
 
             .nodetools {
@@ -184,13 +168,11 @@
 
         .nodeframe {
             position: absolute; // needed for z-index (moving/fixed have higher z-index)
-            .node {
+            .small_post_directive {
                 cursor: pointer;
-                .nodecontent {
-                    max-width: 170px;
-                    padding-right: 5px;
-                    word-wrap: break-word;
-                }
+                margin: 0;
+                max-width: 170px;
+                word-wrap: break-word;
             }
         }
 
@@ -223,10 +205,6 @@
             padding: 5px;
             margin: 0;
             cursor: pointer;
-
-            .nodecontent {
-                margin: 0px;
-            }
         }
         .popover {
             margin: 0px;
