@@ -43,10 +43,6 @@ function EditService(Post, HistoryService, store, DiscourseNode, ZenService) {
             this.setValidityProperties();
         }
 
-        updateOriginal() {
-            this.apply(_.omit(this, "original"));
-        }
-
         setReference(reference) {
             this.referenceNode = reference.encode ? reference.encode() : reference;
         }
@@ -247,7 +243,6 @@ function EditService(Post, HistoryService, store, DiscourseNode, ZenService) {
     }
 
     function editSession(session, index = 0) {
-        session.updateOriginal();
         self.list.splice(index, 0, session);
     }
 
