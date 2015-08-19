@@ -17,17 +17,15 @@ angular.module("wust.elements").directive("tagEditor", function() {
                     $scope.search = "";
                     $scope.onChange = $scope.onChange ? $scope.onChange : function() {};
 
-                    let completeTabbing;
-                    let suggestionFunc = $scope.getSuggestions ? $scope.getSuggestions : function() { return []; };
-                    $scope.getSuggestions = function(search) {
-                        if (completeTabbing === undefined)
-                            return suggestionFunc(search);
-                        else
-                            return $scope.suggestions;
-                    };
+                    let completeTabbing, ignoreNextSuggestion;
+                    $scope.getSuggestions = $scope.getSuggestions ? $scope.getSuggestions : function() { return []; };
 
                     $scope.$watch("search", function(value) {
-                        $scope.suggestions = $scope.getSuggestions({search: value});
+                        if (!ignoreNextSuggestion && completeTabbing === undefined) {
+                            $scope.getSuggestions({search: value}).$then(val => $scope.suggestions = val);
+                        }
+
+                        ignoreNextSuggestion = false;
                     });
 
                     $scope.add = function(tag) {
@@ -68,6 +66,7 @@ angular.module("wust.elements").directive("tagEditor", function() {
                                         $scope.search = $scope.suggestions[idx + 1].title;
                                     } else {
                                         $scope.search = completeTabbing;
+                                        ignoreNextSuggestion = true;
                                         completeTabbing = undefined;
                                     }
                                     $scope.$apply();
