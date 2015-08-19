@@ -1,8 +1,6 @@
-package tutorial.webapp
-
 import scala.scalajs.js.JSApp
 
-object TutorialApp extends JSApp {
+object Hello extends JSApp {
   def main(): Unit = {
     println("Hello scalajs!")
   }

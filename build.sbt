@@ -96,7 +96,7 @@ import sbt.Project.projectToRef
 lazy val scalajs = (project in file("scalajs")).settings(
   scalaVersion := scalaV,
   scalacOptions ++= scalacOpts,
-  persistLauncher := true, // run Main automatically
+  persistLauncher := false, // run Main automatically
   sourceMapsDirectories += scalajsSharedJs.base / "..",
   // we disable the scalajs optimizations,
   // because in production there is an error in the generated code
