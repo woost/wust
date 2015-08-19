@@ -98,6 +98,9 @@ lazy val scalajs = (project in file("scalajs")).settings(
   scalacOptions ++= scalacOpts,
   persistLauncher := true, // run Main automatically
   sourceMapsDirectories += scalajsSharedJs.base / "..",
+  // we disable the scalajs optimizations,
+  // because in production there is an error in the generated code
+  scalaJSOptimizerOptions ~= { _.withDisableOptimizer(true) },
   libraryDependencies ++= Seq(
     "org.scala-js" %%% "scalajs-dom" % "0.8.1",
     "com.lihaoyi" %%% "utest" % "0.3.1"
@@ -127,7 +130,7 @@ lazy val seed = (project in file("seed")).settings(
 ).dependsOn(schema, wust)
 
 // deploy to heroku
-herokuAppName in Compile := "wustpr"
+herokuAppName in Compile := "wust"
 
 val scalacOpts = Seq(
   "-encoding", "UTF-8",
