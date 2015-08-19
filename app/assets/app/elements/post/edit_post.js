@@ -7,7 +7,8 @@ function editPost() {
         restrict: "A",
         templateUrl: "assets/app/elements/post/edit_post.html",
         scope: {
-            node: "="
+            node: "=",
+            alwaysShowTagSuggestions: "@"
         },
         controller: editPostCtrl,
         controllerAs: "vm",
