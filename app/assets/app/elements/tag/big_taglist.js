@@ -38,17 +38,39 @@ function bigTaglistCtrl(Post, Session) {
         return tagCache[tag.id];
     }
 
+    function unvoteExisting(tag, weight) {
+        let existing = getVote(tag);
+        if (existing === undefined) {
+            return false;
+        } else {
+            let resource = wrapResource(tag);
+            resource.neutral.$create().$then(val => {
+                Session.updateVote(tag.id, vm.node.id, val);
+                tagCache[tag.id] = undefined;
+                humane.success("Unvoted");
+            });
+
+            return true;
+        }
+    }
+
     function upvote(tag) {
+        if (unvoteExisting(tag))
+            return;
+
         let resource = wrapResource(tag);
         resource.up.$create().$then(val => {
-            Session.addVote(tag.id, vm.node.id, val);
+            Session.updateVote(tag.id, vm.node.id, val);
             humane.success("Up voted");
         });
     }
     function downvote(tag) {
+        if (unvoteExisting(tag))
+            return;
+
         let resource = wrapResource(tag);
         resource.down.$create().$then(val => {
-            Session.addVote(tag.id, vm.node.id, val);
+            Session.updateVote(tag.id, vm.node.id, val);
             humane.success("Down voted");
         });
     }

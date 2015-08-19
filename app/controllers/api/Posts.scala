@@ -20,7 +20,8 @@ object Posts extends Nodes[Connectable] {
     )),
     ("votes", N < Dimensionizes < (EndRelationRead(Dimensionizes, VoteDimension),
       ("up", N < VotesAccess(1) + CheckUser.apply),
-      ("down", N < VotesAccess(-1) + CheckUser.apply)
+      ("down", N < VotesAccess(-1) + CheckUser.apply),
+      ("neutral", N < VotesAccess(0) + CheckUser.apply)
     )),
     ("tags", N < SchemaTags < (EndRelationRead(SchemaTags, TagLike)))
   )

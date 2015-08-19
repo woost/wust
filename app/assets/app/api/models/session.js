@@ -8,11 +8,17 @@ function Session(restmod) {
     this.votes = [];
     this.update = update;
     this.forget = forget;
-    this.addVote = addVote;
+    this.updateVote = updateVote;
     this.getVote = getVote;
 
     function getVote(startId, endId) {
         return _.find(self.votes, {
+            startId, endId
+        });
+    }
+
+    function removeVote(startId, endId) {
+        return _.remove(self.votes, {
             startId, endId
         });
     }
@@ -27,6 +33,13 @@ function Session(restmod) {
         }
 
         existing.weight = vote.weight;
+    }
+
+    function updateVote(startId, endId, vote) {
+        if (vote.weight === 0)
+            removeVote(startId, endId);
+        else
+            addVote(startId, endId, vote);
     }
 
     function update() {

@@ -130,7 +130,7 @@ object Database {
     if (!discourse.graph.nodes.isEmpty) {
       //TODO clear does not emit changes
       //discourse.graph.nodes.clear()
-      discourse.graph.nodes -= discourse.graph.nodes.head
+      discourse.graph.nodes.foreach(discourse.graph.nodes -= _)
       db.transaction { tx =>
         tx.persistChanges(discourse.graph)
         model.WustSchema.deleteConnectsGarbage(tx)
@@ -208,7 +208,7 @@ object Database {
       }
     }
     else {
-      discourse.graph.relations.clear()
+      discourse.graph.relations.foreach(discourse.graph.relations -= _)
       val failure = tx.commit.persistChanges(discourse.graph)
       failure.isEmpty
     }
