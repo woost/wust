@@ -332,12 +332,9 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
         registerUIEvents() {
             //TODO: register only on added d3Nodes
-            this.d3Node.select("div")
-                // dragging will trigger onClick here,
-                // so register it in onDragMoveEnd
-                // .on("click", this.ignoreHyperRelation(node => {
-                //     this.onClick(node);
-                // }))
+            this.d3Node
+                // dragging will trigger onClick on a node,
+                // so register your action in onDragMoveEnd
                 .on("mouseover", d => scope.$apply(() => {
                     this.setNodeOffset(d);
                     vm.state.hoveredNode = d;
