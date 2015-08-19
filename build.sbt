@@ -126,6 +126,9 @@ lazy val seed = (project in file("seed")).settings(
   )
 ).dependsOn(schema, wust)
 
+// deploy to heroku
+herokuAppName in Compile := "wust"
+
 val scalacOpts = Seq(
   "-encoding", "UTF-8",
   "-unchecked",

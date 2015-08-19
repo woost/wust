@@ -35,3 +35,7 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-traceur" % "1.0.0")
 
 // use sass preprocessor for css
 addSbtPlugin("default" % "sbt-sass" % "0.1.9")
+
+
+// deploy to heroku from sbt
+addSbtPlugin("com.heroku" % "sbt-heroku" % "0.4.3")
