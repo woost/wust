@@ -225,12 +225,7 @@
             cursor: pointer;
 
             .nodecontent {
-                display:block;
-                width:100%;
-                // TODO: this is a hack
-                height:50px;
-                position: absolute;
-                top: 0;
+                margin: 0px;
             }
         }
         .popover {
