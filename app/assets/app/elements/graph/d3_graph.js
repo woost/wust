@@ -949,7 +949,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.setFixed(d);
             } else {
                 // onClick event on node is triggered here
-                this.onClick(d);
+                if (!d.isHyperRelation)
+                    this.onClick(d);
 
                 // if the user just clicked, the position should be reset.
                 // unsetFixed(graph, force, d);
