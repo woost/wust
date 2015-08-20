@@ -1,14 +1,16 @@
-<i ng-if="::vm.symbolAction" ng-click='vm.symbolAction.handler(vm.node)' ng-class="vm.symbolAction.class" class='symbol_tool pull-right text-default' data-title="{{vm.symbolAction.title}}" bs-tooltip animation=""></i>
+<span class="small_post_directive node" colored-tag-node="vm.node" ignore-tags="vm.ignoreTags" ui-draggable="true" drag="vm.node.encode ? vm.node.encode() : vm.node" drag-channel="{{vm.node.isHyperRelation? 'hyper_node' : 'node'}}" stop-drag-propagation>
+    <i ng-if="::vm.symbolAction" ng-click='vm.symbolAction.handler(vm.node)' ng-class="vm.symbolAction.class" class='symbol_tool pull-right text-default' data-title="{{vm.symbolAction.title}}" bs-tooltip animation=""></i>
 
-<span ng-switch="::vm.node.isHyperRelation">
-    <div class="node_dispatcher" ng-switch-when="true">
-        <div small-post node="vm.node.startNode"></div>
-        <div small-post node="vm.node.endNode"></div>
-    </div>
-    <a ng-switch-default ng-bind="vm.node.title" ui-sref="focus({id: vm.node.id})"></a>
-</span>
-<span class="tag_circle_container pull-right">
-    <span ng-repeat="tag in vm.node.tags | sorttags:vm.ignoreTags" class="tag_circle_title" data-title="{{tag.title}}" bs-tooltip animation="">
-        <span colored-tag-fill="tag" class="tag_circle"></span>
+    <span ng-switch="::vm.node.isHyperRelation">
+        <div class="node_dispatcher" ng-switch-when="true">
+            <div small-post node="vm.node.startNode"></div>
+            <div small-post node="vm.node.endNode"></div>
+        </div>
+        <a ng-switch-default ng-bind="vm.node.title" ui-sref="focus({id: vm.node.id})"></a>
+    </span>
+    <span class="tag_circle_container pull-right">
+        <span ng-repeat="tag in vm.node.tags | sorttags:vm.ignoreTags" class="tag_circle_title" data-title="{{tag.title}}" bs-tooltip animation="">
+            <span colored-tag-fill="tag" class="tag_circle"></span>
+        </span>
     </span>
 </span>
