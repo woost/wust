@@ -15,15 +15,16 @@ function staticEditPost() {
     };
 }
 
-StaticEditPostCtrl.$inject = [];
+StaticEditPostCtrl.$inject = ["$state"];
 
 // expects scope.node to be a session.
 // used by the scratchpad which retrieves a list of sessions from the EditService.
-function StaticEditPostCtrl() {
+function StaticEditPostCtrl($state) {
     let vm = this;
 
     vm.editableChange = editableChange;
     vm.redirectEnter = redirectEnter;
+    vm.deleteNode = deleteNode;
     vm.focusEditTags = false;
 
     function redirectEnter(event) {
@@ -32,6 +33,12 @@ function StaticEditPostCtrl() {
             event.stopPropagation();
             event.preventDefault();
         }
+    }
+
+    function deleteNode() {
+        vm.node.deleteNode().$then(() => {
+            $state.go("dashboard");
+        });
     }
 
     function editableChange(data) {

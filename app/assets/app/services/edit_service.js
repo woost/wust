@@ -144,7 +144,7 @@ function EditService(Post, HistoryService, store, DiscourseNode, ZenService) {
             if (this.isLocal)
                 return;
 
-            Post.$buildRaw(_.pick(this, "id")).$destroy().$then(() => {
+            return Post.$buildRaw(_.pick(this, "id")).$destroy().$then(() => {
                 HistoryService.remove(this.id);
                 this.remove();
                 humane.success("Removed node");
