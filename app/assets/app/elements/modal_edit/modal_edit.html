@@ -2,9 +2,14 @@
     <form class="wust_form modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <span ng-if="vm.node.referenceNode !== undefined">
-                    <label>Replies to</label>
-                    <span small-post node="vm.node.referenceNode"></span>
+                <span ng-switch="vm.node.referenceNode">
+                    <span ng-switch-when="undefined">
+                        <label>New Discussion</label>
+                    </span>
+                    <span ng-switch-default>
+                        <label>Replies to</label>
+                        <span small-post node="vm.node.referenceNode"></span>
+                    </span>
                 </span>
             </div>
             <div ng-switch="vm.previewEnabled" class="modal-body">
