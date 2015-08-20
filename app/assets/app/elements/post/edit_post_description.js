@@ -1,26 +1,26 @@
-angular.module("wust.elements").directive("editPost", editPost);
+angular.module("wust.elements").directive("editPostDescription", editPostDescription);
 
-editPost.$inject = [];
+editPostDescription.$inject = [];
 
-function editPost() {
+function editPostDescription() {
     return {
         restrict: "A",
-        templateUrl: "assets/app/elements/post/edit_post.html",
+        templateUrl: "assets/app/elements/post/edit_post_description.html",
         scope: {
             node: "=",
             alwaysShowTagSuggestions: "@"
         },
-        controller: editPostCtrl,
+        controller: editPostDescriptionCtrl,
         controllerAs: "vm",
         bindToController: true
     };
 }
 
-editPostCtrl.$inject = ["DiscourseNode"];
+editPostDescriptionCtrl.$inject = ["DiscourseNode"];
 
 // expects scope.node to be a session.
 // used by the scratchpad which retrieves a list of sessions from the EditService.
-function editPostCtrl(DiscourseNode) {
+function editPostDescriptionCtrl(DiscourseNode) {
     let vm = this;
 
     vm.ace = {

@@ -8,7 +8,7 @@
         <div class="text-center" style="cursor:pointer" ng-click='vm.previewEnabled = !vm.previewEnabled' data-title='preview' bs-tooltip animation=''><i class="fa" ng-class="{'fa-eye-slash': vm.previewEnabled, 'fa-eye': !vm.previewEnabled}"></i></div>
         <div ng-switch="vm.previewEnabled" class="description">
             <div ng-switch-when="true" markdown="vm.node.description"></div>
-            <div ng-switch-default edit-post node="vm.node"></div>
+            <div ng-switch-default edit-post-description node="vm.node"></div>
         </div>
         <button class="btn btn-xs btn-success pull-right" ng-click="vm.node.save().$then(vm.onFinish)" ng-disabled="!vm.node.canSave" data-title="save" bs-tooltip animation=""><i class="fa fa-check"></i></button>
         <button class="btn btn-xs btn-default pull-right" ng-click="vm.onFinish()">Cancel</button>
