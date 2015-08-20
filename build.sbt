@@ -33,13 +33,11 @@ lazy val wust = (project in file(".")).settings(
     "org.webjars.bower" % "angular-native-dragdrop" % "1.1.0",
     "org.webjars.bower" % "ng-sortable" % "1.3.0",
     "org.webjars.bower" % "angular-restmod" % "1.1.8",
-    "org.webjars.bower" % "angular-xeditable" % "0.1.9",
     "org.webjars.bower" % "angular-storage-no-cookies" % "0.0.13",
     "org.webjars.bower" % "angular-ui-switch" % "0.1.0",
     "org.webjars.bower" % "ace-builds" % "1.2.0",
     "org.webjars.bower" % "angular-ui-ace" % "0.2.3",
     // styles and fonts
-    "org.webjars.bower" % "animate.css" % "3.4.0",
     "org.webjars.bower" % "bootstrap-css-only" % "3.3.4",
     "org.webjars.bower" % "font-awesome" % "4.4.0",
     "org.webjars.bower" % "lodium" % "0.1.2",

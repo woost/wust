@@ -13,7 +13,6 @@ angular.module("wust", [
     "as.sortable",
     "ngSanitize",
     "uiSwitch",
-    "xeditable",
     "wust.config",
     "wust.filters",
     "wust.elements",
