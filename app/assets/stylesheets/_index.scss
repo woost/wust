@@ -12,11 +12,6 @@ html, body {
     font-size: 14px;
     height: 100%;
     overflow: hidden;
-    // prevent browser from rendering the uncompiled html
-    // https://docs.angularjs.org/api/ng/directive/ngCloak
-    [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
-        display: none !important;
-    }
     #page {
         height: 100%;
     }
