@@ -28,14 +28,16 @@ function contenteditable() {
                         return;
                     }
                 }
-
-                scope.$apply(() => ngModel.$setViewValue(text));
             });
         }
 
         ngModel.$render = function() {
             element.text(ngModel.$viewValue || "");
         };
+
+        element.bind("blur keyup change", function() {
+            scope.$apply(() => ngModel.$setViewValue(element.text()));
+        });
     }
   };
 }
