@@ -10,12 +10,44 @@ object Usertest1Init extends Task with SeedTools {
 
   dbContext { implicit db =>
     modifyDiscourse { discourse =>
-      val startPost = createPost("Das ist eine Frage?")
-      val reply = createPost("Eine Antwort.")
+      val replies = mergeClassification("repliesTo")
+      val problem = mergeClassification("Problem")
+      val question = mergeClassification("Question")
+      val pro = mergeClassification("Pro")
+      val startpost = mergeClassification("Question")
+
+      val rootnode = createPost("Was denkt ihr über Wäsche?")
+      val stinken = createPost("Meine Wäsche stinkt.")
+      val schmutzig = createPost("Meine Wäsche ist schmutzig.")
+      val wasser = createPost("Ich esse gerne Wasser.")
+      val meinung = createPost("Der Platz im Bus neben dir ist bestimmt immer frei.")
+
+      val stinkenConnects = Connects.create(stinken, rootnode)
+      val schmutzigConnects = Connects.create(schmutzig, rootnode)
+      val wasserConnects = Connects.create(wasser, rootnode)
+      val meinungConnects = Connects.create(meinung, stinken)
+
       discourse.add(
-        startPost,
-        Connects.create(reply, startPost)
+        stinken,
+        schmutzig,
+        wasser,
+        meinung,
+        stinkenConnects,
+        schmutzigConnects,
+        wasserConnects,
+        meinungConnects,
+        tag(rootnode, startpost),
+        tag(meinung, pro),
+        tag(rootnode, question),
+        tag(stinkenConnects, replies),
+        tag(schmutzigConnects, replies),
+        tag(wasserConnects, replies),
+        tag(meinungConnects, replies),
+        tag(stinken, problem),
+        tag(schmutzig, problem)
       )
     }
   }
+  
+  ImportReddit.main(Array())
 }
