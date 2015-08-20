@@ -1,6 +1,6 @@
 <div class="edit_post_directive">
     <div data-title="click to edit" bs-tooltip animation="">
-        <h2 contenteditable="true" focus-me="vm.inputFocus" ng-keydown="vm.redirectEnter($event)" ng-model="vm.node.title" ng-change="vm.node.onChange()" ng-class="{'is_invalid': !vm.node.isValid}" class="title">
+        <h2 contenteditable="true" maxchars="140" focus-me="vm.inputFocus" ng-keydown="vm.redirectEnter($event)" ng-model="vm.node.title" ng-change="vm.node.onChange()" ng-class="{'is_invalid': !vm.node.isValid}" class="title">
         </h2>
     </div>
     <div edit-taglist set-focus="vm.focusEditTags" tags="vm.node.tags" on-change="vm.node.onChange()"></div>
