@@ -84,7 +84,7 @@ function infiniteScroll($rootScope) {
             //information to display instead of counting from the beginning
             scope.infinite.currentPage = 0;
             scope.infinite.maxPage = -1;
-            scope.infinite.noMore = false;
+            scope.infinite.noMore = true;
             scope.infinite.loading = true;
             pageInfos = [];
 
