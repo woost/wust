@@ -32,7 +32,7 @@ function editPostDescriptionCtrl(DiscourseNode) {
             onLoad: onEditorLoad,
             // onBlur: onEditorBlur,
             advanced: {
-                // highlightActiveLine: false,
+                highlightActiveLine: false,
                 // printMarginColumn: false,
                 // showPrintMargin: false,
                 // enableSnippets: false,
