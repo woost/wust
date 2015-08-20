@@ -23,16 +23,11 @@ bigPostCtrl.$inject = ["SidebarService", "EditService", "Session", "ModalEditSer
 function bigPostCtrl(SidebarService, EditService, Session, ModalEditService) {
     let vm = this;
 
-    vm.updateFocused = updateFocused;
+    vm.editNode = EditService.createSession(vm.node);
     vm.replyTo = replyTo;
 
-    function updateFocused() {
-        EditService.edit(vm.node);
-        SidebarService.left.visible = true;
-    }
-
-    function replyTo(node) {
+    function replyTo() {
         ModalEditService.show();
-        ModalEditService.currentNode.setReference(node);
+        ModalEditService.currentNode.setReference(vm.editNode);
     }
 }

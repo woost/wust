@@ -1,0 +1,34 @@
+.static_edit_post_directive {
+    margin: 0px;
+    $line-height: 36px;
+    .editable-click {
+        color: inherit;
+        border: 0;
+        min-height:$line-height;
+        cursor: pointer;
+        word-wrap: break-word;
+        border-bottom: 1px solid #ccc;
+        &.is_invalid {
+            border-bottom: 1px solid red;
+        }
+    }
+    // overwrite bootstrap
+    // https://github.com/twbs/bootstrap/blob/b8bc20432f93385989291f2a67112e29b97de682/dist/css/bootstrap.css#L2923-2939
+    .form-inline  {
+        width: 100%;
+        .form-group {
+            width: 100%;
+            input {
+                width: 100%;
+            }
+        }
+        .form-control {
+            width: 100%;
+            display: block;
+        }
+    }
+    .description {
+        min-height: 200px;
+    }
+}
+
