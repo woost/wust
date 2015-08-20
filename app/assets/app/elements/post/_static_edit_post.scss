@@ -12,6 +12,9 @@
             border-bottom: 1px solid red;
         }
     }
+    textarea {
+        margin-top: -12px;
+    }
     // overwrite bootstrap
     // https://github.com/twbs/bootstrap/blob/b8bc20432f93385989291f2a67112e29b97de682/dist/css/bootstrap.css#L2923-2939
     .form-inline  {
