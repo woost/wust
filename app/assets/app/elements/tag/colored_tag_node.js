@@ -14,7 +14,7 @@ function coloredTagNode(Helpers) {
 
     function link(scope, elem) {
         let rawElem = elem[0];
-        scope.$watch("coloredTagNode.tags", tags => {
+        scope.$watchCollection("coloredTagNode.tags", tags => {
             return setColors(Helpers.sortTags(_.reject(tags, i => _.any(scope.ignoreTags, _.pick(i, "id"))))[0]);
         });
 

@@ -11,15 +11,10 @@
         }
     }
     .modal-body {
-        .panel {
-            margin: 0px;
-            .panel-heading {
-                min-height: 55px;
-                .tldr_input {
-                    font-size: 20px;
-                }
-            }
-            .panel-body {
+        .description {
+            min-height: 200px;
+            .edit_post_description_directive {
+                height: 200px;
             }
         }
     }
