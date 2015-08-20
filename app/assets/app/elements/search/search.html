@@ -16,7 +16,7 @@
             </div>
             <div edit-taglist tags="vm.search.selectedTags" class="row edit_tags" always-show="true" existing-only="true" on-change="vm.search.triggerSearch()"></div>
             <div id="search_options_bottom">
-                <div ng-show="vm.infinite.noMore" class="row">
+                <div ng-show="vm.infinite.noMore && !vm.infinite.loading" class="row">
                     <label class="col-md-4">#Results</label>
                     <span class="col-md-6">{{vm.search.results.length}}</span>
                 </div>
