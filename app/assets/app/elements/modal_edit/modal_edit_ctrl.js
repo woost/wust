@@ -13,7 +13,7 @@ function ModalEditCtrl(DiscourseNode, Search, EditService,ModalEditService) {
 
     function save() {
         let ref = vm.node.referenceNode;
-        ModalEditService.save(response => {
+        return ModalEditService.save(response => {
             Search.$search({
                 title: "RepliesTo",
                 label: DiscourseNode.TagLike.label,

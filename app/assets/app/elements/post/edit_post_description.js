@@ -7,8 +7,7 @@ function editPostDescription() {
         restrict: "A",
         templateUrl: "assets/app/elements/post/edit_post_description.html",
         scope: {
-            node: "=",
-            alwaysShowTagSuggestions: "@"
+            node: "="
         },
         controller: editPostDescriptionCtrl,
         controllerAs: "vm",

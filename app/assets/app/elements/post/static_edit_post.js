@@ -8,6 +8,7 @@ function staticEditPost() {
         templateUrl: "assets/app/elements/post/static_edit_post.html",
         scope: {
             node: "=",
+            alwaysShowTagSuggestions: "@",
             onFinish: "&"
         },
         controller: StaticEditPostCtrl,
