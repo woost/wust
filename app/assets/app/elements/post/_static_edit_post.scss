@@ -1,19 +1,21 @@
 .static_edit_post_directive {
     margin: 0px;
-    $line-height: 36px;
-    .editable-click {
-        color: inherit;
-        border: 0;
-        min-height:$line-height;
-        cursor: pointer;
-        word-wrap: break-word;
-        border-bottom: 1px solid #ccc;
+    .title {
+        padding: 2px;
+        outline: none;
+        border-radius: 3px;
+        border: 2px solid transparent;
         &.is_invalid {
-            border-bottom: 1px solid red;
+            border-color: red !important;
         }
-    }
-    textarea {
-        margin-top: -12px;
+        &[contenteditable='true']:hover{
+            background: #E6E6E6;
+        }
+        &:focus, &:focus:hover  {
+            background: #FFF;
+            border-color: #69c773;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.15) inset;
+        }
     }
     // overwrite bootstrap
     // https://github.com/twbs/bootstrap/blob/b8bc20432f93385989291f2a67112e29b97de682/dist/css/bootstrap.css#L2923-2939
@@ -37,4 +39,3 @@
         }
     }
 }
-

@@ -7,7 +7,8 @@ function staticEditPost() {
         restrict: "A",
         templateUrl: "assets/app/elements/post/static_edit_post.html",
         scope: {
-            node: "="
+            node: "=",
+            onFinish: "&"
         },
         controller: StaticEditPostCtrl,
         controllerAs: "vm",
@@ -22,10 +23,10 @@ StaticEditPostCtrl.$inject = ["$state"];
 function StaticEditPostCtrl($state) {
     let vm = this;
 
-    vm.editableChange = editableChange;
     vm.redirectEnter = redirectEnter;
     vm.deleteNode = deleteNode;
     vm.focusEditTags = false;
+    vm.onFinish = vm.onFinish || _.noop;
 
     function redirectEnter(event) {
         if(event.keyCode === 13) {
@@ -39,10 +40,5 @@ function StaticEditPostCtrl($state) {
         vm.node.deleteNode().$then(() => {
             $state.go("dashboard");
         });
-    }
-
-    function editableChange(data) {
-        vm.node.title = data;
-        vm.node.onChange();
     }
 }

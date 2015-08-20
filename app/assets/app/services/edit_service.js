@@ -125,7 +125,7 @@ function EditService(Post, HistoryService, store, DiscourseNode, ZenService) {
         setValidityProperties(dirtyModel = this.dirtyModel()) {
             this.isPristine = _.isEmpty(dirtyModel);
             this.isLocal = this.id === undefined;
-            this.isValid = this.isHyperRelation || !_.isEmpty(this.title);
+            this.isValid = this.isHyperRelation || (!_.isEmpty(this.title) && this.title.length < 140);
             this.canSave = this.isValid && (this.isLocal || !this.isPristine);
         }
 

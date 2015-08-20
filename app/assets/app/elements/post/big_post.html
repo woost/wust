@@ -1,8 +1,8 @@
 <div class="big_post_directive" colored-tag-node="vm.node" ng-switch="vm.editMode">
-    <span class="fa fa-pencil pull-right" style="cursor:pointer" ng-click="vm.editMode = !vm.editMode" data-title="edit post" bs-tooltip animation=""></span>
-    <div ng-switch-when="true" static-edit-post node="vm.editNode"></div>
+    <div ng-switch-when="true" static-edit-post on-finish="vm.editMode = false" node="vm.editNode"></div>
     <div ng-switch-default>
-        <h2 ng-bind="vm.node.title"></h2>
+        <span class="fa fa-pencil pull-right" style="cursor:pointer" ng-click="vm.editMode = true" data-title="edit post" bs-tooltip animation=""></span>
+        <h2 ng-bind="vm.node.title" class="post_title"></h2>
         <div class="timestamp"><span show-timestamp node="vm.node"></span></div>
         <div big-taglist node="vm.node" class="taglist"></div>
         <span toggle-zen node="vm.node" class="pull-right" ng-show="vm.node.description"></span>
