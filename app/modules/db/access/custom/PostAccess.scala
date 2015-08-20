@@ -107,6 +107,7 @@ case class PostAccess() extends NodeReadBase[Connectable] with NodeDeleteBase[Co
         Connectable.matchesOnUuid(uuid)
       }
 
+      discourse.add(node)
       addTagsToGraph(discourse, context.user, node)
 
       db.transaction(_.persistChanges(discourse)) match {
