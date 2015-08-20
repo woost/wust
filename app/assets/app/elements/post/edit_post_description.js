@@ -32,12 +32,12 @@ function editPostDescriptionCtrl(DiscourseNode) {
             onLoad: onEditorLoad,
             // onBlur: onEditorBlur,
             advanced: {
-                highlightActiveLine: false,
-                printMarginColumn: false,
-                showPrintMargin: false,
-                enableSnippets: false,
-                enableBasicAutocompletion: false,
-                enableLiveAutocompletion: false,
+                // highlightActiveLine: false,
+                // printMarginColumn: false,
+                // showPrintMargin: false,
+                // enableSnippets: false,
+                // enableBasicAutocompletion: false,
+                // enableLiveAutocompletion: false,
                 fontFamily: "inconsolata",
                 fontSize: "16px"
             }
