@@ -8,11 +8,10 @@ function editTaglist() {
         templateUrl: "assets/app/elements/tag/edit_taglist.html",
         scope: {
             tags: "=",
-            tagSearch: "=",
+            setFocus: "=",
             onChange: "&",
             existingOnly: "@",
-            alwaysShow: "@",
-            initialFocus: "@"
+            alwaysShow: "@"
         },
         controller: editTaglistCtrl,
         controllerAs: "vm",

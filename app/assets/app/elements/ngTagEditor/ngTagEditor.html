@@ -5,7 +5,7 @@
                 <span ng-bind="tag.title"></span>
                 <span class="remove" ng-click="remove($index); $event.stopPropagation();">x</span>
             </span>
-            <input type="text" class="tag-input" placeholder="Add Tags" ng-focus="focus = true" ng-blur="focus = false" focus-me="setFocus" ng-model="tagSearch"/>
+            <input type="text" class="tag-input" placeholder="Add Tags" ng-focus="focus = true" ng-blur="focus = false; unfocusedInput()" focus-me="setFocus" ng-model="search"/>
         </div>
         <div class="tag-suggestions" ng-show="suggestions && (alwaysShow || focus)">
             <span class="title">Suggestions:</span>

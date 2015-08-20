@@ -8,7 +8,6 @@ function editPost() {
         templateUrl: "assets/app/elements/post/edit_post.html",
         scope: {
             node: "=",
-            tagSearch: "=",
             alwaysShowTagSuggestions: "@"
         },
         controller: editPostCtrl,

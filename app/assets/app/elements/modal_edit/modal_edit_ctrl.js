@@ -12,11 +12,6 @@ function ModalEditCtrl(DiscourseNode, Search, EditService,ModalEditService) {
     vm.save = save;
 
     function save() {
-        if (vm.tagSearch) {
-            vm.node.tags.push({title: vm.tagSearch});
-            vm.tagSearch = "";
-        }
-
         let ref = vm.node.referenceNode;
         ModalEditService.save(response => {
             Search.$search({
