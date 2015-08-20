@@ -19,7 +19,7 @@ function coloredTagNode(Helpers) {
         });
 
         function setColors(tag) {
-            if (tag === undefined) {
+            if (tag === undefined || tag.id === undefined) {
                 rawElem.style.backgroundColor = "";
                 rawElem.style.borderColor = "";
             } else {

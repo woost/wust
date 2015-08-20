@@ -61,10 +61,15 @@ function hashToHsl(tag, saturation, brightness) {
 }
 
 function sortTags(tags) {
-    return _.sortByOrder(tags,
+    let [remote,local] = _.partition(tags, "id");
+    return orderTags(remote).concat(orderTags(local));
+
+    function orderTags(tags) {
+        return _.sortByOrder(tags,
             ["isClassification", "weight"],
             ["desc","desc"]
-            );
+        );
+    }
 }
 
 function cssCompat(original, jsSuffix, cssSuffix) {
