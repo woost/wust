@@ -1,12 +1,1 @@
-<!-- TODO:handle writable option -->
-<div class='discourse_node_list'>
-    <div class="drop_post_container" ui-on-Drop="vm.nodeModel.add($data)" drop-validate="vm.nodeModel.canAdd($data)" drop-channel="node,hyper_node,scratch_node">
-        <div ng-if="vm.isLoading" class="la-ball-triangle-path la-dark la-relative">
-            <div></div>
-            <div></div>
-            <div></div>
-        </div>
-        <div ng-include="'assets/app/elements/node_list/discourse_node_list.tpl.html'"></div>
-    </div>
-</div>
-
+<div ng-include="'assets/app/elements/node_list/discourse_node_list.tpl.html'"></div>
