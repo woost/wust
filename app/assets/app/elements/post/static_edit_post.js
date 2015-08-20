@@ -23,18 +23,8 @@ StaticEditPostCtrl.$inject = ["$state"];
 function StaticEditPostCtrl($state) {
     let vm = this;
 
-    vm.redirectEnter = redirectEnter;
     vm.deleteNode = deleteNode;
-    vm.focusEditTags = false;
     vm.onFinish = vm.onFinish || _.noop;
-
-    function redirectEnter(event) {
-        if(event.keyCode === 13) {
-            vm.focusEditTags = true;
-            event.stopPropagation();
-            event.preventDefault();
-        }
-    }
 
     function deleteNode() {
         vm.node.deleteNode().$then(() => {

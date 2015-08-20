@@ -1,14 +1,5 @@
 <div class="static_edit_post_directive">
-    <div data-title="click to edit" bs-tooltip animation="">
-        <h2 contenteditable="true" ng-keydown="vm.redirectEnter($event)" ng-model="vm.node.title" ng-change="vm.node.onChange()" ng-class="{'is_invalid': !vm.node.isValid}" class="title">
-        </h2>
-    </div>
-    <div edit-taglist set-focus="vm.focusEditTags" tags="vm.node.tags" on-change="vm.node.onChange()"></div>
-    <div class="text-center" style="cursor:pointer" ng-click='vm.previewEnabled = !vm.previewEnabled' data-title='preview' bs-tooltip animation=''><i class="fa" ng-class="{'fa-eye-slash': vm.previewEnabled, 'fa-eye': !vm.previewEnabled}"></i></div>
-    <div ng-switch="vm.previewEnabled" class="description">
-        <div ng-switch-when="true" markdown="vm.node.description"></div>
-        <div ng-switch-default edit-post-description node="vm.node"></div>
-    </div>
+    <div edit-post node="vm.node"></div>
     <button class="btn btn-xs btn-success pull-right" ng-click="vm.node.save().$then(vm.onFinish)" ng-disabled="!vm.node.canSave" data-title="save" bs-tooltip animation=""><i class="fa fa-check"></i></button>
     <button class="btn btn-xs btn-default pull-right" ng-click="vm.onFinish()">Cancel</button>
     <button class="btn btn-xs btn-danger" ng-click="vm.deleteNode()" ng-hide="vm.node.isLocal" data-title="delete" bs-tooltip animation=""><i class="fa fa-trash-o"></i></button>
