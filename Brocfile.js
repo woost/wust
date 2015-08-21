@@ -9,10 +9,7 @@ var iife = require("broccoli-iife");
 var compileSass = require("broccoli-compass");
 var cleanCSS = require("broccoli-clean-css");
 
-
-
 //TODO: asset fingerprinting
-//TODO: css minify
 
 var stylesTree = mergeTrees([
     funnel("app/assets/stylesheets", { include: ["*.scss"] }),
@@ -25,10 +22,10 @@ var compiledStyles = compileSass(stylesTree, {
     sassDir: ".",
 });
 
-var styles = concat(compiledStyles, {
+var styles = cleanCSS(concat(compiledStyles, {
     inputFiles: ["stylesheets/**/*.css"],
     outputFile: "/main.css"
-});
+}));
 
 var hintedScripts = new JSHinter(funnel("app/assets/app", {
     include: ["**/*.js"],
