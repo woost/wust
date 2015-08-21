@@ -1,6 +1,7 @@
 var mergeTrees = require("broccoli-merge-trees");
 var funnel = require("broccoli-funnel");
 var concat = require("broccoli-concat");
+var iife = require("broccoli-iife");
 
 var esTranspiler = require("broccoli-babel-transpiler");
 
@@ -29,11 +30,10 @@ var styles = concat(compiledStyles, {
     outputFile: "/main.css"
 });
 
-
-var compiledScripts = esTranspiler(funnel("app/assets/app", {
+var compiledScripts = iife(esTranspiler(funnel("app/assets/app", {
     include: ["**/*.js"],
     destDir: "javascripts"
-}));
+})));
 
 var scripts = concat(compiledScripts, {
     inputFiles: ["javascripts/**/*.js"],
