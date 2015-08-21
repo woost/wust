@@ -1,5 +1,13 @@
 {
-    "engines": {
-        "node": "0.11.x"
-    }
+  "engines": {
+    "node": "0.11.x"
+  },
+  "devDependencies": {
+    "broccoli": "^0.16.7",
+    "broccoli-funnel": "^0.2.8",
+    "broccoli-merge-trees": "^0.2.3",
+    "broccoli-babel-transpiler": "^5.4.3",
+    "broccoli-sass": "~0.3.3",
+    "broccoli-compass": "^0.2.3"
+  }
 }

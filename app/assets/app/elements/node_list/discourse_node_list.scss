@@ -1,3 +1,5 @@
+@import "compass/css3/flexbox";
+
 .discourse_node_list {
     .node_dispatcher {
         margin-top: 25px;
@@ -14,7 +16,7 @@
             padding: 6px;
             @include display-flex(flex);
             @include flex-wrap(wrap);
-            @include justify-content(left);
+            @include justify-content(flex-start);
         }
     }
 }
