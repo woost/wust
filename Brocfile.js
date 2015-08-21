@@ -27,12 +27,15 @@ var styles = cleanCSS(concat(compiledStyles, {
     outputFile: "/main.css"
 }));
 
-var hintedScripts = new JSHinter(funnel("app/assets/app", {
+
+var originalScripts = funnel("app/assets/app", {
     include: ["**/*.js"],
     destDir: "javascripts"
-}));
+});
 
-var compiledScripts = iife(esTranspiler(hintedScripts));
+var jsHintResults = new JSHinter(originalScripts);
+
+var compiledScripts = iife(esTranspiler(originalScripts));
 
 var scripts = concat(compiledScripts, {
     inputFiles: ["javascripts/**/*.js"],
@@ -41,4 +44,4 @@ var scripts = concat(compiledScripts, {
 });
 
 // Merge the compiled styles and scripts into one output directory.
-module.exports = mergeTrees([styles, scripts]);
+module.exports = mergeTrees([styles, scripts, jsHintResults]);
