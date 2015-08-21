@@ -22,9 +22,18 @@ collapseEditPostCtrl.$inject = [];
 function collapseEditPostCtrl() {
     let vm = this;
 
+    vm.focusEditTags = false;
     vm.editableChange = editableChange;
-
+    vm.redirectEnter = redirectEnter;
     vm.save = save;
+
+    function redirectEnter(event) {
+        if(event.keyCode === 13) {
+            vm.focusEditTags = true;
+            event.stopPropagation();
+            event.preventDefault();
+        }
+    }
 
     function save() {
         if (vm.tagSearch) {

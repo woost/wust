@@ -6,8 +6,8 @@
             </div>
 
             <div class="center-controls" data-title="click to edit" bs-tooltip animation="" ui-draggable="true" drag="vm.node.encode ? vm.node.encode() : vm.node" drag-channel="{{(!vm.node.isLocal || vm.node.canSave) ? 'scratch_node' : 'scratch_move'}}">
-                <a editable-text="vm.node.title" ng-bind="vm.node.title" onaftersave="vm.node.onChange()" e-ng-change="vm.editableChange($data)" blur="submit" buttons="no" e-placeholder="TL;DR" e-required ng-class="{'is_invalid': !vm.node.isValid}" e-class="wust_form_input">
-                </a>
+                <h3 contenteditable="true" ng-model="vm.node.title" ng-change="vm.node.onChange()" placeholder="TL;DR" ng-class="{'is_invalid': !vm.node.isValid}" class="title" ng-keydown="vm.redirectEnter($event)">
+                </h3>
             </div>
             <div class="pull-right right-controls">
                 <i ng-if="vm.node.canSave" class="fa fa-asterisk modified-indicator" data-title="this post contains unsaved changes" bs-tooltip animation=""></i>
@@ -19,7 +19,7 @@
                 <label>Replies to</label>
                 <span small-post node="vm.node.referenceNode"></span>
             </div>
-            <div edit-taglist tags="vm.node.tags" on-change="vm.node.onChange()"></div>
+            <div edit-taglist tags="vm.node.tags" set-focus="vm.focusEditTags" on-change="vm.node.onChange()"></div>
             <div edit-post-description node="vm.node"></div>
             <button class="pull-left btn btn-xs btn-danger" ng-click="vm.node.deleteNode();" ng-hide="vm.node.isLocal" data-title="delete" bs-tooltip animation=""><i class="fa fa-trash-o"></i></button>
             <button class="pull-left btn btn-xs btn-warning" ng-click="vm.node.discard()" ng-hide="vm.node.isPristine" data-title="discard changes" bs-tooltip animation=""><i class="fa fa-undo"></i></button>

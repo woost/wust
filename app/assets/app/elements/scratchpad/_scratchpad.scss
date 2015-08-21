@@ -1,10 +1,25 @@
 #scratchpad_component {
     height: 100%;
     padding: 5px;
-    .new_post_button {
-        font-style: normal;
-        text-decoration: none;
-        color: inherit;
+    .new_post_title {
+        width: 300px;
+    }
+    .title {
+        padding: 2px;
+        outline: none;
+        border-radius: 3px;
+        border: 2px solid transparent;
+        &.is_invalid {
+            border-color: red;
+        }
+        &[contenteditable='true']:hover{
+            background: #E6E6E6;
+        }
+        &:focus, &:focus:hover  {
+            background: #FFF;
+            border-color: #69c773;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.15) inset;
+        }
     }
     #edit_list {
         padding-top: 10px;
