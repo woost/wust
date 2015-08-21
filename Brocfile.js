@@ -1,16 +1,16 @@
 var mergeTrees = require("broccoli-merge-trees");
 var funnel = require("broccoli-funnel");
 var concat = require("broccoli-concat");
-var iife = require("broccoli-iife");
 
+var JSHinter = require('broccoli-jshint');
 var esTranspiler = require("broccoli-babel-transpiler");
+var iife = require("broccoli-iife");
 
 var compileSass = require("broccoli-compass");
 var cleanCSS = require("broccoli-clean-css");
 
 
 
-//TODO: jshint
 //TODO: asset fingerprinting
 //TODO: css minify
 
@@ -30,10 +30,12 @@ var styles = concat(compiledStyles, {
     outputFile: "/main.css"
 });
 
-var compiledScripts = iife(esTranspiler(funnel("app/assets/app", {
+var hintedScripts = new JSHinter(funnel("app/assets/app", {
     include: ["**/*.js"],
     destDir: "javascripts"
-})));
+}));
+
+var compiledScripts = iife(esTranspiler(hintedScripts));
 
 var scripts = concat(compiledScripts, {
     inputFiles: ["javascripts/**/*.js"],
