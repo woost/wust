@@ -35,7 +35,10 @@ function coloredTag(Helpers) {
             if(scope.border === "true")
                 rawElem.style.borderColor = Helpers.hashToHslBorder(scope.coloredTag);
 
-            rawElem.style.color = "white";
+            // intense tags
+            // rawElem.style.color = "white";
+            // light tags
+            rawElem.style.color = "black";
         }
     }
 }
