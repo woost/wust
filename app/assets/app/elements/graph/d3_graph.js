@@ -191,13 +191,13 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.d3Node = this.d3NodeContainerWithData.append("div")
                 .attr("class", d => d.isHyperRelation ? "hyperrelation" : "small_post_directive")
                 .style("background-color", n => (n.tags.length > 0 && !n.isHyperRelation) ? Helpers.hashToHslBackground(n.tags[0]) : undefined)
-                .style("border-color", n => n.tags.length > 0 ? Helpers.hashToHslBorder(n.tags[0]) : undefined)
+                .style("border-color", n => !n.isHyperRelation && n.tags.length > 0 ? Helpers.hashToHslBorder(n.tags[0]) : undefined)
                 .html(d => {
                     //TODO: do it with d3 data-joins, or directly with the angular-port
                     //TODO FIXME: XSS
                     if(d.isHyperRelation) {
                         return _.values(d.tags).map(t => {
-                            return `<span class="label nodetag" style="background: ${Helpers.hashToHslFill(t)};">${t.title}</span><br>`;
+                            return `<span class="tag nodetag" style="background: ${Helpers.hashToHslFill(t)}; border-color: ${d.tags.length > 0 ? Helpers.hashToHslBorder(d.tags[0]) : undefined};">${t.title}</span><br>`;
                         }).join("");
                     } else {
                         return `${d.title}
