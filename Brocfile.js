@@ -13,8 +13,7 @@ var cleanCSS = require("broccoli-clean-css");
 
 var stylesTree = mergeTrees([
     funnel("app/assets/stylesheets", { include: ["*.scss"] }),
-    funnel("app/assets/app", { include: ["**/*.scss"], destDir: "app"
-    })
+    funnel("app/assets/app", { include: ["**/*.scss"], destDir: "app" })
 ]);
 
 var compiledStyles = compileSass(stylesTree, {
@@ -27,18 +26,12 @@ var styles = cleanCSS(concat(compiledStyles, {
     outputFile: "/main.css"
 }));
 
-
-var originalScripts = funnel("app/assets/app", {
-    include: ["**/*.js"],
-    destDir: "javascripts"
-});
-
+var originalScripts = funnel("app/assets/app", { include: ["**/*.js"], destDir: "javascripts" });
 var jsHintResults = new JSHinter(originalScripts);
-
 var compiledScripts = iife(esTranspiler(originalScripts));
 
 var scripts = concat(compiledScripts, {
-    inputFiles: ["javascripts/**/*.js"],
+    inputFiles: ["javascripts/module.js", "javascripts/**/*.js"],
     outputFile: "/main.js",
     wrapInFunction: true
 });

@@ -16,9 +16,9 @@ addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.4")
 
 // web plugins
 // https://www.mschweighauser.com/playframework-asset-pipeline/
-addSbtPlugin("com.typesafe.sbt" % "sbt-jshint" % "1.0.3")
+// addSbtPlugin("com.typesafe.sbt" % "sbt-jshint" % "1.0.3")
 
-libraryDependencies += "org.webjars" % "jshint-node" % "2.6.3-2" // override sbt-jshint dependency until it contains the new version
+// libraryDependencies += "org.webjars" % "jshint-node" % "2.6.3-2" // override sbt-jshint dependency until it contains the new version
 
 // versioned assets
 addSbtPlugin("com.typesafe.sbt" % "sbt-digest" % "1.1.0")
@@ -26,15 +26,15 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-digest" % "1.1.0")
 // compression
 addSbtPlugin("com.typesafe.sbt" % "sbt-gzip" % "1.0.0")
 
-addSbtPlugin("net.ground5hark.sbt" % "sbt-css-compress" % "0.1.3")
+// addSbtPlugin("net.ground5hark.sbt" % "sbt-css-compress" % "0.1.3")
 
 // addSbtPlugin("net.ground5hark.sbt" % "sbt-closure" % "0.1.3")
 
 // ecmascript 6
-addSbtPlugin("com.typesafe.sbt" % "sbt-traceur" % "1.0.0")
+// addSbtPlugin("com.typesafe.sbt" % "sbt-traceur" % "1.0.0")
 
 // use sass preprocessor for css
-addSbtPlugin("default" % "sbt-sass" % "0.1.9")
+// addSbtPlugin("default" % "sbt-sass" % "0.1.9")
 
 
 // deploy to heroku from sbt

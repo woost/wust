@@ -8,10 +8,11 @@
     "broccoli-clean-css": "^1.0.0",
     "broccoli-compass": "^0.2.3",
     "broccoli-concat": "0.0.13",
+    "broccoli-funnel": "^0.2.8",
     "broccoli-iife": "0.1.0",
     "broccoli-jshint": "1.0.0",
-    "broccoli-funnel": "^0.2.8",
     "broccoli-merge-trees": "^0.2.3",
-    "broccoli-sass": "~0.3.3"
+    "broccoli-sass": "~0.3.3",
+    "node-sass": "^3.2.0"
   }
 }
