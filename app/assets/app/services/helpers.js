@@ -59,7 +59,7 @@ function hashToHslFill(tag) {
 
 function hashToHslFillLight(tag) {
     if(tag.color === -1) return "hsl(0, 0%, 55%)";
-    return hashToHsl(tag, 80, 85);
+    return hashToHsl(tag, 90, 80);
     // return hashToHsl(tag, 57, 55);
 }
 

@@ -3,12 +3,14 @@
     height: 24px;
     margin: 0 7px 0 0;
     padding: 0 5px;
-    // intense tags are without border
-    // light tags are with 1px border
+
+    // intense tags are without border and bold
+    // light tags are with 1px border and normal
+    // font-weight: bold;
     border: 1px solid;
+
     border-radius: 2px;
     font-size: 14px;
-    font-weight: bold;
     line-height: 24px;
     cursor: default;
     color: black;
