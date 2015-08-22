@@ -1,6 +1,7 @@
 var mergeTrees = require("broccoli-merge-trees");
 var funnel = require("broccoli-funnel");
 var concat = require("broccoli-concat");
+var BrowserSync = require('broccoli-browser-sync');
 
 var JSHinter = require('broccoli-jshint');
 var esTranspiler = require("broccoli-babel-transpiler");
@@ -21,10 +22,12 @@ var compiledStyles = compileSass(stylesTree, {
     sassDir: ".",
 });
 
-var styles = cleanCSS(concat(compiledStyles, {
+//TODO: cleanCss in production
+var styles = concat(compiledStyles, {
     inputFiles: ["stylesheets/**/*.css"],
     outputFile: "/main.css"
-}));
+});
+
 
 var originalScripts = funnel("app/assets/app", { include: ["**/*.js"], destDir: "javascripts" });
 var jsHintResults = new JSHinter(originalScripts);
@@ -36,5 +39,15 @@ var scripts = concat(compiledScripts, {
     wrapInFunction: true
 });
 
-// Merge the compiled styles and scripts into one output directory.
-module.exports = mergeTrees([styles, scripts, jsHintResults]);
+var browserSync = new BrowserSync([styles, scripts], {
+    // proxy the local play server
+    port: 9000,
+    browserSync: {
+        open: false //TODO: does not work, always opens a browser
+    }
+});
+
+module.exports = mergeTrees([
+        styles, scripts,
+        jsHintResults, browserSync
+]);

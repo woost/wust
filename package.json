@@ -5,6 +5,7 @@
   "devDependencies": {
     "broccoli": "^0.16.7",
     "broccoli-babel-transpiler": "^5.4.3",
+    "broccoli-browser-sync": "^1.0.0",
     "broccoli-clean-css": "^1.0.0",
     "broccoli-compass": "^0.2.3",
     "broccoli-concat": "0.0.13",
