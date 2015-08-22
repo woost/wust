@@ -14,3 +14,9 @@
 input.wust_form_input.ng-invalid.ng-touched {
     border: 1px solid red;
 }
+
+// make contenteditable elements work with webkit
+// http://stackoverflow.com/questions/4251227/contenteditable-div-not-actually-editable-in-webkit
+*[contenteditable] {
+    -webkit-user-select: auto !important;
+}
