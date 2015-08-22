@@ -2,7 +2,7 @@
     <button class="add_stream_button btn btn-default pull-right" type="button" animation="am-fade-and-scale-down" ng-click="vm.addTagStream()">Stream <i class="fa fa-plus"></i></button>
     <h3>Tag <a ui-sref="tags.details({id: vm.tag.id})" class="tag" colored-tag-fill="vm.tag" ng-bind="vm.tag.title"></a></h3>
     <div id="tag_detail_box" infinite-scroll="vm.loadMorePosts()" infinite="infinitePosts" promise="vm.contributions">
-        <div ng-repeat="contribution in vm.contributions | unique:'id' track by contribution.id" small-post node="contribution" class="ng-trans ng-trans-scale-up ease"></div>
+        <div ng-repeat="contribution in vm.contributions | unique:'id' track by contribution.id" small-post node="contribution" ignore-tags="::[vm.tag]" class="ng-trans ng-trans-scale-up ease"></div>
         <button class="btn btn-default pull-right ng-hide" ng-click="infinitePosts.manualLoad()" ng-disabled="infinitePosts.loading" ng-hide="infinitePosts.noMore">More</button>
     </div>
 </div>
