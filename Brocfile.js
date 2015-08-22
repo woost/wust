@@ -31,7 +31,7 @@ var styles = concat(compiledStyles, {
 
 var originalScripts = funnel("app/assets/app", { include: ["**/*.js"], destDir: "javascripts" });
 var jsHintResults = new JSHinter(originalScripts);
-var compiledScripts = iife(esTranspiler(originalScripts));
+var compiledScripts = iife(esTranspiler(originalScripts, { optional: ["es6.spec.symbols"] }));
 
 var scripts = concat(compiledScripts, {
     inputFiles: ["javascripts/module.js", "javascripts/**/*.js"],
