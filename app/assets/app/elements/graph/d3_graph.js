@@ -471,17 +471,14 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             this.graph.nodes.forEach((n, i) => {
                 //TODO: somehow we need to keep the old domNodeContainer and domNodeFrame for already existing nodes
                 //i am not sure whether the indices will be correct then,
-                // just ignore if we already have a domNode
-                if (n.domNodeContainer !== undefined)
-                    return;
-
-                n.domNodeContainer = this.d3NodeContainerWithData[0][i];
+                // do not ask why i fixed it like this. i have no idea.
+                n.domNodeContainer = n.domNodeContainer || this.d3NodeContainerWithData[0][i];
                 n.d3NodeContainer = d3.select(n.domNodeContainer);
 
                 n.domNode = this.d3Node[0][i];
                 n.d3Node = d3.select(n.domNode);
 
-                n.domNodeFrame = this.d3NodeFrame[0][i];
+                n.domNodeFrame = n.domNodeFrame || this.d3NodeFrame[0][i];
                 n.d3NodeFrame = d3.select(n.domNodeFrame);
             });
 
