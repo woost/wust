@@ -40,7 +40,7 @@ function bigTaglistCtrl(Post, Session) {
 
     function unvoteExisting(tag, weight) {
         let existing = getVote(tag);
-        if (existing === undefined) {
+        if (existing === undefined || existing.weight !== weight) {
             return false;
         } else {
             let resource = wrapResource(tag);
@@ -55,7 +55,7 @@ function bigTaglistCtrl(Post, Session) {
     }
 
     function upvote(tag) {
-        if (unvoteExisting(tag))
+        if (unvoteExisting(tag, 1))
             return;
 
         let resource = wrapResource(tag);
@@ -65,7 +65,7 @@ function bigTaglistCtrl(Post, Session) {
         });
     }
     function downvote(tag) {
-        if (unvoteExisting(tag))
+        if (unvoteExisting(tag, -1))
             return;
 
         let resource = wrapResource(tag);
