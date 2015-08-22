@@ -469,16 +469,20 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             // write dom element ref and rect into graph node
             // for easy lookup
             this.graph.nodes.forEach((n, i) => {
+                //TODO: somehow we need to keep the old domNodeContainer and domNodeFrame for already existing nodes
+                //i am not sure whether the indices will be correct then,
+                // just ignore if we already have a domNode
+                if (n.domNodeContainer !== undefined)
+                    return;
+
                 n.domNodeContainer = this.d3NodeContainerWithData[0][i];
                 n.d3NodeContainer = d3.select(n.domNodeContainer);
 
                 n.domNode = this.d3Node[0][i];
                 n.d3Node = d3.select(n.domNode);
 
-                //TODO: i am not sure whether the indices will be correct then,
-                //but the old nodes should be in the tail of the node list
-                n.domNodeFrame = n.domNodeFrame || this.d3NodeFrame[0][i];
-                n.d3NodeFrame = n.d3NodeFrame || d3.select(n.domNodeFrame);
+                n.domNodeFrame = this.d3NodeFrame[0][i];
+                n.d3NodeFrame = d3.select(n.domNodeFrame);
             });
 
             this.graph.relations.forEach((r, i) => {
