@@ -159,18 +159,28 @@ function DiscourseNodeList() {
                     // TODO: element still has properties from edit_service Session
                     self.apiList.$buildRaw(_.pick(elem, "title", "description", "addedTags")).$save().$then(data => {
                         humane.success("Created and connected node");
+                        data.node.tags = elem.tags;
                         EditService.updateNode(elem.localId, data.node);
-                        //TODO: graph should only contain created items
-                        //this.component.self.addNode(elem);
-                        _.each(data.graph.nodes, n => self.component.add(n));
-                        self.component.commit();
+                        addToComponent(data);
                     });
                 } else {
                     self.apiList.$buildRaw(elem).$save({}).$then(data => {
                         humane.success("Connected node");
-                        _.each(data.graph.nodes, n => self.component.add(n));
-                        self.component.commit();
+                        addToComponent(data);
                     });
+                }
+
+                // I am here because nobody implemented tags in write responses
+                function addToComponent(response) {
+                    let newElem = response.node;
+                    newElem = _.find(response.graph.nodes, {
+                        id: newElem.id
+                    });
+
+                    newElem.tags = elem.tags;
+
+                    _.each(response.graph.nodes, n => self.component.add(n));
+                    self.component.commit();
                 }
             }
         }
