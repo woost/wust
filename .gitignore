@@ -15,5 +15,6 @@ tmp
 /.settings
 /magic
 /node_modules
+/public/assets
 
 .sass-cache

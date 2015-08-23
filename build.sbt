@@ -9,9 +9,6 @@ val paradiseVersion = "2.1.0-M5"
 //   settings = sharedsettings
 //   ) dependsOn(macros)
 
-//TODO: dont build scaladoc
-// http://stackoverflow.com/a/21491331/793909
-
 lazy val wust = (project in file(".")).settings(
   scalaVersion := scalaV,
   resolvers += "Atlassian Releases" at "https://maven.atlassian.com/public/",
@@ -62,7 +59,10 @@ lazy val wust = (project in file(".")).settings(
   scalaJSProjects := Seq(scalajs),
   pipelineStages := Seq(scalaJSProd, digest, gzip),
   excludeFilter in gzip := (excludeFilter in gzip).value || new SimpleFileFilter(file => new File(file.getAbsolutePath + ".gz").exists), // do not compress assets for which a gzipped version already exists
-  scalacOptions ++= scalacOpts
+  scalacOptions ++= scalacOpts,
+  // disable gerenation of scaladoc
+  sources in (Compile,doc) := Seq.empty,
+  publishArtifact in (Compile, packageDoc) := false
 ).
   enablePlugins(PlayScala).
   dependsOn(schema, scalajsSharedJvm).

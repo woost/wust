@@ -1,0 +1,5 @@
+#!/bin/bash
+
+rm -rf public/assets
+BROCCOLI_ENV=production broccoli build public/assets
+

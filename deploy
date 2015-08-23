@@ -1,0 +1,7 @@
+#!/bin/bash
+
+echo "generating production assets..."
+./prodassets
+
+echo "deploying to Heroku..."
+sbt stage deployHeroku
