@@ -22,40 +22,17 @@ lazy val wust = (project in file(".")).settings(
     // in case we need to export shared code to js:
     // https://stackoverflow.com/questions/28413266/how-to-export-properties-of-shared-case-classes
     // angular
-    "org.webjars.bower" % "angular" % "1.4.4",
-    "org.webjars.bower" % "angular-animate" % "1.4.4",
-    "org.webjars.bower" % "angular-sanitize" % "1.4.4",
-    "org.webjars.bower" % "angular-ui-router" % "0.2.15",
-    "org.webjars.bower" % "angular-bootstrap" % "0.13.1",
-    "org.webjars.bower" % "angular-strap" % "2.3.1", //similar (maybe even better?) to angular-ui-bootstrap but with working popover
-    "org.webjars.bower" % "angular-motion" % "0.4.2", // animations for angular-strap
-    "org.webjars.bower" % "ng-trans-css" % "0.9.1",
-    "org.webjars.bower" % "angular-native-dragdrop" % "1.1.0",
-    "org.webjars.bower" % "ng-sortable" % "1.3.0",
-    "org.webjars.bower" % "angular-restmod" % "1.1.8",
-    "org.webjars.bower" % "angular-storage-no-cookies" % "0.0.13",
-    "org.webjars.bower" % "angular-ui-switch" % "0.1.0",
-    "org.webjars.bower" % "ace-builds" % "1.2.0",
-    "org.webjars.bower" % "angular-ui-ace" % "0.2.3",
     // styles and fonts
-    "org.webjars.bower" % "bootstrap-css-only" % "3.3.4",
     "org.webjars.bower" % "font-awesome" % "4.4.0",
-    "org.webjars.bower" % "lodium" % "0.1.2",
-    // js auth
-    "org.webjars.bower" % "angular-jwt" % "0.0.9",
     // basic js libraries
-    "org.webjars.bower" % "lodash" % "3.10.1",
-    "org.webjars.bower" % "d3" % "3.5.6",
-    "org.webjars.bower" % "humane-js" % "3.2.2",
     // markdown parser
-    "org.webjars.bower" % "marked" % "0.3.3",
     // authentication / authorization
     "com.mohiva" %% "play-silhouette" % "2.0",
     "com.typesafe.play.plugins" %% "play-plugins-mailer" % "2.3.1",
     // database
     "commons-codec" % "commons-codec" % "1.10" // for base64 encoding of uuids
   ),
-  addCompilerPlugin("org.scalamacros" % "paradise" % paradiseVersion cross CrossVersion.full),
+  // addCompilerPlugin("org.scalamacros" % "paradise" % paradiseVersion cross CrossVersion.full),
   scalaJSProjects := Seq(scalajs),
   pipelineStages := Seq(scalaJSProd, digest, gzip),
   excludeFilter in gzip := (excludeFilter in gzip).value || new SimpleFileFilter(file => new File(file.getAbsolutePath + ".gz").exists), // do not compress assets for which a gzipped version already exists
@@ -123,7 +100,7 @@ lazy val seed = (project in file("seed")).settings(
 ).dependsOn(schema, wust)
 
 // deploy to heroku
-herokuAppName in Compile := "wust"
+herokuAppName in Compile := "wustpr"
 
 val scalacOpts = Seq(
   "-encoding", "UTF-8",
