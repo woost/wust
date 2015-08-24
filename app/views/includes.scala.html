@@ -6,12 +6,11 @@
 
 <link rel="icon" type="image/png" href='@routes.Assets.versioned("images/favicon.png")'>
 
-<link rel="stylesheet" media="screen" href='@routes.Assets.versioned("lib/font-awesome/css/font-awesome.css")'>
 <link rel="stylesheet" media="screen" href='@routes.Assets.versioned("wust-font.css")'>
 
 @if(play.api.Play.mode == play.api.Mode.Prod) {
-    <link rel="stylesheet" media="screen" href='assets/assets/main.css'>
-    <script src='assets/assets/main.js'></script>
+    <link rel="stylesheet" media="screen" href='@routes.Assets.versioned("assets/main.css")'>
+    <script src='@routes.Assets.versioned("assets/main.js")'></script>
 } else {
     <link rel="stylesheet" media="screen" href='http://localhost:4200/main.css'>
     <script src='http://localhost:4200/main.js'></script>

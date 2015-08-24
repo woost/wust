@@ -4,6 +4,7 @@ var funnel = require("broccoli-funnel");
 // var concat = require("broccoli-concat");
 var concat = require("broccoli-sourcemap-concat");
 var env = require('broccoli-env').getEnv(); // BROCCOLI_ENV
+var prod = env === 'production';
 
 var JSHinter = require('broccoli-jshint');
 var esTranspiler = require("broccoli-babel-transpiler");
@@ -16,7 +17,6 @@ var csso = require('broccoli-csso');
 
 var BrowserSync = require('broccoli-browser-sync');
 
-//TODO: asset fingerprinting
 //TODO: sourcemaps and iife, only in dev
 
 var stylesTree = mergeTrees([
@@ -32,6 +32,7 @@ var compiledStyles = compileSass(stylesTree, {
 var styles = concat(mergeTrees([compiledStyles, "node_modules", "bower_components"], {overwrite: true}), {
     inputFiles: [
         "bootstrap-css-only/css/bootstrap.css",
+        "font-awesome/css/font-awesome.css",
         "angular-motion/dist/angular-motion.css",
         "angular-ui-switch/angular-ui-switch.css",
         "ng-trans-css/ng-trans.css",
@@ -50,8 +51,7 @@ var appScripts = iife(esTranspiler(appScriptsEs6, { optional: ["es6.spec.symbols
 
 var scripts = concat(mergeTrees([appScripts,"node_modules", "bower_components"], {overwrite: true}), {
     inputFiles: [
-        //TODO: minified versions in production, normal in dev
-        "angular/angular.js",
+        prod ? "angular/angular.min.js" : "angular/angular.js",
         "angular-animate/angular-animate.js",
         "angular-sanitize/angular-sanitize.js",
         "angular-ui-router/release/angular-ui-router.js",
@@ -90,7 +90,7 @@ var scripts = concat(mergeTrees([appScripts,"node_modules", "bower_components"],
 });
 
 
-if (env === 'production') {
+if (prod) {
     module.exports = mergeTrees([
             csso(styles),
             closure(scripts, 'main.js', {

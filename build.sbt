@@ -21,11 +21,6 @@ lazy val wust = (project in file(".")).settings(
     "com.vmunier" %% "play-scalajs-scripts" % "0.2.2",
     // in case we need to export shared code to js:
     // https://stackoverflow.com/questions/28413266/how-to-export-properties-of-shared-case-classes
-    // angular
-    // styles and fonts
-    "org.webjars.bower" % "font-awesome" % "4.4.0",
-    // basic js libraries
-    // markdown parser
     // authentication / authorization
     "com.mohiva" %% "play-silhouette" % "2.0",
     "com.typesafe.play.plugins" %% "play-plugins-mailer" % "2.3.1",
