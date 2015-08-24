@@ -8,6 +8,7 @@ var env = require('broccoli-env').getEnv(); // BROCCOLI_ENV
 var JSHinter = require('broccoli-jshint');
 var esTranspiler = require("broccoli-babel-transpiler");
 var iife = require("broccoli-iife");
+var closure = require('broccoli-closure');
 
 var compileSass = require("broccoli-compass");
 // var cleanCSS = require("broccoli-clean-css");
@@ -16,7 +17,7 @@ var csso = require('broccoli-csso');
 var BrowserSync = require('broccoli-browser-sync');
 
 //TODO: asset fingerprinting
-//TODO: sourcemaps
+//TODO: sourcemaps and iife, only in dev
 
 var stylesTree = mergeTrees([
     funnel("app/assets/stylesheets", { include: ["*.scss"] }),
@@ -49,7 +50,8 @@ var appScripts = iife(esTranspiler(appScriptsEs6, { optional: ["es6.spec.symbols
 
 var scripts = concat(mergeTrees([appScripts,"node_modules", "bower_components"], {overwrite: true}), {
     inputFiles: [
-        "angular/angular.min.js",
+        //TODO: minified versions in production, normal in dev
+        "angular/angular.js",
         "angular-animate/angular-animate.js",
         "angular-sanitize/angular-sanitize.js",
         "angular-ui-router/release/angular-ui-router.js",
@@ -73,10 +75,10 @@ var scripts = concat(mergeTrees([appScripts,"node_modules", "bower_components"],
         "lodium/lodium.js",
         "marked/lib/marked.js",
 
-        "angular-ui-ace/ui-ace.js",
 
         "ace-builds/src-min-noconflict/ace.js",
         "ace-builds/src-min-noconflict/mode-markdown.js",
+        "angular-ui-ace/ui-ace.js",
         // "lib/ace-builds/src-min-noconflict/keybinding-vim.js",
         // "lib/ace-builds/src-min-noconflict/ext-language_tools.js",
 
@@ -91,7 +93,12 @@ var scripts = concat(mergeTrees([appScripts,"node_modules", "bower_components"],
 if (env === 'production') {
     module.exports = mergeTrees([
             csso(styles),
-            scripts
+            closure(scripts, 'main.js', {
+                'language_in':         'ECMASCRIPT5',
+                'language_out':        'ECMASCRIPT5',
+                'warning_level':       'QUIET',
+                'compilation_level':   'SIMPLE_OPTIMIZATIONS'
+            })
     ]);
 } else { // development
     var browserSync = new BrowserSync([styles, scripts], {
