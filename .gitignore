@@ -16,6 +16,6 @@ tmp
 /magic
 /node_modules
 /bower_components
-/public/assets
+/public
 
 .sass-cache

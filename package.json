@@ -16,8 +16,10 @@
     "broccoli-iife": "0.1.0",
     "broccoli-jshint": "1.0.0",
     "broccoli-merge-trees": "^0.2.3",
+    "broccoli-ng-annotate": "^1.2.0",
     "broccoli-sass": "~0.3.3",
     "broccoli-sourcemap-concat": "^1.0.2",
+    "broccoli-string-replace": "^0.1.0",
     "node-sass": "^3.2.0"
   },
   "dependencies": {

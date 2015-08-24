@@ -6,15 +6,8 @@
 
 <link rel="icon" type="image/png" href='@routes.Assets.versioned("images/favicon.png")'>
 
-<link rel="stylesheet" media="screen" href='@routes.Assets.versioned("wust-font.css")'>
-
-@if(play.api.Play.mode == play.api.Mode.Prod) {
-    <link rel="stylesheet" media="screen" href='@routes.Assets.versioned("assets/main.css")'>
-    <script src='@routes.Assets.versioned("assets/main.js")'></script>
-} else {
-    <link rel="stylesheet" media="screen" href='http://localhost:4200/main.css'>
-    <script src='http://localhost:4200/main.js'></script>
-}
+<link rel="stylesheet" media="screen" href='@routes.Assets.versioned("main.css")'>
+<script src='@routes.Assets.versioned("main.js")'></script>
 
 @playscalajs.html.jsdeps(projectName = "scalajs")
 @playscalajs.html.selectScript(projectName = "scalajs")

@@ -1,18 +1,18 @@
 var mergeTrees = require("broccoli-merge-trees");
 var funnel = require("broccoli-funnel");
-// var pickFiles = require('broccoli-static-compiler');
 // var concat = require("broccoli-concat");
 var concat = require("broccoli-sourcemap-concat");
 var env = require('broccoli-env').getEnv(); // BROCCOLI_ENV
 var prod = env === 'production';
+var replace = require('broccoli-string-replace');
 
 var JSHinter = require('broccoli-jshint');
 var esTranspiler = require("broccoli-babel-transpiler");
 var iife = require("broccoli-iife");
 var closure = require('broccoli-closure');
+var ngAnnotate = require('broccoli-ng-annotate');
 
 var compileSass = require("broccoli-compass");
-// var cleanCSS = require("broccoli-clean-css");
 var csso = require('broccoli-csso');
 
 var BrowserSync = require('broccoli-browser-sync');
@@ -29,7 +29,34 @@ var compiledStyles = compileSass(stylesTree, {
     sassDir: ".",
 });
 
-var styles = concat(mergeTrees([compiledStyles, "node_modules", "bower_components"], {overwrite: true}), {
+var dependencies = mergeTrees(["node_modules", "bower_components"], {overwrite: true});
+
+var staticAssets = mergeTrees([funnel("static_assets", {
+    exclude: [ "**/*.css", "**/*.js", "**/*.woff*" ]
+})]);
+
+var staticAssetsCssJs = funnel("static_assets", {
+    include: [ "**/*.css", "**/*.js" ],
+    destDir: "static_assets_css_js"
+});
+
+var fonts = mergeTrees([
+        funnel("bower_components/font-awesome", { include: [ "**/*.woff*" ]}),
+        funnel("bower_components/bootstrap-css-only", { include: [ "**/*.woff*" ]}),
+        funnel("static_assets", { include: [ "**/*.woff*" ], destDir:"fonts"}),
+]);
+
+var styles = concat(replace(mergeTrees([compiledStyles, dependencies, staticAssetsCssJs]), {
+    files: [
+        "bootstrap-css-only/css/bootstrap.css",
+        "font-awesome/css/font-awesome.css",
+        "static_assets_css_js/wust-font.css"
+    ],
+    pattern: {
+        match: /url\('..\/fonts?/g,
+        replacement: "url('fonts"
+    }
+}), {
     inputFiles: [
         "bootstrap-css-only/css/bootstrap.css",
         "font-awesome/css/font-awesome.css",
@@ -39,48 +66,58 @@ var styles = concat(mergeTrees([compiledStyles, "node_modules", "bower_component
         "ng-sortable/dist/ng-sortable.css",
         "humane-js/themes/libnotify.css",
 
+        "static_assets_css_js/**/*.css",
+
         "stylesheets/**/*.css"
     ],
     outputFile: "/main.css"
 });
 
-
 var appScriptsEs6 = funnel("app/assets/app", { include: ["**/*.js"], destDir: "javascripts" });
 var jsHintResults = new JSHinter(appScriptsEs6);
 var appScripts = iife(esTranspiler(appScriptsEs6, { optional: ["es6.spec.symbols"] }));
 
-var scripts = concat(mergeTrees([appScripts,"node_modules", "bower_components"], {overwrite: true}), {
-    inputFiles: [
-        prod ? "angular/angular.min.js" : "angular/angular.js",
-        "angular-animate/angular-animate.js",
-        "angular-sanitize/angular-sanitize.js",
-        "angular-ui-router/release/angular-ui-router.js",
-        "angular-bootstrap/ui-bootstrap.js",
-        "angular-bootstrap/ui-bootstrap-tpls.js",
-        "angular-strap/dist/angular-strap.js",
-        "angular-strap/dist/angular-strap.tpl.js",
+function min(file) {
+    if(prod)
+        return file.slice(0,-2) + "min.js"
+    else
+        return file;
+}
 
-        "lodash/lodash.js",
+var scripts = concat(mergeTrees([appScripts,dependencies,staticAssetsCssJs]), {
+    inputFiles: [
+        min("angular/angular.js"),
+        min("angular-animate/angular-animate.js"),
+        min("angular-sanitize/angular-sanitize.js"),
+        min("angular-ui-router/release/angular-ui-router.js"),
+        min("angular-bootstrap/ui-bootstrap.js"),
+        min("angular-bootstrap/ui-bootstrap-tpls.js"),
+        min("angular-strap/dist/angular-strap.js"),
+        min("angular-strap/dist/angular-strap.tpl.js"),
+
+        min("lodash/lodash.js"),
 
         "angular-native-dragdrop/draganddrop.js",
-        "ng-sortable/dist/ng-sortable.js",
-        "humane-js/humane.js",
-        "d3/d3.js",
+        min("ng-sortable/dist/ng-sortable.js"),
+        min("humane-js/humane.js"),
+        min("d3/d3.js"),
 
-        "angular-jwt/dist/angular-jwt.js",
-        "angular-storage-no-cookies/dist/angular-storage.js",
-        "angular-restmod/dist/angular-restmod-bundle.js",
-        "angular-ui-switch/angular-ui-switch.js",
+        min("angular-jwt/dist/angular-jwt.js"),
+        min("angular-storage-no-cookies/dist/angular-storage.js"),
+        min("angular-restmod/dist/angular-restmod-bundle.js"),
+        min("angular-ui-switch/angular-ui-switch.js"),
 
         "lodium/lodium.js",
-        "marked/lib/marked.js",
+        "marked/marked.min.js",
 
 
         "ace-builds/src-min-noconflict/ace.js",
         "ace-builds/src-min-noconflict/mode-markdown.js",
-        "angular-ui-ace/ui-ace.js",
+        min("angular-ui-ace/ui-ace.js"),
         // "lib/ace-builds/src-min-noconflict/keybinding-vim.js",
         // "lib/ace-builds/src-min-noconflict/ext-language_tools.js",
+
+        // "static_assets_css_js/**/*.js",
 
         "javascripts/module.js",
         "javascripts/**/*.js"
@@ -97,8 +134,10 @@ if (prod) {
                 'language_in':         'ECMASCRIPT5',
                 'language_out':        'ECMASCRIPT5',
                 'warning_level':       'QUIET',
-                'compilation_level':   'SIMPLE_OPTIMIZATIONS'
-            })
+                'compilation_level':   'WHITESPACE_ONLY'
+            }),
+            staticAssets,
+            fonts
     ]);
 } else { // development
     var browserSync = new BrowserSync([styles, scripts], {
@@ -110,7 +149,7 @@ if (prod) {
     });
 
     module.exports = mergeTrees([
-            styles, scripts,
+            styles, scripts, staticAssets, fonts,
             jsHintResults, browserSync
     ]);
 }
