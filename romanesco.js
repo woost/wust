@@ -16,7 +16,9 @@ console.log("Reading Brocfile", require.resolve(brocfile), "\n");
 
 process.chdir(appRoot);
 
-fs.mkdir(destDir);
+try {
+    fs.mkdirSync(destDir);
+} catch (e) {}
 
 var tree = require(brocfile);
 var builder = new broccoli.Builder(tree);
