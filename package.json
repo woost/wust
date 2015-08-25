@@ -23,7 +23,8 @@
     "broccoli-string-replace": "^0.1.0",
     "ncp": "^2.0.0",
     "node-sass": "^3.2.0",
-    "sane": "^1.2.0"
+    "sane": "^1.2.0",
+    "mkdirp": "^0.5.1"
   },
   "dependencies": {
     "angular": "^1.4.4",

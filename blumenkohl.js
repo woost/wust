@@ -6,6 +6,7 @@ var broccoli = require("broccoli");
 var Watcher = require("broccoli-sane-watcher");
 var ncp = require("ncp");
 var path = require("path");
+var mkdirp = require("mkdirp");
 
 var arguments = process.argv.slice(2);
 
@@ -18,9 +19,7 @@ console.log("Writing to", destDir, "\n");
 
 process.chdir(appRoot);
 
-try {
-    fs.mkdirSync(destDir);
-} catch (e) {}
+mkdirp(destDir);
 
 var tree = require(brocfile);
 var builder = new broccoli.Builder(tree);
