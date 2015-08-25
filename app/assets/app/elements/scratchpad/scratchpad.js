@@ -25,7 +25,8 @@ function scratchpadCtrl(EditService, SidebarService) {
     vm.editNewPost = editNewPost;
 
     vm.newPost = {
-        title: ""
+        title: "",
+        tags: []
     };
 
     function editNewPost() {
