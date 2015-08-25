@@ -7,12 +7,14 @@ var Watcher = require("broccoli-sane-watcher");
 var ncp = require("ncp");
 var path = require("path");
 
-var destDir = "public"
+var arguments = process.argv.slice(2);
 
-var appRoot = process.env.APP_ROOT || process.cwd();
-var brocfile = process.env.BROCFILE || path.join(__dirname, "Brocfile.js");
+var appRoot = __dirname;
+var destDir = arguments[0] || "public"
+var brocfile = path.join(appRoot, "Brocfile.js");
 
-console.log("Reading Brocfile", require.resolve(brocfile), "\n");
+console.log("Reading Brocfile", brocfile);
+console.log("Writing to", destDir, "\n");
 
 process.chdir(appRoot);
 
