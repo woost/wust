@@ -19,20 +19,11 @@ function editTaglist() {
     };
 }
 
-editTaglistCtrl.$inject = ["Search", "DiscourseNode"];
+editTaglistCtrl.$inject = ["TagSuggestions"];
 
-function editTaglistCtrl(Search, DiscourseNode) {
+function editTaglistCtrl(TagSuggestions) {
     let vm = this;
 
-    vm.searchTags = searchTags;
+    vm.searchTags = TagSuggestions.search;
     vm.onChange = vm.onChange || _.noop;
-
-    function searchTags(title) {
-        return Search.$search({
-            title: title,
-            label: DiscourseNode.TagLike.label,
-            size: 8,
-            page: 0
-        });
-    }
 }
