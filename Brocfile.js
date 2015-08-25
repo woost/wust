@@ -81,7 +81,7 @@ var styles = concat(mergeTrees([compiledStyles, dependencies, staticAssetsCssJs,
 
 var appScriptsEs6 = funnel("app/assets/app", { include: ["**/*.js"], destDir: "javascripts" });
 var jsHintResults = new JSHinter(appScriptsEs6);
-var appScripts = iife(esTranspiler(appScriptsEs6, { optional: ["es6.spec.symbols"] }));
+var appScripts = iife(esTranspiler(appScriptsEs6));
 
 function min(file) {
     if(prod)

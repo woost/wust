@@ -14,8 +14,8 @@ function DiscourseNodeList() {
     get.$inject = ["$injector", "$rootScope", "DiscourseNode", "EditService"];
 
     function get($injector, $rootScope, DiscourseNode, EditService) {
-        const PREDECESSORS = Symbol("predecessors");
-        const SUCCESSORS = Symbol("successors");
+        const PREDECESSORS = 0;
+        const SUCCESSORS = 1;
 
         class NodeModel {
             constructor(component, node, connectorType, writable) {
