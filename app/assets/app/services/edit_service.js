@@ -185,6 +185,9 @@ function EditService(Post, HistoryService, store, DiscourseNode, ZenService) {
     }
 
     function findNode(localId) {
+        if (localId === undefined)
+            return undefined;
+
         return _.find(self.list, {
             localId
         });

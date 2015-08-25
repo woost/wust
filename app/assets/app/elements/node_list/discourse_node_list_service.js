@@ -155,22 +155,28 @@ function DiscourseNodeList() {
                     return;
 
                 let self = this;
-                if (elem.id === undefined) {
-                    // TODO: element still has properties from edit_service Session
-                    self.apiList.$buildRaw(_.pick(elem, "title", "description", "addedTags")).$save().$then(data => {
-                        humane.success("Created and connected node");
-                        data.node.tags = elem.tags;
-                        EditService.updateNode(elem.localId, data.node);
-                        addToComponent(data);
-                    });
+
+                // first we check whether the node is currenlty edited and
+                // has unsaved changes or is fresh.
+                let editedNode = EditService.findNode(elem.localId);
+                if (editedNode !== undefined && editedNode.canSave) {
+                    editedNode.save().$then(connectNode);
                 } else {
-                    self.apiList.$buildRaw(elem).$save({}).$then(data => {
-                        humane.success("Connected node");
-                        addToComponent(data);
-                    });
+                    connectNode(elem);
                 }
 
-                // I am here because nobody implemented tags in write responses
+                function connectNode(node) {
+                    if (node.id === undefined) {
+                        console.warn("Tried to connect local node which is not in the EditService", node);
+                    } else {
+                        self.apiList.$buildRaw(node).$save({}).$then(data => {
+                            humane.success("Connected node");
+                            addToComponent(data);
+                        });
+                    }
+                }
+
+                // TODO: I am here because nobody implemented tags in write responses
                 function addToComponent(response) {
                     let newElem = response.node;
                     newElem = _.find(response.graph.nodes, {

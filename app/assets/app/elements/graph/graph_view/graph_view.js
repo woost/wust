@@ -42,11 +42,12 @@ function graphViewCtrl($scope, $stateParams, FocusService, $filter, EditService,
     }
 
     function addNodeToGraph(node, event) {
-        // we can drop local nodes from the scratchpad here,
-        // so let us create them if before putting them in the graph, so we
-        // have an id in the graph
-        if (node.id === undefined) {
-            EditService.findNode(node.localId).save().$then(data => placeNodeInGraph(data, event));
+        // we can drop local nodes from the scratchpad here.
+        // so we check whether the node was edited and has unsaved changes and
+        // save it before adding it to the graph.
+        let editedNode = EditService.findNode(node.localId);
+        if (editedNode !== undefined && editedNode.canSave) {
+            editedNode.save().$then(data => placeNodeInGraph(data, event));
         } else {
             placeNodeInGraph(node, event);
         }
