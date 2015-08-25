@@ -7,6 +7,7 @@ import play.api.mvc.Results._
 import play.api.mvc._
 import play.filters.gzip.GzipFilter
 import play.api.Play.current
+import play.api.Play
 import java.io.File
 import com.typesafe.config.ConfigFactory
 
@@ -26,17 +27,23 @@ object LoggingFilter extends EssentialFilter {
   }
 }
 
-object DevelopmentFilters extends WithFilters(LoggingFilter)
-object ProductionFilters extends WithFilters(new GzipFilter())
+trait MyWithFilters extends GlobalSettings {
+  // this reimplements the WithFilters class
+  // https://github.com/playframework/playframework/blob/912ea929f61a5c452e090715e6d02a22871a0dbb/framework/src/play/src/main/scala/play/api/mvc/Filters.scala#L107
+  lazy val filters = if(Play.isDev) {
+    Array(LoggingFilter)
+  } else {
+    Array(new GzipFilter)
+  }
 
-object Global extends GlobalSettings with SecuredSettings with SilhouetteLogger {
+  override def doFilter(a: EssentialAction): EssentialAction = {
+    Filters(super.doFilter(a), filters: _*)
+  }
+}
+
+object Global extends GlobalSettings with MyWithFilters with SecuredSettings with SilhouetteLogger {
 
   wust.Shared.hello()
-
-  override def onLoadConfig(config: Configuration, path: File, classloader: ClassLoader, mode: Mode.Mode): Configuration = {
-    val modeSpecificConfig = config ++ Configuration(ConfigFactory.load(s"application.${mode.toString.toLowerCase}.conf"))
-    super.onLoadConfig(modeSpecificConfig, path, classloader, mode)
-  }
 
   override def onNotAuthenticated(request: RequestHeader, lang: Lang): Option[Future[Result]] = {
     // Called when a user is not authenticated.

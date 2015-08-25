@@ -1,6 +1,7 @@
 @import play.api.Play.current
+@import play.api.Play
 
-@if(play.api.Play.mode == play.api.Mode.Prod) {
+@if(Play.isProd) {
     @inspectlet()
 }
 
