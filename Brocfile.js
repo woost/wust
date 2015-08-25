@@ -46,7 +46,11 @@ var fonts = mergeTrees([
         funnel("static_assets", { include: [ "**/*.woff*" ], destDir:"fonts"}),
 ]);
 
-var styles = concat(replace(mergeTrees([compiledStyles, dependencies, staticAssetsCssJs]), {
+var fontCss = replace(mergeTrees([
+        funnel("bower_components", { include: [ "bootstrap-css-only/css/bootstrap.css" ]}),
+        funnel("bower_components", { include: [ "font-awesome/css/font-awesome.css" ]}),
+        funnel(staticAssetsCssJs, { include: [ "static_assets_css_js/wust-font.css" ]}),
+]),{
     files: [
         "bootstrap-css-only/css/bootstrap.css",
         "font-awesome/css/font-awesome.css",
@@ -56,7 +60,9 @@ var styles = concat(replace(mergeTrees([compiledStyles, dependencies, staticAsse
         match: /url\('..\/fonts?/g,
         replacement: "url('fonts"
     }
-}), {
+});
+
+var styles = concat(mergeTrees([compiledStyles, dependencies, staticAssetsCssJs, fontCss], {overwrite: true}), {
     inputFiles: [
         "bootstrap-css-only/css/bootstrap.css",
         "font-awesome/css/font-awesome.css",
