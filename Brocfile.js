@@ -1,24 +1,18 @@
-var mergeTrees = require("broccoli-merge-trees");
-var funnel = require("broccoli-funnel");
-// var concat = require("broccoli-concat");
-var concat = require("broccoli-sourcemap-concat");
 var env = require("broccoli-env").getEnv(); // BROCCOLI_ENV
 var prod = env === "production";
-var replace = require("broccoli-string-replace");
 
+var concat = prod ? require("broccoli-concat") : require("broccoli-sourcemap-concat");
+var mergeTrees = require("broccoli-merge-trees");
+var funnel = require("broccoli-funnel");
+var replace = require("broccoli-string-replace");
 var JSHinter = require("broccoli-jshint");
 var esTranspiler = require("broccoli-babel-transpiler");
 var iife = require("broccoli-iife");
 var closure = require("broccoli-closure");
-// var htmlJsStr = require("js-string-escape");
 var html2js = require("broccoli-html2js");
-
 var compileSass = require("broccoli-compass");
 var csso = require("broccoli-csso");
-
 var BrowserSync = require("broccoli-browser-sync");
-
-//TODO: sourcemaps and iife, only in dev
 
 var stylesTree = mergeTrees([
     funnel("app/assets/stylesheets", { include: ["*.scss"] }),
@@ -138,8 +132,7 @@ var scripts = concat(mergeTrees([appScripts,htmlTemplates,dependencies,staticAss
         "javascripts/**/*.js",
         "templates.js"
     ],
-    outputFile: "/main.js",
-    wrapInFunction: true
+    outputFile: "/main.js"
 });
 
 
