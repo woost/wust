@@ -1,5 +1,5 @@
 <div id="scratchpad_component">
-    <button class="close view_close_button pull-right" ng-click="vm.sidebar.left.visible = false" aria-label="Close " data-title="hide scratchpad" bs-tooltip animation=""><span aria-hidden="true">&times;</span></button>
+    <button type="button" class="btn btn-default fa fa-arrows-alt pull-right" onclick="this.blur()" ng-model="vm.sidebar.left.fullscreen" bs-checkbox data-title="toggle fullscreen" bs-tooltip placement="bottom" animation=""></button>
     <form ng-submit="vm.editNewPost()" class="new_post_title">
         <input class="form-control" ng-model="vm.newPost.title" placeholder="TL;DR">
     </form>

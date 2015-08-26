@@ -24,7 +24,7 @@ function discourseNodeListCtrl() {
     vm.symbolAction = {
         handler: remove,
         title: "disconnect",
-        class: "fa fa-scissors"
+        class: "fa fa-eye"
     };
 
     function remove(node) {

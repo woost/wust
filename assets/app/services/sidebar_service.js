@@ -9,15 +9,27 @@ function SidebarService(store, Helpers) {
     this.right = new Sidebar("right");
 
     function Sidebar(name) {
-        let visible = sideStore.get(name) || false;
+        let obj = sideStore.get(name) || {
+            visible: false,
+            fullscreen: false
+        };
         Object.defineProperty(this, "visible", {
             get: function() {
-                return visible;
+                return obj.visible;
             },
             set: function(val) {
-                visible = !!val;
-                sideStore.set(name, visible);
+                obj.visible = !!val;
+                sideStore.set(name, obj);
                 setTimeout( () => Helpers.fireWindowResizeEvent(), 150 );
+            }
+        });
+        Object.defineProperty(this, "fullscreen", {
+            get: function() {
+                return obj.fullscreen;
+            },
+            set: function(val) {
+                obj.fullscreen = !!val;
+                sideStore.set(name, obj);
             }
         });
     }

@@ -19,9 +19,15 @@ main {
             overflow-y: auto;
             @include transition(all 100ms ease);
             border-right: $sidebar_border;
+            background: white;
             &.visible {
                 width: 400px;
                 min-width: 400px;
+                &.fullscreen {
+                    width: 100%;
+                    min-width: 100%;
+                    z-index: $zindex_sidebar_fullscreen;
+                }
             }
             // resize: horizontal;
             // // fixes inherited resize property in webkit
