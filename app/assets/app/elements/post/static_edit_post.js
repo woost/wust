@@ -5,7 +5,7 @@ staticEditPost.$inject = [];
 function staticEditPost() {
     return {
         restrict: "A",
-        templateUrl: "post/static_edit_post.html",
+        templateUrl: "elements/post/static_edit_post.html",
         scope: {
             node: "=",
             alwaysShowTagSuggestions: "@",

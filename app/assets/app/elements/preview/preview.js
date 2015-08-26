@@ -6,7 +6,7 @@ function preview() {
     return {
         restrict: "A",
         replace: true,
-        templateUrl: "preview/preview.html",
+        templateUrl: "elements/preview/preview.html",
         scope: {
             node: "=",
             trim: "@"

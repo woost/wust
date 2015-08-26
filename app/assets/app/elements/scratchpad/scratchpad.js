@@ -6,7 +6,7 @@ function scratchpad() {
     return {
         restrict: "A",
         replace: true,
-        templateUrl: "scratchpad/scratchpad.html",
+        templateUrl: "elements/scratchpad/scratchpad.html",
         scope: true,
         controller: scratchpadCtrl,
         controllerAs: "vm",

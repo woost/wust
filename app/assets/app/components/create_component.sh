@@ -80,7 +80,7 @@ cat << EOF
 .state("${component_plural}", {
         parent: "page",
         url: "/${component_plural}",
-        templateUrl: \`\${templateBase}/${component_plural}/${component}.html\`,
+        templateUrl: \`components/${component_plural}/${component}.html\`,
         controller: "$controller_name as vm"
 })
 EOF

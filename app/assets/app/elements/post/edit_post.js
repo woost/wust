@@ -5,7 +5,7 @@ editPost.$inject = [];
 function editPost() {
     return {
         restrict: "A",
-        templateUrl: "post/edit_post.html",
+        templateUrl: "elements/post/edit_post.html",
         scope: {
             node: "=",
             inputFocus: "=",

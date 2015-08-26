@@ -5,7 +5,7 @@ bigPost.$inject = [];
 function bigPost() {
     return {
         restrict: "A",
-        templateUrl: "post/big_post.html",
+        templateUrl: "elements/post/big_post.html",
         scope: {
             node: "="
         },

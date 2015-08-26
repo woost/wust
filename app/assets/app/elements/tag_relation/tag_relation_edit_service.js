@@ -7,7 +7,7 @@ function TagRelationEditService($rootScope, $modal, EditService) {
 
     let modalInstance = $modal({
         show: false,
-        templateUrl: "tag_relation/tag_relation.html",
+        templateUrl: "elements/tag_relation/tag_relation.html",
         controller: "TagRelationCtrl",
         controllerAs: "vm",
         animation: "am-fade-and-slide-top"

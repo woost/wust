@@ -5,7 +5,7 @@ focusGraph.$inject = [];
 function focusGraph() {
     return {
         restrict: "A",
-        templateUrl: "assets/app/components/focus/graph/graph.html",
+        templateUrl: "components/focus/graph/graph.html",
         scope: {
             component: "=",
             isLoading: "="

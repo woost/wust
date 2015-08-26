@@ -3,47 +3,46 @@ angular.module("wust.config").config(RoutesConfig);
 RoutesConfig.$inject = ["$stateProvider", "$urlRouterProvider", "$locationProvider"];
 
 function RoutesConfig($stateProvider, $urlRouterProvider, $locationProvider) {
-    const templateBase = "assets/app/components";
     $stateProvider.state("page", {
         abstract: true,
-        templateUrl: `${templateBase}/page/page.html`,
+        templateUrl: `components/page/page.html`,
         controller: "PageCtrl as vm",
     }).state("dashboard", {
         parent: "page",
         url: "/dashboard",
-        templateUrl: `${templateBase}/dashboard/dashboard.html`,
+        templateUrl: `components/dashboard/dashboard.html`,
         controller: "DashboardCtrl as vm",
     }).state("vote", {
         parent: "page",
         url: "/vote",
-        templateUrl: `${templateBase}/votes/vote.html`,
+        templateUrl: `components/votes/vote.html`,
         controller: "VotesCtrl as vm",
     }).state("users", {
         abstract: true,
         parent: "page",
         url: "/users",
-        templateUrl: `${templateBase}/users/user.html`,
+        templateUrl: `components/users/user.html`,
     }).state("users.list", {
         url: "/list",
-        templateUrl: `${templateBase}/users/list.html`,
+        templateUrl: `components/users/list.html`,
         controller: "UserListsCtrl as vm",
     }).state("users.details", {
         url: "/details/:id",
-        templateUrl: `${templateBase}/users/detail.html`,
+        templateUrl: `components/users/detail.html`,
         controller: "UserDetailsCtrl as vm",
     }).state("tags", {
         parent: "page",
         url: "/tags",
-        templateUrl: `${templateBase}/tags/tag.html`,
+        templateUrl: `components/tags/tag.html`,
         controller: "TagsCtrl as vm",
     }).state("tags.details", {
         url: "/:id",
-        templateUrl: `${templateBase}/tags/tag_detail.html`,
+        templateUrl: `components/tags/tag_detail.html`,
         controller: "TagDetailsCtrl as vm",
     }).state("focus", {
         parent: "page",
         url: "/focus/:id",
-        templateUrl: `${templateBase}/focus/focus.html`,
+        templateUrl: `components/focus/focus.html`,
         controller: "FocusCtrl as vm",
         resolve: {
             rootNode: ["Post","$stateParams", function(Post, $stateParams) {

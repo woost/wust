@@ -9,7 +9,7 @@ angular.module("wust.elements").directive("tagEditor", function() {
                 existingOnly: "@",
                 alwaysShow: "@"
             },
-            templateUrl: "ngTagEditor/ngTagEditor.html",
+            templateUrl: "elements/ngTagEditor/ngTagEditor.html",
             controller: ["$scope", "$attrs", "$element", "$filter",
                 function($scope, $attrs, $element, $filter) {
                     $scope.focus = false;

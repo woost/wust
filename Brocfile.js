@@ -74,7 +74,7 @@ var styles = concat(mergeTrees([compiledStyles, dependencies, staticAssetsCssJs,
     outputFile: "/main.css"
 });
 
-var htmlTemplates = html2js("app/assets/app/elements", {
+var htmlTemplates = html2js("app/assets/app", {
     inputFiles: ["**/*.html"],
     outputFile: "/templates.js",
     module: "wust.templates",

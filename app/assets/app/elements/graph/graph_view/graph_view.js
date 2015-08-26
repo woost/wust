@@ -5,7 +5,7 @@ graphView.$inject = [];
 function graphView() {
     return {
         restrict: "A",
-        templateUrl: "graph/graph_view/graph_view.html",
+        templateUrl: "elements/graph/graph_view/graph_view.html",
         replace: true,
         scope: {
             graph: "="

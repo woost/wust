@@ -6,7 +6,7 @@ function search() {
     return {
         restrict: "A",
         replace: true,
-        templateUrl: "search/search.html",
+        templateUrl: "elements/search/search.html",
         scope: true,
         controller: searchCtrl,
         controllerAs: "vm",

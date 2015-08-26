@@ -5,7 +5,7 @@ focusNeighbours.$inject = [];
 function focusNeighbours() {
     return {
         restrict: "A",
-        templateUrl: "assets/app/components/focus/neighbours/neighbours.html",
+        templateUrl: "components/focus/neighbours/neighbours.html",
         scope: {
             component: "=",
             isLoading: "="

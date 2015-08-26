@@ -5,7 +5,7 @@ smallPost.$inject = [];
 function smallPost() {
     return {
         restrict: "A",
-        templateUrl: "post/small_post.html",
+        templateUrl: "elements/post/small_post.html",
         scope: {
             node: "=",
             symbolAction: "=",

@@ -5,7 +5,7 @@ editPostDescription.$inject = [];
 function editPostDescription() {
     return {
         restrict: "A",
-        templateUrl: "post/edit_post_description.html",
+        templateUrl: "elements/post/edit_post_description.html",
         scope: {
             node: "="
         },
