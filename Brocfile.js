@@ -15,8 +15,8 @@ var csso = require("broccoli-csso");
 var BrowserSync = require("broccoli-browser-sync");
 
 var stylesTree = mergeTrees([
-    funnel("app/assets/stylesheets", { include: ["*.scss"] }),
-    funnel("app/assets/app", { include: ["**/*.scss"], destDir: "app" })
+    funnel("assets/stylesheets", { include: ["*.scss"] }),
+    funnel("assets/app", { include: ["**/*.scss"], destDir: "app" })
 ]);
 
 var compiledStyles = compileSass(stylesTree, {
@@ -74,7 +74,7 @@ var styles = concat(mergeTrees([compiledStyles, dependencies, staticAssetsCssJs,
     outputFile: "/main.css"
 });
 
-var htmlTemplates = html2js("app/assets/app", {
+var htmlTemplates = html2js("assets/app", {
     inputFiles: ["**/*.html"],
     outputFile: "/templates.js",
     module: "wust.templates",
@@ -82,7 +82,7 @@ var htmlTemplates = html2js("app/assets/app", {
     htmlmin: { collapseWhitespace: true }
 });
 
-var appScriptsEs6 = funnel("app/assets/app", { include: ["**/*.js"], destDir: "javascripts" });
+var appScriptsEs6 = funnel("assets/app", { include: ["**/*.js"], destDir: "javascripts" });
 var jsHintResults = new JSHinter(appScriptsEs6);
 var appScripts = iife(esTranspiler(appScriptsEs6));
 
