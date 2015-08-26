@@ -19,11 +19,23 @@ function editTaglist() {
     };
 }
 
-editTaglistCtrl.$inject = ["TagSuggestions"];
+editTaglistCtrl.$inject = ["TagSuggestions", "$q"];
 
-function editTaglistCtrl(TagSuggestions) {
+function editTaglistCtrl(TagSuggestions, $q) {
     let vm = this;
 
-    vm.searchTags = TagSuggestions.search;
+    let searchTriggerDelay = 200;
+    let delayedTriggerSearch;
+
+    vm.searchTags = searchTags;
     vm.onChange = vm.onChange || _.noop;
+
+    function searchTags(term) {
+        if(delayedTriggerSearch)
+            clearTimeout(delayedTriggerSearch);
+
+        return $q((resolve, reject) => {
+            delayedTriggerSearch = setTimeout(() => TagSuggestions.search(term).$then(resolve, reject), searchTriggerDelay);
+        });
+    }
 }

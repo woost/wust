@@ -26,7 +26,7 @@ function navigationCtrl($state, Auth, SearchService, DiscourseNode, Search, Moda
         password: ""
     };
 
-    let searchTriggerDelay = 300;
+    let searchTriggerDelay = 200;
     let delayedTriggerSearch;
 
     vm.onSearchBoxChange = onSearchBoxChange;
