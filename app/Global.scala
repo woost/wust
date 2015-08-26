@@ -20,7 +20,15 @@ object LoggingFilter extends EssentialFilter {
       nextFilter(requestHeader).map { result =>
         val endTime = System.currentTimeMillis
         val requestTime = endTime - startTime
-        Logger.info(s"${"%5d" format requestTime}ms ${requestHeader.method} ${requestHeader.uri} [${result.header.status}]")
+        def timeColored(text:String, ms:Long):String = {
+          val red = "\033[31m"
+          val yellow = "\033[33m"
+          val reset = "\033[0m"
+          if(ms < 100) return text
+          else if(ms < 1000) return s"$yellow$text$reset"
+          else return s"$red$text$reset"
+        }
+        Logger.info(timeColored(s"${"%5d" format requestTime}ms ${requestHeader.method} ${requestHeader.uri} [${result.header.status}]", requestTime))
         result.withHeaders("Request-Time" -> requestTime.toString)
       }
     }
