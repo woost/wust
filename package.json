@@ -12,6 +12,7 @@
     "broccoli-concat": "0.0.13",
     "broccoli-csso": "^1.0.0",
     "broccoli-env": "0.0.1",
+    "broccoli-flatten": "^0.1.1",
     "broccoli-funnel": "^0.2.8",
     "broccoli-html2js": "^0.0.5",
     "broccoli-iife": "0.1.0",

@@ -13,6 +13,7 @@ var html2js = require("broccoli-html2js");
 var compileSass = require("broccoli-compass");
 var csso = require("broccoli-csso");
 var BrowserSync = require("broccoli-browser-sync");
+var flatten = require('broccoli-flatten');
 
 var stylesTree = mergeTrees([
     funnel("assets/stylesheets", { include: ["*.scss"] }),
@@ -26,30 +27,29 @@ var compiledStyles = compileSass(stylesTree, {
 
 var dependencies = mergeTrees(["node_modules", "bower_components"], {overwrite: true});
 
-var staticAssets = mergeTrees([funnel("static_assets", {
-    exclude: [ "**/*.css", "**/*.js", "**/*.woff*" ]
-})]);
+var staticAssetsCss = funnel("static_assets", {
+    include: [ "**/*.css" ],
+    destDir: "static_assets_css"
+});
 
-var staticAssetsCssJs = funnel("static_assets", {
-    include: [ "**/*.css", "**/*.js" ],
-    destDir: "static_assets_css_js"
+var staticAssetsJs = funnel("static_assets", {
+    include: [ "**/*.js" ],
+    destDir: "static_assets_js"
 });
 
 var fonts = mergeTrees([
-        funnel("bower_components/font-awesome", { include: [ "**/*.woff*" ]}),
-        funnel("bower_components/bootstrap-css-only", { include: [ "**/*.woff*" ]}),
-        funnel("static_assets", { include: [ "**/*.woff*" ], destDir:"fonts"}),
+        flatten(funnel("bower_components", { include: [ "bootstrap-css-only/fonts/*.woff*", "font-awesome/fonts/*.woff*" ]}), {destDir: "fonts"}),
+        funnel("static_assets", { include: [ "**/*.woff*" ], destDir: "fonts"}),
 ]);
 
 var fontCss = replace(mergeTrees([
-        funnel("bower_components", { include: [ "bootstrap-css-only/css/bootstrap.css" ]}),
-        funnel("bower_components", { include: [ "font-awesome/css/font-awesome.css" ]}),
-        funnel(staticAssetsCssJs, { include: [ "static_assets_css_js/wust-font.css" ]}),
+        funnel("bower_components", { include: [ "bootstrap-css-only/css/bootstrap.css", "font-awesome/css/font-awesome.css" ]}),
+        funnel(staticAssetsCss, { include: [ "static_assets_css/wust-font.css" ]}),
 ]),{
     files: [
         "bootstrap-css-only/css/bootstrap.css",
         "font-awesome/css/font-awesome.css",
-        "static_assets_css_js/wust-font.css"
+        "static_assets_css/wust-font.css"
     ],
     pattern: {
         match: /url\('..\/fonts?/g,
@@ -57,7 +57,7 @@ var fontCss = replace(mergeTrees([
     }
 });
 
-var styles = concat(mergeTrees([compiledStyles, dependencies, staticAssetsCssJs, fontCss], {overwrite: true}), {
+var styles = concat(mergeTrees([compiledStyles, dependencies, staticAssetsCss, fontCss], {overwrite: true}), {
     inputFiles: [
         "bootstrap-css-only/css/bootstrap.css",
         "font-awesome/css/font-awesome.css",
@@ -67,7 +67,7 @@ var styles = concat(mergeTrees([compiledStyles, dependencies, staticAssetsCssJs,
         "ng-sortable/dist/ng-sortable.css",
         "humane-js/themes/libnotify.css",
 
-        "static_assets_css_js/**/*.css",
+        "static_assets_css/**/*.css",
 
         "stylesheets/**/*.css"
     ],
@@ -93,7 +93,7 @@ function min(file) {
         return file;
 }
 
-var scripts = concat(mergeTrees([appScripts,htmlTemplates,dependencies,staticAssetsCssJs]), {
+var scripts = concat(mergeTrees([appScripts,htmlTemplates,dependencies,staticAssetsJs]), {
     inputFiles: [
         min("angular/angular.js"),
         min("angular-animate/angular-animate.js"),
@@ -126,7 +126,7 @@ var scripts = concat(mergeTrees([appScripts,htmlTemplates,dependencies,staticAss
         // "lib/ace-builds/src-min-noconflict/keybinding-vim.js",
         // "lib/ace-builds/src-min-noconflict/ext-language_tools.js",
 
-        // "static_assets_css_js/**/*.js",
+        // "static_assets_js/**/*.js",
 
         "javascripts/module.js",
         "javascripts/**/*.js",
@@ -145,7 +145,6 @@ if (prod) {
                 "warning_level":       "QUIET",
                 "compilation_level":   "WHITESPACE_ONLY"
             }),
-            staticAssets,
             fonts
     ]);
 } else { // development
@@ -158,7 +157,7 @@ if (prod) {
     });
 
     module.exports = mergeTrees([
-            styles, scripts, staticAssets, fonts,
+            styles, scripts, fonts,
             jsHintResults, browserSync
     ]);
 }
