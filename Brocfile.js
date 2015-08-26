@@ -149,7 +149,7 @@ if (prod) {
             fonts
     ]);
 } else { // development
-    var browserSync = new BrowserSync([styles, scripts], {
+    var browserSync = new BrowserSync([appScripts, htmlTemplates, scripts], {
         // proxy the local play server
         port: 9000,
         browserSync: {
