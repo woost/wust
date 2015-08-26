@@ -5,7 +5,7 @@ historyList.$inject = [];
 function historyList() {
     return {
         restrict: "A",
-        templateUrl: "assets/app/elements/history_list/history_list.html",
+        templateUrl: "history_list/history_list.html",
         scope: true,
         controller: HistoryListCtrl,
         controllerAs: "vm",

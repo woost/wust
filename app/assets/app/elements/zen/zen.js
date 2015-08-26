@@ -6,7 +6,7 @@ function zen() {
     return {
         restrict: "A",
         replace: true,
-        templateUrl: "assets/app/elements/zen/zen.html",
+        templateUrl: "zen/zen.html",
         scope: true,
         controller: zenCtrl,
         controllerAs: "vm",

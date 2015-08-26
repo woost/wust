@@ -6,7 +6,7 @@ function navigation() {
     return {
         restrict: "A",
         replace: true,
-        templateUrl: "assets/app/elements/navigation/navigation.html",
+        templateUrl: "navigation/navigation.html",
         scope: true,
         controller: navigationCtrl,
         controllerAs: "vm",

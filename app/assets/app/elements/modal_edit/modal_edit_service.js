@@ -7,7 +7,7 @@ function ModalEditService($rootScope, $modal, EditService, $state) {
 
     let modalInstance = $modal({
         show: false,
-        templateUrl: "assets/app/elements/modal_edit/modal_edit.html",
+        templateUrl: "modal_edit/modal_edit.html",
         controller: "ModalEditCtrl",
         controllerAs: "vm",
         animation: "am-fade-and-slide-top"

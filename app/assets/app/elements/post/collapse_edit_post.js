@@ -5,7 +5,7 @@ collapseEditPost.$inject = [];
 function collapseEditPost() {
     return {
         restrict: "A",
-        templateUrl: "assets/app/elements/post/collapse_edit_post.html",
+        templateUrl: "post/collapse_edit_post.html",
         scope: {
             node: "="
         },

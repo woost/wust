@@ -2,20 +2,21 @@ var mergeTrees = require("broccoli-merge-trees");
 var funnel = require("broccoli-funnel");
 // var concat = require("broccoli-concat");
 var concat = require("broccoli-sourcemap-concat");
-var env = require('broccoli-env').getEnv(); // BROCCOLI_ENV
-var prod = env === 'production';
-var replace = require('broccoli-string-replace');
+var env = require("broccoli-env").getEnv(); // BROCCOLI_ENV
+var prod = env === "production";
+var replace = require("broccoli-string-replace");
 
-var JSHinter = require('broccoli-jshint');
+var JSHinter = require("broccoli-jshint");
 var esTranspiler = require("broccoli-babel-transpiler");
 var iife = require("broccoli-iife");
-var closure = require('broccoli-closure');
-var ngAnnotate = require('broccoli-ng-annotate');
+var closure = require("broccoli-closure");
+// var htmlJsStr = require("js-string-escape");
+var html2js = require("broccoli-html2js");
 
 var compileSass = require("broccoli-compass");
-var csso = require('broccoli-csso');
+var csso = require("broccoli-csso");
 
-var BrowserSync = require('broccoli-browser-sync');
+var BrowserSync = require("broccoli-browser-sync");
 
 //TODO: sourcemaps and iife, only in dev
 
@@ -79,18 +80,26 @@ var styles = concat(mergeTrees([compiledStyles, dependencies, staticAssetsCssJs,
     outputFile: "/main.css"
 });
 
+var htmlTemplates = html2js("app/assets/app/elements", {
+    inputFiles: ["**/*.html"],
+    outputFile: "/templates.js",
+    module: "wust.templates",
+    singleModule: true,
+    htmlmin: { collapseWhitespace: true }
+});
+
 var appScriptsEs6 = funnel("app/assets/app", { include: ["**/*.js"], destDir: "javascripts" });
 var jsHintResults = new JSHinter(appScriptsEs6);
 var appScripts = iife(esTranspiler(appScriptsEs6));
 
 function min(file) {
     if(prod)
-        return file.slice(0,-2) + "min.js"
+        return file.slice(0,-2) + "min.js";
     else
         return file;
 }
 
-var scripts = concat(mergeTrees([appScripts,dependencies,staticAssetsCssJs]), {
+var scripts = concat(mergeTrees([appScripts,htmlTemplates,dependencies,staticAssetsCssJs]), {
     inputFiles: [
         min("angular/angular.js"),
         min("angular-animate/angular-animate.js"),
@@ -126,7 +135,8 @@ var scripts = concat(mergeTrees([appScripts,dependencies,staticAssetsCssJs]), {
         // "static_assets_css_js/**/*.js",
 
         "javascripts/module.js",
-        "javascripts/**/*.js"
+        "javascripts/**/*.js",
+        "templates.js"
     ],
     outputFile: "/main.js",
     wrapInFunction: true
@@ -136,11 +146,11 @@ var scripts = concat(mergeTrees([appScripts,dependencies,staticAssetsCssJs]), {
 if (prod) {
     module.exports = mergeTrees([
             csso(styles),
-            closure(scripts, 'main.js', {
-                'language_in':         'ECMASCRIPT5',
-                'language_out':        'ECMASCRIPT5',
-                'warning_level':       'QUIET',
-                'compilation_level':   'WHITESPACE_ONLY'
+            closure(scripts, "main.js", {
+                "language_in":         "ECMASCRIPT5",
+                "language_out":        "ECMASCRIPT5",
+                "warning_level":       "QUIET",
+                "compilation_level":   "WHITESPACE_ONLY"
             }),
             staticAssets,
             fonts

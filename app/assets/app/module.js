@@ -16,7 +16,8 @@ angular.module("wust", [
     "wust.config",
     "wust.filters",
     "wust.elements",
-    "wust.components"
+    "wust.components",
+    "wust.templates"
 ]);
 
 angular.module("wust.config", [

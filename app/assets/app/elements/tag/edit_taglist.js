@@ -5,7 +5,7 @@ editTaglist.$inject = [];
 function editTaglist() {
     return {
         restrict: "A",
-        templateUrl: "assets/app/elements/tag/edit_taglist.html",
+        templateUrl: "tag/edit_taglist.html",
         scope: {
             tags: "=",
             setFocus: "=",

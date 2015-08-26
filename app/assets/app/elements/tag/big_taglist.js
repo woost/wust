@@ -5,7 +5,7 @@ bigTaglist.$inject = [];
 function bigTaglist() {
     return {
         restrict: "A",
-        templateUrl: "assets/app/elements/tag/big_taglist.html",
+        templateUrl: "tag/big_taglist.html",
         scope: {
             node: "="
         },

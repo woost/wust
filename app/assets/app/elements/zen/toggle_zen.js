@@ -5,7 +5,7 @@ toggleZen.$inject = ["ZenService"];
 function toggleZen(ZenService) {
     return {
         restrict: "A",
-        templateUrl: "assets/app/elements/zen/toggle_zen.html",
+        templateUrl: "zen/toggle_zen.html",
         scope: {
             node: "="
         },
