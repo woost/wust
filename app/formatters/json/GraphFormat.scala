@@ -41,9 +41,7 @@ object GraphFormat {
 
     implicit def tagsWrites = new Writes[Tags] {
       def writes(cat: Tags) = {
-        // the same as tagWrites but with voting weight
         val tag: TagLike = cat.startNodeOpt.get
-        val weight: Double = cat.rawItem.properties("weight").asDouble
         JsObject(Seq(
           ("id", JsString(tag.uuid)),
           ("label", JsString(TagLike.label)),
@@ -52,9 +50,8 @@ object GraphFormat {
           ("isVotable", JsBoolean(tag.isInstanceOf[VoteDimension])),
           ("isClassification", JsBoolean(tag.isInstanceOf[Classification])),
           ("color", tag.color.map(JsNumber(_)).getOrElse(JsNull)),
-          ("symbol", tag.symbol.map(JsString(_)).getOrElse(JsNull)),
-          ("weight", JsNumber(weight))
-            ))
+          ("symbol", tag.symbol.map(JsString(_)).getOrElse(JsNull))
+        ))
       }
     }
 

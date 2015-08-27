@@ -249,35 +249,8 @@ object Database {
       return postsandconnects,rel,tag,cat,tagtocat,cattotaggable
     """
 
-
-    // query for getting the weight per post per tag:
-    // only returns weights when voted
-    val tagWeightQuery = s"""
-      match ${ focusNode.toQuery }
-      match (${ focusNode.name })-[:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(postsandconnects:${Connectable.label})
-      with distinct postsandconnects
-      match (tag:`${ TagLike.label }`)-[:`${ Tags.startRelationType }`]->(tags:`${ Tags.label }`)-[:`${ Tags.endRelationType }`]->(postsandconnects)
-      match (tag)-[:`${ Dimensionizes.startRelationType }`]->(dim:`${ Dimensionizes.label }`)-[:`${ Dimensionizes.endRelationType }`]->(postsandconnects)
-      optional match (dim)<-[nodetagvoteup:${ Votes.relationType }]-() where nodetagvoteup.weight = 1
-      optional match (dim)<-[nodetagvotedown:${ Votes.relationType }]-() where nodetagvotedown.weight = -1
-      with tags, count(nodetagvoteup.weight) as up, count(nodetagvotedown.weight) as down
-      return tags.uuid, ${tagweight("up","down")} as weight
-    """
-
     val params = focusNode.parameterMap
-    implicit val componentRawGraph = db.queryGraph(Query(query, params))
-    val component = Discourse(componentRawGraph)
-    val tagweights = db.queryTable(Query(tagWeightQuery, params))
-
-    // build hashmap weights: Map tags-hyperrelation.uuid -> weight
-    val weights = tagweights.rows.map { tagweight =>
-      tagweight("tags.uuid").asString -> tagweight("weight").asInstanceOf[DoublePropertyValue]
-    }.toMap
-
-    // write weights in to tags-hyperrelations
-    for(tags <- component.tags) {
-      tags.rawItem.properties("weight") = weights.getOrElse(tags.uuid, tagweight_p)
-    }
+    val component = Discourse(db.queryGraph(Query(query, params)))
 
     component
   }

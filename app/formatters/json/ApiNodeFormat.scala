@@ -16,9 +16,7 @@ object ApiNodeFormat {
     implicit def tagsWrites = new Writes[Tags] {
       //TODO: this is a code dup from GraphForma.scala
       def writes(cat: Tags) = {
-        // the same as tagWrites but with voting weight
         val tag: TagLike = cat.startNodeOpt.get
-        val weight: Double = cat.rawItem.properties.get("weight").map(_.asDouble).getOrElse(0)
         JsObject(Seq(
           ("id", JsString(tag.uuid)),
           ("label", JsString(TagLike.label)),
@@ -27,8 +25,7 @@ object ApiNodeFormat {
           ("isVotable", JsBoolean(tag.isInstanceOf[VoteDimension])),
           ("isClassification", JsBoolean(tag.isInstanceOf[Classification])),
           ("color", tag.color.map(JsNumber(_)).getOrElse(JsNull)),
-          ("symbol", tag.symbol.map(JsString(_)).getOrElse(JsNull)),
-          ("weight", JsNumber(weight))
+          ("symbol", tag.symbol.map(JsString(_)).getOrElse(JsNull))
         ))
       }
     }

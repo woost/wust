@@ -59,39 +59,7 @@ class TaggedTaggable[NODE <: UuidNode] extends AccessNodeDecoratorControl[NODE] 
       """
       val params = nodeDef.parameterMap ++ tagDef.parameterMap ++ tagsDef.parameterMap ++ Map("nodeUuids" -> response.map(_.uuid).toSeq)
 
-      val dimDef = HyperNodeDefinition(tagDef, Dimensionizes, nodeDef)
-      val userUpDef = ConcreteFactoryNodeDefinition(User)
-      val votesUpDef = RelationDefinition(userUpDef, Votes, dimDef)
-      val userDownDef = ConcreteFactoryNodeDefinition(User)
-      val votesDownDef = RelationDefinition(userDownDef, Votes, dimDef)
-
-      val tagWeightQuery = s"""
-      match ${tagsDef.toQuery} where ${nodeDef.name}.uuid in {nodeUuids}
-      match ${dimDef.toQuery(false, false)}
-      optional match ${votesDownDef.toQuery(true, false)} where ${votesDownDef.name}.weight = -1
-      optional match ${votesUpDef.toQuery(true, false)} where ${votesUpDef.name}.weight = 1
-      with ${tagDef.name}, count(${votesUpDef.name}.weight) as up, count(${votesDownDef.name}.weight) as down
-      return ${tagDef.name}.uuid, ${tagweight("up","down")} as weight
-      """
-
-      val tagWeightParams = params ++ dimDef.parameterMap ++ userDownDef.parameterMap ++ userUpDef.parameterMap ++ votesDownDef.parameterMap ++ votesUpDef.parameterMap
-
-      // val discourse = Discourse(db.queryGraph(Query(query, params.toMap)))
-
-      // val params = focusNode.parameterMap
-      implicit val discourseRawGraph = db.queryGraph(Query(query, params))
-      val discourse = Discourse(discourseRawGraph)
-      val tagweights = db.queryTable(Query(tagWeightQuery, tagWeightParams))
-
-      // build hashmap weights: Map tags-hyperrelation.uuid -> weight
-      val weights = tagweights.rows.map { tagweight =>
-        tagweight(s"${tagDef.name}.uuid").asString -> tagweight("weight").asInstanceOf[DoublePropertyValue]
-      }.toMap
-
-      // write weights in to tags-hyperrelations
-      for(tags <- discourse.tags) {
-        tags.rawItem.properties("weight") = weights.getOrElse(tags.uuid, tagweight_p)
-      }
+      val discourse = Discourse(db.queryGraph(Query(query, params.toMap)))
 
       discourse.add(response.toSeq: _*)
     }
