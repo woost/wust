@@ -73,8 +73,9 @@ function sortTags(tags) {
 
     function orderTags(tags) {
         return _.sortByOrder(tags,
-            ["isClassification", "weight", "id"],
-            ["desc","desc", "asc"]
+            // make sorting deterministic
+            ["isClassification","id"],
+            ["desc","asc"]
         );
     }
 }
