@@ -9,7 +9,7 @@ import scala.util.Try
 
 object ImportHackerNews extends Task with SeedTools {
 
-  val hackerNewsScope = mergeScope(s"HackerNews")
+  val hackerNewsScope = mergeScope(s"HackerNews", color = Some(24))
   dbContext { implicit db =>
     println("merging HackerNews Scope...")
     modifyDiscourse { discourse =>

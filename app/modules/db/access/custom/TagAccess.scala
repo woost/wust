@@ -9,6 +9,7 @@ import modules.requests._
 import play.api.libs.json.JsValue
 import renesca.parameter.implicits._
 import play.api.mvc.Results._
+import model.Helpers.tagTitleColor
 
 class TagAccess extends NodeReadBase[TagLike] {
   val factory = TagLike
@@ -19,7 +20,10 @@ class TagAccess extends NodeReadBase[TagLike] {
       //currently only handled by update.
       //TODO: what about scopes here? we are only merging tags not taglike, but
       //it is not possible to merge on taglike, as they are traits
-      val node = Categorization.merge(title = request.title, merge = Set("title"))
+      val node = Categorization.merge(
+        title = request.title,
+        color = tagTitleColor(request.title),
+        merge = Set("title"))
       val contribution = SchemaCreated.create(context.user, node)
 
       db.transaction(_.persistChanges(node, contribution)) match {

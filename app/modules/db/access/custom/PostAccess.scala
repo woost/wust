@@ -9,6 +9,7 @@ import modules.requests._
 import play.api.libs.json.JsValue
 import renesca.parameter.implicits._
 import play.api.mvc.Results._
+import model.Helpers.tagTitleColor
 
 //TODO: this should be about posts, we should separate the api here...or rename this access.
 case class PostAccess() extends NodeReadBase[Connectable] with NodeDeleteBase[Connectable] {
@@ -20,7 +21,10 @@ case class PostAccess() extends NodeReadBase[Connectable] with NodeDeleteBase[Co
       if (tag.id.isDefined)
         Some(TagLike.matchesOnUuid(tag.id.get))
       else if (tag.title.isDefined)
-        Some(Categorization.merge(title = tag.title.get, merge = Set("title")))
+        Some(Categorization.merge(
+          title = tag.title.get,
+          color = tagTitleColor(tag.title.get),
+          merge = Set("title")))
       else
         None
     }

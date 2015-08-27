@@ -3,24 +3,25 @@ package tasks
 import model.WustSchema._
 import renesca.parameter.implicits._
 import org.unbescape.html.HtmlEscape.unescapeHtml
+import model.Helpers.tagTitleColor
 
 trait SeedTools {
   val maxTitleLength = 140
 
   def mergeClassification(title: String, description: Option[String] = None, color:Option[Long] = None) = {
-    Classification.merge(title = title, description = description, color = color, merge = Set("title"))
+    Classification.merge(title = title, description = description, color = color.getOrElse(tagTitleColor(title)), merge = Set("title"))
   }
 
-  def mergeCategorization(title: String, description: Option[String] = None) = {
-    Categorization.merge(title = title, description = description, merge = Set("title"))
+  def mergeCategorization(title: String, description: Option[String] = None, color:Option[Long] = None) = {
+    Categorization.merge(title = title, color = color.getOrElse(tagTitleColor(title)), description = description, merge = Set("title"))
   }
 
-  def mergeStaticTag(title: String, description: Option[String] = None) = {
-    StaticTag.merge(title = title, description = description, merge = Set("title"))
+  def mergeStaticTag(title: String, description: Option[String] = None, color:Option[Long] = None) = {
+    StaticTag.merge(title = title, color = color.getOrElse(tagTitleColor(title)), description = description, merge = Set("title"))
   }
 
-  def mergeScope(title: String, description: Option[String] = None) = {
-    Scope.merge(title = title, description = description, merge = Set("title"))
+  def mergeScope(title: String, description: Option[String] = None, color:Option[Long] = None) = {
+    Scope.merge(title = title, color = color.getOrElse(tagTitleColor(title)), description = description, merge = Set("title"))
   }
 
   def tag(item: Taggable, tag: TagLike) = {

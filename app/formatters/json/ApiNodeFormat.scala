@@ -24,7 +24,7 @@ object ApiNodeFormat {
           ("description", JsString(tag.description.getOrElse(""))),
           ("isVotable", JsBoolean(tag.isInstanceOf[VoteDimension])),
           ("isClassification", JsBoolean(tag.isInstanceOf[Classification])),
-          ("color", tag.color.map(JsNumber(_)).getOrElse(JsNull)),
+          ("color", JsNumber(tag.color)),
           ("symbol", tag.symbol.map(JsString(_)).getOrElse(JsNull))
         ))
       }
@@ -56,7 +56,7 @@ object ApiNodeFormat {
         ("description", JsString(n.description.getOrElse(""))),
         ("isVotable", JsBoolean(n.isInstanceOf[VoteDimension])),
         ("isClassification", JsBoolean(n.isInstanceOf[Classification])),
-        ("color", n.color.map(JsNumber(_)).getOrElse(JsNull))
+        ("color", JsNumber(n.color))
       )
       case n: RealUser        => Seq(
         ("id", JsString(n.uuid)),

@@ -21,7 +21,7 @@ object ImportReddit extends Task with SeedTools {
   val ws = new play.api.libs.ws.ning.NingWSClient(builder.build())
   def getJson(url: String): JsValue = Await.result(ws.url(url).get(), 10.seconds).json
 
-  val redditScope = mergeScope("Reddit")
+  val redditScope = mergeScope("Reddit", color = Some(210))
   val startPostTag = mergeStaticTag("StartPost")
   val replyTag = mergeClassification("repliesTo")
 

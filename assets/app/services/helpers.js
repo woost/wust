@@ -7,6 +7,7 @@ angular.module("wust.services").value("Helpers", {
     hashToHslBackground,
     hashToHslFill,
     hashToHslFillLight,
+    tagTitleColor,
     sortTags,
     cssCompat,
     lineIntersection,
@@ -63,8 +64,12 @@ function hashToHslFillLight(tag) {
     // return hashToHsl(tag, 57, 55);
 }
 
+function tagTitleColor(title) {
+    return Math.abs(hashCode(title.toLowerCase())) % 360;
+}
+
 function hashToHsl(tag, saturation, brightness) {
-    return `hsl(${tag.color || Math.abs(hashCode(tag.id)) % 360}, ${saturation}%, ${brightness}%)`;
+    return `hsl(${tag.color}, ${saturation}%, ${brightness}%)`;
 }
 
 function sortTags(tags) {
