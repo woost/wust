@@ -1,7 +1,7 @@
 <div id="neighbours_component">
     <div discourse-node-list node-model='vm.references.model' is-loading="vm.isLoading" class="neighbours_attachedto discourse_node_list_horizontal"></div>
-    <div class="fa fa-long-arrow-right fa-2x arrow-right"></div>
+    <div class="fa fa-long-arrow-right fa-2x arrow-right" ng-show="vm.references.model.list.length > 0"></div>
     <div big-post node="vm.component.rootNode" class="neighbours_content"></div>
-    <div class="fa fa-long-arrow-right fa-2x arrow-right"></div>
+    <div class="fa fa-long-arrow-right fa-2x arrow-right" ng-show="vm.replies.model.list.length > 0"></div>
     <div discourse-node-list node-model='vm.replies.model' is-loading="vm.isLoading" class="neighbours_followers discourse_node_list_horizontal"></div>
 </div>
