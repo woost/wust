@@ -242,8 +242,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.d3NodeTools = this.d3NodeContainerWithData.append("div")
                     .attr("class", "nodetools");
 
-                this.d3NodePinTool = this.d3NodeTools.append("div")
-                    .attr("class", "nodetool pintool fa fa-thumb-tack");
+                this.d3NodeReplyTool = this.d3NodeTools.append("div")
+                    .attr("class", "nodetool replytool fa fa-plus");
 
                 this.d3NodeConnectTool = this.d3NodeTools.append("div")
                     .attr("class", "nodetool connecttool icon-flow-line")
@@ -252,8 +252,9 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.d3NodeDisconnectTool = this.d3NodeTools.append("div")
                     .attr("class", "nodetool disconnecttool fa fa-scissors");
 
-                this.d3NodeReplyTool = this.d3NodeTools.append("div")
-                    .attr("class", "nodetool replytool fa fa-reply");
+                this.d3NodePinTool = this.d3NodeTools.append("div")
+                    .attr("class", "nodetool pintool fa fa-thumb-tack");
+
 
                 // this.d3NodeDeleteTool = this.d3NodeTools.append("div")
                 //     .attr("class", "nodetool deletetool fa fa-trash");
