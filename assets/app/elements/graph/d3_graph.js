@@ -575,12 +575,19 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     geometry.Vec2(t.x, t.y));
         }
 
+        nodeRect(node) {
+            return geometry.Rect(
+                    geometry.Vec2(node.x, node.y),
+                    node.size
+                    ).centered;
+        }
+
         drawRelations() {
             this.graph.relations.forEach((relation) => {
                 // clamp every relation line to the intersections with its incident node rectangles
                 let line = this.relationLine(relation);
-                line = line.clampBy(geometry.Rect(geometry.Vec2(relation.source.x, relation.source.y), relation.source.size).centered);
-                line = line ? line.clampBy(geometry.Rect(geometry.Vec2(relation.target.x, relation.target.y), relation.target.size).centered) : undefined;
+                line = line.clampBy(this.nodeRect(relation.source));
+                line = line ? line.clampBy(this.nodeRect(relation.target)) : undefined;
 
                 if( line !== undefined ) {
                     if (isNaN(line.x1) || isNaN(line.y1) || isNaN(line.x2) || isNaN(line.y2))
@@ -920,9 +927,34 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 let dx = this.dragOffsetX + (event.clientX - this.dragStartMouseX) / scale;
                 let dy = this.dragOffsetY + (event.clientY - this.dragStartMouseY) / scale;
                 let a = Math.atan2(dy, dx);
-                this.d3ConnectorLine
-                    .attr("x1", this.dragStartNodeX + dx + Math.cos(a) * this.connectorLineOvershoot)
-                    .attr("y1", this.dragStartNodeY + dy + Math.sin(a) * this.connectorLineOvershoot);
+                let endX = this.dragStartNodeX + dx + Math.cos(a) * this.connectorLineOvershoot;
+                let endY = this.dragStartNodeY + dy + Math.sin(a) * this.connectorLineOvershoot;
+
+                if(vm.state.hoveredNode) {
+                    let line = geometry.Line(geometry.Vec2(endX, endY), geometry.Vec2(this.dragStartNodeX, this.dragStartNodeY));
+                    let clamped = line.clampBy(this.nodeRect(vm.state.hoveredNode));
+                    clamped = clamped ? clamped.clampBy(this.nodeRect(this.dragStartNode)) : undefined;
+                    if( clamped ) {
+                        this.d3ConnectorLine
+                            .attr("x1", clamped.x1)
+                            .attr("y1", clamped.y1)
+                            .attr("x2", clamped.x2)
+                            .attr("y2", clamped.y2);
+                    }
+                    else {
+                        this.d3ConnectorLine
+                            .attr("x1", endX)
+                            .attr("y1", endY)
+                            .attr("x2", this.dragStartNodeX)
+                            .attr("y2", this.dragStartNodeY);
+                    }
+                } else {
+                    this.d3ConnectorLine
+                        .attr("x1", endX)
+                        .attr("y1", endY)
+                        .attr("x2", this.dragStartNodeX)
+                        .attr("y2", this.dragStartNodeY);
+                }
 
                 if (vm.state.hoveredNode !== undefined) {
                     vm.state.hoveredNode.d3NodeContainer.classed({
