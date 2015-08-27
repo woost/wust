@@ -1,0 +1,3 @@
+#!/bin/bash
+
+blumenkohl target/web/public/main
