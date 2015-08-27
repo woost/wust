@@ -27,6 +27,9 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.nodeVerticalForceFactor = 1;
                 this.stopForceOnPan = true;
                 this.stopForceAfterNodeDrag = true;
+                this.connectorLineOvershoot = 0;
+                this.connectorLineArrowScale = 7;
+                this.connectorLineArrowOffset = 0;
 
                 // state
                 this.drawOnTick = this.drawOnTick = this.visibleConvergence;
@@ -107,13 +110,13 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 // svg-marker for connector line arrow
                 this.d3SvgDefs.append("svg:marker")
                     .attr("id", "graph_connector_arrow")
-                    .attr("viewBox", "-5 -1.5 5 3")
-                    .attr("refX", -5)
-                    .attr("markerWidth", 5)
-                    .attr("markerHeight", 3)
+                    .attr("viewBox", "0 -0.5 1 1")
+                    .attr("refX", this.connectorLineArrowOffset / this.connectorLineArrowScale)
+                    .attr("markerWidth", this.connectorLineArrowScale)
+                    .attr("markerHeight", this.connectorLineArrowScale)
                     .attr("orient", "auto")
                     .append("svg:path")
-                    .attr("d", "M 0,-1.5 L -5,-0.5 L -5,0.5 L0,1.5")
+                    .attr("d", "M 1,-0.3 L 0,-0.05 L 0,0.05 L1,0.3")
                     .attr("class", "connectorlinearrow"); // for the stroke color
 
                 // choose the correct transform style for many browsers
@@ -901,9 +904,12 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             if (this.isDragging) {
                 // default positioning is center of node.
                 // but we let node stay under grabbed position.
+                let dx = this.dragOffsetX + (event.clientX - this.dragStartMouseX) / scale;
+                let dy = this.dragOffsetY + (event.clientY - this.dragStartMouseY) / scale;
+                let a = Math.atan2(dy, dx);
                 this.d3ConnectorLine
-                    .attr("x1", this.dragStartNodeX + this.dragOffsetX + (event.clientX - this.dragStartMouseX) / scale)
-                    .attr("y1", this.dragStartNodeY + this.dragOffsetY + (event.clientY - this.dragStartMouseY) / scale);
+                    .attr("x1", this.dragStartNodeX + dx + Math.cos(a) * this.connectorLineOvershoot)
+                    .attr("y1", this.dragStartNodeY + dy + Math.sin(a) * this.connectorLineOvershoot);
 
                 if (vm.state.hoveredNode !== undefined) {
                     vm.state.hoveredNode.d3NodeContainer.classed({
@@ -932,7 +938,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     //TODO: we need to make it impossible to drag on self loops and incident relations,
                     //is assured by backend.
                     EditService.connectNodes(startNode, endNode).$then(response => {
-                        console.log(response);
                         let connects = _.find(response.graph.nodes, n => n.isHyperRelation && startNode.id === n.startId && endNode.id === n.endId);
                         if (connects === undefined) {
                             console.warn(`cannot find connects relation for tag-modal: ${startNode} -> ${endNode}`);
