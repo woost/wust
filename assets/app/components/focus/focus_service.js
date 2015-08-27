@@ -1,8 +1,8 @@
-angular.module("wust.services").service("FocusService", FocusService);
+angular.module("wust.components").service("FocusService", FocusService);
 
-FocusService.$inject = ["Helpers"];
+FocusService.$inject = ["Helpers", "SearchService", "ZenService", "SidebarService"];
 
-function FocusService(Helpers) {
+function FocusService(Helpers, SearchService, ZenService, SidebarService) {
     class Tab {
         constructor(index) {
             this.index = index;
