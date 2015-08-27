@@ -69,7 +69,7 @@ function tagTitleColor(title) {
 }
 
 function hashToHsl(tag, saturation, brightness) {
-    return `hsl(${tag.color}, ${saturation}%, ${brightness}%)`;
+    return `hsl(${tag.color || tagTitleColor(tag.title)}, ${saturation}%, ${brightness}%)`;
 }
 
 function sortTags(tags) {
