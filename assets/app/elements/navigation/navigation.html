@@ -18,11 +18,12 @@
                 <li><a ui-sref="users.list" ng-class="{active: vm.$state.includes('users.*')}" ng-click="vm.fullscreen.hideFullscreens()"><i class="fa fa-users"></i> Users</a></li>
             </ul>
 
+
             <form id="node_search_form" class="navbar-form navbar-left" ng-submit='vm.onSearchBoxChange()'>
                 <div class="input-group">
                     <input type="text" class="form-control" ng-model="vm.search.query" ng-change='vm.onSearchBoxChange()'>
                     <span class="input-group-btn">
-                        <button type="button" class="btn btn-default fa fa-search" onclick="this.blur()" ng-model="vm.search.resultsVisible" bs-checkbox ng-disabled="!vm.search.query"></button>
+                        <button class="btn btn-default" onclick="this.blur()" ng-model="vm.search.resultsVisible" bs-checkbox ng-disabled="!vm.search.query"><i class="fa fa-search"></i></button>
                     </span>
                 </div>
             </form>
