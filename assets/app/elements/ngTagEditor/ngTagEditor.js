@@ -40,12 +40,13 @@ angular.module("wust.elements").directive("tagEditor", function() {
                             return;
 
                         completeTabbing = undefined;
-                        tag = _.find($scope.suggestions, _.pick(tag, "title")) || tag;
+                        let tagTitleLC = tag.title.toLowerCase();
+                        tag = _.find($scope.suggestions, t => t.title.toLowerCase() === tagTitleLC) || tag;
                         tag = tag.encode ? tag.encode() : tag;
                         if ($scope.existingOnly && tag.id === undefined)
                             return;
 
-                        if (!_.any($scope.tags, _.pick(tag, "title"))) {
+                        if (!_.any($scope.tags, t => t.title.toLowerCase() === tagTitleLC)) {
                             $scope.tags.push(tag);
                             $scope.onChange();
                         }
