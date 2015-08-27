@@ -24,8 +24,4 @@ function searchCtrl($scope, SearchService, $rootScope) {
         if (vm.infinite)
             vm.infinite.initialize();
     });
-
-    $rootScope.$on("$stateChangeStart", () => {
-        vm.search.resultsVisible = false;
-    });
 }

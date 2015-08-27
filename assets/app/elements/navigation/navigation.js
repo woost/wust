@@ -14,9 +14,9 @@ function navigation() {
     };
 }
 
-navigationCtrl.$inject = ["$state", "Auth", "SearchService", "DiscourseNode", "Search", "ModalEditService"];
+navigationCtrl.$inject = ["$state", "Auth", "SearchService", "DiscourseNode", "Search", "ModalEditService", "FullscreenService"];
 
-function navigationCtrl($state, Auth, SearchService, DiscourseNode, Search, ModalEditService) {
+function navigationCtrl($state, Auth, SearchService, DiscourseNode, Search, ModalEditService, FullscreenService) {
     let vm = this;
 
     vm.navbarCollapsed = true;
@@ -35,6 +35,7 @@ function navigationCtrl($state, Auth, SearchService, DiscourseNode, Search, Moda
     vm.logout = Auth.logout;
     vm.search = SearchService.search;
     vm.newDiscussion = newDiscussion;
+    vm.fullscreen = FullscreenService;
     vm.$state = $state;
 
     function authenticate(register) {

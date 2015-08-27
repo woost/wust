@@ -1,8 +1,8 @@
 angular.module("wust.components").controller("PageCtrl", PageCtrl);
 
-PageCtrl.$inject = ["SidebarService", "EditService"];
+PageCtrl.$inject = ["SidebarService", "EditService", "FullscreenService", "$rootScope"];
 
-function PageCtrl(SidebarService, EditService) {
+function PageCtrl(SidebarService, EditService, FullscreenService, $rootScope) {
     let vm = this;
 
     vm.sidebar = SidebarService;
@@ -12,4 +12,6 @@ function PageCtrl(SidebarService, EditService) {
         SidebarService.left.visible = true;
         EditService.edit(data);
     }
+
+    $rootScope.$on("$stateChangeStart", FullscreenService.hideFullscreens);
 }

@@ -18,6 +18,9 @@ function SidebarService(store, Helpers) {
                 return obj.visible;
             },
             set: function(val) {
+                if (val === obj.visible)
+                    return;
+
                 obj.visible = !!val;
                 sideStore.set(name, obj);
                 setTimeout( () => Helpers.fireWindowResizeEvent(), 150 );
@@ -28,6 +31,9 @@ function SidebarService(store, Helpers) {
                 return obj.fullscreen;
             },
             set: function(val) {
+                if (val === obj.fullscreen)
+                    return;
+
                 obj.fullscreen = !!val;
                 sideStore.set(name, obj);
             }
