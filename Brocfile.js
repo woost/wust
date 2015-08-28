@@ -37,6 +37,10 @@ var staticAssetsJs = funnel("static_assets", {
     destDir: "static_assets_js"
 });
 
+var images = funnel("assets", {
+    include: [ "images/*.png" ]
+});
+
 var fonts = mergeTrees([
         flatten(funnel("bower_components", { include: [ "bootstrap-css-only/fonts/*.woff*", "font-awesome/fonts/*.woff*" ]}), {destDir: "fonts"}),
         funnel("static_assets", { include: [ "**/*.woff*" ], destDir: "fonts"}),
@@ -145,7 +149,8 @@ if (prod) {
                 "warning_level":       "QUIET",
                 "compilation_level":   "WHITESPACE_ONLY"
             }),
-            fonts
+            fonts,
+            images
     ]);
 } else { // development
     var browserSync = new BrowserSync([appScripts, htmlTemplates, styles], {
@@ -157,7 +162,7 @@ if (prod) {
     });
 
     module.exports = mergeTrees([
-            styles, scripts, fonts,
+            styles, scripts, fonts, images,
             jsHintResults, browserSync
     ]);
 }
