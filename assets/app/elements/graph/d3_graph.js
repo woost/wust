@@ -200,29 +200,29 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     if(d.isHyperRelation) {
                         let elem = document.createElement("span");
                         _.values(d.tags).forEach(t => {
-                            let tag_elem = document.createElement("span");
-                            tag_elem.className = "tag nodetag";
-                            tag_elem.style.backgroundColor = Helpers.hashToHslFill(t);
-                            tag_elem.style.borderColor = Helpers.hashToHslBorder(t);
-                            tag_elem.appendChild(document.createTextNode(t.title));
-                            elem.appendChild(tag_elem);
+                            let tagElem = document.createElement("span");
+                            tagElem.className = "tag nodetag";
+                            tagElem.style.backgroundColor = Helpers.hashToHslFill(t);
+                            tagElem.style.borderColor = Helpers.hashToHslBorder(t);
+                            tagElem.appendChild(document.createTextNode(t.title));
+                            elem.appendChild(tagElem);
                         });
                         return elem.outerHTML;
                     } else {
                         let elem = document.createElement("span");
                         elem.appendChild(document.createTextNode(d.title));
-                        let circle_cont = document.createElement("span");
-                        circle_cont.className = "tag_circle_container pull-right";
-                        elem.appendChild(circle_cont);
+                        let circleCont = document.createElement("span");
+                        circleCont.className = "tag_circle_container pull-right";
+                        elem.appendChild(circleCont);
                         _.values(d.tags).forEach(t => {
-                            let circle_title = document.createElement("span");
-                            circle_title.className = "tag_circle_title";
-                            circle_title.setAttribute("title", t.title);
-                            circle_cont.appendChild(circle_title);
+                            let circleTitle = document.createElement("span");
+                            circleTitle.className = "tag_circle_title";
+                            circleTitle.setAttribute("title", t.title);
+                            circleCont.appendChild(circleTitle);
                             let circle = document.createElement("span");
                             circle.className = "tag_circle";
                             circle.style.backgroundColor = Helpers.hashToHslFill(t);
-                            circle_title.appendChild(circle);
+                            circleTitle.appendChild(circle);
                         });
                         return elem.outerHTML;
                     }
