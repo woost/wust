@@ -2,4 +2,3 @@
 
 rm -rf public
 BROCCOLI_ENV=production broccoli build public
-

@@ -87,7 +87,15 @@ var htmlTemplates = html2js("assets/app", {
 });
 
 var appScriptsEs6 = funnel("assets/app", { include: ["**/*.js"], destDir: "javascripts" });
-var jsHintResults = new JSHinter(appScriptsEs6);
+var jsHintResults = new JSHinter(appScriptsEs6, {
+    logError: function(message) {
+        console.error(message);
+        if (prod) {
+            console.log("JsHint failed, exiting.");
+            process.exit(1);
+        }
+    }
+});
 var appScripts = iife(esTranspiler(appScriptsEs6));
 
 function min(file) {
@@ -142,15 +150,16 @@ var scripts = concat(mergeTrees([appScripts,htmlTemplates,dependencies,staticAss
 
 if (prod) {
     module.exports = mergeTrees([
-            csso(styles),
-            closure(scripts, "main.js", {
-                "language_in":         "ECMASCRIPT5",
-                "language_out":        "ECMASCRIPT5",
-                "warning_level":       "QUIET",
-                "compilation_level":   "WHITESPACE_ONLY"
-            }),
-            fonts,
-            images
+        csso(styles),
+        closure(scripts, "main.js", {
+            "language_in":         "ECMASCRIPT5",
+            "language_out":        "ECMASCRIPT5",
+            "warning_level":       "QUIET",
+            "compilation_level":   "WHITESPACE_ONLY"
+        }),
+        fonts,
+        images,
+        jsHintResults
     ]);
 } else { // development
     var browserSync = new BrowserSync([appScripts, htmlTemplates, styles], {
@@ -162,7 +171,6 @@ if (prod) {
     });
 
     module.exports = mergeTrees([
-            styles, scripts, fonts, images,
-            jsHintResults, browserSync
+        styles, scripts, fonts, images, browserSync, jsHintResults
     ]);
 }
