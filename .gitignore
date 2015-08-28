@@ -13,9 +13,14 @@ tmp
 /.project
 /RUNNING_PID
 /.settings
+
 /magic
-/node_modules
-/bower_components
 /public
 
+/node_modules
+/bower_components
+
 .sass-cache
+/.ivy2
+/.sbt
+/software
