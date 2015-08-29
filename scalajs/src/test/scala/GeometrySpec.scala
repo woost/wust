@@ -30,13 +30,23 @@ object GeometrySpec extends TestSuite {
           assert(c.x == 15)
           assert(c.y == 21)
         }
+        'division {
+          val a = Vec2(6,8)
+          val c = a / 2
+          assert(c.x == 3)
+          assert(c.y == 4)
+        }
       }
 
       'Line {
-        'consstructor {
+        'constructor {
           val l = Line(Vec2(7,3), Vec2(8,4))
           assert(l.start == Vec2(7,3))
           assert(l.end == Vec2(8,4))
+          assert(l.x1 == 7)
+          assert(l.y1 == 3)
+          assert(l.x2 == 8)
+          assert(l.y2 == 4)
         }
       }
 
@@ -44,7 +54,16 @@ object GeometrySpec extends TestSuite {
         'constructor {
           val r = Rect(Vec2(7,3), Vec2(8,4))
           assert(r.pos == Vec2(7,3))
-          assert(r.dim == Vec2(8,4))
+          assert(r.size == Vec2(8,4))
+          assert(r.x == 7)
+          assert(r.y == 3)
+          assert(r.width == 8)
+          assert(r.height == 4)
+        }
+
+        'constructor {
+          val r = Rect(Vec2(7,3), Vec2(8,4))
+          assert(r.center == Vec2(11,5))
         }
 
         'corners {

@@ -1,28 +1,55 @@
 package geometry
 
-case class Vec2(x:Double, y:Double) {
-  def +(that:Vec2) = Vec2(this.x + that.x, this.y + that.y)
-  def *(a:Double) = Vec2(this.x * a, this.y * a)
+import scala.scalajs.js
+import scala.scalajs.js.annotation.{JSExport, JSExportAll}
+import scala.annotation.meta.field
+import js.JSConverters._
 
-  def isInside(r:Rect) = x > r.pos.x && y > r.pos.y && x < r.otherPos.x && y < r.otherPos.y
+@JSExport
+case class Vec2(
+  @(JSExport @field) x:Double,
+  @(JSExport @field) y:Double) {
+  @JSExport("plus") def +(that:Vec2) = Vec2(this.x + that.x, this.y + that.y)
+  @JSExport("times") def *(a:Double) = Vec2(this.x * a, this.y * a)
+  @JSExport("div") def /(a:Double) = Vec2(this.x / a, this.y / a)
+
+  @JSExport def isInside(r:Rect) = x > r.pos.x && y > r.pos.y && x < r.otherPos.x && y < r.otherPos.y
 }
 
-case class Line(start:Vec2, end:Vec2) {
-  def isInside(r:Rect) = (start isInside r) && (end isInside r)
+@JSExport
+case class Line(
+  @(JSExport @field) start:Vec2,
+  @(JSExport @field) end:Vec2) {
+  @JSExport def x1 = start.x
+  @JSExport def y1 = start.y
+  @JSExport def x2 = end.x
+  @JSExport def y2 = end.y
 
-  def intersect(that:Line) = Algorithms.intersection(this, that)
-  def intersectFirst(r:Rect) = Algorithms.firstIntersection(r, this)
-  def clampBy(r:Rect) = Algorithms.clampLineByRect(this, r)
+  @JSExport def isInside(r:Rect) = (start isInside r) && (end isInside r)
+
+  def intersect(that:Line):Option[Algorithms.LineIntersection] = Algorithms.intersection(this, that)
+  def intersectFirst(r:Rect):Either[Boolean,Vec2] = Algorithms.firstIntersection(r, this)
+  def clampBy(r:Rect):Option[Line] = Algorithms.clampLineByRect(this, r)
+  @JSExport("clampBy") def clampBy_js(r:Rect):js.UndefOr[Line] = clampBy(r).orUndefined
 }
 
-case class Rect(pos:Vec2, dim:Vec2) {
-  lazy val otherPos = pos + dim
+@JSExport
+case class Rect(
+  @(JSExport @field) pos:Vec2,
+  @(JSExport @field) size:Vec2) {
+  @JSExport def x = pos.x
+  @JSExport def y = pos.y
+  @JSExport def width = size.x
+  @JSExport def height = size.y
+
+  @JSExport lazy val otherPos = pos + size
+  @JSExport lazy val center = pos + size / 2
 
   lazy val corners = Array(
     pos,
-    Vec2(pos.x + dim.x, pos.y),
+    Vec2(pos.x + size.x, pos.y),
     otherPos,
-    Vec2(pos.x, pos.y + dim.y)
+    Vec2(pos.x, pos.y + size.y)
   )
 
   lazy val edges = Array(
@@ -82,7 +109,6 @@ object Algorithms {
     // Left(fals) => line is completely outside
     // Right(pos) => one intersection point
     for(edge <- rect.edges) {
-      println(edge, intersection(line, edge))
       (line intersect edge).foreach{ i => if(i.onLine1 && i.onLine2) return Right(i.pos) }
     }
 

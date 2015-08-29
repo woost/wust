@@ -508,11 +508,16 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
         recalculateNodeDimensions(nodes) {
             nodes.forEach(n => {
-                if(n.domNode)
-                    n.rect = {
-                        width: n.domNode.offsetWidth,
-                        height: n.domNode.offsetHeight
-                    };
+                if(n.domNode) {
+                    let size = geometry.Vec2(
+                            n.domNode.offsetWidth,
+                            n.domNode.offsetHeight)
+                    n.rect = geometry.Rect(
+                            geometry.Vec2(
+                                n.x - size.x / 2,
+                                n.y - size.y / 2),
+                            size);
+                }
             });
         }
 
@@ -567,11 +572,22 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             });
         }
 
+        relationLine(relation) {
+            let s = relation.source;
+            let t = relation.target;
+            return geometry.Line(
+                    geometry.Vec2(s.x, s.y),
+                    geometry.Vec2(t.x, t.y));
+        }
+
         drawRelations() {
             this.graph.relations.forEach((relation) => {
                 // clamp every relation line to the intersections with its incident node rectangles
-                let line = Helpers.clampLineByRects(relation, relation.source.rect, relation.target.rect);
-                if (isNaN(line.x1) || isNaN(line.y1) || isNaN(line.x2) || isNaN(line.y2))
+                let line = this.relationLine(relation);
+                line = line.clampBy(relation.source.rect);
+                line = line ? line.clampBy(relation.target.rect) : undefined;
+
+                if (line === undefined || isNaN(line.x1) || isNaN(line.y1) || isNaN(line.x2) || isNaN(line.y2))
                     console.warn("invalid coordinates for relation");
                 else {
                     let pathAttr = `M ${line.x1} ${line.y1} L ${line.x2} ${line.y2}`;
