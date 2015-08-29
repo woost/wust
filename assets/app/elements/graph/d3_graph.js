@@ -511,7 +511,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 if(n.domNode) {
                     let size = geometry.Vec2(
                             n.domNode.offsetWidth,
-                            n.domNode.offsetHeight)
+                            n.domNode.offsetHeight);
                     n.rect = geometry.Rect(
                             geometry.Vec2(
                                 n.x - size.x / 2,
