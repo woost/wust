@@ -3,11 +3,16 @@ package geometry
 case class Vec2(x:Double, y:Double) {
   def +(that:Vec2) = Vec2(this.x + that.x, this.y + that.y)
   def *(a:Double) = Vec2(this.x * a, this.y * a)
+
+  def isInside(r:Rect) = x > r.pos.x && y > r.pos.y && x < r.otherPos.x && y < r.otherPos.y
 }
 
 case class Line(start:Vec2, end:Vec2) {
+  def isInside(r:Rect) = (start isInside r) && (end isInside r)
+
   def intersect(that:Line) = Algorithms.intersection(this, that)
-  def intersectFirst(that:Rect) = Algorithms.firstIntersection(that, this)
+  def intersectFirst(r:Rect) = Algorithms.firstIntersection(r, this)
+  def clampBy(r:Rect) = Algorithms.clampLineByRect(this, r)
 }
 
 case class Rect(pos:Vec2, dim:Vec2) {
@@ -16,19 +21,16 @@ case class Rect(pos:Vec2, dim:Vec2) {
   lazy val corners = Array(
     pos,
     Vec2(pos.x + dim.x, pos.y),
-    Vec2(pos.x, pos.y + dim.y),
-    otherPos
+    otherPos,
+    Vec2(pos.x, pos.y + dim.y)
   )
 
   lazy val edges = Array(
-      Line(corners(0), corners(1)),
-      Line(corners(1), corners(2)),
-      Line(corners(2), corners(3)),
-      Line(corners(3), corners(0))
-    )
-
-  def inside(p:Vec2):Boolean = p.x > pos.x && p.y > pos.y && p.x < otherPos.x && p.y < otherPos.y
-  def inside(l:Line):Boolean = inside(l.start) && inside(l.end)
+    Line(corners(0), corners(1)),
+    Line(corners(1), corners(2)),
+    Line(corners(2), corners(3)),
+    Line(corners(3), corners(0))
+  )
 
   def intersectFirst(that:Line) = Algorithms.firstIntersection(this, that)
 }
@@ -67,55 +69,38 @@ object Algorithms {
     x = line2StartX + (b * (line2EndX - line2StartX))
     y = line2StartX + (b * (line2EndY - line2StartY))
     */
-    // if line1 is a segment and line2 is infinite, they intersect if:
-    val resultOnLine1 = a > 0 && a < 1
-    // if line2 is a segment and line1 is infinite, they intersect if:
-    val resultOnLine2 = b > 0 && b < 1
-    // if line1 and line2 are segments, they intersect if both of the above are true
-    return Some(LineIntersection(Vec2(resultX, resultY), resultOnLine1, resultOnLine2))
+   // if line1 is a segment and line2 is infinite, they intersect if:
+   val resultOnLine1 = a > 0 && a < 1
+   // if line2 is a segment and line1 is infinite, they intersect if:
+   val resultOnLine2 = b > 0 && b < 1
+   // if line1 and line2 are segments, they intersect if both of the above are true
+   return Some(LineIntersection(Vec2(resultX, resultY), resultOnLine1, resultOnLine2))
   }
 
   def firstIntersection(rect:Rect, line:Line):Either[Boolean,Vec2] = {
-    for(edge <- rect.edges)
-      intersection(line, edge).foreach{ i => if(i.onLine1 && i.onLine2) return Right(i.pos) }
-    return Left(rect.inside(line))
+    // Left(true) => line is completely inside
+    // Left(fals) => line is completely outside
+    // Right(pos) => one intersection point
+    for(edge <- rect.edges) {
+      println(edge, intersection(line, edge))
+      (line intersect edge).foreach{ i => if(i.onLine1 && i.onLine2) return Right(i.pos) }
+    }
+
+    return Left(line isInside rect)
   }
 
-// function clampLineByRects(edge, sourceRect, targetRect) {
-//     let linkLine = {
-//         start: {
-//             x: edge.source.x,
-//             y: edge.source.y
-//         },
-//         end: {
-//             x: edge.target.x,
-//             y: edge.target.y
-//         }
-//     };
-
-//     let sourceIntersection = lineRectIntersection(linkLine, {
-//         width: sourceRect.width,
-//         height: sourceRect.height,
-//         x: edge.source.x - sourceRect.width / 2,
-//         y: edge.source.y - sourceRect.height / 2
-//     });
-
-//     let targetIntersection = lineRectIntersection(linkLine, {
-//         width: targetRect.width,
-//         height: targetRect.height,
-//         x: edge.target.x - targetRect.width / 2,
-//         y: edge.target.y - targetRect.height / 2
-//     });
-
-//     return {
-//         x1: sourceIntersection === undefined ? edge.source.x : sourceIntersection
-//             .x,
-//         y1: sourceIntersection === undefined ? edge.source.y : sourceIntersection
-//             .y,
-//         x2: targetIntersection === undefined ? edge.target.x : targetIntersection
-//             .x,
-//         y2: targetIntersection === undefined ? edge.target.y : targetIntersection
-//             .y
-//     };
-// }
+  def clampLineByRect(line:Line, rect:Rect):Option[Line] = {
+    // Assuming there is only one intersection.
+    // Which means that one line end is inside the rect,
+    // the other one outside.
+    // If there are two intersections the resulting line
+    // can be wrong
+    firstIntersection(rect, line) match {
+      case Left(true) => None
+      case Left(false) => Some(line)
+      case Right(intersection) =>
+        if(line.end isInside rect) Some(Line(line.start, intersection))
+        else Some(Line(intersection, line.end))
+    }
+  }
 }

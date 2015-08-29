@@ -49,19 +49,33 @@ object GeometrySpec extends TestSuite {
 
         'corners {
           val r = Rect(Vec2(2,3), Vec2(2,1))
-          val c = r.corners
-          assert(c.toList == Array(Vec2(2,3), Vec2(4,3), Vec2(2,4), Vec2(4,4)).toList)
+          val c = r.corners.toList
+          assert(c.toList == List(Vec2(2,3), Vec2(4,3), Vec2(4,4), Vec2(2,4)))
         }
 
-        //TODO: edges
+        'edges {
+          val r = Rect(Vec2(2,3), Vec2(2,1))
+          val e = r.edges.toList
+          assert(e.toList == List(
+            Line(Vec2(2,3), Vec2(4,3)),
+            Line(Vec2(4,3), Vec2(4,4)),
+            Line(Vec2(4,4), Vec2(2,4)),
+            Line(Vec2(2,4), Vec2(2,3))).toList
+          )
+        }
 
         'PointInside {
           val r = Rect(Vec2(2,3), Vec2(2,1))
-          assert(r.inside(Vec2(3, 3.5)) == true)
-          assert(r.inside(Vec2(3, 4.5)) == false)
+          assert((Vec2(3, 3.5) isInside r) == true)
+          assert((Vec2(3, 4.5) isInside r) == false)
         }
 
-        //TODO: line inside
+        'LineInside {
+          val r = Rect(Vec2(2,3), Vec2(2,1))
+          assert((Line(Vec2(2.5,3.5), Vec2(3.5,3.5)) isInside r) == true)
+          assert((Line(Vec2(2.5,3.5), Vec2(5.5,3.5)) isInside r) == false)
+          assert((Line(Vec2(4.5,3.5), Vec2(5.5,3.5)) isInside r) == false)
+        }
       }
     }
     'Algorithms {
@@ -106,7 +120,7 @@ object GeometrySpec extends TestSuite {
         }
         'NoIntersectInside {
           val r = Rect(Vec2(2,3), Vec2(2,1))
-          val l = Line(Vec2(2.5,3.5), Vec2(2.5,3.5))
+          val l = Line(Vec2(2.5,3.5), Vec2(3.5,3.5))
           val i = (r intersectFirst l).left.get
           assert( i == true )
         }
@@ -118,7 +132,30 @@ object GeometrySpec extends TestSuite {
         }
       }
 
-      // 'ClampLineByl
+      'ClampLineByRect {
+        // assuming there is only one intersection
+        // which means that one line end is inside the rect
+        // if there are two intersections the resulting line
+        // can be wrong
+        'Intersect {
+          val r = Rect(Vec2(2,3), Vec2(2,1))
+          val l = Line(Vec2(3,2), Vec2(3,3.5))
+          val c = (l clampBy r).get
+          assert( c == Line(Vec2(3,2), Vec2(3,3)) )
+        }
+        'NoClamp {
+          val r = Rect(Vec2(2,3), Vec2(2,1))
+          val l = Line(Vec2(3,2), Vec2(4,2))
+          val c = (l clampBy r).get
+          assert( c == l )
+        }
+        'FullClamp {
+          val r = Rect(Vec2(2,3), Vec2(2,1))
+          val l = Line(Vec2(2.5,3.5), Vec2(3.5,3.5))
+          val c = (l clampBy r)
+          assert( c == None )
+        }
+      }
     }
   }
 }
