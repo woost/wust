@@ -3,10 +3,7 @@ var prod = env === "production";
 var devDestDir = "target/web/public/main";
 
 var fs = require("fs");
-var rimraf = require("rimraf");
 var mkdirp = require("mkdirp");
-var path = require("path");
-var q = require("q");
 
 mkdirp(devDestDir);
 

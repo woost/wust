@@ -23,10 +23,7 @@
     "broccoli-sourcemap-concat": "^1.0.2",
     "broccoli-string-replace": "^0.1.0",
     "fs": "0.0.2",
-    "node-sass": "^3.2.0",
-    "path": "^0.11.14",
-    "q": "^1.4.1",
-    "rimraf": "^2.4.3"
+    "node-sass": "^3.2.0"
   },
   "dependencies": {
     "angular": "^1.4.4",
