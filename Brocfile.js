@@ -5,6 +5,7 @@ var devDestDir = "target/web/public/main";
 var fs = require("fs");
 var mkdirp = require("mkdirp");
 
+if (!prod)
 mkdirp(devDestDir);
 
 var concat = prod ? require("broccoli-concat") : require("broccoli-sourcemap-concat");
@@ -44,8 +45,9 @@ var staticAssetsJs = funnel("static_assets", {
     destDir: "static_assets_js"
 });
 
-var images = funnel("assets", {
-    include: [ "images/*.png" ]
+var images = funnel("assets/images", {
+    include: [ "*.png" ],
+    destDir: "images"
 });
 
 var fonts = mergeTrees([
