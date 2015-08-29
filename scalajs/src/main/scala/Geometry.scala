@@ -5,7 +5,10 @@ case class Vec2(x:Double, y:Double) {
   def *(a:Double) = Vec2(this.x * a, this.y * a)
 }
 
-case class Line(start:Vec2, end:Vec2)
+case class Line(start:Vec2, end:Vec2) {
+  def intersect(that:Line) = Algorithms.intersection(this, that)
+  def intersectFirst(that:Rect) = Algorithms.firstIntersection(that, this)
+}
 
 case class Rect(pos:Vec2, dim:Vec2) {
   lazy val otherPos = pos + dim
@@ -26,6 +29,8 @@ case class Rect(pos:Vec2, dim:Vec2) {
 
   def inside(p:Vec2):Boolean = p.x > pos.x && p.y > pos.y && p.x < otherPos.x && p.y < otherPos.y
   def inside(l:Line):Boolean = inside(l.start) && inside(l.end)
+
+  def intersectFirst(that:Line) = Algorithms.firstIntersection(this, that)
 }
 
 object Algorithms {
@@ -70,10 +75,47 @@ object Algorithms {
     return Some(LineIntersection(Vec2(resultX, resultY), resultOnLine1, resultOnLine2))
   }
 
-  // first intersection
-  def intersection(rect:Rect, line:Line):Either[Boolean,Vec2] = {
+  def firstIntersection(rect:Rect, line:Line):Either[Boolean,Vec2] = {
     for(edge <- rect.edges)
       intersection(line, edge).foreach{ i => if(i.onLine1 && i.onLine2) return Right(i.pos) }
     return Left(rect.inside(line))
   }
+
+// function clampLineByRects(edge, sourceRect, targetRect) {
+//     let linkLine = {
+//         start: {
+//             x: edge.source.x,
+//             y: edge.source.y
+//         },
+//         end: {
+//             x: edge.target.x,
+//             y: edge.target.y
+//         }
+//     };
+
+//     let sourceIntersection = lineRectIntersection(linkLine, {
+//         width: sourceRect.width,
+//         height: sourceRect.height,
+//         x: edge.source.x - sourceRect.width / 2,
+//         y: edge.source.y - sourceRect.height / 2
+//     });
+
+//     let targetIntersection = lineRectIntersection(linkLine, {
+//         width: targetRect.width,
+//         height: targetRect.height,
+//         x: edge.target.x - targetRect.width / 2,
+//         y: edge.target.y - targetRect.height / 2
+//     });
+
+//     return {
+//         x1: sourceIntersection === undefined ? edge.source.x : sourceIntersection
+//             .x,
+//         y1: sourceIntersection === undefined ? edge.source.y : sourceIntersection
+//             .y,
+//         x2: targetIntersection === undefined ? edge.target.x : targetIntersection
+//             .x,
+//         y2: targetIntersection === undefined ? edge.target.y : targetIntersection
+//             .y
+//     };
+// }
 }

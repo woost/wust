@@ -65,12 +65,11 @@ object GeometrySpec extends TestSuite {
       }
     }
     'Algorithms {
-      import Algorithms._
       'LineIntersection {
         'Segments {
           val a = Line(Vec2(1,3), Vec2(4,1))
           val b = Line(Vec2(2,1), Vec2(3,3))
-          val i = intersection(a, b).get
+          val i = (a intersect b).get
           assert( i.pos == Vec2(2.5, 2) )
           assert( i.onLine1 == true )
           assert( i.onLine2 == true )
@@ -78,21 +77,21 @@ object GeometrySpec extends TestSuite {
         'SegmentAndLine {
           val a = Line(Vec2(1,3), Vec2(4,1))
           val b = Line(Vec2(0,0), Vec2(2,2))
-          val i = intersection(a, b).get
+          val i = (a intersect b).get
           assert( i.onLine1 == true )
           assert( i.onLine2 == false )
         }
         'LineAndSegment {
           val a = Line(Vec2(1,3), Vec2(4,1))
           val b = Line(Vec2(0,3), Vec2(1,4))
-          val i = intersection(a, b).get
+          val i = (a intersect b).get
           assert( i.onLine1 == false )
           assert( i.onLine2 == true )
         }
         'Parallel {
           val a = Line(Vec2(1,3), Vec2(4,1))
           val b = Line(Vec2(2,3), Vec2(5,1))
-          val i = intersection(a,b)
+          val i = (a intersect b)
           assert( i == None )
         }
       }
@@ -100,22 +99,26 @@ object GeometrySpec extends TestSuite {
         'Intersect {
           val r = Rect(Vec2(2,3), Vec2(2,1))
           val l = Line(Vec2(3,2), Vec2(3,3.5))
-          val i = intersection(r, l).right.get
+          val i = (r intersectFirst l).right.get
+          val i2 = (l intersectFirst r).right.get
           assert( i == Vec2(3, 3) )
+          assert( i2 == Vec2(3, 3) )
         }
         'NoIntersectInside {
           val r = Rect(Vec2(2,3), Vec2(2,1))
           val l = Line(Vec2(2.5,3.5), Vec2(2.5,3.5))
-          val i = intersection(r, l).left.get
+          val i = (r intersectFirst l).left.get
           assert( i == true )
         }
         'NoIntersectOutside {
           val r = Rect(Vec2(2,3), Vec2(2,1))
           val l = Line(Vec2(2.5,2.5), Vec2(2.5,2.5))
-          val i = intersection(r, l).left.get
+          val i = (r intersectFirst l).left.get
           assert( i == false )
         }
       }
+
+      // 'ClampLineByl
     }
   }
 }
