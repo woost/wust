@@ -10,6 +10,10 @@
 <link rel="stylesheet" media="screen" href='@routes.Assets.versioned("main.css")'>
 <script src='@routes.Assets.versioned("main.js")'></script>
 
+@if(Play.isDev) {
+    <script src='@routes.Assets.versioned("error.js")'></script>
+}
+
 @playscalajs.html.jsdeps(projectName = "scalajs")
 @playscalajs.html.selectScript(projectName = "scalajs")
 @{/*playscalajs.html.launcher(projectName = "scalajs")*/}

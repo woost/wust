@@ -4,7 +4,7 @@ d3Graph.$inject = ["$window", "DiscourseNode", "Helpers", "$location", "$filter"
 
 function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, ModalEditService, EditService, TagRelationEditService) {
     return {
-        restrict: "A",
+        restrict: 'A',
         scope: false,
         link
     };

@@ -1,6 +1,5 @@
 #!/bin/bash
 
 rm -rf public
-rm -rf target/web/public/main/*
 
 blumenkohl target/web/public/main
