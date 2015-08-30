@@ -49,6 +49,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.dragStartOffsetX = undefined;
                 this.dragStartOffsetY = undefined;
 
+                this.linkStrength = 1; // originally this.force.linkStrength
+
                 this.force = d3.layout.force()
                     .size([this.width, this.height])
                     .nodes(graph.nodes)
@@ -581,7 +583,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 // clamped is the line that is covered by the intersection of the nodes
                 // the length is negative to push the nodes away from each other
                 let clamped = line.clampBy(sourceRect).clampBy(targetRect);
-                return [clamped, -clamped.length];
+                return [geometry.Line(clamped.end, clamped.start), -clamped.length];
             }
         }
 
@@ -594,13 +596,13 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             this.graph.relations.forEach (relation => {
                 // cut every relation line to the intersections with its incident node rectangles
 
-                let source = relation.source;
-                let target = relation.target;
                 // gauss-seidel relaxation for links
                 // https://github.com/mbostock/d3/blob/78e0a4bb81a6565bf61e3ef1b898ef8377478766/src/layout/force.js#L77
+
+                let source = relation.source;
+                let target = relation.target;
                 let shouldDistance = this.force.linkDistance();
                 let [currentLine, currentDistance] = this.cutLineLength(relation); // can be negative
-                console.log(Math.round(currentDistance));
 
                 if( currentDistance > 0 )
                     relation.line = currentLine;
@@ -614,17 +616,20 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 let y = vector.y;
 
                 let alpha = this.force.alpha();
-                let strength = 0.99; // originally this.force.linkStrength
 
-                let currentForceDirection = alpha * strength * (currentDistance - shouldDistance) / currentDistance;
-                x *= currentForceDirection;
-                y *= currentForceDirection;
-                let currentForce = source.weight / (target.weight + source.weight);
-                target.x -= x * currentForce;
-                target.y -= y * currentForce;
-                currentForce = 1 - currentForce;
-                source.x += x * currentForce;
-                source.y += y * currentForce;
+                let currentForce = alpha * this.linkStrength * (currentDistance - shouldDistance) / currentDistance;
+                x *= currentForce;
+                y *= currentForce;
+                let forceWeight = source.weight / (target.weight + source.weight);
+
+                if(!source.fixed) {
+                    source.x += x * (1 - forceWeight);
+                    source.y += y * (1 - forceWeight);
+                }
+                if(!target.fixed) {
+                    target.x -= x * forceWeight;
+                    target.y -= y * forceWeight;
+                }
             });
         }
 
@@ -670,7 +675,10 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             this.graph.relations.forEach(relation => {
                 let line = relation.line;
 
-                if( line === undefined ) return;
+                if( line === undefined ) {
+                    relation.domPath.setAttribute("d", "");
+                    return;
+                }
 
                 if (isNaN(line.x1) || isNaN(line.y1) || isNaN(line.x2) || isNaN(line.y2))
                     console.warn("invalid coordinates for relation");
