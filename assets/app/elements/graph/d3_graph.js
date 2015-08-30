@@ -24,7 +24,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.visibleConvergence = false;
                 this.debugDraw = false;
                 this.hyperRelationAlignForce = 0.5;
-                this.nodeVerticalForceFactor = 1;
+                this.nodeVerticalForceFactor = 2;
                 this.stopForceOnPan = true;
                 this.stopForceAfterNodeDrag = true;
                 this.connectorLineOvershoot = 0;
@@ -49,7 +49,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.dragStartOffsetX = undefined;
                 this.dragStartOffsetY = undefined;
 
-                this.linkStrength = 1; // originally this.force.linkStrength
+                this.linkStrength = 3; // originally this.force.linkStrength
 
                 this.force = d3.layout.force()
                     .size([this.width, this.height])
@@ -58,12 +58,23 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     .linkStrength(0.0) // rigidity, 0, because we handle this ourselves in tick()
                     .friction(0.92)
                     .linkDistance(50) // weak geometric constraint. Pushes nodes to achieve this distance
-                    .charge(-1300)
+                    .charge(-1500)
                     .chargeDistance(1000)
-                    .gravity(0.01)
+                    .gravity(0.001)
                     .theta(0.8)
                     .alpha(0.1);
                 this.zoom = d3.behavior.zoom().scaleExtent([0.1, 3]); // min/max zoom level
+
+                // old config
+                // .linkStrength(3) // rigidity
+                // .friction(0.9)
+                // // .linkDistance(120) // weak geometric constraint. Pushes nodes to achieve this distance
+                // .linkDistance(d => connectsHyperEdge(d) ? 120 : 200)
+                // .charge(d => d.hyperEdge ? -1500 : -1500)
+                // .gravity(0.1)
+
+
+
             }
 
             init() {
@@ -722,6 +733,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             // this is the first graph display,
             // so focus the rootNode
             if(oldWidth === 0 && oldHeight === 0) {
+                this.converge();
                 this.focusMarkedNodes(0);
                 setTimeout(() => this.focusRootNode(), 200);
             }
