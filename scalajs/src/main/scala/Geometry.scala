@@ -9,7 +9,10 @@ import js.JSConverters._
 case class Vec2(
   @(JSExport @field) x:Double,
   @(JSExport @field) y:Double) {
+  @JSExport def width = x
+  @JSExport def height = y
   @JSExport("plus") def +(that:Vec2) = Vec2(this.x + that.x, this.y + that.y)
+  @JSExport("minus") def -(that:Vec2) = Vec2(this.x - that.x, this.y - that.y)
   @JSExport("times") def *(a:Double) = Vec2(this.x * a, this.y * a)
   @JSExport("div") def /(a:Double) = Vec2(this.x / a, this.y / a)
 
@@ -34,6 +37,10 @@ case class Line(
 }
 
 @JSExport
+object Rect {
+}
+
+@JSExport
 case class Rect(
   @(JSExport @field) pos:Vec2,
   @(JSExport @field) size:Vec2) {
@@ -44,6 +51,8 @@ case class Rect(
 
   @JSExport lazy val otherPos = pos + size
   @JSExport lazy val center = pos + size / 2
+
+  @JSExport def centered = Rect(center - size, size)
 
   lazy val corners = Array(
     pos,

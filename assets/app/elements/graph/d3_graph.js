@@ -508,16 +508,11 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
         recalculateNodeDimensions(nodes) {
             nodes.forEach(n => {
-                if(n.domNode) {
-                    let size = geometry.Vec2(
-                            n.domNode.offsetWidth,
-                            n.domNode.offsetHeight);
-                    n.rect = geometry.Rect(
-                            geometry.Vec2(
-                                n.x - size.x / 2,
-                                n.y - size.y / 2),
-                            size);
-                }
+                if(n.domNode)
+                    n.size = geometry.Vec2(
+                        n.domNode.offsetWidth,
+                        n.domNode.offsetHeight);
+
             });
         }
 
@@ -568,7 +563,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
         drawNodes() {
             this.graph.nodes.forEach((node) => {
-                node.domNodeContainer.style[this.transformCompat] = `translate(${node.x - node.rect.width / 2}px, ${node.y - node.rect.height / 2}px)`;
+                node.domNodeContainer.style[this.transformCompat] = `translate(${node.x - node.size.width / 2}px, ${node.y - node.size.height / 2}px)`;
             });
         }
 
@@ -584,14 +579,16 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             this.graph.relations.forEach((relation) => {
                 // clamp every relation line to the intersections with its incident node rectangles
                 let line = this.relationLine(relation);
-                line = line.clampBy(relation.source.rect);
-                line = line ? line.clampBy(relation.target.rect) : undefined;
+                line = line.clampBy(geometry.Rect(geometry.Vec2(relation.source.x, relation.source.y), relation.source.size).centered);
+                line = line ? line.clampBy(geometry.Rect(geometry.Vec2(relation.target.x, relation.target.y), relation.target.size).centered) : undefined;
 
-                if (line === undefined || isNaN(line.x1) || isNaN(line.y1) || isNaN(line.x2) || isNaN(line.y2))
-                    console.warn("invalid coordinates for relation");
-                else {
-                    let pathAttr = `M ${line.x1} ${line.y1} L ${line.x2} ${line.y2}`;
-                    relation.domPath.setAttribute("d", pathAttr);
+                if( line !== undefined ) {
+                    if (isNaN(line.x1) || isNaN(line.y1) || isNaN(line.x2) || isNaN(line.y2))
+                        console.warn("invalid coordinates for relation");
+                    else {
+                        let pathAttr = `M ${line.x1} ${line.y1} L ${line.x2} ${line.y2}`;
+                        relation.domPath.setAttribute("d", pathAttr);
+                    }
                 }
             });
         }

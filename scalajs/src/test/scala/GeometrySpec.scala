@@ -16,6 +16,8 @@ object GeometrySpec extends TestSuite {
           val v = Vec2(5,7)
           assert(v.x == 5)
           assert(v.y == 7)
+          assert(v.width == 5)
+          assert(v.height == 7)
         }
         'addition {
           val a = Vec2(5,7)
@@ -23,6 +25,13 @@ object GeometrySpec extends TestSuite {
           val c = a + b
           assert(c.x == 7)
           assert(c.y == 10)
+        }
+        'substraction {
+          val a = Vec2(5,7)
+          val b = Vec2(2,3)
+          val c = a - b
+          assert(c.x == 3)
+          assert(c.y == 4)
         }
         'multiplication {
           val a = Vec2(5,7)
@@ -61,7 +70,12 @@ object GeometrySpec extends TestSuite {
           assert(r.height == 4)
         }
 
-        'constructor {
+        'centeredRect {
+          val r = Rect(Vec2(7,3), Vec2(8,4))
+          assert(r.centered == Rect(Vec2(3,1), Vec2(8,4)))
+        }
+
+        'center {
           val r = Rect(Vec2(7,3), Vec2(8,4))
           assert(r.center == Vec2(11,5))
         }
