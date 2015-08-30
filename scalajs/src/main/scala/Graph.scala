@@ -500,6 +500,7 @@ class RawGraph(private[js] var nodes: Set[RawNode], private[js] var relations: S
   override def toString = s"Graph(${ nodes.map(_.id).mkString(",") }, ${ relations.map(r => r.startId + "->" + r.endId).mkString(",") })"
 }
 
+@js.native
 trait RecordNode extends js.Object {
   def id: String = js.native
   def label: String = js.native
@@ -516,11 +517,13 @@ trait RecordNode extends js.Object {
   def timestamp: js.UndefOr[js.Any] = js.native
 }
 
+@js.native
 trait RecordRelation extends js.Object {
   def startId: String = js.native
   def endId: String = js.native
 }
 
+@js.native
 trait RecordGraph extends js.Object {
   def nodes: js.Array[RecordNode] = js.native
   def relations: js.Array[RecordRelation] = js.native
