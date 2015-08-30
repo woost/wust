@@ -520,8 +520,9 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             nodes.forEach(n => {
                 if(n.domNode)
                     n.size = geometry.Vec2(
-                        n.domNode.offsetWidth,
-                        n.domNode.offsetHeight);
+                        //TODO: remove default values, and correctly get sizes by quickly showing html elements
+                        n.domNode.offsetWidth || (n.isHyperRelation ? 80 : 170),
+                        n.domNode.offsetHeight || (n.isHyperRelation ? 35 : 24));
 
             });
         }
