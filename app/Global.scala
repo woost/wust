@@ -21,9 +21,9 @@ object LoggingFilter extends EssentialFilter {
         val endTime = System.currentTimeMillis
         val requestTime = endTime - startTime
         def timeColored(text:String, ms:Long):String = {
-          val red = "\033[31m"
-          val yellow = "\033[33m"
-          val reset = "\033[0m"
+          val red = "\u001b[31m"
+          val yellow = "\u001b[33m"
+          val reset = "\u001b[0m"
           if(ms < 100) return text
           else if(ms < 1000) return s"$yellow$text$reset"
           else return s"$red$text$reset"
