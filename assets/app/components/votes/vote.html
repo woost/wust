@@ -13,29 +13,11 @@
         </div>
 
         <div id="action_container">
-            <div ng-show="vm.change.action == 'delete'" style="padding:20px;padding-top:5px">
+            <div ng-show="vm.change.action == 'delete'" class="action">
                 <span ng-class="vm.change.affected.node.class">{{vm.change.affected.node.title}}</span>
             </div>
 
-            <div ng-show="vm.change.action == 'create'" style="padding:20px;padding-top:5px">
-                <span ng-class="vm.change.affected.node.class">{{vm.change.affected.node.title}}</span>
-            </div>
-
-            <div ng-show="vm.change.action == 'connect'" style="padding:20px;padding-top:5px">
-                <div style="text-align:center">
-                    <span ng-class="vm.change.affected.startnode.class">{{vm.change.affected.startnode.title}}</span>
-                </div>
-                <div class="relation_title">
-                    <i class="fa fa-2x fa-long-arrow-down"></i>
-
-                    <div>{{vm.change.affected.relation.title}}</div>
-                </div>
-                <div style="text-align:center">
-                    <span ng-class="vm.change.affected.endnode.class">{{vm.change.affected.endnode.title}}</span>
-                </div>
-            </div>
-
-            <div ng-show="vm.change.action == 'disconnect'" style="padding:20px;padding-top:5px">
+            <div ng-show="vm.change.action == 'disconnect'" class="action">
                 <div style="text-align:center">
                     <span ng-class="vm.change.affected.startnode.class">{{vm.change.affected.startnode.title}}</span>
                 </div>
@@ -52,21 +34,20 @@
                 </div>
             </div>
 
-            <div ng-show="vm.change.action == 'flag'" style="padding:20px;padding-top:5px">
+            <div ng-show="vm.change.action == 'flag'" class="action">
                 <span ng-class="vm.change.affected.node.class">{{vm.change.affected.node.title}}</span>
 
                 <i class="fa fa-flag" style="margin-left:30px"></i> spam
             </div>
 
-
-            <div style="display:flex;justify-content:space-between">
-                <button class="btn btn-default" ng-click="vm.skip()" style="margin:10px">
+            <div class="vote-buttons">
+                <button class="btn btn-default" ng-click="vm.skip()">
                     <i class="fa fa-check-square-o text-success"></i> makes sense
                 </button>
-                <button class="btn btn-default" ng-click="vm.skip()" style="margin:10px">
+                <button class="btn btn-default" ng-click="vm.skip()">
                     <i class="fa fa-forward text-warning"></i> I don't know
                 </button>
-                <button class="btn btn-default" ng-click="vm.skip()" style="margin:10px">
+                <button class="btn btn-default" ng-click="vm.skip()">
                     <i class="fa fa-close text-danger"></i> dosn't make sense
                 </button>
             </div>

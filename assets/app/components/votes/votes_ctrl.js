@@ -15,31 +15,6 @@ function VotesCtrl() {
             }
         }
     }, {
-        action: "create",
-        icon: "fa-star-o",
-        affected: {
-            node: {
-                title: "Ich bin zu dick",
-                class: "discourse_problem node"
-            }
-        }
-    }, {
-        action: "connect",
-        icon: "fa-compress",
-        affected: {
-            startnode: {
-                title: "Ich ernähre mich schlecht",
-                class: "discourse_problem node"
-            },
-            relation: {
-                title: "causes"
-            },
-            endnode: {
-                title: "Ich bin zu dick",
-                class: "discourse_problem node"
-            }
-        }
-    }, {
         action: "disconnect",
         icon: "fa-expand",
         affected: {
@@ -54,6 +29,16 @@ function VotesCtrl() {
                 title: "Ich ernähre mich schlecht",
                 class: "discourse_problem node"
             }
+        }
+    }, {
+        action: "after-change",
+        icon: "fa-edit",
+        affected: {
+            node: {
+                title: "Hello",
+                newTitle: "Hallo",
+                class: "discourse_goal node"
+            },
         }
     }, {
         action: "flag",

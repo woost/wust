@@ -1,6 +1,7 @@
 @import "compass/css3/flexbox";
 
 #vote_component {
+    padding-left: 50px;
     #description_container {
         @include display-flex(flex);
         height: 200px;
@@ -9,10 +10,21 @@
             padding: 10px;
             margin-left: 180px;
         }
+        .vote-buttons {
+            @include display-flex(flex);
+            @include justify-content(space-between);
+            .btn {
+                margin: 10px;
+            }
+        }
         #action_container {
             @include display-flex(flex);
             @include flex-direction(column);
-            padding-left: 50px
+            padding-left: 50px;
+            .action {
+                padding: 20px;
+                padding-top: 5px;
+            }
         }
     }
 }
