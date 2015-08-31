@@ -73,7 +73,7 @@ object WustSchema {
   @Node trait ContentNode extends UuidNode
 
   // Content
-  @Node trait Connectable extends UuidNode with Taggable with Votable
+  @Node trait Connectable extends UuidNode with Taggable
   @HyperRelation class Connects(startNode: Connectable, endNode: Connectable) extends Connectable with Taggable with ContentRelation with HyperConnection with UuidNode
   @Node trait Inheritable
   @HyperRelation class Inherits(startNode: Inheritable, endNode: Inheritable) extends ContentRelation with HyperConnection with UuidNode
@@ -104,15 +104,13 @@ object WustSchema {
   @Node trait Action extends Timestamp
   //TODO: store content of action in action, for example the new description and title
   @HyperRelation class Created(startNode: User, endNode: ContentNode) extends Action
-  @HyperRelation class Updated(startNode: User, endNode: ContentNode) extends Action with Votable {
+  @HyperRelation class Updated(startNode: User, endNode: ContentNode) extends Action with UuidNode {
     val oldTitle:String
     val newTitle:String
     val oldDescription:Option[String]
     val newDescription:Option[String]
     var applied:Boolean = false
   }
-
-  @Node class UpdateAccept extends VoteDimension
 
   // TODO: should be a node? as the to be deleted node will deleted and we cannot connect there?
   // hiding nodes seems like more work.
@@ -140,13 +138,13 @@ object WustSchema {
   @HyperRelation class Tags(startNode: TagLike, endNode: Taggable) extends ContentRelation with HyperConnection with UuidNode
 
   // Tags
-  @Node class Categorization extends TagLike with VoteDimension
-  @Node class Classification extends TagLike with VoteDimension
+  @Node class Categorization extends TagLike
+  @Node class Classification extends TagLike
   @Node class StaticTag extends TagLike
 
 
   // Scopes
-  @Node class Scope extends TagLike
+  @Node class Scope extends TagLike with VoteDimension
   //  @Relation class HasReadAccess(startNode: UserGroup, endNode: Scope)
   //  @Relation class HasWriteAccess(startNode: UserGroup, endNode: Scope)
   //  @Relation class Owns(startNode: UserGroup, endNode: Scope)

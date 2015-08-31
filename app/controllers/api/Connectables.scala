@@ -19,11 +19,6 @@ object Connectables extends Nodes[Connectable] {
       ("connects-to", N > StartContentRelationAccess(Connects, Connectable) + ConnectableAccess.apply + TaggedTaggable.apply[Connectable]),
       ("connects-from", N < EndContentRelationAccess(Connects, Connectable) + ConnectableAccess.apply + TaggedTaggable.apply[Connectable])
     )),
-    ("votes", N < Dimensionizes < (EndRelationRead(Dimensionizes, VoteDimension),
-      ("up", N < VotesAccess(1) + CheckUser.apply),
-      ("down", N < VotesAccess(-1) + CheckUser.apply),
-      ("neutral", N < VotesAccess(0) + CheckUser.apply)
-    )),
     ("tags", N < SchemaTags < (EndRelationRead(SchemaTags, TagLike)))
   )
 }
