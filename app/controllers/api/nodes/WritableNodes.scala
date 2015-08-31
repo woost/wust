@@ -23,14 +23,14 @@ trait WritableNodes[NODE <: UuidNode] extends NodesBase {
 
   override def connectMember(path: String, uuid: String) = UserAwareAction { request =>
     getSchema(nodeSchema.connectSchemas, path)(connectSchema => {
-      getResult(connectSchema.inv.op.create(context(request), ConnectParameter(nodeSchema.op.factory, uuid)))(connectResponse)
+      getResult(connectSchema.op.create(context(request), ConnectParameter(nodeSchema.op.factory, uuid)))(connectResponse)
     })
   }
 
   override def connectMember(path: String, uuid: String, otherUuid: String) = UserAwareAction { request =>
     validateConnect(uuid, otherUuid)(() => {
       getSchema(nodeSchema.connectSchemas, path)(connectSchema => {
-        getResult(connectSchema.inv.op.create(context(request), ConnectParameter(nodeSchema.op.factory, uuid), otherUuid))(connectResponse)
+        getResult(connectSchema.op.create(context(request), ConnectParameter(nodeSchema.op.factory, uuid), otherUuid))(connectResponse)
       })
     })
   }
@@ -39,11 +39,11 @@ trait WritableNodes[NODE <: UuidNode] extends NodesBase {
     getHyperSchema(nodeSchema.connectSchemas, path)({
       case c@StartHyperConnectSchema(factory, op, connectSchemas) =>
         getSchema(connectSchemas, nestedPath)(schema =>
-          getResult(schema.inv.op.create(context(request), HyperConnectParameter(nodeSchema.op.factory, uuid, c.factory, c.op.nodeFactory, otherUuid)))(connectResponse)
+          getResult(schema.op.create(context(request), HyperConnectParameter(nodeSchema.op.factory, uuid, c.factory, c.op.nodeFactory, otherUuid)))(connectResponse)
         )
       case c@EndHyperConnectSchema(factory, op, connectSchemas)   =>
         getSchema(connectSchemas, nestedPath)(schema =>
-          getResult(schema.inv.op.create(context(request), HyperConnectParameter(c.op.nodeFactory, otherUuid, c.factory, nodeSchema.op.factory, uuid)))(connectResponse)
+          getResult(schema.op.create(context(request), HyperConnectParameter(c.op.nodeFactory, otherUuid, c.factory, nodeSchema.op.factory, uuid)))(connectResponse)
         )
     })
   }
@@ -53,11 +53,11 @@ trait WritableNodes[NODE <: UuidNode] extends NodesBase {
       getHyperSchema(nodeSchema.connectSchemas, path)({
         case c@StartHyperConnectSchema(factory, op, connectSchemas) =>
           getSchema(connectSchemas, nestedPath)(schema =>
-            getResult(schema.inv.op.create(context(request), HyperConnectParameter(nodeSchema.op.factory, uuid, c.factory, c.op.nodeFactory, otherUuid), nestedUuid))(connectResponse)
+            getResult(schema.op.create(context(request), HyperConnectParameter(nodeSchema.op.factory, uuid, c.factory, c.op.nodeFactory, otherUuid), nestedUuid))(connectResponse)
           )
         case c@EndHyperConnectSchema(factory, op, connectSchemas)   =>
           getSchema(connectSchemas, nestedPath)(schema =>
-            getResult(schema.inv.op.create(context(request), HyperConnectParameter(c.op.nodeFactory, otherUuid, c.factory, nodeSchema.op.factory, uuid), nestedUuid))(connectResponse)
+            getResult(schema.op.create(context(request), HyperConnectParameter(c.op.nodeFactory, otherUuid, c.factory, nodeSchema.op.factory, uuid), nestedUuid))(connectResponse)
           )
       })
     })

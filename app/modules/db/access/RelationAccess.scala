@@ -11,7 +11,7 @@ import renesca.schema._
 import play.api.mvc.Results._
 import play.api.mvc.Result
 
-trait RelationAccess[NODE <: UuidNode, +OTHER <: UuidNode] {
+trait RelationAccess[-NODE <: UuidNode, +OTHER <: UuidNode] {
   def read(context: RequestContext, param: ConnectParameter[NODE]): Either[Result, Iterable[OTHER]]
   def read[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,NODE with AbstractRelation[S,E], E]): Either[Result, Iterable[OTHER]]
   def delete(context: RequestContext, param: ConnectParameter[NODE], uuid: String): Either[Result, Boolean]

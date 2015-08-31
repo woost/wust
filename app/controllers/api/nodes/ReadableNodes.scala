@@ -25,7 +25,7 @@ trait ReadableNodes[NODE <: UuidNode] extends NodesBase {
 
   override def showMembers(path: String, uuid: String) = UserAwareAction { request =>
     getSchema(nodeSchema.connectSchemas, path)(connectSchema => {
-      getResult(connectSchema.inv.op.read(context(request), ConnectParameter(nodeSchema.op.factory, uuid)))(jsonNodes)
+      getResult(connectSchema.op.read(context(request), ConnectParameter(nodeSchema.op.factory, uuid)))(jsonNodes)
     })
   }
 
@@ -33,11 +33,11 @@ trait ReadableNodes[NODE <: UuidNode] extends NodesBase {
     getHyperSchema(nodeSchema.connectSchemas, path)({
       case c@StartHyperConnectSchema(factory,op,connectSchemas) =>
         getSchema(connectSchemas, nestedPath)(schema =>
-          getResult(schema.inv.op.read(context(request), HyperConnectParameter(nodeSchema.op.factory, uuid, c.factory, c.op.nodeFactory, otherUuid)))(jsonNodes)
+          getResult(schema.op.read(context(request), HyperConnectParameter(nodeSchema.op.factory, uuid, c.factory, c.op.nodeFactory, otherUuid)))(jsonNodes)
         )
       case c@EndHyperConnectSchema(factory,op,connectSchemas) =>
         getSchema(connectSchemas, nestedPath)(schema =>
-          getResult(schema.inv.op.read(context(request), HyperConnectParameter(c.op.nodeFactory, otherUuid, c.factory, nodeSchema.op.factory, uuid)))(jsonNodes)
+          getResult(schema.op.read(context(request), HyperConnectParameter(c.op.nodeFactory, otherUuid, c.factory, nodeSchema.op.factory, uuid)))(jsonNodes)
         )
     })
   }

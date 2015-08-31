@@ -35,12 +35,12 @@ case class RequestContext(controller: NodesBase with Controller, user: User, jso
   }
 }
 
-case class ConnectParameter[BASE <: UuidNode](
+case class ConnectParameter[+BASE <: UuidNode](
   baseFactory: UuidNodeMatchesFactory[BASE],
   baseUuid: String
 )
 
-case class HyperConnectParameter[START <: UuidNode, BASE <: UuidNode with AbstractRelation[START,END], END <: UuidNode](
+case class HyperConnectParameter[START <: UuidNode, +BASE <: UuidNode with AbstractRelation[START,END], END <: UuidNode](
   startFactory: UuidNodeMatchesFactory[START],
   startUuid: String,
   baseFactory: HyperConnectionFactory[START, BASE, END] with UuidNodeMatchesFactory[BASE],
