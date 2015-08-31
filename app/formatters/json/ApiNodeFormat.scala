@@ -33,6 +33,7 @@ object ApiNodeFormat {
 
     //TODO: this should be multiple formats...code dup
     def writes(node: Node) = {
+      println("format " + node)
       JsObject(node match {
       case n: Post => Seq(
         ("id", JsString(n.uuid)),
@@ -66,6 +67,12 @@ object ApiNodeFormat {
       case n: DummyUser        => Seq(
         ("id", JsString(n.uuid)),
         ("name", JsString(n.name))
+      )
+      case n: Updated        => Seq(
+        ("oldTitle", JsString(n.oldTitle)),
+        ("newTitle", JsString(n.newTitle)),
+        ("oldDescription", JsString(n.oldDescription.getOrElse(""))),
+        ("newDescription", JsString(n.newDescription.getOrElse("")))
       )
       case n              =>
         throw new RuntimeException("You did not define a formatter for the api: " + node)

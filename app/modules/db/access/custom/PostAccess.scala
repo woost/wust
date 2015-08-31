@@ -89,22 +89,12 @@ case class PostAccess() extends ConnectableAccessBase with NodeReadBase[Post] wi
       val discourse = tagDefGraph(request.addedTags)
 
       val node = if (request.title.isDefined || request.description.isDefined) {
+        //need to persist node in order to access title/description
         val node = Post.matchesOnUuid(uuid)
-        discourse.add(node)
-        if(request.description.isDefined) {
-          //TODO: normally we would want to set it back to None instead of ""
-          // but matches nodes currently cannot save deletions of properties as long
-          // as they are local. this is also true for merge nodes!
-          // if(request.description.get.isEmpty)
-          //   node.description = None
-          // else
-          node.description = request.description
-        }
+        db.persistChanges(node)
 
-        if(request.title.isDefined)
-          node.title = request.title.get
-        // request.title und request.description sind beide options
-        // wenn die empty sind heisst das, dass der user die property nicht geaendert hat.
+        discourse.add(node)
+
         val contribution = Updated.create(context.user, node, oldTitle = node.title, newTitle = request.title.getOrElse(node.title), oldDescription = node.description, newDescription = request.description.orElse(node.description))
         discourse.add(contribution)
         node

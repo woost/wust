@@ -16,13 +16,12 @@ function focusNeighbours() {
     };
 }
 
-NeighboursCtrl.$inject = ["Connectable", "DiscourseNodeList"];
+NeighboursCtrl.$inject = ["Post", "DiscourseNodeList"];
 
 function NeighboursCtrl(Post, DiscourseNodeList) {
     let vm = this;
 
-    vm.sourceA = "hallo du da";
-    vm.sourceB = "hell das da";
+    vm.changes = Post.$buildRaw(vm.component.rootNode).changes.$search();
     vm.references = DiscourseNodeList.write.Connectable.successors(vm.component, vm.component.rootNode, "connectsTo");
         // .nested(DiscourseNodeList.write.Connectable.predecessors, "connectsFrom");
     vm.replies = DiscourseNodeList.write.Connectable.predecessors(vm.component, vm.component.rootNode, "connectsFrom");
