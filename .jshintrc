@@ -79,6 +79,7 @@
         "Lodium",
         "marked",
         "renesca",
-        "geometry"
+        "geometry",
+        "JsDiff"
     ]
 }

@@ -131,6 +131,7 @@ var scripts = concat(mergeTrees([appScripts,htmlTemplates,dependencies,staticAss
         "ace-builds/src-min-noconflict/ace.js",
         "ace-builds/src-min-noconflict/mode-markdown.js",
         min("angular-ui-ace/ui-ace.js"),
+        min("diff/dist/diff.js"),
         // "lib/ace-builds/src-min-noconflict/keybinding-vim.js",
         // "lib/ace-builds/src-min-noconflict/ext-language_tools.js",
 
