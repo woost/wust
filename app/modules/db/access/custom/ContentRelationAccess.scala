@@ -6,7 +6,7 @@ import model.WustSchema._
 import modules.db.Database.db
 import modules.db.HyperNodeDefinitionBase
 import modules.db.access._
-import modules.requests.{ConnectResponse, PostAddRequest}
+import modules.requests.{ConnectResponse}
 import play.api.libs.json.JsValue
 import play.api.mvc.Result
 import play.api.mvc.Results._

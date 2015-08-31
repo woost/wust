@@ -67,7 +67,7 @@ case class PostAccess() extends ConnectableAccessBase with NodeReadBase[Post] wi
   val factory = Post
 
   override def create(context: RequestContext) = {
-    context.withJson { (request: TaggedPostAddRequest) =>
+    context.withJson { (request: PostAddRequest) =>
       val discourse = tagDefGraph(request.addedTags)
 
       val node = Post.create(title = request.title, description = request.description)
@@ -84,7 +84,7 @@ case class PostAccess() extends ConnectableAccessBase with NodeReadBase[Post] wi
   }
 
   override def update(context: RequestContext, uuid: String) = {
-    context.withJson { (request: TaggedPostUpdateRequest) =>
+    context.withJson { (request: PostUpdateRequest) =>
       deleteTagsFromGraph(request.removedTags, uuid)
       val discourse = tagDefGraph(request.addedTags)
 
@@ -122,7 +122,7 @@ case class ConnectableAccess() extends ConnectableAccessBase with NodeReadBase[C
 
   override def create(context: RequestContext) = postAccess.create(context)
   override def update(context: RequestContext, uuid: String) = {
-    context.withJson { (request: TaggedPostUpdateRequest) =>
+    context.withJson { (request: ConnectableUpdateRequest) =>
       deleteTagsFromGraph(request.removedTags, uuid)
       val discourse = tagDefGraph(request.addedTags)
       val node = Connectable.matchesOnUuid(uuid)

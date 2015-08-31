@@ -12,26 +12,21 @@ object RequestFormat {
 
   implicit val postAddFormat = (
     (__ \ "description").readNullable[String] and
-      (__ \ "title").read[String]
-    )(PostAddRequest)
-
-  implicit val taggedPostAddFormat = (
-    (__ \ "description").readNullable[String] and
       (__ \ "title").read[String] and
       (__ \ "addedTags").readNullable[List[TagConnectRequest]]
-    )(TaggedPostAddRequest)
+    )(PostAddRequest)
 
   implicit val postUpdateFormat = (
-    (__ \ "description").readNullable[String] and
-      (__ \ "title").readNullable[String]
-    )(PostUpdateRequest)
-
-  implicit val taggedPostUpdateFormat = (
     (__ \ "description").readNullable[String] and
       (__ \ "title").readNullable[String] and
       (__ \ "addedTags").readNullable[List[TagConnectRequest]] and
       (__ \ "removedTags").readNullable[List[String]]
-    )(TaggedPostUpdateRequest)
+    )(PostUpdateRequest)
+
+  implicit val connectableUpdateFormat = (
+      (__ \ "addedTags").readNullable[List[TagConnectRequest]] and
+      (__ \ "removedTags").readNullable[List[String]]
+    )(ConnectableUpdateRequest)
 
   implicit val tagAddFormat = (__ \ "title").read[String].map(TagAddRequest(_))
 

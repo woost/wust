@@ -33,7 +33,6 @@ object ApiNodeFormat {
 
     //TODO: this should be multiple formats...code dup
     def writes(node: Node) = {
-      println("format " + node)
       JsObject(node match {
       case n: Post => Seq(
         ("id", JsString(n.uuid)),
