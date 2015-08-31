@@ -6,8 +6,6 @@ function FocusCtrl(Helpers, FocusService, $stateParams, HistoryService, rootNode
     let vm = this;
 
     let rawRootNode = rootNode.$encode();
-    //TODO: encode misses tags
-    rawRootNode.tags = rootNode.tags.$encode();
 
     let graph = {
         nodes: [rawRootNode],

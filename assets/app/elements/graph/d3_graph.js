@@ -1,8 +1,8 @@
 angular.module("wust.elements").directive("d3Graph", d3Graph);
 
-d3Graph.$inject = ["$window", "DiscourseNode", "Helpers", "$location", "$filter", "Post", "ModalEditService", "EditService", "TagRelationEditService"];
+d3Graph.$inject = ["$window", "DiscourseNode", "Helpers", "$location", "$filter", "Connectable", "ModalEditService", "EditService", "TagRelationEditService"];
 
-function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, ModalEditService, EditService, TagRelationEditService) {
+function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectable, ModalEditService, EditService, TagRelationEditService) {
     return {
         restrict: "A",
         scope: false,
@@ -898,7 +898,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
         }
 
         disconnectHyperRelation(d) {
-            Post.$buildRaw({
+            Connectable.$buildRaw({
                 id: d.startId
             }).connectsTo.$buildRaw({
                 id: d.endId
@@ -909,7 +909,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
         }
 
         removeNode(d) {
-            Post.$buildRaw({
+            Connectable.$buildRaw({
                 id: d.id
             }).$destroy().$then(response => {}, response => humane.error("Server error:\n" + response));
             this.graph.removeNode(d.id);

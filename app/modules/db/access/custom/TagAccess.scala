@@ -41,9 +41,10 @@ class TagAccess extends NodeReadBase[TagLike] {
         node.description = request.description
       }
 
-      val contribution = Updated.create(context.user, node)
+      // val contribution = Updated.create(context.user, node)
 
-      db.transaction(_.persistChanges(contribution)) match {
+      db.transaction(_.persistChanges(node)) match {
+      // db.transaction(_.persistChanges(contribution)) match {
         case Some(err) => Left(BadRequest(s"Cannot update Tag with uuid '$uuid': $err'"))
         case _         => Right(node)
       }

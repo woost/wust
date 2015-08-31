@@ -15,9 +15,9 @@ function bigTaglist() {
     };
 }
 
-bigTaglistCtrl.$inject = ["Post", "Session"];
+bigTaglistCtrl.$inject = ["Connectable", "Session"];
 
-function bigTaglistCtrl(Post, Session) {
+function bigTaglistCtrl(Connectable, Session) {
     let vm = this;
 
     vm.upvote = upvote;
@@ -27,7 +27,7 @@ function bigTaglistCtrl(Post, Session) {
     let tagCache = {};
 
     function wrapResource(tag) {
-        let model = Post.$buildRaw(_.pick(vm.node, "id"));
+        let model = Connectable.$buildRaw(_.pick(vm.node, "id"));
         return model.votes.$buildRaw(tag).$reveal();
     }
 

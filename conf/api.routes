@@ -6,6 +6,8 @@ GET    /auth/signout              controllers.api.auth.SignUpController.signOut
 # discourse node api
 -> /posts controllers.api.Posts
 
+-> /connectables controllers.api.Connectables
+
 -> /tags controllers.api.Tags
 
 -> /users controllers.api.Users

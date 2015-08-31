@@ -1,19 +1,21 @@
 angular.module("wust.services").service("EditService", EditService);
 
-EditService.$inject = ["Post", "HistoryService", "store", "DiscourseNode", "ZenService"];
+EditService.$inject = ["Post", "Connectable", "HistoryService", "store", "DiscourseNode", "ZenService"];
 
-function EditService(Post, HistoryService, store, DiscourseNode, ZenService) {
+function EditService(Post, Connectable, HistoryService, store, DiscourseNode, ZenService) {
     let editStore = store.getNamespacedStore("edit");
     let self = this;
 
     class Session {
-        constructor(other, lazyAdd = false) {
+        constructor(other, lazyAdd = false, connectable = false) {
             // local id to identify nodes without an id
             this.localId = _.uniqueId();
 
             this.apply(other);
 
             this.expandedEditor = other.expandedEditor === undefined ? true : other.expandedEditor;
+
+            this.service = connectable ? Connectable : Post;
 
             this.lazyAdd = lazyAdd;
         }
@@ -80,7 +82,7 @@ function EditService(Post, HistoryService, store, DiscourseNode, ZenService) {
             let message = model.id === undefined ? "Added new node" : "Updated now";
 
             let referenceNode = this.referenceNode;
-            return Post.$buildRaw(model).$update(dirtyModel).$then(data => {
+            return this.service.$buildRaw(model).$update(dirtyModel).$then(data => {
                 humane.success(message);
 
                 // the response only holds newly added tags
@@ -145,7 +147,7 @@ function EditService(Post, HistoryService, store, DiscourseNode, ZenService) {
             if (this.isLocal)
                 return;
 
-            return Post.$buildRaw(_.pick(this, "id")).$destroy().$then(() => {
+            return this.service.$buildRaw(_.pick(this, "id")).$destroy().$then(() => {
                 HistoryService.remove(this.id);
                 this.remove();
                 humane.success("Removed node");
@@ -219,7 +221,7 @@ function EditService(Post, HistoryService, store, DiscourseNode, ZenService) {
     function connectNodes(startNode, endNode) {
         let ref;
         if (endNode.isHyperRelation) {
-            let start = Post.$buildRaw({
+            let start = Connectable.$buildRaw({
                 id: endNode.startId
             });
             let hyper = start.connectsTo.$buildRaw({
@@ -227,7 +229,7 @@ function EditService(Post, HistoryService, store, DiscourseNode, ZenService) {
             });
             ref = hyper.connectsFrom.$buildRaw(_.pick(startNode, "id"));
         } else {
-            let start = Post.$buildRaw(_.pick(startNode, "id"));
+            let start = Connectable.$buildRaw(_.pick(startNode, "id"));
             ref = start.connectsTo.$buildRaw(_.pick(endNode, "id"));
         }
 
@@ -242,8 +244,8 @@ function EditService(Post, HistoryService, store, DiscourseNode, ZenService) {
         });
     }
 
-    function createSession(node = {}, lazyAdd = true) {
-        return new Session(node, lazyAdd);
+    function createSession(node = {}, lazyAdd = true, connectable = false) {
+        return new Session(node, lazyAdd, connectable);
     }
 
     function editSession(session, index = 0) {

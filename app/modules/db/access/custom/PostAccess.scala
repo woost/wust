@@ -4,18 +4,15 @@ import controllers.api.nodes.RequestContext
 import formatters.json.RequestFormat._
 import model.WustSchema.{Created => SchemaCreated, _}
 import modules.db.Database.db
-import modules.db.access.{NodeReadBase, NodeDeleteBase}
+import modules.db.access._
 import modules.requests._
 import play.api.libs.json.JsValue
 import renesca.parameter.implicits._
 import play.api.mvc.Results._
 import model.Helpers.tagTitleColor
 
-//TODO: this should be about posts, we should separate the api here...or rename this access.
-case class PostAccess() extends NodeReadBase[Connectable] with NodeDeleteBase[Connectable] {
-  val factory = Post
-
-  private def tagDefGraph(addedTags: List[TagConnectRequest]): Discourse = {
+trait ConnectableAccessBase {
+  protected def tagDefGraph(addedTags: List[TagConnectRequest]): Discourse = {
     val discourse = Discourse.empty
     val nodes = addedTags.flatMap { tag =>
       if (tag.id.isDefined)
@@ -33,7 +30,7 @@ case class PostAccess() extends NodeReadBase[Connectable] with NodeDeleteBase[Co
     discourse
   }
 
-  private def addTagsToGraph(discourse: Discourse, user: User, node: Connectable) {
+  protected def addTagsToGraph(discourse: Discourse, user: User, node: Connectable) {
     //FIXME: bug in renesca-magic #22
     // discourse.tagLikes.foreach(tag => {
     discourse.nodesAs(TagLike).foreach(tag => {
@@ -44,11 +41,11 @@ case class PostAccess() extends NodeReadBase[Connectable] with NodeDeleteBase[Co
   }
 
   //TODO: this is two extra requests...
-  private def deleteTagsFromGraph(removedTags: List[String], uuid: String) {
+  protected def deleteTagsFromGraph(removedTags: List[String], uuid: String) {
     if (removedTags.isEmpty)
       return
 
-    val node = Connectable.matchesOnUuid(uuid)
+    val node = Post.matchesOnUuid(uuid)
     val discourse = Discourse(node)
 
     removedTags.foreach { tagUuid =>
@@ -64,6 +61,10 @@ case class PostAccess() extends NodeReadBase[Connectable] with NodeDeleteBase[Co
     discourse.remove(discourse.tags: _*)
     db.persistChanges(discourse)
   }
+}
+
+case class PostAccess() extends ConnectableAccessBase with NodeReadBase[Post] with NodeDeleteBase[Post] {
+  val factory = Post
 
   override def create(context: RequestContext) = {
     context.withJson { (request: TaggedPostAddRequest) =>
@@ -102,24 +103,45 @@ case class PostAccess() extends NodeReadBase[Connectable] with NodeDeleteBase[Co
 
         if(request.title.isDefined)
           node.title = request.title.get
-
-        val contribution = Updated.create(context.user, node)
+        // request.title und request.description sind beide options
+        // wenn die empty sind heisst das, dass der user die property nicht geaendert hat.
+        val contribution = Updated.create(context.user, node, oldTitle = node.title, newTitle = request.title.getOrElse(node.title), oldDescription = node.description, newDescription = request.description.orElse(node.description))
         discourse.add(contribution)
-
         node
       } else {
-        Connectable.matchesOnUuid(uuid)
+        Post.matchesOnUuid(uuid)
       }
 
       discourse.add(node)
       addTagsToGraph(discourse, context.user, node)
 
       db.transaction(_.persistChanges(discourse)) match {
-        case Some(err) => Left(BadRequest(s"Cannot update Connectable with uuid '$uuid': $err'"))
+        case Some(err) => Left(BadRequest(s"Cannot update Post with uuid '$uuid': $err'"))
         //FIXME: why the fuck do i need to do this???
         //otherwise node.rev_tags is empty? something is messed up here.
-        case _         => Right(discourse.connectables.find(_.uuid == node.uuid).get)
+        case _         => Right(discourse.posts.find(_.uuid == node.uuid).get)
         // case _         => Right(node)
+      }
+    }
+  }
+}
+
+case class ConnectableAccess() extends ConnectableAccessBase with NodeReadBase[Connectable] {
+  val postAccess = PostAccess()
+  val factory = Connectable
+
+  override def create(context: RequestContext) = postAccess.create(context)
+  override def update(context: RequestContext, uuid: String) = {
+    context.withJson { (request: TaggedPostUpdateRequest) =>
+      deleteTagsFromGraph(request.removedTags, uuid)
+      val discourse = tagDefGraph(request.addedTags)
+      val node = Connectable.matchesOnUuid(uuid)
+      discourse.add(node)
+      addTagsToGraph(discourse, context.user, node)
+
+      db.transaction(_.persistChanges(discourse)) match {
+        case Some(err) => Left(BadRequest(s"Cannot update Post with uuid '$uuid': $err'"))
+        case _         => Right(discourse.connectables.find(_.uuid == node.uuid).get)
       }
     }
   }

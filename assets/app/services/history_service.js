@@ -52,7 +52,6 @@ function HistoryService(Post, DiscourseNode, store) {
     function restoreNode(id) {
         Post.$find(id).$then(node => {
             let encoded = node.$encode();
-            encoded.tags = node.tags.$encode();
             addNode(encoded);
         });
     }

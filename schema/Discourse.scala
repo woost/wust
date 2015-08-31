@@ -5,6 +5,17 @@ import renesca.parameter.LongPropertyValue
 import renesca.schema.macros
 import renesca.Transaction
 
+object custom {
+  import renesca.{graph => raw}
+  import renesca.schema.RelationFactory
+  import WustSchema._
+
+  object UpdatedToContentNodeFactory extends RelationFactory[Updated, UpdatedToContentNode, ContentNode] {
+    def relationType = Updated.endRelationType
+    def wrap(relation: raw.Relation) = ???
+  }
+}
+
 @macros.GraphSchema
 object WustSchema {
   // TODO: Type aliases for several HyperRelation combinations
@@ -93,7 +104,16 @@ object WustSchema {
   @Node trait Action extends Timestamp
   //TODO: store content of action in action, for example the new description and title
   @HyperRelation class Created(startNode: User, endNode: ContentNode) extends Action
-  @HyperRelation class Updated(startNode: User, endNode: ContentNode) extends Action
+  @HyperRelation class Updated(startNode: User, endNode: ContentNode) extends Action with Votable {
+    val oldTitle:String
+    val newTitle:String
+    val oldDescription:Option[String]
+    val newDescription:Option[String]
+    var applied:Boolean = false
+  }
+
+  @Node class UpdateAccept extends VoteDimension
+
   // TODO: should be a node? as the to be deleted node will deleted and we cannot connect there?
   // hiding nodes seems like more work.
   @HyperRelation class Deleted(startNode: User, endNode: ContentNode) extends Action
