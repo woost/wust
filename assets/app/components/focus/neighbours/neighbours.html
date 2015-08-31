@@ -3,16 +3,7 @@
     <div class="fa fa-long-arrow-right fa-2x arrow-right" ng-show="vm.references.model.list.length > 0"></div>
     <div class="neighbours_content">
         <div big-post node="vm.component.rootNode"></div>
-
-        <b ng-if="vm.changes.length > 0">Change requests</b>
-        <div class="changerequest" ng-repeat="change in vm.changes">
-            <button class="btn btn-danger pull-right btn-xs" type="button" ng-click="vm.newStream()"><i class="fa fa-close"></i></button>
-            <button class="btn btn-success pull-right btn-xs" type="button" ng-click="vm.newStream()"><i class="fa fa-check"></i></button>
-            <b>Title:</b>
-            <div word-based-diff source-a="change.oldTitle" source-b="change.newTitle"></div>
-            <b>Description:</b>
-            <div word-based-diff source-a="change.oldDescription" source-b="change.newDescription"></div>
-        </div>
+        <div post-changes="vm.changes"></div>
     </div>
     <div class="fa fa-long-arrow-right fa-2x arrow-right" ng-show="vm.replies.model.list.length > 0"></div>
     <div discourse-node-list node-model='vm.replies.model' is-loading="vm.isLoading" class="neighbours_followers discourse_node_list_horizontal"></div>

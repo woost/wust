@@ -1,0 +1,11 @@
+<div class="post_changes_directive" ng-if="vm.postChanges.length > 0">
+    <b>Change requests</b>
+    <div class="changerequest" ng-repeat="change in vm.postChanges">
+        <button class="btn btn-danger pull-right btn-xs" type="button" ng-click="vm.newStream()"><i class="fa fa-close"></i></button>
+        <button class="btn btn-success pull-right btn-xs" type="button" ng-click="vm.newStream()"><i class="fa fa-check"></i></button>
+        <b>Title:</b>
+        <div word-based-diff source-a="change.oldTitle" source-b="change.newTitle"></div>
+        <b>Description:</b>
+        <div word-based-diff source-a="change.oldDescription" source-b="change.newDescription"></div>
+    </div>
+</div>
