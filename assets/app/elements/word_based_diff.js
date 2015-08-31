@@ -14,7 +14,7 @@ function wordBasedDiff() {
 
     function link(scope, element, attrs) {
         let rawElem = element[0];
-        var diff = JsDiff.diffChars(scope.sourceA, scope.sourceB);
+        var diff = JsDiff.diffWords(scope.sourceA, scope.sourceB);
 
         diff.forEach(function(part){
             // green for additions, red for deletions
