@@ -15,15 +15,25 @@ xmlHttp.onreadystatechange = function() {
                 if (!response.errors || !response.errors.length)
                     return;
 
-                var errorElem = document.createElement("div");
+                var errorElem = document.createElement("pre");
                 errorElem.style.paddingLeft = "100px";
                 var errorHead = document.createElement("h2");
                 errorHead.appendChild(document.createTextNode(reporter + " reported:"));
                 errorElem.appendChild(errorHead);
                 response.errors.forEach(function(error) {
                     var elem = document.createElement("div");
-                    elem.style.color = "red";
-                    elem.appendChild(document.createTextNode(error));
+                    var formattedError = error
+                        .replace(/\u001b\[31m/g,"<span style='color:red'>")
+                        .replace(/\u001b\[32m/g,"<span style='color:green'>")
+                        .replace(/\u001b\[33m/g,"<span style='color:yellow'>")
+                        .replace(/\u001b\[34m/g,"<span style='color:blue'>")
+                        .replace(/\u001b\[35m/g,"<span style='color:magenta'>")
+                        .replace(/\u001b\[36m/g,"<span style='color:cyan'>")
+                        .replace(/\u001b\[37m/g,"<span style='color:white'>")
+                        .replace(/\u001b\[39m/g,"</span>") // foreground default
+                        .replace(/\u001b\[0m/g,"</span>"); // reset all attributes
+                    var formattedElem = document.createElement("span");
+                    elem.innerHTML = formattedError;
                     errorElem.appendChild(elem);
                 });
 
