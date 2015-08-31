@@ -14,7 +14,7 @@ object SeedInit extends Task with SeedTools {
 
     modifyDiscourse { implicit discourse =>
       discourse.add(
-        DummyUser.create(name = "anonymous"),
+        DummyUser.merge(name = "anonymous"),
 
         mergeClassification("Problem", color = Some(46)),
         mergeClassification("Goal", color = Some(158)),
