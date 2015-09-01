@@ -49,8 +49,8 @@ class TaggedTaggable[NODE <: UuidNode] extends AccessNodeDecoratorControl[NODE] 
   override def shapeResponse(response: Iterable[NODE]) = {
     //TODO: share code with component query
     if (!response.isEmpty) {
-      val tagDef = LabelNodeDefinition[VoteDimension with TagLike](TagLike.labels)
-      val nodeDef = LabelNodeDefinition[Votable with Taggable](Taggable.labels)
+      val tagDef = ConcreteFactoryNodeDefinition(TagLike)
+      val nodeDef = ConcreteFactoryNodeDefinition(Taggable)
       val tagsDef = HyperNodeDefinition(tagDef, Tags, nodeDef)
 
       val query = s"""

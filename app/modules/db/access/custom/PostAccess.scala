@@ -95,7 +95,8 @@ case class PostAccess() extends ConnectableAccessBase with NodeReadBase[Post] wi
 
         discourse.add(node)
 
-        val contribution = Updated.create(context.user, node, oldTitle = node.title, newTitle = request.title.getOrElse(node.title), oldDescription = node.description, newDescription = request.description.orElse(node.description))
+        //TODO: correct threshold and votes for apply
+        val contribution = Updated.create(context.user, node, oldTitle = node.title, newTitle = request.title.getOrElse(node.title), oldDescription = node.description, newDescription = request.description.orElse(node.description), applyThreshold = 5, applyVotes = 0)
         discourse.add(contribution)
         node
       } else {

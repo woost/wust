@@ -10,7 +10,7 @@ object custom {
   import renesca.schema.RelationFactory
   import WustSchema._
 
-  object UpdatedToContentNodeFactory extends RelationFactory[Updated, UpdatedToContentNode, ContentNode] {
+  object UpdatedToPostFactory extends RelationFactory[Updated, UpdatedToPost, Post] {
     def relationType = Updated.endRelationType
     def wrap(relation: raw.Relation) = ???
   }
@@ -80,7 +80,7 @@ object WustSchema {
 
   // post explicitly inherits timestamp to make it cheap to query recent posts
   // otherwise we would need to take include the created relation every time
-  @Node class Post extends ContentNode with Connectable with Inheritable with Taggable with Votable with Timestamp {
+  @Node class Post extends ContentNode with Connectable with Inheritable with Taggable with Timestamp {
     var title: String
     var description: Option[String]
 
@@ -103,26 +103,24 @@ object WustSchema {
   // Action
   @Node trait Action extends Timestamp
   //TODO: store content of action in action, for example the new description and title
-  @HyperRelation class Created(startNode: User, endNode: ContentNode) extends Action
-  @HyperRelation class Updated(startNode: User, endNode: ContentNode) extends Action with UuidNode {
+  @HyperRelation class Created(startNode: User, endNode: Post) extends Action
+  @HyperRelation class Updated(startNode: User, endNode: Post) extends Action with UuidNode with HyperConnection {
     val oldTitle:String
     val newTitle:String
     val oldDescription:Option[String]
     val newDescription:Option[String]
+    val applyThreshold:Long
+    val applyVotes:Long
     var applied:Boolean = false
   }
 
   // TODO: should be a node? as the to be deleted node will deleted and we cannot connect there?
   // hiding nodes seems like more work.
-  @HyperRelation class Deleted(startNode: User, endNode: ContentNode) extends Action
+  @HyperRelation class Deleted(startNode: User, endNode: Post) extends Action
   @Relation class Reviewed(startNode: User, endNode: Action)
   //TODO: multidimesional voting?
 
-
-  @Node trait VoteDimension extends UuidNode
-  @Node trait Votable extends UuidNode
-  @HyperRelation class Dimensionizes(startNode: VoteDimension, endNode: Votable) extends HyperConnection with UuidNode
-  @Relation class Votes(startNode: User, endNode: Dimensionizes) extends RelationTimestamp {
+  @Relation class VotesOnUpdated(startNode: User, endNode: Updated) extends RelationTimestamp {
     val weight: Long // Up:+1 or Down:-1
   }
 
@@ -144,7 +142,7 @@ object WustSchema {
 
 
   // Scopes
-  @Node class Scope extends TagLike with VoteDimension
+  @Node class Scope extends TagLike
   //  @Relation class HasReadAccess(startNode: UserGroup, endNode: Scope)
   //  @Relation class HasWriteAccess(startNode: UserGroup, endNode: Scope)
   //  @Relation class Owns(startNode: UserGroup, endNode: Scope)

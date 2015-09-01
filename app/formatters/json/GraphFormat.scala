@@ -32,7 +32,6 @@ object GraphFormat {
         ("label", JsString(TagLike.label)),
         ("title", JsString(tag.title)),
         ("description", JsString(tag.description.getOrElse(""))),
-        ("isVotable", JsBoolean(tag.isInstanceOf[VoteDimension])),
         ("isClassification", JsBoolean(tag.isInstanceOf[Classification])),
         ("color", JsNumber(tag.color)),
         ("symbol", tag.symbol.map(JsString(_)).getOrElse(JsNull))
@@ -47,7 +46,6 @@ object GraphFormat {
           ("label", JsString(TagLike.label)),
           ("title", JsString(tag.title)),
           ("description", JsString(tag.description.getOrElse(""))),
-          ("isVotable", JsBoolean(tag.isInstanceOf[VoteDimension])),
           ("isClassification", JsBoolean(tag.isInstanceOf[Classification])),
           ("color", JsNumber(tag.color)),
           ("symbol", tag.symbol.map(JsString(_)).getOrElse(JsNull))

@@ -22,7 +22,6 @@ object ApiNodeFormat {
           ("label", JsString(TagLike.label)),
           ("title", JsString(tag.title)),
           ("description", JsString(tag.description.getOrElse(""))),
-          ("isVotable", JsBoolean(tag.isInstanceOf[VoteDimension])),
           ("isClassification", JsBoolean(tag.isInstanceOf[Classification])),
           ("color", JsNumber(tag.color)),
           ("symbol", tag.symbol.map(JsString(_)).getOrElse(JsNull))
@@ -54,7 +53,6 @@ object ApiNodeFormat {
         ("label", JsString(TagLike.label)),
         ("title", JsString(n.title)),
         ("description", JsString(n.description.getOrElse(""))),
-        ("isVotable", JsBoolean(n.isInstanceOf[VoteDimension])),
         ("isClassification", JsBoolean(n.isInstanceOf[Classification])),
         ("color", JsNumber(n.color))
       )

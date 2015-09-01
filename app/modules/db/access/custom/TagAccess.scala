@@ -24,9 +24,9 @@ class TagAccess extends NodeReadBase[TagLike] {
         title = request.title,
         color = tagTitleColor(request.title),
         merge = Set("title"))
-      val contribution = SchemaCreated.create(context.user, node)
+      // val contribution = SchemaCreated.create(context.user, node)
 
-      db.transaction(_.persistChanges(node, contribution)) match {
+      db.transaction(_.persistChanges(node)) match {
         case Some(err) => Left(BadRequest(s"Cannot create Tag: $err'"))
         case _         => Right(node)
       }
