@@ -43,10 +43,10 @@ function Auth($rootScope, $window, restmod, jwtHelper, store, Session) {
     function checkLoggedIn() {
         if (self.current.token && jwtHelper.isTokenExpired(self.current.token)) {
             logoutLocally();
-            return true
+            return false;
         }
 
-        return false;
+        return true;
     }
 
     function authenticate(model, message, user) {
