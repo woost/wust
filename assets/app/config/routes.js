@@ -23,11 +23,11 @@ function RoutesConfig($stateProvider, $urlRouterProvider, $locationProvider) {
         url: "/users",
         templateUrl: `components/users/user.html`,
     }).state("users.list", {
-        url: "/list",
+        url: "",
         templateUrl: `components/users/list.html`,
         controller: "UserListsCtrl as vm",
     }).state("users.details", {
-        url: "/details/:id",
+        url: "/:id",
         templateUrl: `components/users/detail.html`,
         controller: "UserDetailsCtrl as vm",
     }).state("tags", {
