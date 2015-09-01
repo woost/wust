@@ -178,7 +178,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
                 // the first commit is only the rootNode
                 if(this.commitCount <= 1) return;
                 // the second commit brings the rest of the graph and triggers the convergence
-                if(this.commitCount === 2) this.converge();
+                // if(this.commitCount === 2) this.converge();
 
                 //TODO: this really is an unwanted side effect, we should not sort nodes here
                 //add nodes to svg, first hypernodes then nodes, so the normal
@@ -286,10 +286,14 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
                 this.updateGraphRefs();
                 this.recalculateNodeDimensions(this.graph.nodes);
 
-                this.registerUIEvents();
+                // this.registerUIEvents();
                 this.force.nodes(this.graph.nodes); // nodes and relations get replaced instead of just changed by scalajs
                 this.force.links(this.graph.relations); // that's why we need to set the new references
+
+                // we only want to initialize, not start the simulation
+                // https://github.com/mbostock/d3/blob/78e0a4bb81a6565bf61e3ef1b898ef8377478766/src/layout/force.js#L274
                 this.force.start();
+                this.force.stop();
 
                 this.registerUIEvents();
             }
@@ -424,19 +428,25 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
             _.sortBy(this.graph.nonHyperRelationNodes, "verticalForce").forEach((n, i) => n.verticalForce = i);
         }
 
-        converge() {
+        converge(onConvergeFinish = _.noop) {
             // let convergeIterations = 0;
             this.initConverge();
 
+            this.force.resume();
+
             if (this.visibleConvergence) {
                 //TODO: why two times afterConverge? called also in nonBlockingConverge
-                this.force.on("end", _.once(this.afterConverge.bind(this))); // we don't know how to unsubscribe
+                let afterConvergeOnce = _.once(this.afterConverge.bind(this)); // we don't know how to unsubscribe
+                this.force.on("end", () => {
+                    afterConvergeOnce();
+                    onConvergeFinish();
+                });
             } else {
-                requestAnimationFrame(this.nonBlockingConverge.bind(this));
+                requestAnimationFrame(this.nonBlockingConverge.bind(this, onConvergeFinish));
             }
         }
 
-        nonBlockingConverge() {
+        nonBlockingConverge(onConvergeFinish = _.noop) {
             let startTime = Date.now();
             // keep a constant frame rate
             while (((startTime + 300) > Date.now()) && (this.force.alpha() > 0)) {
@@ -445,9 +455,10 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
             }
 
             if (this.force.alpha() > 0) {
-                requestAnimationFrame(this.nonBlockingConverge.bind(this));
+                requestAnimationFrame(this.nonBlockingConverge.bind(this, onConvergeFinish));
             } else {
                 this.afterConverge();
+                onConvergeFinish();
             }
         }
 
@@ -482,26 +493,23 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
         }
 
         afterConverge() {
-            this.resizeGraph();
+            if(this.visibleConvergence)
+                this.resizeGraph(null);
+            else
+                this.resizeGraph(null, 0);
 
             this.setFixed(this.graph.rootNode);
 
             this.drawOnTick = true;
             this.onDraw();
+
             if (this.visibleConvergence)
                 this.focusMarkedNodes();
-            else {
+            else
                 this.focusMarkedNodes(0);
-                setTimeout(() => this.focusRootNode(700), 0);
-            }
 
-
-            this.d3HtmlContainer.classed({
-                "converged": true
-            });
-            this.d3SvgContainer.classed({
-                "converged": true
-            });
+            this.d3HtmlContainer.classed({ "converged": true });
+            this.d3SvgContainer.classed({ "converged": true });
         }
 
         updateGraphRefs() {
@@ -529,11 +537,12 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
 
         recalculateNodeDimensions(nodes) {
             nodes.forEach(n => {
-                if(n.domNode)
+                if(n.domNode) {
                     n.size = geometry.Vec2(
                         //TODO: remove default values, and correctly get sizes by quickly showing html elements
-                        n.domNode.offsetWidth || (n.isHyperRelation ? 80 : 170),
-                        n.domNode.offsetHeight || (n.isHyperRelation ? 35 : 24));
+                        n.domNode.offsetWidth,
+                        n.domNode.offsetHeight);
+                }
 
             });
         }
@@ -733,9 +742,9 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
             // this is the first graph display,
             // so focus the rootNode
             if(oldWidth === 0 && oldHeight === 0) {
-                this.converge();
-                this.focusMarkedNodes(0);
-                setTimeout(() => this.focusRootNode(), 200);
+                _.defer(() => {
+                    this.converge(() => setTimeout(() => this.focusRootNode(), 700));
+                });
             }
 
             // only do this on a real resize. (not on tab changes etc)
@@ -760,7 +769,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
             // if graph was hidden when initialized,
             // all foreign objects have size 0
             // this call recalculates the sizes
-            this.recalculateNodeDimensions(this.graph.nodes);
+            // this.recalculateNodeDimensions(this.graph.nodes);
 
             this.drawGraph();
         }
