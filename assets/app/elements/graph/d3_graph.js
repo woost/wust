@@ -19,6 +19,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
                 this.rootDomElement = rootDomElement;
                 this.onClick = onClick;
                 this.onDraw = onDraw;
+                this.uuid = Math.random();
 
                 // settings
                 this.visibleConvergence = false;
@@ -362,7 +363,10 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
             this.d3Svg.on("dblclick.zoom", null);
 
             // register for resize event
-            angular.element($window).bind("resize", this.resizeGraph.bind(this));
+            let element = angular.element($window);
+            let handler = this.resizeGraph.bind(this);
+            element.bind("resize", handler);
+            scope.$on("$destroy", () => element.unbind("resize", handler));
         }
 
         registerUIEvents() {
@@ -429,6 +433,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
         }
 
         converge(onConvergeFinish = _.noop) {
+            console.log(`converge (${this.uuid})`);
             // let convergeIterations = 0;
             this.initConverge();
 
@@ -493,10 +498,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
         }
 
         afterConverge() {
-            if(this.visibleConvergence)
-                this.resizeGraph(null);
-            else
-                this.resizeGraph(null, 0);
+            this.resizeContainers();
 
             this.setFixed(this.graph.rootNode);
 
