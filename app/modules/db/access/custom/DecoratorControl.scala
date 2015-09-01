@@ -14,7 +14,7 @@ import renesca.parameter.implicits._
 // does not allow dummy users for any request
 class CheckUser extends AccessDecoratorControl with AccessDecoratorControlDefault {
   override def acceptRequest(context: RequestContext) = {
-    if (context.user.isDummy)
+    if (context.user.isEmpty)
       Some(Unauthorized("Not Authorized"))
     else
       None

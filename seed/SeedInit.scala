@@ -14,8 +14,6 @@ object SeedDatabase extends Task with SeedTools {
 
     modifyDiscourse { implicit discourse =>
       discourse.add(
-        DummyUser.merge(name = "anonymous"),
-
         mergeClassification("Problem", color = Some(46)),
         mergeClassification("Goal", color = Some(158)),
         mergeClassification("Idea", color = Some(210)),

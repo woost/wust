@@ -14,7 +14,7 @@ class UserAccess extends NodeReadBase[User] {
   val factory = User
 
   override def update(context: RequestContext, uuid: String) = {
-    context.withRealUser { user =>
+    context.withUser { user =>
       context.withJson { (request: UserUpdateRequest) =>
         //TODO: sanity check + welcome mail
         if (request.email.isDefined)

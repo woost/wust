@@ -2,7 +2,7 @@ package services
 
 import com.mohiva.play.silhouette.api._
 import com.typesafe.plugin._
-import model.WustSchema.RealUser
+import model.WustSchema.User
 import play.api.Play.current
 import play.api.i18n.Lang
 import play.api.libs.concurrent.Akka
@@ -44,9 +44,9 @@ trait MailService[I <: Identity] {
 
 }
 
-class SimpleMailService extends MailService[RealUser] {
+class SimpleMailService extends MailService[User] {
 
-  def sendWelcomeEmail(user: RealUser)(implicit request: RequestHeader, lang: Lang) {
+  def sendWelcomeEmail(user: User)(implicit request: RequestHeader, lang: Lang) {
     if (user.email.isEmpty)
       return
 

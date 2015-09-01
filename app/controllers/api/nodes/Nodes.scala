@@ -12,7 +12,7 @@ import play.api.mvc.Results._
 import renesca.parameter.implicits._
 import renesca.schema._
 
-case class RequestContext(controller: NodesBase with Controller, user: User, json: Option[JsValue], query: Map[String, String]) {
+case class RequestContext(controller: NodesBase with Controller, user: Option[User], json: Option[JsValue], query: Map[String, String]) {
   def page = query.get("page").map(_.toInt)
   def size = query.get("size").map(_.toInt)
   def limit = size.getOrElse(15)
@@ -25,13 +25,8 @@ case class RequestContext(controller: NodesBase with Controller, user: User, jso
     jsonAs[S].map(handler(_)).getOrElse(Left(UnprocessableEntity("Cannot parse json body")))
   }
 
-  def realUser = user match {
-    case u: RealUser => Some(u)
-    case _ => None
-  }
-
-  def withRealUser[T](handler: RealUser => Either[Result,T]) = {
-    realUser.map(handler(_)).getOrElse(Left(Forbidden("Only for users")))
+  def withUser[T](handler: User => Either[Result,T]) = {
+    user.map(handler(_)).getOrElse(Left(Forbidden("Only for users")))
   }
 }
 
@@ -57,10 +52,10 @@ object SchemaWrapper extends RootNodeTraitFactory[UuidNode] {
   }
 }
 
-trait NodesBase extends NestedResourceRouter with DefaultNestedResourceController with Silhouette[RealUser, JWTAuthenticator] with HeaderEnvironmentModule {
+trait NodesBase extends NestedResourceRouter with DefaultNestedResourceController with Silhouette[User, JWTAuthenticator] with HeaderEnvironmentModule {
 
   protected def context(request: UserAwareRequest[AnyContent]) = {
-    RequestContext(this, getUser(request.identity), request.body.asJson, request.queryString.flatMap { case (k,v) => v.headOption.map((k, _)) })
+    RequestContext(this, request.identity, request.body.asJson, request.queryString.flatMap { case (k,v) => v.headOption.map((k, _)) })
   }
 
   protected def unauthorized = Unauthorized("Only logged-in users allowed")
@@ -88,10 +83,6 @@ trait NodesBase extends NestedResourceRouter with DefaultNestedResourceControlle
       case Left(msg)  => msg
       case Right(value) => handler(value)
     }
-  }
-
-  protected def getUser(identity: Option[User]): User = {
-    identity.getOrElse(DummyUser.matchesOnName("anonymous"))
   }
 
   protected def validateConnect(uuid: String, otherUuid: String)(handler: () => Result): Result = {

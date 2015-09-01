@@ -56,14 +56,10 @@ object ApiNodeFormat {
         ("isClassification", JsBoolean(n.isInstanceOf[Classification])),
         ("color", JsNumber(n.color))
       )
-      case n: RealUser        => Seq(
+      case n: User        => Seq(
         ("id", JsString(n.uuid)),
         ("name", JsString(n.name)),
         ("email", JsString(n.email.getOrElse("")))
-      )
-      case n: DummyUser        => Seq(
-        ("id", JsString(n.uuid)),
-        ("name", JsString(n.name))
       )
       case n: Updated        => Seq(
         ("oldTitle", JsString(n.oldTitle)),

@@ -15,7 +15,7 @@ import renesca.graph.Label
 import renesca.parameter.PropertyKey
 import modules.db.access.custom.TaggedTaggable
 
-object Session extends TaggedTaggable[UuidNode] with Controller with Silhouette[RealUser, JWTAuthenticator] with HeaderEnvironmentModule {
+object Session extends TaggedTaggable[UuidNode] with Controller with Silhouette[User, JWTAuthenticator] with HeaderEnvironmentModule {
   def votes() = UserAwareAction { request =>
     request.identity.map { user =>
       Ok(JsArray(Seq()))

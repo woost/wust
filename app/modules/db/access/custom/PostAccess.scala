@@ -67,51 +67,55 @@ case class PostAccess() extends ConnectableAccessBase with NodeReadBase[Post] wi
   val factory = Post
 
   override def create(context: RequestContext) = {
-    context.withJson { (request: PostAddRequest) =>
-      val discourse = tagDefGraph(request.addedTags)
+    context.withUser { user =>
+      context.withJson { (request: PostAddRequest) =>
+        val discourse = tagDefGraph(request.addedTags)
 
-      val node = Post.create(title = request.title, description = request.description)
-      val contribution = SchemaCreated.create(context.user, node)
-      discourse.add(node, contribution)
+        val node = Post.create(title = request.title, description = request.description)
+        val contribution = SchemaCreated.create(user, node)
+        discourse.add(node, contribution)
 
-      addTagsToGraph(discourse, context.user, node)
+        addTagsToGraph(discourse, user, node)
 
-      db.transaction(_.persistChanges(discourse)) match {
-        case Some(err) => Left(BadRequest(s"Cannot create Post: $err'"))
-        case _         => Right(node)
+        db.transaction(_.persistChanges(discourse)) match {
+          case Some(err) => Left(BadRequest(s"Cannot create Post: $err'"))
+          case _         => Right(node)
+        }
       }
     }
   }
 
   override def update(context: RequestContext, uuid: String) = {
-    context.withJson { (request: PostUpdateRequest) =>
-      deleteTagsFromGraph(request.removedTags, uuid)
-      val discourse = tagDefGraph(request.addedTags)
+    context.withUser { user =>
+      context.withJson { (request: PostUpdateRequest) =>
+        deleteTagsFromGraph(request.removedTags, uuid)
+        val discourse = tagDefGraph(request.addedTags)
 
-      val node = if (request.title.isDefined || request.description.isDefined) {
-        //need to persist node in order to access title/description
-        val node = Post.matchesOnUuid(uuid)
-        db.persistChanges(node)
+        val node = if (request.title.isDefined || request.description.isDefined) {
+          //need to persist node in order to access title/description
+          val node = Post.matchesOnUuid(uuid)
+          db.persistChanges(node)
+
+          discourse.add(node)
+
+          //TODO: correct threshold and votes for apply
+          val contribution = Updated.create(user, node, oldTitle = node.title, newTitle = request.title.getOrElse(node.title), oldDescription = node.description, newDescription = request.description.orElse(node.description), applyThreshold = 5, applyVotes = 0)
+          discourse.add(contribution)
+          node
+        } else {
+          Post.matchesOnUuid(uuid)
+        }
 
         discourse.add(node)
+        addTagsToGraph(discourse, user, node)
 
-        //TODO: correct threshold and votes for apply
-        val contribution = Updated.create(context.user, node, oldTitle = node.title, newTitle = request.title.getOrElse(node.title), oldDescription = node.description, newDescription = request.description.orElse(node.description), applyThreshold = 5, applyVotes = 0)
-        discourse.add(contribution)
-        node
-      } else {
-        Post.matchesOnUuid(uuid)
-      }
-
-      discourse.add(node)
-      addTagsToGraph(discourse, context.user, node)
-
-      db.transaction(_.persistChanges(discourse)) match {
-        case Some(err) => Left(BadRequest(s"Cannot update Post with uuid '$uuid': $err'"))
-        //FIXME: why the fuck do i need to do this???
-        //otherwise node.rev_tags is empty? something is messed up here.
-        case _         => Right(discourse.posts.find(_.uuid == node.uuid).get)
-        // case _         => Right(node)
+        db.transaction(_.persistChanges(discourse)) match {
+          case Some(err) => Left(BadRequest(s"Cannot update Post with uuid '$uuid': $err'"))
+          //FIXME: why the fuck do i need to do this???
+          //otherwise node.rev_tags is empty? something is messed up here.
+          case _         => Right(discourse.posts.find(_.uuid == node.uuid).get)
+          // case _         => Right(node)
+        }
       }
     }
   }
@@ -123,16 +127,18 @@ case class ConnectableAccess() extends ConnectableAccessBase with NodeReadBase[C
 
   override def create(context: RequestContext) = postAccess.create(context)
   override def update(context: RequestContext, uuid: String) = {
-    context.withJson { (request: ConnectableUpdateRequest) =>
-      deleteTagsFromGraph(request.removedTags, uuid)
-      val discourse = tagDefGraph(request.addedTags)
-      val node = Connectable.matchesOnUuid(uuid)
-      discourse.add(node)
-      addTagsToGraph(discourse, context.user, node)
+    context.withUser { user =>
+      context.withJson { (request: ConnectableUpdateRequest) =>
+        deleteTagsFromGraph(request.removedTags, uuid)
+        val discourse = tagDefGraph(request.addedTags)
+        val node = Connectable.matchesOnUuid(uuid)
+        discourse.add(node)
+        addTagsToGraph(discourse, user, node)
 
-      db.transaction(_.persistChanges(discourse)) match {
-        case Some(err) => Left(BadRequest(s"Cannot update Post with uuid '$uuid': $err'"))
-        case _         => Right(discourse.connectables.find(_.uuid == node.uuid).get)
+        db.transaction(_.persistChanges(discourse)) match {
+          case Some(err) => Left(BadRequest(s"Cannot update Post with uuid '$uuid': $err'"))
+          case _         => Right(discourse.connectables.find(_.uuid == node.uuid).get)
+        }
       }
     }
   }

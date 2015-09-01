@@ -4,7 +4,7 @@ import com.mohiva.play.silhouette.api.util.{PasswordInfo => SPasswordInfo}
 import com.mohiva.play.silhouette.api.{Silhouette, _}
 import com.mohiva.play.silhouette.impl.authenticators.JWTAuthenticator
 import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
-import model.WustSchema.RealUser
+import model.WustSchema.User
 import model.auth.{SignUp, Token}
 import modules.auth.HeaderEnvironmentModule
 import play.api.libs.concurrent.Execution.Implicits._
@@ -13,7 +13,7 @@ import play.api.mvc._
 
 import scala.concurrent.Future
 
-class SignUpController extends Silhouette[RealUser, JWTAuthenticator]
+class SignUpController extends Silhouette[User, JWTAuthenticator]
 with HeaderEnvironmentModule {
 
   implicit val restFormat = formatters.json.UserFormats.RestFormat

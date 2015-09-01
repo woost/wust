@@ -1,15 +1,15 @@
 package model.auth
 
 import com.mohiva.play.silhouette.api.Authorization
-import model.WustSchema.{RealUser, User}
+import model.WustSchema.User
 import play.api.i18n._
 import play.api.mvc.RequestHeader
 
 /**
  * Check for authorization
  */
-case class WithRole(role: Role) extends Authorization[RealUser] {
-  def isAuthorized(user: RealUser)(implicit request: RequestHeader, lang: Lang) = false
+case class WithRole(role: Role) extends Authorization[User] {
+  def isAuthorized(user: User)(implicit request: RequestHeader, lang: Lang) = false
   //TODO: roles in user
 //  user.roles match {
 //    case list: Set[Role] => list.contains(role)

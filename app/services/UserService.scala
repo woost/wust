@@ -11,17 +11,17 @@ import renesca.parameter.implicits._
 
 import scala.concurrent.Future
 
-trait UserService extends IdentityService[RealUser] {
+trait UserService extends IdentityService[User] {
 
-  def create(loginInfo: SLoginInfo, signUp: SignUp, json: JsValue = JsNull): Future[RealUser]
+  def create(loginInfo: SLoginInfo, signUp: SignUp, json: JsValue = JsNull): Future[User]
 
 }
 
 class UserServiceDB extends UserService {
   implicit def sloginInfoToLoginInfo(li: SLoginInfo) = LoginInfo.create(li.providerID, li.providerKey)
 
-  def create(sLoginInfo: SLoginInfo, signUp: SignUp, json: JsValue = JsNull): Future[RealUser] = {
-    val user = RealUser.create(signUp.identifier)
+  def create(sLoginInfo: SLoginInfo, signUp: SignUp, json: JsValue = JsNull): Future[User] = {
+    val user = User.create(signUp.identifier)
     val group = UserGroup.matchesOnName("everyone")
     val memberOf = MemberOf.create(user, group)
     val loginInfo: LoginInfo = sLoginInfo
@@ -33,11 +33,11 @@ class UserServiceDB extends UserService {
     }
   }
 
-  def retrieve(sLoginInfo: SLoginInfo): Future[Option[RealUser]] = {
+  def retrieve(sLoginInfo: SLoginInfo): Future[Option[User]] = {
     val auth = Auth(Database.db.queryGraph(
-      Query(s"match (u:`${RealUser.label}`)-[r:`${HasLogin.relationType}`]->(l:`${LoginInfo.label}` {providerKey: {providerKey}, providerID: {providerID}}) return u",
+      Query(s"match (u:`${User.label}`)-[r:`${HasLogin.relationType}`]->(l:`${LoginInfo.label}` {providerKey: {providerKey}, providerID: {providerID}}) return u",
         Map("providerKey" -> sLoginInfo.providerKey, "providerID" -> sLoginInfo.providerID))))
-    Future.successful(auth.realUsers.headOption)
+    Future.successful(auth.users.headOption)
   }
 
   //intentionally also return dummyusers, so check for an existing name

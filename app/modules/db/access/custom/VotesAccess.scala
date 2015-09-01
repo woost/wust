@@ -17,7 +17,7 @@ case class VotesOnUpdatedAccess(
   val nodeFactory = User
 
   //TODO: nicer interface for custom access, here we know more...
-  override def create(context: RequestContext, param: ConnectParameter[Updated]) = {
+  override def create(context: RequestContext, param: ConnectParameter[Updated]) = context.withUser { user =>
     val success = if (sign == 0) {
       // first we define the updated relation between user and post that defines the actual change request
       val start = ConcreteFactoryNodeDefinition(User)
@@ -25,8 +25,8 @@ case class VotesOnUpdatedAccess(
       val changeRequest = HyperNodeDefinition(start, Updated, end, Some(param.baseUuid))
 
       // next we define the voting relation between the currently logged in user and the change request
-      val user = ConcreteNodeDefinition(context.user)
-      val votes = RelationDefinition(user, VotesOnUpdated, changeRequest)
+      val userNode = ConcreteNodeDefinition(user)
+      val votes = RelationDefinition(userNode, VotesOnUpdated, changeRequest)
       disconnectNodes(votes)
       true
     } else {
@@ -34,7 +34,7 @@ case class VotesOnUpdatedAccess(
       val end = Post.matches()
       //TODO: should have matchesOnUuid(start, end, uuid)
       val changeRequest = Updated.matches(start, end, uuid = Some(param.baseUuid), matches = Set("uuid"))
-      val votes = VotesOnUpdated.merge(context.user, changeRequest, weight = sign, onMatch = Set("weight"))
+      val votes = VotesOnUpdated.merge(user, changeRequest, weight = sign, onMatch = Set("weight"))
       val failure = db.transaction(_.persistChanges(start, end, changeRequest, votes))
       !failure.isDefined
     }

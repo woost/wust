@@ -7,7 +7,7 @@ import com.mohiva.play.silhouette.impl.authenticators.{JWTAuthenticator, _}
 import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
 import com.mohiva.play.silhouette.impl.services.DelegableAuthInfoService
 import com.mohiva.play.silhouette.impl.util.{BCryptPasswordHasher, PlayCacheLayer, SecureRandomIDGenerator}
-import model.WustSchema.RealUser
+import model.WustSchema.User
 import model.auth.PasswordInfoDAO
 import play.api.Play
 import play.api.Play.current
@@ -47,8 +47,8 @@ trait HeaderEnvironmentModule {
       clock = Clock())
   }
 
-  implicit lazy val env: Environment[RealUser, JWTAuthenticator] = {
-    Environment[RealUser, JWTAuthenticator](
+  implicit lazy val env: Environment[User, JWTAuthenticator] = {
+    Environment[User, JWTAuthenticator](
       userService,
       authenticatorService,
       Map(
