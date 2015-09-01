@@ -1,12 +1,12 @@
 <div class="big_post_directive" colored-tag-node="vm.node" ng-switch="vm.editMode">
     <div ng-switch-when="true" static-edit-post on-finish="vm.editMode = false" node="vm.editNode"></div>
     <div ng-switch-default>
-        <span class="fa fa-pencil pull-right" style="cursor:pointer" ng-click="vm.editMode = true" data-title="edit post" bs-tooltip animation=""></span>
+        <button class="fa fa-pencil pull-right btn btn-sm btn-default" ng-click="vm.editMode = true" data-title="edit" bs-tooltip animation=""></button>
         <h2 ng-bind="vm.node.title" class="post_title"></h2>
         <div class="timestamp"><span show-timestamp node="vm.node"></span></div>
         <div big-taglist node="vm.node" class="taglist"></div>
         <span toggle-zen node="vm.node" class="pull-right" ng-show="vm.node.description"></span>
         <div class="post_description" markdown="vm.node.description" ng-show="vm.node.description"></div>
-        <div class="replytool fa fa-plus pull-right" style="cursor:pointer" ng-click='vm.replyTo()' data-title="reply" bs-tooltip animation=""></div>
+        <button class="replytool fa fa-plus pull-right btn btn-sm btn-default" ng-click='vm.replyTo()' data-title="respond" bs-tooltip animation=""></button>
     </div>
 </div>
