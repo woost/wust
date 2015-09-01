@@ -101,13 +101,9 @@ object Database {
     val queries = relationDefinitions.map { relationDefinition =>
       val query = s"match ${ relationDefinition.toQuery } return ${ relationDefinition.startDefinition.name }"
       val params = relationDefinition.parameterMap
-      println("query " + query)
-      println("params " + params)
       Query(query, params)
     }
-    val d = Discourse(db.queryGraphs(queries: _*).fold(Graph.empty)(_ merge _))
-    println("d " + d)
-    d
+    Discourse(db.queryGraphs(queries: _*).fold(Graph.empty)(_ merge _))
   }
 
   def endConnectedDiscourseNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinitions: FixedAndNodeRelationDefinition[START, RELATION, END]*): Seq[START] = {
