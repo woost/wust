@@ -33,7 +33,7 @@ function editPostDescriptionCtrl(DiscourseNode) {
             advanced: {
                 highlightActiveLine: false,
                 // printMarginColumn: false,
-                // showPrintMargin: false,
+                showPrintMargin: false,
                 // enableSnippets: false,
                 // enableBasicAutocompletion: false,
                 // enableLiveAutocompletion: false,
