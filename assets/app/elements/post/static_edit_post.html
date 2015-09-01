@@ -1,6 +1,8 @@
 <div class="static_edit_post_directive">
-    <div edit-post node="vm.node"></div>
-    <button class="btn btn-sm btn-success pull-right" ng-click="vm.node.save().$then(vm.onFinish)" ng-disabled="!vm.node.canSave" data-title="save" bs-tooltip animation=""><i class="fa fa-check"></i></button>
-    <button class="btn btn-sm btn-default pull-right cancel-button" ng-click="vm.onFinish()">Cancel</button>
-    <button class="btn btn-sm btn-danger" ng-click="vm.deleteNode()" ng-hide="vm.node.isLocal" data-title="delete" bs-tooltip animation=""><i class="fa fa-trash-o"></i></button>
+    <div class="buttons">
+        <button class="btn btn-sm btn-success pull-right" ng-click="vm.node.save().$then(vm.onFinish)" ng-disabled="!vm.node.canSave" data-title="save" bs-tooltip animation=""><i class="fa fa-check"></i></button>
+        <button class="btn btn-sm btn-default pull-right cancel-button" ng-click="vm.onFinish()">Cancel</button>
+        <button class="btn btn-sm btn-danger" ng-click="vm.deleteNode()" ng-hide="vm.node.isLocal" data-title="delete" bs-tooltip animation=""><i class="fa fa-trash-o"></i></button>
+    </div>
+    <div class="edit-area" edit-post node="vm.node"></div>
 </div>
