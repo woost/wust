@@ -10,6 +10,7 @@
     "lodash": "~3.10.1",
     "lodium": "~0.1.2",
     "marked": "~0.3.5",
-    "ng-trans-css": "~0.9.1"
+    "ng-trans-css": "~0.9.1",
+    "angular-xeditable": "~0.1.9"
   }
 }

@@ -79,6 +79,7 @@ var styles = concat(mergeTrees([compiledStyles, dependencies, staticAssetsCss, f
         "ng-trans-css/ng-trans.css",
         "ng-sortable/dist/ng-sortable.css",
         "humane-js/themes/libnotify.css",
+        "angular-xeditable/dist/css/xeditable.css",
 
         "static_assets_css/**/*.css",
 
@@ -127,9 +128,9 @@ var scripts = concat(mergeTrees([appScripts,htmlTemplates,dependencies,staticAss
         "lodium/lodium.js",
         "marked/marked.min.js",
 
-
         "ace-builds/src-min-noconflict/ace.js",
         "ace-builds/src-min-noconflict/mode-markdown.js",
+        min("angular-xeditable/dist/js/xeditable.js"),
         min("angular-ui-ace/ui-ace.js"),
         min("diff/dist/diff.js"),
         // "lib/ace-builds/src-min-noconflict/keybinding-vim.js",

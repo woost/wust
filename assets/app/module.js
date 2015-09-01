@@ -1,5 +1,6 @@
 angular.module("wust", [
     "ngAnimate",
+    "xeditable",
     "ui.bootstrap.collapse",
     "ui.bootstrap.typeahead",
     "template/typeahead/typeahead-popup.html",
