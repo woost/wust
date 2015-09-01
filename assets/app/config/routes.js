@@ -41,7 +41,7 @@ function RoutesConfig($stateProvider, $urlRouterProvider, $locationProvider) {
         controller: "TagDetailsCtrl as vm",
     }).state("focus", {
         parent: "page",
-        url: "/focus/:id",
+        url: "/focus/:id/:type",
         templateUrl: `components/focus/focus.html`,
         controller: "FocusCtrl as vm",
         resolve: {

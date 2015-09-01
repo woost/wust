@@ -67,6 +67,6 @@ function graphViewCtrl($scope, $stateParams, FocusService, $filter, EditService,
         if (node.id === $stateParams.id)
             FocusService.activateTab(0); // show neighbours view
         else
-            $state.go("focus", _.pick(node, "id"));
+            $state.go("focus", { id: node.id, type: undefined });
     }
 }

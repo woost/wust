@@ -18,8 +18,14 @@ function FocusCtrl(Helpers, FocusService, $stateParams, HistoryService, rootNode
     vm.componentLoading = true;
 
     vm.tabViews = FocusService.tabViews;
-    vm.tabViews[0]._active = true;
-    vm.tabViews[1]._active = false;
+    if ($stateParams.type === "graph") {
+        vm.tabViews[0]._active = false;
+        vm.tabViews[1]._active = true;
+    } else {
+        vm.tabViews[0]._active = true;
+        vm.tabViews[1]._active = false;
+    }
+
 
     // we are viewing details about a node, so add it to the nodehistory
     HistoryService.add(vm.graphComponent.rootNode);
