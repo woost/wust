@@ -19,7 +19,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
                 this.rootDomElement = rootDomElement;
                 this.onClick = onClick;
                 this.onDraw = onDraw;
-                this.uuid = Math.random();
 
                 // settings
                 this.visibleConvergence = false;
@@ -179,7 +178,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
                 // the first commit is only the rootNode
                 if(this.commitCount <= 1) return;
                 // the second commit brings the rest of the graph and triggers the convergence
-                // if(this.commitCount === 2) this.converge();
 
                 //TODO: this really is an unwanted side effect, we should not sort nodes here
                 //add nodes to svg, first hypernodes then nodes, so the normal
@@ -287,14 +285,14 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
                 this.updateGraphRefs();
                 this.recalculateNodeDimensions(this.graph.nodes);
 
-                // this.registerUIEvents();
                 this.force.nodes(this.graph.nodes); // nodes and relations get replaced instead of just changed by scalajs
                 this.force.links(this.graph.relations); // that's why we need to set the new references
 
                 // we only want to initialize, not start the simulation
                 // https://github.com/mbostock/d3/blob/78e0a4bb81a6565bf61e3ef1b898ef8377478766/src/layout/force.js#L274
                 this.force.start();
-                this.force.stop();
+                // don't converge, we are triggering this manually in the beginning
+                if(this.commitCount <= 2) this.force.stop();
 
                 this.registerUIEvents();
             }
@@ -433,7 +431,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
         }
 
         converge(onConvergeFinish = _.noop) {
-            console.log(`converge (${this.uuid})`);
             // let convergeIterations = 0;
             this.initConverge();
 
