@@ -2,7 +2,6 @@ package controllers.api
 
 import controllers.api.nodes.Nodes
 import model.WustSchema.{Tags => SchemaTags, _}
-import model.custom._
 import modules.db.access._
 import modules.db.access.custom._
 import modules.requests.dsl._

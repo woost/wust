@@ -5,17 +5,6 @@ import renesca.parameter.LongPropertyValue
 import renesca.schema.macros
 import renesca.Transaction
 
-object custom {
-  import renesca.{graph => raw}
-  import renesca.schema.RelationFactory
-  import WustSchema._
-
-  object UpdatedToPostFactory extends RelationFactory[Updated, UpdatedToPost, Post] {
-    def relationType = Updated.endRelationType
-    def wrap(relation: raw.Relation) = ???
-  }
-}
-
 @macros.GraphSchema
 object WustSchema {
   // TODO: Type aliases for several HyperRelation combinations
