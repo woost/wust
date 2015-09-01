@@ -5,7 +5,7 @@ import renesca.parameter.implicits._
 
 object Usertest1Init extends Task with SeedTools {
   ClearDatabase.main(Array())
-  SeedInit.main(Array())
+  SeedDatabase.main(Array())
   println(s"Preparing Database for Usertest1 on ${db.restService.server}...")
 
   dbContext { implicit db =>

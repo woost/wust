@@ -22,8 +22,9 @@ trait Task extends App {
   }
 }
 
-object AllTasks extends App {
-  SeedInit.main(Array())
+object A_ClearSeedRedditHN extends App {
+  ClearDatabase.main(Array())
+  SeedDatabase.main(Array())
   ImportReddit.main(Array())
   ImportHackerNews.main(Array())
 }
