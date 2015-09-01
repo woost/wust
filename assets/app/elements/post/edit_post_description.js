@@ -38,7 +38,9 @@ function editPostDescriptionCtrl(DiscourseNode) {
                 // enableBasicAutocompletion: false,
                 // enableLiveAutocompletion: false,
                 fontFamily: "inconsolata",
-                fontSize: "16px"
+                fontSize: "16px",
+                maxLines: 20,
+                minLines: 10
             }
         }
     };
