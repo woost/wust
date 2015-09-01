@@ -33,7 +33,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
 
                 // state
                 this.drawOnTick = this.drawOnTick = this.visibleConvergence;
-                vm.state.hoveredNode = undefined;
+                this.hoveredNode = undefined;
                 this.width = rootDomElement.offsetWidth;
                 this.height = rootDomElement.offsetHeight;
                 this.dragInitiated = false; // if dragStart was triggered with the correct mouse button
@@ -372,10 +372,10 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
                 // so register your action in onDragMoveEnd
                 .on("mouseover", d => scope.$apply(() => {
                     this.setNodeOffset(d);
-                    vm.state.hoveredNode = d;
+                    this.hoveredNode = d;
                 }))
                 .on("mouseout", d => {
-                    scope.$apply(() => vm.state.hoveredNode = undefined);
+                    scope.$apply(() => this.hoveredNode = undefined);
                     d.d3NodeContainer.classed({
                         "selected": false
                     });
@@ -1046,9 +1046,9 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
                 let endX = this.dragStartNodeX + dx + Math.cos(a) * this.connectorLineOvershoot;
                 let endY = this.dragStartNodeY + dy + Math.sin(a) * this.connectorLineOvershoot;
 
-                if(vm.state.hoveredNode) {
+                if(this.hoveredNode) {
                     let line = geometry.Line(geometry.Vec2(endX, endY), geometry.Vec2(this.dragStartNodeX, this.dragStartNodeY));
-                    let cut = this.cutByRects(line, this.nodeRect(vm.state.hoveredNode), this.nodeRect(this.dragStartNode));
+                    let cut = this.cutByRects(line, this.nodeRect(this.hoveredNode), this.nodeRect(this.dragStartNode));
                     if( cut ) {
                         this.d3ConnectorLine
                             .attr("x1", cut.x1)
@@ -1071,8 +1071,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
                         .attr("y2", this.dragStartNodeY);
                 }
 
-                if (vm.state.hoveredNode !== undefined) {
-                    vm.state.hoveredNode.d3NodeContainer.classed({
+                if (this.hoveredNode !== undefined) {
+                    this.hoveredNode.d3NodeContainer.classed({
                         "selected": true
                     });
                     this.dragStartNode.d3NodeContainer.classed({
@@ -1089,9 +1089,9 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
         // we use dragend instead of click event, because it is emitted on mobile phones as well as on pcs
         onDragConnectEnd() {
             if (this.isDragging) {
-                if (vm.state.hoveredNode !== undefined) {
+                if (this.hoveredNode !== undefined) {
                     let startNode = this.dragStartNode; // always normal node
-                    let endNode = vm.state.hoveredNode;
+                    let endNode = this.hoveredNode;
                     // starting on hypernodes is also forbidden,
                     // but we don't need to handle this, because
                     // the connect button does not exist on hyperRelations.

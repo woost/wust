@@ -22,7 +22,6 @@ function graphViewCtrl($scope, $stateParams, FocusService, $filter, EditService,
     let vm = this;
 
     vm.addNodeToGraph = addNodeToGraph;
-    vm.state = {};
     vm.onClick = onClick;
     vm.search = {
         title: ""

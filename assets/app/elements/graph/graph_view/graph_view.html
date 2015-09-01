@@ -4,7 +4,7 @@
             <input type="text" class="form-control" ng-model="vm.search.title" placeholder="filter">
         </div>
     </div>
-    <div class="post-preview-frame" ng-class="{left: !vm.state.hoveredNode.onLeftHalf, right: vm.state.hoveredNode.onLeftHalf, top: !vm.state.hoveredNode.onUpperHalf, bottom: vm.state.hoveredNode.onUpperHalf}" ng-show="vm.state.hoveredNode && !vm.state.hoveredNode.isHyperRelation && !vm.d3Graph.isDragging">
-        <div preview node="vm.state.hoveredNode"></div>
+    <div class="post-preview-frame" ng-class="{left: !vm.d3Graph.hoveredNode.onLeftHalf, right: vm.d3Graph.hoveredNode.onLeftHalf, top: !vm.d3Graph.hoveredNode.onUpperHalf, bottom: vm.d3Graph.hoveredNode.onUpperHalf}" ng-show="vm.d3Graph.hoveredNode && !vm.d3Graph.hoveredNode.isHyperRelation && !vm.d3Graph.isDragging">
+        <div preview node="vm.d3Graph.hoveredNode"></div>
     </div>
 </div>
