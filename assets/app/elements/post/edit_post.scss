@@ -1,15 +1,16 @@
 .edit_post_directive {
     margin: 0px;
     .title {
-        padding: 2px;
         outline: none;
         border-radius: 3px;
         border: 2px solid transparent;
         &.is_invalid {
             border-color: red;
         }
-        &[contenteditable='true']:hover{
-            background: #E6E6E6;
+        &[contenteditable='true']{
+            background: white;
+            border: 1px solid #CCC;
+            padding: 10px;
         }
         &:focus, &:focus:hover  {
             background: #FFF;

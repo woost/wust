@@ -1,4 +1,10 @@
 .static_edit_post_directive {
+
+    .ace_editor {
+        border: 1px solid #CCC;
+        border-radius: 3px;
+    }
+
     .description {
         min-height: 500px;
         .edit_post_description_directive {

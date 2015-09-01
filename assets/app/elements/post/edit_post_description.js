@@ -53,7 +53,7 @@ function editPostDescriptionCtrl(DiscourseNode) {
             node = editor.renderer.emptyMessageNode = document.createElement("div");
             node.textContent = "Optional description";
             node.className = "ace_invisible ace_emptyMessage";
-            node.style.padding = "5px 5px";
+            node.style.padding = "10px";
             editor.renderer.scroller.appendChild(node);
         }
     }
@@ -65,6 +65,7 @@ function editPostDescriptionCtrl(DiscourseNode) {
     function onEditorLoad(editor) {
         // editor.setKeyboardHandler("ace/keyboard/vim");
         editor.$blockScrolling = Infinity;
+        editor.renderer.setPadding(10);
         update(editor);
         editor.on("input", _.partial(update, editor));
     }
