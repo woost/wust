@@ -26,4 +26,5 @@ function NeighboursCtrl(Post, DiscourseNodeList) {
         // .nested(DiscourseNodeList.write.Connectable.predecessors, "connectsFrom");
     vm.replies = DiscourseNodeList.write.Connectable.predecessors(vm.component, vm.component.rootNode, "connectsFrom");
         // .nested(DiscourseNodeList.write.Connectable.predecessors, "connectsFrom");
+    vm.parallels = DiscourseNodeList.read.parallels(vm.component, vm.component.rootNode);
 }

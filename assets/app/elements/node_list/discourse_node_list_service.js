@@ -16,6 +16,7 @@ function DiscourseNodeList() {
     function get($injector, $rootScope, DiscourseNode, EditService) {
         const PREDECESSORS = 0;
         const SUCCESSORS = 1;
+        const PARALLELS = 2;
 
         class NodeModel {
             constructor(component, node, connectorType, writable) {
@@ -33,6 +34,9 @@ function DiscourseNodeList() {
                         break;
                     case SUCCESSORS:
                         this.nodeProperty = "successors";
+                        break;
+                    case PARALLELS:
+                        this.nodeProperty = "parallels";
                         break;
                     default:
                         throw "Invalid connectorType for node list: " + this.connectorType;
@@ -88,6 +92,9 @@ function DiscourseNodeList() {
             }
 
             nested(nodeListCreate, modelProperty) {
+                if (this.connectorType === PARALLELS)
+                    throw "Cannot nest parallel discourse nodes";
+
                 this.isNested = true;
                 let nestedNodeListDef = node => nodeListCreate(this.component, node, modelProperty);
                 this.nestedNodeLists.push(nestedNodeListDef);
@@ -99,6 +106,9 @@ function DiscourseNodeList() {
 
         class WriteNodeModel extends NodeModel {
             constructor(component, node, connectorType, modelProperty, nodeInfo) {
+                if (connectorType === PARALLELS)
+                    throw "Cannot create WriteNodeModel of parallel discourse nodes";
+
                 super(component, node, connectorType, true);
                 this.modelProperty = modelProperty;
                 this.service = nodeInfo.service;
@@ -223,7 +233,8 @@ function DiscourseNodeList() {
             }),
             read: {
                 predecessors: (component, node) => new NodeList(new ReadNodeModel(component, node, PREDECESSORS)),
-                successors: (component, node) => new NodeList(new ReadNodeModel(component, node, SUCCESSORS))
+                successors: (component, node) => new NodeList(new ReadNodeModel(component, node, SUCCESSORS)),
+                parallels: (component, node) => new NodeList(new ReadNodeModel(component, node, PARALLELS)),
             }
         };
     }

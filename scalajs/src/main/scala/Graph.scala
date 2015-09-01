@@ -95,6 +95,7 @@ trait NodeBase extends NodeDelegates {
   def predecessors = inRelations.map(_.startNode)
   def successors = outRelations.map(_.endNode)
   def neighbours = predecessors ++ successors
+  def parallels = predecessors.flatMap(_.successors).filter(_ != this)
   @JSExport def inDegree = inRelations.size
   @JSExport def outDegree = outRelations.size
   @JSExport def degree = inDegree + outDegree
@@ -105,6 +106,7 @@ trait NodeBase extends NodeDelegates {
   @JSExport("predecessors") def predecessorsJs = predecessors.toJSArray
   @JSExport("successors") def successorsJs = successors.toJSArray
   @JSExport("neighbours") def neighboursJs = neighbours.toJSArray
+  @JSExport("parallels") def parallelsJs = parallels.toJSArray
 
   def encode(): js.Any
 

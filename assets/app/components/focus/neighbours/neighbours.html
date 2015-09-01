@@ -4,6 +4,7 @@
     <div class="neighbours_content">
         <div big-post node="vm.component.rootNode"></div>
         <div post-changes="vm.changes"></div>
+        <div discourse-node-list node-model='vm.parallels.model' is-loading="vm.isLoading" class="discourse_node_list_vertical"></div>
     </div>
     <div class="fa fa-long-arrow-right fa-2x arrow-right" ng-show="vm.replies.model.list.length > 0"></div>
     <div discourse-node-list node-model='vm.replies.model' is-loading="vm.isLoading" class="neighbours_followers discourse_node_list_horizontal"></div>
