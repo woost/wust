@@ -41,7 +41,7 @@ case class VotesOnUpdatedAccess(
 
     Left(if (success)
       Ok(JsObject(Seq(
-        ("sign", JsNumber(sign))
+        ("weight", JsNumber(sign))
       )))
     else
       BadRequest("No vote :/")
