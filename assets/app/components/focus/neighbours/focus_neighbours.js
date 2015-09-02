@@ -21,7 +21,8 @@ NeighboursCtrl.$inject = ["Post", "DiscourseNodeList"];
 function NeighboursCtrl(Post, DiscourseNodeList) {
     let vm = this;
 
-    vm.changes = Post.$buildRaw(vm.component.rootNode).changes.$search();
+    vm.editChanges = Post.$buildRaw(vm.component.rootNode).requestsEdit.$search();
+    vm.tagChanges = Post.$buildRaw(vm.component.rootNode).requestsTags.$search();
     vm.references = DiscourseNodeList.write.Connectable.successors(vm.component, vm.component.rootNode, "connectsTo");
         // .nested(DiscourseNodeList.write.Connectable.predecessors, "connectsFrom");
     vm.replies = DiscourseNodeList.write.Connectable.predecessors(vm.component, vm.component.rootNode, "connectsFrom");

@@ -1,6 +1,6 @@
-<div class="post_changes_directive" ng-if="vm.postChanges.length > 0">
+<div class="post_edit_changes_directive" ng-if="vm.postEditChanges.length > 0">
     <b>Change requests</b>
-    <div class="changerequest" ng-repeat="change in vm.postChanges">
+    <div class="changerequest" ng-repeat="change in vm.postEditChanges">
         <button class="btn btn-danger pull-right btn-xs" type="button" ng-click="vm.newStream()"><i class="fa fa-close"></i></button>
         <button class="btn btn-success pull-right btn-xs" type="button" ng-click="vm.newStream()"><i class="fa fa-check"></i></button>
         <b>Title:</b>

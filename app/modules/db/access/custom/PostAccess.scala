@@ -35,10 +35,11 @@ trait ConnectableAccessBase {
   protected def addRequestTagsToGraph(discourse: Discourse, user: User, post: Post, request: AddTagRequestBase with RemoveTagRequestBase) {
     //TODO: initialize added tags = karma
     //TODO: initialize removed tags = (current threshold - karma)
+    //TODO: avoid duplicates
     val tagRequests = request.addedTags.flatMap(tagConnectRequestToTag(_)) ++ request.removedTags.map(TagLike.matchesOnUuid(_))
     tagRequests.foreach { tag =>
       val updatedTags = UpdatedTags.create(user, post, applyThreshold = 5, applyVotes = 0)
-      discourse.add(Tags.create(tag, updatedTags))
+      discourse.add(updatedTags, Tags.create(tag, updatedTags))
     }
   }
 
