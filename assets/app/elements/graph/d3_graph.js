@@ -378,7 +378,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
                 }))
                 .on("mouseout", d => {
                     scope.$apply(() => this.hoveredNode = undefined);
-                    this.nodeInfo.d3NodeContainer(d).classed({
+                    this.elementInfo.d3NodeContainer(d).classed({
                         "selected": false
                     });
                 });
@@ -514,24 +514,28 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
         updateGraphRefs() {
             // write dom element ref and rect into graph node
             // for easy lookup
-            let newNodeInfo = {
+            let newElementInfo = {
                 domNodeContainer: {},
                 d3NodeContainer: {},
                 domNode: {},
                 d3Node: {},
                 domNodeFrame: {},
-                d3NodeFrame: {}
+                d3NodeFrame: {},
+                domPath: {},
+                d3Path: {}
             };
 
-            if (this.nodeInfo === undefined) {
-                this.nodeInfo = {
-                    data: newNodeInfo,
+            if (this.elementInfo === undefined) {
+                this.elementInfo = {
+                    data: newElementInfo,
                     domNodeContainer: function(n) { return this.data.domNodeContainer[n.id]; },
                     d3NodeContainer: function(n) { return this.data.d3NodeContainer[n.id]; },
                     domNode: function(n) { return this.data.domNode[n.id]; },
                     d3Node: function(n) { return this.data.d3Node[n.id]; },
                     domNodeFrame: function(n) { return this.data.domNodeFrame[n.id]; },
-                    d3NodeFrame: function(n) { return this.data.d3NodeFrame[n.id]; }
+                    d3NodeFrame: function(n) { return this.data.d3NodeFrame[n.id]; },
+                    domPath: function(r) { return this.data.domPath[r.startId + r.endId]; },
+                    d3Path: function(r) { return this.data.d3Path[r.startId + r.endId]; }
                 };
             }
 
@@ -540,42 +544,28 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
                 //i am not sure whether the indices will be correct then,
                 // do not ask why i fixed it like this. i have no idea.
 
-                newNodeInfo.domNodeContainer[n.id] = this.nodeInfo.domNodeContainer(n) || this.d3NodeContainerWithData[0][i];
-                newNodeInfo.d3NodeContainer[n.id] = d3.select(newNodeInfo.domNodeContainer[n.id]);
+                newElementInfo.domNodeContainer[n.id] = this.elementInfo.domNodeContainer(n) || this.d3NodeContainerWithData[0][i];
+                newElementInfo.d3NodeContainer[n.id] = d3.select(newElementInfo.domNodeContainer[n.id]);
 
-                newNodeInfo.domNode[n.id] = this.d3Node[0][i];
-                newNodeInfo.d3Node[n.id] = d3.select(newNodeInfo.domNode[n.id]);
+                newElementInfo.domNode[n.id] = this.d3Node[0][i];
+                newElementInfo.d3Node[n.id] = d3.select(newElementInfo.domNode[n.id]);
 
-                newNodeInfo.domNodeFrame[n.id] = this.nodeInfo.domNodeFrame(n) || this.d3NodeFrame[0][i];
-                newNodeInfo.d3NodeFrame[n.id] = d3.select(newNodeInfo.domNodeFrame[n.id]);
+                newElementInfo.domNodeFrame[n.id] = this.elementInfo.domNodeFrame(n) || this.d3NodeFrame[0][i];
+                newElementInfo.d3NodeFrame[n.id] = d3.select(newElementInfo.domNodeFrame[n.id]);
             });
-
-            let newPathInfo = {
-                domPath: {},
-                d3Path: {}
-            };
-
-            if (this.pathInfo === undefined) {
-                this.pathInfo = {
-                    data: newPathInfo,
-                    domPath: function(r) { return this.data.domPath[r.startId + r.endId]; },
-                    d3Path: function(r) { return this.data.d3Path[r.startId + r.endId]; }
-                };
-            }
 
             this.graph.relations.forEach((r, i) => {
                 let id = r.startId + r.endId;
-                newPathInfo.domPath[id] = this.d3RelationPathWithData[0][i];
-                newPathInfo.d3Path[id] = d3.select(newPathInfo.domPath[id]);
+                newElementInfo.domPath[id] = this.d3RelationPathWithData[0][i];
+                newElementInfo.d3Path[id] = d3.select(newElementInfo.domPath[id]);
             });
 
-            this.nodeInfo.data = newNodeInfo;
-            this.pathInfo.data = newPathInfo;
+            this.elementInfo.data = newElementInfo;
         }
 
         recalculateNodeDimensions(nodes) {
             nodes.forEach(n => {
-                let domNode = this.nodeInfo.domNode(n);
+                let domNode = this.elementInfo.domNode(n);
                 if(domNode) {
                     n.size = geometry.Vec2(
                         //TODO: remove default values, and correctly get sizes by quickly showing html elements
@@ -706,7 +696,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
 
         drawNodes() {
             this.graph.nodes.forEach((node) => {
-                this.nodeInfo.domNodeContainer(node).style[this.transformCompat] = `translate(${node.x - node.size.width / 2}px, ${node.y - node.size.height / 2}px)`;
+                this.elementInfo.domNodeContainer(node).style[this.transformCompat] = `translate(${node.x - node.size.width / 2}px, ${node.y - node.size.height / 2}px)`;
             });
         }
 
@@ -736,7 +726,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
                 let line = relation.line;
 
                 if( line === undefined ) {
-                    let domPath = this.pathInfo.domPath(relation);
+                    let domPath = this.elementInfo.domPath(relation);
                     domPath.setAttribute("d", "");
                     return;
                 }
@@ -745,7 +735,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
                     console.warn("invalid coordinates for relation");
                 else {
                     let pathAttr = `M ${line.x1} ${line.y1} L ${line.x2} ${line.y2}`;
-                    let domPath = this.pathInfo.domPath(relation);
+                    let domPath = this.elementInfo.domPath(relation);
                     domPath.setAttribute("d", pathAttr);
                 }
             });
@@ -811,6 +801,13 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
             // all foreign objects have size 0
             // this call recalculates the sizes
             // this.recalculateNodeDimensions(this.graph.nodes);
+
+            // if the info about dom elements was not created yet.
+            if (this.elementInfo === undefined) {
+                this.updateGraph();
+                // TODO: felix. sometimes the resize handler is called before the graph was initialized. any idea how to solve this properly?
+                setTimeout(this.force.start.bind(this.force), 200);
+            }
 
             this.drawGraph();
         }
@@ -907,14 +904,14 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
             this.graph.nodes.forEach(node => {
                 let opacity = (node.marked) ? 1.0 : notMarkedOpacity;
                 let visibility = node.visible ? "inherit" : "hidden";
-                let domNodeFrame = this.nodeInfo.domNodeFrame(node);
+                let domNodeFrame = this.elementInfo.domNodeFrame(node);
                 domNodeFrame.style.opacity = opacity;
                 domNodeFrame.style.visibility = visibility;
             });
 
             // set relation visibility
             this.graph.relations.forEach((relation, i) => {
-                let domPath = this.pathInfo.domPath(relation);
+                let domPath = this.elementInfo.domPath(relation);
                 domPath.style.visibility = relation.visible ? "inherit" : "hidden";
                 domPath.style.opacity = (relation.source.marked === true && relation.target.marked === true) ? 1.0 : notMarkedOpacity;
             });
@@ -928,7 +925,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
         // fix the position of a given node
         setFixed(d) {
             d.fixed = true;
-            this.nodeInfo.d3NodeContainer(d).classed({
+            this.elementInfo.d3NodeContainer(d).classed({
                 "fixed": true
             });
 
@@ -940,7 +937,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
         // unfix the position of a given node
         unsetFixed(d) {
             d.fixed = false;
-            this.nodeInfo.d3NodeContainer(d).classed({
+            this.elementInfo.d3NodeContainer(d).classed({
                 "fixed": false
             });
 
@@ -1007,7 +1004,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
             this.dragStartMouseY = event.clientY;
             this.dragStartNode = d;
 
-            let domRect = this.nodeInfo.domNode(d).getBoundingClientRect();
+            let domRect = this.elementInfo.domNode(d).getBoundingClientRect();
             let eventRect = target.getBoundingClientRect();
 
             // vector from dragged element to node center, scaled, plus click offset
@@ -1057,7 +1054,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
 
         onDragMove(d) {
             //TODO: fails when zooming/scrolling and dragging at the same time
-            this.onDragMoveInit(d, 5, () => this.nodeInfo.d3NodeContainer(d).classed({
+            this.onDragMoveInit(d, 5, () => this.elementInfo.d3NodeContainer(d).classed({
                 "moving": true
             }));
 
@@ -1115,14 +1112,14 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
                 }
 
                 if (this.hoveredNode !== undefined) {
-                    this.nodeInfo.d3NodeContainer(this.hoveredNode).classed({
+                    this.elementInfo.d3NodeContainer(this.hoveredNode).classed({
                         "selected": true
                     });
-                    this.nodeInfo.d3NodeContainer(this.dragStartNode).classed({
+                    this.elementInfo.d3NodeContainer(this.dragStartNode).classed({
                         "selected": true
                     });
                 } else {
-                    this.nodeInfo.d3NodeContainer(this.dragStartNode).classed({
+                    this.elementInfo.d3NodeContainer(this.dragStartNode).classed({
                         "selected": false
                     });
                 }
@@ -1160,7 +1157,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
             this.d3ConnectorLine.classed({
                 "moving": false
             });
-            this.nodeInfo.d3NodeContainer(this.dragStartNode).classed({
+            this.elementInfo.d3NodeContainer(this.dragStartNode).classed({
                 "selected": false
             });
         }
@@ -1186,7 +1183,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
             scope.$apply();
             this.setNodeOffset(d);
 
-            this.nodeInfo.d3NodeContainer(d).classed({
+            this.elementInfo.d3NodeContainer(d).classed({
                 "moving": false
             });
         }
