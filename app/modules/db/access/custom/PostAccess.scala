@@ -125,7 +125,11 @@ case class ConnectableAccess() extends ConnectableAccessBase with NodeReadBase[C
   val postAccess = PostAccess()
   val factory = Connectable
 
+  // we redirect the create action the PostAccess. It is not possible to create
+  // connectables withou any context and usually you want to handle connects
+  // and posts in one api, so usally creating a post is what you want
   override def create(context: RequestContext) = postAccess.create(context)
+
   override def update(context: RequestContext, uuid: String) = {
     context.withUser { user =>
       context.withJson { (request: ConnectableUpdateRequest) =>
