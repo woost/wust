@@ -25,7 +25,12 @@ function StaticEditPostCtrl($state) {
     let vm = this;
 
     vm.deleteNode = deleteNode;
-    vm.onFinish = vm.onFinish || _.noop;
+    vm.onSave = onSave;
+
+    function onSave() {
+        if (vm.onFinish)
+            vm.node.save().$then(data => vm.onFinish({response: data}));
+    }
 
     function deleteNode() {
         vm.node.deleteNode().$then(() => {

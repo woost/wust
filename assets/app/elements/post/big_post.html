@@ -1,5 +1,5 @@
 <div class="big_post_directive" colored-tag-node="vm.node" ng-switch="vm.editMode">
-    <div ng-switch-when="true" static-edit-post on-finish="vm.editMode = false" node="vm.editNode"></div>
+    <div ng-switch-when="true" static-edit-post on-finish="vm.onSave(response)" node="vm.editNode"></div>
     <div ng-switch-default>
         <button class="fa fa-pencil pull-right btn btn-sm btn-default" ng-click="vm.editMode = true" data-title="edit" bs-tooltip animation=""></button>
         <h2 ng-bind="vm.node.title" class="post_title"></h2>
@@ -9,4 +9,6 @@
         <div class="post_description" markdown="vm.node.description" ng-show="vm.node.description"></div>
         <button class="replytool pull-right btn btn-sm btn-default" ng-click='vm.replyTo()' data-title="respond" bs-tooltip animation=""><i class="fa fa-comment"></i></button>
     </div>
+    <div post-tag-changes="vm.tagChanges"></div>
+    <div post-edit-changes="vm.editChanges"></div>
 </div>
