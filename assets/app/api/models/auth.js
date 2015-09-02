@@ -41,12 +41,16 @@ function Auth($rootScope, $window, restmod, jwtHelper, store, Session) {
 
 
     function checkLoggedIn() {
-        if (self.current.token && jwtHelper.isTokenExpired(self.current.token)) {
-            logoutLocally();
-            return false;
+        if (self.current.token) {
+            if (jwtHelper.isTokenExpired(self.current.token)) {
+                logoutLocally();
+                return false;
+            } else {
+                return true;
+            }
         }
 
-        return true;
+        return false;
     }
 
     function authenticate(model, message, user) {
