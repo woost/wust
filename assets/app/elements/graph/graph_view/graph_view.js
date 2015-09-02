@@ -25,7 +25,7 @@ function graphViewCtrl($scope, $stateParams, $filter, EditService, $state) {
     vm.isConverged = false;
     vm.addNodeToGraph = addNodeToGraph;
     vm.onClick = onClick;
-    vm.onDraw = () => vm.isConverged = true;
+    vm.onDraw = () => $scope.$apply(() => vm.isConverged = true);
     vm.search = {
         title: ""
     };
