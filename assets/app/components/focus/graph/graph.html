@@ -1,10 +1,1 @@
-<div id="graph_component">
-    <div class="loading_indicator">
-        <div ng-if="vm.isLoading" class="la-ball-triangle-path la-2x la-dark la-absolute">
-            <div></div>
-            <div></div>
-            <div></div>
-        </div>
-    </div>
-    <div graph-view graph="vm.component"></div>
-</div>
+<div id="graph_component" graph-view is-loading="vm.isLoading" graph="vm.component"></div>

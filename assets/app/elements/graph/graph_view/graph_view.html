@@ -1,4 +1,11 @@
 <div class="graph_view_component">
+    <div class="loading_indicator">
+        <div ng-if="vm.isLoading || !vm.isConverged" class="la-ball-triangle-path la-2x la-dark la-absolute">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    </div>
     <div d3-graph class="graph_network" ui-on-Drop="vm.addNodeToGraph($data, $event)" drop-channel="node,scratch_node">
         <div id="filter_input">
             <input type="text" class="form-control" ng-model="vm.search.title" placeholder="filter">

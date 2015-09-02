@@ -8,7 +8,8 @@ function graphView() {
         templateUrl: "elements/graph/graph_view/graph_view.html",
         replace: true,
         scope: {
-            graph: "="
+            graph: "=",
+            isLoading: "="
         },
         controller: graphViewCtrl,
         controllerAs: "vm",
@@ -21,8 +22,10 @@ graphViewCtrl.$inject = ["$scope", "$stateParams", "$filter", "EditService", "$s
 function graphViewCtrl($scope, $stateParams, $filter, EditService, $state) {
     let vm = this;
 
+    vm.isConverged = false;
     vm.addNodeToGraph = addNodeToGraph;
     vm.onClick = onClick;
+    vm.onDraw = () => vm.isConverged = true;
     vm.search = {
         title: ""
     };
