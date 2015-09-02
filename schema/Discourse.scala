@@ -109,7 +109,7 @@ object WustSchema {
   @Relation class Reviewed(startNode: User, endNode: Action)
   //TODO: multidimesional voting?
 
-  @Relation class VotesOnUpdated(startNode: User, endNode: Updated) extends RelationTimestamp {
+  @Relation class VotesChangeRequest(startNode: User, endNode: ChangeRequest) extends RelationTimestamp {
     val weight: Long // Up:+1 or Down:-1
   }
 

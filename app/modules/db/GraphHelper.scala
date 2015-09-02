@@ -14,7 +14,7 @@ object GraphHelper {
 
   def findNodes[NODE <: UuidNode](discourse: Discourse, factory: NodeFactory[NODE], uuids: String*): Seq[NODE] = {
     if(uuids.isEmpty)
-      nodesWithType[NODE](discourse.nodes).toSeq
+      nodesWithType[NODE](discourse.nodes ++ discourse.hyperRelations).toSeq
     else
       uuids.flatMap { uuid => nodeWithUuid[NODE](discourse, uuid) }
   }

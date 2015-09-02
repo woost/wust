@@ -62,11 +62,15 @@ object ApiNodeFormat {
         ("email", JsString(n.email.getOrElse("")))
       )
       case n: Updated        => Seq(
+        ("id", JsString(n.uuid)),
         ("oldTitle", JsString(n.oldTitle)),
         ("newTitle", JsString(n.newTitle)),
         ("oldDescription", JsString(n.oldDescription.getOrElse(""))),
-        ("newDescription", JsString(n.newDescription.getOrElse(""))),
-        ("isRequest", JsBoolean(true))
+        ("newDescription", JsString(n.newDescription.getOrElse("")))
+      )
+      case n: UpdatedTags    => Seq(
+        ("id", JsString(n.uuid)),
+        ("tags", Json.toJson(n.inRelationsAs(Tags).map(tagsWrites.writes)))
       )
       case n              =>
         throw new RuntimeException("You did not define a formatter for the api: " + node)

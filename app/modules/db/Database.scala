@@ -50,7 +50,7 @@ object Database {
   def limitedDiscourseNodes[NODE <: UuidNode](skip: Int, limit: Int, factory: NodeFactory[NODE]): (Discourse, Seq[NODE]) = {
     val nodeDef = ConcreteFactoryNodeDefinition(factory)
     val discourse = discourseGraphWithReturn(s"${ nodeDef.name } skip $skip limit $limit", nodeDef)
-    (discourse, nodesWithType[NODE](discourse.nodes))
+    (discourse, nodesWithType[NODE](discourse.nodes ++ discourse.hyperRelations))
   }
 
   def discourseNodes[NODE <: UuidNode](factory: NodeFactory[NODE], uuids: String*): (Discourse, Seq[NODE]) = {
