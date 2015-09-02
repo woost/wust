@@ -40,37 +40,38 @@ function hashCode(string) {
     return hash;
 }
 
+// post and tag label border
 function hashToColorBorder(tag) {
     if(tag.color === -1) return "hsl(0, 0%, 45%)";
-    return hashToColor(tag, 40, 45);
+    return hashToColor(tag, 39.96390757499496, 58.4835019610919);
 }
 
+// post bg
 function hashToColorBackground(tag) {
     if(tag.color === -1) return "hsl(0, 0%, 98%)";
-    return hashToColor(tag, 90, 95);
+    return hashToColor(tag, 37.35167134606828, 91.15895160743396);
 }
 
+// tag circles
 function hashToColorFill(tag) {
     if(tag.color === -1) return "hsl(0, 0%, 55%)";
-    return hashToColor(tag, 75, 65);
+    return hashToColor(tag, 40.15277996845449, 65);
 }
 
+// tag label bg
 function hashToColorFillLight(tag) {
     if(tag.color === -1) return "hsl(0, 0%, 55%)";
-    return hashToColor(tag, 90, 80);
-    // return hashToColor(tag, 57, 55);
+    return hashToColor(tag, 39.96390757499496, 58.4835019610919);
 }
 
 function tagTitleColor(title) {
     return Math.abs(hashCode(title.toLowerCase())) % 360;
 }
 
-function hashToColor(tag, saturation, brightness) {
+function hashToColor(tag, chromaValue, lightness) {
     // https://vis4.net/blog/posts/avoid-equidistant-hsv-colors/
     let hue = tag.color || tagTitleColor(tag.title); // 0..360
-    let chroma = saturation / 100;//0.7; // 0..~5
-    let lightness = brightness / 100;//1; // 0..~1.7
-    return chroma.hcl(hue, chroma, lightness).hex();
+    return chroma.hcl(hue, chromaValue, lightness).hex();
 }
 
 function sortTags(tags) {
