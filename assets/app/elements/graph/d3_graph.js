@@ -205,8 +205,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
 
                 this.d3Node = this.d3NodeContainerWithData.append("div")
                 .attr("class", d => d.isHyperRelation ? "hyperrelation" : "small_post_directive")
-                .style("background-color", n => (n.tags.length > 0 && !n.isHyperRelation) ? Helpers.hashToHslBackground(n.tags[0]) : undefined)
-                .style("border-color", n => !n.isHyperRelation && n.tags.length > 0 ? Helpers.hashToHslBorder(n.tags[0]) : undefined)
+                .style("background-color", n => (n.tags.length > 0 && !n.isHyperRelation) ? Helpers.hashToColorBackground(n.tags[0]) : undefined)
+                .style("border-color", n => !n.isHyperRelation && n.tags.length > 0 ? Helpers.hashToColorBorder(n.tags[0]) : undefined)
                 .html(d => {
                     //TODO: do it with d3 data-joins, or directly with the angular-port
                     if(d.isHyperRelation) {
@@ -214,8 +214,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
                         _.values(d.tags).forEach(t => {
                             let tagElem = document.createElement("span");
                             tagElem.className = "tag nodetag";
-                            tagElem.style.backgroundColor = Helpers.hashToHslFill(t);
-                            tagElem.style.borderColor = Helpers.hashToHslBorder(t);
+                            tagElem.style.backgroundColor = Helpers.hashToColorFill(t);
+                            tagElem.style.borderColor = Helpers.hashToColorBorder(t);
                             tagElem.appendChild(document.createTextNode(t.title));
                             elem.appendChild(tagElem);
                         });
@@ -233,7 +233,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
                             circleCont.appendChild(circleTitle);
                             let circle = document.createElement("span");
                             circle.className = "tag_circle";
-                            circle.style.backgroundColor = Helpers.hashToHslFill(t);
+                            circle.style.backgroundColor = Helpers.hashToColorFill(t);
                             circleTitle.appendChild(circle);
                         });
                         return elem.outerHTML;

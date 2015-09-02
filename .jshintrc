@@ -80,6 +80,7 @@
         "marked",
         "renesca",
         "geometry",
-        "JsDiff"
+        "JsDiff",
+        "chroma"
     ]
 }

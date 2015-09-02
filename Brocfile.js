@@ -104,6 +104,8 @@ var appScripts = iife(esTranspiler(appScriptsEs6));
 
 var scripts = concat(mergeTrees([appScripts,htmlTemplates,dependencies,staticAssetsJs]), {
     inputFiles: [
+        min("chroma-js/chroma.js"),
+
         min("angular/angular.js"),
         min("angular-animate/angular-animate.js"),
         min("angular-sanitize/angular-sanitize.js"),

@@ -2,11 +2,11 @@ angular.module("wust.services").value("Helpers", {
     fireWindowResizeEvent,
     mapFind,
     hashCode,
-    hashToHsl,
-    hashToHslBorder,
-    hashToHslBackground,
-    hashToHslFill,
-    hashToHslFillLight,
+    hashToColor,
+    hashToColorBorder,
+    hashToColorBackground,
+    hashToColorFill,
+    hashToColorFillLight,
     tagTitleColor,
     sortTags,
     cssCompat,
@@ -40,33 +40,37 @@ function hashCode(string) {
     return hash;
 }
 
-function hashToHslBorder(tag) {
+function hashToColorBorder(tag) {
     if(tag.color === -1) return "hsl(0, 0%, 45%)";
-    return hashToHsl(tag, 40, 45);
+    return hashToColor(tag, 40, 45);
 }
 
-function hashToHslBackground(tag) {
+function hashToColorBackground(tag) {
     if(tag.color === -1) return "hsl(0, 0%, 98%)";
-    return hashToHsl(tag, 90, 95);
+    return hashToColor(tag, 90, 95);
 }
 
-function hashToHslFill(tag) {
+function hashToColorFill(tag) {
     if(tag.color === -1) return "hsl(0, 0%, 55%)";
-    return hashToHsl(tag, 75, 65);
+    return hashToColor(tag, 75, 65);
 }
 
-function hashToHslFillLight(tag) {
+function hashToColorFillLight(tag) {
     if(tag.color === -1) return "hsl(0, 0%, 55%)";
-    return hashToHsl(tag, 90, 80);
-    // return hashToHsl(tag, 57, 55);
+    return hashToColor(tag, 90, 80);
+    // return hashToColor(tag, 57, 55);
 }
 
 function tagTitleColor(title) {
     return Math.abs(hashCode(title.toLowerCase())) % 360;
 }
 
-function hashToHsl(tag, saturation, brightness) {
-    return `hsl(${tag.color || tagTitleColor(tag.title)}, ${saturation}%, ${brightness}%)`;
+function hashToColor(tag, saturation, brightness) {
+    // https://vis4.net/blog/posts/avoid-equidistant-hsv-colors/
+    let hue = tag.color || tagTitleColor(tag.title); // 0..360
+    let chroma = saturation / 100;//0.7; // 0..~5
+    let lightness = brightness / 100;//1; // 0..~1.7
+    return chroma.hcl(hue, chroma, lightness).hex();
 }
 
 function sortTags(tags) {

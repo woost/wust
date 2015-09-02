@@ -23,8 +23,8 @@ function coloredTagNode(Helpers) {
                 rawElem.style.backgroundColor = "";
                 rawElem.style.borderColor = "";
             } else {
-                rawElem.style.backgroundColor = Helpers.hashToHslBackground(tag);
-                rawElem.style.borderColor = Helpers.hashToHslBorder(tag);
+                rawElem.style.backgroundColor = Helpers.hashToColorBackground(tag);
+                rawElem.style.borderColor = Helpers.hashToColorBorder(tag);
             }
         }
     }
