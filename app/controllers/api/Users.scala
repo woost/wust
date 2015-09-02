@@ -8,9 +8,9 @@ import modules.requests.dsl._
 
 object Users extends Nodes[schema.User] {
   val node = NodeDef(UserAccess.apply,
-    ("created", N > StartRelationRead(schema.Created, schema.Post)),
-    ("updated", N > StartRelationRead(schema.Updated, schema.Post)),
-    ("deleted", N > StartRelationRead(schema.Deleted, schema.Post)),
-    ("contributions", N > StartMultiRelationRead(schema.Created, schema.Updated, schema.Deleted)(schema.Post) + TaggedTaggable.apply[schema.Post])
+    "created" -> (N > StartRelationRead(schema.Created, schema.Post)),
+    "updated" -> (N > StartRelationRead(schema.Updated, schema.Post)),
+    "deleted" -> (N > StartRelationRead(schema.Deleted, schema.Post)),
+    "contributions" -> (N > StartMultiRelationRead(schema.Created, schema.Updated, schema.Deleted)(schema.Post) + TaggedTaggable.apply[schema.Post])
   )
 }
