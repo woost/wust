@@ -51,6 +51,7 @@ object WustSchema {
   @Graph trait Discourse {Nodes(User, UserGroup, Post, TagLike) }
   @Relation trait ContentRelation
   //TODO: is HyperConnection really necessary?
+  // --> this is only used by the requestschema and actually is not needed, should be removed.
   @Relation trait HyperConnection
   //TODO: rename to ExposedNode
   @Node trait ContentNode extends UuidNode
