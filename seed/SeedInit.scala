@@ -14,14 +14,14 @@ object SeedDatabase extends Task with SeedTools {
 
     modifyDiscourse { implicit discourse =>
       discourse.add(
-        mergeClassification("Problem", color = Some(46)),
-        mergeClassification("Goal", color = Some(158)),
-        mergeClassification("Idea", color = Some(210)),
-        mergeClassification("Pro", color = Some(105)),
-        mergeClassification("Con", color = Some(359)),
-        mergeClassification("Bug", color = Some(22)),
-        mergeClassification("Question", color = Some(252)),
-        mergeClassification("Answer", color = Some(190)),
+        mergeClassification("Problem", color = Some(90)),
+        mergeClassification("Goal", color = Some(169)),
+        mergeClassification("Idea", color = Some(255)),
+        mergeClassification("Pro", color = Some(135)),
+        mergeClassification("Con", color = Some(21)),
+        mergeClassification("Bug", color = Some(57)),
+        mergeClassification("Question", color = Some(301)),
+        mergeClassification("Answer", color = Some(216)),
         mergeStaticTag("StartPost"),
         mergeClassification("repliesTo")
       )

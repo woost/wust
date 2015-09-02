@@ -43,25 +43,25 @@ function hashCode(string) {
 // post and tag label border
 function hashToColorBorder(tag) {
     if(tag.color === -1) return "hsl(0, 0%, 45%)";
-    return hashToColor(tag, 39.96390757499496, 58.4835019610919);
+    return hashToColor(tag, 40, 58);
 }
 
 // post bg
 function hashToColorBackground(tag) {
     if(tag.color === -1) return "hsl(0, 0%, 98%)";
-    return hashToColor(tag, 37.35167134606828, 91.15895160743396);
+    return hashToColor(tag, 10, 95);
 }
 
 // tag circles
 function hashToColorFill(tag) {
     if(tag.color === -1) return "hsl(0, 0%, 55%)";
-    return hashToColor(tag, 40.15277996845449, 65);
+    return hashToColor(tag, 55, 69);
 }
 
 // tag label bg
 function hashToColorFillLight(tag) {
     if(tag.color === -1) return "hsl(0, 0%, 55%)";
-    return hashToColor(tag, 39.96390757499496, 58.4835019610919);
+    return hashToColor(tag, 40, 80);
 }
 
 function tagTitleColor(title) {
