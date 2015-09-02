@@ -65,7 +65,8 @@ object ApiNodeFormat {
         ("oldTitle", JsString(n.oldTitle)),
         ("newTitle", JsString(n.newTitle)),
         ("oldDescription", JsString(n.oldDescription.getOrElse(""))),
-        ("newDescription", JsString(n.newDescription.getOrElse("")))
+        ("newDescription", JsString(n.newDescription.getOrElse(""))),
+        ("isRequest", JsBoolean(true))
       )
       case n              =>
         throw new RuntimeException("You did not define a formatter for the api: " + node)

@@ -88,15 +88,19 @@ object WustSchema {
   @Node trait Action extends Timestamp
   //TODO: store content of action in action, for example the new description and title
   @HyperRelation class Created(startNode: User, endNode: Post) extends Action
-  @HyperRelation class Updated(startNode: User, endNode: Post) extends Action with UuidNode with HyperConnection {
-    val oldTitle:String
-    val newTitle:String
-    val oldDescription:Option[String]
-    val newDescription:Option[String]
+  @Node trait ChangeRequest extends UuidNode with Action {
     val applyThreshold:Long
     val applyVotes:Long
     var applied:Boolean = false
   }
+  @HyperRelation class Updated(startNode: User, endNode: Post) extends ChangeRequest with HyperConnection {
+    val oldTitle:String
+    val newTitle:String
+    val oldDescription:Option[String]
+    val newDescription:Option[String]
+  }
+
+  @HyperRelation class UpdatedTags(startNode: User, endNode: Post) extends ChangeRequest with Taggable with HyperConnection
 
   // TODO: should be a node? as the to be deleted node will deleted and we cannot connect there?
   // hiding nodes seems like more work.
