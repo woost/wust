@@ -41,12 +41,12 @@ object CheckUserWrite {
 // relationaccess and include the tags in the read queries.
 // Still, this solution is very flexible as we can add decorators to other
 // accesses easily: PostAccess.apply + TaggedTaggable(Post)
-class TaggedTaggable extends AccessNodeDecoratorControl[Taggable] with AccessNodeDecoratorControlDefault[Taggable] {
-  override def shapeResponse(response: Taggable) = {
+class TaggedTaggable[NODE <: UuidNode] extends AccessNodeDecoratorControl[NODE] with AccessNodeDecoratorControlDefault[NODE] {
+  override def shapeResponse(response: NODE) = {
     shapeResponse(List(response)).head
   }
 
-  override def shapeResponse(response: Iterable[Taggable]) = {
+  override def shapeResponse(response: Iterable[NODE]) = {
     //TODO: share code with component query
     if (!response.isEmpty) {
       val tagDef = ConcreteFactoryNodeDefinition(TagLike)
@@ -69,5 +69,5 @@ class TaggedTaggable extends AccessNodeDecoratorControl[Taggable] with AccessNod
 }
 
 object TaggedTaggable {
-  def apply = new TaggedTaggable
+  def apply[NODE <: UuidNode] = new TaggedTaggable[NODE]
 }
