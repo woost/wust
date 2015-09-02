@@ -1,8 +1,8 @@
 angular.module("wust.components").controller("FocusCtrl", FocusCtrl);
 
-FocusCtrl.$inject = ["Helpers", "$stateParams", "$state", "HistoryService", "rootNode", "ConnectedComponents", "$q"];
+FocusCtrl.$inject = ["Helpers", "$stateParams", "$state", "HistoryService", "rootNode", "ConnectedComponents", "$q", "$scope"];
 
-function FocusCtrl(Helpers, $stateParams, $state, HistoryService, rootNode, ConnectedComponents, $q) {
+function FocusCtrl(Helpers, $stateParams, $state, HistoryService, rootNode, ConnectedComponents, $q, $scope) {
     let vm = this;
 
     let rawRootNode = rootNode.$encode();
@@ -30,7 +30,9 @@ function FocusCtrl(Helpers, $stateParams, $state, HistoryService, rootNode, Conn
             if (active) {
                 if (this.index === 1) {
                     $state.transitionTo("focus", { type: "graph" }, { inherit: true, notify: false });
-                    _.defer(Helpers.fireWindowResizeEvent.bind(Helpers));
+                    // switching to graph by tabs
+                    // console.log("focusCtrl: sending display_graph");
+                    $scope.$broadcast("display_graph");
                 } else {
                     $state.transitionTo("focus", { type: "" }, { inherit: true, notify: false });
                 }
@@ -42,9 +44,9 @@ function FocusCtrl(Helpers, $stateParams, $state, HistoryService, rootNode, Conn
 
     vm.tabViews = _.map([0, 1], i => new Tab(i));
     if ($stateParams.type === "graph") {
+        // opening graph by url
         vm.tabViews[0]._active = false;
         vm.tabViews[1]._active = true;
-        _.defer(Helpers.fireWindowResizeEvent.bind(Helpers));
     } else {
         vm.tabViews[0]._active = true;
         vm.tabViews[1]._active = false;

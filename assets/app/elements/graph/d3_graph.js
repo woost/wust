@@ -1,8 +1,8 @@
 angular.module("wust.elements").directive("d3Graph", d3Graph);
 
-d3Graph.$inject = ["$window", "DiscourseNode", "Helpers", "$location", "$filter", "Connectable", "ModalEditService", "EditService", "TagRelationEditService"];
+d3Graph.$inject = ["$window", "DiscourseNode", "Helpers", "$location", "$filter", "Connectable", "ModalEditService", "EditService", "TagRelationEditService", "$q"];
 
-function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectable, ModalEditService, EditService, TagRelationEditService) {
+function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectable, ModalEditService, EditService, TagRelationEditService, $q) {
     return {
         restrict: "A",
         scope: false,
@@ -38,6 +38,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
                 this.height = rootDomElement.offsetHeight;
                 this.dragInitiated = false; // if dragStart was triggered with the correct mouse button
                 this.commitCount = 0;
+                this.displayed = $q.defer();
+                this.gotAllInitialData = $q.defer();
 
                 // state for drag+drop
                 this.isDragging = false;
@@ -81,8 +83,19 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
                 this.initDom();
                 this.registerInitUIEvents();
 
+                _.defer( () => {
+                    // if graph is immediately displayed
+                    if(this.rootDomElement.offsetWidth > 0 && this.rootDomElement.offsetHeight > 0) {
+                        d3Graph.displayGraph();
+                    } else {
+                        // wait for event
+                        scope.$on("display_graph", d3Graph.displayGraph.bind(this));
+                    }
+                });
+
                 // call tick on every simulation step
                 this.force.on("tick", this.tick.bind(this));
+
                 // react on graph changes
                 this.graph.onCommit(this.updateGraph.bind(this));
 
@@ -174,6 +187,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
             }
 
             updateGraph(changes) {
+                // console.log("updateGraph("+(this.commitCount+1)+")");
                 this.commitCount++;
                 // the first commit is only the rootNode
                 if(this.commitCount <= 1) return;
@@ -288,13 +302,16 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
                 this.force.nodes(this.graph.nodes); // nodes and relations get replaced instead of just changed by scalajs
                 this.force.links(this.graph.relations); // that's why we need to set the new references
 
-                // we only want to initialize, not start the simulation
+                // reinitialize the simulation, because we changes nodes and relations
                 // https://github.com/mbostock/d3/blob/78e0a4bb81a6565bf61e3ef1b898ef8377478766/src/layout/force.js#L274
                 this.force.start();
+
                 // don't converge, we are triggering this manually in the beginning
                 if(this.commitCount <= 2) this.force.stop();
 
                 this.registerUIEvents();
+
+                this.gotAllInitialData.resolve();
             }
 
             stopPropagationAfter(func) {
@@ -431,6 +448,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
         }
 
         converge(onConvergeFinish = _.noop) {
+            // console.log("converge");
             // let convergeIterations = 0;
             this.initConverge();
 
@@ -491,7 +509,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
                 this.resizeContainers();
                 this.recalculateNodeDimensions(this.graph.nodes);
             }
-
         }
 
         afterConverge() {
@@ -512,6 +529,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
         }
 
         updateGraphRefs() {
+            // console.log("updateGraphRefs");
             // write dom element ref and rect into graph node
             // for easy lookup
             let newElementInfo = {
@@ -764,52 +782,56 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
         }
 
         // resize graph according to the current element dimensions
-        resizeGraph(event, duration = 500) {
+        resizeGraph(event) {
+            // console.log("resizeGraph");
             let oldWidth = this.width;
             let oldHeight = this.height;
 
             this.resizeContainers();
 
-            // this is the first graph display,
-            // so focus the rootNode
-            if(oldWidth === 0 && oldHeight === 0) {
-                _.defer(() => {
+            // only do this on a real resize. (not on tab changes etc)
+            if(oldWidth === 0 && oldHeight === 0)
+                console.warn("should not happen");
+
+            this.moveOldCenterToNewCenter(oldWidth, oldHeight);
+        }
+
+        moveOldCenterToNewCenter(oldWidth, oldHeight, duration = 500) {
+            let widthDiff = this.width - oldWidth;
+            let heightDiff = this.height - oldHeight;
+            let oldTranslate = this.zoom.translate();
+            let translate = [oldTranslate[0] + widthDiff/2, oldTranslate[1] + heightDiff/2];
+
+            if (duration > 0) {
+                this.d3HtmlContainer.transition().duration(duration).call(this.zoom.translate(translate).event);
+                this.d3SvgContainer.transition().duration(duration).call(this.zoom.translate(translate).event);
+            } else {
+                // skip animation if duration is zero
+                this.d3HtmlContainer.call(this.zoom.translate(translate).event);
+                this.d3SvgContainer.call(this.zoom.translate(translate).event);
+            }
+        }
+
+        displayGraph() {
+            // console.log("triggered: display_graph");
+
+            if( this.displayed.promise.$$state.status ) return;
+            this.displayed.resolve();
+
+            _.defer(() => {
+                if( this.rootDomElement.offsetWidth === 0 ||
+                        this.rootDomElement.offsetHeight === 0 )
+                    console.warn("cannot display graph, root element has size 0");
+
+                this.resizeContainers();
+
+                this.gotAllInitialData.promise.then( () => {
+                    // console.log("data is here, converge!");
+
+                    // so focus the rootNode
                     this.converge(() => setTimeout(() => this.focusRootNode(), 700));
                 });
-            }
-
-            // only do this on a real resize. (not on tab changes etc)
-            if(oldWidth !== 0 && oldHeight !== 0) {
-                // move old center to new center
-                let widthDiff = this.width - oldWidth;
-                let heightDiff = this.height - oldHeight;
-                let oldTranslate = this.zoom.translate();
-                let translate = [oldTranslate[0] + widthDiff/2, oldTranslate[1] + heightDiff/2];
-
-                if (duration > 0) {
-                    this.d3HtmlContainer.transition().duration(duration).call(this.zoom.translate(translate).event);
-                    this.d3SvgContainer.transition().duration(duration).call(this.zoom.translate(translate).event);
-                } else {
-                    // skip animation if duration is zero
-                    this.d3HtmlContainer.call(this.zoom.translate(translate).event);
-                    this.d3SvgContainer.call(this.zoom.translate(translate).event);
-                }
-            }
-
-
-            // if graph was hidden when initialized,
-            // all foreign objects have size 0
-            // this call recalculates the sizes
-            // this.recalculateNodeDimensions(this.graph.nodes);
-
-            // if the info about dom elements was not created yet.
-            if (this.elementInfo === undefined) {
-                this.updateGraph();
-                // TODO: felix. sometimes the resize handler is called before the graph was initialized. any idea how to solve this properly?
-                setTimeout(this.force.start.bind(this.force), 200);
-            }
-
-            this.drawGraph();
+            });
         }
 
 
