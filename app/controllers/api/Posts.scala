@@ -7,7 +7,7 @@ import modules.db.access.custom._
 import modules.requests.dsl._
 
 object Posts extends Nodes[Post] {
-  val node = NodeDef(Post, PostAccess.apply + TaggedTaggable.apply[Post],
+  val node = NodeDef(PostAccess.apply + TaggedTaggable.apply[Post],
     ("changes", N < EndRelationRead(UpdatedToPost, Updated))
   )
 }

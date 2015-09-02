@@ -7,7 +7,7 @@ import modules.db.access.custom._
 import modules.requests.dsl._
 
 object ChangeRequests extends Nodes[Updated] {
-  val node = NodeDef(Updated, NodeRead(Updated),
+  val node = NodeDef("Request", NodeRead(Updated),
     ("up", N < VotesOnUpdatedAccess(1)),
     ("down", N < VotesOnUpdatedAccess(-1)),
     ("neutral", N < VotesOnUpdatedAccess(0))

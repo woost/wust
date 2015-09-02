@@ -37,9 +37,9 @@ object ApiSchemaFormat {
     }
 
     def writes(schema: NodeSchema[NODE]) = JsObject(Seq(
-      ("label", JsString(schema.op.label.name)),
+      ("label", JsString(schema.op.factory.label.name)),
       ("path", JsString(schema.path)),
-      ("name", JsString(schema.op.name)),
+      ("name", JsString(schema.name)),
       ("subs", Json.toJson(schema.connectSchemas))
     ))
   }

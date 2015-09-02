@@ -12,8 +12,6 @@ import renesca.parameter.implicits._
 
 trait NodeAccess[+NODE <: UuidNode] {
   val factory: UuidNodeMatchesFactory[NODE]
-  val name: String
-  val label: Label
 
   def read(context: RequestContext): Either[Result, Iterable[NODE]]
   def read(context: RequestContext, uuid: String): Either[Result, NODE]
@@ -23,10 +21,6 @@ trait NodeAccess[+NODE <: UuidNode] {
 }
 
 trait NodeAccessDefault[NODE <: UuidNode] extends NodeAccess[NODE] {
-  // need to be lazy otherwise play crashes while initializing the routes (not sure why though)
-  lazy val name = factory.getClass.getSimpleName.dropRight(1)
-  lazy val label = factory.label
-
   def read(context: RequestContext): Either[Result, Iterable[NODE]] = Left(NotFound("No read access on Node"))
   def read(context: RequestContext, uuid: String): Either[Result, NODE] = Left(NotFound("No read access on Node"))
   def create(context: RequestContext): Either[Result, NODE] = Left(NotFound("No create access on Node"))
@@ -85,8 +79,6 @@ trait NodeAccessDecorator[NODE <: UuidNode] extends NodeAccess[NODE] with Access
   }
 
   val factory = self.factory
-  val name = self.name
-  val label = self.label
 }
 
 case class NodeAccessDecoration[NODE <: UuidNode](self: NodeAccess[NODE], control: AccessDecoratorControl) extends NodeAccessDecorator[NODE] with AccessDecoratorControlForward

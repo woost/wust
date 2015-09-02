@@ -12,6 +12,8 @@ GET    /auth/signout              controllers.api.auth.SignUpController.signOut
 
 -> /users controllers.api.Users
 
+-> /requests controllers.api.Users
+
 GET /components/:uuid controllers.api.ConnectedComponents.show(uuid: String)
 
 GET /graph controllers.api.Graphs.show

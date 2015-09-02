@@ -8,7 +8,7 @@ import modules.requests.dsl._
 
 //TODO: should connectable and post share the same api? if so, rename to connectable
 object Connectables extends Nodes[Connectable] {
-  val node = NodeDef(Connectable, ConnectableAccess.apply + TaggedTaggable.apply[Connectable],
+  val node = NodeDef(ConnectableAccess.apply + TaggedTaggable.apply[Connectable],
     ("connects-from", N < Connects < (EndContentRelationAccess(Connects, Connectable) + ConnectableAccess.apply + TaggedTaggable.apply[Connectable],
       ("connects-to", N > StartContentRelationAccess(Connects, Connectable) + ConnectableAccess.apply + TaggedTaggable.apply[Connectable]),
       ("connects-from", N < EndContentRelationAccess(Connects, Connectable) + ConnectableAccess.apply + TaggedTaggable.apply[Connectable])
