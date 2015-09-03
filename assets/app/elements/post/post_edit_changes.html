@@ -1,8 +1,10 @@
 <div class="post_edit_changes_directive" ng-if="vm.postEditChanges.length > 0">
     <b>Change requests</b>
     <div class="changerequest" ng-repeat="change in vm.postEditChanges">
-        <button class="btn btn-danger pull-right btn-xs" type="button" ng-click="vm.newStream()"><i class="fa fa-close"></i></button>
-        <button class="btn btn-success pull-right btn-xs" type="button" ng-click="vm.newStream()"><i class="fa fa-check"></i></button>
+        <span class="pull-right">
+            <button class="btn btn-success btn-xs" type="button" ng-click="vm.upvote(change)"><i class="fa fa-check"></i></button>
+            <button class="btn btn-danger btn-xs" type="button" ng-click="vm.downvote(change)"><i class="fa fa-close"></i></button>
+        </span>
         <b>Title:</b>
         <div word-based-diff source-a="change.oldTitle" source-b="change.newTitle"></div>
         <b>Description:</b>

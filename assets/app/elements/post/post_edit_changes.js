@@ -15,8 +15,23 @@ function postEditChanges() {
     };
 }
 
-postEditChangesCtrl.$inject = [];
+postEditChangesCtrl.$inject = ["RequestsEdit"];
 
-function postEditChangesCtrl() {
+function postEditChangesCtrl(RequestsEdit) {
     let vm = this;
+
+    vm.upvote = upvote;
+    vm.downvote = downvote;
+
+    function upvote(change) {
+        RequestsEdit.$buildRaw(change).up.$create().$then(val => {
+            humane.success("Up voted");
+        });
+    }
+
+    function downvote(change) {
+        RequestsEdit.$buildRaw(change).down.$create().$then(val => {
+            humane.success("Down voted");
+        });
+    }
 }

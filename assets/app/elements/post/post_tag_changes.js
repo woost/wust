@@ -15,8 +15,23 @@ function postTagChanges() {
     };
 }
 
-postTagChangesCtrl.$inject = [];
+postTagChangesCtrl.$inject = ["RequestsTag"];
 
-function postTagChangesCtrl() {
+function postTagChangesCtrl(RequestsTag) {
     let vm = this;
+
+    vm.upvote = upvote;
+    vm.downvote = downvote;
+
+    function upvote(change) {
+        RequestsTag.$buildRaw(change).up.$create().$then(val => {
+            humane.success("Up voted");
+        });
+    }
+
+    function downvote(change) {
+        RequestsTag.$buildRaw(change).down.$create().$then(val => {
+            humane.success("Down voted");
+        });
+    }
 }

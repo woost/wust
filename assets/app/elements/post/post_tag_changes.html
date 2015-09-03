@@ -2,5 +2,7 @@
     <b>Tag requests</b>
     <span ng-repeat="change in vm.postTagChanges" class="tag" colored-tag="change.tags[0]" border="true">
         <a ui-sref="tags.details({id: change.tags[0].id})" ng-bind="change.tags[0].title"></a>
+        <i class="fa fa-check" style="color: green" ng-click="vm.upvote(change)"></i>
+        <i class="fa fa-close" style="color: red" ng-click="vm.downvote(change)"></i>
     </span>
 </div>
