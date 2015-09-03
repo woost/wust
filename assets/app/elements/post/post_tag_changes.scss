@@ -1,2 +1,14 @@
 .post_tag_changes_directive {
+    .upvote {
+        color: green;
+        &.active {
+            color: black;
+        }
+    }
+    .downvote {
+        color: red;
+        &.active {
+            color: black;
+        }
+    }
 }

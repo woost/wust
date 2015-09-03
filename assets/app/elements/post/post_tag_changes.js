@@ -23,15 +23,30 @@ function postTagChangesCtrl(RequestsTag) {
     vm.upvote = upvote;
     vm.downvote = downvote;
 
+    function unvote(change) {
+        RequestsTag.$buildRaw(change).neutral.$create().$then(val => {
+            change.vote = null;
+            humane.success("Unvoted");
+        });
+    }
+
     function upvote(change) {
+        if (change.vote && change.vote.weight > 0)
+            return unvote(change);
+
         RequestsTag.$buildRaw(change).up.$create().$then(val => {
-            humane.success("Up voted");
+            change.vote = val;
+            humane.success("Upvoted");
         });
     }
 
     function downvote(change) {
+        if (change.vote && change.vote.weight < 0)
+            return unvote(change);
+
         RequestsTag.$buildRaw(change).down.$create().$then(val => {
-            humane.success("Down voted");
+            change.vote = val;
+            humane.success("Downvoted");
         });
     }
 }
