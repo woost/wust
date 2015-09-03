@@ -95,8 +95,6 @@ trait ResourceRouter extends Router.Routes with ResourceController {
   private val MaybeSlash = "/?".r
   private val Id = pathElement.r
 
-  protected def routePath = path.split("/").last
-
   private val mapRequestToAction: PartialFunction[(String,String),EssentialAction] = {
     case ("GET", MaybeSlash()) => index
     case ("POST", MaybeSlash()) => create

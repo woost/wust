@@ -10,6 +10,7 @@ import play.api.libs.json.{JsResult, JsValue}
 import play.api.mvc.{Controller, AnyContent, Result}
 import play.api.mvc.Results._
 import renesca.parameter.implicits._
+import controllers.Application
 import renesca.schema._
 
 case class RequestContext(controller: NodesBase with Controller, user: Option[User], json: Option[JsValue], query: Map[String, String]) {
@@ -102,6 +103,6 @@ trait NodesBase extends NestedResourceRouter with DefaultNestedResourceControlle
 
 trait Nodes[NODE <: UuidNode] extends ReadableNodes[NODE] with DeletableNodes[NODE] with WritableNodes[NODE] {
   val node: (String) => NodeSchema[NODE]
-  // needs to be lazy, otherwise routePath might be not set by the router
-  lazy val nodeSchema = node(routePath)
+  // needs to be lazy, otherwise prefix might not be set by the router
+  lazy val nodeSchema = node(prefix.stripPrefix(Application.apiDefinition.restRoot))
 }
