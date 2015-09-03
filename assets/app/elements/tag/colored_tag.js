@@ -15,17 +15,24 @@ function coloredTag(Helpers) {
 
     function link(scope, elem) {
         let rawElem = elem[0];
-        if(scope.intense === "true")
-            rawElem.style.backgroundColor = Helpers.hashToColorFill(scope.coloredTag);
+        if (scope.coloredTag.$then)
+            scope.coloredTag.$then(setStyle);
         else
-            rawElem.style.backgroundColor = Helpers.hashToColorFillLight(scope.coloredTag);
+            setStyle();
 
-        if(scope.border === "true")
-            rawElem.style.borderColor = Helpers.hashToColorBorder(scope.coloredTag);
+        function setStyle() {
+            if(scope.intense === "true")
+                rawElem.style.backgroundColor = Helpers.hashToColorFill(scope.coloredTag);
+            else
+                rawElem.style.backgroundColor = Helpers.hashToColorFillLight(scope.coloredTag);
 
-        // intense tags
-        // rawElem.style.color = "white";
-        // light tags
-        rawElem.style.color = "black";
+            if(scope.border === "true")
+                rawElem.style.borderColor = Helpers.hashToColorBorder(scope.coloredTag);
+
+            // intense tags
+            // rawElem.style.color = "white";
+            // light tags
+            rawElem.style.color = "black";
+        }
     }
 }
