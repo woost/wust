@@ -227,16 +227,8 @@ object Database {
     }
   }
 
-  // from paper:
-  // 2011 User-Rating based Ranking of Items from an Axiomatic Perspective
-  // Dirichlet Prior Smoothing: (up + u*p) / (down + up + u)
-  // p: probability for an upvote (needs to be calculated from all votes in the system, I set this to 0.5)
-  // u: influence of our prior (I set this to 10)
   // IMPORTANT: we need to write the constancts as doubles to avoid integer arithmetic
-
-  val tagweight_p = 0.5 // this is also the default weight, if we have up=0 and down=0
-  val tagweight_u = 10
-  def tagweight(up:String, down:String) = s"(($up + ${tagweight_p*tagweight_u})/($up + $down + $tagweight_u))"
+  // def tagweight(up:String, down:String) = s"(($up + ${tagweight_p*tagweight_u})/($up + $down + $tagweight_u))"
   def connectedComponent(focusNode: UuidNodeDefinition[_], depth: Int = 5): Discourse = {
     // Tag weights
     // 1. Cypher does not support subqueries yet, so we have to do extra queries for the tag weights.
