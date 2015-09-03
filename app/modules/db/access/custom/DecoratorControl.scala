@@ -59,7 +59,7 @@ class TaggedTaggable[NODE <: UuidNode] extends AccessNodeDecoratorControl[NODE] 
       """
       val params = nodeDef.parameterMap ++ tagDef.parameterMap ++ tagsDef.parameterMap ++ Map("nodeUuids" -> response.map(_.uuid).toSeq)
 
-      val discourse = Discourse(db.queryGraph(Query(query, params.toMap)))
+      val discourse = Discourse(response.head.graph merge db.queryGraph(Query(query, params.toMap)))
 
       discourse.add(response.toSeq: _*)
     }

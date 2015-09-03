@@ -26,10 +26,8 @@ trait VotesAccessBase extends EndRelationAccessDefault[User, VotesChangeRequest,
       // next we define the voting relation between the currently logged in user and the change request
       val userNode = ConcreteNodeDefinition(user)
       val votes = RelationDefinition(userNode, VotesChangeRequest, changeRequest)
-      disconnectNodes(votes)
-      true
+      disconnectNodesFor(votes)
     } else {
-      //TODO: need matchesOnUuid! for hyperrelations
       val changeRequest = matchesNode(param.baseUuid)
       val votes = VotesChangeRequest.merge(user, changeRequest, weight = sign, onMatch = Set("weight"))
       val failure = db.transaction(_.persistChanges(changeRequest, votes))
@@ -52,6 +50,7 @@ case class VotesUpdatedAccess(
   sign: Long
   ) extends VotesAccessBase {
     override def nodeDefinition(uuid: String) = FactoryUuidNodeDefinition(Updated, uuid)
+    //TODO: need matchesOnUuid! for hyperrelations
     override def matchesNode(uuid: String) = Updated.matchesUuidNode(uuid = Some(uuid), matches = Set("uuid"))
 }
 
