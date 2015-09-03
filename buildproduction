@@ -1,37 +1,14 @@
 #!/bin/bash -e
 
-PATH=$PATH:software/node/bin:node_modules/bower/bin:node_modules/broccoli-cli/bin
-
-if [[ ! -d "software/node" ]]; then
-    echo "downloading node..."
-    mkdir -p software/node
-    wget -c https://nodejs.org/dist/v0.12.7/node-v0.12.7-linux-x64.tar.gz -O software/node.tar.gz --quiet
-
-    tar xzf software/node.tar.gz --strip-components=1 -C software/node
-    rm -f software/node.tar.gz
-fi
-
 echo "installing node dependencies..."
 npm install
 
 echo "installing bower dependencies..."
-bower install
+bower --config.interactive=false install
 
 echo "building production assets..."
 ./prodassets
 
-if [[ ! -e "software/sbt/sbt-launch.jar" ]]; then
-    echo "downloading sbt..."
-    mkdir -p software/sbt
-    wget -c https://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.9/sbt-launch.jar -O software/sbt/sbt-launch.jar --quiet
-fi
-
-sbt() {
-    SBT_OPTS="-Xms512M -Xmx1536M -Xss1M -XX:+CMSClassUnloadingEnabled -XX:MaxPermSize=256M"
-    LOCAL_OPTS="-Dsbt.global.base=./.sbt -Dsbt.ivy.home=./.ivy2"
-    java $SBT_OPTS $LOCAL_OPTS -jar software/sbt/sbt-launch.jar "$@"
-}
-
-echo "staging play application..."
-sbt clean stage
+echo "building play application..."
+sbt clean dist
 

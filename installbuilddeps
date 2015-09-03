@@ -1,0 +1,17 @@
+#!/bin/bash -e
+
+NPMPREFIX="$HOME/.node_modules"
+
+echo 'export PATH=$NPMPREFIX/bin:$PATH' >> ~/.bashrc
+. ~/.bashrc
+mkdir -p $NPMPREFIX
+mkdir -p ~/node-install
+cd ~/node-install
+curl https://nodejs.org/dist/v0.12.7/node-v0.12.7.tar.gz | tar xz --strip-components=1
+./configure --prefix=$NPMPREFIX
+make install
+
+echo "prefix = $NPMPREFIX" >> ~/.npmrc
+wget --quiet -O - https://www.npmjs.org/install.sh | sh
+
+npm -g install bower broccoli-cli
