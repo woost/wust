@@ -18,10 +18,8 @@ case class VotesUpdatedAccess(
 
   override def create(context: RequestContext, param: ConnectParameter[ChangeRequest]) = context.withUser { user =>
     val success = if (sign == 0) {
-      // first we define the updated relation between user and post that defines the actual change request
-      val start = ConcreteFactoryNodeDefinition(User)
-      val end = ConcreteFactoryNodeDefinition(Post)
-      val changeRequest = HyperNodeDefinition(start, Updated, end, Some(param.baseUuid))
+      // first we match the actual change request
+      val changeRequest = FactoryUuidNodeDefinition(Updated, param.baseUuid)
 
       // next we define the voting relation between the currently logged in user and the change request
       val userNode = ConcreteNodeDefinition(user)
@@ -29,12 +27,10 @@ case class VotesUpdatedAccess(
       disconnectNodes(votes)
       true
     } else {
-      val start = User.matches()
-      val end = Post.matches()
-      //TODO: should have matchesOnUuid(start, end, uuid)
-      val changeRequest = Updated.matches(start, end, uuid = Some(param.baseUuid), matches = Set("uuid"))
+      //TODO: need matchesOnUuid! for hyperrelations
+      val changeRequest = Updated.matchesUuidNode(uuid = Some(param.baseUuid), matches = Set("uuid"))
       val votes = VotesChangeRequest.merge(user, changeRequest, weight = sign, onMatch = Set("weight"))
-      val failure = db.transaction(_.persistChanges(start, end, changeRequest, votes))
+      val failure = db.transaction(_.persistChanges(changeRequest, votes))
       !failure.isDefined
     }
 
@@ -58,10 +54,8 @@ case class VotesUpdatedTagsAccess(
 
   override def create(context: RequestContext, param: ConnectParameter[ChangeRequest]) = context.withUser { user =>
     val success = if (sign == 0) {
-      // first we define the updated relation between user and post that defines the actual change request
-      val start = ConcreteFactoryNodeDefinition(User)
-      val end = ConcreteFactoryNodeDefinition(Post)
-      val changeRequest = HyperNodeDefinition(start, UpdatedTags, end, Some(param.baseUuid))
+      // first we match the actual change request
+      val changeRequest = FactoryUuidNodeDefinition(UpdatedTags, param.baseUuid)
 
       // next we define the voting relation between the currently logged in user and the change request
       val userNode = ConcreteNodeDefinition(user)
@@ -69,12 +63,9 @@ case class VotesUpdatedTagsAccess(
       disconnectNodes(votes)
       true
     } else {
-      val start = User.matches()
-      val end = Post.matches()
-      //TODO: should have matchesOnUuid(start, end, uuid)
-      val changeRequest = UpdatedTags.matches(start, end, uuid = Some(param.baseUuid), matches = Set("uuid"))
+      val changeRequest = UpdatedTags.matchesUuidNode(uuid = Some(param.baseUuid), matches = Set("uuid"))
       val votes = VotesChangeRequest.merge(user, changeRequest, weight = sign, onMatch = Set("weight"))
-      val failure = db.transaction(_.persistChanges(start, end, changeRequest, votes))
+      val failure = db.transaction(_.persistChanges(changeRequest, votes))
       !failure.isDefined
     }
 
