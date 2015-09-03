@@ -6,6 +6,7 @@ import play.api.test._
 import play.api.test.Helpers._
 
 import renesca._
+import renesca.parameter.PropertyKey
 
 /**
  * Add your spec here.
@@ -16,7 +17,12 @@ import renesca._
 class Neo4jSpec extends Specification {
 
   "Neo4j" should {
+
     "write isolate transactions" >> {
+      import scala.concurrent._
+      import scala.concurrent.duration._
+      import ExecutionContext.Implicits.global
+
       val db = new DbService
       db.restService = new RestService(
         server = "http://localhost:7474",
@@ -27,14 +33,21 @@ class Neo4jSpec extends Specification {
 
       val tx1 = db.newTransaction
       val tx2 = db.newTransaction
-      tx1.query("""match (n {uuuid: "penis"}) set n.tx1counter = n.counter""");
-      tx2.query("""match (n {uuuid: "penis"}) set n.tx2counter = n.counter""");
-      tx1.query("""match (n {uuuid: "penis"}) set n.counter = n.tx1counter + 1""");
-      tx2.query("""match (n {uuuid: "penis"}) set n.counter = n.tx2counter + 1""");
-      tx1.commit()
-      tx2.commit()
 
+      val f = Future {
+        val g2 = tx2.queryGraph("""match (n {uuuid: "penis"}) set n.__lock=true return n""");
+        tx2.query(s"""match (n {uuuid: "penis"}) set n.counter = ${g2.nodes.head.properties(PropertyKey("counter"))} + 1 remove n.__lock""");
+        tx2.commit()
+      }
+
+      val g1 = tx1.queryGraph("""match (n {uuuid: "penis"}) set n.__lock=true return n""");
+      tx1.query(s"""match (n {uuuid: "penis"}) set n.counter = ${g1.nodes.head.properties(PropertyKey("counter"))} + 1 remove n.__lock""");
+      tx1.commit()
+
+      Await.ready(f, Duration(10, SECONDS))
       val table = db.queryTable("""match (n {uuuid: "penis"}) return n.counter""")
+      db.query("""match (n {uuuid: "penis"}) delete n""")
+
       table.rows.head("n.counter").asLong mustEqual 2L
     }
   }
