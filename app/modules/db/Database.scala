@@ -55,7 +55,7 @@ object Database {
   def limitedDiscourseNodes[NODE <: UuidNode](skip: Int, limit: Int, factory: NodeFactory[NODE]): (Discourse, Seq[NODE]) = {
     val nodeDef = ConcreteFactoryNodeDefinition(factory)
     val discourse = discourseGraphWithReturn(s"${ nodeDef.name } skip $skip limit $limit", nodeDef)
-    (discourse, nodesWithType[NODE](discourse.nodes ++ discourse.hyperRelations))
+    (discourse, nodesWithType[NODE](discourse.nodes))
   }
 
   def discourseNodes[NODE <: UuidNode](factory: NodeFactory[NODE], uuids: String*): (Discourse, Seq[NODE]) = {
@@ -84,7 +84,7 @@ object Database {
 
   def startConnectedDiscourseNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinitions: NodeAndFixedRelationDefinition[START, RELATION, END]*): Seq[END] = {
     val discourse = startConnectedDiscourseGraph(relationDefinitions: _*)
-    nodesWithType[END](discourse.nodes ++ discourse.hyperRelations)
+    nodesWithType[END](discourse.nodes)
   }
 
   //TODO: need ordering for limit search, otherwise we get duplicates
@@ -99,7 +99,7 @@ object Database {
 
   def limitedStartConnectedDiscourseNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](skip: Int, limit: Int, relationDefinitions: NodeAndFixedRelationDefinition[START, RELATION, END]*): Seq[END] = {
     val discourse = limitedStartConnectedDiscourseGraph(skip, limit, relationDefinitions: _*)
-    nodesWithType[END](discourse.nodes ++ discourse.hyperRelations)
+    nodesWithType[END](discourse.nodes)
   }
 
   def endConnectedDiscourseGraph[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinitions: FixedAndNodeRelationDefinition[START, RELATION, END]*): Discourse = {
@@ -113,7 +113,7 @@ object Database {
 
   def endConnectedDiscourseNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinitions: FixedAndNodeRelationDefinition[START, RELATION, END]*): Seq[START] = {
     val discourse = endConnectedDiscourseGraph(relationDefinitions: _*)
-    nodesWithType[START](discourse.nodes ++ discourse.hyperRelations)
+    nodesWithType[START](discourse.nodes)
   }
 
   def limitedEndConnectedDiscourseGraph[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](skip: Int, limit: Int, relationDefinitions: FixedAndNodeRelationDefinition[START, RELATION, END]*): Discourse = {
@@ -127,7 +127,7 @@ object Database {
 
   def limitedEndConnectedDiscourseNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](skip: Int, limit: Int, relationDefinitions: FixedAndNodeRelationDefinition[START, RELATION, END]*): Seq[START] = {
     val discourse = limitedEndConnectedDiscourseGraph(skip, limit, relationDefinitions: _*)
-    nodesWithType[START](discourse.nodes ++ discourse.hyperRelations)
+    nodesWithType[START](discourse.nodes)
   }
 
   def deleteNodes[NODE <: UuidNode](definitions: NodeDefinition[NODE]*) {
