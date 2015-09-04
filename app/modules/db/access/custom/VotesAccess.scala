@@ -33,6 +33,9 @@ trait VotesAccessBase extends EndRelationAccessDefault[User, VotesChangeRequest,
       votes.foreach(request.applyVotes -= _.weight)
 
       val weight = sign // TODO karma
+      if (request.applyVotes + weight >= request.applyThreshold)
+        throw new Exception("Applying change requests currently not possible")
+
       if (sign == 0) {
         // if there are any existing votes, disconnect them
         votes.foreach(discourse.graph.relations -= _.rawItem)
