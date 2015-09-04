@@ -85,6 +85,13 @@ object Search extends TaggedTaggable[UuidNode] with Controller {
       }
     }).getOrElse(Discourse.empty)
 
-    Ok(Json.toJson(shapeResponse(discourse.uuidNodes)))
+    Ok(Json.toJson(
+      // we only add attached tags to the result when searching for
+      // connectables or posts
+      if (label.contains(Connectable.label.name) || label.contains(Post.label.name))
+        shapeResponse(discourse.uuidNodes)
+      else
+        discourse.uuidNodes
+    ))
   }
 }
