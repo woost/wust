@@ -19,23 +19,28 @@ object Database {
     credentials = Some(spray.http.BasicHttpCredentials("db.neo4j.user".configOrElse("neo4j"), "db.neo4j.pass".configOrElse("neo4j")))
   )
 
-  private def discourseGraphWithReturn(returns: String, definitions: GraphDefinition*): Discourse = {
+  //TODO: more methods with optional tx
+
+  private def discourseGraphWithReturn(returns: String, definitions: GraphDefinition*):Discourse = discourseGraphWithReturn(db, returns, definitions: _*)
+  private def discourseGraphWithReturn(tx: QueryHandler, returns: String, definitions: GraphDefinition*): Discourse = {
     if(definitions.isEmpty || returns.isEmpty)
       return Discourse.empty
 
     val matcher = definitions.map(_.toQuery).mkString(",")
     val query = s"match $matcher return $returns"
     val params = definitions.map(_.parameterMap).reduce(_ ++ _)
-    Discourse(db.queryGraph(Query(query, params)))
+    Discourse(tx.queryGraph(Query(query, params)))
   }
 
-  def discourseGraph(definitions: GraphDefinition*): Discourse = {
-    discourseGraphWithReturn("*", definitions: _*)
+  def discourseGraph(definitions: GraphDefinition*): Discourse = discourseGraph(db, definitions: _*)
+  def discourseGraph(tx: QueryHandler, definitions: GraphDefinition*): Discourse = {
+    discourseGraphWithReturn(tx, "*", definitions: _*)
   }
 
-  def itemDiscourseGraph[NODE <: Node](definitions: GraphDefinition*): Discourse = {
+  def itemDiscourseGraph(definitions: GraphDefinition*): Discourse = itemDiscourseGraph(db, definitions: _*)
+  def itemDiscourseGraph[NODE <: Node](tx: QueryHandler, definitions: GraphDefinition*): Discourse = {
     val returns = definitions.map(_.name).mkString(",")
-    discourseGraphWithReturn(returns, definitions: _*)
+    discourseGraphWithReturn(tx, returns, definitions: _*)
   }
 
   def nodeDiscourseGraph[NODE <: UuidNode](factory: NodeFactory[NODE], uuids: String*): Discourse = {
@@ -186,14 +191,13 @@ object Database {
       Some(connectNodes(discourse, nodesOpt.get._2, factory, nodesOpt.get._1))
   }
 
-  def disconnectNodesFor[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinition: FixedRelationDefinition[START, RELATION, END]) = {
-    val tx = db.newTransaction()
-    val discourse = itemDiscourseGraph(relationDefinition)
+  def disconnectNodesFor[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinition: FixedRelationDefinition[START, RELATION, END], tx:QueryHandler = db) = {
+    val discourse = itemDiscourseGraph(tx, relationDefinition)
     discourse.graph.relations.filter {
       //TODO: I do not handle hyperrelations
       _.relationType == relationDefinition.factory.asInstanceOf[RelationFactory[_,_,_]].relationType
     }.foreach(discourse.graph.relations -= _)
-    val failure = tx.commit.persistChanges(discourse.graph)
+    val failure = tx.persistChanges(discourse.graph)
     failure.isEmpty
   }
 
