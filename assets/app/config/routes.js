@@ -3,6 +3,9 @@ angular.module("wust.config").config(RoutesConfig);
 RoutesConfig.$inject = ["$stateProvider", "$urlRouterProvider", "$locationProvider"];
 
 function RoutesConfig($stateProvider, $urlRouterProvider, $locationProvider) {
+    //TODO: caching of focus resolve...workaround...
+    let lastFocus;
+
     $stateProvider.state("page", {
         abstract: true,
         templateUrl: `components/page/page.html`,
@@ -50,15 +53,11 @@ function RoutesConfig($stateProvider, $urlRouterProvider, $locationProvider) {
                 // our url for switching between graph and neighbours view.
                 // so if we are still viewing the same node, we just return
                 // undefined, as no new focusctrl is instantiated
-                if ($state.is("focus", {
-                    id: $stateParams.id
-                }) || $state.is("focus", {
-                    id: $stateParams.id,
-                    type: "graph"
-                })) {
-                    return undefined;
+                if ($state.is("focus") && lastFocus && lastFocus.id === $stateParams.id) {
+                    return lastFocus;
                 } else {
-                    return Post.$find($stateParams.id).$asPromise();
+                    lastFocus = Post.$find($stateParams.id);
+                    return lastFocus.$asPromise();
                 }
             }]
         }
