@@ -44,9 +44,22 @@ function RoutesConfig($stateProvider, $urlRouterProvider, $locationProvider) {
         url: "/focus/:id/:type",
         templateUrl: `components/focus/focus.html`,
         controller: "FocusCtrl as vm",
-        resolve: {
-            rootNode: ["Post","$stateParams", function(Post, $stateParams) {
-                return Post.$find($stateParams.id).$asPromise();
+        resolve: { //TODO: should not use resolve, instead async resolve in focus ctrl
+            rootNode: ["Post","$stateParams","$state", function(Post, $stateParams, $state) {
+                // somehow the resolve method is called every time we change
+                // our url for switching between graph and neighbours view.
+                // so if we are still viewing the same node, we just return
+                // undefined, as no new focusctrl is instantiated
+                if ($state.is("focus", {
+                    id: $stateParams.id
+                }) || $state.is("focus", {
+                    id: $stateParams.id,
+                    type: "graph"
+                })) {
+                    return undefined;
+                } else {
+                    return Post.$find($stateParams.id).$asPromise();
+                }
             }]
         }
     });
