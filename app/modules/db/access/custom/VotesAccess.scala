@@ -65,7 +65,10 @@ trait VotesAccessBase[T <: ChangeRequest] extends EndRelationAccessDefault[User,
 
         failure.map(_ => BadRequest("No vote :/")).getOrElse {
           Ok(JsObject(Seq(
-            ("weight", JsNumber(weight)),
+            ("vote", JsObject(Seq(
+              ("weight", JsNumber(weight))
+            ))),
+            ("votes", JsNumber(request.applyVotes)),
             ("node", node)
           )))
         }

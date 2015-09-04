@@ -69,12 +69,16 @@ object ApiNodeFormat {
         ("newTitle", JsString(n.newTitle)),
         ("oldDescription", JsString(n.oldDescription.getOrElse(""))),
         ("newDescription", JsString(n.newDescription.getOrElse(""))),
-        ("vote", n.inRelationsAs(VotesChangeRequest).headOption.map(vote => JsObject(Seq(("weight", JsNumber(vote.weight))))).getOrElse(JsNull))
+        ("vote", n.inRelationsAs(VotesChangeRequest).headOption.map(vote => JsObject(Seq(("weight", JsNumber(vote.weight))))).getOrElse(JsNull)),
+        ("threshold", JsNumber(n.applyThreshold)),
+        ("votes", JsNumber(n.applyVotes))
       )
       case n: UpdatedTags    => Seq(
         ("id", JsString(n.uuid)),
         ("tags", Json.toJson(n.inRelationsAs(Tags).map(tagsWrites.writes))),
-        ("vote", n.inRelationsAs(VotesChangeRequest).headOption.map(vote => JsObject(Seq(("weight", JsNumber(vote.weight))))).getOrElse(JsNull))
+        ("vote", n.inRelationsAs(VotesChangeRequest).headOption.map(vote => JsObject(Seq(("weight", JsNumber(vote.weight))))).getOrElse(JsNull)),
+        ("threshold", JsNumber(n.applyThreshold)),
+        ("votes", JsNumber(n.applyVotes))
       )
       case n              =>
         throw new RuntimeException("You did not define a formatter for the api: " + node)

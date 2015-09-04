@@ -2,12 +2,13 @@
     <b>Change requests</b>
     <div class="changerequest" ng-repeat="change in vm.postEditChanges">
         <span class="pull-right">
-            <button class="btn btn-success btn-xs" ng-class="{ active: change.vote.weight > 0 }" type="button" ng-click="vm.upvote(change)"><i class="fa fa-check"></i></button>
-            <button class="btn btn-danger btn-xs" ng-class="{ active: change.vote.weight < 0 }" type="button" ng-click="vm.downvote(change)"><i class="fa fa-close"></i></button>
+            <button class="btn btn-success btn-xs" ng-class="{ active: change.vote.weight > 0 }" type="button" ng-click="vm.voting.up(change)"><i class="fa fa-check"></i></button>
+            <button class="btn btn-danger btn-xs" ng-class="{ active: change.vote.weight < 0 }" type="button" ng-click="vm.voting.down(change)"><i class="fa fa-close"></i></button>
         </span>
         <b>Title:</b>
         <div word-based-diff source-a="change.oldTitle" source-b="change.newTitle"></div>
         <b>Description:</b>
         <div word-based-diff source-a="change.oldDescription" source-b="change.newDescription"></div>
+        <div progressbar max="change.threshold" value="change.votes"><span style="padding-top: 5px; color:grey; white-space:nowrap;">{{change.votes}} / {{change.threshold}}</span></div>
     </div>
 </div>

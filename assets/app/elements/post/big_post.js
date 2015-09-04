@@ -38,6 +38,10 @@ function bigPostCtrl(SidebarService, Post, EditService, Session, ModalEditServic
         }
     }
 
+    function onApply(response) {
+        console.log(response);
+    }
+
     function replyTo() {
         ModalEditService.show();
         ModalEditService.currentNode.setReference(vm.editNode);

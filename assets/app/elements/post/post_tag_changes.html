@@ -2,7 +2,8 @@
     <b>Tag requests</b>
     <span ng-repeat="change in vm.postTagChanges" class="tag" colored-tag="change.tags[0]" border="true">
         <a ui-sref="tags.details({id: change.tags[0].id})" ng-bind="change.tags[0].title"></a>
-        <i class="fa fa-check upvote" ng-class="{ active: change.vote.weight > 0 }" ng-click="vm.upvote(change)"></i>
-        <i class="fa fa-close downvote" ng-class="{ active: change.vote.weight < 0 }" ng-click="vm.downvote(change)"></i>
+        <i class="fa fa-check upvote" ng-class="{ active: change.vote.weight > 0 }" ng-click="vm.voting.up(change)"></i>
+        <i class="fa fa-close downvote" ng-class="{ active: change.vote.weight < 0 }" ng-click="vm.voting.down(change)"></i>
+        <div progressbar max="change.threshold" value="change.votes"><span style="padding-top: 5px; color:grey; white-space:nowrap;">{{change.votes}} / {{change.threshold}}</span></div>
     </span>
 </div>
