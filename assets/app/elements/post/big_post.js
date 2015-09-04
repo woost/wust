@@ -28,6 +28,7 @@ function bigPostCtrl(SidebarService, Post, EditService, Session, ModalEditServic
     vm.tagChanges = Post.$buildRaw(vm.node).requestsTags.$search();
     vm.replyTo = replyTo;
     vm.onSave = onSave;
+    vm.onApply = onApply;
     vm.editMode = false;
 
     function onSave(response) {
@@ -39,7 +40,10 @@ function bigPostCtrl(SidebarService, Post, EditService, Session, ModalEditServic
     }
 
     function onApply(response) {
-        console.log(response);
+        vm.node.title = response.title;
+        vm.node.description = response.description;
+        response.tags.forEach(t => vm.node.tags.push(t));
+        vm.editNode.apply(vm.node);
     }
 
     function replyTo() {

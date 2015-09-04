@@ -32,7 +32,8 @@ function postEditChanges() {
 }
 
 class VotingEditor {
-    constructor(service, onApply = _.noop) {
+    constructor(list, service, onApply = _.noop) {
+        this.list = list;
         this.service = service;
         this.onApply = onApply;
     }
@@ -40,8 +41,10 @@ class VotingEditor {
     applyChange(change, response) {
         change.vote = response.vote;
         change.votes = response.votes;
-        if (response.node)
+        if (response.node) {
+            _.remove(this.list, change);
             this.onApply({response: response.node});
+        }
     }
 
     unvote(change) {
@@ -76,12 +79,12 @@ postEditChangesCtrl.$inject = ["RequestsEdit"];
 function postEditChangesCtrl(RequestsEdit) {
     let vm = this;
 
-    vm.voting = new VotingEditor(RequestsEdit);
+    vm.voting = new VotingEditor(vm.postEditChanges, RequestsEdit, vm.onApply);
 }
 
 postTagChangesCtrl.$inject = ["RequestsTag"];
 function postTagChangesCtrl(RequestsTag) {
     let vm = this;
 
-    vm.voting = new VotingEditor(RequestsTag);
+    vm.voting = new VotingEditor(vm.postTagChanges, RequestsTag, vm.onApply);
 }
