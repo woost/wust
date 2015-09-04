@@ -19,13 +19,21 @@ object Search extends TaggedTaggable[UuidNode] with Controller {
     val labels = ContentNode.labels ++ label.map(Label(_))
     val nodeDef = LabelNodeDefinition(labels)
 
-    val titleRegex = title.map(tit => "(?i).*" + tit.replace(" ", ".*") + ".*")
-    val descrMatcher = if (searchDescriptions.getOrElse(false))
-      Some(s"${nodeDef.name}.description =~ {term}")
-    else
-      None
+    val titleRegex = title.flatMap { tit =>
+      if (tit.trim.isEmpty)
+        None
+      else
+        Some("(?i).*" + tit.replace(" ", ".*") + ".*")
+    }
 
-    val titleMatcher = title.map(_ => s"${nodeDef.name}.title =~ {term}")
+    val descrMatcher = titleRegex.flatMap { _ =>
+      if (searchDescriptions.getOrElse(false))
+        Some(s"${nodeDef.name}.description =~ {term}")
+      else
+        None
+    }
+
+    val titleMatcher = titleRegex.map(_ => s"${nodeDef.name}.title =~ {term}")
     val termMatcher = Seq(titleMatcher, descrMatcher).flatten.mkString(" or ")
 
     val returnPostfix = size.map { limit =>
@@ -42,7 +50,7 @@ object Search extends TaggedTaggable[UuidNode] with Controller {
         s"""match ${nodeDef.toQuery}
         $condition
         $returnStatement""",
-        Map("term" -> titleRegex.getOrElse("")) ++ nodeDef.parameterMap
+        titleRegex.map(t => Map("term" -> t)).getOrElse(Map.empty) ++ nodeDef.parameterMap
       )))
     } else {
       if (tagOr.getOrElse(false)) {
@@ -55,7 +63,7 @@ object Search extends TaggedTaggable[UuidNode] with Controller {
           where (${tagDef.name}.uuid in {tagUuids})
           $condition
           $returnStatement""",
-          Map("term" -> titleRegex.getOrElse(""), "tagUuids" -> tags)
+          titleRegex.map(t => Map("term" -> t)).getOrElse(Map.empty) ++ Map("tagUuids" -> tags)
           ++ relationDef.parameterMap
           ++ tagDef.parameterMap
           ++ nodeDef.parameterMap
@@ -69,7 +77,7 @@ object Search extends TaggedTaggable[UuidNode] with Controller {
           s"""match ${nodeDef.toQuery}, ${tagDefs.map(_.toQuery).mkString(",")}, ${relationDefs.map(_.toQuery(false)).mkString(",")}
           $condition
           $returnStatement""",
-          Map("term" -> titleRegex.getOrElse(""), "tagUuids" -> tags)
+          titleRegex.map(t => Map("term" -> t)).getOrElse(Map.empty) ++ Map("tagUuids" -> tags)
           ++ relationDefs.flatMap(_.parameterMap)
           ++ tagDefs.flatMap(_.parameterMap)
           ++ nodeDef.parameterMap
