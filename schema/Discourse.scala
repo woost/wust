@@ -91,9 +91,13 @@ object WustSchema {
   @HyperRelation class Created(startNode: User, endNode: Post) extends Action
   @Node trait ChangeRequest extends UuidNode with Action {
     val applyThreshold:Long
-    val applyVotes:Long
+    var applyVotes:Long
     var applied:Boolean = false
   }
+  //TODO: i am here because a node class needs to inherit from any node trait,
+  //otherwise magic does not generate accessors for the trait
+  @Node class ChangeRequestImplementationThatShouldNeverBeUsed extends ChangeRequest
+
   @HyperRelation class Updated(startNode: User, endNode: Post) extends ChangeRequest with HyperConnection {
     val oldTitle:String
     val newTitle:String

@@ -9,6 +9,7 @@ import modules.requests.ConnectResponse
 import play.api.libs.json._
 import renesca.parameter.implicits._
 import renesca.schema._
+import renesca._
 import play.api.mvc.Results._
 
 trait VotesAccessBase extends EndRelationAccessDefault[User, VotesChangeRequest, ChangeRequest] {
@@ -23,28 +24,34 @@ trait VotesAccessBase extends EndRelationAccessDefault[User, VotesChangeRequest,
     db.transaction { tx =>
       // first we match the actual change request and aquire a write lock,
       // which will last for the whole transaction
-      val changeRequest = matchesNode(param.baseUuid)
-      changeRequest.rawItem.properties += "__lock" -> true
-      tx.persistChanges(changeRequest)
-      val success = if (sign == 0) {
-        val requestDef = nodeDefinition(param.baseUuid)
-        // next we define the voting relation between the currently logged in
-        // the relation should be deleted, as we want to unvote.
-        val userDef = ConcreteNodeDefinition(user)
-        val votes = RelationDefinition(userDef, VotesChangeRequest, requestDef)
-        disconnectNodesFor(votes, tx)
+      val requestDef = nodeDefinition(param.baseUuid)
+      val userDef = ConcreteNodeDefinition(user)
+      val votesDef = RelationDefinition(userDef, VotesChangeRequest, requestDef)
+      val discourse = Discourse(tx.queryGraph(Query(s"match ${requestDef.toQuery} set ${requestDef.name}.__lock = true with ${requestDef.name} optional match ${votesDef.toQuery(true, false)} return ${requestDef.name}, ${votesDef.name}", votesDef.parameterMap)))
+      val request = discourse.changeRequests.head
+      val votes = discourse.votesChangeRequests.headOption
+      votes.foreach(request.applyVotes -= _.weight)
+
+      val weight = sign // TODO karma
+      if (sign == 0) {
+        // if there are any existing votes, disconnect them
+        votes.foreach(discourse.graph.relations -= _.rawItem)
       } else {
         // we want to vote on the change request with our weight. we merge the
-        // votes relation as we want to override any previous vote
-        val votes = VotesChangeRequest.merge(user, changeRequest, weight = sign, onMatch = Set("weight"))
-        changeRequest.rawItem.properties -= "__lock"
-        val failure = tx.persistChanges(changeRequest, votes)
-        !failure.isDefined
+        // votes relation as we want to override any previous vote. merging is
+        // better than just updating the weight on an existing relation, as it
+        // guarantees uniqueness
+        request.applyVotes += weight
+        val newVotes = VotesChangeRequest.merge(user, request, weight = weight, onMatch = Set("weight"))
+        discourse.add(newVotes)
       }
 
-      Left(if (success)
+      request.rawItem.properties -= "__lock"
+      val failure = tx.commit.persistChanges(discourse)
+
+      Left(if (failure.isEmpty)
         Ok(JsObject(Seq(
-          ("weight", JsNumber(sign))
+          ("weight", JsNumber(weight))
         )))
       else
         BadRequest("No vote :/")
