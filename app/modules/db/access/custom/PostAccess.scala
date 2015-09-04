@@ -33,14 +33,19 @@ trait ConnectableAccessBase {
     }
   }
 
-  protected def addRequestTagsToGraph(discourse: Discourse, user: User, post: Post, request: AddTagRequestBase with RemoveTagRequestBase, applyVotes: Long, applyThreshold: Long) {
-    //TODO: initialize added tags = karma
-    //TODO: initialize removed tags = (current threshold - karma)
+  protected def addRequestTagsToGraph(discourse: Discourse, user: User, post: Post, request: AddTagRequestBase with RemoveTagRequestBase, weight: Long, threshold: Long) {
     //TODO: avoid duplicates
-    val tagRequests = request.addedTags.flatMap(tagConnectRequestToTag(_)) ++ request.removedTags.map(TagLike.matchesOnUuid(_))
-    tagRequests.foreach { tag =>
-      val updatedTags = UpdatedTags.create(user, post, applyThreshold = applyThreshold, applyVotes = applyVotes)
-      val votes = VotesChangeRequest.create(user, updatedTags, weight = applyVotes)
+    request.addedTags.flatMap(tagConnectRequestToTag(_)).foreach { tag =>
+      val updatedTags = UpdatedTags.create(user, post, applyThreshold = threshold, applyVotes = weight)
+      val votes = VotesChangeRequest.create(user, updatedTags, weight = weight)
+      discourse.add(updatedTags, Tags.create(tag, updatedTags), votes)
+    }
+    request.removedTags.map(TagLike.matchesOnUuid(_)).foreach { tag =>
+      // for removed tags we set the applyVotes to threshold-weight, so from
+      // here the counter does not represent the weight of the incomming
+      // relations
+      val updatedTags = UpdatedTags.create(user, post, applyThreshold = threshold, applyVotes = threshold - weight)
+      val votes = VotesChangeRequest.create(user, updatedTags, weight = -1 * weight)
       discourse.add(updatedTags, Tags.create(tag, updatedTags), votes)
     }
   }

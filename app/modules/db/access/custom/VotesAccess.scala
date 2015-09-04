@@ -6,18 +6,20 @@ import modules.db.Database._
 import modules.db._
 import modules.db.access.{EndRelationAccessDefault, EndRelationAccess}
 import modules.requests.ConnectResponse
+import formatters.json.ApiNodeFormat._
 import play.api.libs.json._
 import renesca.parameter.implicits._
 import renesca.schema._
 import renesca._
 import play.api.mvc.Results._
 
-trait VotesAccessBase extends EndRelationAccessDefault[User, VotesChangeRequest, ChangeRequest] {
+trait VotesAccessBase[T <: ChangeRequest] extends EndRelationAccessDefault[User, VotesChangeRequest, ChangeRequest] {
   val sign: Long
   val nodeFactory = User
 
-  def nodeDefinition(uuid: String): FactoryUuidNodeDefinition[ChangeRequest]
-  def matchesNode(uuid: String): ChangeRequest
+  def nodeDefinition(uuid: String): FactoryUuidNodeDefinition[T]
+  def selectNode(discourse: Discourse): T
+  def applyChange(request: T, post: Post): Boolean
 
   //TODO: optimize to one request with multiple statements
   override def create(context: RequestContext, param: ConnectParameter[ChangeRequest]) = context.withUser { user =>
@@ -27,16 +29,13 @@ trait VotesAccessBase extends EndRelationAccessDefault[User, VotesChangeRequest,
       val requestDef = nodeDefinition(param.baseUuid)
       val userDef = ConcreteNodeDefinition(user)
       val votesDef = RelationDefinition(userDef, VotesChangeRequest, requestDef)
-      val discourse = Discourse(tx.queryGraph(Query(s"match ${requestDef.toQuery} set ${requestDef.name}.__lock = true with ${requestDef.name} optional match ${votesDef.toQuery(true, false)} return ${requestDef.name}, ${votesDef.name}", votesDef.parameterMap)))
-      val request = discourse.changeRequests.head
+      val discourse = Discourse(tx.queryGraph(Query(s"match ${requestDef.toQuery}-[:`${UpdatedToPost.relationType}`|`${UpdatedTagsToPost.relationType}`]->(post:`${Post.label}`) set ${requestDef.name}.__lock = true with post,${requestDef.name} optional match ${votesDef.toQuery(true, false)} return post,${requestDef.name}, ${votesDef.name}", votesDef.parameterMap)))
+      val request = selectNode(discourse)
       val votes = discourse.votesChangeRequests.headOption
       votes.foreach(request.applyVotes -= _.weight)
 
       val weight = sign // TODO karma
-      if (request.applyVotes + weight >= request.applyThreshold)
-        throw new Exception("Applying change requests currently not possible")
-
-      if (sign == 0) {
+      if (weight == 0) {
         // if there are any existing votes, disconnect them
         votes.foreach(discourse.graph.relations -= _.rawItem)
       } else {
@@ -49,16 +48,31 @@ trait VotesAccessBase extends EndRelationAccessDefault[User, VotesChangeRequest,
         discourse.add(newVotes)
       }
 
-      request.rawItem.properties -= "__lock"
-      val failure = tx.persistChanges(discourse)
+      val postApplies = if (request.applyVotes >= request.applyThreshold) {
+        val post = discourse.posts.head
+        request.applied = applyChange(request, post)
+        if (request.applied)
+          Some(Json.toJson(post))
+        else
+          None
+      } else {
+        Some(JsNull)
+      }
 
-      Left(if (failure.isEmpty)
-        Ok(JsObject(Seq(
-          ("weight", JsNumber(weight))
-        )))
-      else
-        BadRequest("No vote :/")
-      )
+      Left(postApplies.map { node =>
+        request.rawItem.properties -= "__lock"
+        val failure = tx.persistChanges(discourse)
+
+        failure.map(_ => BadRequest("No vote :/")).getOrElse {
+          Ok(JsObject(Seq(
+            ("weight", JsNumber(weight)),
+            ("node", node)
+          )))
+        }
+      }.getOrElse {
+        tx.rollback()
+        BadRequest("Cannot apply changes automatically")
+      })
     }
   }
 }
@@ -66,15 +80,27 @@ trait VotesAccessBase extends EndRelationAccessDefault[User, VotesChangeRequest,
 //TODO: we need hyperrelation traits in magic in order to matches on the hyperrelation trait and get correct type: Relation+Node
 case class VotesUpdatedAccess(
   sign: Long
-  ) extends VotesAccessBase {
+  ) extends VotesAccessBase[Updated] {
     override def nodeDefinition(uuid: String) = FactoryUuidNodeDefinition(Updated, uuid)
-    //TODO: need matchesOnUuid! for hyperrelations
-    override def matchesNode(uuid: String) = Updated.matchesUuidNode(uuid = Some(uuid), matches = Set("uuid"))
+    override def selectNode(discourse: Discourse) = discourse.updateds.head
+    override def applyChange(request: Updated, post: Post) = {
+      if (post.title != request.oldTitle || post.description != request.oldDescription) {
+        false
+      } else {
+        post.title = request.newTitle
+        post.description = request.newDescription
+        request.applied = true
+        true
+      }
+    }
 }
 
 case class VotesUpdatedTagsAccess(
   sign: Long
-  ) extends VotesAccessBase {
+  ) extends VotesAccessBase[UpdatedTags] {
     override def nodeDefinition(uuid: String) = FactoryUuidNodeDefinition(UpdatedTags, uuid)
-    override def matchesNode(uuid: String) = UpdatedTags.matchesUuidNode(uuid = Some(uuid), matches = Set("uuid"))
+    override def selectNode(discourse: Discourse) = discourse.updatedTags.head
+    override def applyChange(request: UpdatedTags, post: Post) = {
+        throw new Exception("Applying change requests for tags currently not possible")
+    }
 }
