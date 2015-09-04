@@ -47,7 +47,7 @@ trait VotesAccessBase extends EndRelationAccessDefault[User, VotesChangeRequest,
       }
 
       request.rawItem.properties -= "__lock"
-      val failure = tx.commit.persistChanges(discourse)
+      val failure = tx.persistChanges(discourse)
 
       Left(if (failure.isEmpty)
         Ok(JsObject(Seq(
