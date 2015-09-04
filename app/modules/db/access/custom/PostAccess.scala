@@ -28,7 +28,6 @@ trait ConnectableAccessBase {
   protected def addTagsToGraph(discourse: Discourse, request: AddTagRequestBase, node: Taggable) {
     request.addedTags.flatMap(tagConnectRequestToTag(_)).foreach { tag =>
       val tags = Tags.merge(tag, node)
-      //TODO initial votes
       discourse.add(tags)
     }
   }

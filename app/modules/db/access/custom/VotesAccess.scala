@@ -19,7 +19,7 @@ trait VotesAccessBase[T <: ChangeRequest] extends EndRelationAccessDefault[User,
 
   def nodeDefinition(uuid: String): FactoryUuidNodeDefinition[T]
   def selectNode(discourse: Discourse): T
-  def applyChange(request: T, post: Post): Boolean
+  def applyChange(discourse: Discourse, request: T, post: Post): Boolean
 
   //TODO: optimize to one request with multiple statements
   override def create(context: RequestContext, param: ConnectParameter[ChangeRequest]) = context.withUser { user =>
@@ -50,7 +50,7 @@ trait VotesAccessBase[T <: ChangeRequest] extends EndRelationAccessDefault[User,
 
       val postApplies = if (request.applyVotes >= request.applyThreshold) {
         val post = discourse.posts.head
-        request.applied = applyChange(request, post)
+        request.applied = applyChange(discourse, request, post)
         if (request.applied)
           Some(Json.toJson(post))
         else
@@ -86,12 +86,17 @@ case class VotesUpdatedAccess(
   ) extends VotesAccessBase[Updated] {
     override def nodeDefinition(uuid: String) = FactoryUuidNodeDefinition(Updated, uuid)
     override def selectNode(discourse: Discourse) = discourse.updateds.head
-    override def applyChange(request: Updated, post: Post) = {
-      if (post.title != request.oldTitle || post.description != request.oldDescription) {
+    override def applyChange(discourse: Discourse, request: Updated, post: Post) = {
+      val changesTitle = request.oldTitle != request.newTitle
+      val changesDesc = request.oldDescription != request.newDescription
+      if (changesTitle && post.title != request.oldTitle || changesDesc && post.description != request.oldDescription) {
         false
       } else {
-        post.title = request.newTitle
-        post.description = request.newDescription
+        if (changesTitle)
+          post.title = request.newTitle
+        if (changesDesc)
+          post.description = request.newDescription
+
         request.applied = true
         true
       }
@@ -103,7 +108,13 @@ case class VotesUpdatedTagsAccess(
   ) extends VotesAccessBase[UpdatedTags] {
     override def nodeDefinition(uuid: String) = FactoryUuidNodeDefinition(UpdatedTags, uuid)
     override def selectNode(discourse: Discourse) = discourse.updatedTags.head
-    override def applyChange(request: UpdatedTags, post: Post) = {
-        throw new Exception("Applying change requests for tags currently not possible")
+    override def applyChange(discourse: Discourse, request: UpdatedTags, post: Post) = {
+      // we need to get the tag which is connected to the request
+      val tagDef = ConcreteFactoryNodeDefinition(TagLike)
+      val tagsDef = RelationDefinition(tagDef, Tags, nodeDefinition(request.uuid))
+      val tag = Discourse(db.queryGraph(Query(s"match ${tagsDef.toQuery} return ${tagDef.name}", tagsDef.parameterMap))).tagLikes.head
+      val tags = Tags.merge(tag, post)
+      discourse.add(tag, tags)
+      true
     }
 }
