@@ -1,7 +1,7 @@
 <nav id="navigation" class="navbar navbar-default navbar-fixed-top" role="navigation">
     <div class="container-fluid">
         <div class="navbar-header">
-            <button id="edit_modal_toggle" type="button" class="btn btn-primary navbar-btn" onclick="this.blur()" ng-click="vm.newDiscussion()">New Discussion</button>
+            <button id="edit_modal_toggle" type="button" class="btn btn-primary navbar-btn" onclick="this.blur()" ng-click="vm.newDiscussion()">New<span class="hidden-xs">&nbsp;Discussion</span></button>
             <button type="button" class="navbar-toggle" ng-click="vm.navbarCollapsed = !vm.navbarCollapsed">
                 <span class="sr-only">Toggle navigation</span>
                 <span class="icon-bar"></span>
@@ -12,10 +12,14 @@
 
         <div ng-class="{search_results_visible: vm.search.resultsVisible, has_fullscreen: vm.fullscreen.hasFullscreen}" class="collapse navbar-collapse" collapse="vm.navbarCollapsed">
             <ul class="nav navbar-nav navbar-left">
-                <li><a ui-sref="dashboard" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()"><i class="fa fa-newspaper-o"></i> Dashboard</a></li>
-                <li><a ui-sref="tags" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()"><i class="fa fa-tags"></i> Tags</a></li>
-                <li><a ui-sref="vote" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()"><i class="fa fa-sort"></i> Moderation</a></li>
-                <li><a ui-sref="users.list" ng-class="{active: vm.$state.includes('users.*')}" ng-click="vm.fullscreen.hideFullscreens()"><i class="fa fa-users"></i> Users</a></li>
+                <li><a ui-sref="dashboard" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()">
+                        <i class="fa fa-newspaper-o"></i><span class="hidden-sm hidden-xs">&nbsp;Dashboard</span></a></li>
+                <li><a ui-sref="tags" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()">
+                        <i class="fa fa-tags"></i><span class="hidden-sm hidden-xs">&nbsp;Tags</span></a></li>
+                <li><a ui-sref="vote" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()">
+                        <i class="fa fa-sort"></i><span class="hidden-sm hidden-xs">&nbsp;Moderation</span></a></li>
+                <li><a ui-sref="users.list" ng-class="{active: vm.$state.includes('users.*')}" ng-click="vm.fullscreen.hideFullscreens()">
+                        <i class="fa fa-users"></i><span class="hidden-sm hidden-xs">&nbsp;Users</span></a></li>
             </ul>
 
 
