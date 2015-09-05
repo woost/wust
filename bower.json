@@ -5,7 +5,6 @@
     "ace-builds": "~1.2.0",
     "angular-storage-no-cookies": "~0.0.13",
     "angular-ui-ace": "~0.2.3",
-    "bootstrap-css-only": "~3.3.5",
     "font-awesome": "~4.4.0",
     "lodash": "~3.10.1",
     "lodium": "~0.1.2",

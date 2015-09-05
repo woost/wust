@@ -23,7 +23,8 @@ var BrowserSync = require("broccoli-browser-sync");
 var flatten = require('broccoli-flatten');
 
 var stylesTree = mergeTrees([
-    funnel("assets/stylesheets", { include: ["*.scss"] }),
+    funnel("node_modules/bootstrap-sass/assets/stylesheets/bootstrap", {include: ["**/*.scss"], exclude: ["_variables.scss"], destDir: "bootstrap"}),
+    funnel("assets/stylesheets", { include: ["*.scss", "bootstrap/_variables.scss"] }),
     funnel("assets/app", { include: ["**/*.scss"], destDir: "app" })
 ]);
 
@@ -51,16 +52,15 @@ var images = funnel("assets/images", {
 });
 
 var fonts = mergeTrees([
-        flatten(funnel("bower_components", { include: [ "bootstrap-css-only/fonts/*.woff*", "font-awesome/fonts/*.woff*" ]}), {destDir: "fonts"}),
+        flatten(funnel("bower_components", { include: ["font-awesome/fonts/*.woff*" ]}), {destDir: "fonts"}),
         funnel("static_assets", { include: [ "**/*.woff*" ], destDir: "fonts"}),
 ]);
 
 var fontCss = replace(mergeTrees([
-        funnel("bower_components", { include: [ "bootstrap-css-only/css/bootstrap.css", "font-awesome/css/font-awesome.css" ]}),
+        funnel("bower_components", { include: [ "font-awesome/css/font-awesome.css" ]}),
         funnel(staticAssetsCss, { include: [ "static_assets_css/wust-font.css" ]}),
 ]),{
     files: [
-        "bootstrap-css-only/css/bootstrap.css",
         "font-awesome/css/font-awesome.css",
         "static_assets_css/wust-font.css"
     ],
@@ -72,7 +72,6 @@ var fontCss = replace(mergeTrees([
 
 var styles = concat(mergeTrees([compiledStyles, dependencies, staticAssetsCss, fontCss], {overwrite: true}), {
     inputFiles: [
-        "bootstrap-css-only/css/bootstrap.css",
         "font-awesome/css/font-awesome.css",
         "angular-motion/dist/angular-motion.css",
         "angular-ui-switch/angular-ui-switch.css",
