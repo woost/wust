@@ -21,4 +21,25 @@ object Moderation {
     postQuality(postUpVotes, postDownVotes)
     ???
   }
+
+  // reject threshold
+  // When do change requests disappear?
+  // - I don't want to see the request anymore, when I'm done thinking about it
+  //   - After voting
+  //   - It can reappear, when it is revised (like pull requests on github)
+  //   - On merge conflicts (which need to be revised)
+  // Reverting votes on change requests
+  // - When do I want to revert a vote on a change request?
+  //   - When I clicked the wrong button (undo)
+  //   - When I see that another request is better and I want to apply that instead
+  //   - When I rethink the request and change my mind
+  // How long do change-actions stay in the vote-stream?
+  //   - depending on how much more karma the mod had than the threshold of the post
+  //   - If I voted, it hides for me
+  //   - It doesn't appear for other when it was
+  //     (depending on the quality of the post)
+  //     - A good change:
+  //     - A bad change:
+  //     - Controversal?
+  //       - Ability to comment/answer on changes?
 }
