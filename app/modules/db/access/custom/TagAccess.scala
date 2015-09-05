@@ -20,7 +20,7 @@ class TagAccess extends NodeReadBase[TagLike] {
       //currently only handled by update.
       //TODO: what about scopes here? we are only merging tags not taglike, but
       //it is not possible to merge on taglike, as they are traits
-      val node = Categorization.merge(
+      val node = StaticTag.merge(
         title = request.title,
         color = tagTitleColor(request.title),
         merge = Set("title"))

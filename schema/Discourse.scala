@@ -94,6 +94,7 @@ object WustSchema {
     var applyVotes:Long
     var applied:Boolean = false
   }
+
   @HyperRelation class Updated(startNode: User, endNode: Post) extends ChangeRequest with HyperConnection {
     val oldTitle:String
     val newTitle:String
@@ -125,10 +126,8 @@ object WustSchema {
   @HyperRelation class Tags(startNode: TagLike, endNode: Taggable) extends ContentRelation with HyperConnection with UuidNode
 
   // Tags
-  @Node class Categorization extends TagLike
   @Node class Classification extends TagLike
   @Node class StaticTag extends TagLike
-
 
   // Scopes
   @Node class Scope extends TagLike

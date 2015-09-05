@@ -24,7 +24,6 @@ object SeedDatabase extends Task with SeedTools {
         mergeClassification("Bug", color = Some(57)),
         mergeClassification("Question", color = Some(301)),
         mergeClassification("Answer", color = Some(216)),
-        mergeStaticTag("StartPost"),
         mergeClassification("repliesTo")
       )
 

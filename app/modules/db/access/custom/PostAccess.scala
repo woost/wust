@@ -17,7 +17,7 @@ trait ConnectableAccessBase {
       if (tag.id.isDefined)
         Some(TagLike.matchesOnUuid(tag.id.get))
       else if (tag.title.isDefined)
-        Some(Categorization.merge(
+        Some(StaticTag.merge(
           title = tag.title.get,
           color = tagTitleColor(tag.title.get),
           merge = Set("title")))

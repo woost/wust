@@ -14,7 +14,6 @@ object Usertest1Init extends Task with SeedTools {
       val problem = mergeClassification("Problem")
       val question = mergeClassification("Question")
       val pro = mergeClassification("Pro")
-      val startpost = mergeClassification("StartPost")
 
       val rootnode = createPost("Was denkt ihr über Wäsche?")
       val stinken = createPost("Meine Wäsche stinkt.")
@@ -36,7 +35,6 @@ object Usertest1Init extends Task with SeedTools {
         schmutzigConnects,
         wasserConnects,
         meinungConnects,
-        tag(rootnode, startpost),
         tag(meinung, pro),
         tag(rootnode, question),
         tag(stinkenConnects, replies),
