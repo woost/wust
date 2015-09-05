@@ -3,7 +3,8 @@
     <div class="fa fa-long-arrow-right fa-2x arrow-right" ng-show="vm.references.model.list.length > 0"></div>
     <div class="neighbours_content">
         <div big-post node="vm.component.rootNode"></div>
-        <div discourse-node-list node-model='vm.parallels.model' is-loading="vm.isLoading" class="discourse_node_list_vertical"></div>
+        <h2>Other Responses:</h2>
+        <div discourse-node-list node-model='vm.parallels.model' is-loading="vm.isLoading" class="parallels discourse_node_list_vertical"></div>
     </div>
     <div class="fa fa-long-arrow-right fa-2x arrow-right" ng-show="vm.replies.model.list.length > 0"></div>
     <div discourse-node-list node-model='vm.replies.model' is-loading="vm.isLoading" class="neighbours_followers discourse_node_list_horizontal"></div>
