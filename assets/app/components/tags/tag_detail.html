@@ -1,8 +1,10 @@
 <div id="tag_detail_component">
-    <button class="add_stream_button btn btn-default pull-right" type="button" animation="am-fade-and-scale-down" ng-click="vm.addTagStream()">Stream <i class="fa fa-plus"></i></button>
-    <h3>Tag
+    <div class="header">
+        <button class="pull-right btn btn-default" type="button" animation="am-fade-and-scale-down" ng-click="vm.addTagStream()">Stream <i class="fa fa-plus"></i></button>
         <span tag-label="vm.tag"></span>
-    </h3>
+        <b ng-if="vm.tag.isClassification">(Classification)</b>
+        <b ng-if="vm.tag.isContext">(Context)</b>
+    </div>
     <div id="tag_detail_box" infinite-scroll="vm.loadMorePosts()" infinite="infinitePosts" promise="vm.contributions">
         <div ng-repeat="contribution in vm.contributions | unique:'id' track by contribution.id" small-post node="contribution" ignore-tags="::[vm.tag]" class="ng-trans ng-trans-scale-up ease"></div>
         <button class="btn btn-default pull-right ng-hide" ng-click="infinitePosts.manualLoad()" ng-disabled="infinitePosts.loading" ng-hide="infinitePosts.noMore">More</button>

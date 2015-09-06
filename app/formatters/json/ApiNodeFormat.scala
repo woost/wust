@@ -23,6 +23,7 @@ object ApiNodeFormat {
           ("title", JsString(tag.title)),
           ("description", JsString(tag.description.getOrElse(""))),
           ("isClassification", JsBoolean(tag.isInstanceOf[Classification])),
+          ("isContext", JsBoolean(tag.isInstanceOf[Scope])),
           ("color", JsNumber(tag.color)),
           ("symbol", tag.symbol.map(JsString(_)).getOrElse(JsNull))
         ))
@@ -56,7 +57,9 @@ object ApiNodeFormat {
         ("title", JsString(n.title)),
         ("description", JsString(n.description.getOrElse(""))),
         ("isClassification", JsBoolean(n.isInstanceOf[Classification])),
-        ("color", JsNumber(n.color))
+        ("isContext", JsBoolean(n.isInstanceOf[Scope])),
+        ("color", JsNumber(n.color)),
+        ("symbol", n.symbol.map(JsString(_)).getOrElse(JsNull))
       )
       case n: User        => Seq(
         ("id", JsString(n.uuid)),
