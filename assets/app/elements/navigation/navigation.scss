@@ -7,7 +7,9 @@
         display: block;
     }
     color: $nav_normal_color;
-    .navpagelinks a:link, a:hover, a:visited, a.active {
+
+    .navpagelinks a:link, .navpagelinks a:hover, .navpagelinks a:visited, .navpagelinks a.active,
+     a.dropdown-toggle:link, a.dropdown-toggle:hover, a.dropdown-toggle:visited {
         color: $nav_normal_color;
     }
 
