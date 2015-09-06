@@ -3,7 +3,6 @@
     <form ng-submit="vm.editNewPost()" class="new_post_title">
         <input class="form-control" ng-model="vm.newPost.title" placeholder="TL;DR">
     </form>
-    <div edit-taglist tags="vm.newPost.tags" existing-only="true"></div>
     <div id="edit_list">
         <div ng-repeat="node in vm.editList" class="ng-trans ng-trans-scale-up ease">
             <div class="drop_post_container" drop-channel="node,scratch_node,scratch_move" ui-on-Drop="vm.edit($data, $index)">

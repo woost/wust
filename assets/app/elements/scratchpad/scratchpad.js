@@ -14,9 +14,9 @@ function scratchpad() {
     };
 }
 
-scratchpadCtrl.$inject = ["EditService", "SidebarService"];
+scratchpadCtrl.$inject = ["EditService", "SidebarService", "ContextService"];
 
-function scratchpadCtrl(EditService, SidebarService) {
+function scratchpadCtrl(EditService, SidebarService, ContextService) {
     let vm = this;
 
     vm.sidebar = SidebarService;
@@ -30,6 +30,7 @@ function scratchpadCtrl(EditService, SidebarService) {
     };
 
     function editNewPost() {
+        vm.newPost.tags = ContextService.currentContexts;
         EditService.edit(vm.newPost);
         vm.newPost.title = "";
     }
