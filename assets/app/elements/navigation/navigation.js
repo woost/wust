@@ -14,9 +14,9 @@ function navigation() {
     };
 }
 
-navigationCtrl.$inject = ["$scope", "$state", "Auth", "SearchService", "DiscourseNode", "Search", "ModalEditService", "FullscreenService", "Helpers"];
+navigationCtrl.$inject = ["$state", "Auth", "SearchService", "DiscourseNode", "Search", "ModalEditService", "FullscreenService", "Helpers", "ContextService"];
 
-function navigationCtrl($scope, $state, Auth, SearchService, DiscourseNode, Search, ModalEditService, FullscreenService, Helpers) {
+function navigationCtrl($state, Auth, SearchService, DiscourseNode, Search, ModalEditService, FullscreenService, Helpers, ContextService) {
     let vm = this;
 
     vm.navbarCollapsed = true;
@@ -37,11 +37,14 @@ function navigationCtrl($scope, $state, Auth, SearchService, DiscourseNode, Sear
     vm.newDiscussion = newDiscussion;
     vm.fullscreen = FullscreenService;
     vm.$state = $state;
-    vm.currentContexts = [];
+    vm.currentContexts = ContextService.currentContexts;
+    vm.onContextChange = onContextChange;
 
-    $scope.$watchCollection("vm.currentContexts", ( newValue, oldValue ) => vm.contextStyle = {
-        "background-color": vm.currentContexts.length > 0 ? Helpers.hashToColorNavBg(vm.currentContexts[0]) : undefined
-    });
+    function onContextChange() {
+        vm.contextStyle = {
+            "background-color": vm.currentContexts.length > 0 ? Helpers.hashToColorNavBg(vm.currentContexts[0]) : undefined
+        };
+    }
 
     function authenticate(register) {
         let func = register ? Auth.register : Auth.login;
