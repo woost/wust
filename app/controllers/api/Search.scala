@@ -16,7 +16,7 @@ import scala.util.Try
 object Search extends TaggedTaggable[UuidNode] with Controller {
   def index(page: Option[Int], size: Option[Int], label: Option[String], title: Option[String], searchDescriptions:Option[Boolean], tags: List[String], tagOr: Option[Boolean]) = Action {
     // white list, so only exposed nodes can be searched
-    val labels = ContentNode.labels ++ label.map(Label(_))
+    val labels = ExposedNode.labels ++ label.map(Label(_))
     val nodeDef = LabelNodeDefinition(labels)
 
     val titleRegex = title.flatMap { tit =>

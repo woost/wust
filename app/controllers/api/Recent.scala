@@ -14,7 +14,7 @@ import modules.db.access.custom.TaggedTaggable
 object Recent extends TaggedTaggable[UuidNode] with Controller {
   def index(label: Option[String]) = Action {
     // white list, so only exposed nodes can be searched
-    val labels = ContentNode.labels ++ label.map(Label(_))
+    val labels = ExposedNode.labels ++ label.map(Label(_))
     val nodeDef = LabelNodeDefinition(labels)
 
    val returnStatement = s"return ${nodeDef.name} order by ${nodeDef.name}.timestamp desc limit 20"
