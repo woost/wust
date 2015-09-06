@@ -2,16 +2,10 @@
     <div class="container-fluid">
         <div class="navbar-header">
             <button id="edit_modal_toggle" type="button" class="btn btn-default navbar-btn" onclick="this.blur()" ng-click="vm.newDiscussion()">New<span class="hidden-xs">&nbsp;Discussion</span></button>
-            <button type="button" class="navbar-toggle" ng-click="vm.navbarCollapsed = !vm.navbarCollapsed">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
         </div>
 
-        <div ng-class="{search_results_visible: vm.search.resultsVisible, has_fullscreen: vm.fullscreen.hasFullscreen}" class="collapse navbar-collapse" collapse="vm.navbarCollapsed">
             <ul class="nav navbar-nav navbar-left">
+        <div ng-class="{search_results_visible: vm.search.resultsVisible, has_fullscreen: vm.fullscreen.hasFullscreen}">
                 <li><a ui-sref="dashboard" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()">
                         <i class="fa fa-newspaper-o"></i><span class="hidden-sm hidden-xs">&nbsp;Dashboard</span></a></li>
                 <li><a ui-sref="tags" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()">
