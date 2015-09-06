@@ -11,6 +11,7 @@ import renesca.graph.Label
 import renesca.parameter.PropertyKey
 import modules.db.access.custom.TaggedTaggable
 
+//TODO: needed?
 object Recent extends TaggedTaggable[UuidNode] with Controller {
   def index(label: Option[String]) = Action {
     // white list, so only exposed nodes can be searched
