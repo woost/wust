@@ -14,9 +14,9 @@ function navigation() {
     };
 }
 
-navigationCtrl.$inject = ["$state", "Auth", "SearchService", "DiscourseNode", "Search", "ModalEditService", "FullscreenService"];
+navigationCtrl.$inject = ["$state", "Auth", "SearchService", "DiscourseNode", "Search", "ModalEditService", "FullscreenService", "Helpers"];
 
-function navigationCtrl($state, Auth, SearchService, DiscourseNode, Search, ModalEditService, FullscreenService) {
+function navigationCtrl($state, Auth, SearchService, DiscourseNode, Search, ModalEditService, FullscreenService, Helpers) {
     let vm = this;
 
     vm.navbarCollapsed = true;
@@ -37,6 +37,10 @@ function navigationCtrl($state, Auth, SearchService, DiscourseNode, Search, Moda
     vm.newDiscussion = newDiscussion;
     vm.fullscreen = FullscreenService;
     vm.$state = $state;
+    vm.currentContext = {title:"Meta", color:Math.floor(Math.random()*360)};
+    vm.contextStyle = {
+        "background-color": Helpers.hashToColorNavBg(vm.currentContext)
+    };
 
     function authenticate(register) {
         let func = register ? Auth.register : Auth.login;

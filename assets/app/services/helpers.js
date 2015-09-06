@@ -6,6 +6,7 @@ angular.module("wust.services").value("Helpers", {
     hashToColorBorder,
     hashToColorBackground,
     hashToColorFill,
+    hashToColorNavBg,
     hashToColorFillLight,
     tagTitleColor,
     sortTags,
@@ -56,6 +57,12 @@ function hashToColorBackground(tag) {
 function hashToColorFill(tag) {
     if(tag.color === -1) return "hsl(0, 0%, 55%)";
     return hashToColor(tag, 55, 69);
+}
+
+// Navigation Background
+function hashToColorNavBg(tag) {
+    if(tag.color === -1) return "hsl(0, 0%, 55%)";
+    return hashToColor(tag, 55, 39);
 }
 
 // tag label bg

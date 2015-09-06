@@ -7,13 +7,17 @@
         display: block;
     }
     color: $nav_normal_color;
+    a:link, a:hover, a:visited, a.active {
+        color: $nav_normal_color !important;
+    }
     .nav {
-        a:link, a:hover, a:visited, a.active {
-            color: $nav_normal_color !important;
-        }
         a:hover {
             color: $nav_hover_color !important;
             background-color: $nav_hover_background !important;
+            opacity: 0.7;
+            &.active {
+                opacity: 1;
+            }
         }
         a.active {
             color: $nav_active_color !important;
@@ -33,14 +37,14 @@
     }
     .search_results_visible {
         #node_search_form {
-            background-color: white !important;
+            background-color: $nav_active_background !important;
         }
     }
     .search_results_visible, .has_fullscreen {
         .nav {
             a.active {
                 color: $nav_normal_color !important;
-                background-color: $nav_normal_background !important;
+                background-color: transparent !important;
             }
         }
     }
