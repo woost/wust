@@ -1,8 +1,8 @@
 .tag {
-    display: inline-block;
+    display: inline-block !important;
     height: 24px;
     margin: 0 7px 0 0;
-    padding: 0 5px;
+    padding: 0 5px !important;
 
     // intense tags are without border and bold
     // light tags are with 1px border and normal
@@ -11,20 +11,20 @@
 
     border-radius: 2px;
     font-size: 14px;
-    line-height: 24px;
-    cursor: default;
-    color: black;
-    a, a:active, a:visited  {
-        color: inherit;
-        text-decoration: none;
-    }
-}
+    line-height: 24px !important;
+    color: black !important;
 
-.tag:hover {
-    a {
-        color: inherit;
+    cursor: pointer;
+
+    a, a:link, a:active, a:visited  {
+        color: black !important;
         text-decoration: none;
     }
-    cursor: pointer;
+    a:hover {
+        background-color: inherit !important;
+        color: inherit;
+        text-decoration: none;
+        opacity: 1;
+    }
 }
 

@@ -4,8 +4,8 @@
             <button id="edit_modal_toggle" type="button" class="btn btn-default navbar-btn" onclick="this.blur()" ng-click="vm.newDiscussion()">New<span class="hidden-xs">&nbsp;Discussion</span></button>
         </div>
 
-            <ul class="nav navbar-nav navbar-left">
         <div ng-class="{search_results_visible: vm.search.resultsVisible, has_fullscreen: vm.fullscreen.hasFullscreen}">
+            <ul class="navpagelinks nav navbar-nav navbar-left">
                 <li><a ui-sref="dashboard" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()">
                         <i class="fa fa-newspaper-o"></i><span class="hidden-sm hidden-xs">&nbsp;Dashboard</span></a></li>
                 <li><a ui-sref="tags" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()">
@@ -25,6 +25,17 @@
                     </span>
                 </div>
             </form>
+
+            <ul class="nav navbar-nav navbar-left">
+                <li>
+                    <div class="current-context">
+                        Context:
+                        <span class="tag" colored-tag="vm.currentContext" border="true">
+                            <a ui-sref="tags.details({id: vm.currentContext.id})" ng-bind="vm.currentContext.title"></a>
+                        </span>
+                    </div>
+                </li>
+            </ul>
 
             <div id="navigation_sign_forms" ng-switch="vm.currentAuth.userId">
                 <form ng-switch-when="undefined" name="signForm" ng-submit="vm.authenticate(registerUser)" class="navbar-form navbar-right ng-trans ng-trans-slide-right ease">
