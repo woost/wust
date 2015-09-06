@@ -59,7 +59,7 @@ object WustSchema {
 
   // Content
   @Node trait Connectable extends UuidNode with Taggable
-  @HyperRelation class Connects(startNode: Connectable, endNode: Connectable) extends Connectable with Taggable with ContentRelation with HyperConnection with UuidNode
+  @HyperRelation class Connects(startNode: Connectable, endNode: Connectable) extends Connectable with Taggable with ContentRelation with HyperConnection with UuidNode with Votable
   @Node trait Inheritable
   @HyperRelation class Inherits(startNode: Inheritable, endNode: Inheritable) extends ContentRelation with HyperConnection with UuidNode
 
@@ -89,7 +89,7 @@ object WustSchema {
   @Node trait Action extends Timestamp
   //TODO: store content of action in action, for example the new description and title
   @HyperRelation class Created(startNode: User, endNode: Post) extends Action
-  @Node trait ChangeRequest extends UuidNode with Action {
+  @Node trait ChangeRequest extends UuidNode with Action with Votable {
     val applyThreshold:Long
     var applyVotes:Long
     var applied:Boolean = false
@@ -102,6 +102,9 @@ object WustSchema {
     val newDescription:Option[String]
   }
 
+  //TODO: simple tags relation? using the normal tags relation makes the
+  //relation votable. also it is a hyperrelation, which is not needed in this
+  //case.
   @HyperRelation class UpdatedTags(startNode: User, endNode: Post) extends ChangeRequest with Taggable with HyperConnection
 
   // TODO: should be a node? as the to be deleted node will deleted and we cannot connect there?
@@ -110,7 +113,8 @@ object WustSchema {
   @Relation class Reviewed(startNode: User, endNode: Action)
   //TODO: multidimesional voting?
 
-  @Relation class VotesChangeRequest(startNode: User, endNode: ChangeRequest) extends RelationTimestamp {
+  @Node trait Votable extends UuidNode
+  @Relation class Votes(startNode: User, endNode: Votable) extends RelationTimestamp {
     val weight: Long // Up:+1 or Down:-1
   }
 
@@ -123,7 +127,7 @@ object WustSchema {
     var symbol: Option[String]
   }
   @Node trait Taggable extends UuidNode
-  @HyperRelation class Tags(startNode: TagLike, endNode: Taggable) extends ContentRelation with HyperConnection with UuidNode
+  @HyperRelation class Tags(startNode: TagLike, endNode: Taggable) extends ContentRelation with HyperConnection with UuidNode with Votable
 
   // Tags
   @Node class Classification extends TagLike

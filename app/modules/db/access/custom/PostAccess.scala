@@ -36,7 +36,7 @@ trait ConnectableAccessBase {
     //TODO: avoid duplicates
     request.addedTags.flatMap(tagConnectRequestToTag(_)).foreach { tag =>
       val updatedTags = UpdatedTags.create(user, post, applyThreshold = threshold, applyVotes = weight)
-      val votes = VotesChangeRequest.create(user, updatedTags, weight = weight)
+      val votes = Votes.create(user, updatedTags, weight = weight)
       discourse.add(updatedTags, Tags.create(tag, updatedTags), votes)
     }
     request.removedTags.map(TagLike.matchesOnUuid(_)).foreach { tag =>
@@ -44,7 +44,7 @@ trait ConnectableAccessBase {
       // here the counter does not represent the weight of the incomming
       // relations
       val updatedTags = UpdatedTags.create(user, post, applyThreshold = threshold, applyVotes = threshold - weight)
-      val votes = VotesChangeRequest.create(user, updatedTags, weight = -1 * weight)
+      val votes = Votes.create(user, updatedTags, weight = -1 * weight)
       discourse.add(updatedTags, Tags.create(tag, updatedTags), votes)
     }
   }
@@ -116,7 +116,7 @@ case class PostAccess() extends ConnectableAccessBase with NodeReadBase[Post] wi
 
             //TODO: correct threshold and votes for apply
             val contribution = Updated.create(user, node, oldTitle = node.title, newTitle = request.title.getOrElse(node.title), oldDescription = node.description, newDescription = request.description.orElse(node.description), applyThreshold = applyThreshold, applyVotes = applyVotes)
-            val votes = VotesChangeRequest.create(user, contribution, weight = applyVotes)
+            val votes = Votes.create(user, contribution, weight = applyVotes)
             discourse.add(contribution, votes)
             node
           } else {

@@ -16,7 +16,7 @@ case class PostUpdatedAccess() extends EndRelationAccessDefault[Updated, Updated
       val updatedDef = ConcreteFactoryNodeDefinition(Updated)
       val postDef = FactoryUuidNodeDefinition(Post, param.baseUuid)
       val relDef = RelationDefinition(updatedDef, UpdatedToPost, postDef)
-      val votesDef = RelationDefinition(userDef, VotesChangeRequest, updatedDef)
+      val votesDef = RelationDefinition(userDef, Votes, updatedDef)
       //TODO: graphdefinition with arbitrary properties, not only uuid
       val query = s"match ${relDef.toQuery} where ${updatedDef.name}.applied = false optional match ${votesDef.toQuery(true, false)} return ${votesDef.name}, ${updatedDef.name}"
       val discourse = Discourse(db.queryGraph(Query(query, relDef.parameterMap ++ votesDef.parameterMap)))
@@ -33,7 +33,7 @@ case class PostUpdatedTagsAccess() extends EndRelationAccessDefault[UpdatedTags,
       val updatedDef = ConcreteFactoryNodeDefinition(UpdatedTags)
       val postDef = FactoryUuidNodeDefinition(Post, param.baseUuid)
       val relDef = RelationDefinition(updatedDef, UpdatedTagsToPost, postDef)
-      val votesDef = RelationDefinition(userDef, VotesChangeRequest, updatedDef)
+      val votesDef = RelationDefinition(userDef, Votes, updatedDef)
       val query = s"match ${relDef.toQuery} where ${updatedDef.name}.applied = false optional match ${votesDef.toQuery(true, false)} return ${votesDef.name}, ${updatedDef.name}"
       val discourse = Discourse(db.queryGraph(Query(query, relDef.parameterMap ++ votesDef.parameterMap)))
       discourse.updatedTags

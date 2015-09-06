@@ -13,7 +13,7 @@ import renesca.schema._
 import renesca._
 import play.api.mvc.Results._
 
-trait VotesAccessBase[T <: ChangeRequest] extends EndRelationAccessDefault[User, VotesChangeRequest, ChangeRequest] {
+trait VotesAccessBase[T <: ChangeRequest] extends EndRelationAccessDefault[User, Votes, Votable] {
   val sign: Long
   val nodeFactory = User
 
@@ -22,16 +22,16 @@ trait VotesAccessBase[T <: ChangeRequest] extends EndRelationAccessDefault[User,
   def applyChange(discourse: Discourse, request: T, post: Post): Boolean
 
   //TODO: optimize to one request with multiple statements
-  override def create(context: RequestContext, param: ConnectParameter[ChangeRequest]) = context.withUser { user =>
+  override def create(context: RequestContext, param: ConnectParameter[Votable]) = context.withUser { user =>
     db.transaction { tx =>
       // first we match the actual change request and aquire a write lock,
       // which will last for the whole transaction
       val requestDef = nodeDefinition(param.baseUuid)
       val userDef = ConcreteNodeDefinition(user)
-      val votesDef = RelationDefinition(userDef, VotesChangeRequest, requestDef)
+      val votesDef = RelationDefinition(userDef, Votes, requestDef)
       val discourse = Discourse(tx.queryGraph(Query(s"match ${requestDef.toQuery}-[:`${UpdatedToPost.relationType}`|`${UpdatedTagsToPost.relationType}`]->(post:`${Post.label}`) set ${requestDef.name}.__lock = true with post,${requestDef.name} optional match ${votesDef.toQuery(true, false)} return post,${requestDef.name}, ${votesDef.name}", votesDef.parameterMap)))
       val request = selectNode(discourse)
-      val votes = discourse.votesChangeRequests.headOption
+      val votes = discourse.votes.headOption
       votes.foreach(request.applyVotes -= _.weight)
 
       val weight = sign // TODO karma
@@ -44,7 +44,7 @@ trait VotesAccessBase[T <: ChangeRequest] extends EndRelationAccessDefault[User,
         // better than just updating the weight on an existing relation, as it
         // guarantees uniqueness
         request.applyVotes += weight
-        val newVotes = VotesChangeRequest.merge(user, request, weight = weight, onMatch = Set("weight"))
+        val newVotes = Votes.merge(user, request, weight = weight, onMatch = Set("weight"))
         discourse.add(newVotes)
       }
 
