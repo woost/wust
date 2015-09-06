@@ -35,18 +35,27 @@
                 </li>
             </ul>
 
-            <div id="navigation_sign_forms" ng-switch="vm.currentAuth.userId">
-                <form ng-switch-when="undefined" name="signForm" ng-submit="vm.authenticate(registerUser)" class="navbar-form navbar-right ng-trans ng-trans-slide-right ease">
-                    <input class="form-control" size="10" name="username" type="text" ng-model='vm.newUser.identifier' placeholder="Username" required>
-                    <input class="form-control" size="10" name="password" type="password" ng-model='vm.newUser.password' placeholder="Password" required>
-                    <input type="submit" value="Login" ng-click="registerUser = false" class="btn btn-default" ng-disabled="signForm.$invalid">
-                    <input type="submit" value="Register" ng-click="registerUser = true" class="btn btn-default" ng-disabled="signForm.$invalid">
-                </form>
-                <form ng-switch-default ng-submit="vm.logout()" class="navbar-form navbar-right ng-trans ng-trans-slide-right ease">
-                    <a ui-sref="users.details({id: vm.currentAuth.userId})" style="padding-right: 10px"><i class="fa fa-user"></i> {{vm.currentAuth.identifier}}</a>
-                    <input type="submit" value="Logout" class="btn btn-default">
-                </form>
-            </div>
+            <ul class="nav navbar-nav navbar-right">
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                        <i class="fa fa-user"></i> <span class="hidden-xs">{{vm.currentAuth.identifier}}</span> <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu auth-dropdown" ng-switch="vm.currentAuth.userId">
+                        <li>
+                            <form ng-switch-when="undefined" name="signForm" ng-submit="vm.authenticate(registerUser)" class="navbar-form navbar-right ng-trans ng-trans-slide-right ease">
+                                <input class="form-control" size="10" name="username" type="text" ng-model='vm.newUser.identifier' placeholder="Username" required>
+                                <input class="form-control" size="10" name="password" type="password" ng-model='vm.newUser.password' placeholder="Password" required>
+                                <input type="submit" value="Login" ng-click="registerUser = false" class="btn btn-default" ng-disabled="signForm.$invalid">
+                                <input type="submit" value="Register" ng-click="registerUser = true" class="btn btn-default" ng-disabled="signForm.$invalid">
+                            </form>
+                            <form ng-switch-default ng-submit="vm.logout()" class="navbar-form navbar-right ng-trans ng-trans-slide-right ease">
+                                <a ui-sref="users.details({id: vm.currentAuth.userId})" style="padding-right: 10px"></a>
+                                <input type="submit" value="Logout" class="btn btn-default">
+                            </form>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
         </div>
     </div>
 </nav>
