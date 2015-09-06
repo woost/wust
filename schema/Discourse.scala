@@ -62,7 +62,7 @@ object WustSchema {
 
   // Content
   @Node trait Connectable extends ExposedNode with Taggable
-  @HyperRelation class Connects(startNode: Connectable, endNode: Connectable) extends Connectable with ConstructRelation with HyperConnection with Votable
+  @HyperRelation class Connects(startNode: Connectable, endNode: Connectable) extends Connectable with ConstructRelation with HyperConnection with Reference
   @Node trait Inheritable
   @HyperRelation class Inherits(startNode: Inheritable, endNode: Inheritable) extends ConstructRelation with HyperConnection with UuidNode
 
@@ -119,6 +119,9 @@ object WustSchema {
     val weight: Long // Up:+1 or Down:-1
   }
 
+  // base class for connects and tags
+  @Node trait Reference extends Votable
+
   // generic Tags (base for Tags, Scopes)
   @Node trait TagLike extends ExposedNode with Inheritable {
     @unique val title: String
@@ -127,7 +130,7 @@ object WustSchema {
     var symbol: Option[String]
   }
   @Node trait Taggable extends UuidNode
-  @HyperRelation class Tags(startNode: TagLike, endNode: Taggable) extends ConstructRelation with HyperConnection with UuidNode with Votable
+  @HyperRelation class Tags(startNode: TagLike, endNode: Taggable) extends ConstructRelation with HyperConnection with UuidNode with Reference
 
   // Tags
   @Node class Classification extends TagLike

@@ -118,3 +118,41 @@ case class VotesUpdatedTagsAccess(
       true
     }
 }
+
+
+case class VotesReferenceAccess(sign: Long) extends EndRelationAccessDefault[User, Votes, Votable] {
+  val nodeFactory = User
+
+  def nodeDefinition(uuid: String) = FactoryUuidNodeDefinition(Reference, uuid)
+  //TODO: matchesOnUuid for hyperrelations in magic
+  def matchesNode(uuid: String) = Reference.matchesUuidNode(uuid = Some(uuid), matches = Set("uuid"))
+
+  override def create(context: RequestContext, param: ConnectParameter[Votable]) = context.withUser { user =>
+    db.transaction { tx =>
+      val weight = sign // TODO: karma
+      val success = if (weight == 0) {
+        val referenceDef = nodeDefinition(param.baseUuid)
+        val userDef = ConcreteNodeDefinition(user)
+        val votesDef = RelationDefinition(userDef, Votes, referenceDef)
+        // next we define the voting relation between the currently logged in user and the change request
+        val votes = RelationDefinition(userDef, Votes, referenceDef)
+        disconnectNodesFor(votes, tx)
+      } else {
+        val reference = matchesNode(param.baseUuid)
+        val votes = Votes.merge(user, reference, weight = weight, onMatch = Set("weight"))
+        val failure = tx.persistChanges(reference, votes)
+        !failure.isDefined
+      }
+
+      Left(if (success)
+        Ok(JsObject(Seq(
+          ("vote", JsObject(Seq(
+            ("weight", JsNumber(weight))
+          )))
+        )))
+      else
+        BadRequest("No vote :/")
+      )
+    }
+  }
+}
