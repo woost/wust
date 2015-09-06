@@ -1,8 +1,8 @@
 angular.module("wust.elements").service("ModalEditService", ModalEditService);
 
-ModalEditService.$inject = ["$rootScope", "$modal", "EditService", "$state"];
+ModalEditService.$inject = ["$rootScope", "$modal", "EditService", "$state", "ContextService"];
 
-function ModalEditService($rootScope, $modal, EditService, $state) {
+function ModalEditService($rootScope, $modal, EditService, $state, ContextService) {
     let self = this;
 
     let modalInstance = $modal({
@@ -36,7 +36,8 @@ function ModalEditService($rootScope, $modal, EditService, $state) {
     }
 
     function showModal() {
-        currentNode = EditService.createSession();
+        let start = {tags: angular.copy(ContextService.currentContexts)};
+        currentNode = EditService.createSession(start);
         modalInstance.$promise.then(modalInstance.show);
     }
 

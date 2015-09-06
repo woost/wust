@@ -56,7 +56,6 @@ function navigationCtrl($state, Auth, SearchService, DiscourseNode, Search, Moda
 
     function newDiscussion() {
         ModalEditService.show();
-        ModalEditService.currentNode.tags = ContextService.currentContexts;
     }
 
     function onSearchBoxChange() {

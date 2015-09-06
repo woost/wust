@@ -30,7 +30,7 @@ function scratchpadCtrl(EditService, SidebarService, ContextService) {
     };
 
     function editNewPost() {
-        vm.newPost.tags = ContextService.currentContexts;
+        vm.newPost.tags = angular.copy(ContextService.currentContexts);
         EditService.edit(vm.newPost);
         vm.newPost.title = "";
     }
