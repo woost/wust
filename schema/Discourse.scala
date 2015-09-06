@@ -120,7 +120,6 @@ object WustSchema {
 
   // generic Tags (base for Tags, Scopes)
   @Node trait TagLike extends ContentNode with Inheritable {
-    //TODO: catch db constraint error when creating new tag, and return the already existing tag.
     @unique val title: String
     var description: Option[String]
     var color: Long // Hue 0..360, -1 is gray
