@@ -54,7 +54,7 @@
                                 <input type="submit" value="Register" ng-click="registerUser = true" class="btn btn-default" ng-disabled="signForm.$invalid">
                             </form>
                             <form ng-switch-default ng-submit="vm.logout()" class="navbar-form navbar-right ng-trans ng-trans-slide-right ease">
-                                <a ui-sref="users.details({id: vm.currentAuth.userId})" style="padding-right: 10px"></a>
+                                <a ui-sref="users.details({id: vm.currentAuth.userId})" style="padding-right: 10px">Profile</a>
                                 <input type="submit" value="Logout" class="btn btn-default">
                             </form>
                         </li>
