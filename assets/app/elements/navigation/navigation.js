@@ -44,6 +44,7 @@ function navigationCtrl($state, Auth, SearchService, DiscourseNode, Search, Moda
         vm.contextStyle = {
             "background-color": vm.currentContexts.length > 0 ? Helpers.hashToColorNavBg(vm.currentContexts[0]) : undefined
         };
+        ContextService.emitChangedEvent();
     }
 
     function authenticate(register) {

@@ -87,7 +87,7 @@ function sortTags(tags) {
 
     function orderTags(tags) {
         return _.sortByOrder(tags,
-            // make sorting deterministic
+            // sort by id to make sorting deterministic
             ["isClassification","id"],
             ["desc","asc"]
         );

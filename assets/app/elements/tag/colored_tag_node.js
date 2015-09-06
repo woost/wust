@@ -1,8 +1,8 @@
 angular.module("wust.elements").directive("coloredTagNode", coloredTagNode);
 
-coloredTagNode.$inject = ["Helpers"];
+coloredTagNode.$inject = ["Helpers", "ContextService", "$rootScope"];
 
-function coloredTagNode(Helpers) {
+function coloredTagNode(Helpers, ContextService, $rootScope) {
     return {
         restrict: "EA",
         scope: {
@@ -14,11 +14,24 @@ function coloredTagNode(Helpers) {
 
     function link(scope, elem) {
         let rawElem = elem[0];
-        scope.$watchCollection("coloredTagNode.tags", tags => {
-            return setColors(Helpers.sortTags(_.reject(tags, i => _.any(scope.ignoreTags, _.pick(i, "id"))))[0]);
-        });
 
-        function setColors(tag) {
+        if (scope.ignoreTags === undefined)
+            $rootScope.$on("context.changed", refreshColor);
+
+        scope.$watchCollection("coloredTagNode.tags", refreshColor);
+
+        function refreshColor() {
+            setColor(selectTag(scope.coloredTagNode.tags));
+        }
+
+        function selectTag(tags) {
+            // if ignoretags are set, we will filter by them (this is the case for streams and search.
+            // otherwise the the current contexts are ignored.
+            let filtered = _.reject(tags, i => _.any(scope.ignoreTags || ContextService.currentContexts, _.pick(i, "id")));
+            return Helpers.sortTags(filtered)[0];
+        }
+
+        function setColor(tag) {
             if (tag === undefined || tag.id === undefined) {
                 rawElem.style.backgroundColor = "";
                 rawElem.style.borderColor = "";
@@ -29,3 +42,4 @@ function coloredTagNode(Helpers) {
         }
     }
 }
+

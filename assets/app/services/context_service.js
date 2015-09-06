@@ -1,8 +1,15 @@
 angular.module("wust.services").service("ContextService", ContextService);
 
-ContextService.$inject = [];
+ContextService.$inject = ["$rootScope"];
 
-function ContextService() {
+function ContextService($rootScope) {
 
     this.currentContexts = [];
+
+    this.emitChangedEvent = emitChangedEvent;
+
+    function emitChangedEvent() {
+        $rootScope.$emit("context.changed");
+    }
 }
+

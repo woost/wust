@@ -15,12 +15,12 @@ function bigPost() {
     };
 }
 
-bigPostCtrl.$inject = ["SidebarService", "Post", "EditService", "Session", "ModalEditService"];
+bigPostCtrl.$inject = ["SidebarService", "Post", "EditService", "Session", "ModalEditService", "ContextService"];
 
 //TODO: we are using the markdown directive directly and also allow to enter zen
 //mode. both directives will lead to parsing the markdown description, which is
 //not needed. zen mode should reuse the parsed description here.
-function bigPostCtrl(SidebarService, Post, EditService, Session, ModalEditService) {
+function bigPostCtrl(SidebarService, Post, EditService, Session, ModalEditService, ContextService) {
     let vm = this;
 
     vm.editNode = EditService.createSession(vm.node);
@@ -30,6 +30,7 @@ function bigPostCtrl(SidebarService, Post, EditService, Session, ModalEditServic
     vm.onSave = onSave;
     vm.onApply = onApply;
     vm.editMode = false;
+    vm.currentContexts = ContextService.currentContexts;
 
     function onSave(response) {
         vm.editMode = false;
