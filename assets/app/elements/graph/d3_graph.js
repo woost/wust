@@ -227,10 +227,13 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
                         let elem = document.createElement("span");
                         _.values(d.tags).forEach(t => {
                             let tagElem = document.createElement("span");
-                            tagElem.className = "tag nodetag";
+                            tagElem.className = "tag-label nodetag";
                             tagElem.style.backgroundColor = Helpers.hashToColorFill(t);
                             tagElem.style.borderColor = Helpers.hashToColorBorder(t);
-                            tagElem.appendChild(document.createTextNode(t.title));
+                            let content = document.createElement("span");
+                            content.className = "content";
+                            content.appendChild(document.createTextNode(t.title));
+                            tagElem.appendChild(content);
                             elem.appendChild(tagElem);
                         });
                         return elem.outerHTML;

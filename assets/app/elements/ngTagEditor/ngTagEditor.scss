@@ -20,10 +20,11 @@
     .tag-suggestions {
         display: block;
     }
-    .tag-editor .tag .remove {
-        margin: 0 0 0 5px;
-        font-weight: bold;
-        cursor: pointer;
+    .tag-editor .tag-label {
+        .remove {
+            padding-left: 0 !important;
+            font-weight: bold;
+        }
     }
     .tag-editor .tag-input {
         display: inline-block;
@@ -54,7 +55,8 @@
         font-size: 14px;
         line-height: 25px;
     }
-    .tag-editor .tag-suggestions .tag {
+
+    .tag-editor .tag-suggestions .tag-label {
         cursor: pointer;
     }
 }

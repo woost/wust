@@ -1,5 +1,3 @@
 <div class="big_taglist_directive">
-    <span ng-repeat="tag in vm.node.tags track by tag.id" class="tag" colored-tag="tag" border="true">
-        <a ui-sref="tags.details({id: tag.id})" ng-bind="tag.title"></a>
-    </span>
+    <span ng-repeat="tag in vm.node.tags track by tag.id" tag-label="tag"></span>
 </div>

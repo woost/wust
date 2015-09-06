@@ -1,8 +1,7 @@
-.tag {
+.tag-label {
     display: inline-block !important;
     height: 24px;
     margin: 0 7px 0 0;
-    padding: 0 5px !important;
 
     // intense tags are without border and bold
     // light tags are with 1px border and normal
@@ -13,13 +12,23 @@
     font-size: 14px;
     line-height: 24px !important;
     color: black !important;
+    cursor: default;
 
-    cursor: pointer;
+    [onclick], [ng-click], [ng-mousedown] {
+        cursor: pointer;
+    }
+
+    .content {
+        padding: 0 5px !important;
+    }
 
     a, a:link, a:active, a:visited  {
         color: black !important;
         text-decoration: none;
+        display: inline-block;
+        height: 100%;
     }
+
     a:hover {
         background-color: inherit !important;
         color: inherit;
