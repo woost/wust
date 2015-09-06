@@ -1,4 +1,4 @@
-<nav id="navigation" class="navbar navbar-default navbar-fixed-top" role="navigation" ng-style="vm.contextStyle">
+<nav id="navigation" class="navbar navbar-inverse navbar-fixed-top" role="navigation" ng-style="vm.contextStyle">
     <div class="container-fluid">
         <div class="navbar-header">
             <button id="edit_modal_toggle" type="button" class="btn btn-default navbar-btn" onclick="this.blur()" ng-click="vm.newDiscussion()">New<span class="hidden-xs">&nbsp;Discussion</span></button>
@@ -16,6 +16,20 @@
                         <i class="fa fa-users"></i><span class="hidden-sm hidden-xs">&nbsp;Users</span></a></li>
             </ul>
 
+            <ul class="nav navbar-nav navbar-left">
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle">
+                        <span ng-repeat="context in vm.currentContexts" tag-label="context"></span>
+                        <span ng-show="vm.currentContexts.length === 0">Context <span class="caret"></span></span>
+                    </a>
+                    <ul class="dropdown-menu context-dropdown" ng-switch="vm.currentAuth.userId">
+                        <li>
+                            <h3>Select Context</h3>
+                            <div edit-taglist tags="vm.currentContexts" existing-only="true"></div>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
 
             <form id="node_search_form" class="navbar-form navbar-left" ng-submit='vm.onSearchBoxChange()'>
                 <div class="input-group">
@@ -25,15 +39,6 @@
                     </span>
                 </div>
             </form>
-
-            <ul class="nav navbar-nav navbar-left">
-                <li>
-                    <div class="current-context">
-                        Context:
-                        <span tag-label="vm.currentContext"></span>
-                    </div>
-                </li>
-            </ul>
 
             <ul class="nav navbar-nav navbar-right">
                 <li class="dropdown">

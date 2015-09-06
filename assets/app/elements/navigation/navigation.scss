@@ -13,24 +13,23 @@
 
     .navpagelinks a:hover, a.dropdown-toggle:hover {
         color: $nav_hover_color;
-        background-color: $nav_hover_background;
-        opacity: 0.7;
-        &.active {
-            opacity: 1;
-        }
+        background-color: rgba($nav_hover_background, 0.7);
     }
     .navpagelinks a.active {
         color: $nav_active_color;
         background-color: $nav_active_background;
     }
 
-    .current-context {
-        padding-top: 12px;
-        line-height: 20px;
+    .tag-label {
+        border-color: rgba(0,0,0,0.7) !important;
+        // tag label is higher than normal text.
+        // negative margin to prevent expanding navbar
+        margin-top: -4px;
+        margin-bottom: -10px;
     }
 
-    .tag-label {
-        border-color: #444 !important;
+    .dropdown-menu {
+        color: #333; //TODO: use bootstrap variable
     }
 
     #node_search_form {
@@ -56,6 +55,14 @@
                 background-color: transparent;
             }
         }
+    }
+    .context-dropdown {
+        h3 {
+            padding: 10px 0px;
+        }
+        width: 300px;
+        height: 270px; // must be high enough to cover expanded tag-editor
+        padding: 10px;
     }
     .auth-dropdown {
         width: 200px;
