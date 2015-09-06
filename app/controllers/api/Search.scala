@@ -55,12 +55,14 @@ object Search extends TaggedTaggable[UuidNode] with Controller {
     } else {
       if (tagOr.getOrElse(false)) {
         val tagDef = ConcreteFactoryNodeDefinition(TagLikeMatches)
-        val relationDef = RelationDefinition(tagDef, SchemaTags, nodeDef)
-        val condition = if (termMatcher.isEmpty) "" else s"and ${termMatcher}"
+        val inheritTagDef = ConcreteFactoryNodeDefinition(TagLikeMatches)
+        val relationDef = RelationDefinition(inheritTagDef, SchemaTags, nodeDef)
+        val condition = if (termMatcher.isEmpty) "" else s"where ${termMatcher}"
+        val tagDefinition = s"${inheritTagDef.toQuery}-[:INHERITSTOINHERITABLE|INHERITABLETOINHERITS*0..10]->${tagDef.toQuery}"
 
         Discourse(db.queryGraph(Query(
-          s"""match ${relationDef.toQuery}
-          where (${tagDef.name}.uuid in {tagUuids})
+          s"""match ${tagDefinition} where (${tagDef.name}.uuid in {tagUuids})
+          with distinct ${inheritTagDef.name} match ${relationDef.toQuery(false, true)}
           $condition
           $returnStatement""",
           titleRegex.map(t => Map("term" -> t)).getOrElse(Map.empty) ++ Map("tagUuids" -> tags)
@@ -70,11 +72,14 @@ object Search extends TaggedTaggable[UuidNode] with Controller {
         )))
       } else {
         val tagDefs = tags.map(uuid => FactoryUuidNodeDefinition(TagLikeMatches, uuid))
-        val relationDefs = tagDefs.map(tagDef => RelationDefinition(tagDef, SchemaTags, nodeDef))
+        val inheritTagDefs = tags.map(_ => ConcreteFactoryNodeDefinition(TagLikeMatches))
+        val relationDefs = inheritTagDefs.map(tagDef => RelationDefinition(tagDef, SchemaTags, nodeDef))
         val condition = if (termMatcher.isEmpty) "" else s"where ${termMatcher}"
+        val tagDefinitions = (tagDefs zip inheritTagDefs).map { case (t,i) => s"${i.toQuery}-[:INHERITSTOINHERITABLE|INHERITABLETOINHERITS*0..10]->${t.toQuery}" }.mkString(",")
 
+        //TODO: distinct?
         Discourse(db.queryGraph(Query(
-          s"""match ${nodeDef.toQuery}, ${tagDefs.map(_.toQuery).mkString(",")}, ${relationDefs.map(_.toQuery(false)).mkString(",")}
+          s"""match ${nodeDef.toQuery}, ${tagDefinitions}, ${relationDefs.map(_.toQuery(false)).mkString(",")}
           $condition
           $returnStatement""",
           titleRegex.map(t => Map("term" -> t)).getOrElse(Map.empty) ++ Map("tagUuids" -> tags)
