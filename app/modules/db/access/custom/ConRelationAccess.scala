@@ -13,10 +13,10 @@ import play.api.mvc.Results._
 import renesca.parameter.implicits._
 import renesca.schema._
 
-trait ContentRelationHelper {
+trait ConstructRelationHelper {
   protected def persistRelation[T <: UuidNode](discourse: Discourse, result: T): Either[Result, ConnectResponse[T]] = {
     db.transaction(_.persistChanges(discourse)).map(err =>
-      Left(BadRequest(s"Cannot create ContentRelation: $err'"))
+      Left(BadRequest(s"Cannot create ConstructRelation: $err'"))
     ).getOrElse({
       //TODO: Only send partial graph: the created relations!
       //TODO: should only send node if the node was newly created
@@ -28,19 +28,19 @@ trait ContentRelationHelper {
 }
 
 //TODO: track what the user did here
-case class StartContentRelationAccess[
+case class StartConRelationAccess[
 START <: UuidNode,
 RELATION <: AbstractRelation[START, END],
 END <: UuidNode
 ](
-  factory: ContentRelationFactory[START, RELATION, END],
-  nodeFactory: UuidNodeMatchesFactory[END]) extends StartRelationReadBase[START,RELATION,END] with StartRelationDeleteBase[START,RELATION,END] with ContentRelationHelper {
+  factory: ConstructRelationFactory[START, RELATION, END],
+  nodeFactory: UuidNodeMatchesFactory[END]) extends StartRelationReadBase[START,RELATION,END] with StartRelationDeleteBase[START,RELATION,END] with ConstructRelationHelper {
 
   override def create(context: RequestContext, param: ConnectParameter[START], otherUuid: String) = {
       val discourse = Discourse.empty
       val base = param.baseFactory.matchesOnUuid(param.baseUuid)
       val node = nodeFactory.matchesOnUuid(otherUuid)
-      discourse.add(factory.mergeContentRelation(base, node))
+      discourse.add(factory.mergeConstructRelation(base, node))
       persistRelation(discourse, node)
   }
 
@@ -50,25 +50,25 @@ END <: UuidNode
       val end = param.endFactory.matchesOnUuid(param.endUuid)
       val base = param.baseFactory.matchesHyperConnection(start, end)
       val node = nodeFactory.matchesOnUuid(uuid)
-      val relation = factory.mergeContentRelation(base, node)
+      val relation = factory.mergeConstructRelation(base, node)
       discourse.add(base, relation)
       persistRelation(discourse, node)
   }
 }
 
-case class EndContentRelationAccess[
+case class EndConRelationAccess[
 START <: UuidNode,
 RELATION <: AbstractRelation[START, END],
 END <: UuidNode
 ](
-  factory: ContentRelationFactory[START, RELATION, END],
-  nodeFactory: UuidNodeMatchesFactory[START]) extends EndRelationReadBase[START,RELATION,END] with EndRelationDeleteBase[START,RELATION,END] with ContentRelationHelper {
+  factory: ConstructRelationFactory[START, RELATION, END],
+  nodeFactory: UuidNodeMatchesFactory[START]) extends EndRelationReadBase[START,RELATION,END] with EndRelationDeleteBase[START,RELATION,END] with ConstructRelationHelper {
 
   override def create(context: RequestContext, param: ConnectParameter[END], otherUuid: String) = {
     val discourse = Discourse.empty
     val base = param.baseFactory.matchesOnUuid(param.baseUuid)
     val node = nodeFactory.matchesOnUuid(otherUuid)
-    discourse.add(factory.mergeContentRelation(node, base))
+    discourse.add(factory.mergeConstructRelation(node, base))
     persistRelation(discourse, node)
   }
 
@@ -78,7 +78,7 @@ END <: UuidNode
       val end = param.endFactory.matchesOnUuid(param.endUuid)
       val base = param.baseFactory.matchesHyperConnection(start, end)
       val node = nodeFactory.matchesOnUuid(uuid)
-      val relation = factory.mergeContentRelation(node, base)
+      val relation = factory.mergeConstructRelation(node, base)
       discourse.add(base, relation)
       persistRelation(discourse, node)
   }

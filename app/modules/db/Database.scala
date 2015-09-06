@@ -143,13 +143,13 @@ object Database {
     }
   }
 
-  def connectNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](discourse: Discourse, start: START, factory: ContentRelationFactory[START, RELATION, END], end: END): (START, END) = {
-    discourse.add(factory.mergeContentRelation(start, end))
+  def connectNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](discourse: Discourse, start: START, factory: ConstructRelationFactory[START, RELATION, END], end: END): (START, END) = {
+    discourse.add(factory.mergeConstructRelation(start, end))
     db.transaction(_.persistChanges(discourse.graph))
     (start, end)
   }
 
-  def connectUuidNodes[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](relationDefinition: UuidRelationDefinition[START, RELATION, END] with ContentRelationDefinition[START, RELATION, END]): Option[(START, END)] = {
+  def connectUuidNodes[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](relationDefinition: UuidRelationDefinition[START, RELATION, END] with ConstructRelationDefinition[START, RELATION, END]): Option[(START, END)] = {
     import relationDefinition._
     val (discourse, (startOpt, endOpt)) = discourseNodes(startDefinition, endDefinition)
     if(startOpt.isEmpty || endOpt.isEmpty)
@@ -173,7 +173,7 @@ object Database {
     (discourse, Some((middle, node)))
   }
 
-  def startConnectHyperNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: UuidNode](relationDefinition: HyperAndNodeRelationDefinition[START, RELATION, END] with NodeAndUuidRelationDefinition[START, RELATION, END] with ContentRelationDefinition[START, RELATION, END]): Option[(START, END)] = {
+  def startConnectHyperNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: UuidNode](relationDefinition: HyperAndNodeRelationDefinition[START, RELATION, END] with NodeAndUuidRelationDefinition[START, RELATION, END] with ConstructRelationDefinition[START, RELATION, END]): Option[(START, END)] = {
     import relationDefinition._
     val (discourse, nodesOpt) = gatherHyperNodesConnector(startDefinition, endDefinition)
     if(nodesOpt.isEmpty)
@@ -182,7 +182,7 @@ object Database {
       Some(connectNodes(discourse, nodesOpt.get._1, factory, nodesOpt.get._2))
   }
 
-  def endConnectHyperNodes[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinition: NodeAndHyperRelationDefinition[START, RELATION, END] with UuidAndNodeRelationDefinition[START, RELATION, END] with ContentRelationDefinition[START, RELATION, END]): Option[(START, END)] = {
+  def endConnectHyperNodes[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinition: NodeAndHyperRelationDefinition[START, RELATION, END] with UuidAndNodeRelationDefinition[START, RELATION, END] with ConstructRelationDefinition[START, RELATION, END]): Option[(START, END)] = {
     import relationDefinition._
     val (discourse, nodesOpt) = gatherHyperNodesConnector(endDefinition, startDefinition)
     if(nodesOpt.isEmpty)

@@ -1,7 +1,7 @@
 package modules.db
 
 import model.Helpers
-import model.WustSchema.{ContentRelationFactory, UuidNode}
+import model.WustSchema.{ConstructRelationFactory, UuidNode}
 import renesca.graph.Label
 import renesca.parameter.ParameterMap
 import renesca.parameter.implicits._
@@ -9,7 +9,7 @@ import renesca.schema._
 
 package object types {
 
-  type ContentRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _, _, _ <: ContentRelationFactory[START, RELATION, END]]
+  type ConstructRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _, _, _ <: ConstructRelationFactory[START, RELATION, END]]
 
   type NodeRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _ <: NodeDefinition[START], _ <: NodeDefinition[END], _]
   type UuidRelationDefinition[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode] = RelationDefinitionBase[START, RELATION, END, _ <: UuidNodeDefinition[START], _ <: UuidNodeDefinition[END], _]
