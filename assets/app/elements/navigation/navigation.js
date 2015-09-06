@@ -55,13 +55,7 @@ function navigationCtrl($state, Auth, SearchService, DiscourseNode, Search, Moda
 
     function newDiscussion() {
         ModalEditService.show();
-        //TODO: get tag by name
-        Search.$search({
-            title: "Startpost",
-            label: DiscourseNode.TagLike.label,
-            size: 1,
-            page: 0
-        }).$then(val => ModalEditService.currentNode.tags = val.$encode());
+        ModalEditService.currentNode.tags = ContextService.currentContexts;
     }
 
     function onSearchBoxChange() {
