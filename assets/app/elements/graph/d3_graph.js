@@ -790,11 +790,11 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
             let oldWidth = this.width;
             let oldHeight = this.height;
 
-            this.resizeContainers();
-
             // only do this on a real resize. (not on tab changes etc)
-            if(oldWidth === 0 && oldHeight === 0)
-                console.warn("should not happen");
+            // this also triggers when resizing the neighbour view
+            if(oldWidth === 0 && oldHeight === 0) return;
+
+            this.resizeContainers();
 
             this.moveOldCenterToNewCenter(oldWidth, oldHeight);
         }
