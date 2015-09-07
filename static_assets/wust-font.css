@@ -1,10 +1,10 @@
 @font-face {
   font-family: 'wust-font';
-  src: url('../font/wust-font.eot?92911352');
-  src: url('../font/wust-font.eot?92911352#iefix') format('embedded-opentype'),
-       url('../font/wust-font.woff?92911352') format('woff'),
-       url('../font/wust-font.ttf?92911352') format('truetype'),
-       url('../font/wust-font.svg?92911352#wust-font') format('svg');
+  src: url('../font/wust-font.eot?3017072');
+  src: url('../font/wust-font.eot?3017072#iefix') format('embedded-opentype'),
+       url('../font/wust-font.woff?3017072') format('woff'),
+       url('../font/wust-font.ttf?3017072') format('truetype'),
+       url('../font/wust-font.svg?3017072#wust-font') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -14,7 +14,7 @@
 @media screen and (-webkit-min-device-pixel-ratio:0) {
   @font-face {
     font-family: 'wust-font';
-    src: url('../font/wust-font.svg?92911352#wust-font') format('svg');
+    src: url('../font/wust-font.svg?3017072#wust-font') format('svg');
   }
 }
 */
@@ -61,4 +61,7 @@
 .icon-comment-alt:before { content: '\e804'; } /* '' */
 .icon-th-large:before { content: '\e805'; } /* '' */
 .icon-target:before { content: '\e806'; } /* '' */
+.icon-up-dir:before { content: '\e807'; } /* '' */
+.icon-down-dir:before { content: '\e808'; } /* '' */
 .icon-share:before { content: '\e809'; } /* '' */
+.icon-dot-circled:before { content: '\e80a'; } /* '' */
