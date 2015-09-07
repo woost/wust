@@ -57,7 +57,9 @@ function RoutesConfig($stateProvider, $urlRouterProvider, $locationProvider) {
                     return lastFocus;
                 } else {
                     lastFocus = Post.$find($stateParams.id);
-                    return lastFocus.$asPromise();
+                    return lastFocus.$asPromise().catch(response => {
+                        $state.go("dashboard");
+                    });
                 }
             }]
         }
