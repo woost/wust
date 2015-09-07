@@ -1,4 +1,4 @@
-<div class="big_post_directive" colored-tag-node="vm.node" ng-switch="vm.editMode">
+<div class="big_post_directive clearfix" colored-tag-node="vm.node" ng-switch="vm.editMode">
     <div ng-switch-when="true" static-edit-post on-finish="vm.onSave(response)" node="vm.editNode"></div>
     <div ng-switch-default>
         <button class="fa fa-pencil pull-right btn btn-sm btn-default" ng-click="vm.editMode = true" data-title="edit" bs-tooltip animation=""></button>
