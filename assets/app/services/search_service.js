@@ -11,6 +11,7 @@ function SearchService(Search, DiscourseNode) {
         query: "",
         results: Search.$collection(),
         searchDescriptions: false,
+        searchStartPost: false,
         tagOr: false,
         selectedTags: [],
         waiting: true,
@@ -63,6 +64,7 @@ function SearchService(Search, DiscourseNode) {
             label: DiscourseNode.Post.label,
             title: this.query,
             searchDescriptions: this.searchDescriptions,
+            startPost: this.searchStartPost,
             tagOr: this.tagOr,
             tags: this.selectedTags.map(t => t.id),
         };

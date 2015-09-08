@@ -21,7 +21,8 @@ function DashboardCtrl(DiscourseNode, StreamService, Search, ContextService, $ro
         label: DiscourseNode.Post.label,
         tags: ContextService.currentContexts.map(c => c.id),
         size: 30,
-        page: 0
+        page: 0,
+        startPost: true
     });
 
     $rootScope.$on("context.changed", () => vm.recentPosts.$refresh({

@@ -14,7 +14,7 @@ import modules.db.access.custom.TaggedTaggable
 import scala.util.Try
 
 object Search extends TaggedTaggable[UuidNode] with Controller {
-  def index(page: Option[Int], size: Option[Int], label: Option[String], title: Option[String], searchDescriptions:Option[Boolean], tags: List[String], tagOr: Option[Boolean]) = Action {
+  def index(page: Option[Int], size: Option[Int], label: Option[String], title: Option[String], searchDescriptions:Option[Boolean], tags: List[String], tagOr: Option[Boolean], startPost: Option[Boolean]) = Action {
     // white list, so only exposed nodes can be searched
     val labels = ExposedNode.labels ++ label.map(Label(_))
     val nodeDef = LabelNodeDefinition(labels)
@@ -24,6 +24,12 @@ object Search extends TaggedTaggable[UuidNode] with Controller {
         None
       else
         Some("(?i).*" + tit.replace(" ", ".*") + ".*")
+    }
+
+    val startPostMatchPostfix = if (startPost.getOrElse(false)) {
+      "<-[:TAGSTOTAGGABLE]-(:TAGS)-[:TAGLIKETOTAGS]-(:SCOPE)"
+    } else {
+      ""
     }
 
     val descrMatcher = titleRegex.flatMap { _ =>
@@ -47,7 +53,7 @@ object Search extends TaggedTaggable[UuidNode] with Controller {
       val condition = if (termMatcher.isEmpty) "" else s"where ${termMatcher}"
 
       Discourse(db.queryGraph(Query(
-        s"""match ${nodeDef.toQuery}
+        s"""match ${nodeDef.toQuery}$startPostMatchPostfix
         $condition
         $returnStatement""",
         titleRegex.map(t => Map("term" -> t)).getOrElse(Map.empty) ++ nodeDef.parameterMap
@@ -62,7 +68,7 @@ object Search extends TaggedTaggable[UuidNode] with Controller {
 
         Discourse(db.queryGraph(Query(
           s"""match ${tagDefinition} where (${tagDef.name}.uuid in {tagUuids})
-          with distinct ${inheritTagDef.name} match ${relationDef.toQuery(false, true)}
+          with distinct ${inheritTagDef.name} match ${relationDef.toQuery(false, true)}$startPostMatchPostfix
           $condition
           $returnStatement""",
           titleRegex.map(t => Map("term" -> t)).getOrElse(Map.empty) ++ Map("tagUuids" -> tags)
@@ -79,7 +85,7 @@ object Search extends TaggedTaggable[UuidNode] with Controller {
 
         //TODO: distinct?
         Discourse(db.queryGraph(Query(
-          s"""match ${nodeDef.toQuery}, ${tagDefinitions}, ${relationDefs.map(_.toQuery(false)).mkString(",")}
+          s"""match ${nodeDef.toQuery}$startPostMatchPostfix, ${tagDefinitions}, ${relationDefs.map(_.toQuery(false)).mkString(",")}
           $condition
           $returnStatement""",
           titleRegex.map(t => Map("term" -> t)).getOrElse(Map.empty) ++ Map("tagUuids" -> tags)
