@@ -28,4 +28,18 @@
     .replytool {
         margin-top: 10px;
     }
+
+    .votebuttons-tags {
+        .votebuttons {
+            $tagheight: 24px;
+            $width: 80px;
+            $height: 160px;
+            width: $width;
+            position: relative;
+            left: -$width;
+            margin-top: -($height -$tagheight)/2;
+            margin-bottom: -($height +$tagheight)/2;
+        }
+    }
+
 }
