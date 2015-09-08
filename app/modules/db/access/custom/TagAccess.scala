@@ -5,14 +5,31 @@ import formatters.json.RequestFormat._
 import model.WustSchema.{Created => SchemaCreated, _}
 import modules.db.Database.db
 import modules.db.access.NodeReadBase
+import modules.db._;
 import modules.requests._
 import play.api.libs.json.JsValue
 import renesca.parameter.implicits._
+import renesca.Query
 import play.api.mvc.Results._
 import model.Helpers.tagTitleColor
 
 class TagAccess extends NodeReadBase[TagLike] {
   val factory = TagLike
+
+  //TODO: should override read for multiple tags, too. so it includes inherits
+  override def read(context: RequestContext, uuid: String) = {
+    println(context + uuid)
+    val node = FactoryUuidNodeDefinition(factory, uuid)
+    val base = ConcreteFactoryNodeDefinition(factory)
+    val impl = ConcreteFactoryNodeDefinition(factory)
+    val baseInherit = RelationDefinition(base, Inherits, node)
+    val implInherit = RelationDefinition(node, Inherits, impl)
+    val query = s"match ${node.toQuery} optional match ${baseInherit.toQuery(true, false)} optional match ${implInherit.toQuery(false, true)} return *"
+    println(query)
+    val discourse = Discourse(db.queryGraph(Query(query, baseInherit.parameterMap ++ implInherit.parameterMap)))
+    println(discourse)
+    discourse.tagLikes.find(_.uuid == uuid).map(Right(_)).getOrElse(Left(NotFound(s"Cannot find node with uuid '$uuid'")))
+  }
 
   override def create(context: RequestContext) = {
     context.withJson { (request: TagAddRequest) =>

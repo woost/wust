@@ -13,23 +13,24 @@ object ApiNodeFormat {
   implicit object NodeFormat extends Format[Node] {
     def reads(json: JsValue) = ???
 
-    implicit def tagsWrites = new Writes[Tags] {
-      //TODO: this is a code dup from GraphForma.scala
-      def writes(cat: Tags) = {
-        val tag: TagLike = cat.startNodeOpt.get
-        JsObject(Seq(
-          ("id", JsString(tag.uuid)),
-          ("label", JsString(TagLike.label)),
-          ("title", JsString(tag.title)),
-          ("description", JsString(tag.description.getOrElse(""))),
-          ("isClassification", JsBoolean(tag.isInstanceOf[Classification])),
-          ("isContext", JsBoolean(tag.isInstanceOf[Scope])),
-          ("color", JsNumber(tag.color)),
-          ("symbol", tag.symbol.map(JsString(_)).getOrElse(JsNull))
-        ))
-      }
+    private def tagLikeToSeq(tag: TagLike) = Seq(
+      ("id", JsString(tag.uuid)),
+      ("label", JsString(TagLike.label)),
+      ("title", JsString(tag.title)),
+      ("description", JsString(tag.description.getOrElse(""))),
+      ("isClassification", JsBoolean(tag.isInstanceOf[Classification])),
+      ("isContext", JsBoolean(tag.isInstanceOf[Scope])),
+      ("color", JsNumber(tag.color)),
+      ("symbol", tag.symbol.map(JsString(_)).getOrElse(JsNull))
+    )
+
+    implicit def tagWrites = new Writes[TagLike] {
+      def writes(tag: TagLike) = JsObject(tagLikeToSeq(tag))
     }
 
+    implicit def tagsWrites = new Writes[Tags] {
+      def writes(cat: Tags) = cat.startNodeOpt.map(tagWrites.writes(_)).getOrElse(JsNull)
+    }
 
     //TODO: this should be multiple formats...code dup
     def writes(node: Node) = {
@@ -51,16 +52,14 @@ object ApiNodeFormat {
         ("label", JsString(n.label)),
         ("tags", Json.toJson(n.inRelationsAs(Tags).map(tagsWrites.writes))) // TODO: why do we have to call tagsWrites.writes explicitly?
       )
-      case n: TagLike => Seq(
-        ("id", JsString(n.uuid)),
-        ("label", JsString(TagLike.label)),
-        ("title", JsString(n.title)),
-        ("description", JsString(n.description.getOrElse(""))),
-        ("isClassification", JsBoolean(n.isInstanceOf[Classification])),
-        ("isContext", JsBoolean(n.isInstanceOf[Scope])),
-        ("color", JsNumber(n.color)),
-        ("symbol", n.symbol.map(JsString(_)).getOrElse(JsNull))
-      )
+      case n: TagLike => tagLikeToSeq(n) ++ (n match { //TODO: traits should have accessors for relations in magic
+        case s:Scope => Seq(("inherited", JsArray(s.inherits.collect{ case t:TagLike => t }.map(tagWrites.writes))), //TODO inherits<Trait> methods in magic
+          ("implemented", JsArray(s.rev_inherits.collect{ case t:TagLike => t }.map(tagWrites.writes))))
+        case c:Classification => Seq(("inherited", JsArray(c.inherits.collect{ case t:TagLike => t }.map(tagWrites.writes))),
+          ("implemented", JsArray(c.rev_inherits.collect{ case t:TagLike => t }.map(tagWrites.writes))))
+        case t:StaticTag => Seq(("inherited", JsArray(t.inherits.collect{ case t:TagLike => t }.map(tagWrites.writes))),
+          ("implemented", JsArray(t.rev_inherits.collect{ case t:TagLike => t }.map(tagWrites.writes))))
+      })
       case n: User        => Seq(
         ("id", JsString(n.uuid)),
         ("name", JsString(n.name)),

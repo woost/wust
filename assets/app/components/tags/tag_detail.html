@@ -4,6 +4,14 @@
         <span tag-label="vm.tag"></span>
         <b ng-if="vm.tag.isClassification">(Classification)</b>
         <b ng-if="vm.tag.isContext">(Context)</b>
+        <div ng-if="vm.tag.inherited.length">
+            <b>Inherited:</b>
+            <span ng-repeat="inherited in vm.tag.inherited" tag-label="inherited"></span>
+        </div>
+        <div ng-if="vm.tag.implemented.length">
+            <b>Implemented:</b>
+            <span ng-repeat="implemented in vm.tag.implemented" tag-label="implemented"></span>
+        </div>
     </div>
     <div id="tag_detail_box" infinite-scroll="vm.loadMorePosts()" infinite="infinitePosts" promise="vm.contributions">
         <div ng-repeat="contribution in vm.contributions | unique:'id' track by contribution.id" small-post node="contribution" ignore-tags="::[vm.tag]" class="ng-trans ng-trans-scale-up ease"></div>
