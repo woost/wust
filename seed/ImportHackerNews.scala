@@ -57,13 +57,31 @@ object ImportHackerNews extends Task with SeedTools {
   def importItem(hnItem: Item)(implicit db: DbService): Unit = {
     modifyDiscourse { discourse =>
       println(s"importing ${ hnItem.itemType }: ${ hnItem.title.get }")
-      val startPost = createPost(hnItem.title.get, hnItem.text, hnItem.url)
       val replyTag = mergeClassification("repliesTo")
       val hackerNewsScope = mergeScope("HackerNews")
-      discourse.add(
-        tag(startPost, mergeScope(s"HN-${ hnItem.itemType }")),
-        Inherits.merge(mergeScope(s"HN-${ hnItem.itemType }"), hackerNewsScope)
-      )
+      val startPost = if (hnItem.title.get.startsWith("Ask HN:")) {
+        val startPost = createPost(hnItem.title.get.stripPrefix("Ask HN:"), hnItem.text, hnItem.url)
+        discourse.add(
+          tag(startPost, mergeClassification("Question")),
+          tag(startPost, mergeScope("Ask-HN")),
+          Inherits.merge(mergeScope("Ask-HN"), hackerNewsScope)
+        )
+        startPost
+      } else if (hnItem.title.get.startsWith("Show HN:")) {
+        val startPost = createPost(hnItem.title.get.stripPrefix("Show HN:"), hnItem.text, hnItem.url)
+        discourse.add(
+          tag(startPost, mergeScope(s"Show-HN")),
+          Inherits.merge(mergeScope(s"Show-HN"), hackerNewsScope)
+        )
+        startPost
+      } else {
+        val startPost = createPost(hnItem.title.get, hnItem.text, hnItem.url)
+        discourse.add(
+          tag(startPost, hackerNewsScope)
+        )
+        startPost
+      }
+
       if(hnItem.itemType == "Ask")
         discourse.add(tag(startPost, mergeClassification("Question")))
 
