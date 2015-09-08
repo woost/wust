@@ -27,8 +27,13 @@ function editTaglistCtrl(TagSuggestions, $q) {
     let searchTriggerDelay = 200;
     let delayedTriggerSearch;
 
+    vm.onChangeDistributor = onChangeDistributor;
     vm.searchTags = searchTags;
-    vm.onChange = vm.onChange || _.noop;
+
+    function onChangeDistributor(type, tag) {
+        if (vm.onChange)
+            vm.onChange({type, tag});
+    }
 
     function searchTags(term) {
         if(delayedTriggerSearch)

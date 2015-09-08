@@ -63,7 +63,8 @@ object WustSchema {
   // Content
   @Node trait Connectable extends ExposedNode with Taggable
   @HyperRelation class Connects(startNode: Connectable, endNode: Connectable) extends Connectable with ConstructRelation with HyperConnection with Reference
-  @Node trait Inheritable
+  @Node trait Inheritable extends UuidNode
+  //TODO: different inherits relation for tags? normal relation instead of hyper relation?
   @HyperRelation class Inherits(startNode: Inheritable, endNode: Inheritable) extends ConstructRelation with HyperConnection with UuidNode
 
   // post explicitly inherits timestamp to make it cheap to query recent posts

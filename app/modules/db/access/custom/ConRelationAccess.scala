@@ -28,15 +28,19 @@ trait ConstructRelationHelper {
 }
 
 //TODO: track what the user did here
+//TODO: all relationaccess should accept this type signature, so we can have
+//relations between traits and still use subclass node as start/end node
 case class StartConRelationAccess[
-START <: UuidNode,
-RELATION <: AbstractRelation[START, END],
-END <: UuidNode
+RSTART <: UuidNode,
+START <: RSTART,
+RELATION <: AbstractRelation[RSTART, REND],
+REND <: UuidNode,
+END <: REND
 ](
-  factory: ConstructRelationFactory[START, RELATION, END],
-  nodeFactory: UuidNodeMatchesFactory[END]) extends StartRelationReadBase[START,RELATION,END] with StartRelationDeleteBase[START,RELATION,END] with ConstructRelationHelper {
+  factory: ConstructRelationFactory[RSTART, RELATION, REND],
+  nodeFactory: UuidNodeMatchesFactory[END]) extends StartRelationReadBase[RSTART,RELATION,REND] with StartRelationDeleteBase[RSTART,RELATION,REND] with ConstructRelationHelper {
 
-  override def create(context: RequestContext, param: ConnectParameter[START], otherUuid: String) = {
+  override def create(context: RequestContext, param: ConnectParameter[RSTART], otherUuid: String) = {
       val discourse = Discourse.empty
       val base = param.baseFactory.matchesOnUuid(param.baseUuid)
       val node = nodeFactory.matchesOnUuid(otherUuid)
@@ -44,7 +48,7 @@ END <: UuidNode
       persistRelation(discourse, node)
   }
 
-  override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,START with AbstractRelation[S,E], E], uuid: String) = {
+  override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,RSTART with AbstractRelation[S,E], E], uuid: String) = {
       val discourse = Discourse.empty
       val start = param.startFactory.matchesOnUuid(param.startUuid)
       val end = param.endFactory.matchesOnUuid(param.endUuid)
@@ -57,14 +61,16 @@ END <: UuidNode
 }
 
 case class EndConRelationAccess[
-START <: UuidNode,
-RELATION <: AbstractRelation[START, END],
-END <: UuidNode
+RSTART <: UuidNode,
+START <: RSTART,
+RELATION <: AbstractRelation[RSTART, REND],
+REND <: UuidNode,
+END <: REND
 ](
-  factory: ConstructRelationFactory[START, RELATION, END],
-  nodeFactory: UuidNodeMatchesFactory[START]) extends EndRelationReadBase[START,RELATION,END] with EndRelationDeleteBase[START,RELATION,END] with ConstructRelationHelper {
+  factory: ConstructRelationFactory[RSTART, RELATION, REND],
+  nodeFactory: UuidNodeMatchesFactory[START]) extends EndRelationReadBase[RSTART,RELATION,REND] with EndRelationDeleteBase[RSTART,RELATION,REND] with ConstructRelationHelper {
 
-  override def create(context: RequestContext, param: ConnectParameter[END], otherUuid: String) = {
+  override def create(context: RequestContext, param: ConnectParameter[REND], otherUuid: String) = {
     val discourse = Discourse.empty
     val base = param.baseFactory.matchesOnUuid(param.baseUuid)
     val node = nodeFactory.matchesOnUuid(otherUuid)
@@ -72,7 +78,7 @@ END <: UuidNode
     persistRelation(discourse, node)
   }
 
-  override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,END with AbstractRelation[S,E], E], uuid: String) = {
+  override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,REND with AbstractRelation[S,E], E], uuid: String) = {
       val discourse = Discourse.empty
       val start = param.startFactory.matchesOnUuid(param.startUuid)
       val end = param.endFactory.matchesOnUuid(param.endUuid)

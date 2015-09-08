@@ -10,6 +10,7 @@ function TagDetailsCtrl($stateParams, TagLike, Search, DiscourseNode, StreamServ
 
     vm.loadMorePosts = loadMorePosts;
     vm.addTagStream = addTagStream;
+    vm.changedInherits = changedInherits;
 
     vm.tag = TagLike.$find($stateParams.id);
     //TODO: tags/id/posts should honor inherits relation
@@ -42,5 +43,16 @@ function TagDetailsCtrl($stateParams, TagLike, Search, DiscourseNode, StreamServ
 
         StreamService.push([vm.tag]);
         humane.success(`Added stream for '${vm.tag.title}'`);
+    }
+
+    function changedInherits(list, type, tag) {
+        switch (type) {
+            case "add":
+                list.$buildRaw(tag).$save({}).$then(() => vm.contributions.$refresh());
+                break;
+            case "remove":
+                list.$buildRaw(tag).$destroy().$then(() => vm.contributions.$refresh());
+                break;
+        }
     }
 }

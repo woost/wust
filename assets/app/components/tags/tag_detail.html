@@ -35,9 +35,9 @@
                 </div>
                 <div>
                     <label>Inherited</label>
-                    <div edit-taglist tags="vm.tag.inherits"></div>
+                    <div edit-taglist tags="vm.tag.inherits" on-change="vm.changedInherits(vm.tag.inherits, type, tag)"></div>
                     <label>Implemented</label>
-                    <div edit-taglist tags="vm.tag.implements"></div>
+                    <div edit-taglist tags="vm.tag.implements" on-change="vm.changedInherits(vm.tag.implements, type, tag)"></div>
                 </div>
             </div>
         </div>

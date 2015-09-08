@@ -15,7 +15,6 @@ angular.module("wust.elements").directive("tagEditor", function() {
                     $scope.focus = false;
                     $scope.suggestions = [];
                     $scope.search = $scope.search || "";
-                    $scope.onChange = $scope.onChange ? $scope.onChange : function() {};
 
                     let completeTabbing, ignoreNextSuggestion;
                     $scope.getSuggestions = $scope.getSuggestions ? $scope.getSuggestions : function() { return []; };
@@ -48,14 +47,17 @@ angular.module("wust.elements").directive("tagEditor", function() {
 
                         if (!_.any($scope.tags, t => t.title.toLowerCase() === tagTitleLC)) {
                             $scope.tags.push(tag);
-                            $scope.onChange();
+                            if ($scope.onChange)
+                                $scope.onChange({type: "add", tag: tag});
                         }
 
                         $scope.search = "";
                     };
                     $scope.remove = function(index) {
-                        $scope.tags.splice(index, 1);
-                        $scope.onChange();
+                        let tag = $scope.tags.splice(index, 1)[0];
+                        if (tag !== undefined)
+                            if ($scope.onChange)
+                                $scope.onChange({type: "remove", tag: tag});
                     };
 
                     $element.find("input").on("keydown", function(e) {
