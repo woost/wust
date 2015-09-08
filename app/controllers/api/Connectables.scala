@@ -15,8 +15,15 @@ object Connectables extends Nodes[Connectable] {
     )),
     "connects-to" -> (N > Connects > (StartConRelationAccess(Connects, Connectable) + ConnectableAccess.apply + TaggedTaggable.apply[Connectable],
       "connects-to" -> (N > StartConRelationAccess(Connects, Connectable) + ConnectableAccess.apply + TaggedTaggable.apply[Connectable]),
-      "connects-from" -> (N < EndConRelationAccess(Connects, Connectable) + ConnectableAccess.apply + TaggedTaggable.apply[Connectable])
+      "connects-from" -> (N < EndConRelationAccess(Connects, Connectable) + ConnectableAccess.apply + TaggedTaggable.apply[Connectable]),
+      "up" -> (N < VotesConnectsAccess(1)),
+      "down" -> (N < VotesConnectsAccess(-1)),
+      "neutral" -> (N < VotesConnectsAccess(0))
     )),
-    "tags" -> (N < SchemaTags < (EndRelationRead(SchemaTags, TagLike)))
+    "tags" -> (N < SchemaTags < (EndRelationRead(SchemaTags, TagLike),
+      "up" -> (N < VotesTagsAccess(1)),
+      "down" -> (N < VotesTagsAccess(-1)),
+      "neutral" -> (N < VotesTagsAccess(0))
+    ))
   )
 }

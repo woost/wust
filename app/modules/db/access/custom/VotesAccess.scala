@@ -1,6 +1,6 @@
 package modules.db.access.custom
 
-import controllers.api.nodes.{ConnectParameter, RequestContext}
+import controllers.api.nodes.{HyperConnectParameter, ConnectParameter, RequestContext}
 import model.WustSchema._
 import modules.db.Database._
 import modules.db._
@@ -119,28 +119,62 @@ case class VotesUpdatedTagsAccess(
     }
 }
 
-
-case class VotesReferenceAccess(sign: Long) extends EndRelationAccessDefault[User, Votes, Votable] {
+case class VotesTagsAccess(sign: Long) extends EndRelationAccessDefault[User, Votes, Votable] {
   val nodeFactory = User
 
-  def nodeDefinition(uuid: String) = FactoryUuidNodeDefinition(Reference, uuid)
-  //TODO: matchesOnUuid for hyperrelations in magic
-  def matchesNode(uuid: String) = Reference.matchesUuidNode(uuid = Some(uuid), matches = Set("uuid"))
-
-  override def create(context: RequestContext, param: ConnectParameter[Votable]) = context.withUser { user =>
+  override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Votable with AbstractRelation[S,E], E]) = context.withUser { user =>
     db.transaction { tx =>
       val weight = sign // TODO: karma
       val success = if (weight == 0) {
-        val referenceDef = nodeDefinition(param.baseUuid)
+        val referenceDef = HyperNodeDefinition(FactoryUuidNodeDefinition(TagLike, param.startUuid), Tags, FactoryUuidNodeDefinition(Connectable, param.endUuid))
         val userDef = ConcreteNodeDefinition(user)
         val votesDef = RelationDefinition(userDef, Votes, referenceDef)
         // next we define the voting relation between the currently logged in user and the change request
-        val votes = RelationDefinition(userDef, Votes, referenceDef)
+        val userNode = ConcreteNodeDefinition(user)
+        val votes = RelationDefinition(userNode, Votes, referenceDef)
         disconnectNodesFor(votes, tx)
       } else {
-        val reference = matchesNode(param.baseUuid)
-        val votes = Votes.merge(user, reference, weight = weight, onMatch = Set("weight"))
-        val failure = tx.persistChanges(reference, votes)
+        val tag = TagLike.matches(uuid = Some(param.startUuid), matches = Set("uuid"))
+        val connectable = Connectable.matches(uuid = Some(param.startUuid), matches = Set("uuid"))
+        val tags = Tags.matches(tag, connectable)
+        val votes = Votes.merge(user, tags, weight = weight, onMatch = Set("weight"))
+        val failure = tx.persistChanges(tag, connectable, tags, votes)
+        !failure.isDefined
+      }
+
+      Left(if (success)
+        Ok(JsObject(Seq(
+          ("vote", JsObject(Seq(
+            ("weight", JsNumber(weight))
+          )))
+        )))
+      else
+        BadRequest("No vote :/")
+      )
+    }
+  }
+}
+
+case class VotesConnectsAccess(sign: Long) extends EndRelationAccessDefault[User, Votes, Votable] {
+  val nodeFactory = User
+
+  override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Votable with AbstractRelation[S,E], E]) = context.withUser { user =>
+    db.transaction { tx =>
+      val weight = sign // TODO: karma
+      val success = if (weight == 0) {
+        val referenceDef = HyperNodeDefinition(FactoryUuidNodeDefinition(Connectable, param.startUuid), Connects, FactoryUuidNodeDefinition(Connectable, param.endUuid))
+        val userDef = ConcreteNodeDefinition(user)
+        val votesDef = RelationDefinition(userDef, Votes, referenceDef)
+        // next we define the voting relation between the currently logged in user and the change request
+        val userNode = ConcreteNodeDefinition(user)
+        val votes = RelationDefinition(userNode, Votes, referenceDef)
+        disconnectNodesFor(votes, tx)
+      } else {
+        val tag = Connectable.matches(uuid = Some(param.startUuid), matches = Set("uuid"))
+        val connectable = Connectable.matches(uuid = Some(param.startUuid), matches = Set("uuid"))
+        val tags = Connects.matches(tag, connectable)
+        val votes = Votes.merge(user, tags, weight = weight, onMatch = Set("weight"))
+        val failure = tx.persistChanges(tag, connectable, tags, votes)
         !failure.isDefined
       }
 
