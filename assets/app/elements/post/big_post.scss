@@ -33,7 +33,7 @@
     .votemenu {
         $tagheight: 24px;
         $buttonwidth: 80px;
-        $height: 160px;
+        $height: 110px;
 
         width: $buttonwidth;
 
@@ -45,6 +45,7 @@
         &>.buttonpair {
             width: $buttonwidth;
             opacity: 0.5;
+            line-height: 0px; // move arrows closer to each other
         }
 
         .detailed {
@@ -54,11 +55,11 @@
 
             .votebuttons {
                 padding: 10px;
-                width: 200px;
+                width: 500px;
+                height: $height;
                 position: relative;
-                top: -23px;
                 @include display-flex(flex);
-                @include justify-content(space-between);
+                @include justify-content(flex-start);
                 @include flex-direction(row);
                 @include align-items(center);
                 background-color: #F8F8F8;
@@ -72,16 +73,17 @@
                     @include align-items(center);
                     width: 120px;
                     .up {
-                        position: relative;
-                        bottom: -20px;
-                    }
-                    .down {
-                        position: relative;
-                        top: -20px;
+                        line-height: 5px;
                     }
                 }
             }
         }
+    }
+    .buttonpair .up, .buttonpair .down {
+        opacity: 0.5;
+    }
+    .buttonpair .active, .buttonpair .up:hover, .buttonpair .down:hover {
+        opacity: 1;
     }
     .votemenu:hover, .votemenu > .detailed:hover {
         &>.buttonpair {
