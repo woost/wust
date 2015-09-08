@@ -34,12 +34,19 @@ trait SeedTools {
     )
   }
 
-  def createPost(rawContent: String) = {
-    val content = unescapeHtml(rawContent)
+  def createPost(title: String, description: Option[String], timestamp: Long) = {
     Post.create(
-      title = shorten(content),
-      description = if(content.length <= maxTitleLength) None else Some(content)
+      title = shorten(unescapeHtml(title)),
+      description = description,
+      timestamp = timestamp
     )
+  }
+
+  def createPost(rawContent: String, timestamp: Option[Long] = None) = {
+    val content = unescapeHtml(rawContent)
+    val title = shorten(content)
+    val description = if(content.length <= maxTitleLength) None else Some(content)
+    timestamp.map(t => Post.create(title = title, description = description, timestamp = t)).getOrElse(Post.create(title = title, description = description))
   }
 }
 

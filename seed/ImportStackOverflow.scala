@@ -1,0 +1,98 @@
+package tasks
+
+import common.ConfigString._
+import model.WustSchema._
+import modules.db.Database
+import play.core.StaticApplication
+import renesca._
+import java.io.File
+import play.api.Play.current
+import play.api.libs.ws.ning.NingAsyncHttpClientConfigBuilder
+import scala.concurrent.{Future, Await}
+import scala.concurrent.ExecutionContext.Implicits.global
+import play.api.libs.json._
+import scala.util.Try
+import scala.concurrent.duration._
+
+object ImportStackOverflow extends Task with SeedTools {
+
+  val builder = new com.ning.http.client.AsyncHttpClientConfig.Builder()
+  builder.setCompressionEnabled(true)
+  val ws = new play.api.libs.ws.ning.NingWSClient(builder.build())
+  def getJson(url: String): JsValue = Await.result(ws.url(url).get(), 10.seconds).json
+
+  val site = "ux"
+  val questionLimit = 2
+  val filterId = "!9McUOAJfkgufsXMHUKprrtPH5vBjclpq8Z--RIM3a0bt2k)S-4zjE6n"
+  val baseurl = s"http://api.stackexchange.com/2.2"
+
+  val questionTag = mergeClassification("Question")
+  val answerTag = mergeClassification("Answer")
+  val soTag = mergeScope("StackOverflow")
+  val replyTag = mergeClassification("repliesTo")
+
+  def questions = {
+    val url = baseurl + s"/questions?page=1&pagesize=$questionLimit&order=desc&min=10&sort=votes&filter=$filterId&site=$site"
+    val json = getJson(url)
+    (json \ "items").as[Seq[JsObject]]
+  }
+
+
+  dbContext { implicit db =>
+    modifyDiscourse { discourse =>
+      val user = User.merge("StackOverflow")
+      discourse.add(user)
+
+      def post(rawPost: JsObject) = {
+        val tagNames = (rawPost \ "tags").asOpt[Seq[String]]
+        val body = (rawPost \ "body_markdown").as[String]
+        val title = (rawPost \ "title").asOpt[String]
+        val downVotes = (rawPost \ "down_vote_count").as[Long]
+        val upVotes = (rawPost \ "up_vote_count").as[Long]
+        val viewCount = (rawPost \ "view_count").asOpt[Long]
+        val creationDate = (rawPost \ "creation_date").as[Long]
+
+        val post = title.map(tit => createPost(tit, Some(body), creationDate)).getOrElse(createPost(body, Some(creationDate)))
+        discourse.add(post)
+        discourse.add(Created.create(user, post))
+        tagNames.foreach(_.foreach(t => discourse.add(tag(post, mergeScope(t)))))
+
+        //TODO: voting
+
+        val comments = (rawPost \ "comments").asOpt[Seq[JsObject]]
+
+        comments.foreach(_.foreach { rawComment =>
+          val body = (rawComment \ "body").as[String]
+          val score = (rawComment \ "score").as[Long]
+          val creationDate = (rawComment \ "creation_date").as[Long]
+
+          val comment = createPost(body, None, creationDate)
+          discourse.add(comment)
+          discourse.add(Created.create(user, comment))
+
+          val connects = Connects.create(comment, post)
+          discourse.add(comment, connects, tag(connects, replyTag))
+
+          //TODO: voting
+        })
+
+        post
+      }
+
+      questions.foreach { rawQuestion =>
+        val question = post(rawQuestion)
+        discourse.add(tag(question, soTag))
+        discourse.add(tag(question, questionTag))
+
+        (rawQuestion \ "answers").as[Seq[JsObject]].foreach { rawAnswer =>
+          val answer = post(rawAnswer)
+          discourse.add(tag(answer, answerTag))
+          val connects = Connects.create(answer, question)
+          discourse.add(answer, connects, tag(connects, replyTag))
+        }
+      }
+    }
+  }
+
+  ws.close()
+}
