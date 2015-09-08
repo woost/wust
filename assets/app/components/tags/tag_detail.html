@@ -1,20 +1,45 @@
 <div id="tag_detail_component">
-    <div class="header">
-        <button class="pull-right btn btn-default" type="button" animation="am-fade-and-scale-down" ng-click="vm.addTagStream()">Stream <i class="fa fa-plus"></i></button>
-        <span tag-label="vm.tag"></span>
-        <b ng-if="vm.tag.isClassification">(Classification)</b>
-        <b ng-if="vm.tag.isContext">(Context)</b>
-        <div ng-if="vm.tag.inherited.length">
-            <b>Inherited:</b>
-            <span ng-repeat="inherited in vm.tag.inherited" tag-label="inherited"></span>
+    <div tabset class="tabs-above">
+        <div tab>
+            <div tab-heading>
+                <span tag-label="vm.tag" disable-link></span>
+            </div>
+            <div class="header">
+                <button class="pull-right btn btn-default" type="button" animation="am-fade-and-scale-down" ng-click="vm.addTagStream()">Stream <i class="fa fa-plus"></i></button>
+                <div ng-if="vm.tag.inherits.length">
+                    <b>Inherited:</b>
+                    <span ng-repeat="inherits in vm.tag.inherits" tag-label="inherits"></span>
+                </div>
+                <div ng-if="vm.tag.implements.length">
+                    <b>Implemented:</b>
+                    <span ng-repeat="implements in vm.tag.implements" tag-label="implements"></span>
+                </div>
+            </div>
+            <div id="tag_detail_box" infinite-scroll="vm.loadMorePosts()" infinite="infinitePosts" promise="vm.contributions" scroll-target="tag_detail_box">
+                <div ng-repeat="contribution in vm.contributions | unique:'id' track by contribution.id" small-post node="contribution" ignore-tags="::[vm.tag]" class="ng-trans ng-trans-scale-up ease"></div>
+                <button class="btn btn-default pull-right ng-hide" ng-click="infinitePosts.manualLoad()" ng-disabled="infinitePosts.loading" ng-hide="infinitePosts.noMore">More</button>
+            </div>
         </div>
-        <div ng-if="vm.tag.implemented.length">
-            <b>Implemented:</b>
-            <span ng-repeat="implemented in vm.tag.implemented" tag-label="implemented"></span>
+        <div tab>
+            <div tab-heading class="text_heading">
+                Edit
+            </div>
+            <div class="tag_editing">
+                <div>
+                    <label>Context</label>
+                    <input type="checkbox" ng-model="vm.tag.isContext" disabled>
+                </div>
+                <div>
+                    <label>Classification </label>
+                    <input type="checkbox" ng-model="vm.tag.isClassification" disabled>
+                </div>
+                <div>
+                    <label>Inherited</label>
+                    <div edit-taglist tags="vm.tag.inherits"></div>
+                    <label>Implemented</label>
+                    <div edit-taglist tags="vm.tag.implements"></div>
+                </div>
+            </div>
         </div>
-    </div>
-    <div id="tag_detail_box" infinite-scroll="vm.loadMorePosts()" infinite="infinitePosts" promise="vm.contributions">
-        <div ng-repeat="contribution in vm.contributions | unique:'id' track by contribution.id" small-post node="contribution" ignore-tags="::[vm.tag]" class="ng-trans ng-trans-scale-up ease"></div>
-        <button class="btn btn-default pull-right ng-hide" ng-click="infinitePosts.manualLoad()" ng-disabled="infinitePosts.loading" ng-hide="infinitePosts.noMore">More</button>
     </div>
 </div>

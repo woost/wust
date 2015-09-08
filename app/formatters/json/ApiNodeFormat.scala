@@ -53,12 +53,12 @@ object ApiNodeFormat {
         ("tags", Json.toJson(n.inRelationsAs(Tags).map(tagsWrites.writes))) // TODO: why do we have to call tagsWrites.writes explicitly?
       )
       case n: TagLike => tagLikeToSeq(n) ++ (n match { //TODO: traits should have accessors for relations in magic
-        case s:Scope => Seq(("inherited", JsArray(s.inherits.collect{ case t:TagLike => t }.map(tagWrites.writes))), //TODO inherits<Trait> methods in magic
-          ("implemented", JsArray(s.rev_inherits.collect{ case t:TagLike => t }.map(tagWrites.writes))))
-        case c:Classification => Seq(("inherited", JsArray(c.inherits.collect{ case t:TagLike => t }.map(tagWrites.writes))),
-          ("implemented", JsArray(c.rev_inherits.collect{ case t:TagLike => t }.map(tagWrites.writes))))
-        case t:StaticTag => Seq(("inherited", JsArray(t.inherits.collect{ case t:TagLike => t }.map(tagWrites.writes))),
-          ("implemented", JsArray(t.rev_inherits.collect{ case t:TagLike => t }.map(tagWrites.writes))))
+        case s:Scope => Seq(("inherits", JsArray(s.inherits.collect{ case t:TagLike => t }.map(tagWrites.writes))), //TODO inherits<Trait> methods in magic
+          ("implements", JsArray(s.rev_inherits.collect{ case t:TagLike => t }.map(tagWrites.writes))))
+        case c:Classification => Seq(("inherits", JsArray(c.inherits.collect{ case t:TagLike => t }.map(tagWrites.writes))),
+          ("implements", JsArray(c.rev_inherits.collect{ case t:TagLike => t }.map(tagWrites.writes))))
+        case t:StaticTag => Seq(("inherits", JsArray(t.inherits.collect{ case t:TagLike => t }.map(tagWrites.writes))),
+          ("implements", JsArray(t.rev_inherits.collect{ case t:TagLike => t }.map(tagWrites.writes))))
       })
       case n: User        => Seq(
         ("id", JsString(n.uuid)),

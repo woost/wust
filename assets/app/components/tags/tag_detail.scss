@@ -1,9 +1,18 @@
 #tag_detail_component {
-    .header {
-        margin-right: 50px;
-        margin-left: 50px;
+    .header,.tag_editing {
+        padding-top: 10px;
+        padding-right: 50px;
+        padding-left: 50px;
+    }
+    .text_heading {
+        // this corresponds to the height of a tag label. makes normal text align like labels in tab heading
+        height: 24px;
+        line-height: 24px;
     }
     height: 100%;
+    .tabs-above, .tab-content, .tab-pane {
+        height: 100%;
+    }
     #tag_detail_box {
         padding-top: 10px;
         width: 100%;
