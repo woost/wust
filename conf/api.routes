@@ -25,5 +25,3 @@ GET /search controllers.api.Search.index(page: Option[Int], size: Option[Int], l
 
 # TODO: search is actually more powerful, still makes sense?
 GET /recent controllers.api.Recent.index(label: Option[String])
-
-GET /session/votes controllers.api.Session.votes()
