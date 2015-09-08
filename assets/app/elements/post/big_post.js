@@ -15,12 +15,12 @@ function bigPost() {
     };
 }
 
-bigPostCtrl.$inject = ["SidebarService", "Post", "EditService", "ModalEditService"];
+bigPostCtrl.$inject = ["SidebarService", "Connectable", "Post", "EditService", "ModalEditService"];
 
 //TODO: we are using the markdown directive directly and also allow to enter zen
 //mode. both directives will lead to parsing the markdown description, which is
 //not needed. zen mode should reuse the parsed description here.
-function bigPostCtrl(SidebarService, Post, EditService, ModalEditService) {
+function bigPostCtrl(SidebarService, Connectable, Post, EditService, ModalEditService) {
     let vm = this;
 
     vm.editNode = EditService.createSession(vm.node);
@@ -30,6 +30,7 @@ function bigPostCtrl(SidebarService, Post, EditService, ModalEditService) {
     vm.onSave = onSave;
     vm.onApply = onApply;
     vm.editMode = false;
+    vm.upvote = upvote;
 
     function onSave(response) {
         vm.editMode = false;
@@ -37,6 +38,16 @@ function bigPostCtrl(SidebarService, Post, EditService, ModalEditService) {
             response.requestsEdit.forEach(req => vm.editChanges.push(req));
             response.requestsTags.forEach(req => vm.tagChanges.push(req));
         }
+    }
+
+    //TODO: need to unvote
+    //TODO: semnatic downvote on post
+    function upvote(tag) {
+        Connectable.$buildRaw(_.pick(vm.node, "id")).tags.$buildRaw(_.pick(tag, "id")).up.$create().$then(() => {
+            humane.success("Upvoted");
+        }, resp => {
+            humane.error(resp);
+        });
     }
 
     function onApply(response) {
