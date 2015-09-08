@@ -22,7 +22,7 @@ object ImportStackOverflow extends Task with SeedTools {
   def getJson(url: String): JsValue = Await.result(ws.url(url).get(), 10.seconds).json
 
   val site = "ux"
-  val questionLimit = 2
+  val questionLimit = 10
   val filterId = "!9McUOAJfkgufsXMHUKprrtPH5vBjclpq8Z--RIM3a0bt2k)S-4zjE6n"
   val baseurl = s"http://api.stackexchange.com/2.2"
 

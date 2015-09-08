@@ -22,10 +22,11 @@ trait Task extends App {
   }
 }
 
-object A_ClearSeedRedditHN extends App {
+object A_ClearSeedRedditSOHN extends App {
   ClearDatabase.main(Array())
   SeedDatabase.main(Array())
   ImportReddit.main(Array())
+  ImportStackOverflow.main(Array())
   ImportHackerNews.main(Array())
 }
 
