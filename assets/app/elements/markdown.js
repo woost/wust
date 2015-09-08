@@ -20,7 +20,8 @@ function markdown() {
     // parser, thus it will be sanitized automatically.
     return {
         restrict: "EA",
-        template: "<div class='well well-sm' style='margin: 0px;' ng-bind-html='markdownHTML'></div>",
+        //TODO: declare background color in css
+        template: "<div class='well well-sm' style='margin: 0px; background-color:#FBFBFB' ng-bind-html='markdownHTML'></div>",
         scope: {
             markdown: "="
         },
