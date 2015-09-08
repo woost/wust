@@ -62,7 +62,6 @@ object ImportHackerNews extends Task with SeedTools {
       val hackerNewsScope = mergeScope("HackerNews")
       discourse.add(
         tag(startPost, mergeStaticTag(s"HN-${ hnItem.itemType }")),
-        tag(startPost, hackerNewsScope),
         Inherits.merge(mergeStaticTag(s"HN-${ hnItem.itemType }"), hackerNewsScope)
       )
       if(hnItem.itemType == "Ask")
@@ -81,7 +80,7 @@ object ImportHackerNews extends Task with SeedTools {
               println("item: " + hnItem)
             } else {
               val connects = Connects.create(commentPost, parentPost)
-              discourse.add(commentPost, connects, tag(commentPost, hackerNewsScope), tag(connects, replyTag))
+              discourse.add(commentPost, connects, tag(connects, replyTag))
               print(".")
               addDeepChildItems(hnItem, commentPost)
             }

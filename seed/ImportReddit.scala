@@ -65,7 +65,7 @@ object ImportReddit extends Task with SeedTools {
                   commentCount += 1
                   val commentPost = createPost((comment \ "data" \ "body").as[String])
                   val connects = Connects.create(commentPost, parent)
-                  discourse.add(commentPost, connects, tag(commentPost, subredditScope), tag(connects, replyTag))
+                  discourse.add(commentPost, connects, tag(connects, replyTag))
 
                   val replies = (comment \ "data" \ "replies": @unchecked) match {
                     case JsString("")     =>
