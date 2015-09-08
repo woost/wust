@@ -30,6 +30,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
                 this.connectorLineOvershoot = 0;
                 this.connectorLineArrowScale = 7;
                 this.connectorLineArrowOffset = 0;
+                this.markerUrl = _.endsWith($location.absUrl(), "/graph") ? $location.absUrl() : $location.absUrl() + "graph";
 
                 // state
                 this.drawOnTick = this.drawOnTick = this.visibleConvergence;
@@ -179,7 +180,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
 
                 this.d3ConnectorLine = this.d3SvgContainer.append("line").classed({
                     "connectorline": true
-                }).style("marker-start", "url(" + $location.absUrl() + "graph#graph_connector_arrow)");
+                }).style("marker-start", "url(" + this.markerUrl + "#graph_connector_arrow)");
 
                 // add use element as the last(!) element to the svg, this controls the foremost element
                 //http://stackoverflow.com/a/6289809
@@ -258,6 +259,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
                 }
                 );
 
+                let self = this;
                 // add relations
                 this.d3RelationPathWithData.enter()
                     .append("path")
@@ -265,7 +267,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
                     .each(function(relation) {
                         // if relation is startRelation of a Hypernode
                         if (!(relation.target.isHyperRelation && relation.target.startId === relation.source.id)) {
-                            d3.select(this).style("marker-end", "url(" + $location.absUrl() + "graph#graph_arrow)");
+                            d3.select(this).style("marker-end", "url(" + self.markerUrl + "#graph_arrow)");
                         }
                     });
 
