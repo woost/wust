@@ -58,7 +58,7 @@ function Auth($rootScope, $window, restmod, jwtHelper, store) {
             self.current.userId = response.userId;
             authStore.set(userKey, self.current);
             humane.success(message);
-        });
+        }, () => humane.error("Error authenticating"));
     }
 
     function logout() {
