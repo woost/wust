@@ -61,8 +61,8 @@ object ImportHackerNews extends Task with SeedTools {
       val replyTag = mergeClassification("repliesTo")
       val hackerNewsScope = mergeScope("HackerNews")
       discourse.add(
-        tag(startPost, mergeStaticTag(s"HN-${ hnItem.itemType }")),
-        Inherits.merge(mergeStaticTag(s"HN-${ hnItem.itemType }"), hackerNewsScope)
+        tag(startPost, mergeScope(s"HN-${ hnItem.itemType }")),
+        Inherits.merge(mergeScope(s"HN-${ hnItem.itemType }"), hackerNewsScope)
       )
       if(hnItem.itemType == "Ask")
         discourse.add(tag(startPost, mergeClassification("Question")))

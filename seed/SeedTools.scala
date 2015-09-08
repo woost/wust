@@ -12,10 +12,6 @@ trait SeedTools {
     Classification.merge(title = title, description = description, color = color.getOrElse(tagTitleColor(title)), merge = Set("title"))
   }
 
-  def mergeStaticTag(title: String, description: Option[String] = None, color:Option[Long] = None) = {
-    StaticTag.merge(title = title, color = color.getOrElse(tagTitleColor(title)), description = description, merge = Set("title"))
-  }
-
   def mergeScope(title: String, description: Option[String] = None, color:Option[Long] = None) = {
     Scope.merge(title = title, color = color.getOrElse(tagTitleColor(title)), description = description, merge = Set("title"))
   }

@@ -57,8 +57,6 @@ object ApiNodeFormat {
           ("implements", JsArray(s.rev_inherits.collect{ case t:TagLike => t }.map(tagWrites.writes))))
         case c:Classification => Seq(("inherits", JsArray(c.inherits.collect{ case t:TagLike => t }.map(tagWrites.writes))),
           ("implements", JsArray(c.rev_inherits.collect{ case t:TagLike => t }.map(tagWrites.writes))))
-        case t:StaticTag => Seq(("inherits", JsArray(t.inherits.collect{ case t:TagLike => t }.map(tagWrites.writes))),
-          ("implements", JsArray(t.rev_inherits.collect{ case t:TagLike => t }.map(tagWrites.writes))))
       })
       case n: User        => Seq(
         ("id", JsString(n.uuid)),

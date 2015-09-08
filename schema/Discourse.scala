@@ -135,7 +135,6 @@ object WustSchema {
 
   // Tags
   @Node class Classification extends TagLike
-  @Node class StaticTag extends TagLike
 
   // Scopes
   @Node class Scope extends TagLike
