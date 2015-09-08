@@ -135,10 +135,13 @@ case class VotesTagsAccess(sign: Long) extends EndRelationAccessDefault[User, Vo
         disconnectNodesFor(votes, tx)
       } else {
         val tag = TagLike.matches(uuid = Some(param.startUuid), matches = Set("uuid"))
-        val connectable = Connectable.matches(uuid = Some(param.startUuid), matches = Set("uuid"))
+        val connectable = Connectable.matches(uuid = Some(param.endUuid), matches = Set("uuid"))
         val tags = Tags.matches(tag, connectable)
         val votes = Votes.merge(user, tags, weight = weight, onMatch = Set("weight"))
         val failure = tx.persistChanges(tag, connectable, tags, votes)
+        println("VOTEEEEEED")
+if (failure.isDefined)
+        println(failure.get)
         !failure.isDefined
       }
 
@@ -171,10 +174,12 @@ case class VotesConnectsAccess(sign: Long) extends EndRelationAccessDefault[User
         disconnectNodesFor(votes, tx)
       } else {
         val tag = Connectable.matches(uuid = Some(param.startUuid), matches = Set("uuid"))
-        val connectable = Connectable.matches(uuid = Some(param.startUuid), matches = Set("uuid"))
+        val connectable = Connectable.matches(uuid = Some(param.endUuid), matches = Set("uuid"))
         val tags = Connects.matches(tag, connectable)
         val votes = Votes.merge(user, tags, weight = weight, onMatch = Set("weight"))
         val failure = tx.persistChanges(tag, connectable, tags, votes)
+        if (failure.isDefined)
+        println(failure.get)
         !failure.isDefined
       }
 
