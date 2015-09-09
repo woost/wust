@@ -66,7 +66,7 @@ object ImportStackOverflow extends Task with SeedTools {
           val score = (rawComment \ "score").as[Long]
           val creationDate = (rawComment \ "creation_date").as[Long]
 
-          val comment = createPost(body, None, creationDate)
+          val comment = createPost(body, Some(creationDate))
           discourse.add(comment)
           discourse.add(Created.create(user, comment))
 
