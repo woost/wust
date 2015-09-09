@@ -994,8 +994,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
         }
 
         replyToNode(existingNode) {
-            ModalEditService.show();
-            ModalEditService.currentNode.setReference(existingNode);
+            ModalEditService.show(existingNode);
         }
 
         setNodePositionFromOffset(node, x, y) {

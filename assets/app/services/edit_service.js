@@ -46,7 +46,7 @@ function EditService(Post, Connectable, HistoryService, store, DiscourseNode, Ze
         }
 
         setReference(reference) {
-            this.referenceNode = reference.encode ? reference.encode() : reference;
+            this.referenceNode = reference && reference.encode ? reference.encode() : reference;
         }
 
         //TODO: we should rewrite the whole logic here, it is weird and hacky, but it works so i leave it as is :)

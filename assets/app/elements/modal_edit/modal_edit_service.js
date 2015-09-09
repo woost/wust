@@ -35,10 +35,17 @@ function ModalEditService($rootScope, $modal, EditService, $state, ContextServic
         return promise;
     }
 
-    function showModal() {
-        let start = {tags: angular.copy(ContextService.currentContexts)};
-        currentNode = EditService.createSession(start);
-        modalInstance.$promise.then(modalInstance.show);
+    function showModal(referenceNode) {
+        if(referenceNode === undefined) {
+            let start = {tags: angular.copy(ContextService.currentContexts)};
+            currentNode = EditService.createSession(start);
+            modalInstance.$promise.then(modalInstance.show);
+        } else {
+            currentNode = EditService.createSession({});
+            modalInstance.$promise.then(modalInstance.show);
+        }
+
+        currentNode.setReference(referenceNode);
     }
 
     function hideModal() {

@@ -58,7 +58,6 @@ function bigPostCtrl(SidebarService, Connectable, Post, EditService, ModalEditSe
     }
 
     function replyTo() {
-        ModalEditService.show();
-        ModalEditService.currentNode.setReference(vm.editNode);
+        ModalEditService.show(vm.editNode);
     }
 }
