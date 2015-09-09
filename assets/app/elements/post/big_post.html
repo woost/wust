@@ -12,7 +12,7 @@
             </div>
             <div class="detailed">
                 <div class="votebuttons">
-                    <div ng-repeat="tag in vm.node.tags track by tag.id" class="buttonpair">
+                    <div ng-repeat="tag in vm.node.tags | contextonly" class="buttonpair">
                         <i class="up icon-up-dir fa-4x" ng-click="vm.upvote(tag)"></i>
                         <span tag-label="tag"></span>
                     </div>
