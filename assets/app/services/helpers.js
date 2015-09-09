@@ -8,6 +8,10 @@ angular.module("wust.services").value("Helpers", {
     hashToColorFill,
     hashToColorNavBg,
     hashToColorFillLight,
+    hashToColorFillLighter,
+    hashToColorContextLabelBg,
+    contextCircleColor,
+    contextCircleBorderColor,
     tagTitleColor,
     sortTags,
     cssCompat,
@@ -59,6 +63,17 @@ function hashToColorFill(tag) {
     return hashToColor(tag, 55, 69);
 }
 
+// tag circles: context
+function contextCircleColor(tag) {
+    if(tag.color === -1) return "hsl(0, 0%, 55%)";
+    return hashToColor(tag, 20, 98);
+}
+
+function contextCircleBorderColor(tag) {
+    if(tag.color === -1) return "hsl(0, 0%, 55%)";
+    return hashToColor(tag, 20, 85);
+}
+
 // Navigation Background
 function hashToColorNavBg(tag) {
     if(tag.color === -1) return "hsl(0, 0%, 55%)";
@@ -68,7 +83,18 @@ function hashToColorNavBg(tag) {
 // tag label bg
 function hashToColorFillLight(tag) {
     if(tag.color === -1) return "hsl(0, 0%, 55%)";
-    return hashToColor(tag, 40, 80);
+    return hashToColor(tag, 40, 90);
+}
+
+function hashToColorContextLabelBg(tag) {
+    if(tag.color === -1) return "hsl(0, 0%, 55%)";
+    return hashToColor(tag, 30, 98);
+}
+
+// tag eselsohr
+function hashToColorFillLighter(tag) {
+    if(tag.color === -1) return "hsl(0, 0%, 55%)";
+    return hashToColor(tag, 20, 100);
 }
 
 function tagTitleColor(title) {
