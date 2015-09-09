@@ -11,7 +11,8 @@ function editTaglist() {
             setFocus: "=",
             onChange: "&",
             existingOnly: "@",
-            alwaysShow: "@"
+            alwaysShow: "@",
+            tagType: "@"
         },
         controller: editTaglistCtrl,
         controllerAs: "vm",
@@ -19,9 +20,9 @@ function editTaglist() {
     };
 }
 
-editTaglistCtrl.$inject = ["TagSuggestions", "$q"];
+editTaglistCtrl.$inject = ["TagSuggestions", "DiscourseNode", "$q"];
 
-function editTaglistCtrl(TagSuggestions, $q) {
+function editTaglistCtrl(TagSuggestions, DiscourseNode, $q) {
     let vm = this;
 
     let searchTriggerDelay = 200;
@@ -40,7 +41,20 @@ function editTaglistCtrl(TagSuggestions, $q) {
             clearTimeout(delayedTriggerSearch);
 
         return $q((resolve, reject) => {
-            delayedTriggerSearch = setTimeout(() => TagSuggestions.search(term).$then(resolve, reject), searchTriggerDelay);
+            let label;
+            switch (vm.tagType) {
+                //TODO: expose labels without own node api in schema object from api
+                case "context":
+                    // label = DiscourseNode.Scope.label;
+                    label = "SCOPE";
+                    break;
+                case "classification":
+                    // label = DiscourseNode.Classification.label;
+                    label = "CLASSIFICATION";
+                    break;
+            }
+
+            delayedTriggerSearch = setTimeout(() => TagSuggestions.search(term, label).$then(resolve, reject), searchTriggerDelay);
         });
     }
 }
