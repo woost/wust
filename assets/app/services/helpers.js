@@ -48,13 +48,13 @@ function hashCode(string) {
 // post and tag label border
 function hashToColorBorder(tag) {
     if(tag.color === -1) return "hsl(0, 0%, 45%)";
-    return hashToColor(tag, 40, 58);
+    return hashToColor(tag, 40, 48);
 }
 
 // post bg
 function hashToColorBackground(tag) {
     if(tag.color === -1) return "hsl(0, 0%, 98%)";
-    return hashToColor(tag, 10, 95);
+    return hashToColor(tag, 20, 98);
 }
 
 // tag circles
@@ -63,7 +63,6 @@ function hashToColorFill(tag) {
     return hashToColor(tag, 55, 69);
 }
 
-// tag circles: context
 function contextCircleColor(tag) {
     if(tag.color === -1) return "hsl(0, 0%, 55%)";
     return hashToColor(tag, 20, 98);
@@ -77,7 +76,7 @@ function contextCircleBorderColor(tag) {
 // Navigation Background
 function hashToColorNavBg(tag) {
     if(tag.color === -1) return "hsl(0, 0%, 55%)";
-    return hashToColor(tag, 55, 39);
+    return hashToColor(tag, 20, 98);
 }
 
 // tag label bg
