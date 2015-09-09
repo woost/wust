@@ -126,7 +126,7 @@ case class VotesTagsAccess(sign: Long) extends EndRelationAccessDefault[User, Vo
     db.transaction { tx =>
       val weight = sign // TODO: karma
       val success = if (weight == 0) {
-        val referenceDef = HyperNodeDefinition(FactoryUuidNodeDefinition(TagLike, param.startUuid), Tags, FactoryUuidNodeDefinition(Connectable, param.endUuid))
+        val referenceDef = HyperNodeDefinition(FactoryUuidNodeDefinition(Scope, param.startUuid), Tags, FactoryUuidNodeDefinition(Connectable, param.endUuid))
         val userDef = ConcreteNodeDefinition(user)
         val votesDef = RelationDefinition(userDef, Votes, referenceDef)
         // next we define the voting relation between the currently logged in user and the change request
@@ -134,7 +134,7 @@ case class VotesTagsAccess(sign: Long) extends EndRelationAccessDefault[User, Vo
         val votes = RelationDefinition(userNode, Votes, referenceDef)
         disconnectNodesFor(votes, tx)
       } else {
-        val tag = TagLike.matches(uuid = Some(param.startUuid), matches = Set("uuid"))
+        val tag = Scope.matches(uuid = Some(param.startUuid), matches = Set("uuid"))
         val connectable = Connectable.matches(uuid = Some(param.endUuid), matches = Set("uuid"))
         val tags = Tags.matches(tag, connectable)
         val votes = Votes.merge(user, tags, weight = weight, onMatch = Set("weight"))

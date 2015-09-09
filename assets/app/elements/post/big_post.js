@@ -46,7 +46,7 @@ function bigPostCtrl(SidebarService, Connectable, Post, EditService, ModalEditSe
         Connectable.$buildRaw(_.pick(vm.node, "id")).tags.$buildRaw(_.pick(tag, "id")).up.$create().$then(() => {
             humane.success("Upvoted");
         }, resp => {
-            humane.error(resp);
+            humane.error(resp.$response.data);
         });
     }
 
