@@ -17,6 +17,9 @@
             @include display-flex(flex);
             @include flex-wrap(wrap);
             @include justify-content(flex-start);
+            &>div {
+                width: 100%;
+            }
         }
     }
 }

@@ -1,6 +1,5 @@
 <div id="neighbours_component">
-    <div discourse-node-list node-model='vm.references.model' is-loading="vm.isLoading" class="neighbours_attachedto discourse_node_list_horizontal"></div>
-    <div class="fa fa-long-arrow-right fa-2x arrow-right" ng-style="{visibility: vm.references.model.list.length && 'visible' || 'hidden'}"></div>
+    <div discourse-node-list node-model='vm.references.model' is-loading="vm.isLoading" class="neighbours_attachedto discourse_node_list_horizontal" template-before="components/focus/neighbours/attachedto_connection.html"></div>
     <div class="neighbours_content">
         <div big-post node="vm.component.rootNode"></div>
         <h3 ng-show="vm.parallels.model.list.length > 0">Sibling Posts:</h3>

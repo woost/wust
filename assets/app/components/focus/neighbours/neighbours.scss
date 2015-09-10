@@ -4,24 +4,35 @@
     width: 100%;
     padding: 20px;
     @include display-flex(flex);
-    @include justify-content(space-between);
+    @include justify-content(center);
     @include flex-direction(rows);
     @include align-items(flex-start);
     .neighbours_attachedto {
-        width: 20%;
-        max-width: 20%;
-        min-width: 200px;
+        width: 270px;
         padding-right: 10px;
         // background: red;
         .node_model_list {
             //right alignment of small posts
-            @include justify-content(flex-end);
+            // @include justify-content(flex-end);
+        }
+        .predecessor_connection {
+            margin-left: 5px;
+            float:right;
+
+            //icons are higher than minimum small post height, this prevents float failure
+            height:20px;
+            line-height: 20px;
+            .upvote_button {
+                opacity: 0.5;
+            }
+            .upvote_button.active, .upvote_button:hover {
+                opacity: 1;
+            }
         }
     }
+
     .neighbours_content {
-        width: 60%;
-        max-width: 60%;
-        min-width: 600px;
+        width: 600px;
 
         margin-left: 15px;
         margin-right: 15px;
@@ -37,9 +48,7 @@
         // background: green;
     }
     .neighbours_followers {
-        width: 20%;
-        max-width: 20%;
-        min-width: 200px;
+        width: 270px;
         padding-left: 10px;
         // background: blue;
     }
@@ -51,7 +60,4 @@
         }
     }
 
-    .arrow-right {
-        margin-top: 30px;
-    }
 }
