@@ -9,6 +9,7 @@ import modules.requests.dsl._
 object Posts extends Nodes[Post] {
   val node = NodeDef(PostAccess.apply + TaggedTaggable.apply[Post],
     "requests-edit" -> (N < PostUpdatedAccess.apply),
-    "requests-tags" -> (N < PostUpdatedTagsAccess.apply + TaggedTaggable.apply[UpdatedTags])
+    "requests-add-tags" -> (N < PostAddTagsAccess.apply + TaggedTaggable.apply[AddTags]),
+    "requests-remove-tags" -> (N < PostRemoveTagsAccess.apply + TaggedTaggable.apply[RemoveTags])
   )
 }

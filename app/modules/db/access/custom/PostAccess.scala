@@ -35,17 +35,14 @@ trait ConnectableAccessBase {
   protected def addRequestTagsToGraph(discourse: Discourse, user: User, post: Post, request: AddTagRequestBase with RemoveTagRequestBase, weight: Long, threshold: Long) {
     //TODO: avoid duplicates
     request.addedTags.flatMap(tagConnectRequestToTag(_)).foreach { tag =>
-      val updatedTags = UpdatedTags.create(user, post, applyThreshold = threshold, applyVotes = weight)
-      val votes = Votes.create(user, updatedTags, weight = weight)
-      discourse.add(updatedTags, Tags.create(tag, updatedTags), votes)
+      val addTags = AddTags.create(user, post, applyThreshold = threshold, applyVotes = weight)
+      val votes = Votes.create(user, addTags, weight = weight)
+      discourse.add(addTags, Tags.create(tag, addTags), votes)
     }
     request.removedTags.map(TagLike.matchesOnUuid(_)).foreach { tag =>
-      // for removed tags we set the applyVotes to threshold-weight, so from
-      // here the counter does not represent the weight of the incomming
-      // relations
-      val updatedTags = UpdatedTags.create(user, post, applyThreshold = threshold, applyVotes = threshold - weight)
-      val votes = Votes.create(user, updatedTags, weight = -1 * weight)
-      discourse.add(updatedTags, Tags.create(tag, updatedTags), votes)
+      val removeTags = RemoveTags.create(user, post, applyThreshold = threshold, applyVotes = weight)
+      val votes = Votes.create(user, removeTags, weight = weight)
+      discourse.add(removeTags, Tags.create(tag, removeTags), votes)
     }
   }
 
@@ -98,7 +95,6 @@ case class PostAccess() extends ConnectableAccessBase with NodeReadBase[Post] wi
     context.withUser { user =>
       context.withJson { (request: PostUpdateRequest) =>
         db.transaction { tx =>
-          deleteTagsFromGraph(tx, request, uuid)
           val discourse = Discourse.empty
 
           val applyVotes = 1 // TODO: karma

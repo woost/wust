@@ -39,7 +39,7 @@ function EditService(Post, Connectable, HistoryService, store, DiscourseNode, Ze
                 title: this.title,
                 description: this.description,
                 label: this.label,
-                tags: tags
+                tags: angular.copy(tags)
             };
 
             this.setValidityProperties();
@@ -86,7 +86,8 @@ function EditService(Post, Connectable, HistoryService, store, DiscourseNode, Ze
                 humane.success(message);
 
                 // the response only holds newly added tags
-                data.tags = this.tags.filter(t => t.id && !_.any(dirtyModel.addedTags, {id: t.id})).concat(data.tags).map(t => t.encode ? t.encode() : t);
+                // data.tags = this.tags.filter(t => t.id && !_.any(dirtyModel.addedTags, {id: t.id})).concat(data.tags).map(t => t.encode ? t.encode() : t);
+                data.tags = this.original.tags;
                 this.apply(data);
                 storeEditList();
 

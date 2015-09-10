@@ -43,7 +43,8 @@ object ApiNodeFormat {
         ("tags", Json.toJson(n.inRelationsAs(Tags).map(tagsWrites.writes))), // TODO: why do we have to call tagsWrites.writes explicitly?
         ("timestamp", Json.toJson(JsNumber(n.timestamp))),
         ("requestsEdit", Json.toJson(n.inRelationsAs(Updated))), //TODO: accessors for subrelations of hyperrelations, to get connected hypernode
-        ("requestsTags", Json.toJson(n.inRelationsAs(UpdatedTags)))
+        ("requestsAddTags", Json.toJson(n.inRelationsAs(AddTags))),
+        ("requestsRemoveTags", Json.toJson(n.inRelationsAs(RemoveTags)))
       )
       case n: Connects => Seq(
         ("id", JsString(n.uuid)),
@@ -73,7 +74,14 @@ object ApiNodeFormat {
         ("threshold", JsNumber(n.applyThreshold)),
         ("votes", JsNumber(n.applyVotes))
       )
-      case n: UpdatedTags    => Seq(
+      case n: AddTags    => Seq(
+        ("id", JsString(n.uuid)),
+        ("tags", Json.toJson(n.inRelationsAs(Tags).map(tagsWrites.writes))),
+        ("vote", n.inRelationsAs(Votes).headOption.map(vote => JsObject(Seq(("weight", JsNumber(vote.weight))))).getOrElse(JsNull)),
+        ("threshold", JsNumber(n.applyThreshold)),
+        ("votes", JsNumber(n.applyVotes))
+      )
+      case n: RemoveTags    => Seq(
         ("id", JsString(n.uuid)),
         ("tags", Json.toJson(n.inRelationsAs(Tags).map(tagsWrites.writes))),
         ("vote", n.inRelationsAs(Votes).headOption.map(vote => JsObject(Seq(("weight", JsNumber(vote.weight))))).getOrElse(JsNull)),

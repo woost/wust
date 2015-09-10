@@ -194,9 +194,17 @@ object Database {
   def disconnectNodesFor[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinition: FixedRelationDefinition[START, RELATION, END], tx:QueryHandler = db) = {
     val discourse = itemDiscourseGraph(tx, relationDefinition)
     discourse.graph.relations.filter {
-      //TODO: I do not handle hyperrelations
       _.relationType == relationDefinition.factory.asInstanceOf[RelationFactory[_,_,_]].relationType
     }.foreach(discourse.graph.relations -= _)
+    val failure = tx.persistChanges(discourse.graph)
+    failure.isEmpty
+  }
+
+  def disconnectHyperNodesFor[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinition: FixedRelationDefinition[START, RELATION, END], tx:QueryHandler = db) = {
+    val discourse = itemDiscourseGraph(tx, relationDefinition)
+    discourse.graph.nodes.filter {
+      _.labels == relationDefinition.factory.asInstanceOf[HyperRelationFactory[_,_,_,_,_]].labels
+    }.foreach(discourse.graph.nodes -= _)
     val failure = tx.persistChanges(discourse.graph)
     failure.isEmpty
   }

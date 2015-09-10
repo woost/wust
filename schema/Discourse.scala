@@ -107,7 +107,8 @@ object WustSchema {
   //TODO: simple tags relation? using the normal tags relation makes the
   //relation votable. also it is a hyperrelation, which is not needed in this
   //case.
-  @HyperRelation class UpdatedTags(startNode: User, endNode: Post) extends ChangeRequest with Taggable with HyperConnection
+  @HyperRelation class AddTags(startNode: User, endNode: Post) extends ChangeRequest with Taggable with HyperConnection
+  @HyperRelation class RemoveTags(startNode: User, endNode: Post) extends ChangeRequest with Taggable with HyperConnection
 
   // TODO: should be a node? as the to be deleted node will deleted and we cannot connect there?
   // hiding nodes seems like more work.

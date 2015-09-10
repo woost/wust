@@ -8,7 +8,8 @@ function postTagChanges() {
         templateUrl: "elements/post/post_tag_changes.html",
         scope: {
             postTagChanges: "=",
-            onApply: "&"
+            onApply: "&",
+            remove: "@"
         },
         controller: postTagChangesCtrl,
         controllerAs: "vm",
@@ -43,7 +44,7 @@ class VotingEditor {
         change.votes = response.votes;
         if (response.node) {
             _.remove(this.list, change);
-            this.onApply({response: response.node});
+            this.onApply({response: response.node, tag: change.tags ? change.tags[0] : undefined});
         }
     }
 
@@ -82,9 +83,9 @@ function postEditChangesCtrl(RequestsEdit) {
     vm.voting = new VotingEditor(vm.postEditChanges, RequestsEdit, vm.onApply);
 }
 
-postTagChangesCtrl.$inject = ["RequestsTag"];
-function postTagChangesCtrl(RequestsTag) {
+postTagChangesCtrl.$inject = ["RequestsAddTag", "RequestsRemoveTag"];
+function postTagChangesCtrl(RequestsAddTag, RequestsRemoveTag) {
     let vm = this;
 
-    vm.voting = new VotingEditor(vm.postTagChanges, RequestsTag, vm.onApply);
+    vm.voting = new VotingEditor(vm.postTagChanges, vm.remove === undefined ? RequestsAddTag : RequestsRemoveTag, vm.onApply);
 }
