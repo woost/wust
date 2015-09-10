@@ -21,11 +21,11 @@ discourseNodeListCtrl.$inject = [];
 function discourseNodeListCtrl() {
     let vm = this;
 
-    vm.symbolAction = {
+    vm.symbolAction = vm.nodeModel.writable ? {
         handler: remove,
         title: "disconnect",
         class: "fa fa-scissors"
-    };
+    } : undefined;
 
     function remove(node) {
         vm.nodeModel.remove(node);

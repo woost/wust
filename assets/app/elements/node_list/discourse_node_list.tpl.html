@@ -8,19 +8,13 @@
         <div class="node_model_list" ng-switch="::vm.nodeModel.isNested">
             <div ng-switch-when="true">
                 <div ng-repeat='node in vm.nodeModel.list track by node.id'>
-                    <span ng-switch="vm.nodeModel.writable">
-                        <span ng-switch-when="true" small-post node="node" symbol-action='vm.symbolAction'></span>
-                        <span ng-switch-default small-post node="node"></span>
-                    </span>
+                    <span small-post node="node" symbol-action='vm.symbolAction'></span>
                     <div ng-repeat="nested in node.nestedNodeLists[vm.nodeModel.listId]" discourse-node-list node-model='nested.model'></div>
                 </div>
             </div>
             <div ng-switch-default>
                 <span ng-repeat='node in vm.nodeModel.list track by node.id' class="ng-trans ng-trans-scale-up ease">
-                    <span ng-switch="vm.nodeModel.writable">
-                        <span ng-switch-when="true" small-post node="node" symbol-action='vm.symbolAction'></span>
-                        <span ng-switch-default small-post node="node"></span>
-                    </span>
+                    <span small-post node="node" symbol-action='vm.symbolAction'></span>
                 </span>
             </div>
         </div>
