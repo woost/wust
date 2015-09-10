@@ -69,7 +69,7 @@ trait ConnectableAccessBase {
   }
 }
 
-case class PostAccess() extends ConnectableAccessBase with NodeReadBase[Post] with NodeDeleteBase[Post] {
+case class PostAccess() extends TaggedTaggable[Post] with ConnectableAccessBase with NodeReadBase[Post] with NodeDeleteBase[Post] {
   val factory = Post
 
   override def create(context: RequestContext) = {
@@ -126,7 +126,7 @@ case class PostAccess() extends ConnectableAccessBase with NodeReadBase[Post] wi
             case Some(err) => Left(BadRequest(s"Cannot update Post with uuid '$uuid': $err'"))
             //FIXME: why the fuck do i need to do this???
             //otherwise node.rev_tags is empty? something is messed up here.
-            case _         => Right(discourse.posts.find(_.uuid == node.uuid).get)
+            case _         => Right(shapeResponse(discourse.posts.find(_.uuid == node.uuid).get))
             // case _         => Right(node)
           }
         }
@@ -135,7 +135,7 @@ case class PostAccess() extends ConnectableAccessBase with NodeReadBase[Post] wi
   }
 }
 
-case class ConnectableAccess() extends ConnectableAccessBase with NodeReadBase[Connectable] {
+case class ConnectableAccess() extends TaggedTaggable[Connectable] with ConnectableAccessBase with NodeReadBase[Connectable] {
   val postAccess = PostAccess()
   val factory = Connectable
 
@@ -156,7 +156,7 @@ case class ConnectableAccess() extends ConnectableAccessBase with NodeReadBase[C
 
           tx.persistChanges(discourse) match {
             case Some(err) => Left(BadRequest(s"Cannot update Post with uuid '$uuid': $err'"))
-            case _         => Right(discourse.connectables.find(_.uuid == node.uuid).get)
+            case _         => Right(shapeResponse(discourse.connectables.find(_.uuid == node.uuid).get))
           }
         }
       }

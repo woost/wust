@@ -85,9 +85,6 @@ function EditService(Post, Connectable, HistoryService, store, DiscourseNode, Ze
             return this.service.$buildRaw(model).$update(dirtyModel).$then(data => {
                 humane.success(message);
 
-                // the response only holds newly added tags
-                // data.tags = this.tags.filter(t => t.id && !_.any(dirtyModel.addedTags, {id: t.id})).concat(data.tags).map(t => t.encode ? t.encode() : t);
-                data.tags = this.original.tags;
                 this.apply(data);
                 storeEditList();
 
