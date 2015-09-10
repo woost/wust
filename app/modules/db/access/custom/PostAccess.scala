@@ -69,8 +69,9 @@ trait ConnectableAccessBase {
   }
 }
 
-case class PostAccess() extends TaggedTaggable[Post] with ConnectableAccessBase with NodeReadBase[Post] with NodeDeleteBase[Post] {
+case class PostAccess() extends ConnectableAccessBase with NodeReadBase[Post] with NodeDeleteBase[Post] {
   val factory = Post
+  val tagTaggable = TaggedTaggable.apply[Post]
 
   override def create(context: RequestContext) = {
     context.withUser { user =>
@@ -126,7 +127,7 @@ case class PostAccess() extends TaggedTaggable[Post] with ConnectableAccessBase 
             case Some(err) => Left(BadRequest(s"Cannot update Post with uuid '$uuid': $err'"))
             //FIXME: why the fuck do i need to do this???
             //otherwise node.rev_tags is empty? something is messed up here.
-            case _         => Right(shapeResponse(discourse.posts.find(_.uuid == node.uuid).get))
+            case _         => Right(tagTaggable.shapeResponse(discourse.posts.find(_.uuid == node.uuid).get))
             // case _         => Right(node)
           }
         }
@@ -135,9 +136,10 @@ case class PostAccess() extends TaggedTaggable[Post] with ConnectableAccessBase 
   }
 }
 
-case class ConnectableAccess() extends TaggedTaggable[Connectable] with ConnectableAccessBase with NodeReadBase[Connectable] {
+case class ConnectableAccess() extends ConnectableAccessBase with NodeReadBase[Connectable] {
   val postAccess = PostAccess()
   val factory = Connectable
+  val tagTaggable = TaggedTaggable.apply[Connectable]
 
   // we redirect the create action the PostAccess. It is not possible to create
   // connectables withou any context and usually you want to handle connects
@@ -156,7 +158,7 @@ case class ConnectableAccess() extends TaggedTaggable[Connectable] with Connecta
 
           tx.persistChanges(discourse) match {
             case Some(err) => Left(BadRequest(s"Cannot update Post with uuid '$uuid': $err'"))
-            case _         => Right(shapeResponse(discourse.connectables.find(_.uuid == node.uuid).get))
+            case _         => Right(tagTaggable.shapeResponse(discourse.connectables.find(_.uuid == node.uuid).get))
           }
         }
       }

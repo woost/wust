@@ -41,7 +41,7 @@ object CheckUserWrite {
 // relationaccess and include the tags in the read queries.
 // Still, this solution is very flexible as we can add decorators to other
 // accesses easily: PostAccess.apply + TaggedTaggable(Post)
-class TaggedTaggable[NODE <: UuidNode] extends AccessNodeDecoratorControl[NODE] with AccessNodeDecoratorControlDefault[NODE] {
+class TaggedTaggable[NODE <: Taggable] extends AccessNodeDecoratorControl[NODE] with AccessNodeDecoratorControlDefault[NODE] {
   override def shapeResponse(response: NODE) = {
     shapeResponse(List(response)).head
   }
@@ -69,5 +69,5 @@ class TaggedTaggable[NODE <: UuidNode] extends AccessNodeDecoratorControl[NODE] 
 }
 
 object TaggedTaggable {
-  def apply[NODE <: UuidNode] = new TaggedTaggable[NODE]
+  def apply[NODE <: Taggable] = new TaggedTaggable[NODE]
 }
