@@ -54,13 +54,13 @@ function hashToColorBorder(tag) {
 
 function postBorderColor(tag) {
     if(tag.color === -1) return "hsl(0, 0%, 45%)";
-    return hashToColor(tag, 40, 68);
+    return hashToColor(tag, 20, 70);
 }
 
 // post bg
 function postBackgroundColor(tag) {
     if(tag.color === -1) return "hsl(0, 0%, 98%)";
-    return hashToColor(tag, 20, 98);
+    return hashToColor(tag, 20, 99);
 }
 
 // tag circles
