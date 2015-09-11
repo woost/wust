@@ -241,7 +241,7 @@ object Database {
 
   // IMPORTANT: we need to write the constancts as doubles to avoid integer arithmetic
   // def tagweight(up:String, down:String) = s"(($up + ${tagweight_p*tagweight_u})/($up + $down + $tagweight_u))"
-  def connectedComponent(focusNode: UuidNodeDefinition[_], depth: Int = 5): Discourse = {
+  def connectedComponent(focusNode: UuidNodeDefinition[_], identity:Option[User], depth: Int = 5): Discourse = {
     // Tag weights
     // 1. Cypher does not support subqueries yet, so we have to do extra queries for the tag weights.
     // This is not very efficient, because the component is traversed in each query.
@@ -264,11 +264,13 @@ object Database {
       optional match (tag:`${ TagLike.label }`)-[tagtocat:`${ Tags.startRelationType }`]->(cat:`${ Tags.label }`)-[cattotaggable:`${ Tags.endRelationType }`]->(postsandconnects)
       optional match (:USER)-[viewed :`${Viewed.relationType}`]->(postsandconnects)
       optional match (:USER)-[answervoted :`${Votes.relationType}`]->(postsandconnects:${Connects.label})
+      optional match (:USER {uuid: {useruuid}})-[selfanswervoted :`${Votes.relationType}`]->(postsandconnects:${Connects.label})
 
-      return postsandconnects,rel,tag,cat,tagtocat,cattotaggable, count(viewed) as viewcount, count(answervoted) as answervotecount 
+      return postsandconnects,rel,tag,cat,tagtocat,cattotaggable, count(viewed) as viewcount, count(answervoted) as answervotecount, count(selfanswervoted) as selfanswervotecount
     """
 
-    val params = focusNode.parameterMap
+    val useruuid = identity.map(_.uuid).getOrElse("") //TODO: do not write empty string into query
+    val params = focusNode.parameterMap + ("useruuid" -> useruuid)
     val (graph, table) = db.queryGraphsAndTables(Query(query, params)).head
     val component = Discourse(graph)
 
@@ -276,6 +278,7 @@ object Database {
     table.rows.foreach { row =>
       val viewcount = row("viewcount").asLong
       val answervotecount = row("answervotecount").asLong
+      val selfanswervotecount = row("selfanswervotecount").asLong
 
       if( viewcount > 0) {
         val uuid = row("postsandconnects").asMap("uuid").asString
@@ -284,6 +287,10 @@ object Database {
       if( answervotecount > 0) {
         val uuid = row("postsandconnects").asMap("uuid").asString
         uuidToNode(uuid).rawItem.properties += ("answervotecount" -> answervotecount)
+      }
+      if( selfanswervotecount > 0) {
+        val uuid = row("postsandconnects").asMap("uuid").asString
+        uuidToNode(uuid).rawItem.properties += ("selfanswervotecount" -> selfanswervotecount)
       }
     }
 
