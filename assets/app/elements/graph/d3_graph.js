@@ -31,6 +31,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
                 this.connectorLineArrowScale = 7;
                 this.connectorLineArrowOffset = 0;
                 this.markerUrl = _.endsWith($location.absUrl(), "/graph") ? $location.absUrl() : $location.absUrl() + "graph";
+                this.arrowToResponse = true;
 
                 // state
                 this.drawOnTick = this.drawOnTick = this.visibleConvergence;
@@ -125,13 +126,13 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
                 // svg-marker for relation arrows
                 this.d3SvgDefs.append("svg:marker")
                     .attr("id", "graph_arrow")
-                    .attr("viewBox", "0 -3 10 6")
-                    .attr("refX", 10)
+                    .attr("viewBox", this.arrowToResponse ? "-10 -3 10 6" : "0 -3 10 6") // x y w h
+                    .attr("refX", this.arrowToResponse ? -10 : 10)
                     .attr("markerWidth", 15)
                     .attr("markerHeight", 9)
                     .attr("orient", "auto")
                     .append("svg:path")
-                    .attr("d", "M 0,-3 L 10,-0.5 L 10,0.5 L0,3")
+                    .attr("d", this.arrowToResponse ? "M 0,-3 L -10,-0.5 L -10,0.5 L0,3" : "M 0,-3 L 10,-0.5 L 10,0.5 L0,3" )
                     .attr("class", "svgrelation"); // for the stroke color
 
                 // svg-marker for connector line arrow
@@ -265,10 +266,16 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
                     .append("path")
                     .attr("class", "svgrelation")
                     .each(function(relation) {
-                        // if relation is startRelation of a Hypernode
-                        if (!(relation.target.isHyperRelation && relation.target.startId === relation.source.id)) {
+                        // we have to check if we are connected to a hyperrelation,
+                        // and if yes, if we are the start- ore endRelation.
+                        // (response)--[startRelation]-->(H)--[endRelation]-->(post)
+                        let isStartRelation = relation.target.isHyperRelation && relation.target.startId === relation.source.id;
+                        let isEndRelation = relation.source.isHyperRelation && relation.source.endId === relation.target.id;
+                        if( isStartRelation && self.arrowToResponse )
+                            d3.select(this).style("marker-start", "url(" + self.markerUrl + "#graph_arrow)");
+
+                        if( isEndRelation && !self.arrowToResponse )
                             d3.select(this).style("marker-end", "url(" + self.markerUrl + "#graph_arrow)");
-                        }
                     });
 
 
