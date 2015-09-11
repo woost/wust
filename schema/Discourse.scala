@@ -88,6 +88,8 @@ object WustSchema {
     }
   }
 
+  @Relation class Viewed(startNode: User, endNode: Post) extends RelationTimestamp with ConstructRelation
+
   // Action
   @HyperRelation class Created(startNode: User, endNode: Post) extends UuidNode with Timestamp
   @Node trait ChangeRequest extends UuidNode with Timestamp with Votable {

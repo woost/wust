@@ -113,6 +113,19 @@ case class PostAccess() extends ConnectableAccessBase with NodeReadBase[Post] wi
   val factory = Post
   val tagTaggable = TaggedTaggable.apply[Post]
 
+  override def read(context: RequestContext, uuid: String) = {
+    val node = factory.matchesOnUuid(uuid)
+    val discourse = Discourse(node)
+    context.user.foreach { user =>
+      discourse.add(Viewed.merge(user, node))
+    }
+
+    db.transaction(_.persistChanges(discourse)) match {
+      case Some(err) => Left(NotFound(s"Cannot find node with uuid '$uuid': $err"))
+      case None => Right(node)
+    }
+  }
+
   override def create(context: RequestContext) = {
     context.withUser { user =>
       context.withJson { (request: PostAddRequest) =>
