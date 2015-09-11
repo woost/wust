@@ -63,14 +63,9 @@
 
             .fixed .small_post_directive {
                 @include box-shadow(0 0 0 5px #9A9A9A);
-                // outline: 5px solid #DDD;
-                // border-color: #000 !important; // important, because of the colored borders set for every element
-                border-width: 2px;
-                padding: 0.5px 14px 0px 11px; // -1px in width/height because of 1px more border
             }
 
             .fixed .hyperrelation {
-                border-radius: 4px;
                 @include box-shadow(0 0 0 7px #9A9A9A);
             }
 
@@ -78,8 +73,6 @@
                 // dark shadow
                 @include box-shadow(0 5px 20px #333);
                 border-color: #000;
-                border-width: 2px;
-                padding: 0.5px 14px 0px 11px; // -1px in width/height because of 1px more border //TODO: use border-box instead
             }
             .moving .hyperrelation {
                 // dark shadow
