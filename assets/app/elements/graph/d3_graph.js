@@ -1163,8 +1163,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
         onDragConnectEnd() {
             if (this.isDragging) {
                 if (this.hoveredNode !== undefined) {
-                    let startNode = this.dragStartNode; // always normal node
-                    let endNode = this.hoveredNode;
+                    let startNode = this.arrowToResponse ? this.hoveredNode : this.dragStartNode; // always normal node
+                    let endNode = this.arrowToResponse ? this.dragStartNode : this.hoveredNode;
                     // starting on hypernodes is also forbidden,
                     // but we don't need to handle this, because
                     // the connect button does not exist on hyperRelations.
