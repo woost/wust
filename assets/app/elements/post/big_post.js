@@ -31,7 +31,7 @@ function bigPostCtrl(SidebarService, Connectable, Post, EditService, ModalEditSe
     vm.onSave = onSave;
     vm.onApply = onApply;
     vm.editMode = false;
-    vm.upvote = upvote;
+    vm.upvoteTag = upvoteTag;
 
     function onSave(response) {
         vm.editMode = false;
@@ -44,9 +44,9 @@ function bigPostCtrl(SidebarService, Connectable, Post, EditService, ModalEditSe
 
     //TODO: need to unvote
     //TODO: semnatic downvote on post
-    function upvote(tag) {
+    function upvoteTag(tag) {
         Connectable.$buildRaw(_.pick(vm.node, "id")).tags.$buildRaw(_.pick(tag, "id")).up.$create().$then(() => {
-            humane.success("Upvoted");
+            humane.success("Upvoted post in context");
         }, resp => {
             humane.error(resp.$response.data);
         });
