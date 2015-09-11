@@ -19,7 +19,7 @@ object Connectables extends Nodes[Connectable] {
       "up" -> (N < VotesConnectsAccess(1)),
       "neutral" -> (N < VotesConnectsAccess(0))
     )),
-    "tags" -> (N < SchemaTags < (EndRelationRead(SchemaTags, TagLike),
+    "tags" -> (N < SchemaTags < (EndRelationRead(SchemaTags, Scope),
       "up" -> (N < VotesTagsAccess(1)),
       "neutral" -> (N < VotesTagsAccess(0))
     ))

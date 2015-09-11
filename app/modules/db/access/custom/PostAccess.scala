@@ -17,7 +17,7 @@ import model.Helpers.tagTitleColor
 trait ConnectableAccessBase {
   private def tagConnectRequestToTag(tag: TagConnectRequest) = {
       if (tag.id.isDefined)
-        Some(TagLike.matchesOnUuid(tag.id.get))
+        Some(Scope.matchesOnUuid(tag.id.get))
       else if (tag.title.isDefined)
         Some(Scope.merge(
           title = tag.title.get,
@@ -39,7 +39,7 @@ trait ConnectableAccessBase {
     // TODO: checking for duplicates is not really safe if there are concurrent requests
     // TODO: do not get all connected requests if not needed...its just slow
     val userDef = ConcreteFactoryNodeDefinition(User)
-    val tagDef = ConcreteFactoryNodeDefinition(TagLike)
+    val tagDef = ConcreteFactoryNodeDefinition(Scope)
     val requestDef = ConcreteFactoryNodeDefinition(TagChangeRequest)
     val postDef = ConcreteNodeDefinition(post)
     val tagsDef = RelationDefinition(tagDef, Tags, requestDef)
@@ -78,7 +78,7 @@ trait ConnectableAccessBase {
 
       if (!alreadyExisting) {
         val remTags = RemoveTags.create(user, post, applyThreshold = threshold, approvalSum = weight)
-        val tag = TagLike.matchesOnUuid(tagReq)
+        val tag = Scope.matchesOnUuid(tagReq)
         discourse.add(Tags.create(tag, remTags))
         val votes = Votes.create(user, remTags, weight = weight)
         discourse.add(remTags, votes)
@@ -95,7 +95,7 @@ trait ConnectableAccessBase {
     val discourse = Discourse(node)
 
     request.removedTags.foreach { tagUuid =>
-      val tag = TagLike.matchesOnUuid(tagUuid)
+      val tag = Scope.matchesOnUuid(tagUuid)
       discourse.add(tag)
       val tagging = Tags.matches(tag, node)
       discourse.add(tagging)

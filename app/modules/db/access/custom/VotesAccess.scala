@@ -110,9 +110,9 @@ case class VotesAddTagsAccess(
     override def selectNode(discourse: Discourse) = discourse.addTags.head
     override def applyChange(discourse: Discourse, request: AddTags, post: Post, tx:QueryHandler) = {
       // we need to get the tag which is connected to the request
-      val tagDef = ConcreteFactoryNodeDefinition(TagLike)
+      val tagDef = ConcreteFactoryNodeDefinition(Scope)
       val tagsDef = RelationDefinition(tagDef, Tags, nodeDefinition(request.uuid))
-      val tag = Discourse(db.queryGraph(Query(s"match ${tagsDef.toQuery} return ${tagDef.name}", tagsDef.parameterMap))).tagLikes.head
+      val tag = Discourse(db.queryGraph(Query(s"match ${tagsDef.toQuery} return ${tagDef.name}", tagsDef.parameterMap))).scopes.head
       val tags = Tags.merge(tag, post)
       discourse.add(tag, tags)
       true
@@ -126,7 +126,7 @@ case class VotesRemoveTagsAccess(
     override def selectNode(discourse: Discourse) = discourse.removeTags.head
     override def applyChange(discourse: Discourse, request: RemoveTags, post: Post, tx:QueryHandler) = {
       // we need to get the tag which is connected to the request
-      val tagDef = ConcreteFactoryNodeDefinition(TagLike)
+      val tagDef = ConcreteFactoryNodeDefinition(Scope)
       val tagsDef = RelationDefinition(tagDef, Tags, nodeDefinition(request.uuid))
       //TODO: should use existing transaction
       disconnectHyperNodesFor(tagsDef, tx)

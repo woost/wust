@@ -49,7 +49,7 @@ class TaggedTaggable[NODE <: Taggable] extends AccessNodeDecoratorControl[NODE] 
   override def shapeResponse(response: Iterable[NODE]) = {
     //TODO: share code with component query
     if (!response.isEmpty) {
-      val tagDef = ConcreteFactoryNodeDefinition(TagLike)
+      val tagDef = ConcreteFactoryNodeDefinition(Scope)
       val nodeDef = ConcreteFactoryNodeDefinition(Taggable)
       val tagsDef = HyperNodeDefinition(tagDef, Tags, nodeDef)
 

@@ -134,7 +134,7 @@ object WustSchema {
     var symbol: Option[String]
   }
   @Node trait Taggable extends UuidNode
-  @HyperRelation class Tags(startNode: TagLike, endNode: Taggable) extends ConstructRelation with HyperConnection with UuidNode with Reference
+  @HyperRelation class Tags(startNode: Scope, endNode: Taggable) extends ConstructRelation with HyperConnection with UuidNode with Reference
 
   // Tags
   @Node class Classification extends TagLike

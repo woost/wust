@@ -10,7 +10,8 @@ import modules.db.access.custom._
 //TODO: rename to TagLike
 object Tags extends Nodes[schema.TagLike] {
   val node = NodeDef(TagAccess.apply,
-    "posts" -> (N > StartRelationRead(schema.Tags, schema.Post) + TaggedTaggable.apply[schema.Taggable]),
+    //TODO: extra access for this
+    // "posts" -> (N > StartRelationRead(schema.Tags, schema.Post) + TaggedTaggable.apply[schema.Taggable]),
     "inherits" -> (N > StartConRelationAccess(schema.Inherits, schema.TagLike)),
     "implements" -> (N < EndConRelationAccess(schema.Inherits, schema.TagLike))
   )

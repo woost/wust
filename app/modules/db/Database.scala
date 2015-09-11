@@ -261,7 +261,7 @@ object Database {
     val query = s"""
       match ${ focusNode.toQuery }-[rel:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(postsandconnects:${Connectable.label})
       with distinct postsandconnects, rel
-      optional match (tag:`${ TagLike.label }`)-[tagtocat:`${ Tags.startRelationType }`]->(cat:`${ Tags.label }`)-[cattotaggable:`${ Tags.endRelationType }`]->(postsandconnects)
+      optional match (tag:`${ Scope.label }`)-[tagtocat:`${ Tags.startRelationType }`]->(cat:`${ Tags.label }`)-[cattotaggable:`${ Tags.endRelationType }`]->(postsandconnects)
       optional match (:USER)-[viewed :`${Viewed.relationType}`]->(postsandconnects)
       optional match (:USER)-[answervoted :`${Votes.relationType}`]->(postsandconnects:${Connects.label})
       optional match (:USER {uuid: {useruuid}})-[selfanswervoted :`${Votes.relationType}`]->(postsandconnects:${Connects.label})

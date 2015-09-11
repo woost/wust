@@ -60,8 +60,9 @@ object Search extends TaggedTaggable[Taggable] with Controller {
       )))
     } else {
       if (tagOr.getOrElse(false)) {
-        val tagDef = ConcreteFactoryNodeDefinition(TagLikeMatches)
-        val inheritTagDef = ConcreteFactoryNodeDefinition(TagLikeMatches)
+        //TODO: classification need to be matched on the outgoing connects relation of the post
+        val tagDef = ConcreteFactoryNodeDefinition(Scope)
+        val inheritTagDef = ConcreteFactoryNodeDefinition(Scope)
         val relationDef = RelationDefinition(inheritTagDef, SchemaTags, nodeDef)
         val condition = if (termMatcher.isEmpty) "" else s"where ${termMatcher}"
         val tagDefinition = s"${inheritTagDef.toQuery}-[:INHERITSTOINHERITABLE|INHERITABLETOINHERITS*0..10]->${tagDef.toQuery}"
@@ -77,8 +78,9 @@ object Search extends TaggedTaggable[Taggable] with Controller {
           ++ nodeDef.parameterMap
         )))
       } else {
-        val tagDefs = tags.map(uuid => FactoryUuidNodeDefinition(TagLikeMatches, uuid))
-        val inheritTagDefs = tags.map(_ => ConcreteFactoryNodeDefinition(TagLikeMatches))
+        //TODO: classification need to be matched on the outgoing connects relation of the post
+        val tagDefs = tags.map(uuid => FactoryUuidNodeDefinition(Scope, uuid))
+        val inheritTagDefs = tags.map(_ => ConcreteFactoryNodeDefinition(Scope))
         val relationDefs = inheritTagDefs.map(tagDef => RelationDefinition(tagDef, SchemaTags, nodeDef))
         val condition = if (termMatcher.isEmpty) "" else s"where ${termMatcher}"
         val tagDefinitions = (tagDefs zip inheritTagDefs).map { case (t,i) => s"${i.toQuery}-[:INHERITSTOINHERITABLE|INHERITABLETOINHERITS*0..10]->${t.toQuery}" }.mkString(",")
