@@ -44,9 +44,9 @@ function coloredTag(Helpers) {
                 }
                 else {
                     let color = Helpers.hashToColorContextLabelBg(tag);
-                    // rawElem.style.backgroundColor = color;
-                    let otherColor = Helpers.hashToColorFillLighter(tag);
-                    rawElem.style.background = `-webkit-linear-gradient(-55deg, ${otherColor}, ${otherColor} 22px, ${color} 22px, ${color} 60px)`;
+                    rawElem.style.backgroundColor = color;
+                    // let otherColor = Helpers.hashToColorFillLighter(tag);
+                    // rawElem.style.background = `-webkit-linear-gradient(-55deg, ${otherColor}, ${otherColor} 22px, ${color} 22px, ${color} 60px)`;
                     rawElem.style.border = "1px solid " + Helpers.contextCircleBorderColor(tag);
                 }
             }
