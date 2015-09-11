@@ -32,6 +32,7 @@ function bigPostCtrl(SidebarService, Connectable, Post, EditService, ModalEditSe
     vm.onApply = onApply;
     vm.editMode = false;
     vm.upvoteTag = upvoteTag;
+    vm.nodeHasContext = () => _.any(vm.node.tags, "isContext");
 
     function onSave(response) {
         vm.editMode = false;

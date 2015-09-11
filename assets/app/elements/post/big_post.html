@@ -5,7 +5,7 @@
         <h2 ng-bind="vm.node.title" class="post_title"></h2>
         <div class="timestamp"><span show-timestamp node="vm.node"></span></div>
 
-        <div class="votemenu">
+        <div class="votemenu" ng-if="vm.nodeHasContext()">
             <div class="buttonpair">
                 <i class="icon-up-dir fa-4x"></i>
                 <i class="icon-down-dir fa-4x"></i>
