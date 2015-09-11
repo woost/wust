@@ -94,7 +94,7 @@ object WustSchema {
   @HyperRelation class Created(startNode: User, endNode: Post) extends UuidNode with Timestamp
   @Node trait ChangeRequest extends UuidNode with Timestamp with Votable {
     val applyThreshold:Long
-    var applyVotes:Long
+    var approvalSum:Long = 0
     var applied:Boolean = false
   }
 

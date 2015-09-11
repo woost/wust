@@ -72,21 +72,21 @@ object ApiNodeFormat {
         ("newDescription", JsString(n.newDescription.getOrElse(""))),
         ("vote", n.inRelationsAs(Votes).headOption.map(vote => JsObject(Seq(("weight", JsNumber(vote.weight))))).getOrElse(JsNull)),
         ("threshold", JsNumber(n.applyThreshold)),
-        ("votes", JsNumber(n.applyVotes))
+        ("votes", JsNumber(n.approvalSum))
       )
       case n: AddTags    => Seq(
         ("id", JsString(n.uuid)),
         ("tags", Json.toJson(n.inRelationsAs(Tags).map(tagsWrites.writes))),
         ("vote", n.inRelationsAs(Votes).headOption.map(vote => JsObject(Seq(("weight", JsNumber(vote.weight))))).getOrElse(JsNull)),
         ("threshold", JsNumber(n.applyThreshold)),
-        ("votes", JsNumber(n.applyVotes))
+        ("votes", JsNumber(n.approvalSum))
       )
       case n: RemoveTags    => Seq(
         ("id", JsString(n.uuid)),
         ("tags", Json.toJson(n.inRelationsAs(Tags).map(tagsWrites.writes))),
         ("vote", n.inRelationsAs(Votes).headOption.map(vote => JsObject(Seq(("weight", JsNumber(vote.weight))))).getOrElse(JsNull)),
         ("threshold", JsNumber(n.applyThreshold)),
-        ("votes", JsNumber(n.applyVotes))
+        ("votes", JsNumber(n.approvalSum))
       )
       case n              =>
         throw new RuntimeException("You did not define a formatter for the api: " + node)

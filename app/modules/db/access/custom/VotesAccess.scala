@@ -32,7 +32,7 @@ trait VotesAccessBase[T <: ChangeRequest] extends EndRelationAccessDefault[User,
       val discourse = Discourse(tx.queryGraph(Query(s"match ${requestDef.toQuery}-[:`${UpdatedToPost.relationType}`|`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->(post:`${Post.label}`) set ${requestDef.name}.__lock = true with post,${requestDef.name} optional match ${votesDef.toQuery(true, false)} return post,${requestDef.name}, ${votesDef.name}", votesDef.parameterMap)))
       val request = selectNode(discourse)
       val votes = discourse.votes.headOption
-      votes.foreach(request.applyVotes -= _.weight)
+      votes.foreach(request.approvalSum -= _.weight)
 
       val weight = sign // TODO karma
       if (weight == 0) {
@@ -43,12 +43,12 @@ trait VotesAccessBase[T <: ChangeRequest] extends EndRelationAccessDefault[User,
         // votes relation as we want to override any previous vote. merging is
         // better than just updating the weight on an existing relation, as it
         // guarantees uniqueness
-        request.applyVotes += weight
+        request.approvalSum += weight
         val newVotes = Votes.merge(user, request, weight = weight, onMatch = Set("weight"))
         discourse.add(newVotes)
       }
 
-      val postApplies = if (request.applyVotes >= request.applyThreshold) {
+      val postApplies = if (request.approvalSum >= request.applyThreshold) {
         val post = discourse.posts.head
         request.applied = applyChange(discourse, request, post, tx)
         if (request.applied)
@@ -68,7 +68,7 @@ trait VotesAccessBase[T <: ChangeRequest] extends EndRelationAccessDefault[User,
             ("vote", JsObject(Seq(
               ("weight", JsNumber(weight))
             ))),
-            ("votes", JsNumber(request.applyVotes)),
+            ("votes", JsNumber(request.approvalSum)),
             ("node", node)
           )))
         }

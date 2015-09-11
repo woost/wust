@@ -63,7 +63,7 @@ trait ConnectableAccessBase {
 
       if (!alreadyExisting) {
         tagConnectRequestToTag(tagReq).map { tag =>
-          val addTags = AddTags.create(user, post, applyThreshold = threshold, applyVotes = weight)
+          val addTags = AddTags.create(user, post, applyThreshold = threshold, approvalSum = weight)
           discourse.add(Tags.create(tag, addTags))
           addTags
         } foreach { addTags =>
@@ -77,7 +77,7 @@ trait ConnectableAccessBase {
       val alreadyExisting = existRemTags.exists(_.rev_tags.head.uuid == tagReq)
 
       if (!alreadyExisting) {
-        val remTags = RemoveTags.create(user, post, applyThreshold = threshold, applyVotes = weight)
+        val remTags = RemoveTags.create(user, post, applyThreshold = threshold, approvalSum = weight)
         val tag = TagLike.matchesOnUuid(tagReq)
         discourse.add(Tags.create(tag, remTags))
         val votes = Votes.create(user, remTags, weight = weight)
@@ -152,9 +152,9 @@ case class PostAccess() extends ConnectableAccessBase with NodeReadBase[Post] wi
         db.transaction { tx =>
           val discourse = Discourse.empty
 
-          val applyVotes = 1 // TODO: karma
+          val approvalSum = 1 // TODO: karma
           val applyThreshold = 5 // TODO: correct edit threshold
-          if (applyVotes >= applyThreshold)
+          if (approvalSum >= applyThreshold)
             throw new Exception("Instant edits are not implemented yet!")
 
           //TODO: check for edit threshold and implement instant edit
@@ -166,15 +166,15 @@ case class PostAccess() extends ConnectableAccessBase with NodeReadBase[Post] wi
             discourse.add(node)
 
             //TODO: correct threshold and votes for apply
-            val contribution = Updated.create(user, node, oldTitle = node.title, newTitle = request.title.getOrElse(node.title), oldDescription = node.description, newDescription = request.description.orElse(node.description), applyThreshold = applyThreshold, applyVotes = applyVotes)
-            val votes = Votes.create(user, contribution, weight = applyVotes)
+            val contribution = Updated.create(user, node, oldTitle = node.title, newTitle = request.title.getOrElse(node.title), oldDescription = node.description, newDescription = request.description.orElse(node.description), applyThreshold = applyThreshold, approvalSum = approvalSum)
+            val votes = Votes.create(user, contribution, weight = approvalSum)
             discourse.add(contribution, votes)
             node
           } else {
             Post.matchesOnUuid(uuid)
           }
 
-          addRequestTagsToGraph(discourse, user, node, request, applyVotes, applyThreshold)
+          addRequestTagsToGraph(discourse, user, node, request, approvalSum, applyThreshold)
           discourse.add(node)
 
           tx.persistChanges(discourse) match {
