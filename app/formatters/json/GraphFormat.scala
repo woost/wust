@@ -61,7 +61,8 @@ object GraphFormat {
         ("title", JsString(post.title)),
         ("description", JsString(post.description.getOrElse(""))),
         ("tags", Json.toJson(post.inRelationsAs(Tags))),
-        ("timestamp", Json.toJson(JsNumber(post.timestamp)))
+        ("timestamp", Json.toJson(JsNumber(post.timestamp))),
+        ("viewcount", JsNumber(post.rawItem.properties("viewcount").asLong))
       )
       case connects: Connects =>
         Seq(

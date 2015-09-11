@@ -259,15 +259,25 @@ object Database {
     // query undirected connected component of posts with maximum depth
     // depth * 2 because hyperrelation depth
     val query = s"""
-      match ${ focusNode.toQuery }
-      match (${ focusNode.name })-[rel:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(postsandconnects:${Connectable.label})
+      match ${ focusNode.toQuery }-[rel:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(postsandconnects:${Connectable.label})
       with distinct postsandconnects, rel
       optional match (tag:`${ TagLike.label }`)-[tagtocat:`${ Tags.startRelationType }`]->(cat:`${ Tags.label }`)-[cattotaggable:`${ Tags.endRelationType }`]->(postsandconnects)
-      return postsandconnects,rel,tag,cat,tagtocat,cattotaggable
+      optional match (:USER)-[viewed :`${Viewed.relationType}`]->(postsandconnects)
+      return postsandconnects,rel,tag,cat,tagtocat,cattotaggable, count(viewed) as viewcount
     """
 
     val params = focusNode.parameterMap
-    val component = Discourse(db.queryGraph(Query(query, params)))
+    val (graph, table) = db.queryGraphsAndTables(Query(query, params)).head
+    val component = Discourse(graph)
+
+    val uuidToNode = component.uuidNodes.map(n => (n.uuid,n)).toMap
+    table.rows.foreach { row =>
+      val viewcount = row("viewcount").asLong
+      if( viewcount > 0) {
+        val uuid = row("postsandconnects").asMap("uuid").asString
+        uuidToNode(uuid).rawItem.properties += ("viewcount" -> viewcount)
+      }
+    }
 
     component
   }

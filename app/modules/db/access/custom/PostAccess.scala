@@ -117,6 +117,7 @@ case class PostAccess() extends ConnectableAccessBase with NodeReadBase[Post] wi
     val node = factory.matchesOnUuid(uuid)
     val discourse = Discourse(node)
     context.user.foreach { user =>
+      //TODO: set viewed on current post when logging in
       discourse.add(Viewed.merge(user, node))
     }
 
