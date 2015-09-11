@@ -36,8 +36,8 @@ function coloredTagNode(Helpers, ContextService, $rootScope) {
                 rawElem.style.backgroundColor = "";
                 rawElem.style.borderColor = "";
             } else {
-                rawElem.style.backgroundColor = Helpers.hashToColorBackground(tag);
-                rawElem.style.borderColor = Helpers.hashToColorBorder(tag);
+                rawElem.style.backgroundColor = Helpers.postBackgroundColor(tag);
+                rawElem.style.borderColor = Helpers.postBorderColor(tag);
             }
         }
     }

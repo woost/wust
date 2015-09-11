@@ -4,7 +4,8 @@ angular.module("wust.services").value("Helpers", {
     hashCode,
     hashToColor,
     hashToColorBorder,
-    hashToColorBackground,
+    postBorderColor,
+    postBackgroundColor,
     hashToColorFill,
     hashToColorNavBg,
     hashToColorFillLight,
@@ -45,14 +46,19 @@ function hashCode(string) {
     return hash;
 }
 
-// post and tag label border
+// tag label border
 function hashToColorBorder(tag) {
     if(tag.color === -1) return "hsl(0, 0%, 45%)";
     return hashToColor(tag, 40, 48);
 }
 
+function postBorderColor(tag) {
+    if(tag.color === -1) return "hsl(0, 0%, 45%)";
+    return hashToColor(tag, 40, 68);
+}
+
 // post bg
-function hashToColorBackground(tag) {
+function postBackgroundColor(tag) {
     if(tag.color === -1) return "hsl(0, 0%, 98%)";
     return hashToColor(tag, 20, 98);
 }

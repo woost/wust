@@ -9,6 +9,8 @@
 $graph_relation_color: #666;
 $graph_connectorline_color: #3B85FF;
 
+$post_default_border_color: #AAA;
+
 $dashboard_recent_header_border: #6db5ff;
 
 //TODO: use bootstrap variables
@@ -22,10 +24,8 @@ $nav_hover_background: white;
 $sidebar_border: 1px solid  #d8d8d8;
 $stream_border: 2px solid  #d8d8d8;
 
-// intense tags
 // $vote_button_color: #e8e8e8;
 // $vote_button_hover_color: white;
-// light tags
 $vote_button_color:  #777;
 $vote_button_hover_color:  black;
 $vote_button_active_color: black;

@@ -5,10 +5,10 @@ coloredTag.$inject = ["Helpers"];
 function coloredTag(Helpers) {
     return {
         restrict: "EA",
+        // require: ["tagtype"], //TODO: require more attribute in directives
         scope: {
             coloredTag: "=",
-            intense: "@",
-            border: "@"
+            tagtype: "@"
         },
         link
     };
@@ -24,7 +24,7 @@ function coloredTag(Helpers) {
             let tag = scope.coloredTag;
             let otherColor = Math.floor(Math.random()*360);
             let otherTag = {color: otherColor, title: ""};
-            if(scope.intense === "true") { // tag circles
+            if(scope.tagtype === "circle") {
                 if(tag.isClassification) {
                     let color = Helpers.hashToColorFill(tag);
 
@@ -36,28 +36,20 @@ function coloredTag(Helpers) {
                     rawElem.style.backgroundColor = color;
                     rawElem.style.border = "1px solid " + Helpers.contextCircleBorderColor(tag);
                 }
-            } else { // tag labels
+            } else if(scope.tagtype === "label") {
                 if(tag.isClassification) {
                     let color = Helpers.hashToColorFillLight(tag);
                     rawElem.style.backgroundColor = Helpers.hashToColorFillLight(tag);
-                    if(scope.border === "true")
-                        rawElem.style.borderColor = Helpers.hashToColorBorder(scope.coloredTag);
+                    rawElem.style.borderColor = Helpers.hashToColorBorder(scope.coloredTag);
                 }
                 else {
                     let color = Helpers.hashToColorContextLabelBg(tag);
+                    // rawElem.style.backgroundColor = color;
                     let otherColor = Helpers.hashToColorFillLighter(tag);
                     rawElem.style.background = `-webkit-linear-gradient(-55deg, ${otherColor}, ${otherColor} 22px, ${color} 22px, ${color} 60px)`;
-                    // rawElem.style.backgroundColor = color;
-                    if(scope.border === "true")
-                        rawElem.style.border = "1px solid " + Helpers.contextCircleBorderColor(tag);
+                    rawElem.style.border = "1px solid " + Helpers.contextCircleBorderColor(tag);
                 }
             }
-
-
-            // intense tags
-            // rawElem.style.color = "white";
-            // light tags
-            rawElem.style.color = "black";
         }
     }
 }

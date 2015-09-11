@@ -1,8 +1,9 @@
+@import "globals";
 @import "compass/css3/flexbox";
 @import "compass/css3/box-shadow";
 
 .big_post_directive {
-    border: 1px solid;
+    border: 1px solid $post_default_border_color;
     border-radius: 4px;
     padding: 15px;
     .post_title {

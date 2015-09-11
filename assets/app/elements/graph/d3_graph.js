@@ -221,7 +221,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
 
                 this.d3Node = this.d3NodeContainerWithData.append("div")
                 .attr("class", d => d.isHyperRelation ? "hyperrelation" : "small_post_directive")
-                .style("background-color", n => (n.tags.length > 0 && !n.isHyperRelation) ? Helpers.hashToColorBackground(n.tags[0]) : undefined)
+                .style("background-color", n => (n.tags.length > 0 && !n.isHyperRelation) ? Helpers.postBackgroundColor(n.tags[0]) : undefined)
                 .style("border-color", n => !n.isHyperRelation && n.tags.length > 0 ? Helpers.hashToColorBorder(n.tags[0]) : undefined)
                 .html(d => {
                     //TODO: do it with d3 data-joins, or directly with the angular-port
