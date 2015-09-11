@@ -263,7 +263,9 @@ object Database {
       with distinct postsandconnects, rel
       optional match (tag:`${ TagLike.label }`)-[tagtocat:`${ Tags.startRelationType }`]->(cat:`${ Tags.label }`)-[cattotaggable:`${ Tags.endRelationType }`]->(postsandconnects)
       optional match (:USER)-[viewed :`${Viewed.relationType}`]->(postsandconnects)
-      return postsandconnects,rel,tag,cat,tagtocat,cattotaggable, count(viewed) as viewcount
+      optional match (:USER)-[answervoted :`${Votes.relationType}`]->(postsandconnects:${Connects.label})
+
+      return postsandconnects,rel,tag,cat,tagtocat,cattotaggable, count(viewed) as viewcount, count(answervoted) as answervotecount 
     """
 
     val params = focusNode.parameterMap
@@ -273,9 +275,15 @@ object Database {
     val uuidToNode = component.uuidNodes.map(n => (n.uuid,n)).toMap
     table.rows.foreach { row =>
       val viewcount = row("viewcount").asLong
+      val answervotecount = row("answervotecount").asLong
+
       if( viewcount > 0) {
         val uuid = row("postsandconnects").asMap("uuid").asString
         uuidToNode(uuid).rawItem.properties += ("viewcount" -> viewcount)
+      }
+      if( answervotecount > 0) {
+        val uuid = row("postsandconnects").asMap("uuid").asString
+        uuidToNode(uuid).rawItem.properties += ("answervotecount" -> answervotecount)
       }
     }
 

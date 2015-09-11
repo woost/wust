@@ -62,7 +62,7 @@ object GraphFormat {
         ("description", JsString(post.description.getOrElse(""))),
         ("tags", Json.toJson(post.inRelationsAs(Tags))),
         ("timestamp", Json.toJson(JsNumber(post.timestamp))),
-        ("viewcount", JsNumber(post.rawItem.properties("viewcount").asLong))
+        ("viewcount", post.rawItem.properties.get("viewcount").map(x => JsNumber(x.asLong)).getOrElse(JsNumber(0)))
       )
       case connects: Connects =>
         Seq(
@@ -70,7 +70,8 @@ object GraphFormat {
           //TODO: jsNull oder besser garnicht senden, aus der Seq rausnehmen und flatten
           ("startId", JsString(connects.startNodeOpt.map(_.uuid).getOrElse(""))),
           ("endId", JsString(connects.endNodeOpt.map(_.uuid).getOrElse(""))),
-          ("tags", Json.toJson(connects.inRelationsAs(Tags)))
+          ("tags", Json.toJson(connects.inRelationsAs(Tags))),
+          ("answervotecount", connects.rawItem.properties.get("answervotecount").map(x => JsNumber(x.asLong)).getOrElse(JsNumber(0)))
         )
       case _                  => Seq.empty
     }))
