@@ -76,7 +76,7 @@ main {
                 margin-right: -1px;
             }
             @include flex-grow(1);
-            min-width: 600px;
+            min-width: 900px;
             @include transition(width 100ms ease);
         }
     }

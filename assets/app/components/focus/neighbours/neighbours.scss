@@ -9,6 +9,7 @@
     @include align-items(flex-start);
     .neighbours_attachedto {
         width: 270px;
+        min-width: 270px;
         padding-right: 10px;
         // background: red;
         .node_model_list {
@@ -33,6 +34,7 @@
 
     .neighbours_content {
         width: 600px;
+        min-width: 400px;
 
         margin-left: 15px;
         margin-right: 15px;
