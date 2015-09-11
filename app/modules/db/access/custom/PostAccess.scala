@@ -5,10 +5,12 @@ import formatters.json.RequestFormat._
 import model.WustSchema.{Created => SchemaCreated, _}
 import modules.db.Database.db
 import modules.db.access._
+import modules.db._
 import modules.requests._
 import play.api.libs.json.JsValue
 import renesca.parameter.implicits._
 import renesca.QueryHandler
+import renesca.Query
 import play.api.mvc.Results._
 import model.Helpers.tagTitleColor
 
@@ -32,17 +34,55 @@ trait ConnectableAccessBase {
     }
   }
 
+  //TODO: refactor
   protected def addRequestTagsToGraph(discourse: Discourse, user: User, post: Post, request: AddTagRequestBase with RemoveTagRequestBase, weight: Long, threshold: Long) {
-    //TODO: avoid duplicates
-    request.addedTags.flatMap(tagConnectRequestToTag(_)).foreach { tag =>
-      val addTags = AddTags.create(user, post, applyThreshold = threshold, applyVotes = weight)
-      val votes = Votes.create(user, addTags, weight = weight)
-      discourse.add(addTags, Tags.create(tag, addTags), votes)
+    // TODO: checking for duplicates is not really safe if there are concurrent requests
+    // TODO: do not get all connected requests if not needed...its just slow
+    val userDef = ConcreteFactoryNodeDefinition(User)
+    val tagDef = ConcreteFactoryNodeDefinition(TagLike)
+    val requestDef = ConcreteFactoryNodeDefinition(TagChangeRequest)
+    val postDef = ConcreteNodeDefinition(post)
+    val tagsDef = RelationDefinition(tagDef, Tags, requestDef)
+    val query = s"match ${userDef.toQuery}-[ut:`${UserToAddTags.relationType}`|`${UserToRemoveTags.relationType}`]->${requestDef.toQuery}-[tp:`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->${postDef.toQuery}, ${tagsDef.toQuery(true,false)} return *"
+    val existing = Discourse(db.queryGraph(Query(query, userDef.parameterMap ++ postDef.parameterMap ++ tagsDef.parameterMap)))
+
+    discourse.add(existing.tagLikes: _*)
+    discourse.add(existing.tags: _*)
+    val existAddTags = existing.addTags
+    val existRemTags = existing.removeTags
+
+    request.addedTags.foreach { tagReq =>
+      val alreadyExisting = existAddTags.exists { addTag =>
+        if (tagReq.id.isDefined)
+          addTag.rev_tags.head.uuid == tagReq.id.get
+        else if (tagReq.title.isDefined)
+          addTag.rev_tags.head.title == tagReq.title.get
+        else
+          false
+      }
+
+      if (!alreadyExisting) {
+        tagConnectRequestToTag(tagReq).map { tag =>
+          val addTags = AddTags.create(user, post, applyThreshold = threshold, applyVotes = weight)
+          discourse.add(Tags.create(tag, addTags))
+          addTags
+        } foreach { addTags =>
+          val votes = Votes.create(user, addTags, weight = weight)
+          discourse.add(addTags, votes)
+        }
+      }
     }
-    request.removedTags.map(TagLike.matchesOnUuid(_)).foreach { tag =>
-      val removeTags = RemoveTags.create(user, post, applyThreshold = threshold, applyVotes = weight)
-      val votes = Votes.create(user, removeTags, weight = weight)
-      discourse.add(removeTags, Tags.create(tag, removeTags), votes)
+
+    request.removedTags.foreach { tagReq =>
+      val alreadyExisting = existRemTags.exists(_.rev_tags.head.uuid == tagReq)
+
+      if (!alreadyExisting) {
+        val remTags = RemoveTags.create(user, post, applyThreshold = threshold, applyVotes = weight)
+        val tag = TagLike.matchesOnUuid(tagReq)
+        discourse.add(Tags.create(tag, remTags))
+        val votes = Votes.create(user, remTags, weight = weight)
+        discourse.add(remTags, votes)
+      }
     }
   }
 

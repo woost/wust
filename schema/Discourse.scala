@@ -69,7 +69,7 @@ object WustSchema {
 
   // post explicitly inherits timestamp to make it cheap to query recent posts
   // otherwise we would need to take include the created relation every time
-  @Node class Post extends Connectable with Inheritable with Timestamp {
+  @Node class Post extends Connectable with Timestamp {
     var title: String
     var description: Option[String]
 
@@ -89,9 +89,8 @@ object WustSchema {
   }
 
   // Action
-  @Node trait Action extends UuidNode with Timestamp
-  @HyperRelation class Created(startNode: User, endNode: Post) extends Action
-  @Node trait ChangeRequest extends Action with Votable {
+  @HyperRelation class Created(startNode: User, endNode: Post) extends UuidNode with Timestamp
+  @Node trait ChangeRequest extends UuidNode with Timestamp with Votable {
     val applyThreshold:Long
     var applyVotes:Long
     var applied:Boolean = false
@@ -107,12 +106,13 @@ object WustSchema {
   //TODO: simple tags relation? using the normal tags relation makes the
   //relation votable. also it is a hyperrelation, which is not needed in this
   //case.
-  @HyperRelation class AddTags(startNode: User, endNode: Post) extends ChangeRequest with Taggable with HyperConnection
-  @HyperRelation class RemoveTags(startNode: User, endNode: Post) extends ChangeRequest with Taggable with HyperConnection
+  @Node trait TagChangeRequest extends ChangeRequest with Taggable
+  @HyperRelation class AddTags(startNode: User, endNode: Post) extends TagChangeRequest with HyperConnection
+  @HyperRelation class RemoveTags(startNode: User, endNode: Post) extends TagChangeRequest with HyperConnection
 
   // TODO: should be a node? as the to be deleted node will deleted and we cannot connect there?
   // hiding nodes seems like more work.
-  @HyperRelation class Deleted(startNode: User, endNode: Post) extends Action
+  // @HyperRelation class Deleted(startNode: User, endNode: Post) extends Action
   // @Relation class Reviewed(startNode: User, endNode: Action)
 
   //TODO: multidimesional voting?
