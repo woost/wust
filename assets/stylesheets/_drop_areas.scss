@@ -1,3 +1,5 @@
+@import "globals";
+
 .drop_post_container {
     border: 1px dashed white;
     box-sizing: border-box;
@@ -21,10 +23,12 @@
 }
 
 .graph_network.on-drag-enter, .drop_post_box.on-drag-enter {
-    background-color: #008DFF;
+    background-color: $drag_active_color !important;
+    color: white !important;
     transition: background-color 0.2s;
 }
 .graph_network.on-drag-hover, .drop_post_box.on-drag-hover {
-    background-color: #73C0FF;
+    background-color: $drag_active_hover_color !important;
+    color: white !important;
     transition: background-color 0.2s;
 }

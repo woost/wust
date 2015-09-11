@@ -75,6 +75,14 @@ main {
                 border-right: 0;
                 margin-right: -1px;
             }
+
+            #left_side_toggle, #right_side_toggle {
+                background-color:rgba(255,255,255,0.4);
+            }
+            #left_side_toggle:hover, #right_side_toggle:hover {
+                color: initial;
+                background-color:white;
+            }
             @include flex-grow(1);
             min-width: 900px;
             @include transition(width 100ms ease);

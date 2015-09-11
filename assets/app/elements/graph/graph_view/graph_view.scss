@@ -37,7 +37,7 @@
             }
         .connectorline {
             fill: none;
-            stroke: $graph_connectorline_color;
+            stroke: $drag_active_color;
             stroke-width: 5;
             stroke-linecap: round;
             stroke-dasharray: 10 10;
@@ -47,7 +47,7 @@
             }
         }
         marker path.connectorlinearrow {
-            fill: $graph_connectorline_color !important;
+            fill: $drag_active_color !important;
         }
 
         .nodecontainer {
@@ -81,13 +81,13 @@
 
             .selected .small_post_directive {
                 // outline: 7px dashed white !important;
-                @include box-shadow(0 0 0 4px $graph_connectorline_color);
-                border-color: $graph_connectorline_color !important;
+                @include box-shadow(0 0 0 4px $drag_active_color);
+                border-color: $drag_active_color !important;
             }
             .selected .hyperrelation {
                 // outline: 7px dashed white !important;
-                @include box-shadow(0 0 0 4px $graph_connectorline_color);
-                border-color: $graph_connectorline_color !important;
+                @include box-shadow(0 0 0 4px $drag_active_color);
+                border-color: $drag_active_color !important;
             }
 
             .nodetools {
