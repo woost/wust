@@ -222,7 +222,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
                 this.d3Node = this.d3NodeContainerWithData.append("div")
                 .attr("class", d => d.isHyperRelation ? "hyperrelation" : "small_post_directive")
                 .style("background-color", n => (n.tags.length > 0 && !n.isHyperRelation) ? Helpers.postBackgroundColor(n.tags[0]) : undefined)
-                .style("border-color", n => !n.isHyperRelation && n.tags.length > 0 ? Helpers.hashToColorBorder(n.tags[0]) : undefined)
+                .style("border-color", n => !n.isHyperRelation && n.tags.length > 0 ? Helpers.postBorderColor(n.tags[0]) : undefined)
                 .html(d => {
                     //TODO: do it with d3 data-joins, or directly with the angular-port
                     if(d.isHyperRelation) {
@@ -230,8 +230,14 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
                         _.values(d.tags).forEach(t => {
                             let tagElem = document.createElement("span");
                             tagElem.className = "tag-label nodetag";
-                            tagElem.style.backgroundColor = Helpers.hashToColorFill(t);
-                            tagElem.style.borderColor = Helpers.hashToColorBorder(t);
+
+                            if( t.isClassification ) {
+                                tagElem.style.backgroundColor = Helpers.classificationLabelBackgroundColor(t);
+                                tagElem.style.border = "1px solid " + Helpers.classificationLabelBorderColor(t);
+                            } else {
+                                tagElem.style.backgroundColor = Helpers.contextLabelBackgroundColor(t);
+                                tagElem.style.border = "1px solid " + Helpers.contextLabelBorderColor(t);
+                            }
                             let content = document.createElement("span");
                             content.className = "content";
                             content.appendChild(document.createTextNode(t.title));
@@ -252,7 +258,15 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
                             circleCont.appendChild(circleTitle);
                             let circle = document.createElement("span");
                             circle.className = "tag_circle";
-                            circle.style.backgroundColor = Helpers.hashToColorFill(t);
+
+                            if( t.isClassification ) {
+                                circle.style.backgroundColor = Helpers.classificationCircleBackgroundColor(t);
+                                circle.style.border = "1px solid " + Helpers.classificationCircleBorderColor(t);
+                            } else {
+                                circle.style.backgroundColor = Helpers.contextCircleColor(t);
+                                circle.style.border = "1px solid " + Helpers.contextCircleBorderColor(t);
+                            }
+
                             circleTitle.appendChild(circle);
                         });
                         return elem.outerHTML;

@@ -3,14 +3,15 @@ angular.module("wust.services").value("Helpers", {
     mapFind,
     hashCode,
     hashToColor,
-    hashToColorBorder,
+    navBackgroundColor,
     postBorderColor,
     postBackgroundColor,
-    hashToColorFill,
-    hashToColorNavBg,
-    hashToColorFillLight,
-    hashToColorFillLighter,
-    hashToColorContextLabelBg,
+    classificationLabelBackgroundColor,
+    classificationLabelBorderColor,
+    classificationCircleBackgroundColor,
+    classificationCircleBorderColor,
+    contextLabelBackgroundColor,
+    contextLabelBorderColor,
     contextCircleColor,
     contextCircleBorderColor,
     tagTitleColor,
@@ -46,66 +47,22 @@ function hashCode(string) {
     return hash;
 }
 
-// tag label border
-function hashToColorBorder(tag) {
-    if(tag.color === -1) return "hsl(0, 0%, 45%)";
-    return hashToColor(tag, 40, 48);
-}
+function navBackgroundColor(tag) { return hashToColor(tag, 20, 98); }
 
-function postBorderColor(tag) {
-    if(tag.color === -1) return "hsl(0, 0%, 45%)";
-    return hashToColor(tag, 20, 70);
-}
+function postBackgroundColor(tag) { return hashToColor(tag, 20, 99); }
+function postBorderColor(tag) { return hashToColor(tag, 20, 70); }
 
-// post bg
-function postBackgroundColor(tag) {
-    if(tag.color === -1) return "hsl(0, 0%, 98%)";
-    return hashToColor(tag, 20, 99);
-}
+function classificationLabelBackgroundColor(tag) { return hashToColor(tag, 40, 90); }
+function classificationLabelBorderColor(tag) { return hashToColor(tag, 40, 48); }
+function classificationCircleBackgroundColor(tag) { return hashToColor(tag, 40, 90); }
+function classificationCircleBorderColor(tag) { return hashToColor(tag, 40, 48); }
 
-// tag circles
-function hashToColorFill(tag) {
-    if(tag.color === -1) return "hsl(0, 0%, 55%)";
-    return hashToColor(tag, 55, 69);
-}
+function contextLabelBackgroundColor(tag) { return hashToColor(tag, 30, 98); }
+function contextLabelBorderColor(tag) { return hashToColor(tag, 20, 85); }
+function contextCircleColor(tag) { return hashToColor(tag, 20, 98); }
+function contextCircleBorderColor(tag) { return hashToColor(tag, 20, 85); }
 
-function contextCircleColor(tag) {
-    if(tag.color === -1) return "hsl(0, 0%, 55%)";
-    return hashToColor(tag, 20, 98);
-}
-
-function contextCircleBorderColor(tag) {
-    if(tag.color === -1) return "hsl(0, 0%, 55%)";
-    return hashToColor(tag, 20, 85);
-}
-
-// Navigation Background
-function hashToColorNavBg(tag) {
-    if(tag.color === -1) return "hsl(0, 0%, 55%)";
-    return hashToColor(tag, 20, 98);
-}
-
-// tag label bg
-function hashToColorFillLight(tag) {
-    if(tag.color === -1) return "hsl(0, 0%, 55%)";
-    return hashToColor(tag, 40, 90);
-}
-
-function hashToColorContextLabelBg(tag) {
-    if(tag.color === -1) return "hsl(0, 0%, 55%)";
-    return hashToColor(tag, 30, 98);
-}
-
-// tag eselsohr
-function hashToColorFillLighter(tag) {
-    if(tag.color === -1) return "hsl(0, 0%, 55%)";
-    return hashToColor(tag, 20, 100);
-}
-
-function tagTitleColor(title) {
-    return Math.abs(hashCode(title.toLowerCase())) % 360;
-}
-
+function tagTitleColor(title) { return Math.abs(hashCode(title.toLowerCase())) % 360; }
 function hashToColor(tag, chromaValue, lightness) {
     // https://vis4.net/blog/posts/avoid-equidistant-hsv-colors/
     let hue = tag.color || tagTitleColor(tag.title); // 0..360

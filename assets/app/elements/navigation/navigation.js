@@ -42,7 +42,7 @@ function navigationCtrl($state, Auth, SearchService, DiscourseNode, Search, Moda
 
     function onContextChange() {
         vm.contextStyle = {
-            "background-color": vm.currentContexts.length > 0 ? Helpers.hashToColorNavBg(vm.currentContexts[0]) : undefined,
+            "background-color": vm.currentContexts.length > 0 ? Helpers.navBackgroundColor(vm.currentContexts[0]) : undefined,
             "border-bottom": vm.currentContexts.length > 0 ? ("1px solid " + Helpers.contextCircleBorderColor(vm.currentContexts[0])) : undefined
         };
         ContextService.emitChangedEvent();

@@ -24,29 +24,20 @@ function coloredTag(Helpers) {
             let tag = scope.coloredTag;
             let otherColor = Math.floor(Math.random()*360);
             let otherTag = {color: otherColor, title: ""};
-            if(scope.tagtype === "circle") {
-                if(tag.isClassification) {
-                    let color = Helpers.hashToColorFill(tag);
-
-                    rawElem.style.backgroundColor = Helpers.hashToColorFillLight(tag);
-                    rawElem.style.border = "1px solid " + Helpers.hashToColorBorder(tag);
+            if(tag.isClassification) {
+                if(scope.tagtype === "label") {
+                    rawElem.style.backgroundColor = Helpers.classificationLabelBackgroundColor(tag);
+                    rawElem.style.borderColor = Helpers.classificationLabelBorderColor(scope.coloredTag);
+                } else if(scope.tagtype === "circle") {
+                    rawElem.style.backgroundColor = Helpers.classificationCircleBackgroundColor(tag);
+                    rawElem.style.border = "1px solid " + Helpers.classificationCircleBorderColor(tag);
                 }
-                else {
-                    let color = Helpers.contextCircleColor(tag);
-                    rawElem.style.backgroundColor = color;
-                    rawElem.style.border = "1px solid " + Helpers.contextCircleBorderColor(tag);
-                }
-            } else if(scope.tagtype === "label") {
-                if(tag.isClassification) {
-                    let color = Helpers.hashToColorFillLight(tag);
-                    rawElem.style.backgroundColor = Helpers.hashToColorFillLight(tag);
-                    rawElem.style.borderColor = Helpers.hashToColorBorder(scope.coloredTag);
-                }
-                else {
-                    let color = Helpers.hashToColorContextLabelBg(tag);
-                    rawElem.style.backgroundColor = color;
-                    // let otherColor = Helpers.hashToColorFillLighter(tag);
-                    // rawElem.style.background = `-webkit-linear-gradient(-55deg, ${otherColor}, ${otherColor} 22px, ${color} 22px, ${color} 60px)`;
+            } else { // context
+                if(scope.tagtype === "label") {
+                    rawElem.style.backgroundColor = Helpers.contextLabelBackgroundColor(tag);
+                    rawElem.style.border = "1px solid " + Helpers.contextLabelBorderColor(tag);
+                } else if(scope.tagtype === "circle") {
+                    rawElem.style.backgroundColor = Helpers.contextCircleColor(tag);
                     rawElem.style.border = "1px solid " + Helpers.contextCircleBorderColor(tag);
                 }
             }
