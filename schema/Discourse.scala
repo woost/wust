@@ -139,6 +139,8 @@ object WustSchema {
   // Tags
   @Node class Classification extends TagLike
 
+  @Relation class Classifies(startNode: Classification, endNode: Connects) extends ConstructRelation
+
   // Scopes
   @Node class Scope extends TagLike
   //  @Relation class HasReadAccess(startNode: UserGroup, endNode: Scope)

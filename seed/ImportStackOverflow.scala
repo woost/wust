@@ -29,7 +29,6 @@ object ImportStackOverflow extends Task with SeedTools {
   val questionTag = mergeClassification("Question")
   val answerTag = mergeClassification("Answer")
   val soTag = mergeScope("StackOverflow")
-  val replyTag = mergeClassification("repliesTo")
 
   def questions = {
     val url = baseurl + s"/questions?page=1&pagesize=$questionLimit&order=desc&min=10&sort=votes&filter=$filterId&site=$site"
@@ -71,7 +70,7 @@ object ImportStackOverflow extends Task with SeedTools {
           discourse.add(Created.create(user, comment))
 
           val connects = Connects.create(comment, post)
-          discourse.add(comment, connects, tag(connects, replyTag))
+          discourse.add(comment, connects)
 
           //TODO: voting
         })
@@ -82,13 +81,14 @@ object ImportStackOverflow extends Task with SeedTools {
       questions.foreach { rawQuestion =>
         val question = post(rawQuestion)
         discourse.add(tag(question, soTag))
-        discourse.add(tag(question, questionTag))
+        //TODO: on relation between scope and post
+        //discourse.add(classify(question, questionTag))
 
         (rawQuestion \ "answers").as[Seq[JsObject]].foreach { rawAnswer =>
           val answer = post(rawAnswer)
-          discourse.add(tag(answer, answerTag))
           val connects = Connects.create(answer, question)
-          discourse.add(answer, connects, tag(connects, replyTag))
+          discourse.add(classify(connects, answerTag))
+          discourse.add(answer, connects)
         }
       }
     }

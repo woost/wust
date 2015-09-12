@@ -16,8 +16,12 @@ trait SeedTools {
     Scope.merge(title = title, color = color.getOrElse(tagTitleColor(title)), description = description, merge = Set("title"))
   }
 
-  def tag(item: Taggable, tag: TagLike) = {
+  def tag(item: Taggable, tag: Scope) = {
     Tags.create(tag, item)
+  }
+
+  def classify(item: Connects, tag: Classification) = {
+    Classifies.create(tag, item)
   }
 
   def shorten(str: String, maxlength: Int = maxTitleLength) = {

@@ -44,13 +44,19 @@ function editTaglistCtrl(TagSuggestions, DiscourseNode, $q) {
             let label;
             switch (vm.tagType) {
                 //TODO: expose labels without own node api in schema object from api
-                case "context":
-                    // label = DiscourseNode.Scope.label;
-                    label = "SCOPE";
-                    break;
                 case "classification":
                     // label = DiscourseNode.Classification.label;
                     label = "CLASSIFICATION";
+                    break;
+                case "taglike":
+                    // label = DiscourseNode.Classification.label;
+                    label = "TAGLIKE";
+                    break;
+                case "context":
+                    /* falls through */
+                default:
+                    // label = DiscourseNode.Scope.label;
+                    label = "SCOPE";
                     break;
             }
 

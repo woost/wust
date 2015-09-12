@@ -22,7 +22,6 @@ object ImportReddit extends Task with SeedTools {
   def getJson(url: String): JsValue = Await.result(ws.url(url).get(), 10.seconds).json
 
   val redditScope = mergeScope("Reddit", color = Some(210))
-  val replyTag = mergeClassification("repliesTo")
 
   dbContext { implicit db =>
     val subreddits = List("lifeprotips", "scala", "neo4j")
@@ -50,7 +49,7 @@ object ImportReddit extends Task with SeedTools {
             val permalink = (post \ "data" \ "permalink").as[String]
             val startPost = createPost(title, content, if(url.endsWith(permalink)) None else Some(url))
             print(s"thread: $title")
-            discourse.add(startPost, tag(startPost, subredditScope), replyTag, subredditScope)
+            discourse.add(startPost, tag(startPost, subredditScope), subredditScope)
 
             val jsonComments = getJson(s"http://www.reddit.com/r/$subreddit/comments/$id.json").as[List[JsValue]].apply(1)
             var commentCount = 0
@@ -65,7 +64,7 @@ object ImportReddit extends Task with SeedTools {
                   commentCount += 1
                   val commentPost = createPost((comment \ "data" \ "body").as[String])
                   val connects = Connects.create(commentPost, parent)
-                  discourse.add(commentPost, connects, tag(connects, replyTag))
+                  discourse.add(commentPost, connects)
 
                   val replies = (comment \ "data" \ "replies": @unchecked) match {
                     case JsString("")     =>

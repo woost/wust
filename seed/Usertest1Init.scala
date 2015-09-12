@@ -10,7 +10,6 @@ object Usertest1Init extends Task with SeedTools {
 
   dbContext { implicit db =>
     modifyDiscourse { discourse =>
-      val replies = mergeClassification("repliesTo")
       val problem = mergeClassification("Problem")
       val question = mergeClassification("Question")
       val pro = mergeClassification("Pro")
@@ -35,14 +34,10 @@ object Usertest1Init extends Task with SeedTools {
         schmutzigConnects,
         wasserConnects,
         meinungConnects,
-        tag(meinung, pro),
-        tag(rootnode, question),
-        tag(stinkenConnects, replies),
-        tag(schmutzigConnects, replies),
-        tag(wasserConnects, replies),
-        tag(meinungConnects, replies),
-        tag(stinken, problem),
-        tag(schmutzig, problem)
+        classify(meinungConnects, pro),
+        // classify(rootnode, question), //TODO on relation between scope and post
+        classify(stinkenConnects, problem),
+        classify(schmutzigConnects, problem)
       )
     }
   }

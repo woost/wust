@@ -27,7 +27,8 @@ object Search extends TaggedTaggable[Taggable] with Controller {
     }
 
     val startPostMatchPostfix = if (startPost.getOrElse(false)) {
-      "<-[:TAGSTOTAGGABLE]-(:TAGS)-[:TAGLIKETOTAGS]-(:SCOPE)"
+      //WARUM GIBT DAS KEINEN ERROR IN NEO$J CYPHER
+      s"<-[:`${SchemaTags.endRelationType}`]-(:`${SchemaTags.label}`)<-[:`${SchemaTags.startRelationType}`]-(:`${Scope.label}`)"
     } else {
       ""
     }

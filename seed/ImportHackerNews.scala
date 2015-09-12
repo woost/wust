@@ -57,12 +57,12 @@ object ImportHackerNews extends Task with SeedTools {
   def importItem(hnItem: Item)(implicit db: DbService): Unit = {
     modifyDiscourse { discourse =>
       println(s"importing ${ hnItem.itemType }: ${ hnItem.title.get }")
-      val replyTag = mergeClassification("repliesTo")
       val hackerNewsScope = mergeScope("HackerNews")
       val startPost = if (hnItem.title.get.startsWith("Ask HN:")) {
         val startPost = createPost(hnItem.title.get.stripPrefix("Ask HN:"), hnItem.text, hnItem.url)
         discourse.add(
-          tag(startPost, mergeClassification("Question")),
+          //TODO: classify on relation between scope and post
+          // tag(startPost, mergeClassification("Question")),
           tag(startPost, mergeScope("Ask-HN")),
           Inherits.merge(mergeScope("Ask-HN"), hackerNewsScope)
         )
@@ -70,6 +70,7 @@ object ImportHackerNews extends Task with SeedTools {
       } else if (hnItem.title.get.startsWith("Show HN:")) {
         val startPost = createPost(hnItem.title.get.stripPrefix("Show HN:"), hnItem.text, hnItem.url)
         discourse.add(
+          //TODO: classify on relation between scope and post
           tag(startPost, mergeScope(s"Show-HN")),
           Inherits.merge(mergeScope(s"Show-HN"), hackerNewsScope)
         )
@@ -82,8 +83,9 @@ object ImportHackerNews extends Task with SeedTools {
         startPost
       }
 
-      if(hnItem.itemType == "Ask")
-        discourse.add(tag(startPost, mergeClassification("Question")))
+      //TODO: on relation between scope and post
+      // if(hnItem.itemType == "Ask")
+      //   discourse.add(tag(startPost, mergeClassification("Question")))
 
       addDeepChildItems(hnItem, startPost)
       println()
@@ -98,7 +100,7 @@ object ImportHackerNews extends Task with SeedTools {
               println("item: " + hnItem)
             } else {
               val connects = Connects.create(commentPost, parentPost)
-              discourse.add(commentPost, connects, tag(connects, replyTag))
+              discourse.add(commentPost, connects)
               print(".")
               addDeepChildItems(hnItem, commentPost)
             }
