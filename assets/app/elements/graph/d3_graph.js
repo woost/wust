@@ -32,7 +32,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
                 this.connectorLineArrowOffset = 0;
                 this.markerUrl = _.endsWith($location.absUrl(), "/graph") ? $location.absUrl() : $location.absUrl() + "graph";
                 this.arrowToResponse = true;
-                this.pinOnConnects = false;
+                this.dragHyperRelations = false;
 
                 // state
                 this.drawOnTick = this.drawOnTick = this.visibleConvergence;
@@ -319,7 +319,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
 
                 this.d3NodePinTool = this.d3NodeTools.append("div")
                     .attr("class", "nodetool pintool fa fa-thumb-tack")
-                    .style("display", d => (d.isHyperRelation && !this.pinOnConnects) ? "none" : "inline-block");
+                    .style("display", d => (d.isHyperRelation && !this.dragHyperRelations) ? "none" : "inline-block");
 
 
                 // this.d3NodeDeleteTool = this.d3NodeTools.append("div")
@@ -1102,7 +1102,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
             let diffX = this.dragStartMouseX - event.clientX;
             let diffY = this.dragStartMouseY - event.clientY;
             let diff = Math.sqrt(diffX * diffX + diffY * diffY);
-            if (!this.isDragging) {
+            if (!this.isDragging && (!d.isHyperRelation || this.dragHyperRelations)) {
                 if (diff > tolerance) {
                     this.isDragging = true;
                     // preview is reading isDragging, so angular needs to know that it changed
