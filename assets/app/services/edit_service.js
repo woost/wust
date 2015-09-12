@@ -32,17 +32,17 @@ function EditService(Post, Connectable, HistoryService, store, DiscourseNode, Ze
             this.title = title || "";
             this.description = description || "";
             this.label = label;
-            this.tags = angular.copy(tags);
             this.referenceNode = referenceNode;
             this.newDiscussion = newDiscussion || false;
             this.isHyperRelation = isHyperRelation || false;
+            this.tags = angular.copy(tags.map(t => t.$encode ? t.$encode() : t));
             this.original = original || {
                 id: this.id,
                 localId: this.localId,
                 title: this.title,
                 description: this.description,
                 label: this.label,
-                tags: angular.copy(tags)
+                tags: angular.copy(tags.map(t => t.$encode ? t.$encode() : t))
             };
 
             this.setValidityProperties();
@@ -248,11 +248,6 @@ function EditService(Post, Connectable, HistoryService, store, DiscourseNode, Ze
         }
 
         promise.$then(response => {
-            // add the infos we got from the node parameter
-            let startResponse = _.find(response.graph.nodes, _.pick(startNode, "id"));
-            _.assign(startResponse, startNode);
-            _.assign(response.node, startNode);
-
             HistoryService.addConnectToCurrentView(endNode.id, response);
         });
 

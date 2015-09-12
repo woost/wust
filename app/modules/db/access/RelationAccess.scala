@@ -8,6 +8,7 @@ import modules.db.types._
 import modules.requests.ConnectResponse
 import play.api.libs.json.JsValue
 import renesca.schema._
+import renesca.graph.Graph
 import play.api.mvc.Results._
 import play.api.mvc.Result
 
@@ -235,16 +236,37 @@ trait NodeAwareRelationAccess[NODE <: UuidNode, OTHER <: UuidNode] extends Relat
   val self: RelationAccess[NODE, OTHER]
   val nodeAccess: NodeAccess[OTHER]
 
+  //TODO: should have a way to propagate result to self.create instead of querying a second time via uuid
+  // ==> we merge both result so we have all the information from the
+  // first response in the second response
   override def create(context: RequestContext, param: ConnectParameter[NODE]) = {
     nodeAccess.create(context) match {
       case Left(err) => Left(err)
-      case Right(node) => self.create(context, param, node.uuid)
+      case Right(node) => {
+        self.create(context, param, node.uuid) match {
+          case Left(err) => Left(err)
+          case Right(response) => {
+            val d = Discourse(response.graph.graph.merge(node.graph))
+            response.node.foreach(d.add(_))
+            Right(ConnectResponse(d, response.node))
+          }
+        }
+      }
     }
   }
   override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,NODE with AbstractRelation[S,E], E]) = {
     nodeAccess.create(context) match {
       case Left(err) => Left(err)
-      case Right(node) => self.create(context, param, node.uuid)
+      case Right(node) => {
+        self.create(context, param, node.uuid) match {
+          case Left(err) => Left(err)
+          case Right(response) => {
+            val d = Discourse(response.graph.graph.merge(node.graph))
+            response.node.foreach(d.add(_))
+            Right(ConnectResponse(d, response.node))
+          }
+        }
+      }
     }
   }
 }
