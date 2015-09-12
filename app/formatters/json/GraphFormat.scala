@@ -68,7 +68,7 @@ object GraphFormat {
           //TODO: jsNull oder besser garnicht senden, aus der Seq rausnehmen und flatten
           ("startId", JsString(connects.startNodeOpt.map(_.uuid).getOrElse(""))),
           ("endId", JsString(connects.endNodeOpt.map(_.uuid).getOrElse(""))),
-          ("classifications", Json.toJson(connects.neighboursAs(Classification).map(tagWrites.writes))),
+          ("tags", Json.toJson(connects.neighboursAs(Classification).map(tagWrites.writes))),
           ("votes", connects.rawItem.properties.get("answervotecount").map(x => JsNumber(x.asLong)).getOrElse(JsNumber(0))),
           ("selfvoted", connects.rawItem.properties.get("selfanswervotecount").map(x => JsNumber(x.asLong)).getOrElse(JsNumber(0)))
         )
