@@ -18,10 +18,6 @@ object Connectables extends Nodes[Connectable] {
       "connects-from" -> (N < EndConRelationAccess(Connects, Connectable) + ConnectableAccess.apply + TaggedTaggable.apply[Connectable]),
       "up" -> (N < VotesConnectsAccess(1)),
       "neutral" -> (N < VotesConnectsAccess(0))
-    )),
-    "tags" -> (N < SchemaTags < (EndRelationRead(SchemaTags, Scope),
-      "up" -> (N < VotesTagsAccess(1)),
-      "neutral" -> (N < VotesTagsAccess(0))
     ))
   )
 }
@@ -29,5 +25,16 @@ object Connectables extends Nodes[Connectable] {
 object ConnectsCtrl extends Nodes[Connects] {
   val node = NodeDef(NodeRead(Connects),
     "classified" -> (N < EndConRelationAccess(Classifies, Classification))
+  )
+}
+
+object Posts extends Nodes[Post] {
+  val node = NodeDef(PostAccess.apply,
+    "requests-edit" -> (N < PostUpdatedAccess.apply),
+    "requests-tags" -> (N <> PostTagChangeRequestAccess.apply),
+    "tags" -> (N < SchemaTags < (EndRelationRead(SchemaTags, Scope),
+      "up" -> (N < VotesTagsAccess(1)),
+      "neutral" -> (N < VotesTagsAccess(0))
+    ))
   )
 }

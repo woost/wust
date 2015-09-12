@@ -27,7 +27,7 @@ trait ConnectableAccessBase {
         None
   }
 
-  protected def addTagsToGraph(discourse: Discourse, request: AddTagRequestBase, node: Taggable) {
+  protected def addTagsToGraph(discourse: Discourse, request: AddTagRequestBase, node: Post) {
     request.addedTags.flatMap(tagConnectRequestToTag(_)).foreach { tag =>
       val tags = Tags.merge(tag, node)
       discourse.add(tags)
@@ -225,11 +225,10 @@ case class ConnectableAccess() extends ConnectableAccessBase with NodeReadBase[C
     context.withUser { user =>
       context.withJson { (request: ConnectableUpdateRequest) =>
         db.transaction { tx =>
-          deleteTagsFromGraph(tx, request, uuid)
+          //TODO add/remove classifications
           val discourse = Discourse.empty
           val node = Connectable.matchesOnUuid(uuid)
           discourse.add(node)
-          addTagsToGraph(discourse, request, node)
 
           tx.persistChanges(discourse) match {
             case Some(err) => Left(BadRequest(s"Cannot update Post with uuid '$uuid': $err'"))
