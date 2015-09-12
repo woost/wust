@@ -126,6 +126,7 @@ case class VotesTagsChangeRequestAccess(
     }
 }
 
+//TODO: share code with VotesChangeRequestAccess
 trait VotesReferenceAccess[T <: Reference] extends EndRelationAccessDefault[User, Votes, Votable] {
   val sign: Long
   val nodeFactory = User
@@ -136,27 +137,39 @@ trait VotesReferenceAccess[T <: Reference] extends EndRelationAccessDefault[User
   override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Votable with AbstractRelation[S,E], E]) = context.withUser { user =>
     db.transaction { tx =>
       val weight = sign // TODO: karma
-      val success = if (weight == 0) {
-        val referenceDef = nodeDefinition(param.startUuid, param.endUuid)
-        val userNode = ConcreteNodeDefinition(user)
-        val votes = RelationDefinition(userNode, Votes, referenceDef)
-        disconnectNodesFor(votes, tx)
+      val referenceDef = nodeDefinition(param.startUuid, param.endUuid)
+      val userNode = ConcreteNodeDefinition(user)
+      val votesDef = RelationDefinition(userNode, Votes, referenceDef)
+      val query = s"match ${referenceDef.toQuery} optional match ${votesDef.toQuery(true, false)} set ${referenceDef.name}._locked = true return *"
+      val discourse = Discourse(tx.queryGraph(Query(query, votesDef.parameterMap)))
+      val reference = discourse.references.head
+      val votes = discourse.votes.headOption
+      votes.foreach(reference.voteCount -= _.weight)
+
+      if (weight == 0) {
+        // if there are any existing votes, disconnect them
+        votes.foreach(discourse.graph.relations -= _.rawItem)
       } else {
-        val reference = matchesNode(param.startUuid, param.endUuid)
-        val votes = Votes.merge(user, reference, weight = weight, onMatch = Set("weight"))
-        val failure = tx.persistChanges(reference, votes)
-        !failure.isDefined
+        // we want to vote on the change request with our weight. we merge the
+        // votes relation as we want to override any previous vote. merging is
+        // better than just updating the weight on an existing relation, as it
+        // guarantees uniqueness
+        reference.voteCount += weight
+        val newVotes = Votes.merge(user, reference, weight = weight, onMatch = Set("weight"))
+        discourse.add(newVotes)
       }
 
-      Left(if (success)
+      reference._locked = false
+      val failure = tx.persistChanges(discourse)
+      Left(if (failure.isEmpty) {
         Ok(JsObject(Seq(
           ("vote", JsObject(Seq(
             ("weight", JsNumber(weight))
           )))
         )))
-      else
+      } else {
         BadRequest("No vote :/")
-      )
+      })
     }
   }
 }
