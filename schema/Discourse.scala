@@ -116,13 +116,18 @@ object WustSchema {
   // @Relation class Reviewed(startNode: User, endNode: Action)
 
   //TODO: multidimesional voting?
-  @Node trait Votable extends UuidNode
+  @Node trait Votable extends UuidNode {
+    var _locked: Boolean = false
+  }
+
   @Relation class Votes(startNode: User, endNode: Votable) extends RelationTimestamp {
     val weight: Long // Up:+1 or Down:-1
   }
 
   // base class for connects and tags
-  @Node trait Reference extends Votable
+  @Node trait Reference extends Votable {
+    var voteCount: Long = 0
+  }
 
   // generic Tags (base for Tags, Scopes)
   @Node trait TagLike extends ExposedNode with Inheritable {

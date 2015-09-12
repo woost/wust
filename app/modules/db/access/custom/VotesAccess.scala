@@ -13,7 +13,7 @@ import renesca.schema._
 import renesca._
 import play.api.mvc.Results._
 
-trait VotesAccessBase[T <: ChangeRequest] extends EndRelationAccessDefault[User, Votes, Votable] {
+trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefault[User, Votes, Votable] {
   val sign: Long
   val nodeFactory = User
 
@@ -29,7 +29,7 @@ trait VotesAccessBase[T <: ChangeRequest] extends EndRelationAccessDefault[User,
       val requestDef = nodeDefinition(param.baseUuid)
       val userDef = ConcreteNodeDefinition(user)
       val votesDef = RelationDefinition(userDef, Votes, requestDef)
-      val discourse = Discourse(tx.queryGraph(Query(s"match ${requestDef.toQuery}-[:`${UpdatedToPost.relationType}`|`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->(post:`${Post.label}`) set ${requestDef.name}.__lock = true with post,${requestDef.name} optional match ${votesDef.toQuery(true, false)} return post,${requestDef.name}, ${votesDef.name}", votesDef.parameterMap)))
+      val discourse = Discourse(tx.queryGraph(Query(s"match ${requestDef.toQuery}-[:`${UpdatedToPost.relationType}`|`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->(post:`${Post.label}`) set ${requestDef.name}._locked = true with post,${requestDef.name} optional match ${votesDef.toQuery(true, false)} return post,${requestDef.name}, ${votesDef.name}", votesDef.parameterMap)))
       val request = selectNode(discourse)
       val votes = discourse.votes.headOption
       votes.foreach(request.approvalSum -= _.weight)
@@ -60,7 +60,7 @@ trait VotesAccessBase[T <: ChangeRequest] extends EndRelationAccessDefault[User,
       }
 
       Left(postApplies.map { node =>
-        request.rawItem.properties -= "__lock"
+        request._locked = false
         val failure = tx.persistChanges(discourse)
 
         failure.map(_ => BadRequest("No vote :/")).getOrElse {
@@ -83,7 +83,7 @@ trait VotesAccessBase[T <: ChangeRequest] extends EndRelationAccessDefault[User,
 //TODO: we need hyperrelation traits in magic in order to matches on the hyperrelation trait and get correct type: Relation+Node
 case class VotesUpdatedAccess(
   sign: Long
-  ) extends VotesAccessBase[Updated] {
+  ) extends VotesChangeRequestAccess[Updated] {
     override def nodeDefinition(uuid: String) = FactoryUuidNodeDefinition(Updated, uuid)
     override def selectNode(discourse: Discourse) = discourse.updateds.head
     override def applyChange(discourse: Discourse, request: Updated, post: Post, tx:QueryHandler) = {
@@ -105,7 +105,7 @@ case class VotesUpdatedAccess(
 
 case class VotesTagsChangeRequestAccess(
   sign: Long
-  ) extends VotesAccessBase[TagChangeRequest] {
+  ) extends VotesChangeRequestAccess[TagChangeRequest] {
     override def nodeDefinition(uuid: String) = FactoryUuidNodeDefinition(TagChangeRequest, uuid)
     override def selectNode(discourse: Discourse) = discourse.tagChangeRequests.head
     override def applyChange(discourse: Discourse, req: TagChangeRequest, post: Post, tx:QueryHandler) = req match {
@@ -126,23 +126,25 @@ case class VotesTagsChangeRequestAccess(
     }
 }
 
-case class VotesTagsAccess(sign: Long) extends EndRelationAccessDefault[User, Votes, Votable] {
+trait VotesReferenceAccess[T <: Reference] extends EndRelationAccessDefault[User, Votes, Votable] {
+  val sign: Long
   val nodeFactory = User
+
+  def matchesNode(startUuid: String, endUuid: String): T
+  def nodeDefinition(startUuid: String, endUuid: String): HyperNodeDefinitionBase[T]
 
   override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Votable with AbstractRelation[S,E], E]) = context.withUser { user =>
     db.transaction { tx =>
       val weight = sign // TODO: karma
       val success = if (weight == 0) {
-        val referenceDef = HyperNodeDefinition(FactoryUuidNodeDefinition(Scope, param.startUuid), Tags, FactoryUuidNodeDefinition(Post, param.endUuid))
+        val referenceDef = nodeDefinition(param.startUuid, param.endUuid)
         val userNode = ConcreteNodeDefinition(user)
         val votes = RelationDefinition(userNode, Votes, referenceDef)
         disconnectNodesFor(votes, tx)
       } else {
-        val tag = Scope.matchesOnUuid(param.startUuid)
-        val post = Post.matchesOnUuid(param.endUuid)
-        val tags = Tags.matches(tag, post)
-        val votes = Votes.merge(user, tags, weight = weight, onMatch = Set("weight"))
-        val failure = tx.persistChanges(tag, post, tags, votes)
+        val reference = matchesNode(param.startUuid, param.endUuid)
+        val votes = Votes.merge(user, reference, weight = weight, onMatch = Set("weight"))
+        val failure = tx.persistChanges(reference, votes)
         !failure.isDefined
       }
 
@@ -159,37 +161,24 @@ case class VotesTagsAccess(sign: Long) extends EndRelationAccessDefault[User, Vo
   }
 }
 
-case class VotesConnectsAccess(sign: Long) extends EndRelationAccessDefault[User, Votes, Votable] {
-  val nodeFactory = User
+case class VotesTagsAccess(sign: Long) extends VotesReferenceAccess[Tags] {
 
-  override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Votable with AbstractRelation[S,E], E]) = context.withUser { user =>
-    db.transaction { tx =>
-      val weight = sign // TODO: karma
-      val success = if (weight == 0) {
-        val referenceDef = HyperNodeDefinition(FactoryUuidNodeDefinition(Connectable, param.startUuid), Connects, FactoryUuidNodeDefinition(Connectable, param.endUuid))
-        val userNode = ConcreteNodeDefinition(user)
-        val votes = RelationDefinition(userNode, Votes, referenceDef)
-        disconnectNodesFor(votes, tx)
-      } else {
-        val tag = Connectable.matches(uuid = Some(param.startUuid), matches = Set("uuid"))
-        val connectable = Connectable.matches(uuid = Some(param.endUuid), matches = Set("uuid"))
-        val tags = Connects.matches(tag, connectable)
-        val votes = Votes.merge(user, tags, weight = weight, onMatch = Set("weight"))
-        val failure = tx.persistChanges(tag, connectable, tags, votes)
-        if (failure.isDefined)
-        println(failure.get)
-        !failure.isDefined
-      }
+  override def matchesNode(startUuid: String, endUuid: String): Tags = {
+    Tags.matches(Scope.matchesOnUuid(startUuid), Post.matchesOnUuid(endUuid))
+  }
 
-      Left(if (success)
-        Ok(JsObject(Seq(
-          ("vote", JsObject(Seq(
-            ("weight", JsNumber(weight))
-          )))
-        )))
-      else
-        BadRequest("No vote :/")
-      )
-    }
+  override def nodeDefinition(startUuid: String, endUuid: String): HyperNodeDefinitionBase[Tags] = {
+    HyperNodeDefinition(FactoryUuidNodeDefinition(Scope, startUuid), Tags, FactoryUuidNodeDefinition(Post, endUuid))
+  }
+}
+
+case class VotesConnectsAccess(sign: Long) extends VotesReferenceAccess[Connects] {
+
+  override def matchesNode(startUuid: String, endUuid: String): Connects = {
+    Connects.matches(Connectable.matchesOnUuid(startUuid), Connectable.matchesOnUuid(endUuid))
+  }
+
+  override def nodeDefinition(startUuid: String, endUuid: String): HyperNodeDefinitionBase[Connects] = {
+    HyperNodeDefinition(FactoryUuidNodeDefinition(Connectable, startUuid), Connects, FactoryUuidNodeDefinition(Connectable, endUuid))
   }
 }
