@@ -11,7 +11,7 @@ function ModalEditCtrl(DiscourseNode, Search, EditService,ModalEditService) {
 
     vm.save = save;
 
-    function save(callback) {
-        return vm.node.referenceNode ? ModalEditService.save(callback) : ModalEditService.save().$then(callback);
+    function save() {
+        return ModalEditService.save().$then(() => ModalEditService.hide());
     }
 }

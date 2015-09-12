@@ -24,11 +24,11 @@ function ModalEditService($rootScope, $modal, EditService, $state, ContextServic
         }
     });
 
-    function save(connectCallback) {
+    function save() {
         if (currentNode === undefined)
             return;
 
-        let promise = currentNode.save(connectCallback);
+        let promise = currentNode.save();
         if (currentNode.referenceNode === undefined)
             promise.$then(() => $state.go("focus", _.pick(currentNode, "id")));
 

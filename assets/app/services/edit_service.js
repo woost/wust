@@ -73,7 +73,7 @@ function EditService(Post, Connectable, HistoryService, store, DiscourseNode, Ze
             return dirtyModel;
         }
 
-        save(connectCallback = _.noop) {
+        save() {
             let dirtyModel = this.dirtyModel(true);
             this.setValidityProperties(dirtyModel);
             if (!this.canSave)
@@ -88,7 +88,7 @@ function EditService(Post, Connectable, HistoryService, store, DiscourseNode, Ze
             let referenceNode = this.referenceNode;
             let promise;
             if (referenceNode) {
-                promise = connectNodes(this.encode(), referenceNode, dirtyModel).$then(connectCallback);
+                promise = connectNodes(this.encode(), referenceNode, dirtyModel);
             } else {
                 promise = this.service.$buildRaw(model).$update(dirtyModel);
             }
@@ -248,7 +248,6 @@ function EditService(Post, Connectable, HistoryService, store, DiscourseNode, Ze
         }
 
         promise.$then(response => {
-            humane.success("Connected node");
             // add the infos we got from the node parameter
             let startResponse = _.find(response.graph.nodes, _.pick(startNode, "id"));
             _.assign(startResponse, startNode);
