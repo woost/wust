@@ -8,14 +8,14 @@ import modules.requests.dsl._
 
 //TODO: should connectable and post share the same api? if so, rename to connectable
 object Connectables extends Nodes[Connectable] {
-  val node = NodeDef(ConnectableAccess.apply + TaggedTaggable.apply[Connectable],
-    "connects-from" -> (N < Connects < (EndConRelationAccess(Connects, Connectable) + ConnectableAccess.apply + TaggedTaggable.apply[Connectable],
-      "connects-to" -> (N > StartConRelationAccess(Connects, Connectable) + ConnectableAccess.apply + TaggedTaggable.apply[Connectable]),
-      "connects-from" -> (N < EndConRelationAccess(Connects, Connectable) + ConnectableAccess.apply + TaggedTaggable.apply[Connectable])
+  val node = NodeDef(ConnectableAccess.apply,
+    "connects-from" -> (N < Connects < (EndConRelationAccess(Connects, Connectable) + ConnectableAccess.apply,
+      "connects-to" -> (N > StartConRelationAccess(Connects, Connectable) + ConnectableAccess.apply),
+      "connects-from" -> (N < EndConRelationAccess(Connects, Connectable) + ConnectableAccess.apply)
     )),
-    "connects-to" -> (N > Connects > (StartConRelationAccess(Connects, Connectable) + ConnectableAccess.apply + TaggedTaggable.apply[Connectable],
-      "connects-to" -> (N > StartConRelationAccess(Connects, Connectable) + ConnectableAccess.apply + TaggedTaggable.apply[Connectable]),
-      "connects-from" -> (N < EndConRelationAccess(Connects, Connectable) + ConnectableAccess.apply + TaggedTaggable.apply[Connectable]),
+    "connects-to" -> (N > Connects > (StartConRelationAccess(Connects, Connectable) + ConnectableAccess.apply,
+      "connects-to" -> (N > StartConRelationAccess(Connects, Connectable) + ConnectableAccess.apply),
+      "connects-from" -> (N < EndConRelationAccess(Connects, Connectable) + ConnectableAccess.apply),
       "up" -> (N < VotesConnectsAccess(1)),
       "neutral" -> (N < VotesConnectsAccess(0))
     ))
@@ -23,7 +23,7 @@ object Connectables extends Nodes[Connectable] {
 }
 
 object ConnectsCtrl extends Nodes[Connects] {
-  val node = NodeDef(NodeRead(Connects) + ClassifiedConnects.apply[Connects],
+  val node = NodeDef(NodeRead(Connects),
     "classified" -> (N < EndConRelationAccess(Classifies, Classification))
   )
 }
