@@ -3,7 +3,10 @@
     <div ng-switch-default>
         <button class="fa fa-pencil pull-right btn btn-sm btn-default" ng-click="vm.editMode = true" data-title="edit" bs-tooltip animation=""></button>
         <h2 ng-bind="vm.node.title" class="post_title"></h2>
-        <div class="timestamp"><span show-timestamp node="vm.node"></span></div>
+        <div class="additional_info">
+            <span show-timestamp node="vm.node"></span>
+            <span class="pull-right">{{vm.node.viewCount}} views</span>
+        </div>
 
         <div class="votemenu" ng-if="vm.nodeHasContext()">
             <div class="buttonpair">
