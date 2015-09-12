@@ -58,6 +58,16 @@ class TaggedTaggable[NODE <: UuidNode] extends AccessNodeDecoratorControl[NODE] 
       return *
       """
       val params = nodeDef.parameterMap ++ tagDef.parameterMap ++ tagsDef.parameterMap ++ Map("nodeUuids" -> response.map(_.uuid).toSeq)
+
+      val discourse = Discourse(response.head.graph merge db.queryGraph(Query(query, params.toMap)))
+
+      discourse.add(response.toSeq: _*)
+    }
+
+    response
+  }
+}
+
 class ClassifiedConnects[NODE <: UuidNode] extends AccessNodeDecoratorControl[NODE] with AccessNodeDecoratorControlDefault[NODE] {
   override def shapeResponse(response: NODE) = {
     shapeResponse(List(response)).head
