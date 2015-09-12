@@ -12,6 +12,7 @@ import renesca.parameter.implicits._
 import renesca.schema._
 import renesca._
 import play.api.mvc.Results._
+import moderation.Moderation
 
 trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefault[User, Votes, Votable] {
   val sign: Long
@@ -131,8 +132,9 @@ trait VotesReferenceAccess[T <: Reference] extends EndRelationAccessDefault[User
   val sign: Long
   val nodeFactory = User
 
-  def matchesNode(startUuid: String, endUuid: String): T
   def nodeDefinition(startUuid: String, endUuid: String): HyperNodeDefinitionBase[T]
+  def selectPost(node: T): Post
+  def selectNode(discourse: Discourse, startUuid: String, endUuid: String): T
 
   override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Votable with AbstractRelation[S,E], E]) = context.withUser { user =>
     db.transaction { tx =>
@@ -142,19 +144,22 @@ trait VotesReferenceAccess[T <: Reference] extends EndRelationAccessDefault[User
       val votesDef = RelationDefinition(userNode, Votes, referenceDef)
       val query = s"match ${referenceDef.toQuery} set ${referenceDef.name}._locked = true with ${referenceDef.name} optional match ${votesDef.toQuery(true, false)} return *"
       val discourse = Discourse(tx.queryGraph(Query(query, votesDef.parameterMap)))
-      val reference = discourse.references.head
+      val reference = selectNode(discourse, param.startUuid, param.endUuid)
       val votes = discourse.votes.headOption
       votes.foreach(reference.voteCount -= _.weight)
 
-      if (weight == 0) {
+      val success = if (weight == 0) {
         // if there are any existing votes, disconnect them
         votes.foreach(discourse.graph.relations -= _.rawItem)
+        true
       } else {
         // we want to vote on the change request with our weight. we merge the
         // votes relation as we want to override any previous vote. merging is
         // better than just updating the weight on an existing relation, as it
         // guarantees uniqueness
         reference.voteCount += weight
+        val post = selectPost(reference)
+        reference.quality = Moderation.postQuality(reference.voteCount, post.viewCount - reference.voteCount)
         val newVotes = Votes.merge(user, reference, weight = weight, onMatch = Set("weight"))
         discourse.add(newVotes)
       }
@@ -176,9 +181,8 @@ trait VotesReferenceAccess[T <: Reference] extends EndRelationAccessDefault[User
 
 case class VotesTagsAccess(sign: Long) extends VotesReferenceAccess[Tags] {
 
-  override def matchesNode(startUuid: String, endUuid: String): Tags = {
-    Tags.matches(Scope.matchesOnUuid(startUuid), Post.matchesOnUuid(endUuid))
-  }
+  override def selectNode(discourse: Discourse, startUuid: String, endUuid: String) = discourse.tags.find(t => t.startNodeOpt.map(_.uuid == startUuid).getOrElse(false) && t.endNodeOpt.map(_.uuid == endUuid).getOrElse(false)).get
+  override def selectPost(node: Tags) = node.endNodeOpt.get
 
   override def nodeDefinition(startUuid: String, endUuid: String): HyperNodeDefinitionBase[Tags] = {
     HyperNodeDefinition(FactoryUuidNodeDefinition(Scope, startUuid), Tags, FactoryUuidNodeDefinition(Post, endUuid))
@@ -187,8 +191,10 @@ case class VotesTagsAccess(sign: Long) extends VotesReferenceAccess[Tags] {
 
 case class VotesConnectsAccess(sign: Long) extends VotesReferenceAccess[Connects] {
 
-  override def matchesNode(startUuid: String, endUuid: String): Connects = {
-    Connects.matches(Connectable.matchesOnUuid(startUuid), Connectable.matchesOnUuid(endUuid))
+  override def selectNode(discourse: Discourse, startUuid: String, endUuid: String) = discourse.connects.find(c => c.startNodeOpt.map(_.uuid == startUuid).getOrElse(false) && c.endNodeOpt.map(_.uuid == endUuid).getOrElse(false)).get
+  override def selectPost(node: Connects) = node.endNodeOpt match {
+    case Some(post: Post) => post
+    case Some(connects: Connects) => connects.startNodeOpt.get.asInstanceOf[Post]
   }
 
   override def nodeDefinition(startUuid: String, endUuid: String): HyperNodeDefinitionBase[Connects] = {

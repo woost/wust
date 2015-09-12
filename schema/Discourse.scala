@@ -4,6 +4,7 @@ import com.mohiva.play.silhouette.api.Identity
 import renesca.parameter.LongPropertyValue
 import renesca.schema.macros
 import renesca.Transaction
+import moderation.Moderation
 
 @macros.GraphSchema
 object WustSchema {
@@ -130,6 +131,7 @@ object WustSchema {
   // base class for connects and tags
   @Node trait Reference extends Votable {
     var voteCount: Long = 0
+    var quality: Double = Moderation.votes_p // between 0 and 1
   }
 
   // generic Tags (base for Tags, Scopes)

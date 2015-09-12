@@ -28,7 +28,11 @@ object ApiNodeFormat {
     }
 
     implicit def tagsWrites = new Writes[Tags] {
-      def writes(cat: Tags) = cat.startNodeOpt.map(tagWrites.writes(_)).getOrElse(JsNull)
+      def writes(cat: Tags) = cat.startNodeOpt.map(tag => JsObject(
+        tagLikeToSeq(tag) ++ Seq(
+          ("quality", JsNumber(cat.quality))
+        )
+      )).getOrElse(JsNull)
     }
 
     //TODO: this should be multiple formats...code dup
@@ -48,7 +52,7 @@ object ApiNodeFormat {
         ("id", JsString(n.uuid)),
         ("startId", n.startNodeOpt.map(s => JsString(s.uuid)).getOrElse(JsNull)),
         ("endId", n.endNodeOpt.map(e => JsString(e.uuid)).getOrElse(JsNull)),
-        ("voteCount", JsNumber(n.voteCount)),
+        ("quality", JsNumber(n.quality)),
         ("tags", Json.toJson(n.rev_classifies.map(tagWrites.writes))) // TODO: why do we have to call tagsWrites.writes explicitly?
       )
       case n: TagLike => tagLikeToSeq(n) ++ (n match { //TODO: traits should have accessors for relations in magic
