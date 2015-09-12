@@ -90,8 +90,8 @@ sealed trait NodeDelegates extends NodeLike {
 }
 
 trait NodeBase extends NodeDelegates {
-  @JSExport
-  def classifications = outRelations.collect { case hr: HyperRelation => hr }.toList.sortBy(_.voteCount).flatMap(_.tags)
+  def classifications = successors.collect { case hr: HyperRelation => hr }.toList.sortBy(_.voteCount).flatMap(_.tags)
+  @JSExport("classifications") def classificationsJs = classifications.toJSArray
 
   var inRelations: Set[RelationLike] = Set.empty
   var outRelations: Set[RelationLike] = Set.empty
