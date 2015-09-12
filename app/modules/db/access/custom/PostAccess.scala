@@ -264,7 +264,7 @@ case class ConnectableAccess() extends NodeReadBase[Connectable] {
 
 case class ConnectsAccess() extends ConnectableAccessBase with NodeReadBase[Connects] {
   val factory = Connects
-  val tagTaggable = TaggedTaggable.apply[Connects]
+  val classifiedConnects = ClassifiedConnects.apply[Connects]
 
   // updates only work
   override def update(context: RequestContext, uuid: String) = context.withUser { user =>
@@ -279,7 +279,7 @@ case class ConnectsAccess() extends ConnectableAccessBase with NodeReadBase[Conn
 
         tx.persistChanges(discourse) match {
           case Some(err) => Left(BadRequest(s"Cannot update Connects with uuid '$uuid': $err'"))
-          case _         => Right(tagTaggable.shapeResponse(discourse.connects.find(_.uuid == node.uuid).get))
+          case _         => Right(classifiedConnects.shapeResponse(discourse.connects.find(_.uuid == node.uuid).get))
         }
       }
     }

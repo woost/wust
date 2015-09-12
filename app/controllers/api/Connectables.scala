@@ -23,7 +23,7 @@ object Connectables extends Nodes[Connectable] {
 }
 
 object ConnectsCtrl extends Nodes[Connects] {
-  val node = NodeDef(NodeRead(Connects),
+  val node = NodeDef(NodeRead(Connects) + ClassifiedConnects.apply[Connects],
     "classified" -> (N < EndConRelationAccess(Classifies, Classification))
   )
 }

@@ -58,6 +58,24 @@ class TaggedTaggable[NODE <: UuidNode] extends AccessNodeDecoratorControl[NODE] 
       return *
       """
       val params = nodeDef.parameterMap ++ tagDef.parameterMap ++ tagsDef.parameterMap ++ Map("nodeUuids" -> response.map(_.uuid).toSeq)
+class ClassifiedConnects[NODE <: UuidNode] extends AccessNodeDecoratorControl[NODE] with AccessNodeDecoratorControlDefault[NODE] {
+  override def shapeResponse(response: NODE) = {
+    shapeResponse(List(response)).head
+  }
+
+  override def shapeResponse(response: Iterable[NODE]) = {
+    //TODO: share code with component query
+    if (!response.isEmpty) {
+      val classDef = ConcreteFactoryNodeDefinition(Classification)
+      val nodeDef = ConcreteFactoryNodeDefinition(Connects)
+      val relDef = RelationDefinition(classDef, Classifies, nodeDef)
+
+      val query = s"""
+      match ${relDef.toQuery}
+      where ${nodeDef.name}.uuid in {nodeUuids}
+      return *
+      """
+      val params = nodeDef.parameterMap ++ classDef.parameterMap ++ Map("nodeUuids" -> response.map(_.uuid).toSeq)
 
       val discourse = Discourse(response.head.graph merge db.queryGraph(Query(query, params.toMap)))
 
@@ -70,4 +88,8 @@ class TaggedTaggable[NODE <: UuidNode] extends AccessNodeDecoratorControl[NODE] 
 
 object TaggedTaggable {
   def apply[NODE <: UuidNode] = new TaggedTaggable[NODE]
+}
+
+object ClassifiedConnects {
+  def apply[NODE <: UuidNode] = new ClassifiedConnects[NODE]
 }
