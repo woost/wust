@@ -15,7 +15,7 @@ import play.api.mvc.Results._
 import model.Helpers.tagTitleColor
 
 trait ConnectableAccessBase {
-  private def tagConnectRequestToTag(tag: TagConnectRequest) = {
+  private def tagConnectRequestToScope(tag: TagConnectRequest) = {
       if (tag.id.isDefined)
         Some(Scope.matchesOnUuid(tag.id.get))
       else if (tag.title.isDefined)
@@ -27,9 +27,28 @@ trait ConnectableAccessBase {
         None
   }
 
-  protected def addTagsToGraph(discourse: Discourse, request: AddTagRequestBase, node: Post) {
-    request.addedTags.flatMap(tagConnectRequestToTag(_)).foreach { tag =>
+  private def tagConnectRequestToClassification(tag: TagConnectRequest) = {
+      if (tag.id.isDefined)
+        Some(Classification.matchesOnUuid(tag.id.get))
+      else if (tag.title.isDefined)
+        Some(Classification.merge(
+          title = tag.title.get,
+          color = tagTitleColor(tag.title.get),
+          merge = Set("title")))
+      else
+        None
+  }
+
+  protected def addScopesToGraph(discourse: Discourse, request: AddTagRequestBase, node: Post) {
+    request.addedTags.flatMap(tagConnectRequestToScope(_)).foreach { tag =>
       val tags = Tags.merge(tag, node)
+      discourse.add(tags)
+    }
+  }
+
+  protected def addClassifcationsToGraph(discourse: Discourse, request: AddTagRequestBase, node: Connects) {
+    request.addedTags.flatMap(tagConnectRequestToClassification(_)).foreach { tag =>
+      val tags = Classifies.merge(tag, node)
       discourse.add(tags)
     }
   }
@@ -62,7 +81,7 @@ trait ConnectableAccessBase {
       }
 
       if (!alreadyExisting) {
-        tagConnectRequestToTag(tagReq).map { tag =>
+        tagConnectRequestToScope(tagReq).map { tag =>
           val addTags = AddTags.create(user, post, applyThreshold = threshold, approvalSum = weight)
           discourse.add(ProposesTag.create(addTags, tag))
           addTags
@@ -87,7 +106,7 @@ trait ConnectableAccessBase {
   }
 
   //TODO: this is two extra requests...
-  protected def deleteTagsFromGraph(tx:QueryHandler, request: RemoveTagRequestBase, uuid: String) {
+  protected def deleteScopesFromGraph(tx:QueryHandler, request: RemoveTagRequestBase, uuid: String) {
     if (request.removedTags.isEmpty)
       return
 
@@ -105,6 +124,28 @@ trait ConnectableAccessBase {
     //TODO: persisting might fail if there is a concurrent request, as matches nodes will fail when they cannot be resolved
     tx.persistChanges(discourse)
     discourse.remove(discourse.tags: _*)
+    tx.persistChanges(discourse)
+  }
+
+//TODO: this is two extra requests...
+  protected def deleteClassificationsFromGraph(tx:QueryHandler, request: RemoveTagRequestBase, uuid: String) {
+    if (request.removedTags.isEmpty)
+      return
+
+    val node = Connects.matchesOnUuid(uuid)
+    val discourse = Discourse(node)
+
+    request.removedTags.foreach { tagUuid =>
+      val tag = Classification.matchesOnUuid(tagUuid)
+      discourse.add(tag)
+      val tagging = Classifies.matches(tag, node)
+      discourse.add(tagging)
+    }
+
+    //TODO: we need to resolve matches here, otherwise deletion of local nodes does not work
+    //TODO: persisting might fail if there is a concurrent request, as matches nodes will fail when they cannot be resolved
+    tx.persistChanges(discourse)
+    discourse.remove(discourse.classifies: _*)
     tx.persistChanges(discourse)
   }
 }
@@ -148,92 +189,97 @@ case class PostAccess() extends ConnectableAccessBase with NodeDeleteBase[Post] 
     }
   }
 
-  override def create(context: RequestContext) = {
-    context.withUser { user =>
-      context.withJson { (request: PostAddRequest) =>
-        val discourse = Discourse.empty
+  override def create(context: RequestContext) = context.withUser { user =>
+    context.withJson { (request: PostAddRequest) =>
+      val discourse = Discourse.empty
 
-        val node = Post.create(title = request.title, description = request.description)
-        val contribution = SchemaCreated.create(user, node)
-        discourse.add(node, contribution)
+      val node = Post.create(title = request.title, description = request.description)
+      val contribution = SchemaCreated.create(user, node)
+      discourse.add(node, contribution)
 
-        addTagsToGraph(discourse, request, node)
+      addScopesToGraph(discourse, request, node)
 
-        db.transaction(_.persistChanges(discourse)) match {
-          case Some(err) => Left(BadRequest(s"Cannot create Post: $err'"))
-          case _         => Right(node)
-        }
+      db.transaction(_.persistChanges(discourse)) match {
+        case Some(err) => Left(BadRequest(s"Cannot create Post: $err'"))
+        case _         => Right(node)
       }
     }
   }
 
-  override def update(context: RequestContext, uuid: String) = {
-    context.withUser { user =>
-      context.withJson { (request: PostUpdateRequest) =>
-        db.transaction { tx =>
-          val discourse = Discourse.empty
+  override def update(context: RequestContext, uuid: String) = context.withUser { user =>
+    context.withJson { (request: PostUpdateRequest) =>
+      db.transaction { tx =>
+        val discourse = Discourse.empty
 
-          val approvalSum = 1 // TODO: karma
-          val applyThreshold = 5 // TODO: correct edit threshold
-          if (approvalSum >= applyThreshold)
-            throw new Exception("Instant edits are not implemented yet!")
+        val approvalSum = 1 // TODO: karma
+        val applyThreshold = 5 // TODO: correct edit threshold
+        if (approvalSum >= applyThreshold)
+          throw new Exception("Instant edits are not implemented yet!")
 
-          //TODO: check for edit threshold and implement instant edit
-          val node = if (request.title.isDefined || request.description.isDefined) {
-            val node = Post.matchesOnUuid(uuid)
-            //need to persist node in order to access title/description
-            tx.persistChanges(node)
+        //TODO: check for edit threshold and implement instant edit
+        val node = if (request.title.isDefined || request.description.isDefined) {
+          val node = Post.matchesOnUuid(uuid)
+          //need to persist node in order to access title/description
+          tx.persistChanges(node)
 
-            discourse.add(node)
-
-            //TODO: correct threshold and votes for apply
-            val contribution = Updated.create(user, node, oldTitle = node.title, newTitle = request.title.getOrElse(node.title), oldDescription = node.description, newDescription = request.description.orElse(node.description), applyThreshold = applyThreshold, approvalSum = approvalSum)
-            val votes = Votes.create(user, contribution, weight = approvalSum)
-            discourse.add(contribution, votes)
-            node
-          } else {
-            Post.matchesOnUuid(uuid)
-          }
-
-          addRequestTagsToGraph(discourse, user, node, request, approvalSum, applyThreshold)
           discourse.add(node)
 
-          tx.persistChanges(discourse) match {
-            case Some(err) => Left(BadRequest(s"Cannot update Post with uuid '$uuid': $err'"))
-            //FIXME: why the fuck do i need to do this???
-            //otherwise node.rev_tags is empty? something is messed up here.
-            case _         => Right(tagTaggable.shapeResponse(discourse.posts.find(_.uuid == node.uuid).get))
-            // case _         => Right(node)
-          }
+          //TODO: correct threshold and votes for apply
+          val contribution = Updated.create(user, node, oldTitle = node.title, newTitle = request.title.getOrElse(node.title), oldDescription = node.description, newDescription = request.description.orElse(node.description), applyThreshold = applyThreshold, approvalSum = approvalSum)
+          val votes = Votes.create(user, contribution, weight = approvalSum)
+          discourse.add(contribution, votes)
+          node
+        } else {
+          Post.matchesOnUuid(uuid)
+        }
+
+        addRequestTagsToGraph(discourse, user, node, request, approvalSum, applyThreshold)
+        discourse.add(node)
+
+        tx.persistChanges(discourse) match {
+          case Some(err) => Left(BadRequest(s"Cannot update Post with uuid '$uuid': $err'"))
+          //FIXME: why the fuck do i need to do this???
+          //otherwise node.rev_tags is empty? something is messed up here.
+          case _         => Right(tagTaggable.shapeResponse(discourse.posts.find(_.uuid == node.uuid).get))
+          // case _         => Right(node)
         }
       }
     }
   }
 }
 
-case class ConnectableAccess() extends ConnectableAccessBase with NodeReadBase[Connectable] {
-  val postAccess = PostAccess()
+case class ConnectableAccess() extends NodeReadBase[Connectable] {
   val factory = Connectable
-  val tagTaggable = TaggedTaggable.apply[Connectable]
+  val postAccess = PostAccess()
+  val connectsAccess = ConnectsAccess()
 
   // we redirect the create action the PostAccess. It is not possible to create
   // connectables withou any context and usually you want to handle connects
   // and posts in one api, so usally creating a post is what you want
   override def create(context: RequestContext) = postAccess.create(context)
 
-  override def update(context: RequestContext, uuid: String) = {
-    context.withUser { user =>
-      context.withJson { (request: ConnectableUpdateRequest) =>
-        db.transaction { tx =>
-          //TODO add/remove classifications
-          val discourse = Discourse.empty
-          val node = Connectable.matchesOnUuid(uuid)
-          discourse.add(node)
+  // TODO: add parameter to set which access should be used for update
+  override def update(context: RequestContext, uuid: String) = connectsAccess.update(context, uuid)
+}
 
-          tx.persistChanges(discourse) match {
-            case Some(err) => Left(BadRequest(s"Cannot update Post with uuid '$uuid': $err'"))
-            case _         => Right(tagTaggable.shapeResponse(discourse.connectables.find(_.uuid == node.uuid).get))
-          }
+case class ConnectsAccess() extends ConnectableAccessBase with NodeReadBase[Connects] {
+  val factory = Connects
+  val tagTaggable = TaggedTaggable.apply[Connects]
+
+  // updates only work
+  override def update(context: RequestContext, uuid: String) = context.withUser { user =>
+    context.withJson { (request: ConnectableUpdateRequest) =>
+      db.transaction { tx =>
+        deleteClassificationsFromGraph(tx, request, uuid)
+
+        val discourse = Discourse.empty
+        val node = Connects.matchesOnUuid(uuid)
+        discourse.add(node)
+        addClassifcationsToGraph(discourse, request, node)
+
+        tx.persistChanges(discourse) match {
+          case Some(err) => Left(BadRequest(s"Cannot update Connects with uuid '$uuid': $err'"))
+          case _         => Right(tagTaggable.shapeResponse(discourse.connects.find(_.uuid == node.uuid).get))
         }
       }
     }

@@ -11,13 +11,7 @@ function ModalEditCtrl(DiscourseNode, Search, EditService,ModalEditService) {
 
     vm.save = save;
 
-    function save() {
-        let ref = vm.node.referenceNode;
-        return ModalEditService.save(response => {
-            //TODO: get created relation
-            let createdRel = _.find(response.graph.nodes, n => n.isHyperRelation && n.startId === vm.node.id && n.endId === ref.id);
-            let edited = EditService.createSession(createdRel);
-            edited.save();
-        });
+    function save(callback) {
+        return vm.node.referenceNode ? ModalEditService.save(callback) : ModalEditService.save().$then(callback);
     }
 }

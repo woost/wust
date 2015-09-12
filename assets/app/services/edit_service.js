@@ -82,7 +82,8 @@ function EditService(Post, Connectable, HistoryService, store, DiscourseNode, Ze
             let message = model.id === undefined ? "Added new node" : "Updated now";
 
             let referenceNode = this.referenceNode;
-            return this.service.$buildRaw(model).$update(dirtyModel).$then(data => {
+            let promise = this.service.$buildRaw(model).$update(dirtyModel);
+            promise.$then(data => {
                 humane.success(message);
 
                 this.apply(data);
@@ -98,6 +99,8 @@ function EditService(Post, Connectable, HistoryService, store, DiscourseNode, Ze
                 humane.error(response.$response.data);
                 this.setValidityProperties();
             });
+
+            return promise;
         }
 
         discard() {

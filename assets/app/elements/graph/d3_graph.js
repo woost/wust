@@ -1003,7 +1003,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
                 this.graph.removeNode(d.id);
                 this.graph.commit();
                 this.force.stop();
-            }, humane.error(response.$response.data));
+            }, response => humane.error(response.$response.data));
         }
 
         removeNode(d) {
@@ -1013,7 +1013,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
                 this.graph.removeNode(d.id);
                 this.graph.commit();
                 this.force.stop();
-            }, humane.error(response.$response.data));
+            }, response => humane.error(response.$response.data));
         }
 
         replyToNode(existingNode) {
