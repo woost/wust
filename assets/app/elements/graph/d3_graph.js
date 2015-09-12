@@ -415,11 +415,11 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
             this.d3Node
                 // dragging will trigger onClick on a node,
                 // so register your action in onDragMoveEnd
-                .on("mouseover", d => scope.$apply(() => {
+                .on("mouseenter", d => scope.$apply(() => {
                     this.setNodeOffset(d);
                     this.hoveredNode = d;
                 }))
-                .on("mouseout", d => {
+                .on("mouseleave", d => {
                     scope.$apply(() => this.hoveredNode = undefined);
                     this.elementInfo.d3NodeContainer(d).classed({
                         "selected": false
