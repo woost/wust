@@ -64,6 +64,10 @@ sealed trait NodeDelegates extends NodeLike {
   @JSExport
   val isHyperRelation = rawNode.isHyperRelation
   @JSExport
+  val voteCount = rawNode.voteCount
+  @JSExport
+  val viewCount = rawNode.viewCount
+  @JSExport
   val timestamp = rawNode.timestamp
   @JSExport
   def title = rawNode.title
@@ -86,6 +90,9 @@ sealed trait NodeDelegates extends NodeLike {
 }
 
 trait NodeBase extends NodeDelegates {
+  @JSExport
+  def classifications = outRelations.collect { case hr: HyperRelation => hr }.toList.sortBy(_.voteCount).flatMap(_.tags)
+
   var inRelations: Set[RelationLike] = Set.empty
   var outRelations: Set[RelationLike] = Set.empty
   def relations = inRelations ++ outRelations
@@ -370,8 +377,8 @@ class Graph(private[js] val rawGraph: RawGraph) extends WrappedGraph[Relation] {
 @JSExport
 @JSExportAll
 //TODO: maybe give a concrete type for tags
-class RawNode(val id: String, var title: String, var description: Option[String], val isHyperRelation: Boolean, val startId: Option[String], val endId: Option[String], var tags: js.Array[js.Object], val timestamp: js.Any) {
-  def this(n: RecordNode) = this(n.id, n.title.getOrElse(""), n.description.toOption, n.isHyperRelation.getOrElse(false), n.startId.toOption, n.endId.toOption, n.tags, n.timestamp.getOrElse(0))
+class RawNode(val id: String, var title: String, var description: Option[String], val isHyperRelation: Boolean, val voteCount: Int, val viewCount: Int, val startId: Option[String], val endId: Option[String], var tags: js.Array[js.Object], val timestamp: js.Any) {
+  def this(n: RecordNode) = this(n.id, n.title.getOrElse(""), n.description.toOption, n.isHyperRelation.getOrElse(false), n.voteCount.getOrElse(-1), n.viewCount.getOrElse(-1), n.startId.toOption, n.endId.toOption, n.tags, n.timestamp.getOrElse(0))
   override def toString = s"RawNode($id)"
 
   def canEqual(other: Any): Boolean = other.isInstanceOf[RawNode]
@@ -506,6 +513,8 @@ trait RecordNode extends js.Object {
   def description: js.UndefOr[String] = js.native
 
   def isHyperRelation: js.UndefOr[Boolean] = js.native
+  def voteCount: js.UndefOr[Int] = js.native
+  def viewCount: js.UndefOr[Int] = js.native
   def startId: js.UndefOr[String] = js.native
   def endId: js.UndefOr[String] = js.native
 

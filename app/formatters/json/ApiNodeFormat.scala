@@ -41,12 +41,14 @@ object ApiNodeFormat {
         ("tags", Json.toJson(n.inRelationsAs(Tags).map(tagsWrites.writes))), // TODO: why do we have to call tagsWrites.writes explicitly?
         ("timestamp", Json.toJson(JsNumber(n.timestamp))),
         ("requestsEdit", Json.toJson(n.inRelationsAs(Updated))), //TODO: accessors for subrelations of hyperrelations, to get connected hypernode
-        ("requestsTags", Json.toJson(n.inRelationsAs(AddTags) ++ n.inRelationsAs(RemoveTags)))
+        ("requestsTags", Json.toJson(n.inRelationsAs(AddTags) ++ n.inRelationsAs(RemoveTags))),
+        ("viewCount", JsNumber(n.viewCount))
       )
       case n: Connects => Seq(
         ("id", JsString(n.uuid)),
         ("startId", n.startNodeOpt.map(s => JsString(s.uuid)).getOrElse(JsNull)),
         ("endId", n.endNodeOpt.map(e => JsString(e.uuid)).getOrElse(JsNull)),
+        ("voteCount", JsNumber(n.voteCount)),
         ("tags", Json.toJson(n.rev_classifies.map(tagWrites.writes))) // TODO: why do we have to call tagsWrites.writes explicitly?
       )
       case n: TagLike => tagLikeToSeq(n) ++ (n match { //TODO: traits should have accessors for relations in magic

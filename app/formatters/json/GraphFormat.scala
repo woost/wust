@@ -60,7 +60,7 @@ object GraphFormat {
         ("description", JsString(post.description.getOrElse(""))),
         ("tags", Json.toJson(post.inRelationsAs(Tags))),
         ("timestamp", Json.toJson(JsNumber(post.timestamp))),
-        ("viewcount", post.rawItem.properties.get("viewcount").map(x => JsNumber(x.asLong)).getOrElse(JsNumber(0)))
+        ("viewcount", JsNumber(post.viewCount))
       )
       case connects: Connects =>
         Seq(
@@ -69,7 +69,7 @@ object GraphFormat {
           ("startId", JsString(connects.startNodeOpt.map(_.uuid).getOrElse(""))),
           ("endId", JsString(connects.endNodeOpt.map(_.uuid).getOrElse(""))),
           ("tags", Json.toJson(connects.neighboursAs(Classification).map(tagWrites.writes))),
-          ("votes", connects.rawItem.properties.get("answervotecount").map(x => JsNumber(x.asLong)).getOrElse(JsNumber(0))),
+          ("voteCount", JsNumber(connects.voteCount)),
           ("selfvoted", connects.rawItem.properties.get("selfanswervotecount").map(x => JsNumber(x.asLong)).getOrElse(JsNumber(0)))
         )
       case _                  => Seq.empty

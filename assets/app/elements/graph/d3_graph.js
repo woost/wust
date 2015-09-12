@@ -223,10 +223,10 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
                 .attr("class", d => d.isHyperRelation ? "hyperrelation" : "small_post_directive")
                 .style("background-color", n => {
                     if(n.isHyperRelation) return undefined;
-                    let firstConnects = _.filter(n.successors, n => n.isHyperRelation)[0];
-                    if(firstConnects && firstConnects.tags.length > 0) {
-                        return Helpers.postBackgroundColor(firstConnects.tags[0]);
-                    } else if(n.tags.length)
+
+                    if(n.classifications.length > 0) {
+                        return Helpers.postBackgroundColor(n.classifications[0]);
+                    } else if(n.tags.length > 0)
                         return Helpers.postBackgroundColor(n.tags[0]);
                     else
                         return undefined;
