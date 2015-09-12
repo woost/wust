@@ -162,12 +162,12 @@ END <: UuidNode
 ] extends StartRelationAccessDefault[START,RELATION,END] {
   val factory: AbstractRelationFactory[START,RELATION,END]
 
-  override def delete(context: RequestContext, param: ConnectParameter[START], uuid: String) = {
+  override def delete(context: RequestContext, param: ConnectParameter[START], uuid: String) = context.withUser {
     val relationDefinition = RelationDefinition(toBaseNodeDefinition(param), factory, toNodeDefinition(uuid))
     Right(disconnectNodes(relationDefinition))
   }
 
-  override def delete[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,START with AbstractRelation[S,E],E], uuid: String) = {
+  override def delete[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,START with AbstractRelation[S,E],E], uuid: String) = context.withUser {
     val relationDefinition = RelationDefinition(toBaseNodeDefinition(param), factory, toNodeDefinition(uuid))
     Right(disconnectNodes(relationDefinition))
   }
@@ -180,12 +180,12 @@ END <: UuidNode
 ] extends EndRelationAccessDefault[START,RELATION,END] {
   val factory: AbstractRelationFactory[START,RELATION,END]
 
-  override def delete(context: RequestContext, param: ConnectParameter[END], uuid: String) = {
+  override def delete(context: RequestContext, param: ConnectParameter[END], uuid: String) = context.withUser {
     val relationDefinition = RelationDefinition(toNodeDefinition(uuid), factory, toBaseNodeDefinition(param))
     Right(disconnectNodes(relationDefinition))
   }
 
-  override def delete[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,END with AbstractRelation[S,E],E], uuid: String) = {
+  override def delete[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,END with AbstractRelation[S,E],E], uuid: String) = context.withUser {
     val relationDefinition = RelationDefinition(toNodeDefinition(uuid), factory, toHyperBaseNodeDefinition(param))
     Right(disconnectNodes(relationDefinition))
   }

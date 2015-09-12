@@ -153,7 +153,7 @@ function DiscourseNodeList() {
                     let hyperNode = this.getHyperRelationTo(elem);
                     self.component.removeRelation(hyperNode.startId, hyperNode.endId);
                     self.component.commit();
-                });
+                }, response => humane.error(response.$response.data));
             }
 
             canAdd(elem) {
@@ -182,7 +182,7 @@ function DiscourseNodeList() {
                         self.apiList.$buildRaw(node).$save({}).$then(data => {
                             humane.success("Connected node");
                             addToComponent(data);
-                        });
+                        }, response => humane.error(response.$response.data));
                     }
                 }
 

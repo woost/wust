@@ -94,7 +94,10 @@ function EditService(Post, Connectable, HistoryService, store, DiscourseNode, Ze
                 } else {
                     connectNodes(this.encode(), referenceNode).$then(connectCallback);
                 }
-            }, () => this.setValidityProperties());
+            }, response => {
+                humane.error(response.$response.data);
+                this.setValidityProperties();
+            });
         }
 
         discard() {

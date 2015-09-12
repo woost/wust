@@ -26,9 +26,15 @@ case class RequestContext(controller: NodesBase with Controller, user: Option[Us
     jsonAs[S].map(handler(_)).getOrElse(Left(UnprocessableEntity("Cannot parse json body")))
   }
 
-  def withUser[T](handler: User => Either[Result,T]) = {
-    user.map(handler(_)).getOrElse(Left(Forbidden("Only for users")))
+  def withUser[T](handler: User => Either[Result,T]): Either[Result,T] = {
+    user.map(handler(_)).getOrElse(Left(onlyUsers))
   }
+
+  def withUser[T](handler: => Either[Result,T]): Either[Result,T] = {
+    user.map(_ => handler).getOrElse(Left(onlyUsers))
+  }
+
+  private def onlyUsers = Forbidden("Only for users")
 }
 
 case class ConnectParameter[+BASE <: UuidNode](

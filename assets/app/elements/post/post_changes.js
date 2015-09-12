@@ -52,7 +52,7 @@ class VotingEditor {
         this.service.$buildRaw(change).neutral.$create().$then(val => {
             this.applyChange(change, val);
             humane.success("Unvoted");
-        });
+        }, humane.error(response.$response.data));
     }
 
     up(change) {
@@ -62,7 +62,7 @@ class VotingEditor {
         this.service.$buildRaw(change).up.$create().$then(val => {
             this.applyChange(change, val);
             humane.success("Upvoted");
-        });
+        }, humane.error(response.$response.data));
     }
 
     down(change) {
@@ -72,7 +72,7 @@ class VotingEditor {
         this.service.$buildRaw(change).down.$create().$then(val => {
             this.applyChange(change, val);
             humane.success("Downvoted");
-        });
+        }, humane.error(response.$response.data));
     }
 }
 

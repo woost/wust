@@ -5,12 +5,12 @@ HumaneConfig.$inject = [];
 function HumaneConfig() {
     humane.error = humane.spawn({
         addnCls: "humane-libnotify-error",
-        timeout: 10000,
+        timeout: 1500,
         clickToClose: true
     });
 
     humane.success = humane.spawn({
         addnCls: "humane-libnotify-info",
-        timeout: 700
+        timeout: 750
     });
 }

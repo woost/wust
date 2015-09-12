@@ -999,19 +999,21 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
                 id: d.startId
             }).connectsTo.$buildRaw({
                 id: d.endId
-            }).$destroy().$then(response => {}, response => humane.error("Server error:\n" + response));
-            this.graph.removeNode(d.id);
-            this.graph.commit();
-            this.force.stop();
+            }).$destroy().$then(response => {
+                this.graph.removeNode(d.id);
+                this.graph.commit();
+                this.force.stop();
+            }, humane.error(response.$response.data));
         }
 
         removeNode(d) {
             Connectable.$buildRaw({
                 id: d.id
-            }).$destroy().$then(response => {}, response => humane.error("Server error:\n" + response));
-            this.graph.removeNode(d.id);
-            this.graph.commit();
-            this.force.stop();
+            }).$destroy().$then(response => {
+                this.graph.removeNode(d.id);
+                this.graph.commit();
+                this.force.stop();
+            }, humane.error(response.$response.data));
         }
 
         replyToNode(existingNode) {
