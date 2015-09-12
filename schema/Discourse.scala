@@ -20,7 +20,7 @@ object WustSchema {
     val timestamp: Long = System.currentTimeMillis
   }
   @Relation trait RelationTimestamp {
-    val timestamp: Long = System.currentTimeMillis
+    var timestamp: Long = System.currentTimeMillis
   }
 
   // Authentification
@@ -72,6 +72,9 @@ object WustSchema {
   @Node class Post extends Connectable with Timestamp {
     var title: String
     var description: Option[String]
+
+    var _locked: Boolean = false
+    var viewCount: Long = 0
 
     override def validate: Option[String] = {
       //TODO: challenge validation should work for matches nodes, but they are

@@ -180,8 +180,24 @@ case class PostAccess() extends ConnectableAccessBase with NodeDeleteBase[Post] 
       case Some(node) =>
         context.user.foreach { user =>
           Future {
-            //TODO: set viewed on current post when logging in
-            db.transaction(_.persistChanges(Viewed.merge(user, node)))
+            db.transaction { tx =>
+              val postDef = ConcreteNodeDefinition(node)
+              val userDef = ConcreteNodeDefinition(user)
+              val viewedDef = RelationDefinition(userDef, Viewed, postDef)
+              val query = s"match ${postDef.toQuery} set ${postDef.name}._locked = true with ${postDef.name} optional match ${viewedDef.toQuery(true, false)} return *"
+              val discourse = Discourse(tx.queryGraph(Query(query, viewedDef.parameterMap)))
+              val post = discourse.posts.head
+              discourse.vieweds.headOption match {
+                case Some(viewed) =>
+                  viewed.timestamp = System.currentTimeMillis
+                case None =>
+                  discourse.add(Viewed.merge(user, post))
+                  post.viewCount += 1
+              }
+
+              post._locked = false
+              tx.persistChanges(discourse)
+            }
           }
         }
         Right(node)
