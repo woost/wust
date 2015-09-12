@@ -58,9 +58,9 @@ function graphViewCtrl($scope, $stateParams, $filter, EditService, $state) {
     function placeNodeInGraph(node, event) {
         vm.graph.addNode(node);
         vm.graph.commit();
-        let wrappedNode = vm.graph.nodeById(node.id);
 
-        vm.d3Info.positionNode(node, event.offsetX, event.offsetY);
+        let wrappedNode = vm.graph.nodeById(node.id);
+        vm.d3Info.positionNode(wrappedNode, event.offsetX, event.offsetY);
     }
 
     function onClick(node) {
