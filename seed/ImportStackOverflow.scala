@@ -31,6 +31,7 @@ object ImportStackOverflow extends Task with SeedTools {
   val soTag = mergeScope("StackOverflow")
 
   def questions = {
+    println("downloading top questions...")
     val url = baseurl + s"/questions?page=1&pagesize=$questionLimit&order=desc&min=10&sort=votes&filter=$filterId&site=$site"
     val json = getJson(url)
     (json \ "items").as[Seq[JsObject]]
@@ -38,48 +39,54 @@ object ImportStackOverflow extends Task with SeedTools {
 
 
   dbContext { implicit db =>
+    val user = User.merge("StackOverflow")
     modifyDiscourse { discourse =>
-      val user = User.merge("StackOverflow")
       discourse.add(user)
+    }
 
-      def post(rawPost: JsObject) = {
-        val tagNames = (rawPost \ "tags").asOpt[Seq[String]]
-        val body = (rawPost \ "body_markdown").as[String]
-        val title = (rawPost \ "title").asOpt[String]
-        val downVotes = (rawPost \ "down_vote_count").as[Long]
-        val upVotes = (rawPost \ "up_vote_count").as[Long]
-        val viewCount = (rawPost \ "view_count").asOpt[Long]
-        val creationDate = (rawPost \ "creation_date").as[Long]
+    println(s"Importing StackExchange: $site")
 
-        val post = title.map(tit => createPost(tit, Some(body), creationDate)).getOrElse(createPost(body, Some(creationDate)))
-        discourse.add(post)
-        discourse.add(Created.create(user, post))
-        tagNames.foreach(_.foreach(t => discourse.add(tag(post, mergeScope(t)))))
+    def post(rawPost: JsObject)(implicit discourse:Discourse) = {
+      val tagNames = (rawPost \ "tags").asOpt[Seq[String]]
+      val body = (rawPost \ "body_markdown").as[String]
+      val title = (rawPost \ "title").asOpt[String]
+      val downVotes = (rawPost \ "down_vote_count").as[Long]
+      val upVotes = (rawPost \ "up_vote_count").as[Long]
+      val viewCount = (rawPost \ "view_count").asOpt[Long]
+      val creationDate = (rawPost \ "creation_date").as[Long]
+
+      val post = title.map(tit => createPost(tit, Some(body), creationDate)).getOrElse(createPost(body, Some(creationDate)))
+      discourse.add(post)
+      discourse.add(Created.create(user, post))
+      tagNames.foreach(_.foreach(t => discourse.add(tag(post, mergeScope(t)))))
+
+      //TODO: voting
+
+      val comments = (rawPost \ "comments").asOpt[Seq[JsObject]]
+
+      comments.foreach(_.foreach { rawComment =>
+        val body = (rawComment \ "body").as[String]
+        val score = (rawComment \ "score").as[Long]
+        val creationDate = (rawComment \ "creation_date").as[Long]
+
+        val comment = createPost(body, Some(creationDate))
+        discourse.add(comment)
+        discourse.add(Created.create(user, comment))
+
+        val connects = Connects.create(comment, post)
+        discourse.add(comment, connects)
 
         //TODO: voting
+      })
 
-        val comments = (rawPost \ "comments").asOpt[Seq[JsObject]]
+      post
+    }
 
-        comments.foreach(_.foreach { rawComment =>
-          val body = (rawComment \ "body").as[String]
-          val score = (rawComment \ "score").as[Long]
-          val creationDate = (rawComment \ "creation_date").as[Long]
+    questions.foreach { rawQuestion =>
 
-          val comment = createPost(body, Some(creationDate))
-          discourse.add(comment)
-          discourse.add(Created.create(user, comment))
-
-          val connects = Connects.create(comment, post)
-          discourse.add(comment, connects)
-
-          //TODO: voting
-        })
-
-        post
-      }
-
-      questions.foreach { rawQuestion =>
+      modifyDiscourse { implicit discourse =>
         val question = post(rawQuestion)
+        println(s"Importing question: ${question.title}")
         discourse.add(tag(question, soTag))
         //TODO: on relation between scope and post
         //discourse.add(classify(question, questionTag))
@@ -93,6 +100,7 @@ object ImportStackOverflow extends Task with SeedTools {
       }
     }
   }
+
 
   ws.close()
 }
