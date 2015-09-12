@@ -14,18 +14,10 @@ object EditRequests extends Nodes[Updated] {
   )
 }
 
-object AddTagsRequests extends Nodes[AddTags] {
-  val node = NodeDef("RequestsAddTag", NodeRead(AddTags) + TaggedTaggable.apply[AddTags],
-    "up" -> (N < VotesAddTagsAccess(1)),
-    "down" -> (N < VotesAddTagsAccess(-1)),
-    "neutral" -> (N < VotesAddTagsAccess(0))
-  )
-}
-
-object RemoveTagsRequests extends Nodes[RemoveTags] {
-  val node = NodeDef("RequestsRemoveTag", NodeRead(RemoveTags) + TaggedTaggable.apply[RemoveTags],
-    "up" -> (N < VotesRemoveTagsAccess(1)),
-    "down" -> (N < VotesRemoveTagsAccess(-1)),
-    "neutral" -> (N < VotesRemoveTagsAccess(0))
+object TagsRequests extends Nodes[TagChangeRequest] {
+  val node = NodeDef("RequestsTags", TagChangeRequestAccess(TagChangeRequest),
+    "up" -> (N < VotesTagsChangeRequestAccess(1)),
+    "down" -> (N < VotesTagsChangeRequestAccess(-1)),
+    "neutral" -> (N < VotesTagsChangeRequestAccess(0))
   )
 }

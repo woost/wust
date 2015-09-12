@@ -43,8 +43,7 @@ object ApiNodeFormat {
         ("tags", Json.toJson(n.inRelationsAs(Tags).map(tagsWrites.writes))), // TODO: why do we have to call tagsWrites.writes explicitly?
         ("timestamp", Json.toJson(JsNumber(n.timestamp))),
         ("requestsEdit", Json.toJson(n.inRelationsAs(Updated))), //TODO: accessors for subrelations of hyperrelations, to get connected hypernode
-        ("requestsAddTags", Json.toJson(n.inRelationsAs(AddTags))),
-        ("requestsRemoveTags", Json.toJson(n.inRelationsAs(RemoveTags)))
+        ("requestsTags", Json.toJson(n.inRelationsAs(AddTags) ++ n.inRelationsAs(RemoveTags)))
       )
       case n: Connects => Seq(
         ("id", JsString(n.uuid)),
@@ -76,17 +75,19 @@ object ApiNodeFormat {
       )
       case n: AddTags    => Seq(
         ("id", JsString(n.uuid)),
-        ("tags", Json.toJson(n.inRelationsAs(Tags).map(tagsWrites.writes))),
+        ("tags", Json.toJson(n.proposesTags.map(tagWrites.writes))),
         ("vote", n.inRelationsAs(Votes).headOption.map(vote => JsObject(Seq(("weight", JsNumber(vote.weight))))).getOrElse(JsNull)),
         ("threshold", JsNumber(n.applyThreshold)),
-        ("votes", JsNumber(n.approvalSum))
+        ("votes", JsNumber(n.approvalSum)),
+        ("isRemove", JsBoolean(false))
       )
       case n: RemoveTags    => Seq(
         ("id", JsString(n.uuid)),
-        ("tags", Json.toJson(n.inRelationsAs(Tags).map(tagsWrites.writes))),
+        ("tags", Json.toJson(n.proposesTags.map(tagWrites.writes))),
         ("vote", n.inRelationsAs(Votes).headOption.map(vote => JsObject(Seq(("weight", JsNumber(vote.weight))))).getOrElse(JsNull)),
         ("threshold", JsNumber(n.applyThreshold)),
-        ("votes", JsNumber(n.approvalSum))
+        ("votes", JsNumber(n.approvalSum)),
+        ("isRemove", JsBoolean(true))
       )
       case n              =>
         throw new RuntimeException("You did not define a formatter for the api: " + node)

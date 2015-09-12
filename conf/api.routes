@@ -14,8 +14,7 @@ GET    /auth/signout              controllers.api.auth.SignUpController.signOut
 -> /users controllers.api.Users
 
 -> /requests/edit controllers.api.EditRequests
--> /requests/add-tags controllers.api.AddTagsRequests
--> /requests/remove-tags controllers.api.RemoveTagsRequests
+-> /requests/tags controllers.api.TagsRequests
 
 GET /components/:uuid controllers.api.ConnectedComponents.show(uuid: String)
 

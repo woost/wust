@@ -103,34 +103,26 @@ case class VotesUpdatedAccess(
     }
 }
 
-case class VotesAddTagsAccess(
+case class VotesTagsChangeRequestAccess(
   sign: Long
-  ) extends VotesAccessBase[AddTags] {
-    override def nodeDefinition(uuid: String) = FactoryUuidNodeDefinition(AddTags, uuid)
+  ) extends VotesAccessBase[TagChangeRequest] {
+    override def nodeDefinition(uuid: String) = FactoryUuidNodeDefinition(TagChangeRequest, uuid)
     override def selectNode(discourse: Discourse) = discourse.addTags.head
-    override def applyChange(discourse: Discourse, request: AddTags, post: Post, tx:QueryHandler) = {
-      // we need to get the tag which is connected to the request
-      val tagDef = ConcreteFactoryNodeDefinition(Scope)
-      val tagsDef = RelationDefinition(tagDef, Tags, nodeDefinition(request.uuid))
-      val tag = Discourse(db.queryGraph(Query(s"match ${tagsDef.toQuery} return ${tagDef.name}", tagsDef.parameterMap))).scopes.head
-      val tags = Tags.merge(tag, post)
-      discourse.add(tag, tags)
-      true
-    }
-}
-
-case class VotesRemoveTagsAccess(
-  sign: Long
-  ) extends VotesAccessBase[RemoveTags] {
-    override def nodeDefinition(uuid: String) = FactoryUuidNodeDefinition(RemoveTags, uuid)
-    override def selectNode(discourse: Discourse) = discourse.removeTags.head
-    override def applyChange(discourse: Discourse, request: RemoveTags, post: Post, tx:QueryHandler) = {
-      // we need to get the tag which is connected to the request
-      val tagDef = ConcreteFactoryNodeDefinition(Scope)
-      val tagsDef = RelationDefinition(tagDef, Tags, nodeDefinition(request.uuid))
-      //TODO: should use existing transaction
-      disconnectHyperNodesFor(tagsDef, tx)
-      true
+    override def applyChange(discourse: Discourse, req: TagChangeRequest, post: Post, tx:QueryHandler) = req match {
+        case request: AddTags =>
+          // we need to get the tag which is connected to the request
+          val tagDef = ConcreteFactoryNodeDefinition(Scope)
+          val tagsDef = RelationDefinition(nodeDefinition(request.uuid), ProposesTag, tagDef)
+          val tag = Discourse(db.queryGraph(Query(s"match ${tagsDef.toQuery} return ${tagDef.name}", tagsDef.parameterMap))).scopes.head
+          val tags = Tags.merge(tag, post)
+          discourse.add(tag, tags)
+          true
+        case request: RemoveTags =>
+          // we need to get the tag which is connected to the request
+          val tagDef = ConcreteFactoryNodeDefinition(Scope)
+          val tagsDef = RelationDefinition(tagDef, Tags, ConcreteNodeDefinition(post))
+          disconnectHyperNodesFor(tagsDef, tx)
+          true
     }
 }
 
@@ -142,9 +134,6 @@ case class VotesTagsAccess(sign: Long) extends EndRelationAccessDefault[User, Vo
       val weight = sign // TODO: karma
       val success = if (weight == 0) {
         val referenceDef = HyperNodeDefinition(FactoryUuidNodeDefinition(Scope, param.startUuid), Tags, FactoryUuidNodeDefinition(Connectable, param.endUuid))
-        val userDef = ConcreteNodeDefinition(user)
-        val votesDef = RelationDefinition(userDef, Votes, referenceDef)
-        // next we define the voting relation between the currently logged in user and the change request
         val userNode = ConcreteNodeDefinition(user)
         val votes = RelationDefinition(userNode, Votes, referenceDef)
         disconnectNodesFor(votes, tx)
@@ -178,9 +167,6 @@ case class VotesConnectsAccess(sign: Long) extends EndRelationAccessDefault[User
       val weight = sign // TODO: karma
       val success = if (weight == 0) {
         val referenceDef = HyperNodeDefinition(FactoryUuidNodeDefinition(Connectable, param.startUuid), Connects, FactoryUuidNodeDefinition(Connectable, param.endUuid))
-        val userDef = ConcreteNodeDefinition(user)
-        val votesDef = RelationDefinition(userDef, Votes, referenceDef)
-        // next we define the voting relation between the currently logged in user and the change request
         val userNode = ConcreteNodeDefinition(user)
         val votes = RelationDefinition(userNode, Votes, referenceDef)
         disconnectNodesFor(votes, tx)

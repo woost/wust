@@ -105,10 +105,8 @@ object WustSchema {
     val newDescription:Option[String]
   }
 
-  //TODO: simple tags relation? using the normal tags relation makes the
-  //relation votable. also it is a hyperrelation, which is not needed in this
-  //case.
-  @Node trait TagChangeRequest extends ChangeRequest with Taggable
+  @Node trait TagChangeRequest extends ChangeRequest
+  @Relation class ProposesTag(startNode: TagChangeRequest, endNode: Scope)
   @HyperRelation class AddTags(startNode: User, endNode: Post) extends TagChangeRequest with HyperConnection
   @HyperRelation class RemoveTags(startNode: User, endNode: Post) extends TagChangeRequest with HyperConnection
 

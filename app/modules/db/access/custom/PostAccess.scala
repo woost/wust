@@ -42,8 +42,8 @@ trait ConnectableAccessBase {
     val tagDef = ConcreteFactoryNodeDefinition(Scope)
     val requestDef = ConcreteFactoryNodeDefinition(TagChangeRequest)
     val postDef = ConcreteNodeDefinition(post)
-    val tagsDef = RelationDefinition(tagDef, Tags, requestDef)
-    val query = s"match ${userDef.toQuery}-[ut:`${UserToAddTags.relationType}`|`${UserToRemoveTags.relationType}`]->${requestDef.toQuery}-[tp:`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->${postDef.toQuery}, ${tagsDef.toQuery(true,false)} return *"
+    val tagsDef = RelationDefinition(requestDef, ProposesTag, tagDef)
+    val query = s"match ${userDef.toQuery}-[ut:`${UserToAddTags.relationType}`|`${UserToRemoveTags.relationType}`]->${requestDef.toQuery}-[tp:`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->${postDef.toQuery}, ${tagsDef.toQuery(false,true)} return *"
     val existing = Discourse(db.queryGraph(Query(query, userDef.parameterMap ++ postDef.parameterMap ++ tagsDef.parameterMap)))
 
     discourse.add(existing.tagLikes: _*)
@@ -54,9 +54,9 @@ trait ConnectableAccessBase {
     request.addedTags.foreach { tagReq =>
       val alreadyExisting = existAddTags.exists { addTag =>
         if (tagReq.id.isDefined)
-          addTag.rev_tags.head.uuid == tagReq.id.get
+          addTag.proposesTags.head.uuid == tagReq.id.get
         else if (tagReq.title.isDefined)
-          addTag.rev_tags.head.title == tagReq.title.get
+          addTag.proposesTags.head.title == tagReq.title.get
         else
           false
       }
@@ -64,7 +64,7 @@ trait ConnectableAccessBase {
       if (!alreadyExisting) {
         tagConnectRequestToTag(tagReq).map { tag =>
           val addTags = AddTags.create(user, post, applyThreshold = threshold, approvalSum = weight)
-          discourse.add(Tags.create(tag, addTags))
+          discourse.add(ProposesTag.create(addTags, tag))
           addTags
         } foreach { addTags =>
           val votes = Votes.create(user, addTags, weight = weight)
@@ -74,12 +74,12 @@ trait ConnectableAccessBase {
     }
 
     request.removedTags.foreach { tagReq =>
-      val alreadyExisting = existRemTags.exists(_.rev_tags.head.uuid == tagReq)
+      val alreadyExisting = existRemTags.exists(_.proposesTags.head.uuid == tagReq)
 
       if (!alreadyExisting) {
         val remTags = RemoveTags.create(user, post, applyThreshold = threshold, approvalSum = weight)
         val tag = Scope.matchesOnUuid(tagReq)
-        discourse.add(Tags.create(tag, remTags))
+        discourse.add(ProposesTag.create(remTags, tag))
         val votes = Votes.create(user, remTags, weight = weight)
         discourse.add(remTags, votes)
       }

@@ -23,7 +23,7 @@ sealed trait ConnectSchema[-NODE <: UuidNode] {
 sealed trait PlainConnectSchema[BASE <: UuidNode] extends ConnectSchema[BASE]
 sealed trait HyperConnectSchema[BASE <: UuidNode] extends ConnectSchema[BASE]
 
-case class RelatedConnectSchema(op: RelationAccess[UuidNode, UuidNode]) extends PlainConnectSchema[UuidNode]
+case class RelatedConnectSchema[BASE <: UuidNode, NODE <: UuidNode](op: RelationAccess[BASE, NODE]) extends PlainConnectSchema[BASE]
 
 case class StartConnectSchema[
 START <: UuidNode,
@@ -147,7 +147,7 @@ object dsl {
   }
 
   object N {
-    def <>(op: RelationAccess[UuidNode, UuidNode]) = {
+    def <>[BASE <: UuidNode, NODE <: UuidNode](op: RelationAccess[BASE, NODE]) = {
       RelatedConnectSchema(op)
     }
 

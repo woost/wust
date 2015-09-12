@@ -83,9 +83,9 @@ function postEditChangesCtrl(RequestsEdit) {
     vm.voting = new VotingEditor(vm.postEditChanges, RequestsEdit, vm.onApply);
 }
 
-postTagChangesCtrl.$inject = ["RequestsAddTag", "RequestsRemoveTag"];
-function postTagChangesCtrl(RequestsAddTag, RequestsRemoveTag) {
+postTagChangesCtrl.$inject = ["RequestsTags"];
+function postTagChangesCtrl(RequestsTags) {
     let vm = this;
 
-    vm.voting = new VotingEditor(vm.postTagChanges, vm.remove === undefined ? RequestsAddTag : RequestsRemoveTag, vm.onApply);
+    vm.voting = new VotingEditor(vm.postTagChanges, RequestsTags, vm.onApply);
 }

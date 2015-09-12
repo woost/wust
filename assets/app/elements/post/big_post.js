@@ -25,8 +25,7 @@ function bigPostCtrl(SidebarService, Connectable, Post, EditService, ModalEditSe
 
     vm.editNode = EditService.createSession(vm.node);
     vm.editChanges = Post.$buildRaw(vm.node).requestsEdit.$search();
-    vm.addTagChanges = Post.$buildRaw(vm.node).requestsAddTags.$search();
-    vm.removeTagChanges = Post.$buildRaw(vm.node).requestsRemoveTags.$search();
+    vm.tagChanges = Post.$buildRaw(vm.node).requestsTags.$search();
     vm.replyTo = replyTo;
     vm.onSave = onSave;
     vm.onApply = onApply;
@@ -38,8 +37,7 @@ function bigPostCtrl(SidebarService, Connectable, Post, EditService, ModalEditSe
         vm.editMode = false;
         if (response) {
             response.requestsEdit.forEach(req => vm.editChanges.push(req));
-            response.requestsAddTags.forEach(req => vm.addTagChanges.push(req));
-            response.requestsRemoveTags.forEach(req => vm.removeTagChanges.push(req));
+            response.requestsTags.forEach(req => vm.tagChanges.push(req));
         }
     }
 
