@@ -32,6 +32,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
                 this.connectorLineArrowOffset = 0;
                 this.markerUrl = _.endsWith($location.absUrl(), "/graph") ? $location.absUrl() : $location.absUrl() + "graph";
                 this.arrowToResponse = true;
+                this.pinOnConnects = false;
 
                 // state
                 this.drawOnTick = this.drawOnTick = this.visibleConvergence;
@@ -317,7 +318,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
                     .attr("class", "nodetool disconnecttool fa fa-scissors");
 
                 this.d3NodePinTool = this.d3NodeTools.append("div")
-                    .attr("class", "nodetool pintool fa fa-thumb-tack");
+                    .attr("class", "nodetool pintool fa fa-thumb-tack")
+                    .style("display", d => (d.isHyperRelation && !this.pinOnConnects) ? "none" : "inline-block");
 
 
                 // this.d3NodeDeleteTool = this.d3NodeTools.append("div")
