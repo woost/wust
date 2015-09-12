@@ -19,7 +19,12 @@ function SchemaConfig(SchemaProvider, DiscourseNodeProvider, DiscourseNodeListPr
             },
             Record: {
                 encode: function() {
-                    return this.$encode();
+                    //TODO: more general solution, as encode loses all collection propertiees
+                    let encoded = this.$encode();
+                    if (this.tags !== undefined)
+                        encoded.tags = angular.copy(this.tags);
+
+                    return encoded;
                 }
             },
         }

@@ -5,7 +5,7 @@ FocusCtrl.$inject = ["Helpers", "$stateParams", "$state", "HistoryService", "roo
 function FocusCtrl(Helpers, $stateParams, $state, HistoryService, rootNode, ConnectedComponents, $q, $scope) {
     let vm = this;
 
-    let rawRootNode = rootNode.$encode();
+    let rawRootNode = rootNode.encode();
 
     let graph = {
         nodes: [rawRootNode],
