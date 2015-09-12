@@ -259,14 +259,14 @@ object Database {
     // query undirected connected component of posts with maximum depth
     // depth * 2 because hyperrelation depth
     val query = s"""
-      match ${ focusNode.toQuery }-[rel:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(postsandconnects:${Connectable.label})
-      with distinct postsandconnects, rel
-      optional match (tag:`${ Scope.label }`)-[tagtocat:`${ Tags.startRelationType }`]->(cat:`${ Tags.label }`)-[cattotaggable:`${ Tags.endRelationType }`]->(postsandconnects)
-      optional match (:USER)-[viewed :`${Viewed.relationType}`]->(postsandconnects)
-      optional match (:USER)-[answervoted :`${Votes.relationType}`]->(postsandconnects:${Connects.label})
-      optional match (:USER {uuid: {useruuid}})-[selfanswervoted :`${Votes.relationType}`]->(postsandconnects:${Connects.label})
-
-      return postsandconnects,rel,tag,cat,tagtocat,cattotaggable, count(viewed) as viewcount, count(answervoted) as answervotecount, count(selfanswervoted) as selfanswervotecount
+match ${ focusNode.toQuery }-[connects:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(connectable:`${Connectable.label}`)
+with distinct connectable, connects
+optional match (context:`${ Scope.label }`)-[contexttotags:`${ Tags.startRelationType }`]->(tags:`${ Tags.label }`)-[tagstopost:`${ Tags.endRelationType }`]->(connectable:`${Post.label}`)
+optional match (classification:`${Classification.label}`)-[classifies:`${Classifies.relationType}`]->(connectable:`${Connects.label}`)
+optional match (:`${User.label}`)-[viewed :`${Viewed.relationType}`]->(connectable)
+optional match (:`${User.label}`)-[answervoted :`${Votes.relationType}`]->(connectable:`${Connects.label}`)
+optional match (:`${User.label}` {uuid: {useruuid}})-[selfanswervoted :`${Votes.relationType}`]->(connectable:`${Connects.label}`)
+return connectable,connects,context,tags,contexttotags,tagstopost, classification, classifies, count(viewed) as viewcount, count(answervoted) as answervotecount, count(selfanswervoted) as selfanswervotecount
     """
 
     val useruuid = identity.map(_.uuid).getOrElse("") //TODO: do not write empty string into query
@@ -281,15 +281,15 @@ object Database {
       val selfanswervotecount = row("selfanswervotecount").asLong
 
       if( viewcount > 0) {
-        val uuid = row("postsandconnects").asMap("uuid").asString
+        val uuid = row("connectable").asMap("uuid").asString
         uuidToNode(uuid).rawItem.properties += ("viewcount" -> viewcount)
       }
       if( answervotecount > 0) {
-        val uuid = row("postsandconnects").asMap("uuid").asString
+        val uuid = row("connectable").asMap("uuid").asString
         uuidToNode(uuid).rawItem.properties += ("answervotecount" -> answervotecount)
       }
       if( selfanswervotecount > 0) {
-        val uuid = row("postsandconnects").asMap("uuid").asString
+        val uuid = row("connectable").asMap("uuid").asString
         uuidToNode(uuid).rawItem.properties += ("selfanswervotecount" -> selfanswervotecount)
       }
     }
