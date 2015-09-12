@@ -16,7 +16,7 @@ trait SeedTools {
     Scope.merge(title = title, color = color.getOrElse(tagTitleColor(title)), description = description, merge = Set("title"))
   }
 
-  def tag(item: Taggable, tag: Scope) = {
+  def tag(item: Post, tag: Scope) = {
     Tags.create(tag, item)
   }
 
