@@ -15,7 +15,6 @@ object ApiNodeFormat {
 
     private def tagLikeToSeq(tag: TagLike) = Seq(
       ("id", JsString(tag.uuid)),
-      ("label", JsString(TagLike.label)),
       ("title", JsString(tag.title)),
       ("description", JsString(tag.description.getOrElse(""))),
       ("isClassification", JsBoolean(tag.isInstanceOf[Classification])),
@@ -37,7 +36,6 @@ object ApiNodeFormat {
       JsObject(node match {
       case n: Post => Seq(
         ("id", JsString(n.uuid)),
-        ("label", JsString(n.label)),
         ("title", JsString(n.title)),
         ("description", JsString(n.description.getOrElse(""))),
         ("tags", Json.toJson(n.inRelationsAs(Tags).map(tagsWrites.writes))), // TODO: why do we have to call tagsWrites.writes explicitly?
@@ -49,7 +47,6 @@ object ApiNodeFormat {
         ("id", JsString(n.uuid)),
         ("startId", n.startNodeOpt.map(s => JsString(s.uuid)).getOrElse(JsNull)),
         ("endId", n.endNodeOpt.map(e => JsString(e.uuid)).getOrElse(JsNull)),
-        ("label", JsString(n.label)),
         ("tags", Json.toJson(n.inRelationsAs(Tags).map(tagsWrites.writes))) // TODO: why do we have to call tagsWrites.writes explicitly?
       )
       case n: TagLike => tagLikeToSeq(n) ++ (n match { //TODO: traits should have accessors for relations in magic

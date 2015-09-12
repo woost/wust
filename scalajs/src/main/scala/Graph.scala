@@ -52,7 +52,6 @@ case class Cacher[O](func: () => O) {
 
 sealed trait NodeLike {
   val id: String
-  val label: String
   def title: String
   def description: Option[String]
 }
@@ -62,8 +61,6 @@ sealed trait NodeDelegates extends NodeLike {
 
   @JSExport
   val id = rawNode.id
-  @JSExport
-  val label = rawNode.label
   @JSExport
   val isHyperRelation = rawNode.isHyperRelation
   @JSExport
@@ -139,7 +136,7 @@ trait NodeBase extends NodeDelegates {
 
 @JSExport
 class Node(val rawNode: RawNode) extends NodeBase {
-  @JSExport def encode() = js.Dynamic.literal(id = id, label = label, title = title, description = description.orUndefined, timestamp = timestamp, isHyperRelation = isHyperRelation, tags = tags)
+  @JSExport def encode() = js.Dynamic.literal(id = id, title = title, description = description.orUndefined, timestamp = timestamp, isHyperRelation = isHyperRelation, tags = tags)
 }
 
 sealed trait RelationLike {
@@ -244,7 +241,7 @@ case class HyperRelation(rawNode: RawNode) extends NodeBase with RelationLike {
   @JSExport def source = startNode
   @JSExport def target = endNode
 
-  @JSExport def encode() = js.Dynamic.literal(id = id, label = label, title = title, description.orUndefined, startId = startId, endId = endId, startNode = startNode.encode(), endNode = endNode.encode(), isHyperRelation = isHyperRelation, tags = tags)
+  @JSExport def encode() = js.Dynamic.literal(id = id, title = title, description.orUndefined, startId = startId, endId = endId, startNode = startNode.encode(), endNode = endNode.encode(), isHyperRelation = isHyperRelation, tags = tags)
 }
 
 object Node {
@@ -373,8 +370,8 @@ class Graph(private[js] val rawGraph: RawGraph) extends WrappedGraph[Relation] {
 @JSExport
 @JSExportAll
 //TODO: maybe give a concrete type for tags
-class RawNode(val id: String, val label: String, var title: String, var description: Option[String], val isHyperRelation: Boolean, val startId: Option[String], val endId: Option[String], var tags: js.Array[js.Object], val timestamp: js.Any) {
-  def this(n: RecordNode) = this(n.id, n.label, n.title.getOrElse(n.label), n.description.toOption, n.isHyperRelation.getOrElse(false), n.startId.toOption, n.endId.toOption, n.tags, n.timestamp.getOrElse(0))
+class RawNode(val id: String, var title: String, var description: Option[String], val isHyperRelation: Boolean, val startId: Option[String], val endId: Option[String], var tags: js.Array[js.Object], val timestamp: js.Any) {
+  def this(n: RecordNode) = this(n.id, n.title.getOrElse(""), n.description.toOption, n.isHyperRelation.getOrElse(false), n.startId.toOption, n.endId.toOption, n.tags, n.timestamp.getOrElse(0))
   override def toString = s"RawNode($id)"
 
   def canEqual(other: Any): Boolean = other.isInstanceOf[RawNode]
@@ -505,7 +502,6 @@ class RawGraph(private[js] var nodes: Set[RawNode], private[js] var relations: S
 @js.native
 trait RecordNode extends js.Object {
   def id: String = js.native
-  def label: String = js.native
   def title: js.UndefOr[String] = js.native
   def description: js.UndefOr[String] = js.native
 
