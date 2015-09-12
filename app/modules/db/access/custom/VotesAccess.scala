@@ -107,7 +107,7 @@ case class VotesTagsChangeRequestAccess(
   sign: Long
   ) extends VotesAccessBase[TagChangeRequest] {
     override def nodeDefinition(uuid: String) = FactoryUuidNodeDefinition(TagChangeRequest, uuid)
-    override def selectNode(discourse: Discourse) = discourse.addTags.head
+    override def selectNode(discourse: Discourse) = discourse.tagChangeRequests.head
     override def applyChange(discourse: Discourse, req: TagChangeRequest, post: Post, tx:QueryHandler) = req match {
         case request: AddTags =>
           // we need to get the tag which is connected to the request
