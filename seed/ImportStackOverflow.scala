@@ -28,7 +28,9 @@ object ImportStackOverflow extends Task with SeedTools {
 
   val questionTag = mergeClassification("Question")
   val answerTag = mergeClassification("Answer")
-  val soTag = mergeScope("StackOverflow")
+  val soTag = mergeScope("StackExchange")
+  //TODO: tag per site
+  //TODO: ignore "untagged"
 
   def questions = {
     println("downloading top questions...")
