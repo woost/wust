@@ -86,18 +86,21 @@ function EditService(Post, Connectable, HistoryService, store, DiscourseNode, Ze
             let message = model.id === undefined ? "Added new node" : "Updated now";
 
             let referenceNode = this.referenceNode;
-            let promise = this.service.$buildRaw(model).$update(dirtyModel);
+            let promise;
+            if (referenceNode) {
+                promise = connectNodes(this.encode(), referenceNode, dirtyModel).$then(connectCallback);
+            } else {
+                promise = this.service.$buildRaw(model).$update(dirtyModel);
+            }
+
             promise.$then(data => {
                 humane.success(message);
 
                 this.apply(data);
                 storeEditList();
 
-                //TODO should create+connect in one go...
                 if (referenceNode === undefined) {
                     HistoryService.updateCurrentView(this.encode());
-                } else {
-                    connectNodes(this.encode(), referenceNode).$then(connectCallback);
                 }
             }, response => {
                 humane.error(response.$response.data);
@@ -228,8 +231,9 @@ function EditService(Post, Connectable, HistoryService, store, DiscourseNode, Ze
         return existing;
     }
 
-    function connectNodes(startNode, endNode) {
-        let ref;
+    function connectNodes(startNode, endNode, saveNode = startNode) {
+        let localStart = startNode.id === undefined;
+        let promise;
         if (endNode.isHyperRelation) {
             let start = Connectable.$buildRaw({
                 id: endNode.startId
@@ -237,13 +241,13 @@ function EditService(Post, Connectable, HistoryService, store, DiscourseNode, Ze
             let hyper = start.connectsTo.$buildRaw({
                 id: endNode.endId
             });
-            ref = hyper.connectsFrom.$buildRaw(_.pick(startNode, "id"));
+            promise = localStart ? hyper.connectsFrom.$create(saveNode) : hyper.connectsFrom.$buildRaw(_.pick(startNode, "id")).$save({});
         } else {
-            let start = Connectable.$buildRaw(_.pick(startNode, "id"));
-            ref = start.connectsTo.$buildRaw(_.pick(endNode, "id"));
+            let start = Connectable.$buildRaw(_.pick(endNode, "id"));
+            promise = localStart ? start.connectsFrom.$create(saveNode) : start.connectsFrom.$buildRaw(_.pick(startNode, "id")).$save({});
         }
 
-        return ref.$save({}).$then(response => {
+        promise.$then(response => {
             humane.success("Connected node");
             // add the infos we got from the node parameter
             let startResponse = _.find(response.graph.nodes, _.pick(startNode, "id"));
@@ -252,6 +256,8 @@ function EditService(Post, Connectable, HistoryService, store, DiscourseNode, Ze
 
             HistoryService.addConnectToCurrentView(endNode.id, response);
         });
+
+        return promise;
     }
 
     function createSession(node = {}, lazyAdd = true, connectable = false, newDiscussion = false) {
