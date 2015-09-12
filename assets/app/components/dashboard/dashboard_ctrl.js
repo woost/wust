@@ -22,11 +22,12 @@ function DashboardCtrl(DiscourseNode, StreamService, Search, ContextService, $ro
         tags: ContextService.currentContexts.map(c => c.id),
         size: 30,
         page: 0,
-        startPost: true
+        startPost: ContextService.currentContexts.length === 0
     });
 
     $rootScope.$on("context.changed", () => vm.recentPosts.$refresh({
-        tags: ContextService.currentContexts.map(c => c.id)
+        tags: ContextService.currentContexts.map(c => c.id),
+        startPost: ContextService.currentContexts.length === 0
     }));
 
     function acceptDrop(sourceItemHandleScope, destSortableScope, destItemScope) {
