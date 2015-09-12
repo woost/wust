@@ -7,7 +7,7 @@ function EditService(Post, Connectable, HistoryService, store, DiscourseNode, Ze
     let self = this;
 
     class Session {
-        constructor(other, lazyAdd = false, connectable = false) {
+        constructor(other, lazyAdd = false, connectable = false, newDiscussion = false) {
             // local id to identify nodes without an id
             this.localId = _.uniqueId();
 
@@ -18,10 +18,12 @@ function EditService(Post, Connectable, HistoryService, store, DiscourseNode, Ze
             this.service = connectable ? Connectable : Post;
 
             this.lazyAdd = lazyAdd;
+
+            this.newDiscussion = newDiscussion;
         }
 
         apply({
-            id, title, description, label, original, tags, localId, referenceNode, isHyperRelation
+            id, title, description, label, original, tags, localId, referenceNode, newDiscussion, isHyperRelation
         }) {
             tags = tags || [];
             this.id = id;
@@ -32,6 +34,7 @@ function EditService(Post, Connectable, HistoryService, store, DiscourseNode, Ze
             this.label = label;
             this.tags = angular.copy(tags);
             this.referenceNode = referenceNode;
+            this.newDiscussion = newDiscussion || false;
             this.isHyperRelation = isHyperRelation || false;
             this.original = original || {
                 id: this.id,
@@ -46,6 +49,7 @@ function EditService(Post, Connectable, HistoryService, store, DiscourseNode, Ze
         }
 
         setReference(reference) {
+            this.newDiscussion = this.newDiscussion && !reference;
             this.referenceNode = reference && reference.encode ? reference.encode() : reference;
         }
 
@@ -161,6 +165,8 @@ function EditService(Post, Connectable, HistoryService, store, DiscourseNode, Ze
 
     this.list = restoreEditList();
     this.edit = edit;
+    this.editAnswer = editAnswer;
+    this.editNewDiscussion = editNewDiscussion;
     this.createSession = createSession;
     this.updateNode = updateNode;
     this.findNode = findNode;
@@ -248,12 +254,33 @@ function EditService(Post, Connectable, HistoryService, store, DiscourseNode, Ze
         });
     }
 
-    function createSession(node = {}, lazyAdd = true, connectable = false) {
-        return new Session(node, lazyAdd, connectable);
+    function createSession(node = {}, lazyAdd = true, connectable = false, newDiscussion = false) {
+        return new Session(node, lazyAdd, connectable, newDiscussion);
     }
 
     function editSession(session, index = 0) {
         self.list.splice(index, 0, session);
+    }
+
+    function editAnswer(node) {
+        let existingAnswer = _.find(self.list, elem => elem.isLocal && elem.referenceNode && elem.referenceNode.id === node.id);
+        if (existingAnswer === undefined) {
+            let session = createSession({}, true, false, false);
+            session.setReference(node);
+            return session;
+        } else {
+            return edit(existingAnswer);
+        }
+    }
+
+    function editNewDiscussion(tags = []) {
+        let existingAnswer = _.find(self.list, elem => elem.isLocal && !elem.referenceNode && elem.newDiscussion && _.every(tags, tag => _.any(elem.tags, other => other.id === tag.id)));
+        if (existingAnswer === undefined) {
+            return createSession({tags}, true, false, true);
+        } else {
+            // TODO: what about the tags of the new discussion
+            return edit(existingAnswer);
+        }
     }
 
     function edit(node, index = 0) {
