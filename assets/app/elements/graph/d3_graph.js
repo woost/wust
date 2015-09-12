@@ -1247,6 +1247,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
             d3Graph.setNodePositionFromOffset(node, x, y);
             d3Graph.setFixed(node);
             d3Graph.drawGraph();
+            if(node.degree > 0)
+                d3Graph.force.resume();
         },
         filter: nodes => d3Graph.filter(nodes)
     };
