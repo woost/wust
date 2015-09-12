@@ -3,7 +3,7 @@ package modules.db.access.custom
 import controllers.api.nodes.RequestContext
 import formatters.json.RequestFormat._
 import model.WustSchema.{Created => SchemaCreated, _}
-import modules.db.Database.db
+import modules.db.Database._
 import modules.db.access._
 import modules.db._
 import modules.requests._
@@ -109,21 +109,42 @@ trait ConnectableAccessBase {
   }
 }
 
-case class PostAccess() extends ConnectableAccessBase with NodeReadBase[Post] with NodeDeleteBase[Post] {
+case class PostAccess() extends ConnectableAccessBase with NodeDeleteBase[Post] {
+  import scala.concurrent._
+  import ExecutionContext.Implicits.global
+
   val factory = Post
+  //TODO: no tagtaggable, query directly
   val tagTaggable = TaggedTaggable.apply[Post]
 
-  override def read(context: RequestContext, uuid: String) = {
-    val node = factory.matchesOnUuid(uuid)
-    val discourse = Discourse(node)
-    context.user.foreach { user =>
-      //TODO: set viewed on current post when logging in
-      discourse.add(Viewed.merge(user, node))
-    }
+  override def read(context: RequestContext) = {
+    Right(tagTaggable.shapeResponse(context.page.map { page =>
+      val skip = page * context.limit
+      limitedDiscourseNodes(skip, context.limit, factory)._2
+    }.getOrElse(discourseNodes(factory)._2)))
+  }
 
-    db.transaction(_.persistChanges(discourse)) match {
-      case Some(err) => Left(NotFound(s"Cannot find node with uuid '$uuid': $err"))
-      case None => Right(node)
+  override def read(context: RequestContext, uuid: String) = {
+    val tagDef = ConcreteFactoryNodeDefinition(Scope)
+    val nodeDef = FactoryUuidNodeDefinition(factory, uuid)
+    val tagsDef = HyperNodeDefinition(tagDef, Tags, nodeDef)
+
+    val query = s"""
+    match ${nodeDef.toQuery} optional match ${tagsDef.toQuery(false, true)}
+    return *
+    """
+
+    val discourse = Discourse(db.queryGraph(Query(query, tagsDef.parameterMap)))
+    discourse.posts.headOption match {
+      case Some(node) =>
+        context.user.foreach { user =>
+          Future {
+            //TODO: set viewed on current post when logging in
+            db.transaction(_.persistChanges(Viewed.merge(user, node)))
+          }
+        }
+        Right(node)
+      case None => Left(NotFound(s"Cannot find node with uuid '$uuid'"))
     }
   }
 
