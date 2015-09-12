@@ -113,7 +113,7 @@ case class VotesTagsChangeRequestAccess(
           // we need to get the tag which is connected to the request
           val tagDef = ConcreteFactoryNodeDefinition(Scope)
           val tagsDef = RelationDefinition(nodeDefinition(request.uuid), ProposesTag, tagDef)
-          val tag = Discourse(db.queryGraph(Query(s"match ${tagsDef.toQuery} return ${tagDef.name}", tagsDef.parameterMap))).scopes.head
+          val tag = Discourse(tx.queryGraph(Query(s"match ${tagsDef.toQuery} return ${tagDef.name}", tagsDef.parameterMap))).scopes.head
           val tags = Tags.merge(tag, post)
           discourse.add(tag, tags)
           true
@@ -140,7 +140,7 @@ trait VotesReferenceAccess[T <: Reference] extends EndRelationAccessDefault[User
       val referenceDef = nodeDefinition(param.startUuid, param.endUuid)
       val userNode = ConcreteNodeDefinition(user)
       val votesDef = RelationDefinition(userNode, Votes, referenceDef)
-      val query = s"match ${referenceDef.toQuery} optional match ${votesDef.toQuery(true, false)} set ${referenceDef.name}._locked = true return *"
+      val query = s"match ${referenceDef.toQuery} set ${referenceDef.name}._locked = true with ${referenceDef.name} optional match ${votesDef.toQuery(true, false)} return *"
       val discourse = Discourse(tx.queryGraph(Query(query, votesDef.parameterMap)))
       val reference = discourse.references.head
       val votes = discourse.votes.headOption
