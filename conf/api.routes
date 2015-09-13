@@ -21,3 +21,5 @@ GET /components/:uuid controllers.api.ConnectedComponents.show(uuid: String)
 GET /graph controllers.api.Graphs.show
 
 GET /search controllers.api.Search.index(page: Option[Int], size: Option[Int], label: Option[String], title: Option[String], searchDescriptions: Option[Boolean], tags: List[String], tagOr: Option[Boolean], startPost: Option[Boolean])
+
+GET /session/history controllers.api.Session.history()

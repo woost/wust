@@ -1,8 +1,8 @@
 angular.module("wust.api").service("Auth", Auth);
 
-Auth.$inject = ["$rootScope", "$window", "restmod", "jwtHelper", "store"];
+Auth.$inject = ["$rootScope", "$window", "restmod", "jwtHelper", "store", "HistoryService"];
 
-function Auth($rootScope, $window, restmod, jwtHelper, store) {
+function Auth($rootScope, $window, restmod, jwtHelper, store, HistoryService) {
     let self = this;
 
     let authStore = store.getNamespacedStore("auth");
@@ -19,7 +19,9 @@ function Auth($rootScope, $window, restmod, jwtHelper, store) {
     this.current = authStore.get(userKey) || {};
     this.checkLoggedIn = checkLoggedIn;
 
-    checkLoggedIn();
+    if (checkLoggedIn()) {
+        HistoryService.load();
+    }
 
     // every time the window gets focused, clear the inMemoryCache of the store,
     // so all changes in store get propagated into our current angular session.
@@ -33,10 +35,18 @@ function Auth($rootScope, $window, restmod, jwtHelper, store) {
             self.current.identifier = response.identifier;
             self.current.token = response.token;
             self.current.userId = response.userId;
+
+            let loggedIn = checkLoggedIn();
+            if (loggedIn) {
+                if (prev.userId !== self.current.userId)
+                    HistoryService.load();
+            } else {
+                HistoryService.forget();
+            }
+
             $rootScope.$apply();
         };
     }
-
 
     function checkLoggedIn() {
         if (self.current.token) {
@@ -58,6 +68,7 @@ function Auth($rootScope, $window, restmod, jwtHelper, store) {
             self.current.userId = response.userId;
             authStore.set(userKey, self.current);
             humane.success(message);
+            HistoryService.load();
         }, resp => humane.error(resp.$response.data));
     }
 
@@ -75,5 +86,6 @@ function Auth($rootScope, $window, restmod, jwtHelper, store) {
         delete self.current.token;
         delete self.current.userId;
         authStore.remove(userKey);
+        HistoryService.forget();
     }
 }

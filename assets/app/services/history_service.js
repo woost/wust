@@ -1,23 +1,31 @@
 angular.module("wust.services").service("HistoryService", HistoryService);
 
-HistoryService.$inject = ["Post", "DiscourseNode", "store"];
+HistoryService.$inject = ["Session", "Post", "DiscourseNode"];
 
-function HistoryService(Post, DiscourseNode, store) {
-    let historyStore = store.getNamespacedStore("history");
+function HistoryService(Session, Post, DiscourseNode) {
     let maximum = 8;
     let self = this;
 
     this.visited = [];
-    _.each(historyStore.get("visited"), restoreNode);
-    storeVisited();
-
     this.add = addNode;
     this.remove = removeNode;
+    this.load = load;
+    this.forget = forget;
 
     this.updateCurrentView = updateCurrentView;
     this.addConnectToCurrentView = addConnectToCurrentView;
 
     this.currentViewComponent = undefined;
+
+    function load() {
+        Session.history.$fetch().$then(response => {
+            self.visited = _.values(response.$encode());
+        });
+    }
+
+    function forget() {
+        self.visited = [];
+    }
 
     function updateCurrentView(node) {
         if (this.currentViewComponent === undefined)
@@ -49,26 +57,13 @@ function HistoryService(Post, DiscourseNode, store) {
         current.commit();
     }
 
-    function restoreNode(id) {
-        Post.$find(id).$then(node => {
-            let encoded = node.$encode();
-            addNode(encoded);
-        });
-    }
-
-    function storeVisited() {
-        historyStore.set("visited", _.map(self.visited, n => n.id));
-    }
-
     function removeNode(id) {
         _.remove(self.visited, n => id === n.id);
-        storeVisited();
     }
 
     function addNode(node) {
         _.remove(self.visited, n => node.id === n.id);
         self.visited.splice(0, self.visited.length - maximum - 1);
         self.visited.splice(0, 0, node);
-        storeVisited();
     }
 }

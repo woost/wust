@@ -18,5 +18,5 @@ HistoryListCtrl.$inject = ["HistoryService"];
 function HistoryListCtrl(HistoryService) {
     let vm = this;
 
-    vm.visited = HistoryService.visited;
+    vm.history = HistoryService;
 }
