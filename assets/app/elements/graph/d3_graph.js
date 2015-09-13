@@ -312,6 +312,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
                 this.d3NodeConnectTool = this.d3NodeTools.append("div")
                     .attr("class", "nodetool connecttool icon-flow-line")
+                    .style("display", d => (!d.isHyperRelation || this.arrowToResponse) ? "inline-block" : "none")
                     .append("div").attr("class", "event-offset-rotate-fix");
 
                 this.d3NodeDisconnectTool = this.d3NodeTools.append("div")
@@ -1094,7 +1095,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             this.force.alpha(0);
         }
 
-        onDragMoveInit(d, tolerance = 5, onStartDragging = () => {}) {
+        onDragMoveInit(d, tolerance = 5, onStartDragging = () => {}, condition = d => true) {
             // check whether there was a substantial mouse movement. if
             // not, we will interpret this as a click event after the
             // mouse button is released (see onDragMoveEnd handler).
@@ -1102,7 +1103,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             let diffX = this.dragStartMouseX - event.clientX;
             let diffY = this.dragStartMouseY - event.clientY;
             let diff = Math.sqrt(diffX * diffX + diffY * diffY);
-            if (!this.isDragging && (!d.isHyperRelation || this.dragHyperRelations)) {
+            if (!this.isDragging && condition(d)) {
                 if (diff > tolerance) {
                     this.isDragging = true;
                     // preview is reading isDragging, so angular needs to know that it changed
@@ -1116,7 +1117,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             //TODO: fails when zooming/scrolling and dragging at the same time
             this.onDragMoveInit(d, 5, () => this.elementInfo.d3NodeContainer(d).classed({
                 "moving": true
-            }));
+            }), d => (!d.isHyperRelation || this.dragHyperRelations));
 
             if (this.isDragging) {
                 // default positioning is center of node.
@@ -1146,7 +1147,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 let endX = this.dragStartNodeX + dx + Math.cos(a) * this.connectorLineOvershoot;
                 let endY = this.dragStartNodeY + dy + Math.sin(a) * this.connectorLineOvershoot;
 
-                if(this.hoveredNode) {
+                if (this.hoveredNode !== undefined && (!this.arrowToResponse || !this.hoveredNode.isHyperRelation)) {
                     let line = geometry.Line(geometry.Vec2(endX, endY), geometry.Vec2(this.dragStartNodeX, this.dragStartNodeY));
                     let cut = this.cutByRects(line, this.nodeRect(this.hoveredNode), this.nodeRect(this.dragStartNode));
                     if( cut ) {
@@ -1163,15 +1164,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                             .attr("x2", this.dragStartNodeX)
                             .attr("y2", this.dragStartNodeY);
                     }
-                } else {
-                    this.d3ConnectorLine
-                        .attr("x1", endX)
-                        .attr("y1", endY)
-                        .attr("x2", this.dragStartNodeX)
-                        .attr("y2", this.dragStartNodeY);
-                }
 
-                if (this.hoveredNode !== undefined) {
                     this.elementInfo.d3NodeContainer(this.hoveredNode).classed({
                         "selected": true
                     });
@@ -1179,6 +1172,12 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                         "selected": true
                     });
                 } else {
+                    this.d3ConnectorLine
+                        .attr("x1", endX)
+                        .attr("y1", endY)
+                        .attr("x2", this.dragStartNodeX)
+                        .attr("y2", this.dragStartNodeY);
+
                     this.elementInfo.d3NodeContainer(this.dragStartNode).classed({
                         "selected": false
                     });
@@ -1189,23 +1188,23 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
         // we use dragend instead of click event, because it is emitted on mobile phones as well as on pcs
         onDragConnectEnd() {
             if (this.isDragging) {
-                if (this.hoveredNode !== undefined) {
-                    let startNode = this.dragStartNode; // always normal node
-                    let endNode = this.hoveredNode;
-                    // starting on hypernodes is also forbidden,
-                    // but we don't need to handle this, because
-                    // the connect button does not exist on hyperRelations.
-                    //TODO: we need to make it impossible to drag on self loops and incident relations,
-                    //is assured by backend.
-                    EditService.connectNodes(startNode, endNode).$then(response => {
-                        let connects = _.find(response.graph.nodes, n => n.isHyperRelation && startNode.id === n.startId);
-                        if (connects === undefined) {
-                            console.warn(`cannot find connects relation for tag-modal: ${startNode} -> ${endNode}`);
-                            return;
-                        }
+                if (this.hoveredNode !== undefined ) {
+                    let startNode = this.arrowToResponse ? this.hoveredNode : this.dragStartNode; // always normal node
+                    let endNode = this.arrowToResponse ? this.dragStartNode : this.hoveredNode;
 
-                        TagRelationEditService.show(connects);
-                    });
+                    if(!startNode.isHyperRelation) {
+                        // TODO: we need to make it impossible to drag on self loops and incident relations,
+                        // is assured by backend.
+                        EditService.connectNodes(startNode, endNode).$then(response => {
+                            let connects = _.find(response.graph.nodes, n => n.isHyperRelation && startNode.id === n.startId);
+                            if (connects === undefined) {
+                                console.warn(`cannot find connects relation for tag-modal: ${startNode} -> ${endNode}`);
+                                return;
+                            }
+
+                            TagRelationEditService.show(connects);
+                        });
+                    }
                 }
             }
             // TODO: else { connect without dragging only by clicking }
