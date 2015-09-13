@@ -26,30 +26,7 @@ object GraphFormat {
   implicit object NodeFormat extends Format[Connectable] {
     def reads(json: JsValue) = ???
 
-    implicit def tagWrites = new Writes[TagLike] {
-      def writes(tag: TagLike) = JsObject(Seq(
-        ("id", JsString(tag.uuid)),
-        ("label", JsString(TagLike.label)),
-        ("title", JsString(tag.title)),
-        ("description", JsString(tag.description.getOrElse(""))),
-        ("color", JsNumber(tag.color)),
-        ("symbol", tag.symbol.map(JsString(_)).getOrElse(JsNull))
-      ))
-    }
-
-    implicit def tagsWrites = new Writes[Tags] {
-      def writes(cat: Tags) = {
-        val tag: TagLike = cat.startNodeOpt.get
-        JsObject(Seq(
-          ("id", JsString(tag.uuid)),
-          ("label", JsString(TagLike.label)),
-          ("title", JsString(tag.title)),
-          ("description", JsString(tag.description.getOrElse(""))),
-          ("color", JsNumber(tag.color)),
-          ("symbol", tag.symbol.map(JsString(_)).getOrElse(JsNull))
-        ))
-      }
-    }
+    import ApiNodeFormat.{tagWrites, tagsWrites}
 
     def writes(node: Connectable) = JsObject(Seq(
       ("id", JsString(node.uuid)),

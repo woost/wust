@@ -10,30 +10,30 @@ import renesca.parameter.implicits._
 object ApiNodeFormat {
   implicit def LabelToString(label: Label): String = label.name
 
+  private def tagLikeToSeq(tag: TagLike) = Seq(
+    ("id", JsString(tag.uuid)),
+    ("title", JsString(tag.title)),
+    ("description", JsString(tag.description.getOrElse(""))),
+    ("isClassification", JsBoolean(tag.isInstanceOf[Classification])),
+    ("isContext", JsBoolean(tag.isInstanceOf[Scope])),
+    ("color", JsNumber(tag.color)),
+    ("symbol", tag.symbol.map(JsString(_)).getOrElse(JsNull))
+  )
+
+  implicit def tagWrites = new Writes[TagLike] {
+    def writes(tag: TagLike) = JsObject(tagLikeToSeq(tag))
+  }
+
+  implicit def tagsWrites = new Writes[Tags] {
+    def writes(cat: Tags) = cat.startNodeOpt.map(tag => JsObject(
+      tagLikeToSeq(tag) ++ Seq(
+        ("quality", JsNumber(cat.quality))
+      )
+    )).getOrElse(JsNull)
+  }
+
   implicit object NodeFormat extends Format[Node] {
     def reads(json: JsValue) = ???
-
-    private def tagLikeToSeq(tag: TagLike) = Seq(
-      ("id", JsString(tag.uuid)),
-      ("title", JsString(tag.title)),
-      ("description", JsString(tag.description.getOrElse(""))),
-      ("isClassification", JsBoolean(tag.isInstanceOf[Classification])),
-      ("isContext", JsBoolean(tag.isInstanceOf[Scope])),
-      ("color", JsNumber(tag.color)),
-      ("symbol", tag.symbol.map(JsString(_)).getOrElse(JsNull))
-    )
-
-    implicit def tagWrites = new Writes[TagLike] {
-      def writes(tag: TagLike) = JsObject(tagLikeToSeq(tag))
-    }
-
-    implicit def tagsWrites = new Writes[Tags] {
-      def writes(cat: Tags) = cat.startNodeOpt.map(tag => JsObject(
-        tagLikeToSeq(tag) ++ Seq(
-          ("quality", JsNumber(cat.quality))
-        )
-      )).getOrElse(JsNull)
-    }
 
     //TODO: this should be multiple formats...code dup
     def writes(node: Node) = {
