@@ -131,7 +131,7 @@ object WustSchema {
   // base class for connects and tags
   @Node trait Reference extends Votable {
     var voteCount: Long = 0
-    var quality: Double = Moderation.votes_p // between 0 and 1
+    def quality(viewCount: Long): Double = Moderation.postQuality(voteCount, viewCount - voteCount)
   }
 
   // generic Tags (base for Tags, Scopes)

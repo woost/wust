@@ -133,7 +133,6 @@ trait VotesReferenceAccess[T <: Reference] extends EndRelationAccessDefault[User
   val nodeFactory = User
 
   def nodeDefinition(startUuid: String, endUuid: String): HyperNodeDefinitionBase[T]
-  def selectPost(node: T): Post
   def selectNode(discourse: Discourse, startUuid: String, endUuid: String): T
 
   override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Votable with AbstractRelation[S,E], E]) = context.withUser { user =>
@@ -158,8 +157,6 @@ trait VotesReferenceAccess[T <: Reference] extends EndRelationAccessDefault[User
         // better than just updating the weight on an existing relation, as it
         // guarantees uniqueness
         reference.voteCount += weight
-        val post = selectPost(reference)
-        reference.quality = Moderation.postQuality(reference.voteCount, post.viewCount - reference.voteCount)
         val newVotes = Votes.merge(user, reference, weight = weight, onMatch = Set("weight"))
         discourse.add(newVotes)
       }
@@ -182,7 +179,6 @@ trait VotesReferenceAccess[T <: Reference] extends EndRelationAccessDefault[User
 case class VotesTagsAccess(sign: Long) extends VotesReferenceAccess[Tags] {
 
   override def selectNode(discourse: Discourse, startUuid: String, endUuid: String) = discourse.tags.find(t => t.startNodeOpt.map(_.uuid == startUuid).getOrElse(false) && t.endNodeOpt.map(_.uuid == endUuid).getOrElse(false)).get
-  override def selectPost(node: Tags) = node.endNodeOpt.get
 
   override def nodeDefinition(startUuid: String, endUuid: String): HyperNodeDefinitionBase[Tags] = {
     HyperNodeDefinition(FactoryUuidNodeDefinition(Scope, startUuid), Tags, FactoryUuidNodeDefinition(Post, endUuid))
@@ -192,7 +188,6 @@ case class VotesTagsAccess(sign: Long) extends VotesReferenceAccess[Tags] {
 case class VotesConnectsAccess(sign: Long) extends VotesReferenceAccess[Connects] {
 
   override def selectNode(discourse: Discourse, startUuid: String, endUuid: String) = discourse.connects.find(c => c.startNodeOpt.map(_.uuid == startUuid).getOrElse(false) && c.endNodeOpt.map(_.uuid == endUuid).getOrElse(false)).get
-  override def selectPost(node: Connects) = node.startNodeOpt.get.asInstanceOf[Post]
 
   override def nodeDefinition(startUuid: String, endUuid: String): HyperNodeDefinitionBase[Connects] = {
     HyperNodeDefinition(FactoryUuidNodeDefinition(Connectable, startUuid), Connects, FactoryUuidNodeDefinition(Connectable, endUuid))
