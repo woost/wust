@@ -24,11 +24,9 @@
 
 .graph_network.on-drag-enter, .drop_post_box.on-drag-enter {
     background-color: $drag_active_color !important;
-    color: white !important;
     transition: background-color 0.2s;
 }
 .graph_network.on-drag-hover, .drop_post_box.on-drag-hover {
     background-color: $drag_active_hover_color !important;
-    color: white !important;
     transition: background-color 0.2s;
 }
