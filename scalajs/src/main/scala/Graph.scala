@@ -90,7 +90,7 @@ sealed trait NodeDelegates extends NodeLike {
 }
 
 trait NodeBase extends NodeDelegates {
-  def classifications = successors.collect { case hr: HyperRelation => hr }.flatMap(_.tags)
+  def classifications: Set[RecordTag]
   @JSExport("classifications") def classificationsJs = classifications.toJSArray
 
   var inRelations: Set[RelationLike] = Set.empty
@@ -143,6 +143,9 @@ trait NodeBase extends NodeDelegates {
 
 @JSExport
 class Node(val rawNode: RawNode) extends NodeBase {
+
+  override def classifications = successors.collect { case hr: HyperRelation => hr }.flatMap(_.tags)
+
   @JSExport def encode() = js.Dynamic.literal(id = id, title = title, description = description.orUndefined, timestamp = timestamp, quality = quality, viewCount = viewCount, classifications = classifications, isHyperRelation = isHyperRelation, tags = tags)
 }
 
@@ -240,6 +243,8 @@ sealed trait WrappedGraph[RELATION <: RelationLike] {
 
 @JSExport
 case class HyperRelation(rawNode: RawNode) extends NodeBase with RelationLike {
+  override def classifications = Set.empty
+
   @JSExport override def startId = rawNode.startId.get
   @JSExport override def endId = rawNode.endId.get
 

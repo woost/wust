@@ -9,7 +9,6 @@ function TagRelationCtrl(TagRelationEditService) {
     vm.currentEditRelation = TagRelationEditService.currentRelation;
 
     function save() {
-        console.log(vm.currentEditRelation, vm.selectedTags);
         vm.currentEditRelation.save();
     }
 }
