@@ -54,7 +54,7 @@ trait ConnectableAccessBase {
   }
 
   //TODO: refactor
-  protected def addRequestTagsToGraph(discourse: Discourse, user: User, post: Post, request: AddTagRequestBase with RemoveTagRequestBase, weight: Long, threshold: Long, instantApply: Boolean) {
+  protected def addRequestTagsToGraph(tx: QueryHandler, discourse: Discourse, user: User, post: Post, request: AddTagRequestBase with RemoveTagRequestBase, weight: Long, threshold: Long, instantApply: Boolean) {
     // TODO: checking for duplicates is not really safe if there are concurrent requests
     // TODO: do not get all connected requests if not needed...its just slow
     val userDef = ConcreteFactoryNodeDefinition(User)
@@ -88,6 +88,10 @@ trait ConnectableAccessBase {
         tagConnectRequestToScope(tagReq).map { tag =>
           val addTags = AddTags.create(user, post, applyThreshold = threshold, approvalSum = weight, applied = instantApply)
           discourse.add(ProposesTag.create(addTags, tag))
+          if (instantApply) {
+            discourse.add(Tags.merge(tag, post))
+          }
+
           addTags
         } foreach { addTags =>
           val votes = Votes.create(user, addTags, weight = weight)
@@ -99,10 +103,12 @@ trait ConnectableAccessBase {
     request.removedTags.foreach { tagReq =>
       val alreadyExisting = existRemTags.exists(_.proposesTags.head.uuid == tagReq)
 
+      //TODO: remove tag with instantApply
       if (!alreadyExisting) {
         val remTags = RemoveTags.create(user, post, applyThreshold = threshold, approvalSum = weight)
         val tag = Scope.matchesOnUuid(tagReq)
         discourse.add(ProposesTag.create(remTags, tag))
+
         val votes = Votes.create(user, remTags, weight = weight)
         discourse.add(remTags, votes)
       }
@@ -271,7 +277,7 @@ case class PostAccess() extends ConnectableAccessBase with NodeDeleteBase[Post] 
             }
           }
 
-          addRequestTagsToGraph(discourse, user, node, request, approvalSum, applyThreshold, instantApply)
+          addRequestTagsToGraph(tx, discourse, user, node, request, approvalSum, applyThreshold, instantApply)
 
           tx.persistChanges(discourse) match {
             case Some(err) => Left(BadRequest(s"Cannot update Post with uuid '$uuid': $err"))
