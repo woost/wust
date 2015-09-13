@@ -1,8 +1,8 @@
 angular.module("wust.components").controller("TagDetailsCtrl", TagDetailsCtrl);
 
-TagDetailsCtrl.$inject = ["$stateParams", "TagLike", "Search", "DiscourseNode", "StreamService"];
+TagDetailsCtrl.$inject = ["$stateParams", "Scope", "Search", "DiscourseNode", "StreamService"];
 
-function TagDetailsCtrl($stateParams, TagLike, Search, DiscourseNode, StreamService) {
+function TagDetailsCtrl($stateParams, Scope, Search, DiscourseNode, StreamService) {
     let vm = this;
 
     let postSize = 30;
@@ -12,7 +12,7 @@ function TagDetailsCtrl($stateParams, TagLike, Search, DiscourseNode, StreamServ
     vm.addTagStream = addTagStream;
     vm.changedInherits = changedInherits;
 
-    vm.tag = TagLike.$find($stateParams.id);
+    vm.tag = Scope.$find($stateParams.id);
     //TODO: tags/id/posts should honor inherits relation
     // vm.contributions = vm.tag.posts.$search({
     //     page: postPage,

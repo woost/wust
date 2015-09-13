@@ -1,8 +1,8 @@
 angular.module("wust.components").controller("TagsCtrl", TagsCtrl);
 
-TagsCtrl.$inject = ["$stateParams", "TagLike", "StreamService"];
+TagsCtrl.$inject = ["$stateParams", "Scope", "StreamService"];
 
-function TagsCtrl($stateParams, TagLike, StreamService) {
+function TagsCtrl($stateParams, Scope, StreamService) {
     let vm = this;
 
     let tagSize = 30;
@@ -10,7 +10,7 @@ function TagsCtrl($stateParams, TagLike, StreamService) {
 
     vm.loadMoreTags = loadMoreTags;
 
-    vm.tags = TagLike.$search({
+    vm.tags = Scope.$search({
         page: tagPage,
         size: tagSize
     });

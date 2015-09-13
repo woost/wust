@@ -13,8 +13,8 @@ import renesca.Query
 import play.api.mvc.Results._
 import model.Helpers.tagTitleColor
 
-class TagAccess extends NodeReadBase[TagLike] {
-  val factory = TagLike
+class TagAccess extends NodeReadBase[Scope] {
+  val factory = Scope
 
   //TODO: should override read for multiple tags, too. so it includes inherits
   override def read(context: RequestContext, uuid: String) = {
@@ -28,7 +28,7 @@ class TagAccess extends NodeReadBase[TagLike] {
     println(query)
     val discourse = Discourse(db.queryGraph(Query(query, baseInherit.parameterMap ++ implInherit.parameterMap)))
     println(discourse)
-    discourse.tagLikes.find(_.uuid == uuid).map(Right(_)).getOrElse(Left(NotFound(s"Cannot find node with uuid '$uuid'")))
+    discourse.scopes.find(_.uuid == uuid).map(Right(_)).getOrElse(Left(NotFound(s"Cannot find node with uuid '$uuid'")))
   }
 
   override def create(context: RequestContext) = {
@@ -52,7 +52,7 @@ class TagAccess extends NodeReadBase[TagLike] {
 
   override def update(context: RequestContext, uuid: String) = {
     context.withJson { (request: TagUpdateRequest) =>
-      val node = TagLike.matchesOnUuid(uuid)
+      val node = Scope.matchesOnUuid(uuid)
       //TODO: normally we would want to set it back to None instead of ""
       if (request.description.isDefined) {
         node.description = request.description

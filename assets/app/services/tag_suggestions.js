@@ -9,7 +9,7 @@ function TagSuggestions(Search, DiscourseNode) {
     };
     let initialContextSuggestions;
 
-    function search(title, label = DiscourseNode.TagLike.label) {
+    function search(title, label = DiscourseNode.Scope.label) {
         if (_.isEmpty(title)) {
             if (initialSuggestions[label] === undefined)
                 initialSuggestions[label] = searchTags("", label);
