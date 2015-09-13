@@ -55,7 +55,7 @@ object ImportStackOverflow extends Task with SeedTools {
       val downVotes = (rawPost \ "down_vote_count").as[Long]
       val upVotes = (rawPost \ "up_vote_count").as[Long]
       val viewCount = (rawPost \ "view_count").asOpt[Long]
-      val creationDate = (rawPost \ "creation_date").as[Long]
+      val creationDate = (rawPost \ "creation_date").as[Long] * 1000
 
       val post = title.map(tit => createPost(tit, Some(body), creationDate)).getOrElse(createPost(body, Some(creationDate)))
       discourse.add(post)
@@ -69,7 +69,7 @@ object ImportStackOverflow extends Task with SeedTools {
       comments.foreach(_.foreach { rawComment =>
         val body = (rawComment \ "body").as[String]
         val score = (rawComment \ "score").as[Long]
-        val creationDate = (rawComment \ "creation_date").as[Long]
+        val creationDate = (rawComment \ "creation_date").as[Long] * 1000
 
         val comment = createPost(body, Some(creationDate))
         discourse.add(comment)
