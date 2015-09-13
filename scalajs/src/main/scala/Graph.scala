@@ -143,7 +143,7 @@ trait NodeBase extends NodeDelegates {
 
 @JSExport
 class Node(val rawNode: RawNode) extends NodeBase {
-  @JSExport def encode() = js.Dynamic.literal(id = id, title = title, description = description.orUndefined, timestamp = timestamp, isHyperRelation = isHyperRelation, tags = tags)
+  @JSExport def encode() = js.Dynamic.literal(id = id, title = title, description = description.orUndefined, timestamp = timestamp, quality = quality, viewCount = viewCount, classifications = classifications, isHyperRelation = isHyperRelation, tags = tags)
 }
 
 sealed trait RelationLike {

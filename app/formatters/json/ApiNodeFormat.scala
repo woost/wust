@@ -42,7 +42,8 @@ object ApiNodeFormat {
         ("id", JsString(n.uuid)),
         ("title", JsString(n.title)),
         ("description", JsString(n.description.getOrElse(""))),
-        ("tags", Json.toJson(n.inRelationsAs(Tags).map(tagsWrites.writes))), // TODO: why do we have to call tagsWrites.writes explicitly?
+        ("tags", JsArray(n.inRelationsAs(Tags).map(tagsWrites.writes))), // TODO: why do we have to call tagsWrites.writes explicitly?
+        ("classifications", JsArray(n.inRelationsAs(Connects).flatMap(_.rev_classifies).map(tagWrites.writes))),
         ("timestamp", Json.toJson(JsNumber(n.timestamp))),
         ("requestsEdit", Json.toJson(n.inRelationsAs(Updated))), //TODO: accessors for subrelations of hyperrelations, to get connected hypernode
         ("requestsTags", Json.toJson(n.inRelationsAs(AddTags) ++ n.inRelationsAs(RemoveTags))),

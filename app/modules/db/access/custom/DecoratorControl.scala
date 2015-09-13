@@ -50,17 +50,22 @@ class TaggedTaggable[NODE <: UuidNode] extends AccessNodeDecoratorControl[NODE] 
     //TODO: share code with component query
     if (!response.isEmpty) {
       val tagDef = ConcreteFactoryNodeDefinition(Scope)
+      val classDef = ConcreteFactoryNodeDefinition(Classification)
       val nodeDef = ConcreteFactoryNodeDefinition(Post)
-      val tagsDef = HyperNodeDefinition(tagDef, Tags, nodeDef)
+      val connectsDef = ConcreteFactoryNodeDefinition(Connects)
+      val tagsDef = RelationDefinition(tagDef, Tags, nodeDef)
+      val connDef = RelationDefinition(nodeDef, ConnectableToConnects, connectsDef)
+      val classifiesDef = RelationDefinition(classDef, Classifies, connectsDef)
 
       val query = s"""
-      match ${tagsDef.toQuery} where ${nodeDef.name}.uuid in {nodeUuids}
+      match ${nodeDef.toQuery} where ${nodeDef.name}.uuid in {nodeUuids}
+      optional match ${tagsDef.toQuery(true, false)}
+      optional match ${connDef.toQuery(false, true)}, ${classifiesDef.toQuery(true, false)}
       return *
       """
-      val params = nodeDef.parameterMap ++ tagDef.parameterMap ++ tagsDef.parameterMap ++ Map("nodeUuids" -> response.map(_.uuid).toSeq)
+      val params = tagsDef.parameterMap ++ connDef.parameterMap ++ classifiesDef.parameterMap ++ Map("nodeUuids" -> response.map(_.uuid).toSeq)
 
       val discourse = Discourse(response.head.graph merge db.queryGraph(Query(query, params.toMap)))
-
       discourse.add(response.toSeq: _*)
     }
 
