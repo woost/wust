@@ -251,39 +251,40 @@ case class PostAccess() extends ConnectableAccessBase with NodeDeleteBase[Post] 
         """
 
         val discourse = Discourse(tx.queryGraph(Query(query, createdDef.parameterMap)))
-        val isAuthor = discourse.createds.headOption.isDefined
-        val authorBoost = if (isAuthor) 5 else 0
+        discourse.posts.headOption.map { node =>
+          val isAuthor = discourse.createds.headOption.isDefined
+          val authorBoost = if (isAuthor) 5 else 0
 
-        val karma = 1 // TODO: karma
-        val approvalSum = karma + authorBoost
-        val applyThreshold = 5 // TODO: correct edit threshold
-        val instantApply = approvalSum >= applyThreshold
+          val karma = 1 // TODO: karma
+          val approvalSum = karma + authorBoost
+          val applyThreshold = 5 // TODO: correct edit threshold
+          val instantApply = approvalSum >= applyThreshold
 
-        //TODO: check for edit threshold and implement instant edit
-        val node = if (request.title.isDefined || request.description.isDefined) {
-          val node = Post.matchesOnUuid(uuid)
-          //need to persist node in order to access title/description
-          tx.persistChanges(node)
+          //TODO: check for edit threshold and implement instant edit
+          if (request.title.isDefined || request.description.isDefined) {
+            val contribution = Updated.create(user, node, oldTitle = node.title, newTitle = request.title.getOrElse(node.title), oldDescription = node.description, newDescription = request.description.orElse(node.description), applyThreshold = applyThreshold, approvalSum = approvalSum, applied = instantApply)
+            val votes = Votes.create(user, contribution, weight = approvalSum)
+            discourse.add(contribution, votes)
+            if (instantApply) {
+              request.title.foreach(node.title = _)
+              request.description.foreach(d => node.description = Some(d))
+            }
+          }
 
-          discourse.add(node)
+          addRequestTagsToGraph(discourse, user, node, request, approvalSum, applyThreshold, instantApply)
 
-          val contribution = Updated.create(user, node, oldTitle = node.title, newTitle = request.title.getOrElse(node.title), oldDescription = node.description, newDescription = request.description.orElse(node.description), applyThreshold = applyThreshold, approvalSum = approvalSum, applied = instantApply)
-          val votes = Votes.create(user, contribution, weight = approvalSum)
-          discourse.add(contribution, votes)
-          node
-        } else {
-          Post.matchesOnUuid(uuid)
-        }
-
-        addRequestTagsToGraph(discourse, user, node, request, approvalSum, applyThreshold, instantApply)
-        discourse.add(node)
-
-        tx.persistChanges(discourse) match {
-          case Some(err) => Left(BadRequest(s"Cannot update Post with uuid '$uuid': $err'"))
-          //FIXME: why the fuck do i need to do this???
-          //otherwise node.rev_tags is empty? something is messed up here.
-          case _         => Right(tagTaggable.shapeResponse(discourse.posts.find(_.uuid == node.uuid).get))
-          // case _         => Right(node)
+          tx.persistChanges(discourse) match {
+            case Some(err) => Left(BadRequest(s"Cannot update Post with uuid '$uuid': $err"))
+            //FIXME: why the fuck do i need to do this???
+            //otherwise node.rev_tags is empty? something is messed up here.
+            //TODO: should not use tagtaggable, but only send addedtags so we
+            //have ids in the client for the ones that were created in this
+            //request
+            case _         => Right(tagTaggable.shapeResponse(discourse.posts.find(_.uuid == node.uuid).get))
+            // case _         => Right(node)
+          }
+        } getOrElse {
+          Left(BadRequest(s"Cannot find Post with uuid '$uuid'"))
         }
       }
     }
