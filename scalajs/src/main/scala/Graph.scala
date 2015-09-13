@@ -144,7 +144,7 @@ trait NodeBase extends NodeDelegates {
 @JSExport
 class Node(val rawNode: RawNode) extends NodeBase {
 
-  override def classifications = successors.collect { case hr: HyperRelation => hr }.flatMap(_.tags)
+  override def classifications = (successors ++ outRelations).collect { case hr: HyperRelation => hr }.flatMap(_.tags)
 
   @JSExport def encode() = js.Dynamic.literal(id = id, title = title, description = description.orUndefined, timestamp = timestamp, quality = quality, viewCount = viewCount, classifications = classifications, isHyperRelation = isHyperRelation, tags = tags)
 }

@@ -25,11 +25,10 @@ function coloredTagNode(Helpers, ContextService, $rootScope) {
         }
 
         function selectTag(node) {
-            let tags = node.classifications.concat(node.tags);
+            let tags = Helpers.sortedNodeTags(node, scope.ignoreTags || ContextService.currentContexts);
             // if ignoretags are set, we will filter by them (this is the case for streams and search.
             // otherwise the the current contexts are ignored.
-            let filtered = _.reject(tags, i => _.any(scope.ignoreTags || ContextService.currentContexts, _.pick(i, "id")));
-            return filtered[0];
+            return tags[0];
         }
 
         function setColor(tag) {
