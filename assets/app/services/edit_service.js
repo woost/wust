@@ -13,7 +13,7 @@ function EditService(Post, Connectable, HistoryService, store, DiscourseNode, Ze
 
             this.apply(other);
 
-            this.expandedEditor = other.expandedEditor === undefined ? true : other.expandedEditor;
+            this.expandedEditor = !!other.expandedEditor;
 
             this.service = connectable ? Connectable : Post;
 
