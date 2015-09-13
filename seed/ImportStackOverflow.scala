@@ -21,7 +21,7 @@ object ImportStackOverflow extends Task with SeedTools {
   val ws = new play.api.libs.ws.ning.NingWSClient(builder.build())
   def getJson(url: String): JsValue = Await.result(ws.url(url).get(), 10.seconds).json
 
-  val site = "ux"
+  val sites = List("vi","biology","math", "ux")
   val questionLimit = 10
   val filterId = "!9McUOAJfkgufsXMHUKprrtPH5vBjclpq8Z--RIM3a0bt2k)S-4zjE6n"
   val baseurl = s"http://api.stackexchange.com/2.2"
@@ -32,7 +32,7 @@ object ImportStackOverflow extends Task with SeedTools {
   //TODO: tag per site
   //TODO: ignore "untagged"
 
-  def questions = {
+  def questions(site:String) = {
     println("downloading top questions...")
     val url = baseurl + s"/questions?page=1&pagesize=$questionLimit&order=desc&min=10&sort=votes&filter=$filterId&site=$site"
     val json = getJson(url)
@@ -45,8 +45,6 @@ object ImportStackOverflow extends Task with SeedTools {
     modifyDiscourse { discourse =>
       discourse.add(user)
     }
-
-    println(s"Importing StackExchange: $site")
 
     def post(rawPost: JsObject)(implicit discourse:Discourse) = {
       val tagNames = (rawPost \ "tags").asOpt[Seq[String]]
@@ -84,21 +82,25 @@ object ImportStackOverflow extends Task with SeedTools {
       post
     }
 
-    questions.foreach { rawQuestion =>
+    sites.foreach{ site =>
+      println(s"Importing StackExchange: $site")
+      questions(site).foreach { rawQuestion =>
 
-      modifyDiscourse { implicit discourse =>
-        val question = post(rawQuestion)
-        println(s"Importing question: ${question.title}")
-        discourse.add(tag(question, soTag))
-        //TODO: on relation between scope and post
-        //discourse.add(classify(question, questionTag))
+        modifyDiscourse { implicit discourse =>
+          val question = post(rawQuestion)
+          println(s"Importing question: ${question.title}")
+          discourse.add(tag(question, soTag))
+          //TODO: on relation between scope and post
+          //discourse.add(classify(question, questionTag))
 
-        (rawQuestion \ "answers").as[Seq[JsObject]].foreach { rawAnswer =>
-          val answer = post(rawAnswer)
-          val connects = Connects.create(answer, question)
-          discourse.add(classify(connects, answerTag))
-          discourse.add(answer, connects)
+          (rawQuestion \ "answers").as[Seq[JsObject]].foreach { rawAnswer =>
+            val answer = post(rawAnswer)
+            val connects = Connects.create(answer, question)
+            discourse.add(classify(connects, answerTag))
+            discourse.add(answer, connects)
+          }
         }
+        Thread.sleep(1000)
       }
     }
   }
