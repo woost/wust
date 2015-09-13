@@ -233,19 +233,8 @@ function EditService(Post, Connectable, HistoryService, store, DiscourseNode, Ze
 
     function connectNodes(startNode, endNode, saveNode = startNode) {
         let localStart = startNode.id === undefined;
-        let promise;
-        if (endNode.isHyperRelation) {
-            let start = Post.$buildRaw({
-                id: endNode.startId
-            });
-            let hyper = start.connectsTo.$buildRaw({
-                id: endNode.endId
-            });
-            promise = localStart ? hyper.connectsFrom.$create(saveNode) : hyper.connectsFrom.$buildRaw(_.pick(startNode, "id")).$save({});
-        } else {
-            let start = Connectable.$buildRaw(_.pick(endNode, "id"));
-            promise = localStart ? start.connectsFrom.$create(saveNode) : start.connectsFrom.$buildRaw(_.pick(startNode, "id")).$save({});
-        }
+        let start = Connectable.$buildRaw(_.pick(endNode, "id"));
+        let promise = localStart ? start.connectsFrom.$create(saveNode) : start.connectsFrom.$buildRaw(_.pick(startNode, "id")).$save({});
 
         promise.$then(response => {
             HistoryService.addConnectToCurrentView(endNode.id, response);
