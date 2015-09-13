@@ -49,8 +49,8 @@ object ApiNodeFormat {
           JsArray(n.outRelationsAs(PostToConnects).map(_.endNode).flatMap(con => discourse.classifies.filter(_.endNode == con)).map(_.startNode).sortBy(_.uuid).map(tagWrites.writes))
         }),
         ("timestamp", Json.toJson(JsNumber(n.timestamp))),
-        ("requestsEdit", Json.toJson(n.inRelationsAs(Updated))), //TODO: accessors for subrelations of hyperrelations, to get connected hypernode
-        ("requestsTags", Json.toJson(n.inRelationsAs(AddTags) ++ n.inRelationsAs(RemoveTags))),
+        ("requestsEdit", Json.toJson(n.inRelationsAs(Updated).filter(!_.applied))), //TODO: accessors for subrelations of hyperrelations, to get connected hypernode
+        ("requestsTags", Json.toJson((n.inRelationsAs(AddTags) ++ n.inRelationsAs(RemoveTags)).filter(!_.applied))),
         ("viewCount", JsNumber(n.viewCount))
       )
       case n: Connects => Seq(

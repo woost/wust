@@ -54,7 +54,7 @@ trait ConnectableAccessBase {
   }
 
   //TODO: refactor
-  protected def addRequestTagsToGraph(discourse: Discourse, user: User, post: Post, request: AddTagRequestBase with RemoveTagRequestBase, weight: Long, threshold: Long) {
+  protected def addRequestTagsToGraph(discourse: Discourse, user: User, post: Post, request: AddTagRequestBase with RemoveTagRequestBase, weight: Long, threshold: Long, instantApply: Boolean) {
     // TODO: checking for duplicates is not really safe if there are concurrent requests
     // TODO: do not get all connected requests if not needed...its just slow
     val userDef = ConcreteFactoryNodeDefinition(User)
@@ -71,6 +71,10 @@ trait ConnectableAccessBase {
     val existRemTags = existing.removeTags
 
     request.addedTags.foreach { tagReq =>
+      //TODO: should vote for alreadyexisting requests
+      //needs to lock for caching / share logic with VotesAccess?
+      //this is very important for already existing requests when request has
+      //instantApply, so we apply the existing change request.
       val alreadyExisting = existAddTags.exists { addTag =>
         if (tagReq.id.isDefined)
           addTag.proposesTags.head.uuid == tagReq.id.get
@@ -82,7 +86,7 @@ trait ConnectableAccessBase {
 
       if (!alreadyExisting) {
         tagConnectRequestToScope(tagReq).map { tag =>
-          val addTags = AddTags.create(user, post, applyThreshold = threshold, approvalSum = weight)
+          val addTags = AddTags.create(user, post, applyThreshold = threshold, approvalSum = weight, applied = instantApply)
           discourse.add(ProposesTag.create(addTags, tag))
           addTags
         } foreach { addTags =>
@@ -248,11 +252,12 @@ case class PostAccess() extends ConnectableAccessBase with NodeDeleteBase[Post] 
 
         val discourse = Discourse(tx.queryGraph(Query(query, createdDef.parameterMap)))
         val isAuthor = discourse.createds.headOption.isDefined
+        val authorBoost = if (isAuthor) 5 else 0
 
-        val approvalSum = 1 // TODO: karma
+        val karma = 1 // TODO: karma
+        val approvalSum = karma + authorBoost
         val applyThreshold = 5 // TODO: correct edit threshold
-        if (approvalSum >= applyThreshold || isAuthor)
-          throw new Exception("Instant edits are not implemented yet!")
+        val instantApply = approvalSum >= applyThreshold
 
         //TODO: check for edit threshold and implement instant edit
         val node = if (request.title.isDefined || request.description.isDefined) {
@@ -262,8 +267,7 @@ case class PostAccess() extends ConnectableAccessBase with NodeDeleteBase[Post] 
 
           discourse.add(node)
 
-          //TODO: correct threshold and votes for apply
-          val contribution = Updated.create(user, node, oldTitle = node.title, newTitle = request.title.getOrElse(node.title), oldDescription = node.description, newDescription = request.description.orElse(node.description), applyThreshold = applyThreshold, approvalSum = approvalSum)
+          val contribution = Updated.create(user, node, oldTitle = node.title, newTitle = request.title.getOrElse(node.title), oldDescription = node.description, newDescription = request.description.orElse(node.description), applyThreshold = applyThreshold, approvalSum = approvalSum, applied = instantApply)
           val votes = Votes.create(user, contribution, weight = approvalSum)
           discourse.add(contribution, votes)
           node
@@ -271,7 +275,7 @@ case class PostAccess() extends ConnectableAccessBase with NodeDeleteBase[Post] 
           Post.matchesOnUuid(uuid)
         }
 
-        addRequestTagsToGraph(discourse, user, node, request, approvalSum, applyThreshold)
+        addRequestTagsToGraph(discourse, user, node, request, approvalSum, applyThreshold, instantApply)
         discourse.add(node)
 
         tx.persistChanges(discourse) match {
