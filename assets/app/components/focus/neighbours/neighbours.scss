@@ -1,4 +1,5 @@
 @import "compass/css3/flexbox";
+@import "globals";
 
 #neighbours_component {
     width: 100%;
@@ -8,8 +9,8 @@
     @include flex-direction(rows);
     @include align-items(flex-start);
     .neighbours_attachedto {
-        width: 270px;
-        min-width: 270px;
+        width: 280px;
+        min-width: 280px;
         padding-right: 10px;
         // background: red;
         .node_model_list {
@@ -17,17 +18,26 @@
             // @include justify-content(flex-end);
         }
         .predecessor_connection {
-            margin-left: 5px;
             float:right;
 
             //icons are higher than minimum small post height, this prevents float failure
             height:20px;
             line-height: 20px;
-            .upvote_button {
-                opacity: 0.5;
+            .tools {
+                margin-bottom: -11px;
+                // .button {
+                //     opacity: 0.5;
+                // }
+                // .button.active, .button:hover {
+                //     opacity: 1;
+                // }
             }
-            .upvote_button.active, .upvote_button:hover {
-                opacity: 1;
+            .arrowline {
+                stroke-width: 1px;
+                stroke:$graph_relation_color;
+            }
+            .arrow {
+                fill: $graph_relation_color;
             }
         }
     }
