@@ -66,7 +66,7 @@ class TaggedTaggable[NODE <: UuidNode] extends AccessNodeDecoratorControl[NODE] 
       val params = tagsDef.parameterMap ++ connDef.parameterMap ++ classifiesDef.parameterMap ++ Map("nodeUuids" -> response.map(_.uuid).toSeq)
 
       val graph = db.queryGraph(Query(query, params.toMap))
-      val discourse = Discourse(graph)
+      val discourse = Discourse(response.head.graph merge graph)
       discourse.add(response.toSeq: _*)
     }
 
@@ -93,8 +93,8 @@ class ClassifiedConnects[NODE <: UuidNode] extends AccessNodeDecoratorControl[NO
       """
       val params = nodeDef.parameterMap ++ classDef.parameterMap ++ Map("nodeUuids" -> response.map(_.uuid).toSeq)
 
-      val discourse = Discourse(response.head.graph merge db.queryGraph(Query(query, params.toMap)))
-
+      val graph = db.queryGraph(Query(query, params.toMap))
+      val discourse = Discourse(response.head.graph merge graph)
       discourse.add(response.toSeq: _*)
     }
 
