@@ -43,7 +43,11 @@ object ApiNodeFormat {
         ("title", JsString(n.title)),
         ("description", JsString(n.description.getOrElse(""))),
         ("tags", JsArray(n.inRelationsAs(Tags).map(tagsWrites.writes))), // TODO: why do we have to call tagsWrites.writes explicitly?
-        ("classifications", JsArray(n.inRelationsAs(Connects).flatMap(_.rev_classifies).map(tagWrites.writes))),
+        //("classifications", JsArray(n.outRelationsAs(ConnectableToConnects).flatMap(_.rev_classifies).map(tagWrites.writes))), //TODO WHY DOES THIS NOT WORK...
+        ("classifications", {
+          val discourse = Discourse(n.graph)
+          JsArray(n.outRelationsAs(ConnectableToConnects).map(_.endNode).flatMap(con => discourse.classifies.filter(_.endNode == con)).map(_.startNode).map(tagWrites.writes))
+        }),
         ("timestamp", Json.toJson(JsNumber(n.timestamp))),
         ("requestsEdit", Json.toJson(n.inRelationsAs(Updated))), //TODO: accessors for subrelations of hyperrelations, to get connected hypernode
         ("requestsTags", Json.toJson(n.inRelationsAs(AddTags) ++ n.inRelationsAs(RemoveTags))),
