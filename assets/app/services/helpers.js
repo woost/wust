@@ -2,6 +2,7 @@ angular.module("wust.services").value("Helpers", {
     fireWindowResizeEvent,
     mapFind,
     hashCode,
+    sortedNodeTags,
     hashToColor,
     navBackgroundColor,
     postBorderColor,
@@ -44,6 +45,12 @@ function hashCode(string) {
         hash = hash & hash; // Convert to 32bit integer
     }
     return hash;
+}
+
+
+function sortedNodeTags(node) {
+    let sortByIdQuality = (tags) => _.sortBy(tags, ["id","quality"], ["asc", "desc"]);
+    return sortByIdQuality(node.classifications).concat(sortByIdQuality(node.tags));
 }
 
 function navBackgroundColor(tag) { return hashToColor(tag, 20, 98); }

@@ -237,7 +237,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
                     //TODO: do it with d3 data-joins, or directly with the angular-port
                     if(d.isHyperRelation) {
                         let elem = document.createElement("span");
-                        _.values(d.tags).forEach(t => {
+                        _.values(Helpers.sortedNodeTags(d)).forEach(t => {
                             let tagElem = document.createElement("span");
                             tagElem.className = "tag-label nodetag";
 

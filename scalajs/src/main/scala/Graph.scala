@@ -75,7 +75,7 @@ sealed trait NodeDelegates extends NodeLike {
   def title_=(newTitle: String) = rawNode.title = newTitle
   //FIXME: need to set tags, in order to update the graph from outside
   @JSExport
-  def tags = rawNode.tags.sortBy(_.id).sortBy(_.quality)
+  def tags = rawNode.tags
   @JSExport
   def tags_=(newTags: js.Array[RecordTag]) = rawNode.tags = newTags
 
@@ -90,7 +90,7 @@ sealed trait NodeDelegates extends NodeLike {
 }
 
 trait NodeBase extends NodeDelegates {
-  def classifications = successors.collect { case hr: HyperRelation => hr }.toList.sortBy(_.quality).flatMap(_.tags.sortBy(_.id))
+  def classifications = successors.collect { case hr: HyperRelation => hr }.flatMap(_.tags)
   @JSExport("classifications") def classificationsJs = classifications.toJSArray
 
   var inRelations: Set[RelationLike] = Set.empty
