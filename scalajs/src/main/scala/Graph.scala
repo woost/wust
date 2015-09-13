@@ -144,7 +144,13 @@ trait NodeBase extends NodeDelegates {
 @JSExport
 class Node(val rawNode: RawNode) extends NodeBase {
 
-  override def classifications = (successors ++ outRelations).collect { case hr: HyperRelation => hr }.flatMap(_.tags)
+  override def classifications = {
+    val connects = (successors ++ outRelations).collect { case hr: HyperRelation => hr }
+    if (connects.isEmpty)
+      rawNode.classifications
+    else
+      connects.flatMap(_.tags)
+  }
 
   @JSExport def encode() = js.Dynamic.literal(id = id, title = title, description = description.orUndefined, timestamp = timestamp, quality = quality, viewCount = viewCount, classifications = classifications, isHyperRelation = isHyperRelation, tags = tags)
 }
@@ -381,8 +387,8 @@ class Graph(private[js] val rawGraph: RawGraph) extends WrappedGraph[Relation] {
 
 @JSExport
 @JSExportAll
-class RawNode(val id: String, var title: String, var description: Option[String], val isHyperRelation: Boolean, val quality: Double, val viewCount: Int, val startId: Option[String], val endId: Option[String], var tags: js.Array[RecordTag], val timestamp: js.Any) {
-  def this(n: RecordNode) = this(n.id, n.title.getOrElse(""), n.description.toOption, n.isHyperRelation.getOrElse(false), n.quality.getOrElse(-1), n.viewCount.getOrElse(-1), n.startId.toOption, n.endId.toOption, n.tags, n.timestamp.getOrElse(0))
+class RawNode(val id: String, var title: String, var description: Option[String], val isHyperRelation: Boolean, val quality: Double, val viewCount: Int, val startId: Option[String], val endId: Option[String], var tags: js.Array[RecordTag], val classifications: Set[RecordTag], val timestamp: js.Any) {
+  def this(n: RecordNode) = this(n.id, n.title.getOrElse(""), n.description.toOption, n.isHyperRelation.getOrElse(false), n.quality.getOrElse(-1), n.viewCount.getOrElse(-1), n.startId.toOption, n.endId.toOption, n.tags, n.classifications.getOrElse(js.Array()).toSet, n.timestamp.getOrElse(0))
   override def toString = s"RawNode($id)"
 
   def canEqual(other: Any): Boolean = other.isInstanceOf[RawNode]
@@ -523,6 +529,7 @@ trait RecordNode extends js.Object {
   def endId: js.UndefOr[String] = js.native
 
   def tags: js.Array[RecordTag] = js.native
+  def classifications: js.UndefOr[js.Array[RecordTag]] = js.native
 
   //TODO: why can't this be Long?
   def timestamp: js.UndefOr[js.Any] = js.native
