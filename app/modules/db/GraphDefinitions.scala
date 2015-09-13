@@ -46,7 +46,12 @@ sealed trait FactoryNodeDefinition[+NODE <: Node] extends NodeDefinition[NODE] {
 
 sealed trait FixedNodeDefinition[+NODE <: Node] extends NodeDefinition[NODE]
 
-sealed trait HyperNodeDefinitionBase[+NODE <: Node] extends FixedNodeDefinition[NODE]
+sealed trait HyperNodeDefinitionBase[+NODE <: Node] extends FixedNodeDefinition[NODE] {
+  val startName: String
+  val endName: String
+  val startRelationName: String
+  val endRelationName: String
+}
 
 sealed trait UuidNodeDefinition[+NODE <: UuidNode] extends FixedNodeDefinition[NODE] {
   val uuid: String
@@ -116,6 +121,8 @@ END <: Node,
   val nodeUuid: Option[String]
   val uuidVariable = randomVariable
 
+  val startName = startDefinition.name
+  val endName = endDefinition.name
   final val startRelationName = randomVariable
   final val endRelationName = randomVariable
 

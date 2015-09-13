@@ -142,7 +142,7 @@ trait VotesReferenceAccess[T <: Reference] extends EndRelationAccessDefault[User
       val referenceDef = nodeDefinition(param.startUuid, param.endUuid)
       val userNode = ConcreteNodeDefinition(user)
       val votesDef = RelationDefinition(userNode, Votes, referenceDef)
-      val query = s"match ${referenceDef.toQuery} set ${referenceDef.name}._locked = true with ${referenceDef.name} optional match ${votesDef.toQuery(true, false)} return *"
+      val query = s"match ${referenceDef.toQuery} set ${referenceDef.name}._locked = true with ${referenceDef.startName},${referenceDef.startRelationName},${referenceDef.endName},${referenceDef.endRelationName},${referenceDef.name} optional match ${votesDef.toQuery(true, false)} return *"
       val discourse = Discourse(tx.queryGraph(Query(query, votesDef.parameterMap)))
       val reference = selectNode(discourse, param.startUuid, param.endUuid)
       val votes = discourse.votes.headOption
@@ -192,10 +192,7 @@ case class VotesTagsAccess(sign: Long) extends VotesReferenceAccess[Tags] {
 case class VotesConnectsAccess(sign: Long) extends VotesReferenceAccess[Connects] {
 
   override def selectNode(discourse: Discourse, startUuid: String, endUuid: String) = discourse.connects.find(c => c.startNodeOpt.map(_.uuid == startUuid).getOrElse(false) && c.endNodeOpt.map(_.uuid == endUuid).getOrElse(false)).get
-  override def selectPost(node: Connects) = node.endNodeOpt match {
-    case Some(post: Post) => post
-    case Some(connects: Connects) => connects.startNodeOpt.get.asInstanceOf[Post]
-  }
+  override def selectPost(node: Connects) = node.startNodeOpt.get.asInstanceOf[Post]
 
   override def nodeDefinition(startUuid: String, endUuid: String): HyperNodeDefinitionBase[Connects] = {
     HyperNodeDefinition(FactoryUuidNodeDefinition(Connectable, startUuid), Connects, FactoryUuidNodeDefinition(Connectable, endUuid))
