@@ -8,7 +8,6 @@ import modules.auth.HeaderEnvironmentModule
 import modules.db.Database.db
 import modules.db._
 import play.api.libs.json._
-import formatters.json.SessionFormat._
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
 import renesca.Query
