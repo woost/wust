@@ -52,11 +52,11 @@ function RoutesConfig($stateProvider, $urlRouterProvider, $locationProvider) {
                 // somehow the resolve method is called every time we change
                 // our url for switching between graph and neighbours view.
                 // so if we are still viewing the same node, we just return
-                // undefined, as no new focusctrl is instantiated
+                // the last focused node, as no new focusctrl is instantiated
                 if ($state.is("focus") && lastFocus && lastFocus.id === $stateParams.id) {
                     return lastFocus;
                 } else {
-                    lastFocus = Post.$find($stateParams.id);
+                    lastFocus = Post.$find($stateParams.id, { countView: true });
                     return lastFocus.$asPromise().catch(response => {
                         $state.go("dashboard");
                     });

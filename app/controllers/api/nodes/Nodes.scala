@@ -17,6 +17,7 @@ case class RequestContext(controller: NodesBase with Controller, user: Option[Us
   def page = query.get("page").map(_.toInt)
   def size = query.get("size").map(_.toInt)
   def limit = size.getOrElse(15)
+  def countView = query.get("countView").map(_.toBoolean).getOrElse(false)
 
   def jsonAs[T](implicit rds : play.api.libs.json.Reads[T]) = {
     json.flatMap(_.validate[T].asOpt)
