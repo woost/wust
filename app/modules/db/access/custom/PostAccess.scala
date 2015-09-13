@@ -236,11 +236,22 @@ case class PostAccess() extends ConnectableAccessBase with NodeDeleteBase[Post] 
   override def update(context: RequestContext, uuid: String) = context.withUser { user =>
     context.withJson { (request: PostUpdateRequest) =>
       db.transaction { tx =>
-        val discourse = Discourse.empty
+        val postDef = FactoryUuidNodeDefinition(Post, uuid)
+        val userDef = ConcreteNodeDefinition(user)
+        val createdDef = RelationDefinition(userDef, SchemaCreated, postDef)
+
+        val query = s"""
+          match ${postDef.toQuery}
+          optional match ${createdDef.toQuery(true, false)}
+          return *
+        """
+
+        val discourse = Discourse(tx.queryGraph(Query(query, createdDef.parameterMap)))
+        val isAuthor = discourse.createds.headOption.isDefined
 
         val approvalSum = 1 // TODO: karma
         val applyThreshold = 5 // TODO: correct edit threshold
-        if (approvalSum >= applyThreshold)
+        if (approvalSum >= applyThreshold || isAuthor)
           throw new Exception("Instant edits are not implemented yet!")
 
         //TODO: check for edit threshold and implement instant edit
