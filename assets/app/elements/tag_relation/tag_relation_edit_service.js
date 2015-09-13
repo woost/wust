@@ -32,7 +32,7 @@ function TagRelationEditService($rootScope, $modal, EditService) {
     }
 
     function showModal(node) {
-        currentRelation = EditService.createSession(node, false, true);
+        currentRelation = EditService.editConnects(node);
         modalInstance.$promise.then(modalInstance.show);
     }
 

@@ -23,7 +23,7 @@ bigPostCtrl.$inject = ["SidebarService", "Post", "EditService", "ModalEditServic
 function bigPostCtrl(SidebarService, Post, EditService, ModalEditService) {
     let vm = this;
 
-    vm.editNode = EditService.createSession(vm.node);
+    vm.editNode = EditService.edit(vm.node);
     vm.editChanges = Post.$buildRaw(vm.node).requestsEdit.$search();
     vm.tagChanges = Post.$buildRaw(vm.node).requestsTags.$search();
     vm.replyTo = replyTo;

@@ -170,7 +170,7 @@ function EditService(Post, Connectable, Connects, HistoryService, store, Discour
     this.edit = edit;
     this.editAnswer = editAnswer;
     this.editNewDiscussion = editNewDiscussion;
-    this.createSession = createSession;
+    this.editConnects = editConnects;
     this.updateNode = updateNode;
     this.findNode = findNode;
     this.persist = storeEditList;
@@ -219,15 +219,22 @@ function EditService(Post, Connectable, Connects, HistoryService, store, Discour
         }
 
         let existing;
+        let lazyadd = node.id !== undefined;
         if (existingIdx >= 0) {
             existing = self.list[existingIdx];
-            self.list.splice(existingIdx, 1);
+            if (!lazyadd)
+                self.list.splice(existingIdx, 1);
         } else {
-            existing = new Session(node);
+            // lazily add existing nodes, so they only appear in the scratchpad
+            // if they were actually edited
+            existing = new Session(node, lazyadd);
         }
 
-        self.list.splice(index, 0, existing);
-        storeEditList();
+        if (!lazyadd) {
+            self.list.splice(index, 0, existing);
+            storeEditList();
+        }
+
         return existing;
     }
 
@@ -254,8 +261,8 @@ function EditService(Post, Connectable, Connects, HistoryService, store, Discour
         return promise;
     }
 
-    function createSession(node = {}, lazyAdd = true, connects = false, newDiscussion = false) {
-        return new Session(node, lazyAdd, connects, newDiscussion);
+    function editConnects(node) {
+        return new Session(node, false, true, false);
     }
 
     function editSession(session, index = 0) {
@@ -265,7 +272,7 @@ function EditService(Post, Connectable, Connects, HistoryService, store, Discour
     function editAnswer(node) {
         let existingAnswer = _.find(self.list, elem => elem.isLocal && elem.referenceNode && elem.referenceNode.id === node.id);
         if (existingAnswer === undefined) {
-            let session = createSession({}, true, false, false);
+            let session = new Session({}, true, false, false);
             session.setReference(node);
             return session;
         } else {
@@ -276,7 +283,7 @@ function EditService(Post, Connectable, Connects, HistoryService, store, Discour
     function editNewDiscussion(tags = []) {
         let existingAnswer = _.find(self.list, elem => elem.isLocal && !elem.referenceNode && elem.newDiscussion && _.every(tags, tag => _.any(elem.tags, other => other.id === tag.id)));
         if (existingAnswer === undefined) {
-            return createSession({tags}, true, false, true);
+            return new Session({tags}, true, false, true);
         } else {
             // TODO: what about the tags of the new discussion
             return edit(existingAnswer);
