@@ -9,10 +9,11 @@
                 <h3 contenteditable="true" ng-model="vm.node.title" ng-change="vm.node.onChange()" placeholder="TL;DR" ng-class="{'is_invalid': !vm.node.isValid}" class="title" ng-keydown="vm.redirectEnter($event)">
                 </h3>
             </div>
-            <div class="pull-right right-controls">
-                <i ng-if="vm.node.canSave" class="fa fa-asterisk modified-indicator" data-title="this post contains unsaved changes" bs-tooltip animation=""></i>
+            <div class="right-controls">
+                <i ng-style="{visibility: vm.node.canSave && 'visible' || 'hidden'}" class="fa fa-asterisk modified-indicator" data-title="this post contains unsaved changes" bs-tooltip animation=""></i>
+                <a ng-style="{visibility: !vm.node.isLocal && 'visible' || 'hidden'}" ui-sref="focus({id: vm.node.id})" data-title="link" bs-tooltip animation=""><i class="fa fa-arrow-right"></i></a>
+                <button class="close" ng-click="vm.node.remove()" type="button" aria-label="Close " data-title="remove from scratchpad, discards unsaved changes" bs-tooltip animation=""><span aria-hidden="true">&times;</span></button>
             </div>
-            <button class="close" ng-click="vm.node.remove()" type="button" aria-label="Close " data-title="remove from scratchpad (not delete), discards unsaved changes" bs-tooltip animation=""><span aria-hidden="true">&times;</span></button>
         </div>
         <div class="panel-body" collapse="!vm.node.expandedEditor">
             <div ng-if="vm.node.referenceNode !== undefined">
