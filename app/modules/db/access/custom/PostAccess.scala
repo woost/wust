@@ -275,20 +275,6 @@ case class PostAccess() extends ConnectableAccessBase with NodeDeleteBase[Post] 
   }
 }
 
-case class ConnectableAccess() extends NodeReadBase[Connectable] {
-  val factory = Connectable
-  val postAccess = PostAccess()
-  val connectsAccess = ConnectsAccess()
-
-  // we redirect the create action the PostAccess. It is not possible to create
-  // connectables withou any context and usually you want to handle connects
-  // and posts in one api, so usally creating a post is what you want
-  override def create(context: RequestContext) = postAccess.create(context)
-
-  // TODO: add parameter to set which access should be used for update
-  override def update(context: RequestContext, uuid: String) = connectsAccess.update(context, uuid)
-}
-
 case class ConnectsAccess() extends ConnectableAccessBase with NodeReadBase[Connects] {
   val factory = Connects
   val classifiedConnects = ClassifiedConnects.apply[Connects]

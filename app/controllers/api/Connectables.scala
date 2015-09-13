@@ -9,7 +9,7 @@ import modules.requests.dsl._
 //TODO: should connectable and post share the same api? if so, rename to connectable
 object Connectables extends Nodes[Connectable] {
   // TODO: combine into posts
-  val node = NodeDef(ConnectableAccess.apply,
+  val node = NodeDef(NodeRead(Connectable),
     "connects-from" -> (N < Connects < (EndConRelationAccess(Connects, Post) + PostAccess.apply,
       "connects-from" -> (N < EndConRelationAccess(Connects, Post) + PostAccess.apply)
     ))
@@ -17,7 +17,7 @@ object Connectables extends Nodes[Connectable] {
 }
 
 object ConnectsCtrl extends Nodes[Connects] {
-  val node = NodeDef(NodeRead(Connects),
+  val node = NodeDef(ConnectsAccess.apply,
     "classified" -> (N < EndConRelationAccess(Classifies, Classification))
   )
 }
@@ -30,7 +30,7 @@ object Posts extends Nodes[Post] {
       "up" -> (N < VotesTagsAccess(1)),
       "neutral" -> (N < VotesTagsAccess(0))
     )),
-    "connects-to" -> (N > Connects > (StartConRelationAccess(Connects, Connectable) + ConnectableAccess.apply,
+    "connects-to" -> (N > Connects > (StartConRelationAccess(Connects, Connectable) + PostAccess.apply,
       "connects-from" -> (N < EndConRelationAccess(Connects, Post) + PostAccess.apply),
       "up" -> (N < VotesConnectsAccess(1)),
       "neutral" -> (N < VotesConnectsAccess(0))

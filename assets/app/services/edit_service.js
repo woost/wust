@@ -1,13 +1,13 @@
 angular.module("wust.services").service("EditService", EditService);
 
-EditService.$inject = ["Post", "Connectable", "HistoryService", "store", "DiscourseNode", "ZenService"];
+EditService.$inject = ["Post", "Connectable", "Connects", "HistoryService", "store", "DiscourseNode", "ZenService"];
 
-function EditService(Post, Connectable, HistoryService, store, DiscourseNode, ZenService) {
+function EditService(Post, Connectable, Connects, HistoryService, store, DiscourseNode, ZenService) {
     let editStore = store.getNamespacedStore("edit");
     let self = this;
 
     class Session {
-        constructor(other, lazyAdd = false, connectable = false, newDiscussion = false) {
+        constructor(other, lazyAdd = false, connects = false, newDiscussion = false) {
             // local id to identify nodes without an id
             this.localId = _.uniqueId();
 
@@ -15,7 +15,7 @@ function EditService(Post, Connectable, HistoryService, store, DiscourseNode, Ze
 
             this.expandedEditor = !!other.expandedEditor;
 
-            this.service = connectable ? Connectable : Post;
+            this.service = connects ? Connects : Post;
 
             this.lazyAdd = lazyAdd;
 
@@ -243,8 +243,8 @@ function EditService(Post, Connectable, HistoryService, store, DiscourseNode, Ze
         return promise;
     }
 
-    function createSession(node = {}, lazyAdd = true, connectable = false, newDiscussion = false) {
-        return new Session(node, lazyAdd, connectable, newDiscussion);
+    function createSession(node = {}, lazyAdd = true, connects = false, newDiscussion = false) {
+        return new Session(node, lazyAdd, connects, newDiscussion);
     }
 
     function editSession(session, index = 0) {
