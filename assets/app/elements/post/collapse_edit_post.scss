@@ -9,6 +9,7 @@
             @include justify-content(space-between);
             $line-height: 36px;
             .left-controls {
+                width: 14px;
                 white-space: nowrap;
                 line-height: $line-height; // vertical center
                 cursor: pointer;
