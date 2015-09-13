@@ -8,16 +8,10 @@ import modules.requests.dsl._
 
 //TODO: should connectable and post share the same api? if so, rename to connectable
 object Connectables extends Nodes[Connectable] {
+  // TODO: combine into posts
   val node = NodeDef(ConnectableAccess.apply,
-    "connects-from" -> (N < Connects < (EndConRelationAccess(Connects, Connectable) + ConnectableAccess.apply,
-      "connects-to" -> (N > StartConRelationAccess(Connects, Connectable) + ConnectableAccess.apply),
-      "connects-from" -> (N < EndConRelationAccess(Connects, Connectable) + ConnectableAccess.apply)
-    )),
-    "connects-to" -> (N > Connects > (StartConRelationAccess(Connects, Connectable) + ConnectableAccess.apply,
-      "connects-to" -> (N > StartConRelationAccess(Connects, Connectable) + ConnectableAccess.apply),
-      "connects-from" -> (N < EndConRelationAccess(Connects, Connectable) + ConnectableAccess.apply),
-      "up" -> (N < VotesConnectsAccess(1)),
-      "neutral" -> (N < VotesConnectsAccess(0))
+    "connects-from" -> (N < Connects < (EndConRelationAccess(Connects, Post) + PostAccess.apply,
+      "connects-from" -> (N < EndConRelationAccess(Connects, Post) + PostAccess.apply)
     ))
   )
 }
@@ -35,6 +29,11 @@ object Posts extends Nodes[Post] {
     "tags" -> (N < SchemaTags < (EndRelationRead(SchemaTags, Scope),
       "up" -> (N < VotesTagsAccess(1)),
       "neutral" -> (N < VotesTagsAccess(0))
+    )),
+    "connects-to" -> (N > Connects > (StartConRelationAccess(Connects, Connectable) + ConnectableAccess.apply,
+      "connects-from" -> (N < EndConRelationAccess(Connects, Post) + PostAccess.apply),
+      "up" -> (N < VotesConnectsAccess(1)),
+      "neutral" -> (N < VotesConnectsAccess(0))
     ))
   )
 }

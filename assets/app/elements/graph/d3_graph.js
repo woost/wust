@@ -1,8 +1,8 @@
 angular.module("wust.elements").directive("d3Graph", d3Graph);
 
-d3Graph.$inject = ["$window", "DiscourseNode", "Helpers", "$location", "$filter", "Connectable", "ModalEditService", "EditService", "TagRelationEditService", "$q"];
+d3Graph.$inject = ["$window", "DiscourseNode", "Helpers", "$location", "$filter", "Post", "ModalEditService", "EditService", "TagRelationEditService", "$q"];
 
-function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectable, ModalEditService, EditService, TagRelationEditService, $q) {
+function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, ModalEditService, EditService, TagRelationEditService, $q) {
     return {
         restrict: "A",
         scope: false,
@@ -1006,7 +1006,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
         }
 
         disconnectHyperRelation(d) {
-            Connectable.$buildRaw({
+            Post.$buildRaw({
                 id: d.startId
             }).connectsTo.$buildRaw({
                 id: d.endId
@@ -1018,7 +1018,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
         }
 
         removeNode(d) {
-            Connectable.$buildRaw({
+            Post.$buildRaw({
                 id: d.id
             }).$destroy().$then(response => {
                 this.graph.removeNode(d.id);
@@ -1190,15 +1190,15 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Connectabl
         onDragConnectEnd() {
             if (this.isDragging) {
                 if (this.hoveredNode !== undefined) {
-                    let startNode = this.arrowToResponse ? this.hoveredNode : this.dragStartNode; // always normal node
-                    let endNode = this.arrowToResponse ? this.dragStartNode : this.hoveredNode;
+                    let startNode = this.dragStartNode; // always normal node
+                    let endNode = this.hoveredNode;
                     // starting on hypernodes is also forbidden,
                     // but we don't need to handle this, because
                     // the connect button does not exist on hyperRelations.
                     //TODO: we need to make it impossible to drag on self loops and incident relations,
                     //is assured by backend.
                     EditService.connectNodes(startNode, endNode).$then(response => {
-                        let connects = _.find(response.graph.nodes, n => n.isHyperRelation && startNode.id === n.startId && endNode.id === n.endId);
+                        let connects = _.find(response.graph.nodes, n => n.isHyperRelation && startNode.id === n.startId);
                         if (connects === undefined) {
                             console.warn(`cannot find connects relation for tag-modal: ${startNode} -> ${endNode}`);
                             return;

@@ -235,7 +235,7 @@ function EditService(Post, Connectable, HistoryService, store, DiscourseNode, Ze
         let localStart = startNode.id === undefined;
         let promise;
         if (endNode.isHyperRelation) {
-            let start = Connectable.$buildRaw({
+            let start = Post.$buildRaw({
                 id: endNode.startId
             });
             let hyper = start.connectsTo.$buildRaw({

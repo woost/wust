@@ -63,7 +63,7 @@ object WustSchema {
 
   // Content
   @Node trait Connectable extends ExposedNode
-  @HyperRelation class Connects(startNode: Connectable, endNode: Connectable) extends Connectable with ConstructRelation with HyperConnection with Reference
+  @HyperRelation class Connects(startNode: Post, endNode: Connectable) extends Connectable with ConstructRelation with HyperConnection with Reference
   @Node trait Inheritable extends UuidNode
   //TODO: different inherits relation for tags? normal relation instead of hyper relation?
   @HyperRelation class Inherits(startNode: Inheritable, endNode: Inheritable) extends ConstructRelation with HyperConnection with UuidNode
@@ -159,9 +159,10 @@ object WustSchema {
   def deleteConnectsGarbage(tx: Transaction) {
     // while there are hyperrelations without any of both helper relations
     // delete them
+    //TODO: still needed with fixed startnode to post?
     while(tx.queryTable(
       """MATCH (c:CONNECTS)
-          WHERE NOT (()-[:CONNECTABLETOCONNECTS]->(c) AND (c)-[:CONNECTSTOCONNECTABLE]->())
+          WHERE NOT (()-[:POSTTOCONNECTS]->(c) AND (c)-[:CONNECTSTOCONNECTABLE]->())
           OPTIONAL MATCH (c)-[r]-()
           DELETE c,r
           RETURN COUNT(c)""").rows.head.cells.head.asLong > 0) {}

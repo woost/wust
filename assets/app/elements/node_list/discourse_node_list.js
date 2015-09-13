@@ -17,9 +17,9 @@ function discourseNodeList() {
     };
 }
 
-discourseNodeListCtrl.$inject = ["Connectable"];
+discourseNodeListCtrl.$inject = ["Post"];
 
-function discourseNodeListCtrl(Connectable) {
+function discourseNodeListCtrl(Post) {
     let vm = this;
 
     vm.upvoteAnswer = upvoteAnswer;
@@ -32,7 +32,7 @@ function discourseNodeListCtrl(Connectable) {
 
     //TODO: unvote
     function upvoteAnswer(connectable) {
-        Connectable.$buildRaw(_.pick(vm.nodeModel.component.rootNode, "id")).connectsTo.$buildRaw(_.pick(connectable, "id")).up.$create().$then(() => {
+        Post.$buildRaw(_.pick(vm.nodeModel.component.rootNode, "id")).connectsTo.$buildRaw(_.pick(connectable, "id")).up.$create().$then(() => {
             humane.success("Upvoted post as answer");
         }, resp => {
             humane.error(resp.$response.data);

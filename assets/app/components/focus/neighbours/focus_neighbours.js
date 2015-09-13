@@ -23,7 +23,7 @@ function NeighboursCtrl(DiscourseNodeList) {
 
     vm.references = DiscourseNodeList.write.Connectable.successors(vm.component, vm.component.rootNode, "connectsTo");
         // .nested(DiscourseNodeList.write.Connectable.predecessors, "connectsFrom");
-    vm.replies = DiscourseNodeList.write.Connectable.predecessors(vm.component, vm.component.rootNode, "connectsFrom");
+    vm.replies = DiscourseNodeList.write.Post.predecessors(vm.component, vm.component.rootNode, "connectsFrom");
         // .nested(DiscourseNodeList.write.Connectable.predecessors, "connectsFrom");
     vm.parallels = DiscourseNodeList.read.parallels(vm.component, vm.component.rootNode);
 }

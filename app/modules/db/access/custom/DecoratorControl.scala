@@ -54,7 +54,7 @@ class TaggedTaggable[NODE <: UuidNode] extends AccessNodeDecoratorControl[NODE] 
       val nodeDef = ConcreteFactoryNodeDefinition(Post)
       val connectsDef = ConcreteFactoryNodeDefinition(Connects)
       val tagsDef = RelationDefinition(tagDef, Tags, nodeDef)
-      val connDef = RelationDefinition(nodeDef, ConnectableToConnects, connectsDef)
+      val connDef = RelationDefinition(nodeDef, PostToConnects, connectsDef)
       val classifiesDef = RelationDefinition(classDef, Classifies, connectsDef)
 
       val query = s"""

@@ -43,10 +43,10 @@ object ApiNodeFormat {
         ("title", JsString(n.title)),
         ("description", JsString(n.description.getOrElse(""))),
         ("tags", JsArray(n.inRelationsAs(Tags).sortBy(_.uuid).map(tagsWrites.writes))), // TODO: why do we have to call tagsWrites.writes explicitly?
-        //("classifications", JsArray(n.outRelationsAs(ConnectableToConnects).flatMap(_.rev_classifies).map(tagWrites.writes))), //TODO WHY DOES THIS NOT WORK...
+        //("classifications", JsArray(n.outRelationsAs(PostToConnects).flatMap(_.rev_classifies).map(tagWrites.writes))), //TODO WHY DOES THIS NOT WORK...
         ("classifications", {
           val discourse = Discourse(n.graph)
-          JsArray(n.outRelationsAs(ConnectableToConnects).map(_.endNode).flatMap(con => discourse.classifies.filter(_.endNode == con)).map(_.startNode).sortBy(_.uuid).map(tagWrites.writes))
+          JsArray(n.outRelationsAs(PostToConnects).map(_.endNode).flatMap(con => discourse.classifies.filter(_.endNode == con)).map(_.startNode).sortBy(_.uuid).map(tagWrites.writes))
         }),
         ("timestamp", Json.toJson(JsNumber(n.timestamp))),
         ("requestsEdit", Json.toJson(n.inRelationsAs(Updated))), //TODO: accessors for subrelations of hyperrelations, to get connected hypernode
@@ -57,7 +57,7 @@ object ApiNodeFormat {
         ("id", JsString(n.uuid)),
         ("startId", n.startNodeOpt.map(s => JsString(s.uuid)).getOrElse(JsNull)),
         ("endId", n.endNodeOpt.map(e => JsString(e.uuid)).getOrElse(JsNull)),
-        ("quality", n.startNodeOpt.map(post => JsNumber(n.quality(post.asInstanceOf[Post].viewCount))).getOrElse(JsNull)),
+        ("quality", n.startNodeOpt.map(post => JsNumber(n.quality(post.viewCount))).getOrElse(JsNull)),
         ("tags", Json.toJson(n.rev_classifies.sortBy(_.uuid).map(tagWrites.writes))) // TODO: why do we have to call tagsWrites.writes explicitly?
       )
       case n: TagLike => tagLikeToSeq(n) ++ (n match { //TODO: traits should have accessors for relations in magic

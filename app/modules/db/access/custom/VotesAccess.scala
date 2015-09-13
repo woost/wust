@@ -190,6 +190,6 @@ case class VotesConnectsAccess(sign: Long) extends VotesReferenceAccess[Connects
   override def selectNode(discourse: Discourse, startUuid: String, endUuid: String) = discourse.connects.find(c => c.startNodeOpt.map(_.uuid == startUuid).getOrElse(false) && c.endNodeOpt.map(_.uuid == endUuid).getOrElse(false)).get
 
   override def nodeDefinition(startUuid: String, endUuid: String): HyperNodeDefinitionBase[Connects] = {
-    HyperNodeDefinition(FactoryUuidNodeDefinition(Connectable, startUuid), Connects, FactoryUuidNodeDefinition(Connectable, endUuid))
+    HyperNodeDefinition(FactoryUuidNodeDefinition(Post, startUuid), Connects, FactoryUuidNodeDefinition(Connectable, endUuid))
   }
 }
