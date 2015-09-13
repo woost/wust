@@ -167,15 +167,23 @@ case class PostAccess() extends ConnectableAccessBase with NodeDeleteBase[Post] 
 
   override def read(context: RequestContext, uuid: String) = {
     val tagDef = ConcreteFactoryNodeDefinition(Scope)
+    val classDef = ConcreteFactoryNodeDefinition(Classification)
     val nodeDef = FactoryUuidNodeDefinition(factory, uuid)
+    val connectsDef = ConcreteFactoryNodeDefinition(Connects)
     val tagsDef = HyperNodeDefinition(tagDef, Tags, nodeDef)
+    val connDef = RelationDefinition(nodeDef, ConnectableToConnects, connectsDef)
+    val classifiesDef = RelationDefinition(classDef, Classifies, connectsDef)
 
     val query = s"""
-    match ${nodeDef.toQuery} optional match ${tagsDef.toQuery(false, true)}
+    match ${nodeDef.toQuery}
+    optional match ${tagsDef.toQuery(true, false)}
+    optional match ${connDef.toQuery(false, true)}, ${classifiesDef.toQuery(true, false)}
     return *
     """
 
-    val discourse = Discourse(db.queryGraph(Query(query, tagsDef.parameterMap)))
+    val params = tagsDef.parameterMap ++ connDef.parameterMap ++ classifiesDef.parameterMap
+
+    val discourse = Discourse(db.queryGraph(Query(query, params)))
     discourse.posts.headOption match {
       case Some(node) =>
         context.user.foreach { user =>
