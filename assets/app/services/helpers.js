@@ -15,7 +15,6 @@ angular.module("wust.services").value("Helpers", {
     contextCircleColor,
     contextCircleBorderColor,
     tagTitleColor,
-    sortTags,
     cssCompat,
     coloredBorderWidth: "3px"
 });
@@ -67,19 +66,6 @@ function hashToColor(tag, chromaValue, lightness) {
     // https://vis4.net/blog/posts/avoid-equidistant-hsv-colors/
     let hue = tag.color || tagTitleColor(tag.title); // 0..360
     return chroma.hcl(hue, chromaValue, lightness).hex();
-}
-
-function sortTags(tags) {
-    let [remote,local] = _.partition(tags, "id");
-    return orderTags(remote).concat(orderTags(local));
-
-    function orderTags(tags) {
-        return _.sortByOrder(tags,
-            // sort by id to make sorting deterministic
-            ["isClassification","id"],
-            ["desc","asc"]
-        );
-    }
 }
 
 function cssCompat(original, jsSuffix, cssSuffix) {

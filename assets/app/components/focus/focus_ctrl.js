@@ -56,18 +56,10 @@ function FocusCtrl(Helpers, $stateParams, $state, HistoryService, rootNode, Conn
     HistoryService.add(vm.graphComponent.rootNode);
     HistoryService.currentViewComponent = component;
 
-    // keep tags sorted by weight
-    sortTagsOnGraph(vm.graphComponent);
-    vm.graphComponent.onCommit(() => sortTagsOnGraph(vm.graphComponent));
-
     ConnectedComponents.$find($stateParams.id).$then(response => {
         vm.componentLoading = false;
         response.nodes.forEach(n => vm.graphComponent.addNode(n));
         response.relations.forEach(r => vm.graphComponent.addRelation(r));
         vm.graphComponent.commit();
     }, () => vm.componentLoading = false);
-
-    function sortTagsOnGraph(graph) {
-        graph.nodes.forEach(n => n.tags = Helpers.sortTags(n.tags));
-    }
 }

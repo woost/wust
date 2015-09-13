@@ -75,9 +75,9 @@ sealed trait NodeDelegates extends NodeLike {
   def title_=(newTitle: String) = rawNode.title = newTitle
   //FIXME: need to set tags, in order to update the graph from outside
   @JSExport
-  def tags = rawNode.tags
+  def tags = rawNode.tags.sortBy(_.id).sortBy(_.quality)
   @JSExport
-  def tags_=(newTags: js.Array[js.Object]) = rawNode.tags = newTags
+  def tags_=(newTags: js.Array[RecordTag]) = rawNode.tags = newTags
 
   def description = rawNode.description
   @JSExport
@@ -90,7 +90,7 @@ sealed trait NodeDelegates extends NodeLike {
 }
 
 trait NodeBase extends NodeDelegates {
-  def classifications = successors.collect { case hr: HyperRelation => hr }.toList.sortBy(_.quality).flatMap(_.tags)
+  def classifications = successors.collect { case hr: HyperRelation => hr }.toList.sortBy(_.quality).flatMap(_.tags.sortBy(_.id))
   @JSExport("classifications") def classificationsJs = classifications.toJSArray
 
   var inRelations: Set[RelationLike] = Set.empty
@@ -376,8 +376,7 @@ class Graph(private[js] val rawGraph: RawGraph) extends WrappedGraph[Relation] {
 
 @JSExport
 @JSExportAll
-//TODO: maybe give a concrete type for tags
-class RawNode(val id: String, var title: String, var description: Option[String], val isHyperRelation: Boolean, val quality: Double, val viewCount: Int, val startId: Option[String], val endId: Option[String], var tags: js.Array[js.Object], val timestamp: js.Any) {
+class RawNode(val id: String, var title: String, var description: Option[String], val isHyperRelation: Boolean, val quality: Double, val viewCount: Int, val startId: Option[String], val endId: Option[String], var tags: js.Array[RecordTag], val timestamp: js.Any) {
   def this(n: RecordNode) = this(n.id, n.title.getOrElse(""), n.description.toOption, n.isHyperRelation.getOrElse(false), n.quality.getOrElse(-1), n.viewCount.getOrElse(-1), n.startId.toOption, n.endId.toOption, n.tags, n.timestamp.getOrElse(0))
   override def toString = s"RawNode($id)"
 
@@ -518,10 +517,22 @@ trait RecordNode extends js.Object {
   def startId: js.UndefOr[String] = js.native
   def endId: js.UndefOr[String] = js.native
 
-  def tags: js.Array[js.Object] = js.native
+  def tags: js.Array[RecordTag] = js.native
 
   //TODO: why can't this be Long?
   def timestamp: js.UndefOr[js.Any] = js.native
+}
+
+@js.native
+trait RecordTag extends js.Object {
+  def id: String = js.native
+  def quality: Double = js.native
+  def title: String = js.native
+  def description: js.UndefOr[String] = js.native
+  def isClassification: Boolean = js.native
+  def isContext: Boolean = js.native
+  def color: Int = js.native
+  def symbol: js.UndefOr[String] = js.native
 }
 
 @js.native
