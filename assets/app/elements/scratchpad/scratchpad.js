@@ -19,19 +19,25 @@ scratchpadCtrl.$inject = ["EditService", "SidebarService", "ContextService"];
 function scratchpadCtrl(EditService, SidebarService, ContextService) {
     let vm = this;
 
+    let saveOnEnter = true;
+
     vm.sidebar = SidebarService;
     vm.editList = EditService.list;
     vm.edit = EditService.edit;
     vm.editNewPost = editNewPost;
 
     vm.newPost = {
-        title: "",
-        tags: []
+        title: ""
     };
 
     function editNewPost() {
-        vm.newPost.tags = angular.copy(ContextService.currentContexts);
-        EditService.edit(vm.newPost);
+        let session = EditService.edit(vm.newPost);
+        session.tags = angular.copy(ContextService.currentContexts);
+
         vm.newPost.title = "";
+
+        if (saveOnEnter) {
+            session.save();
+        }
     }
 }
