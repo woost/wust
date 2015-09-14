@@ -103,11 +103,12 @@ trait ConnectableAccessBase {
     request.removedTags.foreach { tagReq =>
       val alreadyExisting = existRemTags.exists(_.proposesTags.head.uuid == tagReq)
 
-      //TODO: remove tag with instantApply
       if (!alreadyExisting) {
-        val remTags = RemoveTags.create(user, post, applyThreshold = threshold, approvalSum = weight)
+        val remTags = RemoveTags.create(user, post, applyThreshold = threshold, approvalSum = weight, applied = instantApply)
         val tag = Scope.matchesOnUuid(tagReq)
         discourse.add(ProposesTag.create(remTags, tag))
+        if (instantApply)
+          discourse.remove(Tags.matches(tag, post))
 
         val votes = Votes.create(user, remTags, weight = weight)
         discourse.add(remTags, votes)
