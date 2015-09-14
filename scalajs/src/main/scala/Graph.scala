@@ -144,12 +144,15 @@ trait NodeBase extends NodeDelegates {
 @JSExport
 class Node(val rawNode: RawNode) extends NodeBase {
 
-  override def classifications = {
+  override def classifications:Set[RecordTag] = {
     val connects = (successors ++ outRelations).collect { case hr: HyperRelation => hr }
     if (connects.isEmpty)
       rawNode.classifications
-    else
-      connects.flatMap(_.tags)
+    else {
+      // remove duplicates by id
+      // we have duplicate tags, because one post can be an idea for many other posts
+      connects.flatMap(_.tags).toList.groupBy(_.id).map(_._2.head).toSet
+    }
   }
 
   @JSExport def encode() = js.Dynamic.literal(id = id, title = title, description = description.orUndefined, timestamp = timestamp, quality = quality, viewCount = viewCount, classifications = classifications, isHyperRelation = isHyperRelation, tags = tags)

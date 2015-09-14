@@ -28,7 +28,7 @@
         <div class="post_description" markdown="vm.node.description" ng-show="vm.node.description"></div>
         <button class="replytool pull-right btn btn-sm btn-default" ng-click='vm.replyTo()' data-title="respond" bs-tooltip animation=""><i class="fa fa-plus"></i></button>
     </div>
-    <a ng-if="vm.tagChanges.length > 0 || vm.editChanges.length > 0" href="#" ng-click="vm.showChanges = !!!vm.showChanges">Post has change requests</a>
+    <a ng-if="vm.tagChanges.length > 0 || vm.editChanges.length > 0" href="#" ng-click="vm.showChanges = !vm.showChanges">Post has change requests</a>
     <div ng-show="vm.showChanges">
         <div post-tag-changes="vm.tagChanges" on-apply="vm.onTagAdd(tag)"></div>
         <div post-edit-changes="vm.editChanges" on-apply="vm.onApply(response)"></div>
