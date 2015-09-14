@@ -48,10 +48,12 @@ trait NodeReadBase[NODE <: UuidNode] extends NodeAccessDefault[NODE] {
 
 trait NodeDeleteBase[NODE <: UuidNode] extends NodeAccessDefault[NODE] {
   override def delete(context: RequestContext, uuid: String) = context.withUser {
-    // TODO: use matches... and remove...
-    deleteNodes(FactoryUuidNodeDefinition(factory, uuid))
+    val node = factory.matchesOnUuid(uuid)
+    val discourse = Discourse.empty
+    discourse.remove(node)
     // TODO: create Deleted action relation
-    Right(true)
+    val failure = db.transaction(_.persistChanges(discourse))
+    Right(!failure.isDefined)
   }
 }
 
