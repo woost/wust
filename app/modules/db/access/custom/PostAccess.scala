@@ -131,9 +131,6 @@ trait ConnectableAccessBase {
       discourse.add(tagging)
     }
 
-    //TODO: we need to resolve matches here, otherwise deletion of local nodes does not work
-    //TODO: persisting might fail if there is a concurrent request, as matches nodes will fail when they cannot be resolved
-    tx.persistChanges(discourse)
     discourse.remove(discourse.tags: _*)
     tx.persistChanges(discourse)
   }
@@ -153,9 +150,6 @@ trait ConnectableAccessBase {
       discourse.add(tagging)
     }
 
-    //TODO: we need to resolve matches here, otherwise deletion of local nodes does not work
-    //TODO: persisting might fail if there is a concurrent request, as matches nodes will fail when they cannot be resolved
-    tx.persistChanges(discourse)
     discourse.remove(discourse.classifies: _*)
     tx.persistChanges(discourse)
   }
