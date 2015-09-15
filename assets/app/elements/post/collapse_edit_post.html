@@ -5,14 +5,14 @@
                 <i ng-click="vm.node.expandedEditor = !vm.node.expandedEditor; vm.node.onChange()" class="accordion_toggle fa" ng-class="{'fa-chevron-down': vm.node.expandedEditor, 'fa-chevron-right': !vm.node.expandedEditor}"></i>
             </div>
 
-            <div class="center-controls" data-title="click to edit" bs-tooltip animation="" ui-draggable="true" drag="vm.node.encode ? vm.node.encode() : vm.node" drag-channel="{{(!vm.node.isLocal || vm.node.canSave) ? 'scratch_node' : 'scratch_move'}}">
+            <div class="center-controls" tooltip="click to edit" ui-draggable="true" drag="vm.node.encode ? vm.node.encode() : vm.node" drag-channel="{{(!vm.node.isLocal || vm.node.canSave) ? 'scratch_node' : 'scratch_move'}}">
                 <h3 contenteditable="true" ng-model="vm.node.title" ng-change="vm.node.onChange()" placeholder="TL;DR" ng-class="{'is_invalid': !vm.node.isValid}" class="title" ng-keydown="vm.redirectEnter($event)">
                 </h3>
             </div>
             <div class="right-controls">
-                <i ng-style="{visibility: vm.node.canSave && 'visible' || 'hidden'}" class="fa fa-asterisk modified-indicator" data-title="this post contains unsaved changes" bs-tooltip animation=""></i>
-                <a ng-style="{visibility: !vm.node.isLocal && 'visible' || 'hidden'}" ui-sref="focus({id: vm.node.id})" data-title="link" bs-tooltip animation=""><i class="fa fa-arrow-right"></i></a>
-                <button class="close" ng-click="vm.node.remove()" type="button" aria-label="Close " data-title="remove from scratchpad, discards unsaved changes" bs-tooltip animation=""><span aria-hidden="true">&times;</span></button>
+                <i ng-style="{visibility: vm.node.canSave && 'visible' || 'hidden'}" class="fa fa-asterisk modified-indicator" tooltip="this post contains unsaved changes"></i>
+                <a ng-style="{visibility: !vm.node.isLocal && 'visible' || 'hidden'}" ui-sref="focus({id: vm.node.id})" tooltip="link"><i class="fa fa-arrow-right"></i></a>
+                <button class="close" ng-click="vm.node.remove()" type="button" aria-label="Close " tooltip="remove from scratchpad, discards unsaved changes"><span aria-hidden="true">&times;</span></button>
             </div>
         </div>
         <div class="panel-body" collapse="!vm.node.expandedEditor">
@@ -22,9 +22,9 @@
             </div>
             <div edit-taglist tags="vm.node.tags" set-focus="vm.focusEditTags" on-change="vm.node.onChange()"></div>
             <div edit-post-description node="vm.node"></div>
-            <button class="pull-left btn btn-xs btn-danger" ng-click="vm.node.deleteNode();" ng-hide="vm.node.isLocal" data-title="delete" bs-tooltip animation=""><i class="fa fa-trash-o"></i></button>
-            <button class="pull-left btn btn-xs btn-warning" ng-click="vm.node.discard()" ng-hide="vm.node.isPristine" data-title="discard changes" bs-tooltip animation=""><i class="fa fa-undo"></i></button>
-            <button class="btn btn-xs btn-success pull-right" ng-click="vm.save()" ng-hide="!vm.node.canSave" data-title="save" bs-tooltip animation=""><i class="fa fa-check"></i></button>
+            <button class="pull-left btn btn-xs btn-danger" ng-click="vm.node.deleteNode();" ng-hide="vm.node.isLocal" tooltip="delete"><i class="fa fa-trash-o"></i></button>
+            <button class="pull-left btn btn-xs btn-warning" ng-click="vm.node.discard()" ng-hide="vm.node.isPristine" tooltip="discard changes"><i class="fa fa-undo"></i></button>
+            <button class="btn btn-xs btn-success pull-right" ng-click="vm.save()" ng-hide="!vm.node.canSave" tooltip="save"><i class="fa fa-check"></i></button>
             <div toggle-zen node="vm.node" class="text-center"></div>
         </div>
     </div>
