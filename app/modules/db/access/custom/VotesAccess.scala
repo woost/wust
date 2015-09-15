@@ -1,7 +1,7 @@
 package modules.db.access.custom
 
 import controllers.api.nodes.{HyperConnectParameter, ConnectParameter, RequestContext}
-import model.WustSchema._
+import model.WustSchema.{Created => SchemaCreated, _}
 import modules.db.Database._
 import modules.db._
 import modules.db.access.{EndRelationAccessDefault, EndRelationAccess}
@@ -28,14 +28,20 @@ trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefa
       // first we match the actual change request and aquire a write lock,
       // which will last for the whole transaction
       val requestDef = nodeDefinition(param.baseUuid)
+      val postDef = ConcreteFactoryNodeDefinition(Post)
       val userDef = ConcreteNodeDefinition(user)
       val votesDef = RelationDefinition(userDef, Votes, requestDef)
-      val discourse = Discourse(tx.queryGraph(Query(s"match ${requestDef.toQuery}-[:`${UpdatedToPost.relationType}`|`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->(post:`${Post.label}`) set ${requestDef.name}._locked = true with post,${requestDef.name} optional match ${votesDef.toQuery(true, false)} return post,${requestDef.name}, ${votesDef.name}", votesDef.parameterMap)))
+      val createdDef = RelationDefinition(userDef, SchemaCreated, postDef)
+      val query = s"match ${requestDef.toQuery}-[:`${UpdatedToPost.relationType}`|`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->${postDef.toQuery}, ${userDef.toQuery} set ${requestDef.name}._locked = true with ${postDef.name},${userDef.name},${requestDef.name} optional match ${votesDef.toQuery(false, false)} optional match ${createdDef.toQuery(false,false)} return ${createdDef.name},${postDef.name},${requestDef.name},${votesDef.name}"
+
+      val discourse = Discourse(tx.queryGraph(query, createdDef.parameterMap ++ votesDef.parameterMap))
       val request = selectNode(discourse)
       val votes = discourse.votes.headOption
       votes.foreach(request.approvalSum -= _.weight)
 
-      val weight = sign // TODO karma
+      val karma = 1 // TODO karma
+      val authorBoost = if (discourse.createds.isEmpty) 0 else Moderation.authorKarmaBoost
+      val weight = sign * (karma + authorBoost) // TODO karma
       if (weight == 0) {
         // if there are any existing votes, disconnect them
         votes.foreach(discourse.graph.relations -= _.rawItem)

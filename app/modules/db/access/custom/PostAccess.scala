@@ -13,6 +13,7 @@ import renesca.QueryHandler
 import renesca.Query
 import play.api.mvc.Results._
 import model.Helpers.tagTitleColor
+import moderation.Moderation
 
 trait ConnectableAccessBase {
   private def tagConnectRequestToScope(tag: TagConnectRequest) = {
@@ -253,8 +254,7 @@ case class PostAccess() extends ConnectableAccessBase with NodeDeleteBase[Post] 
 
         val discourse = Discourse(tx.queryGraph(Query(query, createdDef.parameterMap)))
         discourse.posts.headOption.map { node =>
-          val isAuthor = discourse.createds.headOption.isDefined
-          val authorBoost = if (isAuthor) 5 else 0
+          val authorBoost = if (discourse.createds.isEmpty) 0 else Moderation.authorKarmaBoost
 
           val karma = 1 // TODO: karma
           val approvalSum = karma + authorBoost

@@ -14,6 +14,8 @@ object Moderation {
 
 
   val initialKarma = 0
+  //TODO: flexible
+  val authorKarmaBoost = 5
   //TODO: reason why vote weight should be logarithmic
   def creatorsKarmaAfterPostVote(creatorsKarma:Long, votersKarma:Long, vote:Long) = creatorsKarma + log(votersKarma) * vote
   def postQuality(upVotes:Long, downVotes:Long) = (upVotes + votes_u*votes_p) / (downVotes + upVotes + votes_u)
