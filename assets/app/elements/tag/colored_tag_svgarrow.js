@@ -1,0 +1,43 @@
+angular.module("wust.elements").directive("coloredTagSvgArrow", coloredTagSvgArrow);
+
+coloredTagSvgArrow.$inject = ["Helpers"];
+
+function coloredTagSvgArrow(Helpers) {
+    return {
+        restrict: "EA",
+        scope: {
+            coloredTagSvgArrow: "=",
+            referenceNode: "=",
+        },
+        link
+    };
+
+    function link(scope, elem) {
+        let rawElem = elem[0];
+
+        scope.$watchCollection("coloredTagSvgArrow.tags", refreshColor);
+
+        function refreshColor() {
+            setColor(selectTag(scope.coloredTagSvgArrow, scope.referenceNode.node));
+        }
+
+        function selectTag(node, referenceNode) {
+            let connects = _.find(referenceNode.outRelations, h => h.endNode.id === node.id);
+            let tags = Helpers.sortedNodeTags(connects);
+            return tags[0];
+        }
+
+        function setColor(tag) {
+            let arrowLine = rawElem.children[0];
+            let arrowHead = rawElem.children[1].children[0];
+            if (tag === undefined || tag.id === undefined) {
+                arrowLine.style.stroke = "";
+                arrowHead.style.fill = "";
+            } else {
+                arrowLine.style.stroke = Helpers.postBorderColor(tag);
+                arrowHead.style.fill = Helpers.postBorderColor(tag);
+            }
+        }
+    }
+}
+
