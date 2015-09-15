@@ -23,12 +23,7 @@ function discourseNodeListCtrl(Post) {
     let vm = this;
 
     vm.upvoteAnswer = upvoteAnswer;
-
-    vm.symbolAction = vm.nodeModel.writable ? {
-        handler: remove,
-        title: "disconnect",
-        class: "fa fa-scissors"
-    } : undefined;
+    vm.remove = remove;
 
     //TODO: unvote
     function upvoteAnswer(connectable) {

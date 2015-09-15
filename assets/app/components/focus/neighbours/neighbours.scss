@@ -24,20 +24,26 @@
             height:20px;
             line-height: 20px;
             .tools {
-                margin-bottom: -11px;
-                // .button {
-                //     opacity: 0.5;
-                // }
-                // .button.active, .button:hover {
-                //     opacity: 1;
-                // }
-            }
-            .arrowline {
-                stroke-width: 1px;
-                stroke:$graph_relation_color;
+                // margin-bottom: -11px;
+                .button {
+                    opacity: 0.5;
+                    cursor: pointer;
+                }
+                .button.active, .button:hover {
+                    opacity: 1;
+                }
             }
             .arrow {
-                fill: $graph_relation_color;
+                position:relative;
+                top: -11px;
+                z-index: -1; // put svg below tool buttons
+                .arrowline {
+                    stroke-width: 1px;
+                    stroke:$graph_relation_color;
+                }
+                .arrowhead {
+                    fill: $graph_relation_color;
+                }
             }
         }
     }

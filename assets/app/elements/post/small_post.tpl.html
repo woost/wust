@@ -1,6 +1,4 @@
 <span class="small_post_directive node" colored-tag-node="vm.node" ignore-tags="vm.ignoreTags" ui-draggable="true" drag="vm.node.encode ? vm.node.encode() : vm.node" drag-channel="{{vm.node.isHyperRelation? 'hyper_node' : 'node'}}" stop-drag-propagation>
-    <i ng-if="::vm.symbolAction" ng-click='vm.symbolAction.handler(vm.node)' ng-class="vm.symbolAction.class" class='symbol_tool pull-right text-default' data-title="{{vm.symbolAction.title}}" bs-tooltip animation=""></i>
-
     <span ng-switch="::vm.node.isHyperRelation">
         <div class="node_dispatcher" ng-switch-when="true">
             <div small-post node="vm.node.startNode"></div>

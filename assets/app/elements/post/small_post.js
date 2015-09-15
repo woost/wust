@@ -8,7 +8,6 @@ function smallPost() {
         templateUrl: "elements/post/small_post.html",
         scope: {
             node: "=",
-            symbolAction: "=",
             ignoreTags: "="
         },
         controller: smallPostCtrl,

@@ -2,12 +2,12 @@
     <span class="predecessor_connection">
         <div class="tools">
             <span class="fa fa-chevron-up button" ng-click="vm.upvoteAnswer(node)"></span>
-            <span class="fa fa-scissors button"></span>
+            <span class="fa fa-scissors button" ng-click="vm.remove(node)"></span>
         </div>
-        <svg width="50" height="10">
+        <svg width="50" height="10" class="arrow">
             <path d="M0,5 L 50,5" class="arrowline"></path>
             <svg x="40">
-                <path d="M 0,2 L 10,4.5 L 10,5.5 L0,8" class="arrow"></path>
+                <path d="M 0,2 L 10,4.5 L 10,5.5 L0,8" class="arrowhead"></path>
             </svg>
         </svg>
     </span>
