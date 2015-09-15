@@ -17,13 +17,15 @@ function discourseNodeList() {
     };
 }
 
-discourseNodeListCtrl.$inject = ["Post"];
+discourseNodeListCtrl.$inject = ["Post", "TagRelationEditService"];
 
-function discourseNodeListCtrl(Post) {
+function discourseNodeListCtrl(Post, TagRelationEditService) {
     let vm = this;
 
     vm.upvoteAnswer = upvoteAnswer;
     vm.remove = remove;
+    vm.editConnectsBetweenNodes = editConnectsBetweenNodes;
+
 
     //TODO: unvote
     function upvoteAnswer(connectable) {
@@ -36,5 +38,11 @@ function discourseNodeListCtrl(Post) {
 
     function remove(node) {
         vm.nodeModel.remove(node);
+    }
+
+    function editConnectsBetweenNodes(startNode, endNode) {
+        let connects = _.find(startNode.outRelations, h => h.endNode.id === endNode.id);
+        TagRelationEditService.show(connects);
+        //TODO: update startNode, endNode and bigpost taglist
     }
 }
