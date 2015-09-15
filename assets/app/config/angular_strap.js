@@ -1,9 +1,12 @@
-angular.module("wust.config").config(modalConfig);
+angular.module("wust.config").config(strapConfig);
 
-modalConfig.$inject = ["$modalProvider"];
+strapConfig.$inject = ["$modalProvider", "$tooltipProvider"];
 
-function modalConfig($modalProvider) {
+function strapConfig($modalProvider, $tooltipProvider) {
   angular.extend($modalProvider.defaults, {
     html: true
+  });
+  angular.extend($tooltipProvider.defaults, {
+    animation: ""
   });
 }
