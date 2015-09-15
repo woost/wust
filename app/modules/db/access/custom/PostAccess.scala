@@ -55,28 +55,24 @@ trait ConnectableAccessBase {
   }
 
   //TODO: refactor
-  protected def addRequestTagsToGraph(tx: QueryHandler, discourse: Discourse, user: User, post: Post, request: AddTagRequestBase with RemoveTagRequestBase, weight: Long, threshold: Long, instantApply: Boolean) {
-    // TODO: checking for duplicates is not really safe if there are concurrent requests
+  protected def addRequestTagsToGraph(tx: QueryHandler, discourse: Discourse, user: User, post: Post, request: AddTagRequestBase with RemoveTagRequestBase, weight: Long, threshold: Long) {
     // TODO: do not get all connected requests if not needed...its just slow
+    // because now we write lock every change request connected to the post
     val userDef = ConcreteFactoryNodeDefinition(User)
     val tagDef = ConcreteFactoryNodeDefinition(Scope)
     val requestDef = ConcreteFactoryNodeDefinition(TagChangeRequest)
     val postDef = ConcreteNodeDefinition(post)
     val tagsDef = RelationDefinition(requestDef, ProposesTag, tagDef)
-    val query = s"match ${userDef.toQuery}-[ut:`${UserToAddTags.relationType}`|`${UserToRemoveTags.relationType}`]->${requestDef.toQuery}-[tp:`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->${postDef.toQuery}, ${tagsDef.toQuery(false,true)} return *"
-    val existing = Discourse(db.queryGraph(Query(query, userDef.parameterMap ++ postDef.parameterMap ++ tagsDef.parameterMap)))
+    val query = s"match ${userDef.toQuery}-[ut:`${UserToAddTags.relationType}`|`${UserToRemoveTags.relationType}`]->${requestDef.toQuery}-[tp:`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->${postDef.toQuery}, ${tagsDef.toQuery(false,true)} set ${requestDef.name}._locked = true return *"
+    val existing = Discourse(tx.queryGraph(Query(query, userDef.parameterMap ++ postDef.parameterMap ++ tagsDef.parameterMap)))
 
-    discourse.add(existing.tagLikes: _*)
-    discourse.add(existing.tags: _*)
+    discourse.add(existing.nodes: _*)
+    discourse.add(existing.relations: _*)
     val existAddTags = existing.addTags
     val existRemTags = existing.removeTags
 
     request.addedTags.foreach { tagReq =>
-      //TODO: should vote for alreadyexisting requests
-      //needs to lock for caching / share logic with VotesAccess?
-      //this is very important for already existing requests when request has
-      //instantApply, so we apply the existing change request.
-      val alreadyExisting = existAddTags.exists { addTag =>
+      val alreadyExisting = existAddTags.find { addTag =>
         if (tagReq.id.isDefined)
           addTag.proposesTags.head.uuid == tagReq.id.get
         else if (tagReq.title.isDefined)
@@ -85,36 +81,41 @@ trait ConnectableAccessBase {
           false
       }
 
-      if (!alreadyExisting) {
-        tagConnectRequestToScope(tagReq).map { tag =>
-          val addTags = AddTags.create(user, post, applyThreshold = threshold, approvalSum = weight, applied = instantApply)
-          discourse.add(ProposesTag.create(addTags, tag))
-          if (instantApply) {
-            discourse.add(Tags.merge(tag, post))
-          }
+      alreadyExisting.foreach(_.approvalSum += weight)
+      val crOpt = alreadyExisting orElse tagConnectRequestToScope(tagReq).map { tag =>
+        val addTags = AddTags.create(user, post, applyThreshold = threshold, approvalSum = weight)
+        discourse.add(addTags, tag, ProposesTag.create(addTags, tag))
+        addTags
+      }
 
-          addTags
-        } foreach { addTags =>
-          val votes = Votes.create(user, addTags, weight = weight)
-          discourse.add(addTags, votes)
+      crOpt.foreach { cr =>
+        discourse.add(Votes.create(user, cr, weight = weight))
+        if (cr.canApply) {
+          cr.applied = true;
+          discourse.add(Tags.merge(cr.proposesTags.head, post))
         }
       }
     }
 
     request.removedTags.foreach { tagReq =>
-      val alreadyExisting = existRemTags.exists(_.proposesTags.head.uuid == tagReq)
+      val alreadyExisting = existRemTags.find(_.proposesTags.head.uuid == tagReq)
 
-      if (!alreadyExisting) {
-        val remTags = RemoveTags.create(user, post, applyThreshold = threshold, approvalSum = weight, applied = instantApply)
+      alreadyExisting.foreach(_.approvalSum += weight)
+      val cr = alreadyExisting getOrElse {
+        val remTags = RemoveTags.create(user, post, applyThreshold = threshold, approvalSum = weight)
         val tag = Scope.matchesOnUuid(tagReq)
-        discourse.add(ProposesTag.create(remTags, tag))
-        if (instantApply)
-          discourse.remove(Tags.matches(tag, post))
+        discourse.add(remTags, tag, ProposesTag.create(remTags, tag))
+        remTags
+      }
 
-        val votes = Votes.create(user, remTags, weight = weight)
-        discourse.add(remTags, votes)
+      discourse.add(Votes.create(user, cr, weight = weight))
+      if (cr.canApply) {
+        cr.applied = true;
+        discourse.remove(Tags.matches(cr.proposesTags.head, post))
       }
     }
+
+    existing.changeRequests.foreach(_._locked = false)
   }
 
   //TODO: this is two extra requests...
@@ -259,20 +260,20 @@ case class PostAccess() extends ConnectableAccessBase with NodeDeleteBase[Post] 
           val karma = 1 // TODO: karma
           val approvalSum = karma + authorBoost
           val applyThreshold = 5 // TODO: correct edit threshold
-          val instantApply = approvalSum >= applyThreshold
 
           //TODO: check for edit threshold and implement instant edit
           if (request.title.isDefined || request.description.isDefined) {
-            val contribution = Updated.create(user, node, oldTitle = node.title, newTitle = request.title.getOrElse(node.title), oldDescription = node.description, newDescription = request.description.orElse(node.description), applyThreshold = applyThreshold, approvalSum = approvalSum, applied = instantApply)
+            val contribution = Updated.create(user, node, oldTitle = node.title, newTitle = request.title.getOrElse(node.title), oldDescription = node.description, newDescription = request.description.orElse(node.description), applyThreshold = applyThreshold, approvalSum = approvalSum)
+            contribution.applied = contribution.canApply // TODO: magic extend factory to add sth like that?
             val votes = Votes.create(user, contribution, weight = approvalSum)
             discourse.add(contribution, votes)
-            if (instantApply) {
+            if (contribution.canApply) {
               request.title.foreach(node.title = _)
               request.description.foreach(d => node.description = Some(d))
             }
           }
 
-          addRequestTagsToGraph(tx, discourse, user, node, request, approvalSum, applyThreshold, instantApply)
+          addRequestTagsToGraph(tx, discourse, user, node, request, approvalSum, applyThreshold)
 
           tx.persistChanges(discourse) match {
             case Some(err) => Left(BadRequest(s"Cannot update Post with uuid '$uuid': $err"))

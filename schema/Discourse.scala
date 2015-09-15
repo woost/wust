@@ -100,6 +100,8 @@ object WustSchema {
     val applyThreshold:Long
     var approvalSum:Long = 0
     var applied:Boolean = false
+
+    def canApply = approvalSum >= applyThreshold
   }
 
   @HyperRelation class Updated(startNode: User, endNode: Post) extends ChangeRequest with HyperConnection {
