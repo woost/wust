@@ -11,14 +11,10 @@
     .neighbours_attachedto {
         width: 280px;
         min-width: 280px;
-        padding-right: 10px;
-        // background: red;
-        .node_model_list {
-            //right alignment of small posts
-            // @include justify-content(flex-end);
-        }
-        .predecessor_connection {
+
+        .predecessors_connection {
             float:right;
+            text-align: center;
 
             //icons are higher than minimum small post height, this prevents float failure
             height:20px;
@@ -52,9 +48,6 @@
         width: 600px;
         min-width: 400px;
 
-        margin-left: 15px;
-        margin-right: 15px;
-
         .parallels {
             .small_post_directive {
                 width: 200px;
@@ -62,14 +55,42 @@
                 margin-right: 5px;
             }
         }
-
-        // background: green;
     }
     .neighbours_followers {
-        width: 270px;
-        min-width: 270px;
-        padding-left: 10px;
-        // background: blue;
+        width: 280px;
+        min-width: 280px;
+        text-align: right;
+
+        .followers_connection {
+            float:left;
+            text-align: center;
+
+            //icons are higher than minimum small post height, this prevents float failure
+            height:20px;
+            line-height: 20px;
+            .tools {
+                // margin-bottom: -11px;
+                .button {
+                    opacity: 0.5;
+                    cursor: pointer;
+                }
+                .button.active, .button:hover {
+                    opacity: 1;
+                }
+            }
+            .arrow {
+                position:relative;
+                top: -11px;
+                z-index: -1; // put svg below tool buttons
+                .arrowline {
+                    stroke-width: 1px;
+                    stroke:$graph_relation_color;
+                }
+                .arrowhead {
+                    fill: $graph_relation_color;
+                }
+            }
+        }
     }
 
     .neighbours_followers, .neighbours_attachedto {
