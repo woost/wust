@@ -83,7 +83,6 @@ function EditService(Post, Connectable, Connects, HistoryService, store, Discour
             this.unsetValidityProperties();
 
             let model = _.pick(this, "id");
-            let message = model.id === undefined ? "Added new node" : "Updated now";
 
             let referenceNode = this.referenceNode;
             let promise;
@@ -94,7 +93,24 @@ function EditService(Post, Connectable, Connects, HistoryService, store, Discour
             }
 
             promise.$then(data => {
-                humane.success(message);
+                let appliedRequests = data.requestsTags && _.any(data.requestsTags, "applied") || data.requestsEdit && _.any(data.requestsEdit, "applied");
+                let hasRequests = !_.isEmpty(data.requestsTags) || !_.isEmpty(data.requestsEdit);
+                if (appliedRequests)
+                    humane.success("Updated node");
+                else if (hasRequests)
+                    humane.success("Created change request");
+                else
+                    humane.success("Added new node");
+
+                let keeped;
+                if (data.requestsTags) {
+                    let removed = data.requestsTags.filter(t => t.isRemove && t.applied).map(t => t.tags[0].id);
+                    keeped = this.original.tags.filter(t => !_.contains(removed, t.id));
+                } else {
+                    keeped = this.original.tags;
+                }
+
+                data.tags = _.uniq(data.tags.concat(keeped), "id");
 
                 this.apply(data);
                 storeEditList();

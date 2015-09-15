@@ -278,10 +278,7 @@ case class PostAccess() extends ConnectableAccessBase with NodeDeleteBase[Post] 
             case Some(err) => Left(BadRequest(s"Cannot update Post with uuid '$uuid': $err"))
             //FIXME: why the fuck do i need to do this???
             //otherwise node.rev_tags is empty? something is messed up here.
-            //TODO: should not use tagtaggable, but only send addedtags so we
-            //have ids in the client for the ones that were created in this
-            //request
-            case _         => Right(tagTaggable.shapeResponse(discourse.posts.find(_.uuid == node.uuid).get))
+            case _         => Right(discourse.posts.find(_.uuid == node.uuid).get)
             // case _         => Right(node)
           }
         } getOrElse {

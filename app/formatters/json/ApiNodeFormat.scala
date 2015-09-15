@@ -49,8 +49,8 @@ object ApiNodeFormat {
           JsArray(n.outRelationsAs(PostToConnects).map(_.endNode).flatMap(con => discourse.classifies.filter(_.endNode == con)).map(_.startNode).sortBy(_.uuid).map(tagWrites.writes))
         }),
         ("timestamp", Json.toJson(JsNumber(n.timestamp))),
-        ("requestsEdit", Json.toJson(n.inRelationsAs(Updated).filter(!_.applied))), //TODO: accessors for subrelations of hyperrelations, to get connected hypernode
-        ("requestsTags", Json.toJson((n.inRelationsAs(AddTags) ++ n.inRelationsAs(RemoveTags)).filter(!_.applied))),
+        ("requestsEdit", Json.toJson(n.inRelationsAs(Updated))), //TODO: accessors for subrelations of hyperrelations, to get connected hypernode
+        ("requestsTags", Json.toJson(n.inRelationsAs(AddTags) ++ n.inRelationsAs(RemoveTags))),
         ("viewCount", JsNumber(n.viewCount))
       )
       case n: Connects => Seq(
@@ -87,7 +87,8 @@ object ApiNodeFormat {
         ("vote", n.inRelationsAs(Votes).headOption.map(vote => JsObject(Seq(("weight", JsNumber(vote.weight))))).getOrElse(JsNull)),
         ("threshold", JsNumber(n.applyThreshold)),
         ("votes", JsNumber(n.approvalSum)),
-        ("isRemove", JsBoolean(false))
+        ("isRemove", JsBoolean(false)),
+        ("applied", JsBoolean(n.applied))
       )
       case n: RemoveTags    => Seq(
         ("id", JsString(n.uuid)),
@@ -95,7 +96,8 @@ object ApiNodeFormat {
         ("vote", n.inRelationsAs(Votes).headOption.map(vote => JsObject(Seq(("weight", JsNumber(vote.weight))))).getOrElse(JsNull)),
         ("threshold", JsNumber(n.applyThreshold)),
         ("votes", JsNumber(n.approvalSum)),
-        ("isRemove", JsBoolean(true))
+        ("isRemove", JsBoolean(true)),
+        ("applied", JsBoolean(n.applied))
       )
       case n              =>
         throw new RuntimeException("You did not define a formatter for the api: " + node)

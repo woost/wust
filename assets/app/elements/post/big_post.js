@@ -36,8 +36,8 @@ function bigPostCtrl(SidebarService, Post, EditService, ModalEditService) {
     function onSave(response) {
         vm.editMode = false;
         if (response) {
-            response.requestsEdit.forEach(req => vm.editChanges.push(req));
-            response.requestsTags.forEach(req => vm.tagChanges.push(req));
+            response.requestsEdit.filter(r => !r.applied).forEach(req => vm.editChanges.push(req));
+            response.requestsTags.filter(r => !r.applied).forEach(req => vm.tagChanges.push(req));
         }
     }
 
