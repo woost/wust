@@ -10,7 +10,7 @@
             <div class="table container ng-trans ng-trans-scale-up ease as-sortable-item" as-sortable-item ng-repeat="stream in vm.streams">
                 <div class="table-row header">
                     <div class="as-sortable-item-handle" as-sortable-item-handle>
-                        <button class="close pull-right" ng-click="vm.removeStream($index)" type="button" aria-label="Close " tooltip="remove stream"><span aria-hidden="true">&times;</span></button>
+                        <button class="close pull-right" ng-click="vm.removeStream($index)" type="button" aria-label="Close " data-title="remove stream" bs-tooltip animation=""><span aria-hidden="true">&times;</span></button>
                     </div>
                     <div edit-taglist tags="stream.tags" on-change="vm.refreshStream(stream)" existing-only="true"></div>
                     <hr>
