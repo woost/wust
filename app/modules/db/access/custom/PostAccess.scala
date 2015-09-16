@@ -63,7 +63,7 @@ trait ConnectableAccessBase {
     val requestDef = ConcreteFactoryNodeDefinition(TagChangeRequest)
     val postDef = ConcreteNodeDefinition(post)
     val tagsDef = RelationDefinition(requestDef, ProposesTag, tagDef)
-    val query = s"match ${userDef.toQuery}-[ut:`${UserToAddTags.relationType}`|`${UserToRemoveTags.relationType}`]->${requestDef.toQuery}-[tp:`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->${postDef.toQuery}, ${tagsDef.toQuery(false,true)} set ${requestDef.name}._locked = true return *"
+    val query = s"match ${userDef.toQuery}-[ut:`${UserToAddTags.relationType}`|`${UserToRemoveTags.relationType}`]->(${requestDef.name} ${requestDef.factory.labels.map(l => s":`$l`").mkString} { applied: false })-[tp:`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->${postDef.toQuery}, ${tagsDef.toQuery(false,true)} set ${requestDef.name}._locked = true return *"
     val existing = Discourse(tx.queryGraph(Query(query, userDef.parameterMap ++ postDef.parameterMap ++ tagsDef.parameterMap)))
 
     discourse.add(existing.nodes: _*)
