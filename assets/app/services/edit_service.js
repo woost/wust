@@ -92,7 +92,9 @@ function EditService(Post, Connectable, Connects, HistoryService, store, Discour
                 promise = this.service.$buildRaw(model).$update(dirtyModel);
             }
 
-            promise.$then(data => {
+            promise.$then(response => {
+                let data = referenceNode ? response.node : response;
+
                 let appliedRequests = data.requestsTags && _.any(data.requestsTags, "applied") || data.requestsEdit && _.any(data.requestsEdit, "applied");
                 let hasRequests = !_.isEmpty(data.requestsTags) || !_.isEmpty(data.requestsEdit);
                 if (appliedRequests)
