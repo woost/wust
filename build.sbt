@@ -65,7 +65,7 @@ lazy val scalajs = (project in file("scalajs")).settings(
   sourceMapsDirectories += scalajsSharedJs.base / "..",
   // we disable the scalajs optimizations,
   // because in production there is an error in the generated code
-  scalaJSOptimizerOptions ~= { _.withDisableOptimizer(true) },
+  // scalaJSOptimizerOptions ~= { _.withDisableOptimizer(true) },
   libraryDependencies ++= Seq(
     "org.scala-js" %%% "scalajs-dom" % "0.8.1",
     "com.lihaoyi" %%% "utest" % "0.3.1"
