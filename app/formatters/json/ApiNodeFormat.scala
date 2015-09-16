@@ -79,7 +79,8 @@ object ApiNodeFormat {
         ("newDescription", JsString(n.newDescription.getOrElse(""))),
         ("vote", n.inRelationsAs(Votes).headOption.map(vote => JsObject(Seq(("weight", JsNumber(vote.weight))))).getOrElse(JsNull)),
         ("threshold", JsNumber(n.applyThreshold)),
-        ("votes", JsNumber(n.approvalSum))
+        ("votes", JsNumber(n.approvalSum)),
+        ("applied", JsBoolean(n.applied))
       )
       case n: AddTags    => Seq(
         ("id", JsString(n.uuid)),
