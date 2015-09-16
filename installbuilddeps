@@ -15,3 +15,7 @@ echo "prefix = $NPMPREFIX" >> ~/.npmrc
 wget --quiet -O - https://www.npmjs.org/install.sh | sh
 
 npm -g install bower broccoli-cli
+
+\curl -sSL https://get.rvm.io | bash -s stable --ruby
+[ -s "$HOME/.rvm/scripts/rvm" ] && source "$HOME/.rvm/scripts/rvm"
+gem install compass

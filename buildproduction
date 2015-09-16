@@ -6,6 +6,8 @@ npm install
 echo "installing bower dependencies..."
 bower --config.interactive=false install
 
+[ -s "$HOME/.rvm/scripts/rvm" ] && source "$HOME/.rvm/scripts/rvm"
+
 echo "building production assets..."
 ./prodassets
 
