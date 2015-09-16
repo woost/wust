@@ -31,7 +31,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.connectorLineArrowScale = 7;
                 this.connectorLineArrowOffset = 0;
                 this.markerUrl = _.endsWith($location.absUrl(), "/graph") ? $location.absUrl() : $location.absUrl() + "graph";
-                this.arrowToResponse = true;
+                this.arrowToResponse = false;
                 this.dragHyperRelations = false;
 
                 // state
@@ -319,7 +319,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     .append("div").attr("class", "event-offset-rotate-fix");
 
                 this.d3NodeEditTool = this.d3NodeTools.append("div")
-                    .attr("class", "nodetool edittool fa fa-pencil");
+                    .attr("class", "nodetool edittool fa fa-pencil")
+                    .style("display", d => (d.isHyperRelation) ? "inline-block" : "none");
 
                 this.d3NodePinTool = this.d3NodeTools.append("div")
                     .attr("class", "nodetool pintool fa fa-thumb-tack")
@@ -1034,8 +1035,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
         editNode(d) {
             if(d.isHyperRelation) {
                 TagRelationEditService.show(d);
-            } else {
-                ModalEditService.show(d);
             }
         }
 
