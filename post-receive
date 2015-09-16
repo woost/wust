@@ -1,2 +1,7 @@
 #!/bin/sh
 GIT_WORK_TREE=../app git checkout -f
+./buildproduction
+killall java
+killall -9 java
+nohup target/universal/stage/wust &
+

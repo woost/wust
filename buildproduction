@@ -12,5 +12,5 @@ echo "building production assets..."
 ./prodassets
 
 echo "building play application..."
-sbt clean dist
+sbt clean stage
 
