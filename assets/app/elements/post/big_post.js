@@ -31,13 +31,15 @@ function bigPostCtrl(SidebarService, Post, EditService, ModalEditService) {
     vm.onApply = onApply;
     vm.editMode = false;
     vm.upvoteTag = upvoteTag;
+    vm.onTagAdd = onTagAdd;
+    vm.onTagRemove = onTagRemove;
     vm.nodeHasContext = () => _.any(vm.node.tags, "isContext");
 
     function onSave(response) {
         vm.editMode = false;
         if (response) {
-            vm.editChanges = response.requestsEdit.filter(r => !r.applied);
-            vm.tagChanges = response.requestsTags.filter(r => !r.applied);
+            vm.editChanges = _.uniq(vm.editChanges.concat(response.requestsEdit.filter(r => !r.applied)), "id");
+            vm.tagChanges = _.uniq(vm.tagChanges.concat(response.requestsTags.filter(r => !r.applied)), "id");
         }
     }
 
