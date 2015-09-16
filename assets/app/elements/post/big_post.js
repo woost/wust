@@ -31,15 +31,14 @@ function bigPostCtrl(SidebarService, Post, EditService, ModalEditService) {
     vm.onApply = onApply;
     vm.editMode = false;
     vm.upvoteTag = upvoteTag;
-    vm.onTagAdd = onTagAdd;
-    vm.onTagRemove = onTagRemove;
+    vm.onTagApply = onTagApply;
     vm.nodeHasContext = () => _.any(vm.node.tags, "isContext");
 
     function onSave(response) {
         vm.editMode = false;
         if (response) {
-            vm.editChanges = _.uniq(vm.editChanges.concat(response.requestsEdit.filter(r => !r.applied)), "id");
-            vm.tagChanges = _.uniq(vm.tagChanges.concat(response.requestsTags.filter(r => !r.applied)), "id");
+            vm.editChanges = _.uniq(response.requestsEdit.concat(vm.editChanges), "id").filter(r => !r.applied);
+            vm.tagChanges = _.uniq(response.requestsTags.concat(vm.tagChanges), "id").filter(r => !r.applied);
         }
     }
 
@@ -53,19 +52,18 @@ function bigPostCtrl(SidebarService, Post, EditService, ModalEditService) {
         });
     }
 
-    function onApply(response) {
-        vm.node.title = response.title;
-        vm.node.description = response.description;
+    function onApply(node) {
+        vm.node.title = node.title;
+        vm.node.description = node.description;
         vm.editNode.apply(vm.node);
     }
 
-    function onTagAdd(tag) {
-        vm.node.tags.push(tag);
-        vm.editNode.apply(vm.node);
-    }
+    function onTagApply(tag, isRemove) {
+        if (isRemove)
+            _.remove(vm.node.tags, _.pick(tag, "id"));
+        else
+            vm.node.tags.push(tag);
 
-    function onTagRemove(tag) {
-        _.remove(vm.node.tags, _.pick(tag, "id"));
         vm.editNode.apply(vm.node);
     }
 

@@ -63,8 +63,9 @@ trait ConnectableAccessBase {
     val requestDef = ConcreteFactoryNodeDefinition(TagChangeRequest)
     val postDef = ConcreteNodeDefinition(post)
     val tagsDef = RelationDefinition(requestDef, ProposesTag, tagDef)
-    val query = s"match ${userDef.toQuery}-[ut:`${UserToAddTags.relationType}`|`${UserToRemoveTags.relationType}`]->(${requestDef.name} ${requestDef.factory.labels.map(l => s":`$l`").mkString} { applied: false })-[tp:`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->${postDef.toQuery}, ${tagsDef.toQuery(false,true)} set ${requestDef.name}._locked = true return *"
-    val existing = Discourse(tx.queryGraph(Query(query, userDef.parameterMap ++ postDef.parameterMap ++ tagsDef.parameterMap)))
+    val votesDef = RelationDefinition(ConcreteNodeDefinition(user), Votes, requestDef)
+    val query = s"match ${userDef.toQuery}-[ut:`${UserToAddTags.relationType}`|`${UserToRemoveTags.relationType}`]->(${requestDef.name} ${requestDef.factory.labels.map(l => s":`$l`").mkString} { applied: false })-[tp:`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->${postDef.toQuery}, ${tagsDef.toQuery(false,true)} optional match ${votesDef.toQuery(true, false)} set ${requestDef.name}._locked = true return *"
+    val existing = Discourse(tx.queryGraph(Query(query, votesDef.parameterMap ++ userDef.parameterMap ++ postDef.parameterMap ++ tagsDef.parameterMap)))
 
     discourse.add(existing.nodes: _*)
     discourse.add(existing.relations: _*)
@@ -81,15 +82,22 @@ trait ConnectableAccessBase {
           false
       }
 
-      alreadyExisting.foreach(_.approvalSum += weight)
+      alreadyExisting.foreach { exist =>
+        println(user.votes)
+        if (exist.rev_votes.headOption.isEmpty) {
+          exist.approvalSum += weight
+          discourse.add(Votes.create(user, exist, weight = weight))
+        }
+      }
+
       val crOpt = alreadyExisting orElse tagConnectRequestToScope(tagReq).map { tag =>
         val addTags = AddTags.create(user, post, applyThreshold = threshold, approvalSum = weight)
         discourse.add(addTags, tag, ProposesTag.create(addTags, tag))
+        discourse.add(Votes.create(user, addTags, weight = weight))
         addTags
       }
 
       crOpt.foreach { cr =>
-        discourse.add(Votes.create(user, cr, weight = weight))
         if (cr.canApply) {
           cr.applied = true;
           discourse.add(Tags.merge(cr.proposesTags.head, post))
@@ -100,15 +108,22 @@ trait ConnectableAccessBase {
     request.removedTags.foreach { tagReq =>
       val alreadyExisting = existRemTags.find(_.proposesTags.head.uuid == tagReq)
 
-      alreadyExisting.foreach(_.approvalSum += weight)
+      alreadyExisting.foreach { exist =>
+        println(user.votes)
+        if (exist.rev_votes.headOption.isEmpty) {
+          exist.approvalSum += weight
+          discourse.add(Votes.create(user, exist, weight = weight))
+        }
+      }
+
       val cr = alreadyExisting getOrElse {
         val remTags = RemoveTags.create(user, post, applyThreshold = threshold, approvalSum = weight)
         val tag = Scope.matchesOnUuid(tagReq)
         discourse.add(remTags, tag, ProposesTag.create(remTags, tag))
+        discourse.add(Votes.create(user, remTags, weight = weight))
         remTags
       }
 
-      discourse.add(Votes.create(user, cr, weight = weight))
       if (cr.canApply) {
         cr.applied = true;
         discourse.remove(Tags.matches(cr.proposesTags.head, post))

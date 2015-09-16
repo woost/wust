@@ -59,29 +59,30 @@ trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefa
         val post = discourse.posts.head
         request.applied = applyChange(discourse, request, post, tx)
         if (request.applied)
-          Some(Json.toJson(post))
+          Right(Some(post))
         else
-          None
+          Left("Cannot apply changes automatically")
       } else {
-        Some(JsNull)
+        Right(None)
       }
 
-      Left(postApplies.map { node =>
-        request._locked = false
-        val failure = tx.persistChanges(discourse)
+      Left(postApplies match {
+        case Right(nodeOpt) =>
+          request._locked = false
+          val failure = tx.persistChanges(discourse)
 
-        failure.map(_ => BadRequest("No vote :/")).getOrElse {
-          Ok(JsObject(Seq(
-            ("vote", JsObject(Seq(
-              ("weight", JsNumber(weight))
-            ))),
-            ("votes", JsNumber(request.approvalSum)),
-            ("node", node)
-          )))
-        }
-      }.getOrElse {
-        tx.rollback()
-        BadRequest("Cannot apply changes automatically")
+          failure.map(_ => BadRequest("No vote :/")).getOrElse {
+            Ok(JsObject(Seq(
+              ("vote", JsObject(Seq(
+                ("weight", JsNumber(weight))
+              ))),
+              ("votes", JsNumber(request.approvalSum)),
+              ("node", nodeOpt.map(Json.toJson(_)).getOrElse(JsNull))
+            )))
+          }
+        case Left(err) =>
+          tx.rollback()
+          BadRequest("Cannot apply changes automatically")
       })
     }
   }
@@ -104,7 +105,6 @@ case class VotesUpdatedAccess(
         if (changesDesc)
           post.description = request.newDescription
 
-        request.applied = true
         true
       }
     }
@@ -115,21 +115,20 @@ case class VotesTagsChangeRequestAccess(
   ) extends VotesChangeRequestAccess[TagChangeRequest] {
     override def nodeDefinition(uuid: String) = FactoryUuidNodeDefinition(TagChangeRequest, uuid)
     override def selectNode(discourse: Discourse) = discourse.tagChangeRequests.head
-    override def applyChange(discourse: Discourse, req: TagChangeRequest, post: Post, tx:QueryHandler) = req match {
+    override def applyChange(discourse: Discourse, req: TagChangeRequest, post: Post, tx:QueryHandler) = {
+      // we need to get the tag which is connected to the request
+      // TODO: resolve matches startnode via relation in renesca?
+      val tagDef = ConcreteFactoryNodeDefinition(Scope)
+      val tagsDef = RelationDefinition(nodeDefinition(req.uuid), ProposesTag, tagDef)
+      val scope = Discourse(tx.queryGraph(Query(s"match ${tagsDef.toQuery} return ${tagDef.name}", tagsDef.parameterMap))).scopes.head
+      req match {
         case request: AddTags =>
-          // we need to get the tag which is connected to the request
-          val tagDef = ConcreteFactoryNodeDefinition(Scope)
-          val tagsDef = RelationDefinition(nodeDefinition(request.uuid), ProposesTag, tagDef)
-          val tag = Discourse(tx.queryGraph(Query(s"match ${tagsDef.toQuery} return ${tagDef.name}", tagsDef.parameterMap))).scopes.head
-          val tags = Tags.merge(tag, post)
-          discourse.add(tag, tags)
-          true
+          discourse.add(Tags.merge(scope, post))
         case request: RemoveTags =>
-          // we need to get the tag which is connected to the request
-          val tagDef = ConcreteFactoryNodeDefinition(Scope)
-          val tagsDef = RelationDefinition(tagDef, Tags, ConcreteNodeDefinition(post))
-          disconnectHyperNodesFor(tagsDef, tx)
-          true
+          discourse.remove(Tags.matches(scope, post))
+      }
+
+      true
     }
 }
 
