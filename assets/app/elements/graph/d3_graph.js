@@ -33,6 +33,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.markerUrl = _.endsWith($location.absUrl(), "/graph") ? $location.absUrl() : $location.absUrl() + "graph";
                 this.arrowToResponse = false;
                 this.dragHyperRelations = false;
+                this.constantEdgeLength = true;
 
                 // state
                 this.drawOnTick = this.drawOnTick = this.visibleConvergence;
@@ -60,7 +61,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     .size([this.width, this.height])
                     .nodes(graph.nodes)
                     .links(graph.relations)
-                    .linkStrength(0.0) // rigidity, 0, because we handle this ourselves in tick()
+                    .linkStrength(this.constantEdgeLength ? 0.0 : 3.0) // rigidity, 0, because we handle this ourselves in tick()
                     .friction(0.92)
                     .linkDistance(50) // weak geometric constraint. Pushes nodes to achieve this distance
                     .charge(-1500)
@@ -697,7 +698,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             }
         }
 
-        constantEdgeLength(e) {
+        pushConstantEdgeLength(e) {
             // maintain a constant edge length
             // this.force.linkStrength is set to zero, to disable default d3 calculations.
             // we do that ourselves, because we have rectangles instead of circles.
@@ -748,7 +749,12 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
         tick(e) {
             this.straightenHyperRelations(e);
             this.applyVerticalNodeForce(e);
-            this.constantEdgeLength(e);
+            if(this.constantEdgeLength)
+                this.pushConstantEdgeLength(e);
+            else {
+                this.graph.relations.forEach( relation => relation.line = this.cutLineLength(relation)[0] );
+            }
+
 
             if (this.drawOnTick)
                 this.drawGraph();
