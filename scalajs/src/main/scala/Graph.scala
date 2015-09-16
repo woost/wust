@@ -112,6 +112,14 @@ trait NodeBase extends NodeDelegates {
   @JSExport("neighbours") def neighboursJs = neighbours.toJSArray
   @JSExport("parallels") def parallelsJs = parallels.toJSArray
 
+  // TODO: I am here because the optimizer+minificator of scalajs in production
+  // would otherwise assume that .y is a function even though it isn't. so we
+  // make it a function which will be overriden by d3_graph with an actuall
+  // number value. defining this as var does not work because scalajs will keep
+  // thinking that .y must be a function. Not sure whether this has any side effects.
+  @JSExport def x(): Int = -1
+  @JSExport def y(): Int = -1
+
   def encode(): js.Any
 
   import GraphAlgorithms._
