@@ -232,7 +232,10 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     else
                         return undefined;
                 })
-                .style("border-color", n => !n.isHyperRelation && n.tags.length > 0 ? Helpers.postBorderColor(n.tags[0]) : undefined)
+                .style("border-color", n => {
+                    let tags = Helpers.sortedNodeTags(n);
+                    return !n.isHyperRelation && tags.length > 0 ? Helpers.postBorderColor(tags[0]) : undefined;
+                })
                 .html(d => {
                     //TODO: do it with d3 data-joins, or directly with the angular-port
                     if(d.isHyperRelation) {
