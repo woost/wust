@@ -112,7 +112,6 @@
                 }
                 .pintool {
                     @include transform(translate(0px, 0px) rotate(45deg));
-                    cursor: pointer;
                 }
 
                 .connecttool {
@@ -132,26 +131,8 @@
                     }
                 }
 
-                .disconnecttool {
+                .pintool, .edittool, .replytool {
                     cursor: pointer;
-                    display: none;
-                }
-
-                .replytool {
-                    cursor: pointer;
-                }
-
-                .deletetool {
-                    cursor: pointer;
-                }
-
-            }
-            .nodeframe-hyperrelation {
-                .deletetool {
-                    display: none;
-                }
-                .disconnecttool, .replytool {
-                    display: inline-block;
                 }
             }
             .fixed {

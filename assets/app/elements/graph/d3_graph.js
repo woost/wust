@@ -318,8 +318,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     .style("display", d => (!d.isHyperRelation || this.arrowToResponse) ? "inline-block" : "none")
                     .append("div").attr("class", "event-offset-rotate-fix");
 
-                this.d3NodeDisconnectTool = this.d3NodeTools.append("div")
-                    .attr("class", "nodetool disconnecttool fa fa-scissors");
+                this.d3NodeEditTool = this.d3NodeTools.append("div")
+                    .attr("class", "nodetool edittool fa fa-pencil");
 
                 this.d3NodePinTool = this.d3NodeTools.append("div")
                     .attr("class", "nodetool pintool fa fa-thumb-tack")
@@ -444,7 +444,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             this.d3Node.call(this.dragMove);
             this.d3NodePinTool.on("click", this.stopPropagationAfter(this.toggleFixed.bind(this))).call(this.disableDrag);
             this.d3NodeConnectTool.call(this.dragConnect);
-            this.d3NodeDisconnectTool.on("click", this.stopPropagationAfter(this.disconnectHyperRelation.bind(this))).call(this.disableDrag);
+            this.d3NodeEditTool.on("click", this.stopPropagationAfter(this.editNode.bind(this))).call(this.disableDrag);
             this.d3NodeReplyTool.on("click", this.stopPropagationAfter(this.replyToNode.bind(this))).call(this.disableDrag);
             // this.d3NodeDeleteTool.on("click", this.stopPropagationAfter(this.removeNode.bind(this))).call(this.disableDrag);
         }
@@ -1029,6 +1029,14 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.graph.commit();
                 this.force.stop();
             }, response => humane.error(response.$response.data));
+        }
+
+        editNode(d) {
+            if(d.isHyperRelation) {
+                TagRelationEditService.show(d);
+            } else {
+                ModalEditService.show(d);
+            }
         }
 
         replyToNode(existingNode) {
