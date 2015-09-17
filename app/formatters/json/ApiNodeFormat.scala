@@ -24,6 +24,16 @@ object ApiNodeFormat {
     def writes(tag: TagLike) = JsObject(tagLikeToSeq(tag))
   }
 
+  def classificationWriter(post: Post, tuple: (Classification, Seq[Connects])): JsObject = {
+    val (classification, connectsList) = tuple
+    val quality = connectsList.map(c => c.quality(post.viewCount)).sum / connectsList.size
+    JsObject(
+      tagLikeToSeq(classification) ++ Seq(
+        ("quality", JsNumber(quality))
+      )
+    )
+  }
+
   implicit def tagsWrites = new Writes[Tags] {
     def writes(cat: Tags) = cat.startNodeOpt.map(tag => JsObject(
       tagLikeToSeq(tag) ++ Seq(
@@ -46,7 +56,7 @@ object ApiNodeFormat {
         //("classifications", JsArray(n.outRelationsAs(PostToConnects).flatMap(_.rev_classifies).map(tagWrites.writes))), //TODO WHY DOES THIS NOT WORK...
         ("classifications", {
           val discourse = Discourse(n.graph)
-          JsArray(n.outRelationsAs(PostToConnects).map(_.endNode).flatMap(con => discourse.classifies.filter(_.endNode == con)).map(_.startNode).sortBy(_.uuid).map(tagWrites.writes))
+          JsArray(n.outRelationsAs(PostToConnects).map(_.endNode).flatMap(con => discourse.classifies.filter(_.endNode == con).map(_.startNode).sortBy(_.uuid).map((_, con))).groupBy(_._1).mapValues(_.map(_._2)).map(classificationWriter(n, _)).toSeq)
         }),
         ("timestamp", Json.toJson(JsNumber(n.timestamp))),
         ("requestsEdit", Json.toJson(n.inRelationsAs(Updated))), //TODO: accessors for subrelations of hyperrelations, to get connected hypernode
