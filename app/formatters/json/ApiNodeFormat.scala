@@ -37,7 +37,8 @@ object ApiNodeFormat {
   implicit def tagsWrites = new Writes[Tags] {
     def writes(cat: Tags) = cat.startNodeOpt.map(tag => JsObject(
       tagLikeToSeq(tag) ++ Seq(
-        ("quality", cat.endNodeOpt.map(post => JsNumber(cat.quality(post.viewCount))).getOrElse(JsNull))
+        ("quality", cat.endNodeOpt.map(post => JsNumber(cat.quality(post.viewCount))).getOrElse(JsNull)),
+        ("vote", cat.inRelationsAs(Votes).headOption.map(vote => JsObject(Seq(("weight", JsNumber(vote.weight))))).getOrElse(JsNull))
       )
     )).getOrElse(JsNull)
   }

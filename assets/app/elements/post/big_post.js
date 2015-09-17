@@ -45,7 +45,8 @@ function bigPostCtrl(SidebarService, Post, EditService, ModalEditService) {
     //TODO: need to unvote
     //TODO: semnatic downvote on post
     function upvoteTag(tag) {
-        Post.$buildRaw(_.pick(vm.node, "id")).tags.$buildRaw(_.pick(tag, "id")).up.$create().$then(() => {
+        Post.$buildRaw(_.pick(vm.node, "id")).tags.$buildRaw(_.pick(tag, "id")).up.$create().$then(data => {
+            tag.vote = data.vote;
             humane.success("Upvoted post in context");
         }, resp => {
             humane.error(resp.$response.data);

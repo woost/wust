@@ -76,6 +76,13 @@
                     .up {
                         line-height: 5px;
                     }
+                    & > i {
+                        opacity: 0.5;
+                        &.active {
+                            opacity: 1;
+                            color: black;
+                        }
+                    }
                 }
             }
         }

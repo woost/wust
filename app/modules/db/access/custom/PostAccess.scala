@@ -196,14 +196,21 @@ case class PostAccess() extends ConnectableAccessBase with NodeDeleteBase[Post] 
     val connDef = RelationDefinition(nodeDef, PostToConnects, connectsDef)
     val classifiesDef = RelationDefinition(classDef, Classifies, connectsDef)
 
+    val (ownVoteCondition, ownVoteParams) = context.user.map { user =>
+      val userDef = ConcreteNodeDefinition(user)
+      val votesDef = RelationDefinition(userDef, Votes, tagsDef)
+      (s"optional match ${votesDef.toQuery(true,false)}", votesDef.parameterMap)
+    }.getOrElse(("", Map.empty))
+
     val query = s"""
     match ${nodeDef.toQuery}
     optional match ${tagsDef.toQuery(true, false)}
+    $ownVoteCondition
     optional match ${connDef.toQuery(false, true)}, ${classifiesDef.toQuery(true, false)}
     return *
     """
 
-    val params = tagsDef.parameterMap ++ connDef.parameterMap ++ classifiesDef.parameterMap
+    val params = tagsDef.parameterMap ++ connDef.parameterMap ++ classifiesDef.parameterMap ++ ownVoteParams
 
     val discourse = Discourse(db.queryGraph(Query(query, params)))
     discourse.posts.headOption match {
