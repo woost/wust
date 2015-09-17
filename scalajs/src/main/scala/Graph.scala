@@ -153,7 +153,7 @@ trait NodeBase extends NodeDelegates {
 class Node(val rawNode: RawNode) extends NodeBase {
 
   override def classifications:Set[RecordTag] = {
-    val connects = (successors ++ outRelations).collect { case hr: HyperRelation => hr }
+    val connects = outRelations.collect { case hr: HyperRelation => hr }
     if (connects.isEmpty)
       rawNode.classifications
     else {
