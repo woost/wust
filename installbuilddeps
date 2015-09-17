@@ -2,7 +2,7 @@
 
 NPMPREFIX="$HOME/.node_modules"
 
-echo 'export PATH=$NPMPREFIX/bin:$PATH' >> ~/.bashrc
+echo "export PATH=$NPMPREFIX/bin:$$PATH" >> ~/.bashrc
 . ~/.bashrc
 mkdir -p $NPMPREFIX
 mkdir -p ~/node-install
