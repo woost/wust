@@ -1,6 +1,7 @@
 #!/bin/bash -e
 GIT_WORK_TREE=../app git checkout -f
-echo PATH=$PATH
+source ~/.bashrc
+
 cd ../app
 ./buildproduction
 killall java
