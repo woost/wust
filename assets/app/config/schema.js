@@ -22,9 +22,9 @@ function SchemaConfig(SchemaProvider, DiscourseNodeProvider, DiscourseNodeListPr
                     let encoded = this.$encode();
                     //TODO: more general solution, as encode loses all collection propertiees
                     if (this.tags !== undefined)
-                        encoded.tags = angular.copy(this.tags.map(t => t.$encode()));
+                        encoded.tags = angular.copy(this.tags.map(t => t.$encode ? t.$encode() : t));
                     if (this.classifications !== undefined)
-                        encoded.classifications = angular.copy(this.classifications.map(t => t.$encode()));
+                        encoded.classifications = angular.copy(this.classifications.map(t => t.$encode ? t.$encode() : t));
 
                     return encoded;
                 }
