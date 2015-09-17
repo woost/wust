@@ -12,6 +12,7 @@ function ModalEditCtrl(DiscourseNode, Search, EditService,ModalEditService) {
     vm.save = save;
 
     function save() {
-        return ModalEditService.save().$then(() => ModalEditService.hide());
+        ModalEditService.save();
+        ModalEditService.hide();
     }
 }
