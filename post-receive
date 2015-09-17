@@ -1,13 +1,19 @@
-#!/bin/bash -e
+#!/bin/bash
 GIT_WORK_TREE=../app git checkout -f
+
+#TODO: separate start/stop script
+#TODO: write PID into file
 
 export PATH="$PATH:$HOME/.rvm/bin"
 export PATH="$PATH:$HOME/.node_modules/bin"
+source $HOME/export_neo4j_pass
 
 cd ../app
 ./buildproduction
+
 killall java
 sleep 2
 killall -9 java
-nohup target/universal/stage/bin/wust &
+
+target/universal/stage/bin/wust >&- 2>&- &
 
