@@ -16,13 +16,21 @@ function TagRelationEditService($rootScope, $modal, EditService) {
     this.show = showModal;
     this.hide = hideModal;
     this.save = save;
+    this.disconnect = disconnect;
 
-    let currentRelation;
+    let currentRelation, currentDisconnect;
     Object.defineProperty(this, "currentRelation", {
         get: () => {
             return currentRelation;
         }
     });
+
+    function disconnect() {
+        if (currentRelation === undefined)
+            return;
+
+        currentDisconnect();
+    }
 
     function save() {
         if (currentRelation === undefined)
@@ -31,8 +39,9 @@ function TagRelationEditService($rootScope, $modal, EditService) {
         currentRelation.save();
     }
 
-    function showModal(node) {
+    function showModal(node, disconnectFunc) {
         currentRelation = EditService.editConnects(node);
+        currentDisconnect = disconnectFunc;
         modalInstance.$promise.then(modalInstance.show);
     }
 

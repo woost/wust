@@ -24,8 +24,8 @@ function discourseNodeListCtrl(Post, TagRelationEditService) {
 
     vm.upvoteAnswer = upvoteAnswer;
     vm.remove = remove;
-    vm.editConnectsBetweenNodes = editConnectsBetweenNodes;
-
+    vm.editFollowerConnects = editFollowerConnects;
+    vm.editPredecessorConnects = editPredecessorConnects;
 
     //TODO: unvote
     function upvoteAnswer(connectable) {
@@ -40,9 +40,19 @@ function discourseNodeListCtrl(Post, TagRelationEditService) {
         vm.nodeModel.remove(node);
     }
 
-    function editConnectsBetweenNodes(startNode, endNode) {
-        let connects = _.find(startNode.outRelations, h => h.endNode.id === endNode.id);
-        TagRelationEditService.show(connects);
+    function findConnects(startNode, endNode) {
+        return _.find(startNode.outRelations, h => h.endNode.id === endNode.id);
+    }
+
+    function editPredecessorConnects(node) {
+        let connects = findConnects(vm.nodeModel.node, node);
+        TagRelationEditService.show(connects, () => vm.nodeModel.remove(node));
+        //TODO: update startNode, endNode and bigpost taglist
+    }
+
+    function editFollowerConnects(node) {
+        let connects = findConnects(node, vm.nodeModel.node);
+        TagRelationEditService.show(connects, () => vm.nodeModel.remove(node));
         //TODO: update startNode, endNode and bigpost taglist
     }
 }

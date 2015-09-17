@@ -1040,7 +1040,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
         editNode(d) {
             if(d.isHyperRelation) {
-                TagRelationEditService.show(d);
+                TagRelationEditService.show(d, () => this.disconnectHyperRelation(d));
             }
         }
 
@@ -1218,7 +1218,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                                 return;
                             }
 
-                            TagRelationEditService.show(connects);
+                            TagRelationEditService.show(connects, () => this.disconnectHyperRelation(connects));
                         });
                     }
                 }
