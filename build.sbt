@@ -50,7 +50,9 @@ lazy val schema = (project in file("schema")).
       // for external inheritance and default value code
       "com.mohiva" %% "play-silhouette" % "2.0"
     ),
-    addCompilerPlugin("org.scalamacros" % "paradise" % paradiseVersion cross CrossVersion.full)
+    addCompilerPlugin("org.scalamacros" % "paradise" % paradiseVersion cross CrossVersion.full),
+    sources in (Compile,doc) := Seq.empty,
+    publishArtifact in (Compile, packageDoc) := false
   )
 
 // ScalaJs
@@ -71,7 +73,9 @@ lazy val scalajs = (project in file("scalajs")).settings(
     "com.lihaoyi" %%% "utest" % "0.3.1"
   ),
   testFrameworks += new TestFramework("utest.runner.Framework"),
-  persistLauncher in Test := false
+  persistLauncher in Test := false,
+  sources in (Compile,doc) := Seq.empty,
+  publishArtifact in (Compile, packageDoc) := false
 ).enablePlugins(ScalaJSPlugin, ScalaJSPlay).
   dependsOn(scalajsSharedJs)
 
@@ -91,7 +95,9 @@ lazy val seed = (project in file("seed")).settings(
     "com.github.seratch" %% "hackernews4s" % "0.5.0",
     // escape and unescape operations (html, json, css, ...)
     "org.unbescape" % "unbescape" % "1.1.1.RELEASE"
-  )
+  ),
+  sources in (Compile,doc) := Seq.empty,
+  publishArtifact in (Compile, packageDoc) := false
 ).dependsOn(schema, wust)
 
 // deploy to heroku
