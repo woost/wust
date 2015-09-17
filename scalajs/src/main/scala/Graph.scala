@@ -150,10 +150,11 @@ trait NodeBase extends NodeDelegates {
 }
 
 @JSExport
-class Node(val rawNode: RawNode) extends NodeBase {
+class Node(val rawNode: RawNode, inHyperGraph: Boolean) extends NodeBase {
 
   override def classifications:Set[RecordTag] = {
-    val connects = outRelations.collect { case hr: HyperRelation => hr }
+    val accessor = if (inHyperGraph) outRelations else successors
+    val connects = accessor.collect { case hr: HyperRelation => hr }
     if (connects.isEmpty)
       rawNode.classifications
     else {
@@ -274,11 +275,11 @@ case class HyperRelation(rawNode: RawNode) extends NodeBase with RelationLike {
 }
 
 object Node {
-  def apply(node: RawNode) = {
+  def apply(node: RawNode, inHyperGraph: Boolean) = {
     if(node.isHyperRelation)
       new HyperRelation(node)
     else
-      new Node(node)
+      new Node(node, inHyperGraph)
   }
 }
 
@@ -288,7 +289,7 @@ class HyperGraph(val rawGraph: RawGraph) extends WrappedGraph[HyperRelation] {
   // because they are used in both ways:
   //  1) as a relation which connects two nodes (or hyperrelations)
   //  2) as a node which is the start- or endnode (nodeById has to be mapped) of a relation
-  val nodes: mutable.Set[NodeBase] = mutable.Set.empty ++ rawGraph.nodes.map(Node(_))
+  val nodes: mutable.Set[NodeBase] = mutable.Set.empty ++ rawGraph.nodes.map(Node(_, inHyperGraph = true))
   val hyperRelations: mutable.Set[HyperRelation] = mutable.Set.empty ++ nodes.collect { case n: HyperRelation => n }
   def relations = hyperRelations
   @JSExport("relations") def _relationsJs = relationsJs
@@ -328,7 +329,7 @@ class HyperGraph(val rawGraph: RawGraph) extends WrappedGraph[HyperRelation] {
 
   // propagations upwards, coming from rawGraph
   private[js] def rawAdd(rawNode: RawNode) {
-    val node = Node(rawNode)
+    val node = Node(rawNode, inHyperGraph = true)
     nodes += node
     if(node.isHyperRelation)
       hyperRelations += node.asInstanceOf[HyperRelation]
@@ -343,7 +344,7 @@ class HyperGraph(val rawGraph: RawGraph) extends WrappedGraph[HyperRelation] {
 }
 
 class Graph(private[js] val rawGraph: RawGraph) extends WrappedGraph[Relation] {
-  val nodes: mutable.Set[NodeBase] = mutable.Set.empty ++ rawGraph.nodes.map(Node(_))
+  val nodes: mutable.Set[NodeBase] = mutable.Set.empty ++ rawGraph.nodes.map(Node(_, inHyperGraph = false))
   val relations: mutable.Set[Relation] = mutable.Set.empty ++ rawGraph.relations.map(new Relation(_))
   var hyperRelations: mutable.Set[HyperRelation] = _
   @JSExport("hyperRelations") var hyperRelationsJs: js.Array[HyperRelation] = _
@@ -390,7 +391,7 @@ class Graph(private[js] val rawGraph: RawGraph) extends WrappedGraph[Relation] {
   def removeRelation(startId: String, endId: String) { rawGraph.remove(relationByIds(startId -> endId).rawRelation) }
 
   // propagations upwards, coming from rawGraph
-  def rawAdd(node: RawNode) { nodes += Node(node); }
+  def rawAdd(node: RawNode) { nodes += Node(node, inHyperGraph = false); }
   def rawAdd(relation: RawRelation) { relations += new Relation(relation) }
   def rawRemove(node: RawNode) { nodes -= nodeById(node.id) }
   def rawRemove(relation: RawRelation) { relations -= relationByIds((relation.startId, relation.endId)) }
