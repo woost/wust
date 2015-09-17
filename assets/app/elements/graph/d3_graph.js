@@ -1163,7 +1163,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 let endX = this.dragStartNodeX + dx + Math.cos(a) * this.connectorLineOvershoot;
                 let endY = this.dragStartNodeY + dy + Math.sin(a) * this.connectorLineOvershoot;
 
-                if (this.hoveredNode !== undefined && (!this.arrowToResponse || !this.hoveredNode.isHyperRelation)) {
+                if (this.hoveredNode !== undefined && this.hoveredNode !== this.dragStartNode && (!this.arrowToResponse || !this.hoveredNode.isHyperRelation)) {
                     let line = geometry.Line(geometry.Vec2(endX, endY), geometry.Vec2(this.dragStartNodeX, this.dragStartNodeY));
                     let cut = this.cutByRects(line, this.nodeRect(this.hoveredNode), this.nodeRect(this.dragStartNode));
                     if( cut ) {
@@ -1208,7 +1208,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     let startNode = this.arrowToResponse ? this.hoveredNode : this.dragStartNode; // always normal node
                     let endNode = this.arrowToResponse ? this.dragStartNode : this.hoveredNode;
 
-                    if(!startNode.isHyperRelation) {
+                    if(!startNode.isHyperRelation && startNode !== endNode) {
                         // TODO: we need to make it impossible to drag on self loops and incident relations,
                         // is assured by backend.
                         EditService.connectNodes(startNode, endNode).$then(response => {
