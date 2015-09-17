@@ -13,7 +13,7 @@ angular.module("wust.services").value("Helpers", {
     classificationCircleBorderColor,
     contextLabelBackgroundColor,
     contextLabelBorderColor,
-    contextCircleColor,
+    contextCircleBackgroundColor,
     contextCircleBorderColor,
     tagTitleColor,
     cssCompat,
@@ -65,7 +65,7 @@ function classificationCircleBorderColor(tag) { return hashToColor(tag, 40, 48);
 
 function contextLabelBackgroundColor(tag) { return hashToColor(tag, 30, 98); }
 function contextLabelBorderColor(tag) { return hashToColor(tag, 20, 85); }
-function contextCircleColor(tag) { return hashToColor(tag, 20, 98); }
+function contextCircleBackgroundColor(tag) { return hashToColor(tag, 30, 98); }
 function contextCircleBorderColor(tag) { return hashToColor(tag, 20, 85); }
 
 function tagTitleColor(title) { return Math.abs(hashCode(title.toLowerCase())) % 360; }

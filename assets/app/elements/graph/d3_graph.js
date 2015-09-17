@@ -277,8 +277,9 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                                 circle.style.backgroundColor = Helpers.classificationCircleBackgroundColor(t);
                                 circle.style.border = "1px solid " + Helpers.classificationCircleBorderColor(t);
                             } else {
-                                circle.style.backgroundColor = Helpers.contextCircleColor(t);
+                                circle.style.backgroundColor = Helpers.contextCircleBackgroundColor(t);
                                 circle.style.border = "1px solid " + Helpers.contextCircleBorderColor(t);
+                                circle.style.borderRadius = "2px";
                             }
 
                             circleTitle.appendChild(circle);
