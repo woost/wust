@@ -19,7 +19,6 @@ var closure = require("broccoli-closure");
 var html2js = require("broccoli-html2js");
 var compileSass = errorWrite("Compass", require("broccoli-compass"));
 var csso = require("broccoli-csso");
-var BrowserSync = require("broccoli-browser-sync");
 var flatten = require('broccoli-flatten');
 
 var stylesTree = mergeTrees([
@@ -145,7 +144,6 @@ var scripts = concat(mergeTrees([appScripts,htmlTemplates,dependencies,staticAss
     outputFile: "/main.js"
 });
 
-var browserSync;
 if (prod) {
     module.exports = mergeTrees([
         csso(styles),
@@ -160,6 +158,7 @@ if (prod) {
         jsHintResults
     ]);
 } else { // development
+    var BrowserSync = require("broccoli-browser-sync");
     browserSync = new BrowserSync([appScripts, htmlTemplates, styles], {
         // proxy the local play server
         port: 9000,
