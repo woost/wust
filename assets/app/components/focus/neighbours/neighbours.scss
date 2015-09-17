@@ -33,13 +33,6 @@
                 position:relative;
                 top: -11px;
                 z-index: -1; // put svg below tool buttons
-                .arrowline {
-                    stroke-width: 1px;
-                    stroke:$graph_relation_color;
-                }
-                .arrowhead {
-                    fill: $graph_relation_color;
-                }
             }
         }
     }
@@ -82,13 +75,6 @@
                 position:relative;
                 top: -11px;
                 z-index: -1; // put svg below tool buttons
-                .arrowline {
-                    stroke-width: 1px;
-                    stroke:$graph_relation_color;
-                }
-                .arrowhead {
-                    fill: $graph_relation_color;
-                }
             }
         }
     }
@@ -100,4 +86,14 @@
         }
     }
 
+    .arrow {
+        .arrowline {
+            stroke-width: 1px;
+            stroke:$graph_relation_color;
+        }
+        .arrowhead {
+            stroke-width: 1px;
+            fill: $graph_relation_color;
+        }
+    }
 }

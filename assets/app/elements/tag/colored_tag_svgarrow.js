@@ -34,8 +34,10 @@ function coloredTagSvgArrow(Helpers) {
                 arrowLine.style.stroke = "";
                 arrowHead.style.fill = "";
             } else {
-                arrowLine.style.stroke = Helpers.postBorderColor(tag);
-                arrowHead.style.fill = Helpers.postBorderColor(tag);
+                arrowLine.style.fill = Helpers.classificationCircleBackgroundColor(tag);
+                arrowLine.style.stroke = Helpers.classificationCircleBorderColor(tag);
+                arrowHead.style.fill = Helpers.classificationCircleBackgroundColor(tag);
+                arrowHead.style.stroke = Helpers.classificationCircleBorderColor(tag);
             }
         }
     }
