@@ -24,5 +24,6 @@ tagLabelCtrl.$inject = [];
 
 function tagLabelCtrl() {
     let vm = this;
+    vm.disableLink = vm.disableLink !== undefined || vm.tagLabel.isClassification;
 }
 

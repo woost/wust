@@ -1,5 +1,5 @@
 <span class="tag-label" colored-tag="vm.tagLabel" tagtype="label" border="true">
-    <a ng-if="vm.disableLink !== ''" ng-bind="vm.tagLabel.title" ui-sref="tags.details({id: vm.tagLabel.id})" class="content"></a>
-    <span ng-if="vm.disableLink === ''" ng-bind="vm.tagLabel.title" class="content"></span>
+    <a ng-if="::!vm.disableLink" ng-bind="vm.tagLabel.title" ui-sref="tags.details({id: vm.tagLabel.id})" class="content"></a>
+    <span ng-if="::vm.disableLink" ng-bind="vm.tagLabel.title" class="content"></span>
     <span ng-transclude></span>
 </span>
