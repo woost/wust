@@ -9,5 +9,5 @@ cd ../app
 killall java
 sleep 2
 killall -9 java
-nohup target/universal/stage/wust &
+nohup target/universal/stage/bin/wust &
 
