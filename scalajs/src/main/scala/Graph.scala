@@ -156,7 +156,7 @@ class Node(val rawNode: RawNode, inHyperGraph: Boolean) extends NodeBase {
     val accessor = if (inHyperGraph) outRelations else successors
     val connects = accessor.collect { case hr: HyperRelation => hr }
     if (connects.isEmpty)
-      rawNode.classifications
+      rawNode.classifications // already contains quality
     else {
       // remove duplicates by id
       // we have duplicate tags, because one post can be an idea for many other posts
