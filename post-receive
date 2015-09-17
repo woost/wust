@@ -1,6 +1,7 @@
 #!/bin/bash -e
 GIT_WORK_TREE=../app git checkout -f
 source ~/.bashrc
+echo $PATH
 
 cd ../app
 ./buildproduction
