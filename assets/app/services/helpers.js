@@ -49,7 +49,7 @@ function hashCode(string) {
 
 
 function sortedNodeTags(node) {
-    let sortByIdQuality = (tags) => _.sortBy(tags, ["id","quality"], ["asc", "desc"]);
+    let sortByIdQuality = (tags) => _.sortByOrder(tags, ["quality", "id"], ["desc", "asc"]);
     return sortByIdQuality(node.classifications).concat(sortByIdQuality(node.tags));
 }
 

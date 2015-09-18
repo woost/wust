@@ -2,7 +2,7 @@ package renesca.js
 
 import scala.collection.mutable
 import scala.scalajs.js
-import scala.scalajs.js.annotation.{JSExport, JSExportAll}
+import scala.scalajs.js.annotation.{ScalaJSDefined, JSExport, JSExportAll}
 import js.JSConverters._
 
 object ConsoleImport {
@@ -160,7 +160,16 @@ class Node(val rawNode: RawNode, inHyperGraph: Boolean) extends NodeBase {
     else {
       // remove duplicates by id
       // we have duplicate tags, because one post can be an idea for many other posts
-      connects.flatMap(_.tags).toList.groupBy(_.id).map(_._2.head).toSet
+      connects.map(c => (c.quality, c.tags)).flatMap {
+        case (quality, tags) => tags.map(quality -> _)
+      }.groupBy(_._2.id).values.map(q => q.unzip).map {
+        case (qualities, tags) =>
+          val quality = qualities.sum / qualities.size
+          val tag = tags.head
+          // TODO: this really is a hack, we should create a new tag object!
+          tag.quality = quality
+          tag
+      }.toSet
     }
   }
 
@@ -547,16 +556,16 @@ trait RecordNode extends js.Object {
   def timestamp: js.UndefOr[js.Any] = js.native
 }
 
-@js.native
+@ScalaJSDefined
 trait RecordTag extends js.Object {
-  def id: String = js.native
-  def quality: Double = js.native
-  def title: String = js.native
-  def description: js.UndefOr[String] = js.native
-  def isClassification: Boolean = js.native
-  def isContext: Boolean = js.native
-  def color: Int = js.native
-  def symbol: js.UndefOr[String] = js.native
+  val id: String
+  var quality: Double
+  val title: String
+  val description: js.UndefOr[String]
+  val isClassification: Boolean
+  val isContext: Boolean
+  val color: Int
+  val symbol: js.UndefOr[String]
 }
 
 @js.native
