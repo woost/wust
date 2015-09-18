@@ -9,20 +9,26 @@ package moderation
 
 object Moderation {
   def log(x:Long):Long = Math.log(x).round
+  def sqrt(x:Long):Long = Math.sqrt(x).round
   val votes_p = 0.5 // this is also the default weight, if we have up=0 and down=0
   val votes_u = 10
 
-
+  //TODO: rate limiting for low karma users
   val initialKarma = 0
-  //TODO: flexible
-  val authorKarmaBoost = 5
+
+  val authorKarmaBoost = postChangeThreshold(10000)
+
   //TODO: reason why vote weight should be logarithmic
-  def creatorsKarmaAfterPostVote(creatorsKarma:Long, votersKarma:Long, vote:Long) = creatorsKarma + log(votersKarma) * vote
+  def voteWeight(votersKarma: Long) = log(votersKarma)
+  def authorsKarmaAfterPostVote(authorsKarma:Long, votersKarma:Long) = authorsKarma + voteWeight(votersKarma)
+
+  def postChangeThreshold(viewCount: Long) = sqrt(viewCount)
+  def authorsKarmaAfterPostChangeAccept(authorsKarma: Long, viewCount: Long) = authorsKarma + postChangeThreshold(viewCount)
+
+  def rejectPostChangeThreshold(applyThreshold: Long) = -applyThreshold / 2
+  def authorsKarmaAfterPostChangeReject(authorsKarma: Long, viewCount: Long) = authorsKarma - postChangeThreshold(viewCount)
+
   def postQuality(upVotes:Long, downVotes:Long) = (upVotes + votes_u*votes_p) / (downVotes + upVotes + votes_u)
-  def postChangeThreshold(creatorsKarma:Long, votersKarma:Long, vote:Long, postUpVotes:Long, postDownVotes:Long) = {
-    postQuality(postUpVotes, postDownVotes)
-    ???
-  }
 
   // reject threshold
   // When do change requests disappear?
