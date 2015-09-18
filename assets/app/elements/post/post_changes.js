@@ -47,8 +47,16 @@ class VotingEditor {
     applyChange(change, response) {
         change.vote = response.vote;
         change.votes = response.votes;
-        if (response.node) {
-            _.remove(this.list, change);
+        change.applied = response.applied;
+        if (change.applied !== 0) {
+            _.remove(this.list, {id:change.id});
+        }
+
+
+        if (change.applied === -1) {
+            humane.success("Change request rejected");
+        }
+        if (change.applied === 1) {
             this.onApply({node: response.node, tag: change.tags ? change.tags[0] : undefined, isRemove: change.isRemove});
         }
     }

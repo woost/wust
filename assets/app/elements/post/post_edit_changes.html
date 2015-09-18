@@ -9,6 +9,6 @@
         <div word-based-diff source-a="change.oldTitle" source-b="change.newTitle"></div>
         <b>Description:</b>
         <div word-based-diff source-a="change.oldDescription" source-b="change.newDescription"></div>
-        <div progressbar max="change.threshold" value="change.votes"><span style="padding-top: 5px; color:grey; white-space:nowrap;">{{change.votes}} / {{change.threshold}}</span></div>
+        <div progressbar min="change.rejectThreshold" max="change.applyThreshold" value="change.votes"><span style="padding-top: 5px; color:grey; white-space:nowrap;">{{change.votes}} / {{change.applyThreshold}}</span></div>
     </div>
 </div>

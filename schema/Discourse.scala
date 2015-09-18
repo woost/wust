@@ -99,9 +99,12 @@ object WustSchema {
   @Node trait ChangeRequest extends UuidNode with Timestamp with Votable {
     val applyThreshold:Long
     var approvalSum:Long = 0
-    var applied:Boolean = false
+    var applied:Long = 0
+    var instantChange:Boolean = false
 
+    def rejectThreshold = Moderation.rejectPostChangeThreshold(applyThreshold)
     def canApply = approvalSum >= applyThreshold
+    def canReject = approvalSum < rejectThreshold
   }
 
   @HyperRelation class Updated(startNode: User, endNode: Post) extends ChangeRequest with HyperConnection {

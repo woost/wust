@@ -55,14 +55,19 @@ trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefa
         discourse.add(newVotes)
       }
 
-      val postApplies = if (request.approvalSum >= request.applyThreshold) {
+      val postApplies = if (request.canApply) {
         val post = discourse.posts.head
-        request.applied = applyChange(discourse, request, post, tx)
-        if (request.applied)
+        val changed = applyChange(discourse, request, post, tx)
+        if (changed) {
+          request.applied = 1
           Right(Some(post))
-        else
+        } else {
           Left("Cannot apply changes automatically")
+        }
       } else {
+        if (request.canReject) {
+          request.applied = -1
+        }
         Right(None)
       }
 
@@ -76,13 +81,14 @@ trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefa
               ("vote", JsObject(Seq(
                 ("weight", JsNumber(weight))
               ))),
+              ("applied", JsNumber(request.applied)),
               ("votes", JsNumber(request.approvalSum)),
               ("node", nodeOpt.map(Json.toJson(_)).getOrElse(JsNull))
             )))
           }
         case Left(err) =>
           tx.rollback()
-          BadRequest("Cannot apply changes automatically")
+          BadRequest(err)
       })
     }
   }

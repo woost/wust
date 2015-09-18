@@ -2,6 +2,7 @@ package modules.requests
 
 // either references a new node (just by title) which should be created or it
 // refers to an existing node via id (then title is ignored)
+//TODO: this should be Either[String,String]!
 case class TagConnectRequest(id: Option[String], title: Option[String])
 
 trait AddTagRequestBase {

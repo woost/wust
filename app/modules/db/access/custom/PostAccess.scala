@@ -64,7 +64,7 @@ trait ConnectableAccessBase {
     val postDef = ConcreteNodeDefinition(post)
     val tagsDef = RelationDefinition(requestDef, ProposesTag, tagDef)
     val votesDef = RelationDefinition(ConcreteNodeDefinition(user), Votes, requestDef)
-    val query = s"match ${userDef.toQuery}-[ut:`${UserToAddTags.relationType}`|`${UserToRemoveTags.relationType}`]->(${requestDef.name} ${requestDef.factory.labels.map(l => s":`$l`").mkString} { applied: false })-[tp:`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->${postDef.toQuery}, ${tagsDef.toQuery(false,true)} optional match ${votesDef.toQuery(true, false)} set ${requestDef.name}._locked = true return *"
+    val query = s"match ${userDef.toQuery}-[ut:`${UserToAddTags.relationType}`|`${UserToRemoveTags.relationType}`]->(${requestDef.name} ${requestDef.factory.labels.map(l => s":`$l`").mkString} { applied: 0 })-[tp:`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->${postDef.toQuery}, ${tagsDef.toQuery(false,true)} optional match ${votesDef.toQuery(true, false)} set ${requestDef.name}._locked = true return *"
     val existing = Discourse(tx.queryGraph(Query(query, votesDef.parameterMap ++ userDef.parameterMap ++ postDef.parameterMap ++ tagsDef.parameterMap)))
 
     discourse.add(existing.nodes: _*)
@@ -83,7 +83,8 @@ trait ConnectableAccessBase {
       }
 
       alreadyExisting.foreach { exist =>
-        println(user.votes)
+        // we only get the vote of the current user, so rev_votes is only
+        // defined iff the user already voted on this request
         if (exist.rev_votes.headOption.isEmpty) {
           exist.approvalSum += weight
           discourse.add(Votes.create(user, exist, weight = weight))
@@ -91,7 +92,9 @@ trait ConnectableAccessBase {
       }
 
       val crOpt = alreadyExisting orElse tagConnectRequestToScope(tagReq).map { tag =>
+        // we create a new change request as there is no existing one here
         val addTags = AddTags.create(user, post, applyThreshold = threshold, approvalSum = weight)
+        addTags.instantChange = addTags.canApply
         discourse.add(addTags, tag, ProposesTag.create(addTags, tag))
         discourse.add(Votes.create(user, addTags, weight = weight))
         addTags
@@ -99,7 +102,7 @@ trait ConnectableAccessBase {
 
       crOpt.foreach { cr =>
         if (cr.canApply) {
-          cr.applied = true;
+          cr.applied = 1;
           discourse.add(Tags.merge(cr.proposesTags.head, post))
         }
       }
@@ -109,7 +112,6 @@ trait ConnectableAccessBase {
       val alreadyExisting = existRemTags.find(_.proposesTags.head.uuid == tagReq)
 
       alreadyExisting.foreach { exist =>
-        println(user.votes)
         if (exist.rev_votes.headOption.isEmpty) {
           exist.approvalSum += weight
           discourse.add(Votes.create(user, exist, weight = weight))
@@ -118,6 +120,7 @@ trait ConnectableAccessBase {
 
       val cr = alreadyExisting getOrElse {
         val remTags = RemoveTags.create(user, post, applyThreshold = threshold, approvalSum = weight)
+        remTags.instantChange = remTags.canApply
         val tag = Scope.matchesOnUuid(tagReq)
         discourse.add(remTags, tag, ProposesTag.create(remTags, tag))
         discourse.add(Votes.create(user, remTags, weight = weight))
@@ -125,7 +128,7 @@ trait ConnectableAccessBase {
       }
 
       if (cr.canApply) {
-        cr.applied = true;
+        cr.applied = 1;
         discourse.remove(Tags.matches(cr.proposesTags.head, post))
       }
     }
@@ -278,15 +281,17 @@ case class PostAccess() extends ConnectableAccessBase with NodeDeleteBase[Post] 
         val discourse = Discourse(tx.queryGraph(Query(query, createdDef.parameterMap)))
         discourse.posts.headOption.map { node =>
           val authorBoost = if (discourse.createds.isEmpty) 0 else Moderation.authorKarmaBoost
-
           val karma = 1 // TODO: karma
           val approvalSum = karma + authorBoost
-          val applyThreshold = 5 // TODO: correct edit threshold
+          val applyThreshold = Moderation.postChangeThreshold(node.viewCount)
 
-          //TODO: check for edit threshold and implement instant edit
           if (request.title.isDefined || request.description.isDefined) {
             val contribution = Updated.create(user, node, oldTitle = node.title, newTitle = request.title.getOrElse(node.title), oldDescription = node.description, newDescription = request.description.orElse(node.description), applyThreshold = applyThreshold, approvalSum = approvalSum)
-            contribution.applied = contribution.canApply // TODO: magic extend factory to add sth like that?
+            if (contribution.canApply) {
+              contribution.applied = 1
+              contribution.instantChange = true
+            }
+
             val votes = Votes.create(user, contribution, weight = approvalSum)
             discourse.add(contribution, votes)
             if (contribution.canApply) {

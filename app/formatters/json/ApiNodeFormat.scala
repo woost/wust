@@ -89,27 +89,30 @@ object ApiNodeFormat {
         ("oldDescription", JsString(n.oldDescription.getOrElse(""))),
         ("newDescription", JsString(n.newDescription.getOrElse(""))),
         ("vote", n.inRelationsAs(Votes).headOption.map(vote => JsObject(Seq(("weight", JsNumber(vote.weight))))).getOrElse(JsNull)),
-        ("threshold", JsNumber(n.applyThreshold)),
+        ("applyThreshold", JsNumber(n.applyThreshold)),
+        ("rejectThreshold", JsNumber(n.rejectThreshold)),
         ("votes", JsNumber(n.approvalSum)),
-        ("applied", JsBoolean(n.applied))
+        ("applied", JsNumber(n.applied))
       )
       case n: AddTags    => Seq(
         ("id", JsString(n.uuid)),
         ("tags", Json.toJson(n.proposesTags.map(tagWrites.writes))),
         ("vote", n.inRelationsAs(Votes).headOption.map(vote => JsObject(Seq(("weight", JsNumber(vote.weight))))).getOrElse(JsNull)),
-        ("threshold", JsNumber(n.applyThreshold)),
+        ("applyThreshold", JsNumber(n.applyThreshold)),
+        ("rejectThreshold", JsNumber(n.rejectThreshold)),
         ("votes", JsNumber(n.approvalSum)),
         ("isRemove", JsBoolean(false)),
-        ("applied", JsBoolean(n.applied))
+        ("applied", JsNumber(n.applied))
       )
       case n: RemoveTags    => Seq(
         ("id", JsString(n.uuid)),
         ("tags", Json.toJson(n.proposesTags.map(tagWrites.writes))),
         ("vote", n.inRelationsAs(Votes).headOption.map(vote => JsObject(Seq(("weight", JsNumber(vote.weight))))).getOrElse(JsNull)),
-        ("threshold", JsNumber(n.applyThreshold)),
+        ("applyThreshold", JsNumber(n.applyThreshold)),
+        ("rejectThreshold", JsNumber(n.rejectThreshold)),
         ("votes", JsNumber(n.approvalSum)),
         ("isRemove", JsBoolean(true)),
-        ("applied", JsBoolean(n.applied))
+        ("applied", JsNumber(n.applied))
       )
       case n              =>
         throw new RuntimeException("You did not define a formatter for the api: " + node)
