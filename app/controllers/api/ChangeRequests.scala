@@ -14,6 +14,10 @@ object EditRequests extends Nodes[Updated] {
   )
 }
 
+object InstantRequests extends Nodes[ChangeRequest] {
+  val node = NodeDef("InstantRequests", InstantChangeRequestAccess())
+}
+
 object TagsRequests extends Nodes[TagChangeRequest] {
   val node = NodeDef("RequestsTags", TagChangeRequestAccess(TagChangeRequest),
     "up" -> (N < VotesTagsChangeRequestAccess(1)),

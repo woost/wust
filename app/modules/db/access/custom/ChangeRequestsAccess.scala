@@ -9,6 +9,23 @@ import modules.db.{FactoryUuidNodeDefinition, ConcreteFactoryNodeDefinition, Con
 import renesca.Query
 import play.api.mvc.Results._
 
+case class InstantChangeRequestAccess() extends NodeAccessDefault[ChangeRequest] {
+  val factory = ChangeRequest
+
+  override def read(context: RequestContext) = {
+    val page = context.page.getOrElse(0)
+    val skip = page * context.limit
+
+    val crDef = ConcreteFactoryNodeDefinition(ChangeRequest)
+    val query = s""" match ${crDef.toQuery} where ${crDef.name}.instantChange = true return ${crDef.name} order by ${crDef.name}.timestamp skip ${skip} limit ${context.limit}"""
+    val params = crDef.parameterMap
+
+    val discourse = Discourse(db.queryGraph(query, params))
+
+    Right(discourse.changeRequests)
+  }
+}
+
 case class TagChangeRequestAccess[NODE <: TagChangeRequest](factory: TagChangeRequestMatchesFactory[NODE]) extends NodeAccessDefault[NODE] {
   //TODO: paging
   override def read(context: RequestContext) = {
@@ -19,7 +36,7 @@ case class TagChangeRequestAccess[NODE <: TagChangeRequest](factory: TagChangeRe
     val query = s""" match ${tagsDef.toQuery} return * """
     val params = tagsDef.parameterMap
 
-    val discourse = Discourse(db.queryGraph(Query(query, params)))
+    val discourse = Discourse(db.queryGraph(query, params))
 
     Right(discourse.nodesAs(factory))
   }
@@ -32,7 +49,7 @@ case class TagChangeRequestAccess[NODE <: TagChangeRequest](factory: TagChangeRe
     val query = s""" match ${tagsDef.toQuery} return * """
     val params = tagsDef.parameterMap
 
-    val discourse = Discourse(db.queryGraph(Query(query, params)))
+    val discourse = Discourse(db.queryGraph(query, params))
 
     discourse.nodesAs(factory).headOption match {
       case Some(node) => Right(node)
@@ -53,7 +70,7 @@ case class PostUpdatedAccess() extends EndRelationAccessDefault[Updated, Updated
       val votesDef = RelationDefinition(userDef, Votes, updatedDef)
       //TODO: graphdefinition with arbitrary properties, not only uuid
       val query = s"match ${relDef.toQuery} where ${updatedDef.name}.applied = 0 optional match ${votesDef.toQuery(true, false)} return ${votesDef.name}, ${updatedDef.name}"
-      val discourse = Discourse(db.queryGraph(Query(query, relDef.parameterMap ++ votesDef.parameterMap)))
+      val discourse = Discourse(db.queryGraph(query, relDef.parameterMap ++ votesDef.parameterMap))
       discourse.updateds
     }.getOrElse(Seq.empty))
   }
@@ -71,7 +88,7 @@ case class PostTagChangeRequestAccess() extends RelationAccessDefault[Post, TagC
       val scopeDef = ConcreteFactoryNodeDefinition(Scope)
       val proposes = RelationDefinition(updatedDef, ProposesTag, scopeDef)
       val query = s"match ${updatedDef.toQuery}-[:`${AddTags.endRelationType}`|`${RemoveTags.endRelationType}`]->${postDef.toQuery} where ${updatedDef.name}.applied = 0 optional match ${votesDef.toQuery(true, false)} optional match ${proposes.toQuery(false, true)} return ${votesDef.name}, ${proposes.name}, ${updatedDef.name}"
-      val discourse = Discourse(db.queryGraph(Query(query, postDef.parameterMap ++ votesDef.parameterMap)))
+      val discourse = Discourse(db.queryGraph(query, postDef.parameterMap ++ votesDef.parameterMap))
       discourse.tagChangeRequests
     }.getOrElse(Seq.empty))
   }
