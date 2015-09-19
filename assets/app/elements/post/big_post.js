@@ -7,7 +7,7 @@ function bigPost() {
         restrict: "A",
         templateUrl: "elements/post/big_post.html",
         scope: {
-            node: "="
+            component: "="
         },
         controller: bigPostCtrl,
         controllerAs: "vm",
@@ -22,6 +22,8 @@ bigPostCtrl.$inject = ["SidebarService", "Post", "EditService", "ModalEditServic
 //not needed. zen mode should reuse the parsed description here.
 function bigPostCtrl(SidebarService, Post, EditService, ModalEditService) {
     let vm = this;
+
+    vm.node = vm.component.rootNode;
 
     vm.editNode = EditService.edit(vm.node);
     vm.editChanges = Post.$buildRaw(vm.node).requestsEdit.$search();
@@ -42,15 +44,22 @@ function bigPostCtrl(SidebarService, Post, EditService, ModalEditService) {
         }
     }
 
-    //TODO: need to unvote
     //TODO: semnatic downvote on post
     function upvoteTag(tag) {
-        Post.$buildRaw(_.pick(vm.node, "id")).tags.$buildRaw(_.pick(tag, "id")).up.$create().$then(data => {
-            tag.vote = data.vote;
-            humane.success("Upvoted post in context");
-        }, resp => {
-            humane.error(resp.$response.data);
-        });
+        let service = Post.$buildRaw(_.pick(vm.node, "id")).tags.$buildRaw(_.pick(tag, "id"));
+        if (tag.vote) {
+            service.neutral.$create().$then(data => {
+                tag.vote = undefined;
+                tag.quality = data.quality;
+                humane.success("Unvoted post in context");
+            }, resp => humane.error(resp.$response.data));
+        } else {
+            service.up.$create().$then(data => {
+                tag.vote = data.vote;
+                tag.quality = data.quality;
+                humane.success("Upvoted post in context");
+            }, resp => humane.error(resp.$response.data));
+        }
     }
 
     function onApply(node) {

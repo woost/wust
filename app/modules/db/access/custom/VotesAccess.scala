@@ -145,6 +145,7 @@ trait VotesReferenceAccess[T <: Reference] extends EndRelationAccessDefault[User
 
   def nodeDefinition(startUuid: String, endUuid: String): HyperNodeDefinitionBase[T]
   def selectNode(discourse: Discourse, startUuid: String, endUuid: String): T
+  def selectPost(reference: T): Post
 
   override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Votable with AbstractRelation[S,E], E]) = context.withUser { user =>
     db.transaction { tx =>
@@ -172,10 +173,14 @@ trait VotesReferenceAccess[T <: Reference] extends EndRelationAccessDefault[User
         discourse.add(newVotes)
       }
 
+      val post = selectPost(reference)
+      val quality = reference.quality(post.viewCount)
+
       reference._locked = false
       val failure = tx.persistChanges(discourse)
       Left(if (failure.isEmpty) {
         Ok(JsObject(Seq(
+          ("quality", JsNumber(quality)),
           ("vote", JsObject(Seq(
             ("weight", JsNumber(weight))
           )))
@@ -194,6 +199,8 @@ case class VotesTagsAccess(sign: Long) extends VotesReferenceAccess[Tags] {
   override def nodeDefinition(startUuid: String, endUuid: String): HyperNodeDefinitionBase[Tags] = {
     HyperNodeDefinition(FactoryUuidNodeDefinition(Scope, startUuid), Tags, FactoryUuidNodeDefinition(Post, endUuid))
   }
+
+  override def selectPost(reference: Tags) = reference.endNodeOpt.get
 }
 
 case class VotesConnectsAccess(sign: Long) extends VotesReferenceAccess[Connects] {
@@ -203,4 +210,6 @@ case class VotesConnectsAccess(sign: Long) extends VotesReferenceAccess[Connects
   override def nodeDefinition(startUuid: String, endUuid: String): HyperNodeDefinitionBase[Connects] = {
     HyperNodeDefinition(FactoryUuidNodeDefinition(Post, startUuid), Connects, FactoryUuidNodeDefinition(Connectable, endUuid))
   }
+
+  override def selectPost(reference: Connects) = reference.startNodeOpt.get
 }
