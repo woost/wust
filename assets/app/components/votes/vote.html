@@ -1,45 +1,18 @@
 <div id="vote_component">
-    <div style="height:120px">
-        <div style="margin-bottom:50px" ng-show="vm.showundo">
+    <div class="undobutton_container">
+        <div class="undobutton" ng-show="vm.showundo">
             <button class="btn btn-default" ng-click="vm.undo()">
-                <i class="fa fa-1x fa-arrow-left"></i> undo last vote
+                <i class="fa fa-1x fa-reply"></i> undo last vote
             </button>
         </div>
     </div>
     <div id="description_container">
         <div style="text-align:center;height:60px;width:60px">
             <i class="fa fa-3x fa-fw" ng-class="vm.change.icon"></i>
-            <br/> {{vm.change.action}}
+            <br/> {{vm.change.type}}
         </div>
 
-        <div id="action_container">
-            <div ng-show="vm.change.action == 'delete'" class="action">
-                <span ng-class="vm.change.affected.node.class">{{vm.change.affected.node.title}}</span>
-            </div>
-
-            <div ng-show="vm.change.action == 'disconnect'" class="action">
-                <div style="text-align:center">
-                    <span ng-class="vm.change.affected.startnode.class">{{vm.change.affected.startnode.title}}</span>
-                </div>
-                <div class="relation_title">
-                    <span class="fa-stack">
-                        <i class="fa fa-stack-2x fa-long-arrow-down"></i>
-                        <i class="fa fa-stack-2x fa-close" style="color:red"></i>
-                    </span>
-
-                    <div>{{vm.change.affected.relation.title}}</div>
-                </div>
-                <div style="text-align:center">
-                    <span ng-class="vm.change.affected.endnode.class">{{vm.change.affected.endnode.title}}</span>
-                </div>
-            </div>
-
-            <div ng-show="vm.change.action == 'flag'" class="action">
-                <span ng-class="vm.change.affected.node.class">{{vm.change.affected.node.title}}</span>
-
-                <i class="fa fa-flag" style="margin-left:30px"></i> spam
-            </div>
-
+        <div id="action_container" ng-if="::vm.change">
             <div class="vote-buttons">
                 <button class="btn btn-default" ng-click="vm.skip()">
                     <i class="fa fa-check-square-o text-success"></i> makes sense
@@ -51,6 +24,35 @@
                     <i class="fa fa-close text-danger"></i> dosn't make sense
                 </button>
             </div>
+
+            <div ng-show="vm.change.type === 'Edit'" class="action">
+                <div tabset class="tabs-above">
+                    <div tab>
+                        <div tab-heading>Old</div>
+                        <div class="post">
+                            <h2 class="post-title">{{vm.change.oldTitle}}</h2>
+                            <div class="post_description" markdown="vm.change.oldDescription" ng-show="vm.change.oldDescription"></div>
+                        </div>
+                    </div>
+                    <div tab active="true">
+                        <div tab-heading>Difference</div>
+                        <div class="post">
+                            <h2 class="post-title"><div word-based-diff source-a="vm.change.oldTitle" source-b="vm.change.newTitle"></div></h2>
+                            <div class="well well-sm post_description">
+                                <p class="diff" word-based-diff source-a="vm.change.oldDescription" source-b="vm.change.newDescription"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div tab>
+                        <div tab-heading>New</div>
+                        <div class="post">
+                            <h2 class="post-title">{{vm.change.newTitle}}</h2>
+                            <div class="post_description" markdown="vm.change.newDescription" ng-show="vm.change.newDescription"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>

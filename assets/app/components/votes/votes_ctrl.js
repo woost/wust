@@ -1,60 +1,17 @@
 angular.module("wust.components").controller("VotesCtrl", VotesCtrl);
 
-VotesCtrl.$inject = [];
+VotesCtrl.$inject = ["InstantRequests"];
 
-function VotesCtrl() {
+function VotesCtrl(InstantRequests) {
     let vm = this;
 
-    let changes = [{
-        action: "delete",
-        icon: "fa-trash-o",
-        affected: {
-            node: {
-                title: "Du bist doof",
-                class: "discourse_goal node"
-            }
-        }
-    }, {
-        action: "disconnect",
-        icon: "fa-expand",
-        affected: {
-            startnode: {
-                title: "PC neustarten",
-                class: "discourse_idea node"
-            },
-            relation: {
-                title: "solves"
-            },
-            endnode: {
-                title: "Ich ernähre mich schlecht",
-                class: "discourse_problem node"
-            }
-        }
-    }, {
-        action: "after-change",
-        icon: "fa-edit",
-        affected: {
-            node: {
-                title: "Hello",
-                newTitle: "Hallo",
-                class: "discourse_goal node"
-            },
-        }
-    }, {
-        action: "flag",
-        icon: "fa-flag",
-        affected: {
-            node: {
-                title: "Buy Viagra!",
-                class: "discourse_goal node"
-            },
-            flag: "spam"
-        }
-    }, ];
+    let changes = InstantRequests.$search();
 
     let changeindex = 0;
-    vm.change = changes[changeindex];
-    vm.showundo = false;
+    changes.$then( () => {
+            vm.change = changes[changeindex];
+            vm.showundo = false;
+    });
 
     vm.skip = skip;
     vm.undo = undo;

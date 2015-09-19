@@ -1,20 +1,41 @@
+@import "globals";
 @import "compass/css3/flexbox";
 
 #vote_component {
     padding-left: 50px;
+    .undobutton_container {
+        height: 50px;
+      .undobutton {
+          margin-bottom: 50px;
+      }
+    }
     #description_container {
         @include display-flex(flex);
         height: 200px;
-        .relation_title {
-            @include display-flex(flex);
-            padding: 10px;
-            margin-left: 180px;
-        }
         .vote-buttons {
             @include display-flex(flex);
             @include justify-content(space-between);
             .btn {
                 margin: 10px;
+            }
+        }
+        .post {
+            border: 1px solid $post_default_border_color;
+            border-radius: 4px;
+            padding: 15px;
+            .post_title {
+                padding: 4px;
+            }
+            h2 {
+                word-wrap: break-word;
+            }
+            .post_description {
+                margin: 0;
+                width: 95%;
+                max-width: 600px;
+                .diff {
+                    margin: 0 0 10px;
+                }
             }
         }
         #action_container {
