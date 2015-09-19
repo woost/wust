@@ -13,6 +13,7 @@ object SeedDatabase extends Task with SeedTools {
     db.query("CREATE INDEX ON :TIMESTAMP(timestamp)")
     db.query("CREATE INDEX ON :LOGININFO(providerID)")
     db.query("CREATE INDEX ON :CREATEREQUEST(applied)")
+    db.query("CREATE INDEX ON :CREATEREQUEST(instantChange)")
 
     modifyDiscourse { implicit discourse =>
       discourse.add(
