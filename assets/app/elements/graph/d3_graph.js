@@ -242,21 +242,22 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     if(d.isHyperRelation) {
                         let elem = document.createElement("span");
                         _.values(Helpers.sortedNodeTags(d)).forEach(t => {
-                            let tagElem = document.createElement("span");
-                            tagElem.className = "tag-label nodetag";
+                            let tagLabel = document.createElement("span");
+                            tagLabel.className = "tag-label nodetag";
 
                             if( t.isClassification ) {
-                                tagElem.style.backgroundColor = Helpers.classificationLabelBackgroundColor(t);
-                                tagElem.style.border = "1px solid " + Helpers.classificationLabelBorderColor(t);
-                            } else {
-                                tagElem.style.backgroundColor = Helpers.contextLabelBackgroundColor(t);
-                                tagElem.style.border = "1px solid " + Helpers.contextLabelBorderColor(t);
+                                tagLabel.style.backgroundColor = Helpers.classificationLabelBackgroundColor(t);
+                                tagLabel.style.border = "1px solid " + Helpers.classificationLabelBorderColor(t);
+                                tagLabel.style.borderRadius = Helpers.classificationLabelBorderRadius();
+                            } else { // context
+                                tagLabel.style.backgroundColor = Helpers.contextLabelBackgroundColor(t);
+                                tagLabel.style.border = "1px solid " + Helpers.contextLabelBorderColor(t);
                             }
                             let content = document.createElement("span");
                             content.className = "content";
                             content.appendChild(document.createTextNode(t.title));
-                            tagElem.appendChild(content);
-                            elem.appendChild(tagElem);
+                            tagLabel.appendChild(content);
+                            elem.appendChild(tagLabel);
                         });
                         return elem.outerHTML;
                     } else {
@@ -276,10 +277,10 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                             if( t.isClassification ) {
                                 circle.style.backgroundColor = Helpers.classificationCircleBackgroundColor(t);
                                 circle.style.border = "1px solid " + Helpers.classificationCircleBorderColor(t);
-                            } else {
+                            } else { // context
                                 circle.style.backgroundColor = Helpers.contextCircleBackgroundColor(t);
                                 circle.style.border = "1px solid " + Helpers.contextCircleBorderColor(t);
-                                circle.style.borderRadius = "2px";
+                                circle.style.borderRadius = Helpers.contextCircleBorderRadius();
                             }
 
                             circleTitle.appendChild(circle);

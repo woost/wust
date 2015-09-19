@@ -28,7 +28,7 @@ function coloredTag(Helpers) {
                 if(scope.tagtype === "label") {
                     rawElem.style.backgroundColor = Helpers.classificationLabelBackgroundColor(tag);
                     rawElem.style.borderColor = Helpers.classificationLabelBorderColor(scope.coloredTag);
-                    rawElem.style.borderRadius = "6px";
+                    rawElem.style.borderRadius = Helpers.classificationLabelBorderRadius();
                 } else if(scope.tagtype === "circle") {
                     rawElem.style.backgroundColor = Helpers.classificationCircleBackgroundColor(tag);
                     rawElem.style.border = "1px solid " + Helpers.classificationCircleBorderColor(tag);
@@ -40,7 +40,7 @@ function coloredTag(Helpers) {
                 } else if(scope.tagtype === "circle") {
                     rawElem.style.backgroundColor = Helpers.contextCircleBackgroundColor(tag);
                     rawElem.style.border = "1px solid " + Helpers.contextCircleBorderColor(tag);
-                    rawElem.style.borderRadius = "2px";
+                    rawElem.style.borderRadius = Helpers.contextCircleBorderRadius();
                 }
             }
         }

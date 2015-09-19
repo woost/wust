@@ -15,6 +15,8 @@ angular.module("wust.services").value("Helpers", {
     contextLabelBorderColor,
     contextCircleBackgroundColor,
     contextCircleBorderColor,
+    classificationLabelBorderRadius,
+    contextCircleBorderRadius,
     tagTitleColor,
     cssCompat,
     coloredBorderWidth: "3px"
@@ -60,6 +62,7 @@ function postBorderColor(tag) { return hashToColor(tag, 20, 70); }
 
 function classificationLabelBackgroundColor(tag) { return hashToColor(tag, 40, 90); }
 function classificationLabelBorderColor(tag) { return hashToColor(tag, 40, 48); }
+function classificationLabelBorderRadius(tag) { return "6px";}
 function classificationCircleBackgroundColor(tag) { return hashToColor(tag, 40, 90); }
 function classificationCircleBorderColor(tag) { return hashToColor(tag, 40, 48); }
 
@@ -67,6 +70,7 @@ function contextLabelBackgroundColor(tag) { return hashToColor(tag, 30, 98); }
 function contextLabelBorderColor(tag) { return hashToColor(tag, 30, 58); }
 function contextCircleBackgroundColor(tag) { return hashToColor(tag, 30, 98); }
 function contextCircleBorderColor(tag) { return hashToColor(tag, 30, 58); }
+function contextCircleBorderRadius(tag) { return "2px";}
 
 function tagTitleColor(title) { return Math.abs(hashCode(title.toLowerCase())) % 360; }
 function hashToColor(tag, chromaValue, lightness) {
