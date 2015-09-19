@@ -113,7 +113,7 @@ function EditService(Post, Connectable, Connects, HistoryService, store, Discour
 
                     let keeped;
                     if (data.requestsTags) {
-                        let removed = data.requestsTags.filter(t => t.isRemove && t.applied).map(t => t.tags[0].id);
+                        let removed = data.requestsTags.filter(t => t.isRemove && t.applied).map(t => t.tag.id);
                         keeped = this.original.tags.filter(t => !_.contains(removed, t.id));
                     } else {
                         keeped = this.original.tags;
