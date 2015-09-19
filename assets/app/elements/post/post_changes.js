@@ -52,11 +52,10 @@ class VotingEditor {
             _.remove(this.list, {id:change.id});
         }
 
-
         if (change.applied === -1) {
             humane.success("Change request rejected");
         }
-        if (change.applied === 1) {
+        if (change.applied > 0) {
             this.onApply({node: response.node, tag: change.tag, isRemove: change.isRemove});
         }
     }

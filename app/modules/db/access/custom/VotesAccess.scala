@@ -34,10 +34,11 @@ trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefa
       val userDef = ConcreteNodeDefinition(user)
       val votesDef = RelationDefinition(userDef, Votes, requestDef)
       val createdDef = RelationDefinition(userDef, SchemaCreated, postDef)
-      val query = s"match ${requestDef.toQuery}-[:`${UpdatedToPost.relationType}`|`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->${postDef.toQuery}, ${userDef.toQuery} set ${requestDef.name}._locked = true with ${postDef.name},${userDef.name},${requestDef.name} optional match ${votesDef.toQuery(false, false)} optional match ${createdDef.toQuery(false,false)} return ${createdDef.name},${postDef.name},${requestDef.name},${votesDef.name}"
+      val query = s"match ${requestDef.toQuery}-[:`${UpdatedToPost.relationType}`|`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->${postDef.toQuery}, ${userDef.toQuery} where ${requestDef.name}.applied = ${PENDING} or ${requestDef.name}.applied = ${INSTANT} set ${requestDef.name}._locked = true with ${postDef.name},${userDef.name},${requestDef.name} optional match ${votesDef.toQuery(false, false)} optional match ${createdDef.toQuery(false,false)} return ${createdDef.name},${postDef.name},${requestDef.name},${votesDef.name}"
 
       val discourse = Discourse(tx.queryGraph(query, createdDef.parameterMap ++ votesDef.parameterMap))
       val request = selectNode(discourse)
+
       val votes = discourse.votes.headOption
       votes.foreach(request.approvalSum -= _.weight)
 
@@ -57,19 +58,25 @@ trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefa
         discourse.add(newVotes)
       }
 
-      val postApplies = if (request.canApply) {
+      val postApplies = if (request.applied == PENDING && request.canApply) {
         val post = discourse.posts.head
-        val changed = applyChange(discourse, request, post, tx)
-        if (changed) {
-          request.applied = 1
+        val success = applyChange(discourse, request, post, tx)
+
+        if (success) {
+          request.applied = APPLIED
           Right(Some(post))
-        } else {
+        } else
           Left("Cannot apply changes automatically")
-        }
       } else {
         if (request.canReject) {
-          request.applied = -1
+          if (request.applied == INSTANT) {
+            //TODO: revert change
+            throw new Exception("Reverting instant changes not implemented")
+          }
+
+          request.applied = REJECTED
         }
+
         Right(None)
       }
 

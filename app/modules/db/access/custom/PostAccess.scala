@@ -56,8 +56,23 @@ trait ConnectableAccessBase {
     }
   }
 
+  protected def handleInitialChange(contribution: ChangeRequest, user: User, authorBoost: Long, approvalSum: Long) = {
+    if (contribution.canApply(authorBoost)) {
+      contribution.approvalSum = authorBoost
+      contribution.applied = APPLIED
+      Some(Votes.create(user, contribution, weight = authorBoost))
+    } else if(contribution.canApply(approvalSum)) {
+      contribution.approvalSum = approvalSum
+      contribution.applied = INSTANT
+      None
+    } else {
+      contribution.approvalSum = approvalSum
+      Some(Votes.create(user, contribution, weight = approvalSum))
+    }
+  }
+
   //TODO: refactor
-  protected def addRequestTagsToGraph(tx: QueryHandler, discourse: Discourse, user: User, post: Post, request: AddTagRequestBase with RemoveTagRequestBase, weight: Long, threshold: Long) {
+  protected def addRequestTagsToGraph(tx: QueryHandler, discourse: Discourse, user: User, post: Post, request: AddTagRequestBase with RemoveTagRequestBase, authorBoost: Long, approvalSum: Long, applyThreshold: Long) {
     // TODO: do not get all connected requests if not needed...its just slow
     // because now we write lock every change request connected to the post
     val userDef = ConcreteFactoryNodeDefinition(User)
@@ -66,7 +81,7 @@ trait ConnectableAccessBase {
     val postDef = ConcreteNodeDefinition(post)
     val tagsDef = RelationDefinition(requestDef, ProposesTag, tagDef)
     val votesDef = RelationDefinition(ConcreteNodeDefinition(user), Votes, requestDef)
-    val query = s"match ${userDef.toQuery}-[ut:`${UserToAddTags.relationType}`|`${UserToRemoveTags.relationType}`]->(${requestDef.name} ${requestDef.factory.labels.map(l => s":`$l`").mkString} { applied: 0 })-[tp:`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->${postDef.toQuery}, ${tagsDef.toQuery(false,true)} optional match ${votesDef.toQuery(true, false)} set ${requestDef.name}._locked = true return *"
+    val query = s"match ${userDef.toQuery}-[ut:`${UserToAddTags.relationType}`|`${UserToRemoveTags.relationType}`]->(${requestDef.name} ${requestDef.factory.labels.map(l => s":`$l`").mkString} { applied: ${PENDING} })-[tp:`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->${postDef.toQuery}, ${tagsDef.toQuery(false,true)} optional match ${votesDef.toQuery(true, false)} set ${requestDef.name}._locked = true return *"
     val existing = Discourse(tx.queryGraph(Query(query, votesDef.parameterMap ++ userDef.parameterMap ++ postDef.parameterMap ++ tagsDef.parameterMap)))
 
     discourse.add(existing.nodes: _*)
@@ -88,23 +103,23 @@ trait ConnectableAccessBase {
         // we only get the vote of the current user, so rev_votes is only
         // defined iff the user already voted on this request
         if (exist.rev_votes.headOption.isEmpty) {
-          exist.approvalSum += weight
-          discourse.add(Votes.create(user, exist, weight = weight))
+          exist.approvalSum += approvalSum
+          discourse.add(Votes.create(user, exist, weight = approvalSum))
+          if (exist.canApply)
+            exist.applied = APPLIED
         }
       }
 
       val crOpt = alreadyExisting orElse tagConnectRequestToScope(tagReq).map { tag =>
         // we create a new change request as there is no existing one here
-        val addTags = AddTags.create(user, post, applyThreshold = threshold, approvalSum = weight)
-        addTags.instantChange = addTags.canApply
+        val addTags = AddTags.create(user, post, applyThreshold = applyThreshold, approvalSum = approvalSum)
         discourse.add(addTags, tag, ProposesTag.create(addTags, tag))
-        discourse.add(Votes.create(user, addTags, weight = weight))
+        handleInitialChange(addTags, user, authorBoost = authorBoost, approvalSum = approvalSum).foreach(discourse.add(_))
         addTags
       }
 
       crOpt.foreach { cr =>
-        if (cr.canApply) {
-          cr.applied = 1;
+        if (cr.applied == INSTANT || cr.applied == APPLIED) {
           discourse.add(Tags.merge(cr.proposesTags.head, post))
         }
       }
@@ -115,22 +130,22 @@ trait ConnectableAccessBase {
 
       alreadyExisting.foreach { exist =>
         if (exist.rev_votes.headOption.isEmpty) {
-          exist.approvalSum += weight
-          discourse.add(Votes.create(user, exist, weight = weight))
+          exist.approvalSum += approvalSum
+          discourse.add(Votes.create(user, exist, weight = approvalSum))
+          if (exist.canApply)
+            exist.applied = APPLIED
         }
       }
 
       val cr = alreadyExisting getOrElse {
-        val remTags = RemoveTags.create(user, post, applyThreshold = threshold, approvalSum = weight)
-        remTags.instantChange = remTags.canApply
+        val remTags = RemoveTags.create(user, post, applyThreshold = applyThreshold, approvalSum = approvalSum)
         val tag = Scope.matchesOnUuid(tagReq)
         discourse.add(remTags, tag, ProposesTag.create(remTags, tag))
-        discourse.add(Votes.create(user, remTags, weight = weight))
+        handleInitialChange(remTags, user, authorBoost = authorBoost, approvalSum = approvalSum).foreach(discourse.add(_))
         remTags
       }
 
-      if (cr.canApply) {
-        cr.applied = 1;
+      if (cr.applied == INSTANT || cr.applied == APPLIED) {
         discourse.remove(Tags.matches(cr.proposesTags.head, post))
       }
     }
@@ -281,22 +296,18 @@ case class PostAccess() extends ConnectableAccessBase with NodeDeleteBase[Post] 
           val applyThreshold = Moderation.postChangeThreshold(node.viewCount)
 
           if (request.title.isDefined || request.description.isDefined) {
-            val contribution = Updated.create(user, node, oldTitle = node.title, newTitle = request.title.getOrElse(node.title), oldDescription = node.description, newDescription = request.description.orElse(node.description), applyThreshold = applyThreshold, approvalSum = approvalSum)
-            if (contribution.canApply) {
-              contribution.applied = 1
-              contribution.instantChange = true
-            }
+            val contribution = Updated.create(user, node, oldTitle = node.title, newTitle = request.title.getOrElse(node.title), oldDescription = node.description, newDescription = request.description.orElse(node.description), applyThreshold = applyThreshold)
+            discourse.add(contribution)
 
-            val votes = Votes.create(user, contribution, weight = approvalSum)
-            discourse.add(contribution, votes)
-            //TODO: setting to empty description should be none option
+            handleInitialChange(contribution, user, authorBoost = authorBoost, approvalSum = approvalSum).foreach(discourse.add(_))
+
             if (contribution.canApply) {
               request.title.foreach(node.title = _)
-              request.description.foreach(d => node.description = Some(d))
+              request.description.foreach(d => node.description = if (d.trim.isEmpty) None else Some(d))
             }
           }
 
-          addRequestTagsToGraph(tx, discourse, user, node, request, approvalSum, applyThreshold)
+          addRequestTagsToGraph(tx, discourse, user, node, request, authorBoost = authorBoost, approvalSum = approvalSum, applyThreshold = applyThreshold)
 
           tx.persistChanges(discourse) match {
             case Some(err) => Left(BadRequest(s"Cannot update Post with uuid '$uuid': $err"))
@@ -348,7 +359,7 @@ case class PostUpdatedAccess() extends EndRelationAccessDefault[Updated, Updated
       val relDef = RelationDefinition(updatedDef, UpdatedToPost, postDef)
       val votesDef = RelationDefinition(userDef, Votes, updatedDef)
       //TODO: graphdefinition with arbitrary properties, not only uuid
-      val query = s"match ${relDef.toQuery} where ${updatedDef.name}.applied = 0 optional match ${votesDef.toQuery(true, false)} return ${votesDef.name}, ${updatedDef.name}"
+      val query = s"match ${relDef.toQuery} where ${updatedDef.name}.applied = ${PENDING} optional match ${votesDef.toQuery(true, false)} return ${votesDef.name}, ${updatedDef.name}"
       val discourse = Discourse(db.queryGraph(query, relDef.parameterMap ++ votesDef.parameterMap))
       discourse.updateds
     }.getOrElse(Seq.empty))))
@@ -366,7 +377,7 @@ case class PostTagChangeRequestAccess() extends RelationAccessDefault[Post, TagC
       val votesDef = RelationDefinition(userDef, Votes, updatedDef)
       val scopeDef = ConcreteFactoryNodeDefinition(Scope)
       val proposes = RelationDefinition(updatedDef, ProposesTag, scopeDef)
-      val query = s"match ${updatedDef.toQuery}-[:`${AddTags.endRelationType}`|`${RemoveTags.endRelationType}`]->${postDef.toQuery} where ${updatedDef.name}.applied = 0 optional match ${votesDef.toQuery(true, false)} optional match ${proposes.toQuery(false, true)} return ${votesDef.name}, ${proposes.name}, ${updatedDef.name}"
+      val query = s"match ${updatedDef.toQuery}-[:`${AddTags.endRelationType}`|`${RemoveTags.endRelationType}`]->${postDef.toQuery} where ${updatedDef.name}.applied = ${PENDING} optional match ${votesDef.toQuery(true, false)} optional match ${proposes.toQuery(false, true)} return ${votesDef.name}, ${proposes.name}, ${updatedDef.name}"
       val discourse = Discourse(db.queryGraph(query, postDef.parameterMap ++ votesDef.parameterMap))
       discourse.tagChangeRequests
     }.getOrElse(Seq.empty))))

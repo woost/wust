@@ -28,7 +28,7 @@ case class InstantChangeRequestAccess() extends NodeAccessDefault[ChangeRequest]
     val classifiesDef = RelationDefinition(ConcreteFactoryNodeDefinition(Classification), Classifies, connectsDef)
 
     val query = s"""
-    match ${crDef.toQuery}-[relation:`${UpdatedToPost.relationType}`|`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->${postDef.toQuery} where ${crDef.name}.instantChange = true
+    match ${crDef.toQuery}-[relation:`${UpdatedToPost.relationType}`|`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->${postDef.toQuery} where ${crDef.name}.applied = ${INSTANT}
     with ${postDef.name}, relation, ${crDef.name} order by ${crDef.name}.timestamp skip ${skip} limit ${limit}
     optional match ${crTagsDef.toQuery(false, true)}
     optional match ${tagsDef.toQuery(true, false)}
