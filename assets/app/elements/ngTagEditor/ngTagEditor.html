@@ -2,7 +2,7 @@
     <div class="tag-editor" ng-class="{active:focus}" ng-click="setFocus = true">
         <div class="tag-draft">
             <span ng-repeat="tag in tags" tag-label="tag" disable-link>
-                <span class="content remove" ng-click="remove($index); $event.stopPropagation();">x</span>
+                <i class="right remove fa fa-close" ng-click="remove($index); $event.stopPropagation();"></i>
             </span>
             <input type="text" class="tag-input" placeholder="Add Tags" ng-focus="focus = true" ng-blur="focus = false; unfocusedInput()" focus-me="setFocus" ng-model="search"/>
         </div>

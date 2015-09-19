@@ -45,7 +45,7 @@
 
                             <div ng-if="vm.is('AddTag')">
                                 <span ng-repeat="tag in vm.change.post.tags" tag-label="tag" class="tag" ng-class="{'existing': tag.id !== vm.change.tag.id}">
-                                    <i ng-show="tag.id === vm.change.tag.id" class="icon fa fa-plus"></i>
+                                    <i ng-show="tag.id === vm.change.tag.id" class="fa fa-plus right"></i>
                                 </span>
                             </div>
 
