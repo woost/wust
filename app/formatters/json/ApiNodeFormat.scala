@@ -99,7 +99,7 @@ object ApiNodeFormat {
       case n: AddTags    => Seq(
         ("id", JsString(n.uuid)),
         ("post", n.outRelationsAs(AddTagsToPost).headOption.map(r => Json.toJson(r.endNode)).getOrElse(JsNull)),
-        ("tags", Json.toJson(n.proposesTags.map(tagWrites.writes))),
+        ("tag", n.proposesTags.headOption.map(tagWrites.writes).getOrElse(JsNull)),
         ("vote", n.inRelationsAs(Votes).headOption.map(vote => JsObject(Seq(("weight", JsNumber(vote.weight))))).getOrElse(JsNull)),
         ("applyThreshold", JsNumber(n.applyThreshold)),
         ("rejectThreshold", JsNumber(n.rejectThreshold)),
@@ -111,7 +111,7 @@ object ApiNodeFormat {
       case n: RemoveTags    => Seq(
         ("id", JsString(n.uuid)),
         ("post", n.outRelationsAs(RemoveTagsToPost).headOption.map(r => Json.toJson(r.endNode)).getOrElse(JsNull)),
-        ("tags", Json.toJson(n.proposesTags.map(tagWrites.writes))),
+        ("tag", n.proposesTags.headOption.map(tagWrites.writes).getOrElse(JsNull)),
         ("vote", n.inRelationsAs(Votes).headOption.map(vote => JsObject(Seq(("weight", JsNumber(vote.weight))))).getOrElse(JsNull)),
         ("applyThreshold", JsNumber(n.applyThreshold)),
         ("rejectThreshold", JsNumber(n.rejectThreshold)),

@@ -57,7 +57,7 @@ class VotingEditor {
             humane.success("Change request rejected");
         }
         if (change.applied === 1) {
-            this.onApply({node: response.node, tag: change.tags ? change.tags[0] : undefined, isRemove: change.isRemove});
+            this.onApply({node: response.node, tag: change.tag, isRemove: change.isRemove});
         }
     }
 

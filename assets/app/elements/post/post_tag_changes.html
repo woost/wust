@@ -1,6 +1,6 @@
 <div class="post_tag_changes_directive" ng-if="vm.postTagChanges.length > 0">
     <b>Tag requests</b>
-    <span ng-repeat="change in vm.postTagChanges" tag-label="change.tags[0]">
+    <span ng-repeat="change in vm.postTagChanges" tag-label="change.tag">
         <b ng-if="change.isRemove">DEL</b>
         <i class="fa fa-check upvote" ng-class="{ active: change.vote.weight > 0 }" ng-click="vm.voting.up(change)"></i>
         <i class="fa fa-close downvote" ng-class="{ active: change.vote.weight < 0 }" ng-click="vm.voting.down(change)"></i>
