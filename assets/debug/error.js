@@ -16,7 +16,8 @@ xmlHttp.onreadystatechange = function() {
                     return;
 
                 var errorElem = document.createElement("pre");
-                errorElem.style.paddingLeft = "100px";
+                errorElem.style.padding = "20px";
+                errorElem.style.margin = "10px";
                 var errorHead = document.createElement("h2");
                 errorHead.appendChild(document.createTextNode(reporter + " reported:"));
                 errorElem.appendChild(errorHead);
@@ -46,8 +47,8 @@ xmlHttp.onreadystatechange = function() {
             });
 
             if (parentElem.childElementCount) {
-                var targetElem = document.getElementById("content_view") || document.body ||document.createElement("body");
-                targetElem.innerHTML = parentElem.outerHTML;
+                document.body.innerHTML = parentElem.outerHTML;
+                document.body.style.overflow = "auto";
             }
         }
     }

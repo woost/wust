@@ -8,10 +8,14 @@
 <link rel="icon" type="image/png" href='@routes.Assets.versioned("images/favicon.png")'>
 
 <link rel="stylesheet" media="screen" href='@routes.Assets.versioned("main.css")'>
-<script src='@routes.Assets.versioned("main.js")'></script>
 
 @if(Play.isDev) {
     <script src='@routes.Assets.versioned("error.js")'></script>
+}
+
+<script src='@routes.Assets.versioned("main.js")'></script>
+
+@if(Play.isDev) {
     <script src='@routes.Assets.versioned("dev_gui.js")'></script>
 }
 
