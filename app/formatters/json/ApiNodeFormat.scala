@@ -84,6 +84,7 @@ object ApiNodeFormat {
       )
       case n: Updated        => Seq(
         ("id", JsString(n.uuid)),
+        ("post", n.outRelationsAs(UpdatedToPost).headOption.map(r => Json.toJson(r.endNode)).getOrElse(JsNull)),
         ("oldTitle", JsString(n.oldTitle)),
         ("newTitle", JsString(n.newTitle)),
         ("oldDescription", JsString(n.oldDescription.getOrElse(""))),
@@ -92,27 +93,32 @@ object ApiNodeFormat {
         ("applyThreshold", JsNumber(n.applyThreshold)),
         ("rejectThreshold", JsNumber(n.rejectThreshold)),
         ("votes", JsNumber(n.approvalSum)),
-        ("applied", JsNumber(n.applied))
+        ("applied", JsNumber(n.applied)),
+        ("type", JsString("Edit"))
       )
       case n: AddTags    => Seq(
         ("id", JsString(n.uuid)),
+        ("post", n.outRelationsAs(AddTagsToPost).headOption.map(r => Json.toJson(r.endNode)).getOrElse(JsNull)),
         ("tags", Json.toJson(n.proposesTags.map(tagWrites.writes))),
         ("vote", n.inRelationsAs(Votes).headOption.map(vote => JsObject(Seq(("weight", JsNumber(vote.weight))))).getOrElse(JsNull)),
         ("applyThreshold", JsNumber(n.applyThreshold)),
         ("rejectThreshold", JsNumber(n.rejectThreshold)),
         ("votes", JsNumber(n.approvalSum)),
         ("isRemove", JsBoolean(false)),
-        ("applied", JsNumber(n.applied))
+        ("applied", JsNumber(n.applied)),
+        ("type", JsString("AddTag"))
       )
       case n: RemoveTags    => Seq(
         ("id", JsString(n.uuid)),
+        ("post", n.outRelationsAs(RemoveTagsToPost).headOption.map(r => Json.toJson(r.endNode)).getOrElse(JsNull)),
         ("tags", Json.toJson(n.proposesTags.map(tagWrites.writes))),
         ("vote", n.inRelationsAs(Votes).headOption.map(vote => JsObject(Seq(("weight", JsNumber(vote.weight))))).getOrElse(JsNull)),
         ("applyThreshold", JsNumber(n.applyThreshold)),
         ("rejectThreshold", JsNumber(n.rejectThreshold)),
         ("votes", JsNumber(n.approvalSum)),
         ("isRemove", JsBoolean(true)),
-        ("applied", JsNumber(n.applied))
+        ("applied", JsNumber(n.applied)),
+        ("type", JsString("RemoveTag"))
       )
       case n              =>
         throw new RuntimeException("You did not define a formatter for the api: " + node)

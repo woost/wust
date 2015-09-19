@@ -17,7 +17,7 @@ case class InstantChangeRequestAccess() extends NodeAccessDefault[ChangeRequest]
     val skip = page * context.limit
 
     val crDef = ConcreteFactoryNodeDefinition(ChangeRequest)
-    val query = s""" match ${crDef.toQuery} where ${crDef.name}.instantChange = true return ${crDef.name} order by ${crDef.name}.timestamp skip ${skip} limit ${context.limit}"""
+    val query = s""" match ${crDef.toQuery}-[relation:`${UpdatedToPost.relationType}`|`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->(post:`${Post.label}`) where ${crDef.name}.instantChange = true return post, relation, ${crDef.name} order by ${crDef.name}.timestamp skip ${skip} limit ${context.limit}"""
     val params = crDef.parameterMap
 
     val discourse = Discourse(db.queryGraph(query, params))
