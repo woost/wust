@@ -14,45 +14,52 @@
 
         <div id="action_container" ng-if="::vm.change">
             <div class="vote-buttons">
-                <button class="btn btn-default" ng-click="vm.skip()">
+                <button class="btn btn-default" ng-click="vm.next()">
                     <i class="fa fa-check-square-o text-success"></i> makes sense
                 </button>
-                <button class="btn btn-default" ng-click="vm.skip()">
+                <button class="btn btn-default" ng-click="vm.next()">
                     <i class="fa fa-forward text-warning"></i> I don't know
                 </button>
-                <button class="btn btn-default" ng-click="vm.skip()">
+                <button class="btn btn-default" ng-click="vm.next()">
                     <i class="fa fa-close text-danger"></i> dosn't make sense
                 </button>
             </div>
 
-            <div ng-show="vm.change.type === 'Edit'" class="action">
-                <div tabset class="tabs-above">
-                    <div tab>
-                        <div tab-heading>Old</div>
+            <div ng-class="vm.actionclasses">
+                <ul tabset class="tabs-above">
+                    <li tab>
+                        <a tab-heading>Old</a>
                         <div class="post">
                             <h2 class="post-title">{{vm.change.oldTitle}}</h2>
-                            <div class="post_description" markdown="vm.change.oldDescription" ng-show="vm.change.oldDescription"></div>
+                            <div ng-show="vm.showDescription" class="post-description" markdown="vm.change.oldDescription" ng-show="vm.change.oldDescription"></div>
                         </div>
-                    </div>
-                    <div tab active="true">
-                        <div tab-heading>Difference</div>
+
+                    </li>
+                    <li tab active="vm.showMiddleTab">
+                        <a tab-heading>Difference</a>
                         <div class="post">
-                            <h2 class="post-title"><div word-based-diff source-a="vm.change.oldTitle" source-b="vm.change.newTitle"></div></h2>
-                            <div class="well well-sm post_description">
-                                <p class="diff" word-based-diff source-a="vm.change.oldDescription" source-b="vm.change.newDescription"></p>
+                            <h2 class="post-title">
+                                <div ng-show="vm.is('Edit')" word-based-diff source-a="vm.change.oldTitle" source-b="vm.change.newTitle"></div>
+                                <span ng-show="vm.is('AddTag') || vm.is('RemoveTag')">{{vm.change.post.title}}</span>
+                            </h2>
+                            <div ng-show="vm.showDescription" class="well well-sm post-description">
+                                <p ng-show="vm.is('Edit')" class="diff" word-based-diff source-a="vm.change.oldDescription" source-b="vm.change.newDescription"></p>
+                                <div ng-show="!vm.is('Edit') && vm.change.newDescription" class="post-description" markdown="vm.change.newDescription"></div>
                             </div>
                         </div>
-                    </div>
-                    <div tab>
-                        <div tab-heading>New</div>
+                    </li>
+                    <li tab>
+                        <a tab-heading>New</a>
                         <div class="post">
                             <h2 class="post-title">{{vm.change.newTitle}}</h2>
-                            <div class="post_description" markdown="vm.change.newDescription" ng-show="vm.change.newDescription"></div>
+
+                            <div ng-show="vm.showDescription" class="post-description" markdown="vm.change.newDescription" ng-show="vm.change.newDescription"></div>
                         </div>
-                    </div>
-                </div>
+                    </li>
+                </ul>
             </div>
 
         </div>
+
     </div>
 </div>

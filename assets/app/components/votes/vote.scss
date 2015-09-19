@@ -4,9 +4,9 @@
 #vote_component {
     padding-left: 50px;
     .undobutton_container {
+        margin-top: 10px;
         height: 50px;
       .undobutton {
-          margin-bottom: 50px;
       }
     }
     #description_container {
@@ -19,17 +19,21 @@
                 margin: 10px;
             }
         }
+
+        .AddTag, .RemoveTag {
+            ul > li > a {
+                visibility: hidden;
+            }
+        }
+
         .post {
             border: 1px solid $post_default_border_color;
             border-radius: 4px;
             padding: 15px;
-            .post_title {
-                padding: 4px;
-            }
             h2 {
                 word-wrap: break-word;
             }
-            .post_description {
+            .post-description {
                 margin: 0;
                 width: 95%;
                 max-width: 600px;
@@ -45,6 +49,12 @@
             .action {
                 padding: 20px;
                 padding-top: 5px;
+            }
+
+            .tag-action {
+                .post-title, .post-description {
+                    color: #AAA;
+                }
             }
         }
     }

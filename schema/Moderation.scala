@@ -30,6 +30,8 @@ object Moderation {
 
   def postQuality(upVotes:Long, downVotes:Long) = (upVotes + votes_u*votes_p) / (downVotes + upVotes + votes_u)
 
+  //TODO: user für votestream-votes belohnen?
+
   // reject threshold
   // When do change requests disappear?
   // - I don't want to see the request anymore, when I'm done thinking about it

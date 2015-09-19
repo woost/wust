@@ -7,19 +7,25 @@ function VotesCtrl(InstantRequests) {
 
     let changes = InstantRequests.$search();
 
-    let changeindex = 0;
+    let changeindex = -1;
     changes.$then( () => {
-            vm.change = changes[changeindex];
+            vm.next();
             vm.showundo = false;
     });
 
-    vm.skip = skip;
+    vm.next = next;
     vm.undo = undo;
+    vm.is = (actiontype) => vm.change.type === actiontype;
 
-    function skip() {
+    function next() {
         changeindex = (changeindex + 1) % changes.length;
         vm.change = changes[changeindex];
         vm.showundo = true;
+        vm.showMiddleTab = true;
+        vm.actionclasses = {"action": true};
+        vm.actionclasses[vm.change.type] = true;
+        vm.showDescription = vm.change.oldDescription || vm.change.newDescription || (vm.is("Edit") && vm.description);
+
     }
 
     function undo() {
