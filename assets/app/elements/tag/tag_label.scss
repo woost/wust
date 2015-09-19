@@ -9,7 +9,7 @@
     border-radius: 2px;
     font-size: 14px;
     line-height: 24px !important;
-    color: black !important;
+    color: black;
     cursor: default;
 
     [onclick], [ng-click], [ng-mousedown] {
@@ -21,7 +21,7 @@
     }
 
     a, a:link, a:active, a:visited  {
-        color: black !important;
+        color: black;
         text-decoration: none;
         display: inline-block;
         height: 100%;

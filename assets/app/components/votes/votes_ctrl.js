@@ -13,6 +13,8 @@ function VotesCtrl(InstantRequests) {
             vm.showundo = false;
     });
 
+    //TODO: deliver .quality in change.tag, to display the removed tag at the original position in the taglist
+
     vm.next = next;
     vm.undo = undo;
     vm.is = (actiontype) => vm.change.type === actiontype;
@@ -25,7 +27,6 @@ function VotesCtrl(InstantRequests) {
         vm.actionclasses = {"action": true};
         vm.actionclasses[vm.change.type] = true;
         vm.showDescription = vm.change.oldDescription || vm.change.newDescription || (vm.is("Edit") && vm.description);
-
     }
 
     function undo() {

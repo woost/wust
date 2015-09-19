@@ -1,5 +1,6 @@
 @import "globals";
 @import "compass/css3/flexbox";
+@import "compass/css3/box-shadow";
 
 #vote_component {
     padding-left: 50px;
@@ -42,6 +43,24 @@
                 }
             }
         }
+
+        .AddTag .post .existing.tag .tag-label {
+            background-color: #EEE !important;
+            border-color: #AAA !important;
+            a {
+                color: #777 !important;
+            }
+        }
+        .AddTag .post .tag .tag-label .icon {
+            padding-right: 5px;
+        }
+        .RemoveTag .post .removed.tag .tag-label {
+            a {
+                text-decoration: line-through;
+            }
+            @include box-shadow(0 0 0 5px red);
+        }
+
         #action_container {
             @include display-flex(flex);
             @include flex-direction(column);
