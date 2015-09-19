@@ -294,6 +294,7 @@ case class PostAccess() extends ConnectableAccessBase with NodeDeleteBase[Post] 
 
             val votes = Votes.create(user, contribution, weight = approvalSum)
             discourse.add(contribution, votes)
+            //TODO: setting to empty description should be none option
             if (contribution.canApply) {
               request.title.foreach(node.title = _)
               request.description.foreach(d => node.description = Some(d))
