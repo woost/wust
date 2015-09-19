@@ -163,7 +163,8 @@ if (prod) {
         // proxy the local play server
         port: 9000,
         browserSync: {
-            open: false //TODO: does not work, always opens a browser
+            open: false,
+            notify: false
         }
     });
 

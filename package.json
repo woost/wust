@@ -5,7 +5,7 @@
   "devDependencies": {
     "broccoli": "^0.16.7",
     "broccoli-babel-transpiler": "^5.4.3",
-    "broccoli-browser-sync": "^1.0.0",
+    "broccoli-browser-sync": "git://github.com/cornerman/broccoli-browser-sync.git",
     "broccoli-closure": "^1.2.0",
     "broccoli-compass": "^0.2.3",
     "broccoli-concat": "0.0.13",
