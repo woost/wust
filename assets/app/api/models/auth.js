@@ -41,7 +41,7 @@ function Auth($rootScope, $window, restmod, jwtHelper, store, HistoryService) {
                 if (prev.userId !== self.current.userId)
                     HistoryService.load();
             } else {
-                HistoryService.forget();
+                logoutLocally();
             }
 
             $rootScope.$apply();
@@ -67,8 +67,7 @@ function Auth($rootScope, $window, restmod, jwtHelper, store, HistoryService) {
             self.current.token = response.token;
             self.current.userId = response.userId;
             authStore.set(userKey, self.current);
-            humane.success(message);
-            HistoryService.load();
+            location.reload();
         }, resp => humane.error(resp.$response.data));
     }
 
@@ -77,15 +76,17 @@ function Auth($rootScope, $window, restmod, jwtHelper, store, HistoryService) {
         // also it does not do anything, except telling the server "i clicked logout" - who cares? we just forget the jwt token locally.
         service.signout.$fetch().$then(response => {
             logoutLocally();
-            humane.success("Logged out");
         }, logoutLocally);
     }
 
     function logoutLocally() {
+        if(!self.current.identifier) return;
+
         delete self.current.identifier;
         delete self.current.token;
         delete self.current.userId;
         authStore.remove(userKey);
         HistoryService.forget();
+        location.reload();
     }
 }
