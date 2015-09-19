@@ -64,9 +64,9 @@ function classificationCircleBackgroundColor(tag) { return hashToColor(tag, 40, 
 function classificationCircleBorderColor(tag) { return hashToColor(tag, 40, 48); }
 
 function contextLabelBackgroundColor(tag) { return hashToColor(tag, 30, 98); }
-function contextLabelBorderColor(tag) { return hashToColor(tag, 20, 85); }
+function contextLabelBorderColor(tag) { return hashToColor(tag, 30, 58); }
 function contextCircleBackgroundColor(tag) { return hashToColor(tag, 30, 98); }
-function contextCircleBorderColor(tag) { return hashToColor(tag, 20, 85); }
+function contextCircleBorderColor(tag) { return hashToColor(tag, 30, 58); }
 
 function tagTitleColor(title) { return Math.abs(hashCode(title.toLowerCase())) % 360; }
 function hashToColor(tag, chromaValue, lightness) {
