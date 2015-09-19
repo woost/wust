@@ -60,14 +60,14 @@ trait ConnectableAccessBase {
     if (contribution.canApply(authorBoost)) {
       contribution.approvalSum = authorBoost
       contribution.applied = APPLIED
-      Some(Votes.create(user, contribution, weight = authorBoost))
+      Some(Votes.merge(user, contribution, weight = authorBoost))
     } else if(contribution.canApply(approvalSum)) {
       contribution.approvalSum = approvalSum
       contribution.applied = INSTANT
       None
     } else {
       contribution.approvalSum = approvalSum
-      Some(Votes.create(user, contribution, weight = approvalSum))
+      Some(Votes.merge(user, contribution, weight = approvalSum))
     }
   }
 
@@ -104,7 +104,7 @@ trait ConnectableAccessBase {
         // defined iff the user already voted on this request
         if (exist.rev_votes.headOption.isEmpty) {
           exist.approvalSum += approvalSum
-          discourse.add(Votes.create(user, exist, weight = approvalSum))
+          discourse.add(Votes.merge(user, exist, weight = approvalSum))
           if (exist.canApply)
             exist.applied = APPLIED
         }
@@ -131,7 +131,7 @@ trait ConnectableAccessBase {
       alreadyExisting.foreach { exist =>
         if (exist.rev_votes.headOption.isEmpty) {
           exist.approvalSum += approvalSum
-          discourse.add(Votes.create(user, exist, weight = approvalSum))
+          discourse.add(Votes.merge(user, exist, weight = approvalSum))
           if (exist.canApply)
             exist.applied = APPLIED
         }
