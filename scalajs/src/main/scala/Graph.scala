@@ -65,6 +65,7 @@ sealed trait NodeDelegates extends NodeLike {
   val isHyperRelation = rawNode.isHyperRelation
   @JSExport
   def quality = rawNode.quality
+  @JSExport
   def quality_=(newQuality: Double) = rawNode.quality = newQuality
   @JSExport
   val viewCount = rawNode.viewCount
@@ -104,13 +105,8 @@ trait NodeBase extends NodeDelegates {
 
   def relations = inRelations ++ outRelations
   def predecessors = inRelations.toSeq.sortBy(- _.order).map(_.startNode)
-  def successors = {
-    val sorted = outRelations.toSeq.sortBy(r => {
-      console.log(r.order)
-      -r.order
-    })
-    sorted.map(_.endNode);
-  }
+  def successors = outRelations.toSeq.sortBy(-_.order).map(_.endNode)
+
   def neighbours = predecessors ++ successors
   def parallels = successors.flatMap(_.predecessors).filter(_ != this)
   @JSExport def inDegree = inRelations.size
@@ -120,14 +116,9 @@ trait NodeBase extends NodeDelegates {
   @JSExport("inRelations") def inRelationsJs = inRelations.toJSArray
   @JSExport("outRelations") def outRelationsJs = outRelations.toJSArray
   @JSExport("relations") def relationsJs = relations.toJSArray
-  @JSExport("predecessors") def predecessorsJs = {
-    console.log(predecessors.toJSArray)
-    predecessors.toJSArray
-  }
-  @JSExport("successors") def successorsJs = {
-    console.log(successors.toJSArray)
-    successors.toJSArray
-  }
+  @JSExport("predecessors") def predecessorsJs = predecessors.toJSArray
+  @JSExport("successors") def successorsJs = successors.toJSArray
+
   @JSExport("neighbours") def neighboursJs = neighbours.toJSArray
   @JSExport("parallels") def parallelsJs = parallels.toJSArray
 
