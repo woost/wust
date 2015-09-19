@@ -63,9 +63,6 @@ function Auth($rootScope, $window, restmod, jwtHelper, store, HistoryService) {
 
     function authenticate(model, message, user) {
         model.$create(user).$then(response => {
-            self.current.identifier = response.identifier;
-            self.current.token = response.token;
-            self.current.userId = response.userId;
             authStore.set(userKey, self.current);
             location.reload();
         }, resp => humane.error(resp.$response.data));
@@ -82,11 +79,7 @@ function Auth($rootScope, $window, restmod, jwtHelper, store, HistoryService) {
     function logoutLocally() {
         if(!self.current.identifier) return;
 
-        delete self.current.identifier;
-        delete self.current.token;
-        delete self.current.userId;
         authStore.remove(userKey);
-        HistoryService.forget();
         location.reload();
     }
 }
