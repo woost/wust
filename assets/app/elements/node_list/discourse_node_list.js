@@ -27,13 +27,32 @@ function discourseNodeListCtrl(Post, TagRelationEditService) {
     vm.editFollowerConnects = editFollowerConnects;
     vm.editPredecessorConnects = editPredecessorConnects;
 
+    vm.connectsRelations = {};
+    let deregisterCommit = vm.nodeModel.component.onCommit(() => {
+        vm.connectsRelations = vm.nodeModel.component.rootNode.outRelations.map(rel => {
+            return {
+                [rel.endNode.id]: rel
+            };
+        }).reduce(_.merge, {});
+        deregisterCommit();
+    });
+
     //TODO: unvote
     function upvoteAnswer(connectable) {
-        Post.$buildRaw(_.pick(vm.nodeModel.component.rootNode, "id")).connectsTo.$buildRaw(_.pick(connectable, "id")).up.$create().$then(() => {
-            humane.success("Upvoted post as answer");
-        }, resp => {
-            humane.error(resp.$response.data);
-        });
+        let connects = findConnects(vm.nodeModel.component.rootNode, connectable);
+        vm.connectsRelations[connectable.id] = connects;
+        let service = Post.$buildRaw(_.pick(vm.nodeModel.component.rootNode, "id")).connectsTo.$buildRaw(_.pick(connectable, "id"));
+        if (connects.vote) {
+            service.neutral.$create().$then(data => {
+                connects.vote = undefined;
+                humane.success("Unvoted post as answer");
+            }, resp => humane.error(resp.$response.data));
+        } else {
+            service.up.$create().$then(data => {
+                connects.vote = data.vote;
+                humane.success("Upvoted post as answer");
+            }, resp => humane.error(resp.$response.data));
+        }
     }
 
     function remove(node) {

@@ -70,6 +70,10 @@ sealed trait NodeDelegates extends NodeLike {
   @JSExport
   val timestamp = rawNode.timestamp
   @JSExport
+  def vote = rawNode.vote.orUndefined
+  @JSExport
+  def vote_=(newVote: js.UndefOr[js.Any]) = rawNode.vote = newVote.toOption
+  @JSExport
   def title = rawNode.title
   @JSExport
   def title_=(newTitle: String) = rawNode.title = newTitle
@@ -226,7 +230,10 @@ sealed trait WrappedGraph[RELATION <: RelationLike] {
   }
 
   @JSExport
-  def onCommit(f: js.Function1[GraphChanges[RELATION], Any]) { onCommitActions += f }
+  def onCommit(f: js.Function1[GraphChanges[RELATION], Any]): js.Function0[Any] = {
+    onCommitActions += f
+    () => onCommitActions -= f
+  }
   val onCommitActions: mutable.ArrayBuffer[Function[GraphChanges[RELATION], Any]] = mutable.ArrayBuffer.empty
 
   @JSExport
@@ -408,8 +415,8 @@ class Graph(private[js] val rawGraph: RawGraph) extends WrappedGraph[Relation] {
 
 @JSExport
 @JSExportAll
-class RawNode(val id: String, var title: String, var description: Option[String], val isHyperRelation: Boolean, val quality: Double, val viewCount: Int, val startId: Option[String], val endId: Option[String], var tags: js.Array[RecordTag], val classifications: Set[RecordTag], val timestamp: js.Any) {
-  def this(n: RecordNode) = this(n.id, n.title.getOrElse(""), n.description.toOption, n.isHyperRelation.getOrElse(false), n.quality.getOrElse(-1), n.viewCount.getOrElse(-1), n.startId.toOption, n.endId.toOption, n.tags, n.classifications.getOrElse(js.Array()).toSet, n.timestamp.getOrElse(0))
+class RawNode(val id: String, var title: String, var description: Option[String], val isHyperRelation: Boolean, val quality: Double, val viewCount: Int, val startId: Option[String], val endId: Option[String], var tags: js.Array[RecordTag], val classifications: Set[RecordTag], var vote: Option[js.Any], val timestamp: js.Any) {
+  def this(n: RecordNode) = this(n.id, n.title.getOrElse(""), n.description.toOption, n.isHyperRelation.getOrElse(false), n.quality.getOrElse(-1), n.viewCount.getOrElse(-1), n.startId.toOption, n.endId.toOption, n.tags, n.classifications.getOrElse(js.Array()).toSet, n.vote.toOption, n.timestamp.getOrElse(0))
   override def toString = s"RawNode($id)"
 
   def canEqual(other: Any): Boolean = other.isInstanceOf[RawNode]
@@ -551,6 +558,8 @@ trait RecordNode extends js.Object {
 
   def tags: js.Array[RecordTag] = js.native
   def classifications: js.UndefOr[js.Array[RecordTag]] = js.native
+
+  def vote: js.UndefOr[js.Any]
 
   //TODO: why can't this be Long?
   def timestamp: js.UndefOr[js.Any] = js.native

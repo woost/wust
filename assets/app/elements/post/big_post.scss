@@ -76,22 +76,9 @@
                     .up {
                         line-height: 5px;
                     }
-                    & > i {
-                        opacity: 0.5;
-                        &.active {
-                            opacity: 1;
-                            color: black;
-                        }
-                    }
                 }
             }
         }
-    }
-    .buttonpair .up, .buttonpair .down {
-        opacity: 0.5;
-    }
-    .buttonpair .active, .buttonpair .up:hover, .buttonpair .down:hover {
-        opacity: 1;
     }
     .votemenu:hover, .votemenu > .detailed:hover {
         &>.buttonpair {
@@ -101,6 +88,11 @@
             display: block;
         }
     }
-
-
+    .vote_button {
+        opacity: 0.5;
+        color: black;
+        &.active, &:hover {
+            opacity: 1;
+        }
+    }
 }

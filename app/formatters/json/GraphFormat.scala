@@ -47,7 +47,9 @@ object GraphFormat {
           ("endId", JsString(connects.endNodeOpt.map(_.uuid).getOrElse(""))),
           ("tags", Json.toJson(connects.neighboursAs(Classification).map(tagWrites.writes))),
           ("quality", connects.startNodeOpt.map(post => JsNumber(connects.quality(post.viewCount))).getOrElse(JsNull)),
-          ("selfvoted", connects.rawItem.properties.get("selfanswervotecount").map(x => JsNumber(x.asLong)).getOrElse(JsNumber(0)))
+          ("vote", connects.rawItem.properties.get("selfanswervotecount").map(c => JsObject(Seq(
+            ("weight", JsNumber(c.asLong))))).getOrElse(JsNull)
+          )
         )
       case _                  => Seq.empty
     }))
