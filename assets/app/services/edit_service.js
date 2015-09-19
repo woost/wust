@@ -25,12 +25,12 @@ function EditService(Post, Connectable, Connects, HistoryService, store, Discour
         }
 
         apply({
-            id, title, description, label, original, tags, localId, referenceNode, newDiscussion, isHyperRelation
+            id, title, description, label, original, tags, localId, referenceNode, newDiscussion, isHyperRelation, classifications
         }) {
             tags = tags || [];
+            classifications = classifications || [];
             this.id = id;
             this.localId = localId === undefined ? this.localId : localId;
-            this.title = title || "";
             this.title = title || "";
             this.description = description || "";
             this.label = label;
@@ -38,13 +38,15 @@ function EditService(Post, Connectable, Connects, HistoryService, store, Discour
             this.newDiscussion = newDiscussion || false;
             this.isHyperRelation = isHyperRelation || false;
             this.tags = angular.copy(tags.map(t => t.$encode ? t.$encode() : t));
+            this.classifications = angular.copy(classifications.map(t => t.$encode ? t.$encode() : t));
             this.original = original || {
                 id: this.id,
                 localId: this.localId,
                 title: this.title,
                 description: this.description,
                 label: this.label,
-                tags: angular.copy(tags.map(t => t.$encode ? t.$encode() : t))
+                tags: angular.copy(tags.map(t => t.$encode ? t.$encode() : t)),
+                classifications: angular.copy(classifications.map(t => t.$encode ? t.$encode() : t))
             };
 
             this.setValidityProperties();
@@ -118,6 +120,14 @@ function EditService(Post, Connectable, Connects, HistoryService, store, Discour
                     }
 
                     data.tags = _.uniq(data.tags.concat(keeped), "id");
+                }
+
+                if(referenceNode) {
+                    let connects = response.graph.nodes.find(n => n.label === "CONNECTS");
+                    let session = editConnects(connects);
+                    session.tags = this.classifications;
+                    data.classifications = [];
+                    session.save();
                 }
 
                 this.apply(data);
