@@ -66,10 +66,10 @@ function classificationLabelBorderRadius(tag) { return "6px";}
 function classificationCircleBackgroundColor(tag) { return hashToColor(tag, 40, 90); }
 function classificationCircleBorderColor(tag) { return hashToColor(tag, 40, 48); }
 
-function contextLabelBackgroundColor(tag) { return hashToColor(tag, 30, 98); }
-function contextLabelBorderColor(tag) { return hashToColor(tag, 30, 58); }
-function contextCircleBackgroundColor(tag) { return hashToColor(tag, 30, 98); }
-function contextCircleBorderColor(tag) { return hashToColor(tag, 30, 58); }
+function contextLabelBackgroundColor(tag) { return hashToColor(tag, 20, 99); }
+function contextLabelBorderColor(tag) { return hashToColor(tag, 30, 68); }
+function contextCircleBackgroundColor(tag) { return hashToColor(tag, 20, 99); }
+function contextCircleBorderColor(tag) { return hashToColor(tag, 30, 68); }
 function contextCircleBorderRadius(tag) { return "2px";}
 
 function tagTitleColor(title) { return Math.abs(hashCode(title.toLowerCase())) % 360; }
