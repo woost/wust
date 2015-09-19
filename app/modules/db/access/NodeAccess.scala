@@ -55,6 +55,7 @@ trait NodeDeleteBase[NODE <: UuidNode] extends NodeAccessDefault[NODE] {
   }
 }
 
+case class NodeNothing[NODE <: UuidNode](factory: UuidNodeMatchesFactory[NODE]) extends NodeAccessDefault[NODE]
 case class NodeRead[NODE <: UuidNode](factory: UuidNodeMatchesFactory[NODE]) extends NodeReadBase[NODE]
 case class NodeDelete[NODE <: UuidNode](factory: UuidNodeMatchesFactory[NODE]) extends NodeDeleteBase[NODE]
 case class NodeReadDelete[NODE <: UuidNode](factory: UuidNodeMatchesFactory[NODE]) extends NodeReadBase[NODE] with NodeDeleteBase[NODE]

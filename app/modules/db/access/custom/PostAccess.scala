@@ -1,13 +1,15 @@
 package modules.db.access.custom
 
+import controllers.api.nodes.{ConnectParameter, RequestContext}
 import controllers.api.nodes.RequestContext
 import formatters.json.RequestFormat._
+import formatters.json.EditNodeFormat._
+import play.api.libs.json._
 import model.WustSchema.{Created => SchemaCreated, _}
 import modules.db.Database._
 import modules.db.access._
 import modules.db._
 import modules.requests._
-import play.api.libs.json.JsValue
 import renesca.parameter.implicits._
 import renesca.QueryHandler
 import renesca.Query
@@ -183,13 +185,6 @@ case class PostAccess() extends ConnectableAccessBase with NodeDeleteBase[Post] 
   //TODO: no tagtaggable, query directly
   val tagTaggable = TaggedTaggable.apply[Post]
 
-  override def read(context: RequestContext) = {
-    Right(tagTaggable.shapeResponse(context.page.map { page =>
-      val skip = page * context.limit
-      limitedDiscourseNodes(skip, context.limit, factory)._2
-    }.getOrElse(discourseNodes(factory)._2)))
-  }
-
   override def read(context: RequestContext, uuid: String) = {
     val tagDef = ConcreteFactoryNodeDefinition(Scope)
     val classDef = ConcreteFactoryNodeDefinition(Classification)
@@ -243,7 +238,7 @@ case class PostAccess() extends ConnectableAccessBase with NodeDeleteBase[Post] 
           }
         }
 
-        Right(node)
+        Left(Ok(Json.toJson(node)))
       case None => Left(NotFound(s"Cannot find node with uuid '$uuid'"))
     }
   }
@@ -260,7 +255,7 @@ case class PostAccess() extends ConnectableAccessBase with NodeDeleteBase[Post] 
 
       db.transaction(_.persistChanges(discourse)) match {
         case Some(err) => Left(BadRequest(s"Cannot create Post: $err'"))
-        case _         => Right(node)
+        case _         => Left(Ok(Json.toJson(node)))
       }
     }
   }
@@ -307,7 +302,7 @@ case class PostAccess() extends ConnectableAccessBase with NodeDeleteBase[Post] 
             case Some(err) => Left(BadRequest(s"Cannot update Post with uuid '$uuid': $err"))
             //FIXME: why the fuck do i need to do this???
             //otherwise node.rev_tags is empty? something is messed up here.
-            case _         => Right(discourse.posts.find(_.uuid == node.uuid).get)
+            case _         => Left(Ok(Json.toJson(discourse.posts.find(_.uuid == node.uuid).get)))
             // case _         => Right(node)
           }
         } getOrElse {
@@ -335,9 +330,46 @@ case class ConnectsAccess() extends ConnectableAccessBase with NodeReadBase[Conn
 
         tx.persistChanges(discourse) match {
           case Some(err) => Left(BadRequest(s"Cannot update Connects with uuid '$uuid': $err'"))
-          case _         => Right(classifiedConnects.shapeResponse(discourse.connects.find(_.uuid == node.uuid).get))
+          case _         => Left(Ok(Json.toJson(classifiedConnects.shapeResponse(discourse.connects.find(_.uuid == node.uuid).get))))
         }
       }
     }
   }
+}
+
+//TODO: one api to get them all?
+case class PostUpdatedAccess() extends EndRelationAccessDefault[Updated, UpdatedToPost, Post] {
+  val nodeFactory = Updated
+  override def read(context: RequestContext, param: ConnectParameter[Post]) = {
+    Left(Ok(Json.toJson(context.user.map { user =>
+      val userDef = ConcreteNodeDefinition(user)
+      val updatedDef = ConcreteFactoryNodeDefinition(Updated)
+      val postDef = FactoryUuidNodeDefinition(Post, param.baseUuid)
+      val relDef = RelationDefinition(updatedDef, UpdatedToPost, postDef)
+      val votesDef = RelationDefinition(userDef, Votes, updatedDef)
+      //TODO: graphdefinition with arbitrary properties, not only uuid
+      val query = s"match ${relDef.toQuery} where ${updatedDef.name}.applied = 0 optional match ${votesDef.toQuery(true, false)} return ${votesDef.name}, ${updatedDef.name}"
+      val discourse = Discourse(db.queryGraph(query, relDef.parameterMap ++ votesDef.parameterMap))
+      discourse.updateds
+    }.getOrElse(Seq.empty))))
+  }
+}
+
+case class PostTagChangeRequestAccess() extends RelationAccessDefault[Post, TagChangeRequest] {
+  val nodeFactory = TagChangeRequestMatches
+
+  override def read(context: RequestContext, param: ConnectParameter[Post]) = {
+    Left(Ok(Json.toJson(context.user.map { user =>
+      val userDef = ConcreteNodeDefinition(user)
+      val updatedDef = ConcreteFactoryNodeDefinition(nodeFactory)
+      val postDef = FactoryUuidNodeDefinition(Post, param.baseUuid)
+      val votesDef = RelationDefinition(userDef, Votes, updatedDef)
+      val scopeDef = ConcreteFactoryNodeDefinition(Scope)
+      val proposes = RelationDefinition(updatedDef, ProposesTag, scopeDef)
+      val query = s"match ${updatedDef.toQuery}-[:`${AddTags.endRelationType}`|`${RemoveTags.endRelationType}`]->${postDef.toQuery} where ${updatedDef.name}.applied = 0 optional match ${votesDef.toQuery(true, false)} optional match ${proposes.toQuery(false, true)} return ${votesDef.name}, ${proposes.name}, ${updatedDef.name}"
+      val discourse = Discourse(db.queryGraph(query, postDef.parameterMap ++ votesDef.parameterMap))
+      discourse.tagChangeRequests
+    }.getOrElse(Seq.empty))))
+  }
+
 }

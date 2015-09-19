@@ -47,8 +47,7 @@ object ApiNodeFormat {
     def reads(json: JsValue) = ???
 
     //TODO: this should be multiple formats...code dup
-    def writes(node: Node) = {
-      JsObject(node match {
+    def writes(node: Node) = JsObject(node match {
       case n: Post => Seq(
         ("id", JsString(n.uuid)),
         ("title", JsString(n.title)),
@@ -60,16 +59,7 @@ object ApiNodeFormat {
           JsArray(n.outRelationsAs(PostToConnects).map(_.endNode).flatMap(con => discourse.classifies.filter(_.endNode == con).map(_.startNode).sortBy(_.uuid).map((_, con))).groupBy(_._1).mapValues(_.map(_._2)).map(classificationWriter(n, _)).toSeq)
         }),
         ("timestamp", Json.toJson(JsNumber(n.timestamp))),
-        ("requestsEdit", Json.toJson(n.inRelationsAs(Updated))), //TODO: accessors for subrelations of hyperrelations, to get connected hypernode
-        ("requestsTags", Json.toJson(n.inRelationsAs(AddTags) ++ n.inRelationsAs(RemoveTags))),
         ("viewCount", JsNumber(n.viewCount))
-      )
-      case n: Connects => Seq(
-        ("id", JsString(n.uuid)),
-        ("startId", n.startNodeOpt.map(s => JsString(s.uuid)).getOrElse(JsNull)),
-        ("endId", n.endNodeOpt.map(e => JsString(e.uuid)).getOrElse(JsNull)),
-        ("quality", n.startNodeOpt.map(post => JsNumber(n.quality(post.viewCount))).getOrElse(JsNull)),
-        ("tags", Json.toJson(n.rev_classifies.sortBy(_.uuid).map(tagWrites.writes))) // TODO: why do we have to call tagsWrites.writes explicitly?
       )
       case n: TagLike => tagLikeToSeq(n) ++ (n match { //TODO: traits should have accessors for relations in magic
         case s:Scope => Seq(("inherits", JsArray(s.inherits.collect{ case t:TagLike => t }.map(tagWrites.writes))), //TODO inherits<Trait> methods in magic
@@ -82,47 +72,6 @@ object ApiNodeFormat {
         ("name", JsString(n.name)),
         ("email", JsString(n.email.getOrElse("")))
       )
-      case n: Updated        => Seq(
-        ("id", JsString(n.uuid)),
-        ("post", n.outRelationsAs(UpdatedToPost).headOption.map(r => Json.toJson(r.endNode)).getOrElse(JsNull)),
-        ("oldTitle", JsString(n.oldTitle)),
-        ("newTitle", JsString(n.newTitle)),
-        ("oldDescription", JsString(n.oldDescription.getOrElse(""))),
-        ("newDescription", JsString(n.newDescription.getOrElse(""))),
-        ("vote", n.inRelationsAs(Votes).headOption.map(vote => JsObject(Seq(("weight", JsNumber(vote.weight))))).getOrElse(JsNull)),
-        ("applyThreshold", JsNumber(n.applyThreshold)),
-        ("rejectThreshold", JsNumber(n.rejectThreshold)),
-        ("votes", JsNumber(n.approvalSum)),
-        ("applied", JsNumber(n.applied)),
-        ("type", JsString("Edit"))
-      )
-      case n: AddTags    => Seq(
-        ("id", JsString(n.uuid)),
-        ("post", n.outRelationsAs(AddTagsToPost).headOption.map(r => Json.toJson(r.endNode)).getOrElse(JsNull)),
-        ("tag", n.proposesTags.headOption.map(tagWrites.writes).getOrElse(JsNull)),
-        ("vote", n.inRelationsAs(Votes).headOption.map(vote => JsObject(Seq(("weight", JsNumber(vote.weight))))).getOrElse(JsNull)),
-        ("applyThreshold", JsNumber(n.applyThreshold)),
-        ("rejectThreshold", JsNumber(n.rejectThreshold)),
-        ("votes", JsNumber(n.approvalSum)),
-        ("isRemove", JsBoolean(false)),
-        ("applied", JsNumber(n.applied)),
-        ("type", JsString("AddTag"))
-      )
-      case n: RemoveTags    => Seq(
-        ("id", JsString(n.uuid)),
-        ("post", n.outRelationsAs(RemoveTagsToPost).headOption.map(r => Json.toJson(r.endNode)).getOrElse(JsNull)),
-        ("tag", n.proposesTags.headOption.map(tagWrites.writes).getOrElse(JsNull)),
-        ("vote", n.inRelationsAs(Votes).headOption.map(vote => JsObject(Seq(("weight", JsNumber(vote.weight))))).getOrElse(JsNull)),
-        ("applyThreshold", JsNumber(n.applyThreshold)),
-        ("rejectThreshold", JsNumber(n.rejectThreshold)),
-        ("votes", JsNumber(n.approvalSum)),
-        ("isRemove", JsBoolean(true)),
-        ("applied", JsNumber(n.applied)),
-        ("type", JsString("RemoveTag"))
-      )
-      case n              =>
-        throw new RuntimeException("You did not define a formatter for the api: " + node)
     })
-    }
   }
 }

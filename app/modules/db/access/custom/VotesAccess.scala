@@ -6,7 +6,6 @@ import modules.db.Database._
 import modules.db._
 import modules.db.access.{EndRelationAccessDefault, EndRelationAccess}
 import modules.requests.ConnectResponse
-import formatters.json.ApiNodeFormat._
 import play.api.libs.json._
 import renesca.parameter.implicits._
 import renesca.schema._
@@ -15,6 +14,9 @@ import play.api.mvc.Results._
 import moderation.Moderation
 
 trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefault[User, Votes, Votable] {
+
+  import formatters.json.EditNodeFormat._
+
   val sign: Long
   val nodeFactory = User
 
