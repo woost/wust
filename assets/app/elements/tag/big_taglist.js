@@ -15,9 +15,9 @@ function bigTaglist() {
     };
 }
 
-bigTaglistCtrl.$inject = ["Post"];
+bigTaglistCtrl.$inject = ["Post", "ContextService"];
 
-function bigTaglistCtrl(Post) {
+function bigTaglistCtrl(Post, ContextService) {
     let vm = this;
 
     vm.upvoteTag = upvoteTag;
@@ -30,12 +30,14 @@ function bigTaglistCtrl(Post) {
                 tag.vote = undefined;
                 tag.quality = data.quality;
                 humane.success("Unvoted post in context");
+                ContextService.setContext(vm.node);
             }, resp => humane.error(resp.$response.data));
         } else {
             service.up.$create().$then(data => {
                 tag.vote = data.vote;
                 tag.quality = data.quality;
                 humane.success("Upvoted post in context");
+                ContextService.setContext(vm.node);
             }, resp => humane.error(resp.$response.data));
         }
     }

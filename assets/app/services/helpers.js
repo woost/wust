@@ -19,6 +19,7 @@ angular.module("wust.services").value("Helpers", {
     contextCircleBorderRadius,
     tagTitleColor,
     cssCompat,
+    sortByIdQuality,
     coloredBorderWidth: "3px"
 });
 
@@ -49,9 +50,11 @@ function hashCode(string) {
     return hash;
 }
 
+function sortByIdQuality(tags) {
+    return _.sortByOrder(tags, ["quality", "id"], ["desc", "asc"]);
+}
 
 function sortedNodeTags(node) {
-    let sortByIdQuality = (tags) => _.sortByOrder(tags, ["quality", "id"], ["desc", "asc"]);
     return sortByIdQuality(node.classifications).concat(sortByIdQuality(node.tags));
 }
 

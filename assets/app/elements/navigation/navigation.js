@@ -38,15 +38,8 @@ function navigationCtrl($state, Auth, SearchService, DiscourseNode, Search, Moda
     vm.fullscreen = FullscreenService;
     vm.$state = $state;
     vm.currentContexts = ContextService.currentContexts;
-    vm.onContextChange = onContextChange;
-
-    function onContextChange() {
-        vm.contextStyle = {
-            "background-color": vm.currentContexts.length > 0 ? Helpers.navBackgroundColor(vm.currentContexts[0]) : undefined,
-            "border-bottom": vm.currentContexts.length > 0 ? ("1px solid " + Helpers.contextCircleBorderColor(vm.currentContexts[0])) : undefined
-        };
-        ContextService.emitChangedEvent();
-    }
+    vm.contextStyle = ContextService.contextStyle;
+    vm.onContextChange = () => ContextService.emitChangedEvent();
 
     function authenticate(register) {
         let func = register ? Auth.register : Auth.login;
