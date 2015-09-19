@@ -8,21 +8,6 @@
             <span class="pull-right">{{vm.node.viewCount}} views</span>
         </div>
 
-        <div class="votemenu" ng-if="vm.nodeHasContext()">
-            <div class="buttonpair">
-                <i class="icon-up-dir fa-4x"></i>
-                <i class="icon-down-dir fa-4x"></i>
-            </div>
-            <div class="detailed">
-                <div class="votebuttons">
-                    <div ng-repeat="tag in vm.node.tags | contextonly" class="buttonpair">
-                        <i class="vote_button icon-up-dir fa-4x" ng-class="{ active: tag.vote.weight > 0 }" ng-click="vm.upvoteTag(tag)"></i>
-                        <span tag-label="tag"></span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <div big-taglist node="vm.node" class="taglist"></div>
         <span toggle-zen node="vm.node" class="pull-right" ng-show="vm.node.description"></span>
         <div class="post_description" markdown="vm.node.description" ng-show="vm.node.description"></div>

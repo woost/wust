@@ -22,6 +22,10 @@
     }
     .taglist {
         width: 100%;
+        .tag-label {
+            display: inline-block;
+            margin-bottom: 5px;
+        }
     }
     .post_stats {
         color: #aaa;
@@ -31,64 +35,9 @@
         margin-top: 10px;
     }
 
-    .votemenu {
-        $tagheight: 24px;
-        $buttonwidth: 80px;
-        $height: 110px;
-
-        width: $buttonwidth;
-
-        position: relative;
-        left: -$buttonwidth;
-        margin-top: -($height -$tagheight)/2;
-        margin-bottom: -($height +$tagheight)/2;
-        height: $height;
-        &>.buttonpair {
-            width: $buttonwidth;
-            opacity: 0.5;
-            line-height: 0px; // move arrows closer to each other
-        }
-
-        .detailed {
-            // this class only exists to be able to set display:none
-            // and don't interfere with flexbox
-            display:none;
-
-            .votebuttons {
-                padding: 10px;
-                width: 500px;
-                height: $height;
-                position: relative;
-                @include display-flex(flex);
-                @include justify-content(flex-start);
-                @include flex-direction(row);
-                @include align-items(center);
-                background-color: #F8F8F8;
-                border: 1px solid #333;
-                border-radius: 5px;
-                @include box-shadow(0 5px 20px #333);
-                .buttonpair {
-                    @include display-flex(flex);
-                    @include justify-content(space-between);
-                    @include flex-direction(column);
-                    @include align-items(center);
-                    width: 120px;
-                    .up {
-                        line-height: 5px;
-                    }
-                }
-            }
-        }
-    }
-    .votemenu:hover, .votemenu > .detailed:hover {
-        &>.buttonpair {
-            display: none;
-        }
-        .detailed {
-            display: block;
-        }
-    }
     .vote_button {
+        padding-right: 5px;
+
         opacity: 0.5;
         color: black;
         &.active, &:hover {
