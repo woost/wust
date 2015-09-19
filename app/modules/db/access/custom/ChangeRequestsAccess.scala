@@ -5,7 +5,7 @@ import model.WustSchema.{Created => SchemaCreated, _}
 import modules.db.Database.db
 import modules.db.GraphHelper._
 import modules.db.access._
-import modules.db.{FactoryUuidNodeDefinition, ConcreteFactoryNodeDefinition, ConcreteNodeDefinition, RelationDefinition}
+import modules.db._
 import renesca.Query
 import play.api.mvc.Results._
 
@@ -16,9 +16,23 @@ case class InstantChangeRequestAccess() extends NodeAccessDefault[ChangeRequest]
     val page = context.page.getOrElse(0)
     val skip = page * context.limit
 
-    val crDef = ConcreteFactoryNodeDefinition(ChangeRequest)
-    val query = s""" match ${crDef.toQuery}-[relation:`${UpdatedToPost.relationType}`|`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->(post:`${Post.label}`) where ${crDef.name}.instantChange = true return post, relation, ${crDef.name} order by ${crDef.name}.timestamp skip ${skip} limit ${context.limit}"""
-    val params = crDef.parameterMap
+    val crDef = LabelNodeDefinition[TagChangeRequest](ChangeRequest.labels)
+    val crTagsDef = RelationDefinition(crDef, ProposesTag, ConcreteFactoryNodeDefinition(Scope))
+    val postDef = ConcreteFactoryNodeDefinition(Post)
+    val tagsDef = RelationDefinition(ConcreteFactoryNodeDefinition(Scope), Tags, postDef)
+    val connectsDef = ConcreteFactoryNodeDefinition(Connects)
+    val connDef = RelationDefinition(postDef, PostToConnects, connectsDef)
+    val classifiesDef = RelationDefinition(ConcreteFactoryNodeDefinition(Classification), Classifies, connectsDef)
+
+    val query = s"""
+    match ${crDef.toQuery}-[relation:`${UpdatedToPost.relationType}`|`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->${postDef.toQuery} where ${crDef.name}.instantChange = true
+    optional match ${crTagsDef.toQuery(false, true)}
+    optional match ${tagsDef.toQuery(true, false)}
+    optional match ${connDef.toQuery(false, true)}, ${classifiesDef.toQuery(true, false)}
+    return *
+    order by ${crDef.name}.timestamp skip ${skip} limit ${context.limit}"""
+
+    val params = crDef.parameterMap ++ tagsDef.parameterMap ++ connDef.parameterMap ++ classifiesDef.parameterMap
 
     val discourse = Discourse(db.queryGraph(query, params))
 
