@@ -16,7 +16,7 @@ object Moderation {
   //TODO: rate limiting for low karma users
   val initialKarma = 0
 
-  val authorKarmaBoost = postChangeThreshold(10000)
+  val authorKarmaBoost = postChangeThreshold(1000)
 
   //TODO: reason why vote weight should be logarithmic
   def voteWeight(votersKarma: Long) = log(votersKarma)
