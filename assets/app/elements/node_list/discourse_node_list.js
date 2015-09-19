@@ -45,11 +45,13 @@ function discourseNodeListCtrl(Post, TagRelationEditService) {
         if (connects.vote) {
             service.neutral.$create().$then(data => {
                 connects.vote = undefined;
+                connects.quality = data.quality;
                 humane.success("Unvoted post as answer");
             }, resp => humane.error(resp.$response.data));
         } else {
             service.up.$create().$then(data => {
                 connects.vote = data.vote;
+                connects.quality = data.quality;
                 humane.success("Upvoted post as answer");
             }, resp => humane.error(resp.$response.data));
         }

@@ -64,7 +64,8 @@ sealed trait NodeDelegates extends NodeLike {
   @JSExport
   val isHyperRelation = rawNode.isHyperRelation
   @JSExport
-  val quality = rawNode.quality
+  def quality = rawNode.quality
+  def quality_=(newQuality: Double) = rawNode.quality = newQuality
   @JSExport
   val viewCount = rawNode.viewCount
   @JSExport
@@ -97,11 +98,19 @@ trait NodeBase extends NodeDelegates {
   def classifications: Set[RecordTag]
   @JSExport("classifications") def classificationsJs = classifications.toJSArray
 
+  // in- and outrelations are updated whenever the graph is comitted
   var inRelations: Set[RelationLike] = Set.empty
   var outRelations: Set[RelationLike] = Set.empty
+
   def relations = inRelations ++ outRelations
-  def predecessors = inRelations.map(_.startNode)
-  def successors = outRelations.map(_.endNode)
+  def predecessors = inRelations.toSeq.sortBy(- _.order).map(_.startNode)
+  def successors = {
+    val sorted = outRelations.toSeq.sortBy(r => {
+      console.log(r.order)
+      -r.order
+    })
+    sorted.map(_.endNode);
+  }
   def neighbours = predecessors ++ successors
   def parallels = successors.flatMap(_.predecessors).filter(_ != this)
   @JSExport def inDegree = inRelations.size
@@ -111,8 +120,14 @@ trait NodeBase extends NodeDelegates {
   @JSExport("inRelations") def inRelationsJs = inRelations.toJSArray
   @JSExport("outRelations") def outRelationsJs = outRelations.toJSArray
   @JSExport("relations") def relationsJs = relations.toJSArray
-  @JSExport("predecessors") def predecessorsJs = predecessors.toJSArray
-  @JSExport("successors") def successorsJs = successors.toJSArray
+  @JSExport("predecessors") def predecessorsJs = {
+    console.log(predecessors.toJSArray)
+    predecessors.toJSArray
+  }
+  @JSExport("successors") def successorsJs = {
+    console.log(successors.toJSArray)
+    successors.toJSArray
+  }
   @JSExport("neighbours") def neighboursJs = neighbours.toJSArray
   @JSExport("parallels") def parallelsJs = parallels.toJSArray
 
@@ -185,7 +200,7 @@ sealed trait RelationLike {
   def endId: String
   var startNode: NodeBase = _
   var endNode: NodeBase = _
-
+  def order: Double
 }
 
 @JSExport
@@ -193,6 +208,8 @@ sealed trait RelationLike {
 case class Relation(rawRelation: RawRelation) extends RelationLike {
   def startId = rawRelation.startId
   def endId = rawRelation.endId
+
+  override def order = 0
 
   @JSExport("startNode") def _startNode: NodeBase = startNode
   @JSExport("endNode") def _endNode: NodeBase = endNode
@@ -278,6 +295,8 @@ sealed trait WrappedGraph[RELATION <: RelationLike] {
 @JSExport
 case class HyperRelation(rawNode: RawNode) extends NodeBase with RelationLike {
   override def classifications = Set.empty
+
+  override def order = quality
 
   @JSExport override def startId = rawNode.startId.get
   @JSExport override def endId = rawNode.endId.get
@@ -415,7 +434,7 @@ class Graph(private[js] val rawGraph: RawGraph) extends WrappedGraph[Relation] {
 
 @JSExport
 @JSExportAll
-class RawNode(val id: String, var title: String, var description: Option[String], val isHyperRelation: Boolean, val quality: Double, val viewCount: Int, val startId: Option[String], val endId: Option[String], var tags: js.Array[RecordTag], val classifications: Set[RecordTag], var vote: Option[js.Any], val timestamp: js.Any) {
+class RawNode(val id: String, var title: String, var description: Option[String], val isHyperRelation: Boolean, var quality: Double, val viewCount: Int, val startId: Option[String], val endId: Option[String], var tags: js.Array[RecordTag], val classifications: Set[RecordTag], var vote: Option[js.Any], val timestamp: js.Any) {
   def this(n: RecordNode) = this(n.id, n.title.getOrElse(""), n.description.toOption, n.isHyperRelation.getOrElse(false), n.quality.getOrElse(-1), n.viewCount.getOrElse(-1), n.startId.toOption, n.endId.toOption, n.tags, n.classifications.getOrElse(js.Array()).toSet, n.vote.toOption, n.timestamp.getOrElse(0))
   override def toString = s"RawNode($id)"
 
