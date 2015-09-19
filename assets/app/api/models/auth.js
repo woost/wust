@@ -63,23 +63,24 @@ function Auth($rootScope, $window, restmod, jwtHelper, store, HistoryService) {
 
     function authenticate(model, message, user) {
         model.$create(user).$then(response => {
-            authStore.set(userKey, self.current);
+            authStore.set(userKey, _.pick(response, "identifier", "userId", "token"));
             location.reload();
         }, resp => humane.error(resp.$response.data));
     }
 
-    function logout() {
+    function logout(withReload = true) {
         // TODO: should this really be a get request
         // also it does not do anything, except telling the server "i clicked logout" - who cares? we just forget the jwt token locally.
         service.signout.$fetch().$then(response => {
-            logoutLocally();
-        }, logoutLocally);
+            logoutLocally(withReload);
+        }, () => logoutLocally(withReload));
     }
 
-    function logoutLocally() {
+    function logoutLocally(withReload = true) {
         if(!self.current.identifier) return;
 
         authStore.remove(userKey);
-        location.reload();
+        if(withReload)
+            location.reload();
     }
 }

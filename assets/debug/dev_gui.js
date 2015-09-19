@@ -24,6 +24,7 @@ angular.module("wust").run(function(Auth) {
     }
 
     function randomLogin() {
+        Auth.logout(false);
         Auth.register({
             identifier: Math.random().toString(36).substring(7),
             password: "hans"
