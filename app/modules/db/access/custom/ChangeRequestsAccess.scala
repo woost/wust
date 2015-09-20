@@ -57,7 +57,7 @@ case class PostUpdatedAccess() extends EndRelationAccessDefault[Updated, Updated
       match ${ relDef.toQuery }
       where ${ updatedDef.name }.applied = ${ PENDING }
       optional match ${ votesDef.toQuery(true, false) }
-      return ${relDef.name}, ${ votesDef.name }, ${ updatedDef.name }
+      return ${ votesDef.name }, ${ updatedDef.name }
       """
 
       val discourse = Discourse(db.queryGraph(query, relDef.parameterMap ++ votesDef.parameterMap))
@@ -79,11 +79,11 @@ case class PostTagChangeRequestAccess() extends RelationAccessDefault[Post, TagC
       val proposes = RelationDefinition(updatedDef, ProposesTag, scopeDef)
 
       val query = s"""
-      match ${ updatedDef.toQuery }-[rel:`${ AddTags.endRelationType }`|`${ RemoveTags.endRelationType }`]->${ postDef.toQuery }
+      match ${ updatedDef.toQuery }-[:`${ AddTags.endRelationType }`|`${ RemoveTags.endRelationType }`]->${ postDef.toQuery }
       where ${ updatedDef.name }.applied = ${ PENDING }
       optional match ${ votesDef.toQuery(true, false) }
       optional match ${ proposes.toQuery(false, true) }
-      return rel, ${ votesDef.name }, ${ proposes.name }, ${ updatedDef.name }
+      return ${ votesDef.name }, ${ proposes.name }, ${ updatedDef.name }
       """
 
       val discourse = Discourse(db.queryGraph(query, postDef.parameterMap ++ votesDef.parameterMap))
