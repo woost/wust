@@ -9,7 +9,7 @@ GET    /auth/signout              controllers.api.auth.SignUpController.signOut
 -> /connectables controllers.api.Connectables
 -> /connects controllers.api.ConnectsCtrl
 
--> /tags controllers.api.Tags
+-> /scopes controllers.api.Scopes
 
 -> /users controllers.api.Users
 

@@ -6,7 +6,6 @@ import modules.db.access._
 import modules.db.access.custom._
 import modules.requests.dsl._
 
-//TODO: should connectable and post share the same api? if so, rename to connectable
 object Connectables extends Nodes[Connectable] {
   // TODO: combine into posts
   val node = NodeDef(NodeRead(Connectable),
