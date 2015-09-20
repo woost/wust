@@ -76,7 +76,7 @@ function EditService(Post, Connectable, Connects, HistoryService, store, Discour
             if (removedTags.length > 0)
                 dirtyModel.removedTags = removedTags;
 
-            if (dirtyModel.classifications.length === 0)
+            if (("classification" in dirtyModel) && dirtyModel.classifications.length === 0)
                 delete dirtyModel.classifications;
 
             return dirtyModel;
