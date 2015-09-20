@@ -192,7 +192,7 @@ trait ConnectableAccessBase {
   }
 }
 
-case class PostAccess() extends ConnectableAccessBase with NodeDeleteBase[Post] {
+case class PostAccess() extends ConnectableAccessBase with NodeAccessDefault[Post] {
   import scala.concurrent._
   import ExecutionContext.Implicits.global
 
@@ -271,6 +271,22 @@ case class PostAccess() extends ConnectableAccessBase with NodeDeleteBase[Post] 
       db.transaction(_.persistChanges(discourse)) match {
         case Some(err) => Left(BadRequest(s"Cannot create Post: $err'"))
         case _         => Left(Ok(Json.toJson(node)))
+      }
+    }
+  }
+
+  override def delete(context: RequestContext, uuid: String) = context.withUser { user =>
+    db.transaction { tx =>
+      val node = Post.matchesOnUuid(uuid)
+      val failure = tx.persistChanges(node)
+      if (failure.isDefined)
+        Left(NotFound(s"Cannot find Post with uuid '$uuid'"))
+      else {
+        //TODO: correct creation params for deleted
+        node.hide()
+        val deleted = Deleted.create(user, node, applyThreshold = 1)
+        val failure = tx.persistChanges(deleted)
+        Right(!failure.isDefined)
       }
     }
   }

@@ -4,6 +4,7 @@ import com.mohiva.play.silhouette.api.Identity
 import renesca.parameter.LongPropertyValue
 import renesca.schema.macros
 import renesca.Transaction
+import renesca.graph.Label
 import moderation.Moderation
 
 @macros.GraphSchema
@@ -22,6 +23,27 @@ object WustSchema {
   }
   @Relation trait RelationTimestamp {
     var timestamp: Long = System.currentTimeMillis
+  }
+
+  @Node trait Hideable {
+    //TODO: cannot persist changes of option in matches node
+    var backupLabels: String = ""
+
+    def hide() {
+      backupLabels = rawItem.labels.mkString(":")
+      rawItem.labels.clear()
+      rawItem.labels ++= Hidden.labels
+    }
+  }
+
+  @Node class Hidden {
+    var backupLabels: String = ""
+
+    def unhide() {
+      rawItem.labels.clear()
+      rawItem.labels ++= backupLabels.split(":").toSet.map(Label.apply)
+      backupLabels = ""
+    }
   }
 
   // Authentification
@@ -70,7 +92,7 @@ object WustSchema {
 
   // post explicitly inherits timestamp to make it cheap to query recent posts
   // otherwise we would need to take include the created relation every time
-  @Node class Post extends Connectable with Timestamp {
+  @Node class Post extends Connectable with Timestamp with Hideable {
     var title: String
     var description: Option[String]
 
@@ -114,6 +136,7 @@ object WustSchema {
     def canReject:Boolean = canReject()
   }
 
+  //TODO: rename to Edit(-change-request)
   @HyperRelation class Updated(startNode: User, endNode: Post) extends ChangeRequest with HyperConnection {
     val oldTitle:String
     val newTitle:String
@@ -121,14 +144,13 @@ object WustSchema {
     val newDescription:Option[String]
   }
 
+  @HyperRelation class Deleted(startNode: User, endNode: Post) extends ChangeRequest with HyperConnection
+
   @Node trait TagChangeRequest extends ChangeRequest
   @Relation class ProposesTag(startNode: TagChangeRequest, endNode: Scope)
   @HyperRelation class AddTags(startNode: User, endNode: Post) extends TagChangeRequest with HyperConnection
   @HyperRelation class RemoveTags(startNode: User, endNode: Post) extends TagChangeRequest with HyperConnection
 
-  // TODO: should be a node? as the to be deleted node will deleted and we cannot connect there?
-  // hiding nodes seems like more work.
-  // @HyperRelation class Deleted(startNode: User, endNode: Post) extends Action
   // @Relation class Reviewed(startNode: User, endNode: Action)
 
   //TODO: multidimesional voting?
