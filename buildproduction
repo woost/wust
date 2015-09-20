@@ -8,11 +8,14 @@ bower --config.interactive=false install
 
 [ -s "$HOME/.rvm/scripts/rvm" ] && source "$HOME/.rvm/scripts/rvm"
 
-echo "building production assets..."
-./prodassets
+echo "linting production assets..."
+jshint assets
 
 echo "running tests..."
 sbt clean test
+
+echo "building production assets..."
+./prodassets
 
 echo "building play application..."
 sbt stage
