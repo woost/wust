@@ -25,7 +25,6 @@
   "dependencies": {
     "angular": "^1.4.4",
     "angular-animate": "^1.4.4",
-    "angular-bootstrap": "^0.12.2",
     "angular-jwt": "0.0.9",
     "angular-motion": "^0.4.2",
     "angular-native-dragdrop": "^1.1.2",
