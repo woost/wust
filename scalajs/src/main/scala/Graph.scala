@@ -90,9 +90,6 @@ sealed trait NodeDelegates extends NodeLike {
   def description_=(newDescription: js.UndefOr[String]) = rawNode.description = newDescription.toOption
   @JSExport("description")
   def descriptionJs = description.orUndefined
-
-  @JSExport def startId = rawNode.startId.get
-  @JSExport def endId = rawNode.endId.get
 }
 
 trait NodeBase extends NodeDelegates {
@@ -161,6 +158,8 @@ trait NodeBase extends NodeDelegates {
 
 @JSExport
 class Node(val rawNode: RawNode, inHyperGraph: Boolean) extends NodeBase {
+  @JSExport def startId = null
+  @JSExport def endId = null
 
   override def classifications:Set[RecordTag] = {
     val accessor = if (inHyperGraph) outRelations else successors
