@@ -48,6 +48,7 @@ class VotingEditor {
         change.vote = response.vote;
         change.votes = response.votes;
         change.applied = response.applied;
+
         if (change.applied !== 0) {
             _.remove(this.list, {id:change.id});
         }
@@ -73,7 +74,6 @@ class VotingEditor {
 
         this.service.$buildRaw(change).up.$create().$then(val => {
             this.applyChange(change, val);
-            humane.success("Upvoted");
         }, response => humane.error(response.$response.data));
     }
 
@@ -83,7 +83,6 @@ class VotingEditor {
 
         this.service.$buildRaw(change).down.$create().$then(val => {
             this.applyChange(change, val);
-            humane.success("Downvoted");
         }, response => humane.error(response.$response.data));
     }
 }
