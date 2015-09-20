@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash
 GIT_WORK_TREE=../app git checkout -f
 
 #TODO: separate start/stop script
@@ -9,7 +9,7 @@ export PATH="$PATH:$HOME/.node_modules/bin"
 source $HOME/export_neo4j_pass
 
 cd ../app
-./buildproduction
+./buildproduction || exit 1
 
 killall java
 sleep 2
