@@ -16,6 +16,8 @@ import renesca.parameter.PropertyKey
 @RunWith(classOf[JUnitRunner])
 class Neo4jSpec extends Specification {
 
+  args(skipAll = true)
+
   "Neo4j" should {
 
     "write isolate transactions" >> {

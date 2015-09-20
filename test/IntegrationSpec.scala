@@ -12,6 +12,8 @@ import play.api.test.Helpers._
 @RunWith(classOf[JUnitRunner])
 class IntegrationSpec extends Specification {
 
+  args(skipAll = true)
+
   "Application" should {
 
     "work from within a browser" in new WithBrowser {
@@ -19,6 +21,6 @@ class IntegrationSpec extends Specification {
       browser.goTo("http://localhost:" + port)
 
       browser.pageSource must contain("Wust")
-    }.pendingUntilFixed
+    }
   }
 }
