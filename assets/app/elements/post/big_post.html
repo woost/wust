@@ -13,8 +13,8 @@
         <div class="post_description" markdown="vm.node.description" ng-show="vm.node.description"></div>
         <button class="replytool pull-right btn btn-sm btn-default" ng-click='vm.replyTo()' data-title="respond" bs-tooltip><i class="fa fa-plus"></i></button>
     </div>
-    <a ng-if="vm.tagChanges.length > 0 || vm.editChanges.length > 0" href="#" ng-click="vm.showChanges = !vm.showChanges">Post has change requests</a>
     <div ng-show="vm.showChanges">
+    <a ng-if="vm.tagChanges.length > 0 || vm.editChanges.length > 0" href="#" ng-click="vm.showChanges = !vm.showChanges" class="showchanges">Post has change requests</a>
         <div post-tag-changes="vm.tagChanges" on-apply="vm.onTagApply(tag, isRemove)"></div>
             <div post-edit-changes="vm.editChanges" on-apply="vm.onApply(node)"></div>
     </div>
