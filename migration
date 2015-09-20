@@ -1,0 +1,47 @@
+gitref: first-part -> master
+
+match (u:USER) REMOVE u:DUMMYUSER:REALUSER return u
+
+match (p:POST) REMOVE p:CONTENTNODE:INHERITABLE:TAGGABLE:VOTABLE
+SET p:EXPOSEDNODE:HIDEABLE return p
+
+match (t:CATEGORIZATION) REMOVE t:CATEGORIZATION:CONTENTNODE:VOTEDIMENSION
+SET t:EXPOSEDNODE:SCOPE return t
+
+match (t:CLASSIFICATION) REMOVE t:CONTENTNODE:VOTEDIMENSION
+SET t:EXPOSEDNODE return t
+
+match (n:DIMENSIONIZES)-[r]-() delete n,r
+
+match (c:CONNECTS) remove c:TAGGABLE set c:REFERENCE:EXPOSEDNODE return c
+
+match (:USER)-[:USERTOUPDATED]-(u:UPDATED)-[r:UPDATEDTOCONTENTNODE]-(p:POST) delete r create (u)-[:UPDATEDTOPOST]->(p) return u
+
+match (u:UPDATED) set u:CHANGEREQUEST return u
+
+match (a:POST)-[r:CONNECTABLETOCONNECTS]->(b) delete r create (a)-[:POSTTOCONNECTS]->(b) return a,b
+
+match (t:TAGLIKE {title: "StartPost"})-[r:TAGLIKETOTAGS]->(s:TAGS)-[r2:TAGSTOTAGGABLE]->(:POST) delete t,r,s,r2
+
+match (p:POST)-[ptc:POSTTOCONNECTS]->(c:CONNECTS), (p)<-[tagstotaggable:TAGSTOTAGGABLE]-(tags:TAGS)<-[tagliketotags:TAGLIKETOTAGS]-(classification:CLASSIFICATION) delete tagstotaggable,tags,tagliketotags create (c)<-[:CLASSIFIES]-(classification)
+
+match (u:USER)-[r]->(created)-[r2]->(p:POST) delete r2 create (created)-[:CREATEDTOPOST]->(p)
+
+match (t)-[r1:TAGLIKETOTAGS]->(tags)-[r2:TAGSTOTAGGABLE]->(p:POST) delete r1,r2 create (t)-[:SCOPETOTAGS]->(tags)-[:TAGSTOPOST]->(p)
+
+match (t:CLASSIFICATION {title:"repliesTo"}) optional match (t)-[r1:TAGLIKETOTAGS]->(tags:TAGS)-[r2:TAGSTOTAGGABLE]->(:CONNECTS) optional match (t)-[k]-() delete r1,r2,tags,t,k
+
+match (s:SCOPE)-[r1:TAGLIKETOTAGS]->(tags:TAGS)-[r2:TAGSTOTAGGABLE]->(c:CONNECTS)<-[:POSTTOCONNECTS]-(p:POST) delete r1, r2 create (s)-[:SCOPETOTAGS]->(tags)-[:TAGSTOPOST]->(p)
+
+match (c:CLASSIFICATION)-[r1:TAGLIKETOTAGS]->(tags:TAGS) optional match (tags)-[r3:TAGSTOTAGGABLE]-() delete r1,tags,r3
+
+match (a)-[r:TAGLIKETOTAGS]-(b:TAGS) delete r,b
+
+match (u:USER)-[:USERTOUPDATED]->(updated:UPDATED)-[cr:CREATEDTOPOST]->(p:POST) delete cr create (updated)-[:UPDATEDTOPOST]->(p)
+
+
+match (p:POST) set p.viewCount = 0
+
+#??? match (p:REFERENCE) set p.voteCount = 0
+
+# lowercase tags mergen
