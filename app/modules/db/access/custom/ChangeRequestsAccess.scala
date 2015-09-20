@@ -1,7 +1,6 @@
 package modules.db.access.custom
 
 import controllers.api.nodes.{ConnectParameter, RequestContext}
-import formatters.json.ChangeRequestFormat._
 import model.WustSchema.{Created => SchemaCreated, _}
 import modules.db.Database.db
 import modules.db._
@@ -10,6 +9,8 @@ import play.api.libs.json._
 import play.api.mvc.Results._
 
 case class InstantChangeRequestAccess() extends NodeAccessDefault[ChangeRequest] {
+  import formatters.json.ChangeRequestFormat._
+
   val factory = ChangeRequest
 
   override def read(context: RequestContext) = {
@@ -44,7 +45,10 @@ case class InstantChangeRequestAccess() extends NodeAccessDefault[ChangeRequest]
 
 //TODO: one api to get them all?
 case class PostUpdatedAccess() extends EndRelationAccessDefault[Updated, UpdatedToPost, Post] {
+  import formatters.json.EditNodeFormat.CRFormat
+
   val nodeFactory = Updated
+
   override def read(context: RequestContext, param: ConnectParameter[Post]) = {
     Ok(Json.toJson(context.user.map { user =>
       val userDef = ConcreteNodeDefinition(user)
@@ -57,7 +61,7 @@ case class PostUpdatedAccess() extends EndRelationAccessDefault[Updated, Updated
       match ${ relDef.toQuery }
       where ${ updatedDef.name }.applied = ${ PENDING }
       optional match ${ votesDef.toQuery(true, false) }
-      return ${ votesDef.name }, ${ updatedDef.name }
+      return *
       """
 
       val discourse = Discourse(db.queryGraph(query, relDef.parameterMap ++ votesDef.parameterMap))
@@ -67,6 +71,8 @@ case class PostUpdatedAccess() extends EndRelationAccessDefault[Updated, Updated
 }
 
 case class PostTagChangeRequestAccess() extends RelationAccessDefault[Post, TagChangeRequest] {
+  import formatters.json.EditNodeFormat.CRFormat
+
   val nodeFactory = TagChangeRequestMatches
 
   override def read(context: RequestContext, param: ConnectParameter[Post]) = {
@@ -83,10 +89,11 @@ case class PostTagChangeRequestAccess() extends RelationAccessDefault[Post, TagC
       where ${ updatedDef.name }.applied = ${ PENDING }
       optional match ${ votesDef.toQuery(true, false) }
       optional match ${ proposes.toQuery(false, true) }
-      return ${ votesDef.name }, ${ proposes.name }, ${ updatedDef.name }
+      return *
       """
 
       val discourse = Discourse(db.queryGraph(query, postDef.parameterMap ++ votesDef.parameterMap))
+      println(discourse)
       discourse.tagChangeRequests
     }.getOrElse(Seq.empty)))
   }
