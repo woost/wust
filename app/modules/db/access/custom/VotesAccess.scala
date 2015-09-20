@@ -5,7 +5,6 @@ import model.WustSchema.{Created => SchemaCreated, _}
 import modules.db.Database._
 import modules.db._
 import modules.db.access.{EndRelationAccessDefault, EndRelationAccess}
-import modules.requests.ConnectResponse
 import play.api.libs.json._
 import renesca.parameter.implicits._
 import renesca.schema._
@@ -15,7 +14,7 @@ import moderation.Moderation
 
 trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefault[User, Votes, Votable] {
 
-  import formatters.json.EditNodeFormat._
+  import formatters.json.EditNodeFormat.PostFormat
 
   val sign: Long
   val nodeFactory = User

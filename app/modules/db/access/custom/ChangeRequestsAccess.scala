@@ -1,16 +1,13 @@
 package modules.db.access.custom
 
 import controllers.api.nodes.{ConnectParameter, RequestContext}
+import formatters.json.ChangeRequestFormat._
 import model.WustSchema.{Created => SchemaCreated, _}
 import modules.db.Database.db
-import modules.db.GraphHelper._
-import modules.db.access._
 import modules.db._
-import renesca.Query
-import play.api.mvc.Results._
-import formatters.json.ChangeRequestFormat._
-import formatters.json.PostFormat._
+import modules.db.access._
 import play.api.libs.json._
+import play.api.mvc.Results._
 
 case class InstantChangeRequestAccess() extends NodeAccessDefault[ChangeRequest] {
   val factory = ChangeRequest
@@ -29,11 +26,11 @@ case class InstantChangeRequestAccess() extends NodeAccessDefault[ChangeRequest]
     val classifiesDef = RelationDefinition(ConcreteFactoryNodeDefinition(Classification), Classifies, connectsDef)
 
     val query = s"""
-    match ${crDef.toQuery}-[relation:`${UpdatedToPost.relationType}`|`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->${postDef.toQuery} where ${crDef.name}.applied = ${INSTANT}
-    with ${postDef.name}, relation, ${crDef.name} order by ${crDef.name}.timestamp skip ${skip} limit ${limit}
-    optional match ${crTagsDef.toQuery(false, true)}
-    optional match ${tagsDef.toQuery(true, false)}
-    optional match ${connDef.toQuery(false, true)}, ${classifiesDef.toQuery(true, false)}
+    match ${ crDef.toQuery }-[relation:`${ UpdatedToPost.relationType }`|`${ AddTagsToPost.relationType }`|`${ RemoveTagsToPost.relationType }`]->${ postDef.toQuery } where ${ crDef.name }.applied = ${ INSTANT }
+    with ${ postDef.name }, relation, ${ crDef.name } order by ${ crDef.name }.timestamp skip ${ skip } limit ${ limit }
+    optional match ${ crTagsDef.toQuery(false, true) }
+    optional match ${ tagsDef.toQuery(true, false) }
+    optional match ${ connDef.toQuery(false, true) }, ${ classifiesDef.toQuery(true, false) }
     return *
     """
 
@@ -56,7 +53,7 @@ case class PostUpdatedAccess() extends EndRelationAccessDefault[Updated, Updated
       val relDef = RelationDefinition(updatedDef, UpdatedToPost, postDef)
       val votesDef = RelationDefinition(userDef, Votes, updatedDef)
       //TODO: graphdefinition with arbitrary properties, not only uuid
-      val query = s"match ${relDef.toQuery} where ${updatedDef.name}.applied = ${PENDING} optional match ${votesDef.toQuery(true, false)} return ${votesDef.name}, ${updatedDef.name}"
+      val query = s"match ${ relDef.toQuery } where ${ updatedDef.name }.applied = ${ PENDING } optional match ${ votesDef.toQuery(true, false) } return ${ votesDef.name }, ${ updatedDef.name }"
       val discourse = Discourse(db.queryGraph(query, relDef.parameterMap ++ votesDef.parameterMap))
       discourse.updateds
     }.getOrElse(Seq.empty)))
@@ -74,7 +71,7 @@ case class PostTagChangeRequestAccess() extends RelationAccessDefault[Post, TagC
       val votesDef = RelationDefinition(userDef, Votes, updatedDef)
       val scopeDef = ConcreteFactoryNodeDefinition(Scope)
       val proposes = RelationDefinition(updatedDef, ProposesTag, scopeDef)
-      val query = s"match ${updatedDef.toQuery}-[:`${AddTags.endRelationType}`|`${RemoveTags.endRelationType}`]->${postDef.toQuery} where ${updatedDef.name}.applied = ${PENDING} optional match ${votesDef.toQuery(true, false)} optional match ${proposes.toQuery(false, true)} return ${votesDef.name}, ${proposes.name}, ${updatedDef.name}"
+      val query = s"match ${ updatedDef.toQuery }-[:`${ AddTags.endRelationType }`|`${ RemoveTags.endRelationType }`]->${ postDef.toQuery } where ${ updatedDef.name }.applied = ${ PENDING } optional match ${ votesDef.toQuery(true, false) } optional match ${ proposes.toQuery(false, true) } return ${ votesDef.name }, ${ proposes.name }, ${ updatedDef.name }"
       val discourse = Discourse(db.queryGraph(query, postDef.parameterMap ++ votesDef.parameterMap))
       discourse.tagChangeRequests
     }.getOrElse(Seq.empty)))

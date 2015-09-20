@@ -1,9 +1,6 @@
 package common
 
-import scala.concurrent.duration.FiniteDuration
-import scala.concurrent.duration._
 import play.api.Application
-import collection.JavaConversions._
 
 object ConfigString {
   // https://coderwall.com/p/essqgw/easier-access-to-configuration-values-in-play-application

@@ -1,14 +1,9 @@
 package modules.db.access.custom
 
-import controllers.api.nodes.{HyperConnectParameter, RequestContext}
-import modules.db.Database._
-import modules.db.access._
-import modules.db._
-import modules.requests.ConnectResponse
-import play.api.mvc.Results._
 import model.WustSchema._
+import modules.db.Database._
+import modules.db._
 import renesca.Query
-import renesca.parameter._
 import renesca.parameter.implicits._
 
 // adds tags to the results by querying for them and adding them to the graph
@@ -25,7 +20,7 @@ object TaggedTaggable {
 
   def shapeResponse[NODE <: UuidNode](response: Iterable[NODE]): Iterable[NODE] = {
     //TODO: share code with component query
-    if (!response.isEmpty) {
+    if(!response.isEmpty) {
       val tagDef = ConcreteFactoryNodeDefinition(Scope)
       val classDef = ConcreteFactoryNodeDefinition(Classification)
       val nodeDef = ConcreteFactoryNodeDefinition(Post)
@@ -35,9 +30,9 @@ object TaggedTaggable {
       val classifiesDef = RelationDefinition(classDef, Classifies, connectsDef)
 
       val query = s"""
-      match ${nodeDef.toQuery} where ${nodeDef.name}.uuid in {nodeUuids}
-      optional match ${tagsDef.toQuery(true, false)}
-      optional match ${connDef.toQuery(false, true)}, ${classifiesDef.toQuery(true, false)}
+      match ${ nodeDef.toQuery } where ${ nodeDef.name }.uuid in {nodeUuids}
+      optional match ${ tagsDef.toQuery(true, false) }
+      optional match ${ connDef.toQuery(false, true) }, ${ classifiesDef.toQuery(true, false) }
       return *
       """
       val params = tagsDef.parameterMap ++ connDef.parameterMap ++ classifiesDef.parameterMap ++ Map("nodeUuids" -> response.map(_.uuid).toSeq)
@@ -52,20 +47,20 @@ object TaggedTaggable {
 }
 
 object ClassifiedConnects {
-  def shapeResponse[NODE <: UuidNode](response: NODE):NODE = {
+  def shapeResponse[NODE <: UuidNode](response: NODE): NODE = {
     shapeResponse(List(response)).head
   }
 
-  def shapeResponse[NODE <: UuidNode](response: Iterable[NODE]):Iterable[NODE] = {
+  def shapeResponse[NODE <: UuidNode](response: Iterable[NODE]): Iterable[NODE] = {
     //TODO: share code with component query
-    if (!response.isEmpty) {
+    if(!response.isEmpty) {
       val classDef = ConcreteFactoryNodeDefinition(Classification)
       val nodeDef = ConcreteFactoryNodeDefinition(Connects)
       val relDef = RelationDefinition(classDef, Classifies, nodeDef)
 
       val query = s"""
-      match ${relDef.toQuery}
-      where ${nodeDef.name}.uuid in {nodeUuids}
+      match ${ relDef.toQuery }
+      where ${ nodeDef.name }.uuid in {nodeUuids}
       return *
       """
       val params = nodeDef.parameterMap ++ classDef.parameterMap ++ Map("nodeUuids" -> response.map(_.uuid).toSeq)

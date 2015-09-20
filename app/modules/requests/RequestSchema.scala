@@ -1,7 +1,6 @@
 package modules.requests
 
 import model.WustSchema._
-import modules.db._
 import modules.db.access._
 import renesca.schema._
 
@@ -55,7 +54,7 @@ object dsl {
   START <: UuidNode,
   RELATION <: AbstractRelation[START, END] with UuidNode,
   END <: UuidNode
-  ](factory: HyperConnectionFactory[START,RELATION,END] with UuidNodeMatchesFactory[RELATION]) {
+  ](factory: HyperConnectionFactory[START, RELATION, END] with UuidNodeMatchesFactory[RELATION]) {
     def >(op: StartRelationAccess[START, RELATION, END], connectSchemas: (String, ConnectSchema[RELATION])*) = {
       StartHyperConnectSchema(factory, op, connectSchemas.toMap)
     }
@@ -65,7 +64,7 @@ object dsl {
   START <: UuidNode,
   RELATION <: AbstractRelation[START, END] with UuidNode,
   END <: UuidNode
-  ](factory: HyperConnectionFactory[START,RELATION,END] with UuidNodeMatchesFactory[RELATION]) {
+  ](factory: HyperConnectionFactory[START, RELATION, END] with UuidNodeMatchesFactory[RELATION]) {
     def <(op: EndRelationAccess[START, RELATION, END], connectSchemas: (String, ConnectSchema[RELATION])*) = {
       EndHyperConnectSchema(factory, op, connectSchemas.toMap)
     }
@@ -75,8 +74,8 @@ object dsl {
   START <: UuidNode,
   RELATION <: AbstractRelation[START, END],
   END <: UuidNode
-  ](val access: StartRelationAccess[START,RELATION,END]) {
-    def +(decorate: StartRelationAccess[START,RELATION,END] => StartRelationAccess[START,RELATION,END]) = {
+  ](val access: StartRelationAccess[START, RELATION, END]) {
+    def +(decorate: StartRelationAccess[START, RELATION, END] => StartRelationAccess[START, RELATION, END]) = {
       decorate(access)
     }
     def +(control: AccessDecoratorControl) = {
@@ -88,14 +87,14 @@ object dsl {
   START <: UuidNode,
   RELATION <: AbstractRelation[START, END],
   END <: UuidNode
-  ](access: StartRelationAccess[START,RELATION,END]): StartRelationAccessHolder[START,RELATION,END] = new StartRelationAccessHolder(access)
+  ](access: StartRelationAccess[START, RELATION, END]): StartRelationAccessHolder[START, RELATION, END] = new StartRelationAccessHolder(access)
 
   class EndRelationAccessHolder[
   START <: UuidNode,
   RELATION <: AbstractRelation[START, END],
   END <: UuidNode
-  ](val access: EndRelationAccess[START,RELATION,END]) {
-    def +(decorate: EndRelationAccess[START,RELATION,END] => EndRelationAccess[START,RELATION,END]) = {
+  ](val access: EndRelationAccess[START, RELATION, END]) {
+    def +(decorate: EndRelationAccess[START, RELATION, END] => EndRelationAccess[START, RELATION, END]) = {
       decorate(access)
     }
     def +(control: AccessDecoratorControl) = {
@@ -107,7 +106,7 @@ object dsl {
   START <: UuidNode,
   RELATION <: AbstractRelation[START, END],
   END <: UuidNode
-  ](access: EndRelationAccess[START,RELATION,END]): EndRelationAccessHolder[START,RELATION,END] = new EndRelationAccessHolder(access)
+  ](access: EndRelationAccess[START, RELATION, END]): EndRelationAccessHolder[START, RELATION, END] = new EndRelationAccessHolder(access)
 
   class NodeAccessHolder[NODE <: UuidNode](access: NodeAccess[NODE]) {
     def +(decorate: NodeAccess[NODE] => NodeAccess[NODE]) = {

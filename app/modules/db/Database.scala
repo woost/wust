@@ -1,14 +1,12 @@
 package modules.db
 
 import common.ConfigString._
-
 import model.WustSchema._
-import renesca.graph.Graph
 import modules.db.GraphHelper._
 import modules.db.types._
 import play.api.Play.current
 import renesca._
-import renesca.parameter._
+import renesca.graph.Graph
 import renesca.parameter.implicits._
 import renesca.schema._
 
@@ -21,7 +19,7 @@ object Database {
 
   //TODO: more methods with optional tx
 
-  private def discourseGraphWithReturn(returns: String, definitions: GraphDefinition*):Discourse = discourseGraphWithReturn(db, returns, definitions: _*)
+  private def discourseGraphWithReturn(returns: String, definitions: GraphDefinition*): Discourse = discourseGraphWithReturn(db, returns, definitions: _*)
   private def discourseGraphWithReturn(tx: QueryHandler, returns: String, definitions: GraphDefinition*): Discourse = {
     if(definitions.isEmpty || returns.isEmpty)
       return Discourse.empty
@@ -132,7 +130,7 @@ object Database {
 
   def deleteNodes[NODE <: UuidNode](definitions: NodeDefinition[NODE]*) {
     val discourse = discourseGraph(definitions: _*)
-    if (!discourse.graph.nodes.isEmpty) {
+    if(!discourse.graph.nodes.isEmpty) {
       //TODO clear does not emit changes
       //discourse.graph.nodes.clear()
       discourse.graph.nodes.foreach(discourse.graph.nodes -= _)
@@ -191,19 +189,19 @@ object Database {
       Some(connectNodes(discourse, nodesOpt.get._2, factory, nodesOpt.get._1))
   }
 
-  def disconnectNodesFor[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinition: FixedRelationDefinition[START, RELATION, END], tx:QueryHandler = db) = {
+  def disconnectNodesFor[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinition: FixedRelationDefinition[START, RELATION, END], tx: QueryHandler = db) = {
     val discourse = itemDiscourseGraph(tx, relationDefinition)
     discourse.graph.relations.filter {
-      _.relationType == relationDefinition.factory.asInstanceOf[RelationFactory[_,_,_]].relationType
+      _.relationType == relationDefinition.factory.asInstanceOf[RelationFactory[_, _, _]].relationType
     }.foreach(discourse.graph.relations -= _)
     val failure = tx.persistChanges(discourse.graph)
     failure.isEmpty
   }
 
-  def disconnectHyperNodesFor[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinition: FixedRelationDefinition[START, RELATION, END], tx:QueryHandler = db) = {
+  def disconnectHyperNodesFor[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinition: FixedRelationDefinition[START, RELATION, END], tx: QueryHandler = db) = {
     val discourse = itemDiscourseGraph(tx, relationDefinition)
     discourse.graph.nodes.filter {
-      _.labels == relationDefinition.factory.asInstanceOf[HyperRelationFactory[_,_,_,_,_]].labels
+      _.labels == relationDefinition.factory.asInstanceOf[HyperRelationFactory[_, _, _, _, _]].labels
     }.foreach(discourse.graph.nodes -= _)
     val failure = tx.persistChanges(discourse.graph)
     failure.isEmpty
@@ -241,7 +239,7 @@ object Database {
 
   // IMPORTANT: we need to write the constancts as doubles to avoid integer arithmetic
   // def tagweight(up:String, down:String) = s"(($up + ${tagweight_p*tagweight_u})/($up + $down + $tagweight_u))"
-  def connectedComponent(focusNode: UuidNodeDefinition[_], identity:Option[User], depth: Int = 5): Discourse = {
+  def connectedComponent(focusNode: UuidNodeDefinition[_], identity: Option[User], depth: Int = 5): Discourse = {
     // Tag weights
     // 1. Cypher does not support subqueries yet, so we have to do extra queries for the tag weights.
     // This is not very efficient, because the component is traversed in each query.
@@ -259,11 +257,11 @@ object Database {
     // query undirected connected component of posts with maximum depth
     // depth * 2 because hyperrelation depth
     val query = s"""
-match ${ focusNode.toQuery }-[connects:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(connectable:`${Connectable.label}`)
+match ${ focusNode.toQuery }-[connects:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(connectable:`${ Connectable.label }`)
 with distinct connectable, connects
-optional match (context:`${ Scope.label }`)-[contexttotags:`${ Tags.startRelationType }`]->(tags:`${ Tags.label }`)-[tagstopost:`${ Tags.endRelationType }`]->(connectable:`${Post.label}`)
-optional match (classification:`${Classification.label}`)-[classifies:`${Classifies.relationType}`]->(connectable:`${Connects.label}`)
-optional match (:`${User.label}` {uuid: {useruuid}})-[selfanswervoted :`${Votes.relationType}`]->(connectable:`${Connects.label}`)
+optional match (context:`${ Scope.label }`)-[contexttotags:`${ Tags.startRelationType }`]->(tags:`${ Tags.label }`)-[tagstopost:`${ Tags.endRelationType }`]->(connectable:`${ Post.label }`)
+optional match (classification:`${ Classification.label }`)-[classifies:`${ Classifies.relationType }`]->(connectable:`${ Connects.label }`)
+optional match (:`${ User.label }` {uuid: {useruuid}})-[selfanswervoted :`${ Votes.relationType }`]->(connectable:`${ Connects.label }`)
 return connectable,connects,context,tags,contexttotags,tagstopost, classification, classifies, count(selfanswervoted) as selfanswervotecount
     """
 
@@ -272,11 +270,11 @@ return connectable,connects,context,tags,contexttotags,tagstopost, classificatio
     val (graph, table) = db.queryGraphsAndTables(Query(query, params)).head
     val component = Discourse(graph)
 
-    val uuidToNode = component.uuidNodes.map(n => (n.uuid,n)).toMap
+    val uuidToNode = component.uuidNodes.map(n => (n.uuid, n)).toMap
     table.rows.foreach { row =>
       val selfanswervotecount = row("selfanswervotecount").asLong
 
-      if( selfanswervotecount > 0) {
+      if(selfanswervotecount > 0) {
         val uuid = row("connectable").asMap("uuid").asString
         uuidToNode(uuid).rawItem.properties += ("selfanswervotecount" -> selfanswervotecount)
       }

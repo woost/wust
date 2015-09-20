@@ -1,6 +1,5 @@
 package modules.db.access.custom
 
-import controllers.api.nodes.{ConnectParameter, RequestContext}
 import controllers.api.nodes.RequestContext
 import formatters.json.RequestFormat._
 import play.api.libs.json._

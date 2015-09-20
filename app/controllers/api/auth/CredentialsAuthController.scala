@@ -16,7 +16,7 @@ import play.api.mvc._
 import scala.concurrent.Future
 
 class CredentialsAuthController extends Silhouette[User, JWTAuthenticator]
-  with HeaderEnvironmentModule {
+with HeaderEnvironmentModule {
 
   implicit val restCredentialFormat = CredentialFormat.restFormat
 
@@ -35,7 +35,7 @@ class CredentialsAuthController extends Silhouette[User, JWTAuthenticator]
               })
             }
           }
-          case None =>
+          case None       =>
             Future.failed(new AuthenticatorException("Couldn't find user"))
         }
       }.recoverWith(exceptionHandler)

@@ -2,15 +2,14 @@ package controllers.api.nodes
 
 import com.mohiva.play.silhouette.api.Silhouette
 import com.mohiva.play.silhouette.impl.authenticators.JWTAuthenticator
+import controllers.Application
 import controllers.api.router.{DefaultNestedResourceController, NestedResourceRouter}
 import model.WustSchema._
 import modules.auth.HeaderEnvironmentModule
 import modules.requests.{ConnectSchema, HyperConnectSchema, NodeSchema}
-import play.api.libs.json.{JsResult, JsValue}
-import play.api.mvc.{Controller, AnyContent, Result}
+import play.api.libs.json.JsValue
 import play.api.mvc.Results._
-import renesca.parameter.implicits._
-import controllers.Application
+import play.api.mvc.{AnyContent, Controller, Result}
 import renesca.schema._
 
 case class RequestContext(controller: NodesBase with Controller, user: Option[User], json: Option[JsValue], query: Map[String, String]) {
@@ -19,11 +18,11 @@ case class RequestContext(controller: NodesBase with Controller, user: Option[Us
   def limit = size.getOrElse(15)
   def countView = query.get("countView").map(_.toBoolean).getOrElse(false)
 
-  def jsonAs[T](implicit rds : play.api.libs.json.Reads[T]) = {
+  def jsonAs[T](implicit rds: play.api.libs.json.Reads[T]) = {
     json.flatMap(_.validate[T].asOpt)
   }
 
-  def withJson[S](handler: S => Result)(implicit rds : play.api.libs.json.Reads[S]) = {
+  def withJson[S](handler: S => Result)(implicit rds: play.api.libs.json.Reads[S]) = {
     jsonAs[S].map(handler(_)).getOrElse(UnprocessableEntity("Cannot parse json body"))
   }
 
@@ -41,15 +40,15 @@ case class RequestContext(controller: NodesBase with Controller, user: Option[Us
 case class ConnectParameter[+BASE <: UuidNode](
   baseFactory: UuidNodeMatchesFactory[BASE],
   baseUuid: String
-)
+  )
 
-case class HyperConnectParameter[START <: UuidNode, +BASE <: UuidNode with AbstractRelation[START,END], END <: UuidNode](
+case class HyperConnectParameter[START <: UuidNode, +BASE <: UuidNode with AbstractRelation[START, END], END <: UuidNode](
   startFactory: UuidNodeMatchesFactory[START],
   startUuid: String,
   baseFactory: HyperConnectionFactory[START, BASE, END] with UuidNodeMatchesFactory[BASE],
   endFactory: UuidNodeMatchesFactory[END],
   endUuid: String
-)
+  )
 
 object SchemaWrapper extends RootNodeTraitFactory[UuidNode] {
   def wrapNode[N <: Node](node: N) = {
@@ -63,38 +62,38 @@ object SchemaWrapper extends RootNodeTraitFactory[UuidNode] {
 trait NodesBase extends NestedResourceRouter with DefaultNestedResourceController with Silhouette[User, JWTAuthenticator] with HeaderEnvironmentModule {
 
   protected def context(request: UserAwareRequest[AnyContent]) = {
-    RequestContext(this, request.identity, request.body.asJson, request.queryString.flatMap { case (k,v) => v.headOption.map((k, _)) })
+    RequestContext(this, request.identity, request.body.asJson, request.queryString.flatMap { case (k, v) => v.headOption.map((k, _)) })
   }
 
   protected def unauthorized = Unauthorized("Only logged-in users allowed")
   protected def pathNotFound = NotFound("No defined path")
 
-  protected def getSchema[NODE <: UuidNode](schemas: Map[String,_ <: ConnectSchema[NODE]], path: String)(handler: ConnectSchema[NODE] => Result) = {
+  protected def getSchema[NODE <: UuidNode](schemas: Map[String, _ <: ConnectSchema[NODE]], path: String)(handler: ConnectSchema[NODE] => Result) = {
     schemas.get(path) match {
       case Some(schema) => handler(schema)
       case None         => pathNotFound
     }
   }
 
-  protected def getHyperSchema[NODE <: UuidNode](schemas: Map[String,_ <: ConnectSchema[NODE]], path: String)(handler: HyperConnectSchema[NODE] => Result) = {
+  protected def getHyperSchema[NODE <: UuidNode](schemas: Map[String, _ <: ConnectSchema[NODE]], path: String)(handler: HyperConnectSchema[NODE] => Result) = {
     schemas.get(path) match {
       case Some(schema) => schema match {
         case c: HyperConnectSchema[NODE] => handler(c)
-        case _ => pathNotFound
+        case _                           => pathNotFound
       }
       case None         => pathNotFound
     }
   }
 
   protected def validateConnect(uuid: String, otherUuid: String)(handler: () => Result): Result = {
-    if (uuid == otherUuid)
+    if(uuid == otherUuid)
       BadRequest("Self loops are not allowed")
     else
       handler()
   }
 
   protected def validateHyperConnect(uuid: String, otherUuid: String, nestedUuid: String)(handler: () => Result): Result = validateConnect(uuid, otherUuid) { () =>
-    if (uuid == nestedUuid || otherUuid == nestedUuid)
+    if(uuid == nestedUuid || otherUuid == nestedUuid)
       BadRequest("Incident loops are not allowed")
     else
       handler()

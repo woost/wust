@@ -30,14 +30,14 @@ trait NestedResourceRouter extends ResourceRouter with NestedResourceController 
   protected val IdWithPathAndIdWithPath = (pathElement * 4).r
   protected val IdWithPathAndIdWithPathAndId = (pathElement * 5).r
 
-  private val mapRequestToAction: PartialFunction[(String,String),EssentialAction] = {
-    case ("GET", IdWithPath(id, path)) => showMembers(path, id)
-    case ("POST", IdWithPath(id, path)) => connectMember(path, id)
-    case ("PATCH", IdWithPathAndId(id, path, otherId)) => connectMember(path, id, otherId)
-    case ("DELETE", IdWithPathAndId(id, path, otherId)) => disconnectMember(path, id, otherId)
-    case ("GET", IdWithPathAndIdWithPath(id, path, otherId, otherPath)) => showNestedMembers(path, otherPath, id, otherId)
-    case ("POST", IdWithPathAndIdWithPath(id, path, otherId, otherPath)) => connectNestedMember(path, otherPath, id, otherId)
-    case ("PATCH", IdWithPathAndIdWithPathAndId(id, path, otherId, otherPath, nestedId)) => connectNestedMember(path, otherPath, id, otherId, nestedId)
+  private val mapRequestToAction: PartialFunction[(String, String), EssentialAction] = {
+    case ("GET", IdWithPath(id, path))                                                    => showMembers(path, id)
+    case ("POST", IdWithPath(id, path))                                                   => connectMember(path, id)
+    case ("PATCH", IdWithPathAndId(id, path, otherId))                                    => connectMember(path, id, otherId)
+    case ("DELETE", IdWithPathAndId(id, path, otherId))                                   => disconnectMember(path, id, otherId)
+    case ("GET", IdWithPathAndIdWithPath(id, path, otherId, otherPath))                   => showNestedMembers(path, otherPath, id, otherId)
+    case ("POST", IdWithPathAndIdWithPath(id, path, otherId, otherPath))                  => connectNestedMember(path, otherPath, id, otherId)
+    case ("PATCH", IdWithPathAndIdWithPathAndId(id, path, otherId, otherPath, nestedId))  => connectNestedMember(path, otherPath, id, otherId, nestedId)
     case ("DELETE", IdWithPathAndIdWithPathAndId(id, path, otherId, otherPath, nestedId)) => disconnectNestedMember(path, otherPath, id, otherId, nestedId)
   }
 

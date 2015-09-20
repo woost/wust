@@ -1,17 +1,14 @@
 package modules.db.access.custom
 
-import controllers.api.nodes.{HyperConnectParameter, ConnectParameter, RequestContext}
-import formatters.json.RequestFormat._
+import controllers.api.nodes.{ConnectParameter, HyperConnectParameter, RequestContext}
 import formatters.json.ResponseFormat._
 import model.WustSchema._
 import modules.db.Database.db
-import modules.db.HyperNodeDefinitionBase
 import modules.db.access._
-import modules.requests.{ConnectResponse}
+import modules.requests.ConnectResponse
 import play.api.libs.json._
 import play.api.mvc.Result
 import play.api.mvc.Results._
-import renesca.parameter.implicits._
 import renesca.schema._
 
 trait ConnectsRelationHelper {
@@ -26,7 +23,7 @@ trait ConnectsRelationHelper {
   }
 }
 
-case class StartConnectsAccess() extends StartRelationReadBase[Post,Connects,Connectable] with StartRelationDeleteBase[Post,Connects,Connectable] with ConnectsRelationHelper {
+case class StartConnectsAccess() extends StartRelationReadBase[Post, Connects, Connectable] with StartRelationDeleteBase[Post, Connects, Connectable] with ConnectsRelationHelper {
   val factory = Connects
   val nodeFactory = Connectable
 
@@ -48,7 +45,7 @@ case class StartConnectsAccess() extends StartRelationReadBase[Post,Connects,Con
   }
 }
 
-case class EndConnectsAccess() extends EndRelationReadBase[Post,Connects,Connectable] with EndRelationDeleteBase[Post,Connects,Connectable] with ConnectsRelationHelper {
+case class EndConnectsAccess() extends EndRelationReadBase[Post, Connects, Connectable] with EndRelationDeleteBase[Post, Connects, Connectable] with ConnectsRelationHelper {
   val factory = Connects
   val nodeFactory = Post
 
@@ -58,7 +55,7 @@ case class EndConnectsAccess() extends EndRelationReadBase[Post,Connects,Connect
     postaccess.createNode(context).map(n => createRelation(context, param, n)).getOrElse(BadRequest("Cannot create post"))
   }
 
-  override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,Connectable with AbstractRelation[S,E], E]) = {
+  override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Connectable with AbstractRelation[S, E], E]) = {
     postaccess.createNode(context).map(n => createRelation(context, param, n)).getOrElse(BadRequest("Cannot create post"))
   }
 
@@ -73,7 +70,7 @@ case class EndConnectsAccess() extends EndRelationReadBase[Post,Connects,Connect
     createRelation(context, param, nodeFactory.matchesOnUuid(otherUuid))
   }
 
-  private def createRelation[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,Connectable with AbstractRelation[S,E], E], node: Post) = {
+  private def createRelation[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Connectable with AbstractRelation[S, E], E], node: Post) = {
     val discourse = Discourse(node.graph)
     val start = param.startFactory.matchesOnUuid(param.startUuid)
     val end = param.endFactory.matchesOnUuid(param.endUuid)
@@ -83,7 +80,7 @@ case class EndConnectsAccess() extends EndRelationReadBase[Post,Connects,Connect
     persistRelation(discourse, node)
   }
 
-  override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,Connectable with AbstractRelation[S,E], E], uuid: String) = context.withUser {
+  override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Connectable with AbstractRelation[S, E], E], uuid: String) = context.withUser {
     createRelation(context, param, nodeFactory.matchesOnUuid(uuid))
   }
 }

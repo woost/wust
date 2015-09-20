@@ -2,9 +2,9 @@
 
 package controllers.api.router
 
+import common.Helpers.compose
 import play.api.mvc._
 import play.core.Router
-import common.Helpers.compose
 
 import scala.runtime.AbstractPartialFunction
 
@@ -95,21 +95,21 @@ trait ResourceRouter extends Router.Routes with ResourceController {
   private val MaybeSlash = "/?".r
   private val Id = pathElement.r
 
-  private val mapRequestToAction: PartialFunction[(String,String),EssentialAction] = {
-    case ("GET", MaybeSlash()) => index
+  private val mapRequestToAction: PartialFunction[(String, String), EssentialAction] = {
+    case ("GET", MaybeSlash())  => index
     case ("POST", MaybeSlash()) => create
-    case ("GET", Id(id)) => show(id)
-    case ("PUT", Id(id)) => update(id)
-    case ("DELETE", Id(id)) => destroy(id)
+    case ("GET", Id(id))        => show(id)
+    case ("PUT", Id(id))        => update(id)
+    case ("DELETE", Id(id))     => destroy(id)
   }
 
-  private val isOwnRoute: PartialFunction[(String,String),(String,String)] = {
+  private val isOwnRoute: PartialFunction[(String, String), (String, String)] = {
     case (method, url) if url.startsWith(path) => (method, url.drop(path.length))
   }
 
   protected def mapRequest = mapRequestToAction
 
-  private def mapOwnRequestToAction: PartialFunction[(String,String),EssentialAction] = compose(isOwnRoute, mapRequest)
+  private def mapOwnRequestToAction: PartialFunction[(String, String), EssentialAction] = compose(isOwnRoute, mapRequest)
 
   def routes = new AbstractPartialFunction[RequestHeader, Handler] {
     override def applyOrElse[A <: RequestHeader, B >: Handler](rh: A, default: A => B) = {

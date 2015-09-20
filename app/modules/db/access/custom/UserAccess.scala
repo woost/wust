@@ -1,15 +1,14 @@
 package modules.db.access.custom
 
-import model.WustSchema.{Created => SchemaCreated, _}
 import controllers.api.nodes._
-import play.api.libs.json._
+import formatters.json.RequestFormat._
+import model.WustSchema.{Created => SchemaCreated, _}
 import modules.db.Database.db
 import modules.db._
 import modules.db.access._
 import modules.requests._
-import renesca.parameter.implicits._
+import play.api.libs.json._
 import play.api.mvc.Results._
-import formatters.json.RequestFormat._
 
 class UserAccess extends NodeReadBase[User] {
   val factory = User
@@ -20,7 +19,7 @@ class UserAccess extends NodeReadBase[User] {
     context.withUser { user =>
       context.withJson { (request: UserUpdateRequest) =>
         //TODO: sanity check + welcome mail
-        if (request.email.isDefined)
+        if(request.email.isDefined)
           user.email = request.email
 
         db.transaction(_.persistChanges(user)) match {
@@ -37,6 +36,7 @@ object UserAccess {
 }
 
 case class UserContributions() extends RelationAccessDefault[User, Post] {
+
   import formatters.json.PostFormat._
 
   val nodeFactory = Post
@@ -54,10 +54,10 @@ case class UserContributions() extends RelationAccessDefault[User, Post] {
     val classifiesDef = RelationDefinition(ConcreteFactoryNodeDefinition(Classification), Classifies, connectsDef)
 
     val query = s"""
-    match ${userDef.toQuery}-[r1]->(hyper:`${Action.label}`)-[r2]->${postDef.toQuery}
-    with ${userDef.name}, ${postDef.name}, r1, r2, hyper order by hyper.timestamp skip ${skip} limit ${limit}
-    optional match ${tagsDef.toQuery(true, false)}
-    optional match ${connDef.toQuery(false, true)}, ${classifiesDef.toQuery(true, false)}
+    match ${ userDef.toQuery }-[r1]->(hyper:`${ Action.label }`)-[r2]->${ postDef.toQuery }
+    with ${ userDef.name }, ${ postDef.name }, r1, r2, hyper order by hyper.timestamp skip ${ skip } limit ${ limit }
+    optional match ${ tagsDef.toQuery(true, false) }
+    optional match ${ connDef.toQuery(false, true) }, ${ classifiesDef.toQuery(true, false) }
     return *
     """
 

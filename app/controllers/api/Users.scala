@@ -2,7 +2,7 @@ package controllers.api
 
 import controllers.api.nodes.Nodes
 import model.{WustSchema => schema}
-import modules.db.access.{StartRelationRead,StartMultiRelationRead}
+import modules.db.access.StartRelationRead
 import modules.db.access.custom.{UserAccess, UserContributions}
 import modules.requests.dsl._
 

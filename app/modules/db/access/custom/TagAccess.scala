@@ -3,16 +3,16 @@ package modules.db.access.custom
 import controllers.api.nodes.RequestContext
 import formatters.json.RequestFormat._
 import formatters.json.TagFormat._
+import model.Helpers.tagTitleColor
 import model.WustSchema.{Created => SchemaCreated, _}
 import modules.db.Database.db
+import modules.db._
 import modules.db.access.NodeReadBase
-import modules.db._;
 import modules.requests._
 import play.api.libs.json._
-import renesca.parameter.implicits._
-import renesca.Query
 import play.api.mvc.Results._
-import model.Helpers.tagTitleColor
+import renesca.Query
+import renesca.parameter.implicits._
 
 class TagAccess extends NodeReadBase[Scope] {
   val factory = Scope
@@ -25,7 +25,7 @@ class TagAccess extends NodeReadBase[Scope] {
     val impl = ConcreteFactoryNodeDefinition(factory)
     val baseInherit = RelationDefinition(base, Inherits, node)
     val implInherit = RelationDefinition(node, Inherits, impl)
-    val query = s"match ${node.toQuery} optional match ${baseInherit.toQuery(true, false)} optional match ${implInherit.toQuery(false, true)} return *"
+    val query = s"match ${ node.toQuery } optional match ${ baseInherit.toQuery(true, false) } optional match ${ implInherit.toQuery(false, true) } return *"
     println(query)
     val discourse = Discourse(db.queryGraph(Query(query, baseInherit.parameterMap ++ implInherit.parameterMap)))
     println(discourse)
@@ -55,14 +55,14 @@ class TagAccess extends NodeReadBase[Scope] {
     context.withJson { (request: TagUpdateRequest) =>
       val node = Scope.matchesOnUuid(uuid)
       //TODO: normally we would want to set it back to None instead of ""
-      if (request.description.isDefined) {
+      if(request.description.isDefined) {
         node.description = request.description
       }
 
       // val contribution = Updated.create(context.user, node)
 
       db.transaction(_.persistChanges(node)) match {
-      // db.transaction(_.persistChanges(contribution)) match {
+        // db.transaction(_.persistChanges(contribution)) match {
         case Some(err) => BadRequest(s"Cannot update Tag with uuid '$uuid': $err'")
         case _         => Ok(Json.toJson(node))
       }

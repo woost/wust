@@ -11,10 +11,10 @@ import play.api.mvc.RequestHeader
 case class WithRole(role: Role) extends Authorization[User] {
   def isAuthorized(user: User)(implicit request: RequestHeader, lang: Lang) = false
   //TODO: roles in user
-//  user.roles match {
-//    case list: Set[Role] => list.contains(role)
-//    case _               => false
-//  }
+  //  user.roles match {
+  //    case list: Set[Role] => list.contains(role)
+  //    case _               => false
+  //  }
 
 }
 /**

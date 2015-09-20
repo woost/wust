@@ -62,13 +62,13 @@ sealed trait UuidNodeDefinition[+NODE <: UuidNode] extends FixedNodeDefinition[N
 sealed trait LabelledUuidNodeDefinition[+NODE <: UuidNode] extends UuidNodeDefinition[NODE] {
   val labels: Set[Label]
 
-  def toQuery = s"($name ${labels.map(l => s":`$l`").mkString} {uuid: {$uuidVariable}})"
+  def toQuery = s"($name ${ labels.map(l => s":`$l`").mkString } {uuid: {$uuidVariable}})"
 }
 
 sealed trait LabelledNodeDefinition[+NODE <: Node] extends FixedNodeDefinition[NODE] {
   val labels: Set[Label]
 
-  def toQuery = s"($name ${labels.map(l => s":`$l`").mkString})"
+  def toQuery = s"($name ${ labels.map(l => s":`$l`").mkString })"
 }
 
 case class FactoryUuidNodeDefinition[+NODE <: UuidNode](
@@ -130,7 +130,7 @@ END <: Node,
 
   private def relationMatcher = factory match {
     case r: RelationFactory[_, RELATION, _]            => s"[$name :`${ r.relationType }`]"
-    case r: HyperRelationFactory[_, _, RELATION, _, _] => s"[$startRelationName:`${ r.startRelationType }`]->($name ${ r.labels.map(l => s":`$l`").mkString } ${nodeUuidMatcher})-[$endRelationName:`${ r.endRelationType }`]"
+    case r: HyperRelationFactory[_, _, RELATION, _, _] => s"[$startRelationName:`${ r.startRelationType }`]->($name ${ r.labels.map(l => s":`$l`").mkString } ${ nodeUuidMatcher })-[$endRelationName:`${ r.endRelationType }`]"
   }
 
   private def nodeMatcher(nodeDefinition: NodeDefinition[_]) = nodeDefinition match {
@@ -145,15 +145,15 @@ END <: Node,
   def toQuery: String = toQuery(true)
   def toQuery(matchNodes: Boolean): String = toQuery(matchNodes, matchNodes)
   def toQuery(matchStart: Boolean, matchEnd: Boolean): String = {
-    val (startPre, startNode) = if (matchStart)
-      nodeMatcher(startDefinition)
-    else
-      (None, nodeReferencer(startDefinition))
+    val (startPre, startNode) = if(matchStart)
+                                  nodeMatcher(startDefinition)
+                                else
+                                  (None, nodeReferencer(startDefinition))
 
-    val (endPre, endNode) = if (matchEnd)
-      nodeMatcher(endDefinition)
-    else
-      (None, nodeReferencer(endDefinition))
+    val (endPre, endNode) = if(matchEnd)
+                              nodeMatcher(endDefinition)
+                            else
+                              (None, nodeReferencer(endDefinition))
 
     val preMatcher = List(startPre, endPre).flatten.map(_ + ",").mkString
     s"$preMatcher$startNode-$relationMatcher->$endNode"
@@ -183,6 +183,6 @@ FACTORY <: AbstractRelationFactory[_ <: Node, _ <: AbstractRelation[_ <: Node, _
   startDefinition: STARTDEF,
   factory: AbstractRelationFactory[START, RELATION, END] with FACTORY,
   endDefinition: ENDDEF) extends RelationDefinitionBase[START, RELATION, END, STARTDEF, ENDDEF, AbstractRelationFactory[START, RELATION, END] with FACTORY] {
-    val nodeUuid = None
-  }
+  val nodeUuid = None
+}
 

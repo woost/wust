@@ -1,10 +1,7 @@
 package controllers.api.nodes
 
-import formatters.json.ResponseFormat.connectWrites
 import model.WustSchema._
 import modules.requests._
-import play.api.libs.json.Json
-import play.api.mvc.Action
 
 trait WritableNodes[NODE <: UuidNode] extends NodesBase {
   def nodeSchema: NodeSchema[NODE]

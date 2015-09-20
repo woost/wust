@@ -3,9 +3,8 @@ package controllers.api
 import controllers.api.nodes.Nodes
 import model.{WustSchema => schema}
 import modules.db.access.StartRelationRead
-import modules.db.access.custom.{TagAccess, TaggedTaggable}
+import modules.db.access.custom.{TagAccess, _}
 import modules.requests.dsl._
-import modules.db.access.custom._
 
 //TODO rename to scope
 object Tags extends Nodes[schema.Scope] {

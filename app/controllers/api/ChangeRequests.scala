@@ -15,7 +15,7 @@ object EditRequests extends Nodes[Updated] {
     "up" -> (N < VotesUpdatedAccess(1)),
     "down" -> (N < VotesUpdatedAccess(-1)),
     "neutral" -> (N < VotesUpdatedAccess(0))
-    )
+  )
 }
 
 object TagsRequests extends Nodes[TagChangeRequest] {

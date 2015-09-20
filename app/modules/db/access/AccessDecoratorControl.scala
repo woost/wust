@@ -2,7 +2,6 @@ package modules.db.access
 
 import controllers.api.nodes.RequestContext
 import play.api.mvc.Result
-import model.WustSchema.UuidNode
 
 //TODO: rename to before_action
 //TODO: maybe have just one accessdecoratorcontrol

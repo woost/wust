@@ -1,15 +1,12 @@
 package modules.db.access
 
 import controllers.api.nodes.RequestContext
+import formatters.json.ApiNodeFormat._
 import model.WustSchema._
 import modules.db.Database._
-import modules.db._
 import play.api.libs.json._
-import play.api.mvc.Results._
-import formatters.json.ApiNodeFormat._
 import play.api.mvc.Result
-import renesca.graph.Label
-import renesca.parameter.implicits._
+import play.api.mvc.Results._
 
 trait NodeAccess[+NODE <: UuidNode] {
   val factory: UuidNodeMatchesFactory[NODE]
@@ -42,7 +39,7 @@ trait NodeReadBase[NODE <: UuidNode] extends NodeAccessDefault[NODE] {
     //TODO method for only resolving matches...
     db.transaction(_.persistChanges(node)) match {
       case Some(err) => NotFound(s"Cannot find node with uuid '$uuid': $err")
-      case None => Ok(Json.toJson(node))
+      case None      => Ok(Json.toJson(node))
     }
   }
 }
@@ -51,7 +48,7 @@ trait NodeDeleteBase[NODE <: UuidNode] extends NodeAccessDefault[NODE] {
   override def delete(context: RequestContext, uuid: String) = context.withUser {
     val node = factory.matchesOnUuid(uuid)
     val failure = db.transaction(_.persistChanges(Discourse.remove(node)))
-    if (failure.isDefined)
+    if(failure.isDefined)
       BadRequest("Cannot delete node")
     else
       NoContent

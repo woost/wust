@@ -16,8 +16,6 @@ import scala.concurrent.Future
 class SignUpController extends Silhouette[User, JWTAuthenticator]
 with HeaderEnvironmentModule {
 
-  import formatters.json.UserFormat._
-
   implicit val signUpFormat = Json.format[SignUp]
 
   def signUp = Action.async(parse.json) { implicit request =>
