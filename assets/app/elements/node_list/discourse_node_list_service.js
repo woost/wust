@@ -19,6 +19,14 @@ function DiscourseNodeList() {
         const PARALLELS = 2;
 
         class NodeModel {
+            component:Graph;
+            node:rjsNode;
+            connectorType:number;
+            writable:bool;
+            isNested:bool;
+            nestedNodeLists:Array<rjsNode>;
+            listId:string;
+            nodeProperty:string;
             constructor(component, node, connectorType, writable) {
                 this.component = component;
                 this.node = node;
@@ -105,6 +113,7 @@ function DiscourseNodeList() {
         }
 
         class WriteNodeModel extends NodeModel {
+            modelProperty:string;
             constructor(component, node, connectorType, modelProperty, nodeInfo) {
                 if (connectorType === PARALLELS)
                     throw "Cannot create WriteNodeModel of parallel discourse nodes";

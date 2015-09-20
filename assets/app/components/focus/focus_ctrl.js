@@ -18,6 +18,8 @@ function FocusCtrl(Helpers, $stateParams, $state, HistoryService, rootNode, Conn
     vm.componentLoading = true;
 
     class Tab {
+        index:number;
+        _active:bool;
         constructor(index) {
             this.index = index;
         }
