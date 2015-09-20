@@ -16,10 +16,7 @@ object ChangeRequestFormat {
     def writes(node: ChangeRequest) = JsObject(node match {
       case n: Updated        => Seq(
         ("id", JsString(n.uuid)),
-        ("post", {
-          val discourse = Discourse(n.graph)
-          n.outRelationsAs(UpdatedToPost).headOption.map(r => Json.toJson(discourse.posts.find(_.uuid == r.endNode.uuid).get)).getOrElse(JsNull)
-        }),
+        ("post", n.outRelationsAs(UpdatedToPost).headOption.map(r => Json.toJson(r.endNode)).getOrElse(JsNull)),
         ("oldTitle", JsString(n.oldTitle)),
         ("newTitle", JsString(n.newTitle)),
         ("oldDescription", JsString(n.oldDescription.getOrElse(""))),
@@ -28,19 +25,13 @@ object ChangeRequestFormat {
       )
       case n: AddTags    => Seq(
         ("id", JsString(n.uuid)),
-        ("post", {
-          val discourse = Discourse(n.graph)
-          n.outRelationsAs(AddTagsToPost).headOption.map(r => Json.toJson(discourse.posts.find(_.uuid == r.endNode.uuid).get)).getOrElse(JsNull)
-        }),
+        ("post", n.outRelationsAs(AddTagsToPost).headOption.map(r => Json.toJson(r.endNode)).getOrElse(JsNull)),
         ("tag", n.proposesTags.headOption.map(tagWrites.writes).getOrElse(JsNull)),
         ("type", JsString("AddTag"))
       )
       case n: RemoveTags    => Seq(
         ("id", JsString(n.uuid)),
-        ("post", {
-          val discourse = Discourse(n.graph)
-          n.outRelationsAs(RemoveTagsToPost).headOption.map(r => Json.toJson(discourse.posts.find(_.uuid == r.endNode.uuid).get)).getOrElse(JsNull)
-        }),
+        ("post", n.outRelationsAs(RemoveTagsToPost).headOption.map(r => Json.toJson(r.endNode)).getOrElse(JsNull)),
         ("tag", n.proposesTags.headOption.map(tagWrites.writes).getOrElse(JsNull)),
         ("type", JsString("RemoveTag"))
       )

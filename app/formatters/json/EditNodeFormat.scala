@@ -58,10 +58,7 @@ object EditNodeFormat {
         ("title", JsString(n.title)),
         ("description", JsString(n.description.getOrElse(""))),
         ("tags", Json.toJson(n.inRelationsAs(Tags).sortBy(_.uuid))),
-        ("classifications", {
-          val discourse = Discourse(n.graph)
-          JsArray(n.outRelationsAs(PostToConnects).map(_.endNode).flatMap(con => discourse.classifies.filter(_.endNode == con).map(_.startNode).sortBy(_.uuid).map((_, con))).groupBy(_._1).mapValues(_.map(_._2)).map(classificationWriter(n, _)).toSeq)
-        }),
+        ("classifications", JsArray(n.outRelationsAs(PostToConnects).map(_.endNode).flatMap(con => con.rev_classifies.sortBy(_.uuid).map((_, con))).groupBy(_._1).mapValues(_.map(_._2)).map(classificationWriter(n, _)).toSeq)),
         ("timestamp", Json.toJson(JsNumber(n.timestamp))),
         ("requestsEdit", Json.toJson(n.inRelationsAs(Updated))),
         ("requestsTags", Json.toJson(n.inRelationsAs(AddTags) ++ n.inRelationsAs(RemoveTags))),

@@ -53,11 +53,7 @@ object ApiNodeFormat {
         ("title", JsString(n.title)),
         ("description", JsString(n.description.getOrElse(""))),
         ("tags", JsArray(n.inRelationsAs(Tags).sortBy(_.uuid).map(tagsWrites.writes))), // TODO: why do we have to call tagsWrites.writes explicitly?
-        //("classifications", JsArray(n.outRelationsAs(PostToConnects).flatMap(_.rev_classifies).map(tagWrites.writes))), //TODO WHY DOES THIS NOT WORK...
-        ("classifications", {
-          val discourse = Discourse(n.graph)
-          JsArray(n.outRelationsAs(PostToConnects).map(_.endNode).flatMap(con => discourse.classifies.filter(_.endNode == con).map(_.startNode).sortBy(_.uuid).map((_, con))).groupBy(_._1).mapValues(_.map(_._2)).map(classificationWriter(n, _)).toSeq)
-        }),
+        ("classifications", JsArray(n.outRelationsAs(PostToConnects).map(_.endNode).flatMap(con => con.rev_classifies.sortBy(_.uuid).map((_, con))).groupBy(_._1).mapValues(_.map(_._2)).map(classificationWriter(n, _)).toSeq)),
         ("timestamp", Json.toJson(JsNumber(n.timestamp))),
         ("viewCount", JsNumber(n.viewCount))
       )
