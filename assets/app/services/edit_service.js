@@ -123,7 +123,7 @@ function EditService(Post, Connectable, Connects, HistoryService, store, Discour
                 }
 
                 if(referenceNode) {
-                    let connects = response.graph.nodes.find(n => n.label === "CONNECTS");
+                    let connects = _.find(response.graph.nodes, n => n.label === "CONNECTS");
                     let session = editConnects(connects);
                     session.tags = this.classifications;
                     data.classifications = [];
@@ -317,7 +317,8 @@ function EditService(Post, Connectable, Connects, HistoryService, store, Discour
     function editNewDiscussion(tags = []) {
         let existingAnswer = _.find(self.list, elem => elem.isLocal && !elem.referenceNode && elem.newDiscussion && _.every(tags, tag => _.any(elem.tags, other => other.id === tag.id)));
         if (existingAnswer === undefined) {
-            return new Session({tags}, true, false, true);
+            let session = new Session({}, true, false, true);
+            session.tags = tags;
         } else {
             // TODO: what about the tags of the new discussion
             return edit(existingAnswer);
