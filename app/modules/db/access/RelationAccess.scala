@@ -211,6 +211,8 @@ case class StartRelationDelete[START <: UuidNode, RELATION <: AbstractRelation[S
 case class EndRelationDelete[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factory: AbstractRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[START]) extends EndRelationDeleteBase[START, RELATION, END]
 case class StartRelationReadDelete[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factory: AbstractRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[END]) extends StartRelationDeleteBase[START, RELATION, END] with StartRelationReadBase[START, RELATION, END]
 case class EndRelationReadDelete[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factory: AbstractRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[START]) extends EndRelationDeleteBase[START, RELATION, END] with EndRelationReadBase[START, RELATION, END]
+case class StartRelationNothing[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factory: AbstractRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[END]) extends StartRelationAccessDefault[START, RELATION, END]
+case class EndRelationNothing[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factory: AbstractRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[START]) extends EndRelationAccessDefault[START, RELATION, END]
 
 trait RelationAccessDecorator[NODE <: UuidNode, OTHER <: UuidNode] extends RelationAccess[NODE, OTHER] with AccessDecoratorControlDefault {
   val self: RelationAccess[NODE, OTHER]
