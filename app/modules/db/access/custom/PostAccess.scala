@@ -151,52 +151,32 @@ trait ConnectableAccessBase {
     existing.changeRequests.foreach(_._locked = false)
   }
 
-  //TODO: this is two extra requests...
-  protected def deleteScopesFromGraph(tx:QueryHandler, request: RemoveTagRequestBase, uuid: String) {
-    if (request.removedTags.isEmpty)
-      return
-
-    val node = Post.matchesOnUuid(uuid)
-    val discourse = Discourse(node)
-
+  protected def deleteScopesFromGraph(discourse: Discourse, request: RemoveTagRequestBase, node: Post) {
     request.removedTags.foreach { tagUuid =>
       val tag = Scope.matchesOnUuid(tagUuid)
       discourse.add(tag)
       val tagging = Tags.matches(tag, node)
-      discourse.add(tagging)
+      discourse.remove(tagging)
     }
-
-    discourse.remove(discourse.tags: _*)
-    tx.persistChanges(discourse)
   }
 
-//TODO: this is two extra requests...
-  protected def deleteClassificationsFromGraph(tx:QueryHandler, request: RemoveTagRequestBase, uuid: String) {
-    if (request.removedTags.isEmpty)
-      return
-
-    val node = Connects.matchesOnUuid(uuid)
-    val discourse = Discourse(node)
-
+  protected def deleteClassificationsFromGraph(discourse: Discourse, request: RemoveTagRequestBase, node: Connects) {
     request.removedTags.foreach { tagUuid =>
       val tag = Classification.matchesOnUuid(tagUuid)
       discourse.add(tag)
       val tagging = Classifies.matches(tag, node)
-      discourse.add(tagging)
+      discourse.remove(tagging)
     }
-
-    discourse.remove(discourse.classifies: _*)
-    tx.persistChanges(discourse)
   }
 }
 
 case class PostAccess() extends ConnectableAccessBase with NodeAccessDefault[Post] {
-  import scala.concurrent._
-  import ExecutionContext.Implicits.global
 
   val factory = Post
 
   override def read(context: RequestContext, uuid: String) = {
+    import scala.concurrent._
+    import ExecutionContext.Implicits.global
     import formatters.json.PostFormat._
 
     val tagDef = ConcreteFactoryNodeDefinition(Scope)
@@ -292,7 +272,6 @@ case class PostAccess() extends ConnectableAccessBase with NodeAccessDefault[Pos
         node.hide()
         val deleted = Deleted.create(user, node, applyThreshold = 1)
         val failure = tx.persistChanges(deleted)
-
         if (failure.isDefined)
           BadRequest("Cannot delete node")
         else
@@ -339,10 +318,7 @@ case class PostAccess() extends ConnectableAccessBase with NodeAccessDefault[Pos
 
           tx.persistChanges(discourse) match {
             case Some(err) => BadRequest(s"Cannot update Post with uuid '$uuid': $err")
-            //FIXME: why the fuck do i need to do this???
-            //otherwise node.rev_tags is empty? something is messed up here.
-            case _         => Ok(Json.toJson(discourse.posts.find(_.uuid == node.uuid).get))
-            // case _         => Right(node)
+            case _         => Ok(Json.toJson(node))
           }
         } getOrElse {
           BadRequest(s"Cannot find Post with uuid '$uuid'")
@@ -355,17 +331,14 @@ case class PostAccess() extends ConnectableAccessBase with NodeAccessDefault[Pos
 case class ConnectsAccess() extends ConnectableAccessBase with NodeReadBase[Connects] {
   val factory = Connects
 
-  // updates only work
   override def update(context: RequestContext, uuid: String) = context.withUser { user =>
     import formatters.json.EditNodeFormat._
 
     context.withJson { (request: ConnectableUpdateRequest) =>
       db.transaction { tx =>
-        deleteClassificationsFromGraph(tx, request, uuid)
-
-        val discourse = Discourse.empty
         val node = Connects.matchesOnUuid(uuid)
-        discourse.add(node)
+        val discourse = Discourse(node)
+        deleteClassificationsFromGraph(discourse, request, node)
         addClassifcationsToGraph(discourse, request, node)
 
         tx.persistChanges(discourse) match {

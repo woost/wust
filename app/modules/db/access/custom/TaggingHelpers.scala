@@ -11,15 +11,12 @@ import renesca.parameter.implicits._
 // because shapeResponse takes the original response and queries for its tags.
 // so this costs an extra query. instead we could implement this in a node- or
 // relationaccess and include the tags in the read queries.
-// Still, this solution is very flexible as we can add decorators to other
-// accesses easily: PostAccess.apply + TaggedTaggable(Post)
 object TaggedTaggable {
   def shapeResponse[NODE <: UuidNode](response: NODE): NODE = {
     shapeResponse(List(response)).head
   }
 
   def shapeResponse[NODE <: UuidNode](response: Iterable[NODE]): Iterable[NODE] = {
-    //TODO: share code with component query
     if(!response.isEmpty) {
       val tagDef = ConcreteFactoryNodeDefinition(Scope)
       val classDef = ConcreteFactoryNodeDefinition(Classification)
@@ -35,6 +32,7 @@ object TaggedTaggable {
       optional match ${ connDef.toQuery(false, true) }, ${ classifiesDef.toQuery(true, false) }
       return *
       """
+
       val params = tagsDef.parameterMap ++ connDef.parameterMap ++ classifiesDef.parameterMap ++ Map("nodeUuids" -> response.map(_.uuid).toSeq)
 
       val graph = db.queryGraph(Query(query, params.toMap))
@@ -52,7 +50,6 @@ object ClassifiedConnects {
   }
 
   def shapeResponse[NODE <: UuidNode](response: Iterable[NODE]): Iterable[NODE] = {
-    //TODO: share code with component query
     if(!response.isEmpty) {
       val classDef = ConcreteFactoryNodeDefinition(Classification)
       val nodeDef = ConcreteFactoryNodeDefinition(Connects)

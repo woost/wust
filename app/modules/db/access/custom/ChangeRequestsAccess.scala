@@ -52,8 +52,14 @@ case class PostUpdatedAccess() extends EndRelationAccessDefault[Updated, Updated
       val postDef = FactoryUuidNodeDefinition(Post, param.baseUuid)
       val relDef = RelationDefinition(updatedDef, UpdatedToPost, postDef)
       val votesDef = RelationDefinition(userDef, Votes, updatedDef)
-      //TODO: graphdefinition with arbitrary properties, not only uuid
-      val query = s"match ${ relDef.toQuery } where ${ updatedDef.name }.applied = ${ PENDING } optional match ${ votesDef.toQuery(true, false) } return ${ votesDef.name }, ${ updatedDef.name }"
+
+      val query = s"""
+      match ${ relDef.toQuery }
+      where ${ updatedDef.name }.applied = ${ PENDING }
+      optional match ${ votesDef.toQuery(true, false) }
+      return ${ votesDef.name }, ${ updatedDef.name }
+      """
+
       val discourse = Discourse(db.queryGraph(query, relDef.parameterMap ++ votesDef.parameterMap))
       discourse.updateds
     }.getOrElse(Seq.empty)))
@@ -71,7 +77,15 @@ case class PostTagChangeRequestAccess() extends RelationAccessDefault[Post, TagC
       val votesDef = RelationDefinition(userDef, Votes, updatedDef)
       val scopeDef = ConcreteFactoryNodeDefinition(Scope)
       val proposes = RelationDefinition(updatedDef, ProposesTag, scopeDef)
-      val query = s"match ${ updatedDef.toQuery }-[:`${ AddTags.endRelationType }`|`${ RemoveTags.endRelationType }`]->${ postDef.toQuery } where ${ updatedDef.name }.applied = ${ PENDING } optional match ${ votesDef.toQuery(true, false) } optional match ${ proposes.toQuery(false, true) } return ${ votesDef.name }, ${ proposes.name }, ${ updatedDef.name }"
+
+      val query = s"""
+      match ${ updatedDef.toQuery }-[:`${ AddTags.endRelationType }`|`${ RemoveTags.endRelationType }`]->${ postDef.toQuery }
+      where ${ updatedDef.name }.applied = ${ PENDING }
+      optional match ${ votesDef.toQuery(true, false) }
+      optional match ${ proposes.toQuery(false, true) }
+      return ${ votesDef.name }, ${ proposes.name }, ${ updatedDef.name }
+      """
+
       val discourse = Discourse(db.queryGraph(query, postDef.parameterMap ++ votesDef.parameterMap))
       discourse.tagChangeRequests
     }.getOrElse(Seq.empty)))

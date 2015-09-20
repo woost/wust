@@ -19,16 +19,20 @@ class TagAccess extends NodeReadBase[Scope] {
 
   //TODO: should override read for multiple tags, too. so it includes inherits
   override def read(context: RequestContext, uuid: String) = {
-    println(context + uuid)
     val node = FactoryUuidNodeDefinition(factory, uuid)
     val base = ConcreteFactoryNodeDefinition(factory)
     val impl = ConcreteFactoryNodeDefinition(factory)
     val baseInherit = RelationDefinition(base, Inherits, node)
     val implInherit = RelationDefinition(node, Inherits, impl)
-    val query = s"match ${ node.toQuery } optional match ${ baseInherit.toQuery(true, false) } optional match ${ implInherit.toQuery(false, true) } return *"
-    println(query)
+
+    val query = s"""
+    match ${ node.toQuery }
+    optional match ${ baseInherit.toQuery(true, false) }
+    optional match ${ implInherit.toQuery(false, true) }
+    return *
+    """
+
     val discourse = Discourse(db.queryGraph(Query(query, baseInherit.parameterMap ++ implInherit.parameterMap)))
-    println(discourse)
     discourse.scopes.find(_.uuid == uuid).map(s => Ok(Json.toJson(s))).getOrElse(NotFound(s"Cannot find node with uuid '$uuid'"))
   }
 
@@ -42,7 +46,6 @@ class TagAccess extends NodeReadBase[Scope] {
         title = request.title,
         color = tagTitleColor(request.title),
         merge = Set("title"))
-      // val contribution = SchemaCreated.create(context.user, node)
 
       db.transaction(_.persistChanges(node)) match {
         case Some(err) => BadRequest(s"Cannot create Tag: $err'")
@@ -59,10 +62,7 @@ class TagAccess extends NodeReadBase[Scope] {
         node.description = request.description
       }
 
-      // val contribution = Updated.create(context.user, node)
-
       db.transaction(_.persistChanges(node)) match {
-        // db.transaction(_.persistChanges(contribution)) match {
         case Some(err) => BadRequest(s"Cannot update Tag with uuid '$uuid': $err'")
         case _         => Ok(Json.toJson(node))
       }

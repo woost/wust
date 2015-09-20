@@ -33,7 +33,16 @@ trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefa
       val userDef = ConcreteNodeDefinition(user)
       val votesDef = RelationDefinition(userDef, Votes, requestDef)
       val createdDef = RelationDefinition(userDef, SchemaCreated, postDef)
-      val query = s"match ${requestDef.toQuery}-[:`${UpdatedToPost.relationType}`|`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->${postDef.toQuery}, ${userDef.toQuery} where ${requestDef.name}.applied = ${PENDING} or ${requestDef.name}.applied = ${INSTANT} set ${requestDef.name}._locked = true with ${postDef.name},${userDef.name},${requestDef.name} optional match ${votesDef.toQuery(false, false)} optional match ${createdDef.toQuery(false,false)} return ${createdDef.name},${postDef.name},${requestDef.name},${votesDef.name}"
+
+      val query = s"""
+      match ${requestDef.toQuery}-[:`${UpdatedToPost.relationType}`|`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->${postDef.toQuery}, ${userDef.toQuery}
+      where ${requestDef.name}.applied = ${PENDING} or ${requestDef.name}.applied = ${INSTANT}
+      set ${requestDef.name}._locked = true
+      with ${postDef.name},${userDef.name},${requestDef.name}
+      optional match ${votesDef.toQuery(false, false)}
+      optional match ${createdDef.toQuery(false,false)}
+      return ${createdDef.name},${postDef.name},${requestDef.name},${votesDef.name}
+      """
 
       val discourse = Discourse(tx.queryGraph(query, createdDef.parameterMap ++ votesDef.parameterMap))
       val request = selectNode(discourse)
@@ -146,7 +155,6 @@ case class VotesTagsChangeRequestAccess(
     }
 }
 
-//TODO: share code with VotesChangeRequestAccess
 trait VotesReferenceAccess[T <: Reference] extends EndRelationAccessDefault[User, Votes, Votable] {
   val sign: Long
   val nodeFactory = User
@@ -161,7 +169,14 @@ trait VotesReferenceAccess[T <: Reference] extends EndRelationAccessDefault[User
       val referenceDef = nodeDefinition(param.startUuid, param.endUuid)
       val userNode = ConcreteNodeDefinition(user)
       val votesDef = RelationDefinition(userNode, Votes, referenceDef)
-      val query = s"match ${referenceDef.toQuery} set ${referenceDef.name}._locked = true with ${referenceDef.startName},${referenceDef.startRelationName},${referenceDef.endName},${referenceDef.endRelationName},${referenceDef.name} optional match ${votesDef.toQuery(true, false)} return *"
+
+      val query = s"""
+      match ${referenceDef.toQuery}
+      set ${referenceDef.name}._locked = true
+      with ${referenceDef.startName},${referenceDef.startRelationName},${referenceDef.endName},${referenceDef.endRelationName},${referenceDef.name}
+      optional match ${votesDef.toQuery(true, false)} return *
+      """
+
       val discourse = Discourse(tx.queryGraph(Query(query, votesDef.parameterMap)))
       val reference = selectNode(discourse, param.startUuid, param.endUuid)
       val votes = discourse.votes.headOption

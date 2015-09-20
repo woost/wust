@@ -20,7 +20,6 @@ trait ConstructRelationHelper {
   }
 }
 
-//TODO: track what the user did here
 case class StartConRelationAccess[
 START <: UuidNode,
 RELATION <: AbstractRelation[START, END],
