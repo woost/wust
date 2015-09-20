@@ -1,9 +1,5 @@
-<div class="post_tag_changes_directive" ng-if="vm.postTagChanges.length > 0">
-    <b>Tag requests</b>
-    <span ng-repeat="change in vm.postTagChanges" tag-label="change.tag">
-        <b ng-if="change.isRemove">DEL</b>
-        <i class="fa fa-check upvote" ng-class="{ active: change.vote.weight > 0 }" ng-click="vm.voting.up(change)"></i>
-        <i class="fa fa-close downvote" ng-class="{ active: change.vote.weight < 0 }" ng-click="vm.voting.down(change)"></i>
-        <div progressbar min="change.rejectThreshold" max="change.applyThreshold" value="change.votes"><span style="padding-top: 5px; color:grey; white-space:nowrap;">{{change.votes}} / {{change.applyThreshold}}</span></div>
+<div class="tagchange">
+    <span tag-label="change.tag" ng-class="{'removed': change.isRemove}">
+        <i ng-show="!change.isRemove" class="fa fa-plus right"></i>
     </span>
 </div>

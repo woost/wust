@@ -18,7 +18,7 @@
         Show change requests
     </a>
     <div ng-show="vm.showChanges">
-        <div post-tag-changes="vm.tagChanges" on-apply="vm.onTagApply(tag, isRemove)"></div>
-            <div post-edit-changes="vm.editChanges" on-apply="vm.onApply(node)"></div>
+        <post-change-request changes="vm.tagChanges" template="elements/post/post_tag_changes.html" service="vm.RequestsTags" on-apply="vm.onTagApply(tag, isRemove)"></post-change-request>
+        <post-change-request changes="vm.editChanges" template="elements/post/post_edit_changes.html" service="vm.RequestsEdit" on-apply="vm.onApply(node)"></post-change-request>
     </div>
 </div>

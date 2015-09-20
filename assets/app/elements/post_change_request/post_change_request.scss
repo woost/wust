@@ -1,0 +1,32 @@
+@import "compass/css3/box-shadow";
+
+.post_change_request_directive {
+    .changerequest {
+        border: 1px solid rgba(#666,0.4);
+        background-color: rgba(white,0.4);
+        margin-top:5px;
+        padding: 5px;
+
+        .active {
+            color: black !important;
+        }
+
+        .votebar {
+            margin-top: 10px;
+            .progress {
+                margin-bottom: 5px; // originally strange 20px. is this coming from bootstrap itself?
+            }
+        }
+
+        .tagchange {
+            text-align: center;
+        }
+
+        .removed .tag-label {
+            a {
+                text-decoration: line-through;
+            }
+            @include box-shadow(0 0 0 5px red);
+        }
+    }
+}
