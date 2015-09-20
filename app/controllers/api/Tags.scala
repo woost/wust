@@ -10,8 +10,7 @@ import modules.db.access.custom._
 //TODO rename to scope
 object Tags extends Nodes[schema.Scope] {
   val node = NodeDef("Scope", TagAccess.apply,
-    //TODO: extra access for this
-    "posts" -> (N > StartRelationRead(schema.Tags, schema.Post) + TaggedTaggable.apply[schema.Post]),
+    "posts" -> (N > StartRelationRead(schema.Tags, schema.Post)),
     "inherits" -> (N > StartConRelationAccess(schema.Inherits, schema.Scope)),
     "implements" -> (N < EndConRelationAccess(schema.Inherits, schema.Scope))
   )

@@ -80,7 +80,7 @@ trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefa
         Right(None)
       }
 
-      Left(postApplies match {
+      postApplies match {
         case Right(nodeOpt) =>
           request._locked = false
           val failure = tx.persistChanges(discourse)
@@ -98,7 +98,7 @@ trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefa
         case Left(err) =>
           tx.rollback()
           BadRequest(err)
-      })
+      }
     }
   }
 }
@@ -187,7 +187,7 @@ trait VotesReferenceAccess[T <: Reference] extends EndRelationAccessDefault[User
 
       reference._locked = false
       val failure = tx.persistChanges(discourse)
-      Left(if (failure.isEmpty) {
+      if (failure.isEmpty) {
         Ok(JsObject(Seq(
           ("quality", JsNumber(quality)),
           ("vote", JsObject(Seq(
@@ -196,7 +196,7 @@ trait VotesReferenceAccess[T <: Reference] extends EndRelationAccessDefault[User
         )))
       } else {
         BadRequest("No vote :/")
-      })
+      }
     }
   }
 }

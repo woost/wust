@@ -25,11 +25,13 @@ function EditService(Post, Connectable, Connects, HistoryService, store, Discour
         }
 
         apply({
-            id, title, description, label, original, tags, localId, referenceNode, newDiscussion, isHyperRelation, classifications
+            id, title, description, label, original, tags, localId, referenceNode, newDiscussion, isHyperRelation, classifications, startId, endId
         }) {
             tags = tags || [];
             classifications = classifications || [];
             this.id = id;
+            this.startId = startId;
+            this.endId = endId;
             this.localId = localId === undefined ? this.localId : localId;
             this.title = title || "";
             this.description = description || "";
@@ -101,6 +103,8 @@ function EditService(Post, Connectable, Connects, HistoryService, store, Discour
 
                 if (this.isConnects) {
                     data.tags = this.tags;
+                    data.startId = this.startId;
+                    data.endId = this.endId;
                 } else {
                     let appliedRequests = data.requestsTags && _.any(data.requestsTags, "applied") || data.requestsEdit && _.any(data.requestsEdit, "applied");
                     let hasRequests = !_.isEmpty(data.requestsTags) || !_.isEmpty(data.requestsEdit);
@@ -123,7 +127,7 @@ function EditService(Post, Connectable, Connects, HistoryService, store, Discour
                 }
 
                 if(referenceNode) {
-                    let connects = _.find(response.graph.nodes, n => n.label === "CONNECTS");
+                    let connects = _.find(response.graph.nodes, n => n.label === "CONNECTS" && n.startId === data.id && n.endId === referenceNode.id);
                     let session = editConnects(connects);
                     session.tags = this.classifications;
                     data.classifications = [];
@@ -319,6 +323,7 @@ function EditService(Post, Connectable, Connects, HistoryService, store, Discour
         if (existingAnswer === undefined) {
             let session = new Session({}, true, false, true);
             session.tags = tags;
+            return session;
         } else {
             // TODO: what about the tags of the new discussion
             return edit(existingAnswer);

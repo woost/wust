@@ -6,7 +6,8 @@ import renesca.graph.{Label, RelationType}
 import renesca.schema._
 import renesca.parameter._
 import renesca.parameter.implicits._
-import formatters.json.ApiNodeFormat._
+import formatters.json.TagFormat._
+import formatters.json.PostFormat._
 
 object ChangeRequestFormat {
 
@@ -26,13 +27,13 @@ object ChangeRequestFormat {
       case n: AddTags    => Seq(
         ("id", JsString(n.uuid)),
         ("post", n.outRelationsAs(AddTagsToPost).headOption.map(r => Json.toJson(r.endNode)).getOrElse(JsNull)),
-        ("tag", n.proposesTags.headOption.map(tagWrites.writes).getOrElse(JsNull)),
+        ("tag", n.proposesTags.headOption.map(tag => Json.toJson(tag)).getOrElse(JsNull)),
         ("type", JsString("AddTag"))
       )
       case n: RemoveTags    => Seq(
         ("id", JsString(n.uuid)),
         ("post", n.outRelationsAs(RemoveTagsToPost).headOption.map(r => Json.toJson(r.endNode)).getOrElse(JsNull)),
-        ("tag", n.proposesTags.headOption.map(tagWrites.writes).getOrElse(JsNull)),
+        ("tag", n.proposesTags.headOption.map(tag => Json.toJson(tag)).getOrElse(JsNull)),
         ("type", JsString("RemoveTag"))
       )
       case n              =>

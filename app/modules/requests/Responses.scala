@@ -1,5 +1,5 @@
 package modules.requests
 
-import model.WustSchema.{UuidNode, Discourse}
+import model.WustSchema.{Connectable, Discourse}
 
-case class ConnectResponse[+NODE <: UuidNode](graph: Discourse, node: Option[NODE])
+case class ConnectResponse[+NODE <: Connectable](graph: Discourse, node: Option[NODE])

@@ -2,12 +2,13 @@ package modules.db.access.custom
 
 import controllers.api.nodes.RequestContext
 import formatters.json.RequestFormat._
+import formatters.json.TagFormat._
 import model.WustSchema.{Created => SchemaCreated, _}
 import modules.db.Database.db
 import modules.db.access.NodeReadBase
 import modules.db._;
 import modules.requests._
-import play.api.libs.json.JsValue
+import play.api.libs.json._
 import renesca.parameter.implicits._
 import renesca.Query
 import play.api.mvc.Results._
@@ -28,7 +29,7 @@ class TagAccess extends NodeReadBase[Scope] {
     println(query)
     val discourse = Discourse(db.queryGraph(Query(query, baseInherit.parameterMap ++ implInherit.parameterMap)))
     println(discourse)
-    discourse.scopes.find(_.uuid == uuid).map(Right(_)).getOrElse(Left(NotFound(s"Cannot find node with uuid '$uuid'")))
+    discourse.scopes.find(_.uuid == uuid).map(s => Ok(Json.toJson(s))).getOrElse(NotFound(s"Cannot find node with uuid '$uuid'"))
   }
 
   override def create(context: RequestContext) = {
@@ -44,8 +45,8 @@ class TagAccess extends NodeReadBase[Scope] {
       // val contribution = SchemaCreated.create(context.user, node)
 
       db.transaction(_.persistChanges(node)) match {
-        case Some(err) => Left(BadRequest(s"Cannot create Tag: $err'"))
-        case _         => Right(node)
+        case Some(err) => BadRequest(s"Cannot create Tag: $err'")
+        case _         => Ok(Json.toJson(node))
       }
     }
   }
@@ -62,8 +63,8 @@ class TagAccess extends NodeReadBase[Scope] {
 
       db.transaction(_.persistChanges(node)) match {
       // db.transaction(_.persistChanges(contribution)) match {
-        case Some(err) => Left(BadRequest(s"Cannot update Tag with uuid '$uuid': $err'"))
-        case _         => Right(node)
+        case Some(err) => BadRequest(s"Cannot update Tag with uuid '$uuid': $err'")
+        case _         => Ok(Json.toJson(node))
       }
     }
   }

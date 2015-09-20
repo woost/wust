@@ -71,7 +71,7 @@ object WustSchema {
   @Relation class MemberOf(startNode: User, endNode: UserGroup)
 
   //TODO: rename
-  @Graph trait Discourse {Nodes(User, UserGroup, Post, TagLike, ChangeRequest) }
+  @Graph trait Discourse {Nodes(User, UserGroup, Post, TagLike, Action) }
 
   // relation trait for relation that can be created/merged without further arguments
   @Relation trait ConstructRelation
@@ -85,7 +85,7 @@ object WustSchema {
 
   // Content
   @Node trait Connectable extends ExposedNode
-  @HyperRelation class Connects(startNode: Post, endNode: Connectable) extends Connectable with ConstructRelation with HyperConnection with Reference
+  @HyperRelation class Connects(startNode: Post, endNode: Connectable) extends Connectable with HyperConnection with Reference
   @Node trait Inheritable extends UuidNode
   //TODO: different inherits relation for tags? normal relation instead of hyper relation?
   @HyperRelation class Inherits(startNode: Inheritable, endNode: Inheritable) extends ConstructRelation with HyperConnection with UuidNode
@@ -114,17 +114,18 @@ object WustSchema {
     }
   }
 
-  @Relation class Viewed(startNode: User, endNode: Post) extends RelationTimestamp with ConstructRelation
+  @Relation class Viewed(startNode: User, endNode: Post) extends RelationTimestamp
 
   // Action
-  @HyperRelation class Created(startNode: User, endNode: Post) extends UuidNode with Timestamp
+  @Node trait Action extends UuidNode with Timestamp
+  @HyperRelation class Created(startNode: User, endNode: Post) extends Action
 
   val REJECTED = -1
   val PENDING = 0
   val INSTANT = 1
   val APPLIED = 2
   //TODO: should be called change
-  @Node trait ChangeRequest extends UuidNode with Timestamp with Votable {
+  @Node trait ChangeRequest extends Action with Votable {
     val applyThreshold:Long
     var approvalSum:Long = 0
     var applied:Long = PENDING
@@ -175,12 +176,12 @@ object WustSchema {
     var color: Long // Hue 0..360, -1 is gray
     var symbol: Option[String]
   }
-  @HyperRelation class Tags(startNode: Scope, endNode: Post) extends ConstructRelation with HyperConnection with UuidNode with Reference
+  @HyperRelation class Tags(startNode: Scope, endNode: Post) extends HyperConnection with UuidNode with Reference
 
   // Tags
   @Node class Classification extends TagLike
 
-  @Relation class Classifies(startNode: Classification, endNode: Connects) extends ConstructRelation
+  @Relation class Classifies(startNode: Classification, endNode: Connects)
 
   // Scopes
   @Node class Scope extends TagLike

@@ -26,7 +26,7 @@ object GraphFormat {
   implicit object NodeFormat extends Format[Connectable] {
     def reads(json: JsValue) = ???
 
-    import ApiNodeFormat.{tagWrites, tagsWrites}
+    import TagFormat._
 
     def writes(node: Connectable) = JsObject(Seq(
       ("id", JsString(node.uuid)),
@@ -45,7 +45,7 @@ object GraphFormat {
           //TODO: jsNull oder besser garnicht senden, aus der Seq rausnehmen und flatten
           ("startId", JsString(connects.startNodeOpt.map(_.uuid).getOrElse(""))),
           ("endId", JsString(connects.endNodeOpt.map(_.uuid).getOrElse(""))),
-          ("tags", Json.toJson(connects.neighboursAs(Classification).map(tagWrites.writes))),
+          ("tags", Json.toJson(connects.neighboursAs(Classification))),
           ("quality", connects.startNodeOpt.map(post => JsNumber(connects.quality(post.viewCount))).getOrElse(JsNull)),
           ("vote", connects.rawItem.properties.get("selfanswervotecount").map(c => JsObject(Seq(
             ("weight", JsNumber(c.asLong))))).getOrElse(JsNull)

@@ -13,7 +13,7 @@ import modules.db.access.custom.TaggedTaggable
 
 import scala.util.Try
 
-object Search extends TaggedTaggable[Post] with Controller {
+object Search extends Controller {
   def index(page: Option[Int], size: Option[Int], label: Option[String], title: Option[String], searchDescriptions:Option[Boolean], tags: List[String], tagOr: Option[Boolean], startPost: Option[Boolean]) = Action {
     // white list, so only exposed nodes can be searched
     val labels = ExposedNode.labels ++ label.map(Label(_))
@@ -101,7 +101,7 @@ object Search extends TaggedTaggable[Post] with Controller {
     Ok(Json.toJson(
       // we only add attached tags to the result when searching for posts
       if (label.contains(Post.label.name))
-        shapeResponse(discourse.posts)
+        TaggedTaggable.shapeResponse(discourse.posts)
       else
         discourse.uuidNodes
     ))

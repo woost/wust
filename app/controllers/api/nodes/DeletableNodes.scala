@@ -9,18 +9,13 @@ import play.api.mvc.Action
 trait DeletableNodes[NODE <: UuidNode] extends NodesBase {
   def nodeSchema: NodeSchema[NODE]
 
-  private def deleteResult(deleted: Boolean) = if (deleted)
-      NoContent
-    else
-      BadRequest("Cannot delete Node")
-
   override def destroy(uuid: String) = UserAwareAction { request =>
-      getResult(nodeSchema.op.delete(context(request), uuid))(deleteResult)
+      nodeSchema.op.delete(context(request), uuid)
   }
 
   override def disconnectMember(path: String, uuid: String, otherUuid: String) = UserAwareAction { request =>
     getSchema(nodeSchema.connectSchemas, path)(connectSchema => {
-      getResult(connectSchema.op.delete(context(request), ConnectParameter(nodeSchema.op.factory, uuid), otherUuid))(deleteResult)
+      connectSchema.op.delete(context(request), ConnectParameter(nodeSchema.op.factory, uuid), otherUuid)
     })
   }
 
@@ -28,11 +23,11 @@ trait DeletableNodes[NODE <: UuidNode] extends NodesBase {
     getHyperSchema(nodeSchema.connectSchemas, path)({
       case c@StartHyperConnectSchema(factory,op,connectSchemas) =>
         getSchema(connectSchemas, nestedPath)(schema =>
-          getResult(schema.op.delete(context(request), HyperConnectParameter(nodeSchema.op.factory, uuid, c.factory, c.op.nodeFactory, otherUuid), nestedUuid))(deleteResult)
+          schema.op.delete(context(request), HyperConnectParameter(nodeSchema.op.factory, uuid, c.factory, c.op.nodeFactory, otherUuid), nestedUuid)
         )
       case c@EndHyperConnectSchema(factory,op,connectSchemas) =>
         getSchema(connectSchemas, nestedPath)(schema =>
-          getResult(schema.op.delete(context(request), HyperConnectParameter(c.op.nodeFactory, otherUuid, c.factory, nodeSchema.op.factory, uuid), nestedUuid))(deleteResult)
+          schema.op.delete(context(request), HyperConnectParameter(c.op.nodeFactory, otherUuid, c.factory, nodeSchema.op.factory, uuid), nestedUuid)
         )
     })
   }

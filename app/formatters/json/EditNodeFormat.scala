@@ -6,7 +6,7 @@ import renesca.graph.{Label, RelationType}
 import renesca.schema._
 import renesca.parameter._
 import renesca.parameter.implicits._
-import formatters.json.ApiNodeFormat.{classificationWriter, tagWrites, tagsWrites}
+import formatters.json.TagFormat._
 
 object EditNodeFormat {
 
@@ -28,7 +28,7 @@ object EditNodeFormat {
       )
       case n: AddTags    => Seq(
         ("id", JsString(n.uuid)),
-        ("tag", n.proposesTags.headOption.map(tagWrites.writes).getOrElse(JsNull)),
+        ("tag", n.proposesTags.headOption.map(t => Json.toJson(t)).getOrElse(JsNull)),
         ("vote", n.inRelationsAs(Votes).headOption.map(vote => JsObject(Seq(("weight", JsNumber(vote.weight))))).getOrElse(JsNull)),
         ("applyThreshold", JsNumber(n.applyThreshold)),
         ("rejectThreshold", JsNumber(n.rejectThreshold)),
@@ -38,7 +38,7 @@ object EditNodeFormat {
       )
       case n: RemoveTags    => Seq(
         ("id", JsString(n.uuid)),
-        ("tag", n.proposesTags.headOption.map(tagWrites.writes).getOrElse(JsNull)),
+        ("tag", n.proposesTags.headOption.map(t => Json.toJson(t)).getOrElse(JsNull)),
         ("vote", n.inRelationsAs(Votes).headOption.map(vote => JsObject(Seq(("weight", JsNumber(vote.weight))))).getOrElse(JsNull)),
         ("applyThreshold", JsNumber(n.applyThreshold)),
         ("rejectThreshold", JsNumber(n.rejectThreshold)),
@@ -52,19 +52,17 @@ object EditNodeFormat {
   implicit object PostFormat extends Format[Post] {
     def reads(json: JsValue) = ???
 
-    def writes(n: Post) = {
-      JsObject(Seq(
-        ("id", JsString(n.uuid)),
-        ("title", JsString(n.title)),
-        ("description", JsString(n.description.getOrElse(""))),
-        ("tags", Json.toJson(n.inRelationsAs(Tags).sortBy(_.uuid))),
-        ("classifications", JsArray(n.outRelationsAs(PostToConnects).map(_.endNode).flatMap(con => con.rev_classifies.sortBy(_.uuid).map((_, con))).groupBy(_._1).mapValues(_.map(_._2)).map(classificationWriter(n, _)).toSeq)),
-        ("timestamp", Json.toJson(JsNumber(n.timestamp))),
-        ("requestsEdit", Json.toJson(n.inRelationsAs(Updated))),
-        ("requestsTags", Json.toJson(n.inRelationsAs(AddTags) ++ n.inRelationsAs(RemoveTags))),
-        ("viewCount", JsNumber(n.viewCount))
-      ))
-    }
+    def writes(n: Post) = JsObject(Seq(
+      ("id", JsString(n.uuid)),
+      ("title", JsString(n.title)),
+      ("description", JsString(n.description.getOrElse(""))),
+      ("tags", Json.toJson(n.inRelationsAs(Tags).sortBy(_.uuid))),
+      ("classifications", JsArray(n.outRelationsAs(PostToConnects).map(_.endNode).flatMap(con => con.rev_classifies.sortBy(_.uuid).map((_, con))).groupBy(_._1).mapValues(_.map(_._2)).map(classificationWriter(n, _)).toSeq)),
+      ("timestamp", Json.toJson(JsNumber(n.timestamp))),
+      ("requestsEdit", Json.toJson(n.inRelationsAs(Updated))),
+      ("requestsTags", Json.toJson(n.inRelationsAs(AddTags) ++ n.inRelationsAs(RemoveTags))),
+      ("viewCount", JsNumber(n.viewCount))
+    ))
   }
 
   implicit object ConnectsFormat extends Format[Connects] {

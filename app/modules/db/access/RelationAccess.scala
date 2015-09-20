@@ -6,34 +6,35 @@ import modules.db.Database._
 import modules.db._
 import modules.db.types._
 import modules.requests.ConnectResponse
-import play.api.libs.json.JsValue
+import play.api.libs.json._
 import renesca.schema._
 import renesca.graph.Graph
 import play.api.mvc.Results._
 import play.api.mvc.Result
+import formatters.json.ApiNodeFormat._
 
 trait RelationAccess[-NODE <: UuidNode, +OTHER <: UuidNode] {
-  def read(context: RequestContext, param: ConnectParameter[NODE]): Either[Result, Iterable[OTHER]]
-  def read[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,NODE with AbstractRelation[S,E], E]): Either[Result, Iterable[OTHER]]
-  def delete(context: RequestContext, param: ConnectParameter[NODE], uuid: String): Either[Result, Boolean]
-  def delete[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,NODE with AbstractRelation[S,E],E], uuid: String): Either[Result, Boolean]
-  def create(context: RequestContext, param: ConnectParameter[NODE]): Either[Result, ConnectResponse[OTHER]]
-  def create(context: RequestContext, param: ConnectParameter[NODE], uuid: String): Either[Result, ConnectResponse[OTHER]]
-  def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, NODE with AbstractRelation[S,E], E]): Either[Result, ConnectResponse[OTHER]]
-  def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, NODE with AbstractRelation[S,E], E], uuid: String): Either[Result, ConnectResponse[OTHER]]
+  def read(context: RequestContext, param: ConnectParameter[NODE]): Result
+  def read[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,NODE with AbstractRelation[S,E], E]): Result
+  def delete(context: RequestContext, param: ConnectParameter[NODE], uuid: String): Result
+  def delete[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,NODE with AbstractRelation[S,E],E], uuid: String): Result
+  def create(context: RequestContext, param: ConnectParameter[NODE]): Result
+  def create(context: RequestContext, param: ConnectParameter[NODE], uuid: String): Result
+  def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, NODE with AbstractRelation[S,E], E]): Result
+  def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, NODE with AbstractRelation[S,E], E], uuid: String): Result
 
   val nodeFactory: UuidNodeMatchesFactory[OTHER]
 }
 
 trait RelationAccessDefault[NODE <: UuidNode, OTHER <: UuidNode] extends RelationAccess[NODE, OTHER]{
-  def read(context: RequestContext, param: ConnectParameter[NODE]): Either[Result, Iterable[OTHER]] = Left(NotFound("No read access on Relation"))
-  def read[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,NODE with AbstractRelation[S,E], E]): Either[Result, Iterable[OTHER]] = Left(NotFound("No read access on HyperRelation"))
-  def delete(context: RequestContext, param: ConnectParameter[NODE], uuid: String): Either[Result, Boolean] = Left(NotFound("No delete access on Relation"))
-  def delete[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,NODE with AbstractRelation[S,E],E], uuid: String): Either[Result, Boolean] = Left(NotFound("No delete access on HyperRelation"))
-  def create(context: RequestContext, param: ConnectParameter[NODE]): Either[Result, ConnectResponse[OTHER]] = Left(NotFound("No json create access on Relation"))
-  def create(context: RequestContext, param: ConnectParameter[NODE], uuid: String): Either[Result, ConnectResponse[OTHER]] = Left(NotFound("No create access on Relation"))
-  def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, NODE with AbstractRelation[S,E], E]): Either[Result, ConnectResponse[OTHER]] = Left(NotFound("No json create access on HyperRelation"))
-  def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, NODE with AbstractRelation[S,E], E], uuid: String): Either[Result, ConnectResponse[OTHER]] = Left(NotFound("No create access on HyperRelation"))
+  def read(context: RequestContext, param: ConnectParameter[NODE]) = NotFound("No read access on Relation")
+  def read[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,NODE with AbstractRelation[S,E], E]) = NotFound("No read access on HyperRelation")
+  def delete(context: RequestContext, param: ConnectParameter[NODE], uuid: String) = NotFound("No delete access on Relation")
+  def delete[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,NODE with AbstractRelation[S,E],E], uuid: String) = NotFound("No delete access on HyperRelation")
+  def create(context: RequestContext, param: ConnectParameter[NODE]) = NotFound("No json create access on Relation")
+  def create(context: RequestContext, param: ConnectParameter[NODE], uuid: String) = NotFound("No create access on Relation")
+  def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, NODE with AbstractRelation[S,E], E]) = NotFound("No json create access on HyperRelation")
+  def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, NODE with AbstractRelation[S,E], E], uuid: String) = NotFound("No create access on HyperRelation")
 }
 
 trait StartRelationAccess[
@@ -54,8 +55,8 @@ END <: UuidNode
   protected def pageAwareRead(context: RequestContext, relDefs: Seq[NodeAndFixedRelationDefinition[START,RELATION,END]]) = {
     context.page.map { page =>
       val skip = page * context.limit
-      Right(limitedStartConnectedDiscourseNodes(skip, context.limit, relDefs: _*))
-    }.getOrElse(Right(startConnectedDiscourseNodes(relDefs: _*)))
+      Ok(Json.toJson(limitedStartConnectedDiscourseNodes(skip, context.limit, relDefs: _*)))
+    }.getOrElse(Ok(Json.toJson((startConnectedDiscourseNodes(relDefs: _*)))))
   }
 }
 
@@ -77,8 +78,8 @@ END <: UuidNode
   protected def pageAwareRead(context: RequestContext, relDefs: Seq[FixedAndNodeRelationDefinition[START,RELATION,END]]) = {
     context.page.map { page =>
       val skip = page * context.limit
-      Right(limitedEndConnectedDiscourseNodes(skip, context.limit, relDefs: _*))
-    }.getOrElse(Right(endConnectedDiscourseNodes(relDefs: _*)))
+      Ok(Json.toJson(limitedEndConnectedDiscourseNodes(skip, context.limit, relDefs: _*)))
+    }.getOrElse(Ok(Json.toJson(endConnectedDiscourseNodes(relDefs: _*))))
   }
 }
 
@@ -165,12 +166,18 @@ END <: UuidNode
 
   override def delete(context: RequestContext, param: ConnectParameter[START], uuid: String) = context.withUser {
     val relationDefinition = RelationDefinition(toBaseNodeDefinition(param), factory, toNodeDefinition(uuid))
-    Right(disconnectNodes(relationDefinition))
+    if (disconnectNodes(relationDefinition))
+      BadRequest("Cannot delete relation")
+    else
+      NoContent
   }
 
   override def delete[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,START with AbstractRelation[S,E],E], uuid: String) = context.withUser {
     val relationDefinition = RelationDefinition(toBaseNodeDefinition(param), factory, toNodeDefinition(uuid))
-    Right(disconnectNodes(relationDefinition))
+    if (disconnectNodes(relationDefinition))
+      BadRequest("Cannot delete relation")
+    else
+      NoContent
   }
 }
 
@@ -183,12 +190,18 @@ END <: UuidNode
 
   override def delete(context: RequestContext, param: ConnectParameter[END], uuid: String) = context.withUser {
     val relationDefinition = RelationDefinition(toNodeDefinition(uuid), factory, toBaseNodeDefinition(param))
-    Right(disconnectNodes(relationDefinition))
+    if (disconnectNodes(relationDefinition))
+      BadRequest("Cannot delete relation")
+    else
+      NoContent
   }
 
   override def delete[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,END with AbstractRelation[S,E],E], uuid: String) = context.withUser {
     val relationDefinition = RelationDefinition(toNodeDefinition(uuid), factory, toHyperBaseNodeDefinition(param))
-    Right(disconnectNodes(relationDefinition))
+    if (disconnectNodes(relationDefinition))
+      BadRequest("Cannot delete relation")
+    else
+      NoContent
   }
 }
 
@@ -201,85 +214,40 @@ case class EndRelationDelete[START <: UuidNode, RELATION <: AbstractRelation[STA
 case class StartRelationReadDelete[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factory: AbstractRelationFactory[START,RELATION,END], nodeFactory: UuidNodeMatchesFactory[END]) extends StartRelationDeleteBase[START,RELATION,END] with StartRelationReadBase[START,RELATION,END]
 case class EndRelationReadDelete[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factory: AbstractRelationFactory[START,RELATION,END], nodeFactory: UuidNodeMatchesFactory[START]) extends EndRelationDeleteBase[START,RELATION,END] with EndRelationReadBase[START,RELATION,END]
 
-trait RelationAccessDecorator[NODE <: UuidNode, OTHER <: UuidNode] extends RelationAccess[NODE, OTHER] with AccessDecoratorControlDefault with AccessNodeDecoratorControlDefault[OTHER] {
+trait RelationAccessDecorator[NODE <: UuidNode, OTHER <: UuidNode] extends RelationAccess[NODE, OTHER] with AccessDecoratorControlDefault {
   val self: RelationAccess[NODE, OTHER]
 
   override def read(context: RequestContext, param: ConnectParameter[NODE]) = {
-    acceptRequestRead(context).map(Left(_)).getOrElse(self.read(context, param).right.map(shapeResponse(_)))
+    acceptRequestRead(context).getOrElse(self.read(context, param))
   }
   override def read[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,NODE with AbstractRelation[S,E], E]) = {
-    acceptRequestRead(context).map(Left(_)).getOrElse(self.read(context, param).right.map(shapeResponse(_)))
+    acceptRequestRead(context).getOrElse(self.read(context, param))
   }
   override def delete(context: RequestContext, param: ConnectParameter[NODE], uuid: String) = {
-    acceptRequestWrite(context).map(Left(_)).getOrElse(self.delete(context, param, uuid))
+    acceptRequestWrite(context).getOrElse(self.delete(context, param, uuid))
   }
   override def delete[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,NODE with AbstractRelation[S,E],E], uuid: String) = {
-    acceptRequestWrite(context).map(Left(_)).getOrElse(self.delete(context, param, uuid))
+    acceptRequestWrite(context).getOrElse(self.delete(context, param, uuid))
   }
   override def create(context: RequestContext, param: ConnectParameter[NODE]) = {
-    acceptRequestWrite(context).map(Left(_)).getOrElse(self.create(context, param))
+    acceptRequestWrite(context).getOrElse(self.create(context, param))
   }
   override def create(context: RequestContext, param: ConnectParameter[NODE], uuid: String) = {
-    acceptRequestWrite(context).map(Left(_)).getOrElse(self.create(context, param, uuid))
+    acceptRequestWrite(context).getOrElse(self.create(context, param, uuid))
   }
   override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, NODE with AbstractRelation[S,E], E]) = {
-    acceptRequestWrite(context).map(Left(_)).getOrElse(self.create(context, param))
+    acceptRequestWrite(context).getOrElse(self.create(context, param))
   }
   override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, NODE with AbstractRelation[S,E], E], uuid: String) = {
-    acceptRequestWrite(context).map(Left(_)).getOrElse(self.create(context, param, uuid))
+    acceptRequestWrite(context).getOrElse(self.create(context, param, uuid))
   }
 
   val nodeFactory = self.nodeFactory
-}
-
-trait NodeAwareRelationAccess[NODE <: UuidNode, OTHER <: UuidNode] extends RelationAccessDecorator[NODE, OTHER] {
-  val self: RelationAccess[NODE, OTHER]
-  val nodeAccess: NodeAccess[OTHER]
-
-  //TODO: should have a way to propagate result to self.create instead of querying a second time via uuid
-  // ==> we merge both result so we have all the information from the
-  // first response in the second response
-  override def create(context: RequestContext, param: ConnectParameter[NODE]) = {
-    nodeAccess.create(context) match {
-      case Left(err) => Left(err)
-      case Right(node) => {
-        self.create(context, param, node.uuid) match {
-          case Left(err) => Left(err)
-          case Right(response) => {
-            val d = Discourse(response.graph.graph.merge(node.graph))
-            response.node.foreach(d.add(_))
-            Right(ConnectResponse(d, response.node))
-          }
-        }
-      }
-    }
-  }
-  override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S,NODE with AbstractRelation[S,E], E]) = {
-    nodeAccess.create(context) match {
-      case Left(err) => Left(err)
-      case Right(node) => {
-        self.create(context, param, node.uuid) match {
-          case Left(err) => Left(err)
-          case Right(response) => {
-            val d = Discourse(response.graph.graph.merge(node.graph))
-            response.node.foreach(d.add(_))
-            Right(ConnectResponse(d, response.node))
-          }
-        }
-      }
-    }
-  }
 }
 
 trait RelatedAccess extends RelationAccessDefault[UuidNode, UuidNode] {
   override val nodeFactory = UuidNodeMatches
 }
 
-case class StartNodeAwareRelationAccess[START <: UuidNode, RELATION <: AbstractRelation[START,END], END <: UuidNode](self: StartRelationAccess[START,RELATION,END], nodeAccess: NodeAccess[END]) extends NodeAwareRelationAccess[START,END] with StartRelationAccess[START,RELATION,END]
-case class EndNodeAwareRelationAccess[START <: UuidNode, RELATION <: AbstractRelation[START,END], END <: UuidNode](self: EndRelationAccess[START,RELATION,END], nodeAccess: NodeAccess[START]) extends NodeAwareRelationAccess[END,START] with EndRelationAccess[START,RELATION,END]
-
 case class StartRelationAccessDecoration[START <: UuidNode, RELATION <: AbstractRelation[START,END], END <: UuidNode](self: StartRelationAccess[START,RELATION,END], control: AccessDecoratorControl) extends RelationAccessDecorator[START,END] with StartRelationAccess[START,RELATION,END] with AccessDecoratorControlForward
 case class EndRelationAccessDecoration[START <: UuidNode, RELATION <: AbstractRelation[START,END], END <: UuidNode](self: EndRelationAccess[START,RELATION,END], control: AccessDecoratorControl) extends RelationAccessDecorator[END,START] with EndRelationAccess[START,RELATION,END] with AccessDecoratorControlForward
-
-case class StartRelationAccessNodeDecoration[START <: UuidNode, RELATION <: AbstractRelation[START,END], END <: UuidNode](self: StartRelationAccess[START,RELATION,END], control: AccessNodeDecoratorControl[END]) extends RelationAccessDecorator[START,END] with StartRelationAccess[START,RELATION,END] with AccessNodeDecoratorControlForward[END]
-case class EndRelationAccessNodeDecoration[START <: UuidNode, RELATION <: AbstractRelation[START,END], END <: UuidNode](self: EndRelationAccess[START,RELATION,END], control: AccessNodeDecoratorControl[START]) extends RelationAccessDecorator[END,START] with EndRelationAccess[START,RELATION,END] with AccessNodeDecoratorControlForward[START]

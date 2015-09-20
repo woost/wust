@@ -23,16 +23,16 @@ case class RequestContext(controller: NodesBase with Controller, user: Option[Us
     json.flatMap(_.validate[T].asOpt)
   }
 
-  def withJson[S,T](handler: S => Either[Result,T])(implicit rds : play.api.libs.json.Reads[S]) = {
-    jsonAs[S].map(handler(_)).getOrElse(Left(UnprocessableEntity("Cannot parse json body")))
+  def withJson[S](handler: S => Result)(implicit rds : play.api.libs.json.Reads[S]) = {
+    jsonAs[S].map(handler(_)).getOrElse(UnprocessableEntity("Cannot parse json body"))
   }
 
-  def withUser[T](handler: User => Either[Result,T]): Either[Result,T] = {
-    user.map(handler(_)).getOrElse(Left(onlyUsers))
+  def withUser(handler: User => Result): Result = {
+    user.map(handler(_)).getOrElse(onlyUsers)
   }
 
-  def withUser[T](handler: => Either[Result,T]): Either[Result,T] = {
-    user.map(_ => handler).getOrElse(Left(onlyUsers))
+  def withUser(handler: => Result): Result = {
+    user.map(_ => handler).getOrElse(onlyUsers)
   }
 
   private def onlyUsers = Forbidden("Only for users")
@@ -83,13 +83,6 @@ trait NodesBase extends NestedResourceRouter with DefaultNestedResourceControlle
         case _ => pathNotFound
       }
       case None         => pathNotFound
-    }
-  }
-
-  protected def getResult[T](result: Either[Result, T])(handler: T => Result): Result = {
-    result match {
-      case Left(msg)  => msg
-      case Right(value) => handler(value)
     }
   }
 

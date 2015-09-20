@@ -3,7 +3,7 @@ package controllers.api
 import com.mohiva.play.silhouette.api.Silhouette
 import com.mohiva.play.silhouette.impl.authenticators.JWTAuthenticator
 import model.WustSchema._
-import formatters.json.ApiNodeFormat._
+import formatters.json.PostFormat._
 import modules.auth.HeaderEnvironmentModule
 import modules.db.Database.db
 import modules.db._
@@ -13,7 +13,7 @@ import play.api.mvc.{Action, Controller}
 import renesca.Query
 import modules.db.access.custom.TaggedTaggable
 
-object Session extends TaggedTaggable[Post] with Controller with Silhouette[User, JWTAuthenticator] with HeaderEnvironmentModule {
+object Session extends Controller with Silhouette[User, JWTAuthenticator] with HeaderEnvironmentModule {
   def history() = UserAwareAction { request =>
     request.identity.map { user =>
       val userDef = ConcreteNodeDefinition(user)
@@ -24,7 +24,7 @@ object Session extends TaggedTaggable[Post] with Controller with Silhouette[User
       val params = viewedDef.parameterMap
       val discourse = Discourse(db.queryGraph(Query(query, params)))
 
-      Ok(Json.toJson(shapeResponse(discourse.posts)))
+      Ok(Json.toJson(TaggedTaggable.shapeResponse(discourse.posts)))
     }.getOrElse(Unauthorized("Only users can have a session history"))
   }
 }

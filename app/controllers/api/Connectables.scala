@@ -10,15 +10,15 @@ import modules.requests.dsl._
 object Connectables extends Nodes[Connectable] {
   // TODO: combine into posts
   val node = NodeDef(NodeRead(Connectable),
-    "connects-from" -> (N < Connects < (EndConRelationAccess(Connects, Post) + PostAccess.apply,
-      "connects-from" -> (N < EndConRelationAccess(Connects, Post) + PostAccess.apply)
+    "connects-from" -> (N < Connects < (EndConnectsAccess.apply,
+      "connects-from" -> (N < EndConnectsAccess.apply)
     ))
   )
 }
 
 object ConnectsCtrl extends Nodes[Connects] {
   val node = NodeDef(ConnectsAccess.apply,
-    "classified" -> (N < EndConRelationAccess(Classifies, Classification))
+    "classified" -> (N < EndConnectsAccess.apply)
   )
 }
 
@@ -30,8 +30,8 @@ object Posts extends Nodes[Post] {
       "up" -> (N < VotesTagsAccess(1)),
       "neutral" -> (N < VotesTagsAccess(0))
     )),
-    "connects-to" -> (N > Connects > (StartConRelationAccess(Connects, Connectable) + PostAccess.apply,
-      "connects-from" -> (N < EndConRelationAccess(Connects, Post) + PostAccess.apply),
+    "connects-to" -> (N > Connects > (StartConnectsAccess.apply,
+      "connects-from" -> (N < EndConnectsAccess.apply),
       "up" -> (N < VotesConnectsAccess(1)),
       "neutral" -> (N < VotesConnectsAccess(0))
     ))

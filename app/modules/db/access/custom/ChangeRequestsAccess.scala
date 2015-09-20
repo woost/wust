@@ -9,6 +9,7 @@ import modules.db._
 import renesca.Query
 import play.api.mvc.Results._
 import formatters.json.ChangeRequestFormat._
+import formatters.json.PostFormat._
 import play.api.libs.json._
 
 case class InstantChangeRequestAccess() extends NodeAccessDefault[ChangeRequest] {
@@ -40,6 +41,43 @@ case class InstantChangeRequestAccess() extends NodeAccessDefault[ChangeRequest]
 
     val discourse = Discourse(db.queryGraph(query, params))
 
-    Left(Ok(Json.toJson(discourse.changeRequests)))
+    Ok(Json.toJson(discourse.changeRequests))
   }
+}
+
+//TODO: one api to get them all?
+case class PostUpdatedAccess() extends EndRelationAccessDefault[Updated, UpdatedToPost, Post] {
+  val nodeFactory = Updated
+  override def read(context: RequestContext, param: ConnectParameter[Post]) = {
+    Ok(Json.toJson(context.user.map { user =>
+      val userDef = ConcreteNodeDefinition(user)
+      val updatedDef = ConcreteFactoryNodeDefinition(Updated)
+      val postDef = FactoryUuidNodeDefinition(Post, param.baseUuid)
+      val relDef = RelationDefinition(updatedDef, UpdatedToPost, postDef)
+      val votesDef = RelationDefinition(userDef, Votes, updatedDef)
+      //TODO: graphdefinition with arbitrary properties, not only uuid
+      val query = s"match ${relDef.toQuery} where ${updatedDef.name}.applied = ${PENDING} optional match ${votesDef.toQuery(true, false)} return ${votesDef.name}, ${updatedDef.name}"
+      val discourse = Discourse(db.queryGraph(query, relDef.parameterMap ++ votesDef.parameterMap))
+      discourse.updateds
+    }.getOrElse(Seq.empty)))
+  }
+}
+
+case class PostTagChangeRequestAccess() extends RelationAccessDefault[Post, TagChangeRequest] {
+  val nodeFactory = TagChangeRequestMatches
+
+  override def read(context: RequestContext, param: ConnectParameter[Post]) = {
+    Ok(Json.toJson(context.user.map { user =>
+      val userDef = ConcreteNodeDefinition(user)
+      val updatedDef = ConcreteFactoryNodeDefinition(nodeFactory)
+      val postDef = FactoryUuidNodeDefinition(Post, param.baseUuid)
+      val votesDef = RelationDefinition(userDef, Votes, updatedDef)
+      val scopeDef = ConcreteFactoryNodeDefinition(Scope)
+      val proposes = RelationDefinition(updatedDef, ProposesTag, scopeDef)
+      val query = s"match ${updatedDef.toQuery}-[:`${AddTags.endRelationType}`|`${RemoveTags.endRelationType}`]->${postDef.toQuery} where ${updatedDef.name}.applied = ${PENDING} optional match ${votesDef.toQuery(true, false)} optional match ${proposes.toQuery(false, true)} return ${votesDef.name}, ${proposes.name}, ${updatedDef.name}"
+      val discourse = Discourse(db.queryGraph(query, postDef.parameterMap ++ votesDef.parameterMap))
+      discourse.tagChangeRequests
+    }.getOrElse(Seq.empty)))
+  }
+
 }
