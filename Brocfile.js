@@ -12,7 +12,6 @@ var concat = prod ? require("broccoli-concat") : require("broccoli-sourcemap-con
 var mergeTrees = require("broccoli-merge-trees");
 var funnel = require("broccoli-funnel");
 var replace = require("broccoli-string-replace");
-var JSHinter = errorBuild("JsHint", require("broccoli-jshint"));
 var esTranspiler = errorBuild("Babel", require("broccoli-babel-transpiler"));
 var iife = require("broccoli-iife");
 var closure = require("broccoli-closure");
@@ -96,7 +95,6 @@ var htmlTemplates = html2js("assets/app", {
 
 
 var appScriptsEs6 = funnel("assets/app", { include: ["**/*.js"], destDir: "javascripts" });
-var jsHintResults = JSHinter(appScriptsEs6);
 
 var appScripts = iife(esTranspiler(appScriptsEs6));
 
@@ -154,10 +152,12 @@ if (prod) {
             "compilation_level":   "WHITESPACE_ONLY"
         }),
         fonts,
-        images,
-        jsHintResults
+        images
     ]);
 } else { // development
+    var JSHinter = errorBuild("JsHint", require("broccoli-jshint"));
+    var jsHintResults = JSHinter(appScriptsEs6);
+
     var BrowserSync = require("broccoli-browser-sync");
     browserSync = new BrowserSync([appScripts, htmlTemplates, styles], {
         // proxy the local play server
