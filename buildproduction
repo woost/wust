@@ -11,6 +11,9 @@ bower --config.interactive=false install
 echo "building production assets..."
 ./prodassets
 
+echo "running tests..."
+sbt clean test
+
 echo "building play application..."
-sbt clean stage
+sbt stage
 
