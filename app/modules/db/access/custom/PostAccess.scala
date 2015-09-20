@@ -268,9 +268,11 @@ case class PostAccess() extends ConnectableAccessBase with NodeAccessDefault[Pos
       if (failure.isDefined)
         NotFound(s"Cannot find Post with uuid '$uuid'")
       else {
-        //TODO: correct creation params for deleted
+        // TODO: non-instant changes
         node.hide()
-        val deleted = Deleted.create(user, node, applyThreshold = 1)
+        val applyThreshold = Moderation.postChangeThreshold(node.viewCount)
+        val deleted = Deleted.create(user, node, applyThreshold = applyThreshold)
+        deleted.applied = INSTANT
         val failure = tx.persistChanges(deleted)
         if (failure.isDefined)
           BadRequest("Cannot delete node")
