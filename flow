@@ -1,0 +1,2 @@
+cd assets/app
+flow check --all

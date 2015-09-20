@@ -95,7 +95,7 @@ var htmlTemplates = html2js("assets/app", {
 });
 
 
-var appScriptsEs6 = funnel("assets/app", { include: ["**/*.js"], destDir: "javascripts" });
+var appScriptsEs6 = funnel("assets/app", { include: ["**/*.js"], exclude: ["interfaces/**/*"], destDir: "javascripts" });
 var jsHintResults = JSHinter(appScriptsEs6);
 
 var appScripts = iife(esTranspiler(appScriptsEs6));
