@@ -101,8 +101,8 @@ trait NodeBase extends NodeDelegates {
   var outRelations: Set[RelationLike] = Set.empty
 
   def relations = inRelations ++ outRelations
-  def predecessors = inRelations.toSeq.sortBy(- _.order).map(_.startNode)
-  def successors = outRelations.toSeq.sortBy(-_.order).map(_.endNode)
+  def predecessors = inRelations.map(_.startNode)
+  def successors = outRelations.map(_.endNode)
 
   def neighbours = predecessors ++ successors
   def parallels = successors.flatMap(_.predecessors).filter(_ != this)
@@ -113,8 +113,9 @@ trait NodeBase extends NodeDelegates {
   @JSExport("inRelations") def inRelationsJs = inRelations.toJSArray
   @JSExport("outRelations") def outRelationsJs = outRelations.toJSArray
   @JSExport("relations") def relationsJs = relations.toJSArray
-  @JSExport("predecessors") def predecessorsJs = predecessors.toJSArray
-  @JSExport("successors") def successorsJs = successors.toJSArray
+  //TODO: predecessors are only sorted because of wust
+  @JSExport("predecessors") def predecessorsJs = inRelations.toSeq.sortBy(- _.order).map(_.startNode).toJSArray
+  @JSExport("successors") def successorsJs = outRelations.toSeq.sortBy(- _.order).map(_.endNode).toJSArray
 
   @JSExport("neighbours") def neighboursJs = neighbours.toJSArray
   @JSExport("parallels") def parallelsJs = parallels.toJSArray
