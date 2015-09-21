@@ -1,4 +1,4 @@
-gitref: first-part -> master
+// gitref: first-part -> master
 
 match (u:USER) REMOVE u:DUMMYUSER:REALUSER return u
 
@@ -42,6 +42,6 @@ match (u:USER)-[:USERTOUPDATED]->(updated:UPDATED)-[cr:CREATEDTOPOST]->(p:POST) 
 
 match (p:POST) set p.viewCount = 0
 
-#??? match (p:REFERENCE) set p.voteCount = 0
+//??? match (p:REFERENCE) set p.voteCount = 0
 
-# lowercase tags mergen
+// lowercase tags mergen
