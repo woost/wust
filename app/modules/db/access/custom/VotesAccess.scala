@@ -30,13 +30,13 @@ trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefa
       // first we match the actual change request and aquire a write lock,
       // which will last for the whole transaction
       val requestDef = nodeDefinition(param.baseUuid)
-      val postDef = ConcreteFactoryNodeDefinition(Post)
+      val postDef = LabelNodeDefinition[Post](Set.empty)
       val userDef = ConcreteNodeDefinition(user)
       val votesDef = RelationDefinition(userDef, Votes, requestDef)
       val createdDef = RelationDefinition(userDef, SchemaCreated, postDef)
 
       val query = s"""
-      match ${requestDef.toQuery}-[:`${UpdatedToPost.relationType}`|`${DeletedToHidden}`|`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->${postDef.toQuery}, ${userDef.toQuery}
+      match ${requestDef.toQuery}-[:`${UpdatedToPost.relationType}`|`${DeletedToHidden.relationType}`|`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->${postDef.toQuery}, ${userDef.toQuery}
       where ${requestDef.name}.applied = ${PENDING} or ${requestDef.name}.applied = ${INSTANT}
       set ${requestDef.name}._locked = true
       with ${postDef.name},${userDef.name},${requestDef.name}
@@ -160,7 +160,7 @@ case class VotesDeletedAccess(
     override def nodeDefinition(uuid: String) = FactoryUuidNodeDefinition(Deleted, uuid)
     override def selectNode(discourse: Discourse) = discourse.deleteds.head
     override def unapplyChange(discourse: Discourse, request: Deleted, post: Post, tx:QueryHandler) = {
-      if (post.labels == Hidden.labels) {
+      if (post.rawItem.labels.contains(Hidden.label)) {
         val hidden = Hidden.wrap(post.rawItem)
         hidden.unhide()
         true
