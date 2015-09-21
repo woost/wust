@@ -24,6 +24,11 @@ object ChangeRequestFormat {
         ("newDescription", JsString(n.newDescription.getOrElse(""))),
         ("type", JsString("Edit"))
       )
+      case n: Deleted        => Seq(
+        ("id", JsString(n.uuid)),
+        ("post", n.outRelationsAs(DeletedToHidden).headOption.map(r => Json.toJson(Post.wrap(r.endNode.rawItem))).getOrElse(JsNull)),
+        ("type", JsString("Delete"))
+      )
       case n: AddTags    => Seq(
         ("id", JsString(n.uuid)),
         ("post", n.outRelationsAs(AddTagsToPost).headOption.map(r => Json.toJson(r.endNode)).getOrElse(JsNull)),

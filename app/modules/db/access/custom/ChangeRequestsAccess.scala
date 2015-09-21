@@ -20,14 +20,15 @@ case class InstantChangeRequestAccess() extends NodeAccessDefault[ChangeRequest]
 
     val crDef = LabelNodeDefinition[TagChangeRequest](ChangeRequest.labels)
     val crTagsDef = RelationDefinition(crDef, ProposesTag, ConcreteFactoryNodeDefinition(Scope))
-    val postDef = ConcreteFactoryNodeDefinition(Post)
+    val postDef = LabelNodeDefinition[Post](Set.empty) //matching real posts and hidden posts without any label just by their relations
     val tagsDef = RelationDefinition(ConcreteFactoryNodeDefinition(Scope), Tags, postDef)
     val connectsDef = ConcreteFactoryNodeDefinition(Connects)
     val connDef = RelationDefinition(postDef, PostToConnects, connectsDef)
     val classifiesDef = RelationDefinition(ConcreteFactoryNodeDefinition(Classification), Classifies, connectsDef)
 
     val query = s"""
-    match ${ crDef.toQuery }-[relation:`${ UpdatedToPost.relationType }`|`${ AddTagsToPost.relationType }`|`${ RemoveTagsToPost.relationType }`]->${ postDef.toQuery } where ${ crDef.name }.applied = ${ INSTANT } OR ${ crDef.name }.applied = ${ PENDING }
+    match ${ crDef.toQuery }-[relation:`${ UpdatedToPost.relationType }`|`${ DeletedToHidden.relationType }`|`${ AddTagsToPost.relationType }`|`${ RemoveTagsToPost.relationType }`]->${ postDef.toQuery }
+    where ${ crDef.name }.applied = ${ INSTANT } OR ${ crDef.name }.applied = ${ PENDING }
     with ${ postDef.name }, relation, ${ crDef.name } order by ${ crDef.name }.timestamp skip ${ skip } limit ${ limit }
     optional match ${ crTagsDef.toQuery(false, true) }
     optional match ${ tagsDef.toQuery(true, false) }

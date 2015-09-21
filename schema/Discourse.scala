@@ -29,10 +29,11 @@ object WustSchema {
     //TODO: cannot persist changes of option in matches node
     var backupLabels: String = ""
 
-    def hide() {
+    def hide() = {
       backupLabels = rawItem.labels.mkString(":")
       rawItem.labels.clear()
       rawItem.labels ++= Hidden.labels
+      Hidden.wrap(rawItem)
     }
   }
 
@@ -71,7 +72,7 @@ object WustSchema {
   @Relation class MemberOf(startNode: User, endNode: UserGroup)
 
   //TODO: rename
-  @Graph trait Discourse {Nodes(User, UserGroup, Post, TagLike, Action) }
+  @Graph trait Discourse {Nodes(User, UserGroup, Post, TagLike, Hidden, Action) }
 
   // relation trait for relation that can be created/merged without further arguments
   @Relation trait ConstructRelation
@@ -145,7 +146,7 @@ object WustSchema {
     val newDescription:Option[String]
   }
 
-  @HyperRelation class Deleted(startNode: User, endNode: Post) extends ChangeRequest with HyperConnection
+  @HyperRelation class Deleted(startNode: User, endNode: Hidden) extends ChangeRequest with HyperConnection
 
   @Node trait TagChangeRequest extends ChangeRequest
   @Relation class ProposesTag(startNode: TagChangeRequest, endNode: Scope)
