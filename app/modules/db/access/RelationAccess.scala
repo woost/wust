@@ -165,17 +165,17 @@ END <: UuidNode
   override def delete(context: RequestContext, param: ConnectParameter[START], uuid: String) = context.withUser {
     val relationDefinition = RelationDefinition(toBaseNodeDefinition(param), factory, toNodeDefinition(uuid))
     if(disconnectNodes(relationDefinition))
-      BadRequest("Cannot delete relation")
-    else
       NoContent
+    else
+      BadRequest("Cannot delete relation")
   }
 
   override def delete[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, START with AbstractRelation[S, E], E], uuid: String) = context.withUser {
     val relationDefinition = RelationDefinition(toBaseNodeDefinition(param), factory, toNodeDefinition(uuid))
     if(disconnectNodes(relationDefinition))
-      BadRequest("Cannot delete relation")
-    else
       NoContent
+    else
+      BadRequest("Cannot delete relation")
   }
 }
 
@@ -189,17 +189,17 @@ END <: UuidNode
   override def delete(context: RequestContext, param: ConnectParameter[END], uuid: String) = context.withUser {
     val relationDefinition = RelationDefinition(toNodeDefinition(uuid), factory, toBaseNodeDefinition(param))
     if(disconnectNodes(relationDefinition))
-      BadRequest("Cannot delete relation")
-    else
       NoContent
+    else
+      BadRequest("Cannot delete relation")
   }
 
   override def delete[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, END with AbstractRelation[S, E], E], uuid: String) = context.withUser {
     val relationDefinition = RelationDefinition(toNodeDefinition(uuid), factory, toHyperBaseNodeDefinition(param))
     if(disconnectNodes(relationDefinition))
-      BadRequest("Cannot delete relation")
-    else
       NoContent
+    else
+      BadRequest("Cannot delete relation")
   }
 }
 
