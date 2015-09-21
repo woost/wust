@@ -318,7 +318,7 @@ case class VotesConnectsAccess(sign: Long) extends VotesReferenceAccess[Connects
     val createdDef = RelationDefinition(userDef, SchemaCreated, postDef)
 
     val query = s"""
-    match ${createdDef.toQuery}
+    match ${createdDef.toQuery},
     ${connDef.toQuery}-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`),
     (tag: `${Scope.label}`)-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`)
     merge (${userDef.name})-[r:`${HasKarma.relationType}`]->(tag)
