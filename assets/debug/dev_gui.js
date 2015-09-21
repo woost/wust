@@ -16,6 +16,7 @@ angular.module("wust").run(function(Auth) {
         devGui.style.zIndex = 99999;
         devGui.style.top = 0;
         devGui.style.right = 0;
+        devGui.style.opacity = 0.5;
         document.body.appendChild(devGui);
 
         var randLogin = rawElem("<a href=\"#\">random login</a>");
