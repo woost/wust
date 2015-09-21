@@ -55,7 +55,7 @@ case class EndConnectsAccess() extends EndRelationReadBase[Post, Connects, Conne
     postaccess.createNode(context).map(n => createRelation(context, param, n)).getOrElse(BadRequest("Cannot create post"))
   }
 
-  override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Connectable with AbstractRelation[S, E], E]) = {
+  override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Connectable with AbstractRelation[S, E], E]) = context.withUser {
     postaccess.createNode(context).map(n => createRelation(context, param, n)).getOrElse(BadRequest("Cannot create post"))
   }
 

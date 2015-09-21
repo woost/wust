@@ -255,7 +255,7 @@ case class PostAccess() extends ConnectableAccessBase with NodeAccessDefault[Pos
     }
   }
 
-  override def create(context: RequestContext) = {
+  override def create(context: RequestContext) = context.withUser {
     import formatters.json.EditNodeFormat._
 
     createNode(context).map(n => Ok(Json.toJson(n))).getOrElse(BadRequest("Cannot create Post"))
