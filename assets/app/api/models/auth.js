@@ -21,6 +21,9 @@ function Auth($rootScope, $window, restmod, jwtHelper, store, HistoryService) {
 
     if (checkLoggedIn()) {
         HistoryService.load();
+        this.isLoggedIn = true;
+    } else {
+        this.isLoggedIn = false;
     }
 
     // every time the window gets focused, clear the inMemoryCache of the store,

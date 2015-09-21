@@ -31,7 +31,7 @@ function navigationCtrl($state, Auth, SearchService, DiscourseNode, Search, Moda
 
     vm.onSearchBoxChange = onSearchBoxChange;
     vm.authenticate = authenticate;
-    vm.currentAuth = Auth.current;
+    vm.Auth = Auth;
     vm.logout = Auth.logout;
     vm.search = SearchService.search;
     vm.newDiscussion = newDiscussion;

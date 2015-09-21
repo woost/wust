@@ -14,26 +14,6 @@
 
         .predecessors_connection {
             float:right;
-            text-align: center;
-
-            //icons are higher than minimum small post height, this prevents float failure
-            height:20px;
-            line-height: 20px;
-            .tools {
-                // margin-bottom: -11px;
-                .button {
-                    opacity: 0.5;
-                    cursor: pointer;
-                }
-                .button.active, .button:hover {
-                    opacity: 1;
-                }
-            }
-            .arrow {
-                position:relative;
-                top: -11px;
-                z-index: -1; // put svg below tool buttons
-            }
         }
     }
 
@@ -56,26 +36,6 @@
 
         .followers_connection {
             float:left;
-            text-align: center;
-
-            //icons are higher than minimum small post height, this prevents float failure
-            height:20px;
-            line-height: 20px;
-            .tools {
-                // margin-bottom: -11px;
-                .button {
-                    opacity: 0.5;
-                    cursor: pointer;
-                }
-                .button.active, .button:hover {
-                    opacity: 1;
-                }
-            }
-            .arrow {
-                position:relative;
-                top: -11px;
-                z-index: -1; // put svg below tool buttons
-            }
         }
     }
 
@@ -86,14 +46,36 @@
         }
     }
 
-    .arrow {
-        .arrowline {
-            stroke-width: 1px;
-            stroke:$graph_relation_color;
+    .connection {
+        text-align: center;
+
+        //icons are higher than minimum small post height, this prevents float failure
+        height:20px;
+        line-height: 20px;
+        .tools {
+            height: 20px;
+            // margin-bottom: -11px;
+            .button {
+                opacity: 0.5;
+                cursor: pointer;
+            }
+            .button.active, .button:hover {
+                opacity: 1;
+            }
         }
-        .arrowhead {
-            stroke-width: 1px;
-            fill: $graph_relation_color;
+
+        .arrow {
+            position:relative;
+            top: -11px;
+            z-index: -1; // put svg below tool buttons
+            .arrowline {
+                stroke-width: 1px;
+                stroke:$graph_relation_color;
+            }
+            .arrowhead {
+                stroke-width: 1px;
+                fill: $graph_relation_color;
+            }
         }
     }
 }

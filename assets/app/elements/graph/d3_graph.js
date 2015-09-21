@@ -1,8 +1,8 @@
 angular.module("wust.elements").directive("d3Graph", d3Graph);
 
-d3Graph.$inject = ["$window", "DiscourseNode", "Helpers", "$location", "$filter", "Post", "ModalEditService", "EditService", "TagRelationEditService", "$q"];
+d3Graph.$inject = ["$window", "DiscourseNode", "Helpers", "$location", "$filter", "Post", "ModalEditService", "EditService", "TagRelationEditService", "$q", "Auth"];
 
-function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, ModalEditService, EditService, TagRelationEditService, $q) {
+function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, ModalEditService, EditService, TagRelationEditService, $q, Auth) {
     return {
         restrict: "A",
         scope: false,
@@ -314,16 +314,17 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     .attr("class", "nodetools");
 
                 this.d3NodeReplyTool = this.d3NodeTools.append("div")
-                    .attr("class", "nodetool replytool fa fa-plus");
+                    .attr("class", "nodetool replytool fa fa-plus")
+                    .style("display", d => (Auth.isLoggedIn) ? "inline-block" : "none");
 
                 this.d3NodeConnectTool = this.d3NodeTools.append("div")
                     .attr("class", "nodetool connecttool icon-flow-line")
-                    .style("display", d => (!d.isHyperRelation || this.arrowToResponse) ? "inline-block" : "none")
+                    .style("display", d => (Auth.isLoggedIn && (!d.isHyperRelation || this.arrowToResponse)) ? "inline-block" : "none")
                     .append("div").attr("class", "event-offset-rotate-fix");
 
                 this.d3NodeEditTool = this.d3NodeTools.append("div")
                     .attr("class", "nodetool edittool fa fa-pencil")
-                    .style("display", d => (d.isHyperRelation) ? "inline-block" : "none");
+                    .style("display", d => (Auth.isLoggedIn && d.isHyperRelation) ? "inline-block" : "none");
 
                 this.d3NodePinTool = this.d3NodeTools.append("div")
                     .attr("class", "nodetool pintool fa fa-thumb-tack")

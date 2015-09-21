@@ -15,11 +15,12 @@ function bigTaglist() {
     };
 }
 
-bigTaglistCtrl.$inject = ["Post", "ContextService"];
+bigTaglistCtrl.$inject = ["Post", "ContextService", "Auth"];
 
-function bigTaglistCtrl(Post, ContextService) {
+function bigTaglistCtrl(Post, ContextService, Auth) {
     let vm = this;
 
+    vm.Auth = Auth;
     vm.upvoteTag = upvoteTag;
 
     //TODO: semnatic downvote on post

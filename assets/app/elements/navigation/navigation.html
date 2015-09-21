@@ -1,7 +1,7 @@
 <nav id="navigation" class="navbar navbar navbar-fixed-top" role="navigation" ng-style="vm.contextStyle">
     <div class="container-fluid">
         <div class="navbar-header">
-            <button id="edit_modal_toggle" type="button" class="btn btn-default navbar-btn" onclick="this.blur()" ng-click="vm.newDiscussion()">New<span class="hidden-xs">&nbsp;Discussion</span></button>
+            <button ng-if="::vm.Auth.isLoggedIn" id="edit_modal_toggle" type="button" class="btn btn-default navbar-btn" onclick="this.blur()" ng-click="vm.newDiscussion()">New<span class="hidden-xs">&nbsp;Discussion</span></button>
         </div>
 
         <div ng-class="{search_results_visible: vm.search.resultsVisible, has_fullscreen: vm.fullscreen.hasFullscreen}">
@@ -10,7 +10,7 @@
                         <i class="fa fa-newspaper-o"></i><span class="hidden-sm hidden-xs">&nbsp;Dashboard</span></a></li>
                 <li><a ui-sref="tags" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()">
                         <i class="fa fa-tags"></i><span class="hidden-sm hidden-xs">&nbsp;Tags</span></a></li>
-                <li><a ng-if="vm.currentAuth.userId" ui-sref="vote" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()">
+                <li><a ng-if="::vm.Auth.isLoggedIn" ui-sref="vote" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()">
                         <i class="fa fa-sort"></i><span class="hidden-sm hidden-xs">&nbsp;Moderation</span></a></li>
                 <li><a ui-sref="users.list" ng-class="{active: vm.$state.includes('users.*')}" ng-click="vm.fullscreen.hideFullscreens()">
                         <i class="fa fa-users"></i><span class="hidden-sm hidden-xs">&nbsp;Users</span></a></li>
@@ -22,7 +22,7 @@
                         <span ng-repeat="context in vm.currentContexts" tag-label="context"></span>
                         <span ng-show="vm.currentContexts.length === 0">Context <span class="caret"></span></span>
                     </a>
-                    <ul class="dropdown-menu context-dropdown" ng-switch="vm.currentAuth.userId">
+                    <ul class="dropdown-menu context-dropdown">
                         <li>
                             <h3>Select Context</h3>
                             <div edit-taglist tags="vm.currentContexts" on-change="vm.onContextChange()" tag-type="context" always-show="true" existing-only="true"></div>
@@ -43,18 +43,18 @@
             <ul class="nav navbar-nav navbar-right">
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                        <i class="fa fa-user"></i> <span class="hidden-xs">{{vm.currentAuth.identifier}}</span> <span class="caret"></span>
+                        <i class="fa fa-user"></i> <span class="hidden-xs">{{vm.Auth.current.identifier}}</span> <span class="caret"></span>
                     </a>
-                    <ul class="dropdown-menu auth-dropdown" ng-switch="vm.currentAuth.userId">
+                    <ul class="dropdown-menu auth-dropdown" ng-switch="vm.Auth.isLoggedIn">
                         <li>
-                            <form ng-switch-when="undefined" name="signForm" ng-submit="vm.authenticate(registerUser)" class="navbar-form navbar-right ng-trans ng-trans-slide-right ease">
+                            <form ng-switch-when="false" name="signForm" ng-submit="vm.authenticate(registerUser)" class="navbar-form navbar-right ng-trans ng-trans-slide-right ease">
                                 <input class="form-control" size="10" name="username" type="text" ng-model='vm.newUser.identifier' placeholder="Username" required>
                                 <input class="form-control" size="10" name="password" type="password" ng-model='vm.newUser.password' placeholder="Password" required>
                                 <input type="submit" value="Login" ng-click="registerUser = false" class="btn btn-default" ng-disabled="signForm.$invalid">
                                 <input type="submit" value="Register" ng-click="registerUser = true" class="btn btn-default" ng-disabled="signForm.$invalid">
                             </form>
                             <form ng-switch-default ng-submit="vm.logout()" class="navbar-form navbar-right ng-trans ng-trans-slide-right ease">
-                                <a ui-sref="users.details({id: vm.currentAuth.userId})" style="padding-right: 10px">Profile</a>
+                                <a ui-sref="users.details({id: vm.Auth.current.userId})" style="padding-right: 10px">Profile</a>
                                 <input type="submit" value="Logout" class="btn btn-default">
                             </form>
                         </li>

@@ -17,11 +17,12 @@ function discourseNodeList() {
     };
 }
 
-discourseNodeListCtrl.$inject = ["Post", "TagRelationEditService"];
+discourseNodeListCtrl.$inject = ["Post", "TagRelationEditService", "Auth"];
 
-function discourseNodeListCtrl(Post, TagRelationEditService) {
+function discourseNodeListCtrl(Post, TagRelationEditService, Auth) {
     let vm = this;
 
+    vm.Auth = Auth;
     vm.upvoteAnswer = upvoteAnswer;
     vm.remove = remove;
     vm.editFollowerConnects = editFollowerConnects;
