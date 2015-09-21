@@ -22,6 +22,7 @@ trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefa
   def nodeDefinition(uuid: String): FactoryUuidNodeDefinition[T]
   def selectNode(discourse: Discourse): T
   def applyChange(discourse: Discourse, request: T, post: Post, tx:QueryHandler): Boolean
+  def unapplyChange(discourse: Discourse, request: T, post: Post, tx: QueryHandler): Boolean
 
   //TODO: optimize to one request with multiple statements
   override def create(context: RequestContext, param: ConnectParameter[Votable]) = context.withUser { user =>
@@ -35,7 +36,7 @@ trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefa
       val createdDef = RelationDefinition(userDef, SchemaCreated, postDef)
 
       val query = s"""
-      match ${requestDef.toQuery}-[:`${UpdatedToPost.relationType}`|`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->${postDef.toQuery}, ${userDef.toQuery}
+      match ${requestDef.toQuery}-[:`${UpdatedToPost.relationType}`|`${DeletedToHidden}`|`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->${postDef.toQuery}, ${userDef.toQuery}
       where ${requestDef.name}.applied = ${PENDING} or ${requestDef.name}.applied = ${INSTANT}
       set ${requestDef.name}._locked = true
       with ${postDef.name},${userDef.name},${requestDef.name}
@@ -67,6 +68,7 @@ trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefa
       }
 
       val postApplies = if (request.applied == PENDING && request.canApply) {
+        // delete request are never pending, so it is ok to search for posts instead of hidden
         val post = discourse.posts.head
         val success = applyChange(discourse, request, post, tx)
 
@@ -75,17 +77,22 @@ trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefa
           Right(Some(post))
         } else
           Left("Cannot apply changes automatically")
-      } else {
-        if (request.canReject) {
-          if (request.applied == INSTANT) {
-            //TODO: revert change
-            throw new Exception("Reverting instant changes not implemented")
+      } else if (request.canReject) {
+        if (request.applied == INSTANT) {
+          val post = discourse.posts.headOption.getOrElse(Post.wrap(discourse.hiddens.head.rawItem))
+          val success = unapplyChange(discourse, request, post, tx)
+          if (success) {
+            request.applied = REJECTED
+            Right(Some(post))
+          } else {
+            Left("Cannot unapply changes automatically")
           }
-
+        } else {
           request.applied = REJECTED
+          Right(None)
         }
-
-        Right(None)
+      } else {
+          Right(None)
       }
 
       postApplies match {
@@ -117,6 +124,20 @@ case class VotesUpdatedAccess(
   ) extends VotesChangeRequestAccess[Updated] {
     override def nodeDefinition(uuid: String) = FactoryUuidNodeDefinition(Updated, uuid)
     override def selectNode(discourse: Discourse) = discourse.updateds.head
+    override def unapplyChange(discourse: Discourse, request: Updated, post: Post, tx:QueryHandler) = {
+      val changesTitle = request.oldTitle != request.newTitle
+      val changesDesc = request.oldDescription != request.newDescription
+      if (changesTitle && post.title != request.newTitle || changesDesc && post.description != request.newDescription) {
+        false
+      } else {
+        if (changesTitle)
+          post.title = request.oldTitle
+        if (changesDesc)
+          post.description = request.oldDescription
+
+        true
+      }
+    }
     override def applyChange(discourse: Discourse, request: Updated, post: Post, tx:QueryHandler) = {
       val changesTitle = request.oldTitle != request.newTitle
       val changesDesc = request.oldDescription != request.newDescription
@@ -133,11 +154,42 @@ case class VotesUpdatedAccess(
     }
 }
 
+case class VotesDeletedAccess(
+  sign: Long
+  ) extends VotesChangeRequestAccess[Deleted] {
+    override def nodeDefinition(uuid: String) = FactoryUuidNodeDefinition(Deleted, uuid)
+    override def selectNode(discourse: Discourse) = discourse.deleteds.head
+    override def unapplyChange(discourse: Discourse, request: Deleted, post: Post, tx:QueryHandler) = {
+      if (post.labels == Hidden.labels) {
+        val hidden = Hidden.wrap(post.rawItem)
+        hidden.unhide()
+        true
+      } else {
+        false
+      }
+    }
+    // we do not have noninstant delete changes, so no applychanges in voting
+    override def applyChange(discourse: Discourse, request: Deleted, post: Post, tx:QueryHandler) = ???
+}
+
 case class VotesTagsChangeRequestAccess(
   sign: Long
   ) extends VotesChangeRequestAccess[TagChangeRequest] {
     override def nodeDefinition(uuid: String) = FactoryUuidNodeDefinition(TagChangeRequest, uuid)
     override def selectNode(discourse: Discourse) = discourse.tagChangeRequests.head
+    override def unapplyChange(discourse: Discourse, req: TagChangeRequest, post: Post, tx:QueryHandler) = {
+      val tagDef = ConcreteFactoryNodeDefinition(Scope)
+      val tagsDef = RelationDefinition(nodeDefinition(req.uuid), ProposesTag, tagDef)
+      val scope = Discourse(tx.queryGraph(Query(s"match ${tagsDef.toQuery} return ${tagDef.name}", tagsDef.parameterMap))).scopes.head
+      req match {
+        case request: AddTags =>
+          discourse.remove(Tags.matches(scope, post))
+        case request: RemoveTags =>
+          discourse.add(Tags.merge(scope, post))
+      }
+
+      true
+    }
     override def applyChange(discourse: Discourse, req: TagChangeRequest, post: Post, tx:QueryHandler) = {
       // we need to get the tag which is connected to the request
       // TODO: resolve matches startnode via relation in renesca?

@@ -25,3 +25,11 @@ object TagsRequests extends Nodes[TagChangeRequest] {
     "neutral" -> (N < VotesTagsChangeRequestAccess(0))
   )
 }
+
+object DeleteRequests extends Nodes[Deleted] {
+  val node = NodeDef("RequestsDelete", NodeNothing(Deleted),
+    "up" -> (N < VotesDeletedAccess(1)),
+    "down" -> (N < VotesDeletedAccess(-1)),
+    "neutral" -> (N < VotesDeletedAccess(0))
+  )
+}
