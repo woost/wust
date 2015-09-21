@@ -51,6 +51,8 @@ sealed trait HyperNodeDefinitionBase[+NODE <: Node] extends FixedNodeDefinition[
   val endName: String
   val startRelationName: String
   val endRelationName: String
+  val startDefinition: NodeDefinition[_]
+  val endDefinition: NodeDefinition[_]
 }
 
 sealed trait UuidNodeDefinition[+NODE <: UuidNode] extends FixedNodeDefinition[NODE] {
