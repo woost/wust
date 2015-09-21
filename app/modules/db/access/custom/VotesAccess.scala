@@ -53,7 +53,7 @@ trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefa
 
       val karma = 1 // TODO karma
       val authorBoost = if (discourse.createds.isEmpty) 0 else Moderation.authorKarmaBoost
-      val weight = sign * (karma + authorBoost) // TODO karma
+      val weight = sign * (karma + authorBoost)
       if (weight == 0) {
         // if there are any existing votes, disconnect them
         votes.foreach(discourse.graph.relations -= _.rawItem)
@@ -214,6 +214,7 @@ trait VotesReferenceAccess[T <: Reference] extends EndRelationAccessDefault[User
   def nodeDefinition(startUuid: String, endUuid: String): HyperNodeDefinitionBase[T]
   def selectNode(discourse: Discourse, startUuid: String, endUuid: String): T
   def selectPost(reference: T): Post
+  def updateKarma(tx: QueryHandler, reference: T, karma: Long): Unit
 
   override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Votable with AbstractRelation[S,E], E]) = context.withUser { user =>
     db.transaction { tx =>
@@ -236,7 +237,10 @@ trait VotesReferenceAccess[T <: Reference] extends EndRelationAccessDefault[User
 
       val success = if (weight == 0) {
         // if there are any existing votes, disconnect them
-        votes.foreach(discourse.graph.relations -= _.rawItem)
+        votes.foreach { vote =>
+          updateKarma(tx, reference, -vote.weight)
+          discourse.remove(vote)
+        }
         true
       } else {
         // we want to vote on the change request with our weight. we merge the
@@ -246,6 +250,7 @@ trait VotesReferenceAccess[T <: Reference] extends EndRelationAccessDefault[User
         reference.voteCount += weight
         val newVotes = Votes.merge(user, reference, weight = weight, onMatch = Set("weight"))
         discourse.add(newVotes)
+        updateKarma(tx, reference, weight)
       }
 
       val post = selectPost(reference)
@@ -276,6 +281,24 @@ case class VotesTagsAccess(sign: Long) extends VotesReferenceAccess[Tags] {
   }
 
   override def selectPost(reference: Tags) = reference.endNodeOpt.get
+
+  override def updateKarma(tx: QueryHandler, reference: Tags, karma: Long) {
+    val tagDef = ConcreteNodeDefinition(reference.startNodeOpt.get)
+    val postDef = ConcreteNodeDefinition(reference.endNodeOpt.get)
+    val userDef = ConcreteFactoryNodeDefinition(User)
+    val createdDef = RelationDefinition(userDef, SchemaCreated, postDef)
+
+    val query = s"""
+    match ${createdDef.toQuery}, ${tagDef.toQuery}
+    merge (${userDef.name})-[r:`${HasKarma.relationType}`]->(${tagDef.name})
+    on create set r.karma = {karma}
+    on match set r.karma = r.karma + {karma}
+    """
+
+    val params = tagDef.parameterMap ++ createdDef.parameterMap ++ Map("karma" -> karma)
+
+    tx.query(query, params)
+  }
 }
 
 case class VotesConnectsAccess(sign: Long) extends VotesReferenceAccess[Connects] {
@@ -287,4 +310,24 @@ case class VotesConnectsAccess(sign: Long) extends VotesReferenceAccess[Connects
   }
 
   override def selectPost(reference: Connects) = reference.startNodeOpt.get
+
+  override def updateKarma(tx: QueryHandler, reference: Connects, karma: Long) {
+    val connDef = ConcreteNodeDefinition(reference.endNodeOpt.get)
+    val postDef = ConcreteNodeDefinition(reference.startNodeOpt.get)
+    val userDef = ConcreteFactoryNodeDefinition(User)
+    val createdDef = RelationDefinition(userDef, SchemaCreated, postDef)
+
+    val query = s"""
+    match ${createdDef.toQuery}
+    ${connDef.toQuery}-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`),
+    (tag: `${Scope.label}`)-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`)
+    merge (${userDef.name})-[r:`${HasKarma.relationType}`]->(tag)
+    on create set r.karma = {karma}
+    on match set r.karma = r.karma + {karma}
+    """
+
+    val params = connDef.parameterMap ++ createdDef.parameterMap ++ Map("karma" -> karma)
+
+    tx.query(query, params)
+  }
 }
