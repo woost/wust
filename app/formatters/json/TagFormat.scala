@@ -18,6 +18,12 @@ object TagFormat {
     ("symbol", tag.symbol.map(JsString(_)).getOrElse(JsNull))
   )
 
+  def karmaTagWriter(tag: Scope) = JsObject(
+    tagLikeToSeq(tag) ++ Seq(
+      ("karma", tag.inRelationsAs(HasKarma).headOption.map(has => JsNumber(has.karma)).getOrElse(JsNull))
+    )
+  )
+
   def classificationWriter(post: Post, tuple: (Classification, Seq[Connects])): JsObject = {
     val (classification, connectsList) = tuple
     val quality = connectsList.map(c => c.quality(post.viewCount)).sum / connectsList.size

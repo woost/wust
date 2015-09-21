@@ -2,6 +2,7 @@ package modules.db.access.custom
 
 import controllers.api.nodes._
 import formatters.json.RequestFormat._
+import formatters.json.TagFormat.karmaTagWriter
 import model.WustSchema.{Created => SchemaCreated, _}
 import modules.db.Database.db
 import modules.db._
@@ -67,4 +68,20 @@ case class UserContributions() extends RelationAccessDefault[User, Post] {
     Ok(Json.toJson(discourse.posts))
   }
 
+}
+
+case class UserHasKarma() extends StartRelationAccessDefault[User, HasKarma, Scope] {
+  val nodeFactory = Scope
+
+  override def read(context: RequestContext, param: ConnectParameter[User]) = {
+    val userDef = FactoryUuidNodeDefinition(User, param.baseUuid)
+    val contextDef = ConcreteFactoryNodeDefinition(Scope)
+    val karmaDef = RelationDefinition(userDef, HasKarma, contextDef)
+
+    val query = s"match ${ karmaDef.toQuery } return *"
+    val params = karmaDef.parameterMap
+    val discourse = Discourse(db.queryGraph(query, params))
+
+    Ok(JsArray(discourse.scopes.map(karmaTagWriter)))
+  }
 }

@@ -52,11 +52,14 @@ object WustSchema {
   @Node class User extends UuidNode with Identity {
     @unique val name: String
     var email: Option[String]
-    var karma: Long = 0
   }
   @Node class LoginInfo {
     val providerID: String
     @unique val providerKey: String
+  }
+
+  @Relation class HasKarma(startNode: User, endNode: Scope) {
+    var karma: Long = 0
   }
 
   @Node class PasswordInfo {
