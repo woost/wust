@@ -26,9 +26,17 @@ case class InstantChangeRequestAccess() extends NodeAccessDefault[ChangeRequest]
     val connDef = RelationDefinition(postDef, PostToConnects, connectsDef)
     val classifiesDef = RelationDefinition(ConcreteFactoryNodeDefinition(Classification), Classifies, connectsDef)
 
+    val (userMatcher, userCondition, userParams) = context.user.map { user =>
+      val userDef = ConcreteNodeDefinition(user)
+      val matcher = s", ${userDef.toQuery}"
+      val condition = s"and not((${userDef.name})-[:`${Votes.relationType}`]->(${crDef.name}))"
+      (matcher, condition, userDef.parameterMap)
+    }.getOrElse(("", "", Map.empty))
+
     val query = s"""
-    match ${ crDef.toQuery }-[relation:`${ UpdatedToPost.relationType }`|`${ DeletedToHidden.relationType }`|`${ AddTagsToPost.relationType }`|`${ RemoveTagsToPost.relationType }`]->${ postDef.toQuery }
-    where ${ crDef.name }.applied = ${ INSTANT } OR ${ crDef.name }.applied = ${ PENDING }
+    match ${ crDef.toQuery }-[relation:`${ UpdatedToPost.relationType }`|`${ DeletedToHidden.relationType }`|`${ AddTagsToPost.relationType }`|`${ RemoveTagsToPost.relationType }`]->${ postDef.toQuery } $userMatcher
+    where (${ crDef.name }.applied = ${ INSTANT } OR ${ crDef.name }.applied = ${ PENDING })
+    $userCondition
     with ${ postDef.name }, relation, ${ crDef.name } order by ${ crDef.name }.timestamp skip ${ skip } limit ${ limit }
     optional match ${ crTagsDef.toQuery(false, true) }
     optional match ${ tagsDef.toQuery(true, false) }
@@ -36,7 +44,7 @@ case class InstantChangeRequestAccess() extends NodeAccessDefault[ChangeRequest]
     return *
     """
 
-    val params = crDef.parameterMap ++ tagsDef.parameterMap ++ connDef.parameterMap ++ classifiesDef.parameterMap
+    val params = userParams ++ crDef.parameterMap ++ tagsDef.parameterMap ++ connDef.parameterMap ++ classifiesDef.parameterMap
 
     val discourse = Discourse(db.queryGraph(query, params))
 
