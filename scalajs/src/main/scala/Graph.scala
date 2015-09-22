@@ -184,7 +184,8 @@ class Node(val rawNode: RawNode, inHyperGraph: Boolean) extends NodeBase {
   override def classifications:Set[RecordTag] = {
     val accessor = if (inHyperGraph) outRelations else successors
     val connects = accessor.collect { case hr: HyperRelation => hr }
-    if (connects.isEmpty)
+
+    val connectsClassifications = if (connects.isEmpty)
       rawNode.classifications // already contains quality
     else {
       // remove duplicates by id
@@ -200,6 +201,11 @@ class Node(val rawNode: RawNode, inHyperGraph: Boolean) extends NodeBase {
           tag
       }.toSet
     }
+
+    //TODO quality for tag classifications
+    val tagsClassifications = tags.flatMap(_.classifications.map(_.toSet).getOrElse(Set.empty))
+
+    (connectsClassifications ++ tagsClassifications).groupBy(_.id).map(_._2.head).toSet
   }
 
   @JSExport def encode() = js.Dynamic.literal(id = id, title = title, description = description.orUndefined, timestamp = timestamp, quality = quality, viewCount = viewCount, classifications = classificationsJs, isHyperRelation = isHyperRelation, tags = tags)
@@ -604,6 +610,8 @@ trait RecordTag extends js.Object {
   val isContext: Boolean
   val color: Int
   val symbol: js.UndefOr[String]
+  //TODO: own type for classifications
+  val classifications: js.UndefOr[js.Array[RecordTag]]
 }
 
 @js.native
