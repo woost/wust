@@ -1,8 +1,8 @@
 <div id="neighbours_component">
     <div>
         <div class="btn-group" ng-model="vm.component.rootNode.successorOrder" bs-radio-group>
-            <label class="btn btn-default"><input type="radio" class="btn btn-default" value="0"> Relvance</label>
-            <label class="btn btn-default"><input type="radio" class="btn btn-default" value="1"> Time</label>
+            <label class="btn btn-default fa fa-sort-amount-desc"><input type="radio" class="btn btn-default" value="0"> Votes</label>
+            <label class="btn btn-default fa fa-sort-amount-asc"><input type="radio" class="btn btn-default" value="1"> Time</label>
         </div>
         <div discourse-node-list node-model='vm.references.model' is-loading="vm.isLoading" class="neighbours_attachedto discourse_node_list_horizontal" template-before="components/focus/neighbours/predecessors_connection.html"></div>
     </div>
@@ -11,10 +11,10 @@
         <h3 ng-show="vm.parallels.model.list.length > 0">Sibling Posts:</h3>
         <div discourse-node-list node-model='vm.parallels.model' is-loading="vm.isLoading" class="parallels discourse_node_list_vertical"></div>
     </div>
-    <div>
-        <div class="btn-group" ng-model="vm.component.rootNode.predecessorOrder" bs-radio-group>
-            <label class="btn btn-default"><input type="radio" class="btn btn-default" value="0"> Relvance</label>
-            <label class="btn btn-default"><input type="radio" class="btn btn-default" value="1"> Time</label>
+    <div class="text-right">
+        <div class="btn-group text-right" ng-model="vm.component.rootNode.predecessorOrder" bs-radio-group>
+            <label class="btn btn-default fa fa-sort-amount-desc"><input type="radio" class="btn btn-default" value="0"> Votes</label>
+            <label class="btn btn-default fa fa-sort-amount-asc"><input type="radio" class="btn btn-default" value="1"> Time</label>
         </div>
         <div discourse-node-list node-model='vm.replies.model' is-loading="vm.isLoading" class="neighbours_followers discourse_node_list_horizontal" template-before="components/focus/neighbours/followers_connection.html"></div>
     <div>
