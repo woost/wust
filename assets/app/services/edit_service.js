@@ -139,11 +139,17 @@ function EditService(Post, Connectable, Connects, HistoryService, store, Discour
                 }
 
                 this.apply(data);
-                storeEditList();
 
                 if (referenceNode === undefined) {
                     HistoryService.updateCurrentView(this.encode());
                 }
+
+                if (!this.visible) {
+                    _.remove(self.list, this);
+                }
+
+                storeEditList();
+
             }, response => {
                 humane.error(response.$response.data);
                 this.setValidityProperties();
@@ -193,7 +199,7 @@ function EditService(Post, Connectable, Connects, HistoryService, store, Discour
 
         remove() {
             _.remove(self.list, this);
-            this.onChange();
+            storeEditList();
         }
 
         deleteNode() {
