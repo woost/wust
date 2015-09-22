@@ -34,7 +34,7 @@ function VotesCtrl(InstantRequests, RequestsTags, RequestsEdit, RequestsDelete) 
             changes.splice(changeindex, 1);
             changeindex -= 1;
             next();
-        });
+        }, resp => humane.error(resp.$response.data));
     }
 
     function downvote() {
@@ -44,7 +44,7 @@ function VotesCtrl(InstantRequests, RequestsTags, RequestsEdit, RequestsDelete) 
             changes.splice(changeindex, 1);
             changeindex -= 1;
             next();
-        });
+        }, resp => humane.error(resp.$response.data));
     }
 
     function next() {
