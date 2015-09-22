@@ -259,6 +259,10 @@ object Database {
     val query = s"""
 match ${ focusNode.toQuery }-[connects:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(connectable:`${ Connectable.label }`)
 with distinct connectable, connects
+
+match (connectable) where (:`${Connectable.label}`)<-[:`${Connects.startRelationType}`]-(connectable:`${Connects.label}`)-[:`${Connects.endRelationType}`]-(:`${Post.label}`) OR (connectable:`${Post.label}`)
+with connectable, connects
+
 optional match (context:`${ Scope.label }`)-[contexttotags:`${ Tags.startRelationType }`]->(tags:`${ Tags.label }`)-[tagstopost:`${ Tags.endRelationType }`]->(connectable:`${ Post.label }`)
 optional match (classification:`${ Classification.label }`)-[classifies:`${ Classifies.relationType }`]->(connectable:`${ Connects.label }`)
 optional match (:`${ User.label }` {uuid: {useruuid}})-[selfanswervoted :`${ Votes.relationType }`]->(connectable:`${ Connects.label }`)
@@ -267,6 +271,7 @@ return connectable,connects,context,tags,contexttotags,tagstopost, classificatio
 
     val useruuid = identity.map(_.uuid).getOrElse("") //TODO: do not write empty string into query
     val params = focusNode.parameterMap + ("useruuid" -> useruuid)
+
     val (graph, table) = db.queryGraphsAndTables(Query(query, params)).head
     val component = Discourse(graph)
 
