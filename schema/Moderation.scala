@@ -20,13 +20,11 @@ object Moderation {
 
   //TODO: reason why vote weight should be logarithmic
   def voteWeight(votersKarma: Long) = log(votersKarma)
-  def authorsKarmaAfterPostVote(authorsKarma:Long, votersKarma:Long) = authorsKarma + voteWeight(votersKarma)
+  def postVoteKarma = 1
 
   def postChangeThreshold(viewCount: Long) = sqrt(viewCount)
-  def authorsKarmaAfterPostChangeAccept(authorsKarma: Long, viewCount: Long) = authorsKarma + postChangeThreshold(viewCount)
 
   def rejectPostChangeThreshold(applyThreshold: Long) = -applyThreshold / 2
-  def authorsKarmaAfterPostChangeReject(authorsKarma: Long, viewCount: Long) = authorsKarma - postChangeThreshold(viewCount)
 
   def postQuality(upVotes:Long, downVotes:Long) = (upVotes + votes_u*votes_p) / (downVotes + upVotes + votes_u)
 

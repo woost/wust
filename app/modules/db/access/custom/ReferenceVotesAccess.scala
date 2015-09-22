@@ -24,7 +24,8 @@ trait VotesReferenceAccess[T <: Reference] extends EndRelationAccessDefault[User
 
   override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Votable with AbstractRelation[S,E], E]) = context.withUser { user =>
     db.transaction { tx =>
-      val weight = sign // TODO: karma
+
+      val weight = sign * Moderation.postVoteKarma
       val referenceDef = nodeDefinition(param.startUuid, param.endUuid)
       val userDef = ConcreteNodeDefinition(user)
       val votesDef = RelationDefinition(userDef, Votes, referenceDef)
