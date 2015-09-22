@@ -204,8 +204,9 @@ with connectable, connects
 
 optional match (context:`${ Scope.label }`)-[contexttotags:`${ Tags.startRelationType }`]->(tags:`${ Tags.label }`)-[tagstopost:`${ Tags.endRelationType }`]->(connectable:`${ Post.label }`)
 optional match (classification:`${ Classification.label }`)-[classifies:`${ Classifies.relationType }`]->(connectable:`${ Connects.label }`)
+optional match (tagclassification:`${ Classification.label }`)-[tagclassifies:`${ Classifies.relationType }`]->(tags)
 optional match (:`${ User.label }` {uuid: {useruuid}})-[selfanswervoted :`${ Votes.relationType }`]->(connectable:`${ Connects.label }`)
-return connectable,connects,context,tags,contexttotags,tagstopost, classification, classifies, count(selfanswervoted) as selfanswervotecount
+return connectable,connects,context,tags,contexttotags,tagstopost, classification, classifies, count(selfanswervoted) as selfanswervotecount,tagclassification,tagclassifies
     """
 
     val useruuid = identity.map(_.uuid).getOrElse("") //TODO: do not write empty string into query

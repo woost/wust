@@ -19,11 +19,13 @@ object TaggedTaggable {
   def shapeResponse[NODE <: UuidNode](response: Iterable[NODE]): Iterable[NODE] = {
     if(!response.isEmpty) {
       val tagDef = ConcreteFactoryNodeDefinition(Scope)
-      val classDef = ConcreteFactoryNodeDefinition(Classification)
       val nodeDef = ConcreteFactoryNodeDefinition(Post)
       val connectsDef = ConcreteFactoryNodeDefinition(Connects)
-      val tagsDef = RelationDefinition(tagDef, Tags, nodeDef)
+      val tagsDef = HyperNodeDefinition(tagDef, Tags, nodeDef)
+      val tagClassDef = ConcreteFactoryNodeDefinition(Classification)
+      val tagClassifiesDef = RelationDefinition(tagClassDef, Classifies, tagsDef)
       val connDef = RelationDefinition(nodeDef, PostToConnects, connectsDef)
+      val classDef = ConcreteFactoryNodeDefinition(Classification)
       val classifiesDef = RelationDefinition(classDef, Classifies, connectsDef)
 
       val query = s"""
@@ -33,7 +35,7 @@ object TaggedTaggable {
       return *
       """
 
-      val params = tagsDef.parameterMap ++ connDef.parameterMap ++ classifiesDef.parameterMap ++ Map("nodeUuids" -> response.map(_.uuid).toSeq)
+      val params = tagsDef.parameterMap ++ connDef.parameterMap ++ tagClassifiesDef.parameterMap ++ classifiesDef.parameterMap ++ Map("nodeUuids" -> response.map(_.uuid).toSeq)
 
       val graph = db.queryGraph(Query(query, params.toMap))
       val discourse = Discourse(response.head.graph merge graph)

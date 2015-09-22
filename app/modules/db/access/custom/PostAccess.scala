@@ -153,11 +153,13 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
     import formatters.json.PostFormat._
 
     val tagDef = ConcreteFactoryNodeDefinition(Scope)
-    val classDef = ConcreteFactoryNodeDefinition(Classification)
     val nodeDef = FactoryUuidNodeDefinition(factory, uuid)
     val connectsDef = ConcreteFactoryNodeDefinition(Connects)
     val tagsDef = HyperNodeDefinition(tagDef, Tags, nodeDef)
+    val tagClassDef = ConcreteFactoryNodeDefinition(Classification)
+    val tagClassifiesDef = RelationDefinition(tagClassDef, Classifies, tagsDef)
     val connDef = RelationDefinition(nodeDef, PostToConnects, connectsDef)
+    val classDef = ConcreteFactoryNodeDefinition(Classification)
     val classifiesDef = RelationDefinition(classDef, Classifies, connectsDef)
 
     val (ownVoteCondition, ownVoteParams) = context.user.map { user =>
@@ -168,13 +170,13 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
 
     val query = s"""
     match ${nodeDef.toQuery}
-    optional match ${tagsDef.toQuery(true, false)}
+    optional match ${tagsDef.toQuery(true, false)}, ${tagClassifiesDef.toQuery(true, false)}
     $ownVoteCondition
     optional match ${connDef.toQuery(false, true)}, ${classifiesDef.toQuery(true, false)}
     return *
     """
 
-    val params = tagsDef.parameterMap ++ connDef.parameterMap ++ classifiesDef.parameterMap ++ ownVoteParams
+    val params = tagsDef.parameterMap ++ connDef.parameterMap ++ tagClassifiesDef.parameterMap ++ classifiesDef.parameterMap ++ ownVoteParams
 
     val discourse = Discourse(db.queryGraph(Query(query, params)))
     discourse.posts.headOption match {

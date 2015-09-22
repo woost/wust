@@ -16,6 +16,7 @@ package object types {
 
 }
 
+
 sealed trait GraphDefinition {
   def toQuery: String
   final val name = randomVariable
@@ -161,7 +162,7 @@ END <: Node,
 
 case class HyperNodeDefinition[
 START <: Node,
-RELATION <: HyperRelation[START, _, RELATION, _, END],
+RELATION <: AbstractRelation[START, END] with UuidNode,
 END <: Node,
 STARTDEF <: NodeDefinition[START],
 ENDDEF <: NodeDefinition[END]
@@ -197,15 +198,14 @@ ENDDEF <: NodeDefinition[END]
   nodeUuid: Option[String] = None) extends RelationDefinitionBase[START, RELATION, END, STARTDEF, ENDDEF] {
 
   def relationMatcher = {
-    ""
-    // val (startRelationTypes, labels, endRelationTypes) = factories.collect { case r: HyperRelationFactory[_,_,_,_,_] => r }.map { r =>
-    //   (r.startRelationType, r.label, r.endRelationType)
-    // }.unzip3
+    val (startRelationTypes, labels, endRelationTypes) = factories.map { r =>
+      (r.startRelationType, r.label, r.endRelationType)
+    }.unzip3
 
-    // val startRelation = s"[$startRelationName: ${ startRelationTypes.map(l => s"`$l`").mkString } ]"
-    // val endRelation = s"[$endRelationName: ${ endRelationTypes.map(l => s"`$l`").mkString } ]"
-    // val node = s"($name ${ labels.map(l => s":`$l`").mkString } ${ nodeUuidMatcher })"
-    // s"$startRelation->$node->$endRelation"
+    val startRelation = s"[$startRelationName: ${ startRelationTypes.map(l => s"`$l`").mkString } ]"
+    val endRelation = s"[$endRelationName: ${ endRelationTypes.map(l => s"`$l`").mkString } ]"
+    val node = s"($name ${ labels.map(l => s":`$l`").mkString } ${ nodeUuidMatcher })"
+    s"$startRelation->$node->$endRelation"
   }
 }
 
