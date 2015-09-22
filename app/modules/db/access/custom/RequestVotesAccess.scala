@@ -24,7 +24,6 @@ trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefa
   def applyChange(discourse: Discourse, request: T, post: Post, tx:QueryHandler): Boolean
   def unapplyChange(discourse: Discourse, request: T, post: Post, tx: QueryHandler): Boolean
 
-  //TODO: optimize to one request with multiple statements
   override def create(context: RequestContext, param: ConnectParameter[Votable]) = context.withUser { user =>
     db.transaction { tx =>
       // first we match the actual change request and aquire a write lock,
@@ -56,7 +55,7 @@ trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefa
       val weight = sign * (karma + authorBoost)
       if (weight == 0) {
         // if there are any existing votes, disconnect them
-        votes.foreach(discourse.graph.relations -= _.rawItem)
+        votes.foreach(discourse.remove(_))
       } else {
         // we want to vote on the change request with our weight. we merge the
         // votes relation as we want to override any previous vote. merging is
