@@ -29,7 +29,10 @@ case class InstantChangeRequestAccess() extends NodeAccessDefault[ChangeRequest]
     val (userMatcher, userCondition, userParams) = context.user.map { user =>
       val userDef = ConcreteNodeDefinition(user)
       val matcher = s", ${userDef.toQuery}"
-      val condition = s"and not((${userDef.name})-[:`${Votes.relationType}`]->(${crDef.name}))"
+      val condition = s"""
+      and not((${userDef.name})-[:`${Votes.relationType}`]->(${crDef.name}))
+      and not((${userDef.name})-[:`${UserToUpdated.relationType}`|`${UserToDeleted.relationType}`|`${UserToAddTags.relationType}`|`${UserToRemoveTags.relationType}`]->(${crDef.name}))
+      """
       (matcher, condition, userDef.parameterMap)
     }.getOrElse(("", "", Map.empty))
 
