@@ -32,6 +32,7 @@ function scratchpadCtrl(EditService, SidebarService, ContextService) {
 
     function editNewPost() {
         let session = EditService.edit(vm.newPost);
+        session.visible = true;
         session.tags = angular.copy(ContextService.currentContexts);
 
         vm.newPost.title = "";

@@ -25,11 +25,12 @@ function EditService(Post, Connectable, Connects, HistoryService, store, Discour
         }
 
         apply({
-            id, title, description, label, original, tags, localId, referenceNode, newDiscussion, isHyperRelation, classifications, startId, endId
+            id, title, description, label, original, tags, localId, referenceNode, newDiscussion, isHyperRelation, classifications, startId, endId, visible
         }) {
             tags = tags || [];
             classifications = classifications || [];
             this.id = id;
+            this.visible = visible === undefined ? this.visible : !!visible;
             this.startId = startId;
             this.endId = endId;
             this.localId = localId === undefined ? this.localId : localId;
