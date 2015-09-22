@@ -8,6 +8,11 @@ function UserDetailsCtrl($stateParams, User, Auth, $q) {
     vm.user = User.$find($stateParams.id);
     vm.isCurrentUser = $stateParams.id === Auth.current.userId;
     vm.saveUser = saveUser;
+    vm.karmaTags = User.$buildRaw({id: $stateParams.id}).karma.$search();
+    vm.karmaSum = 0;
+    vm.karmaTags.$then(tags => {
+        vm.karmaSum = tags.map(t => t.karma).reduce((a,b) => a+b);
+    });
 
     let size = 20;
     let page = 0;

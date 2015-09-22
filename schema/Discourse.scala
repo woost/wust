@@ -37,7 +37,7 @@ object WustSchema {
     }
   }
 
-  @Node class Hidden {
+  @Node class Hidden extends UuidNode {
     var backupLabels: String = ""
 
     def unhide() {

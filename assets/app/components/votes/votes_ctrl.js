@@ -40,7 +40,7 @@ function VotesCtrl(InstantRequests, RequestsTags, RequestsEdit, RequestsDelete) 
     function downvote() {
         let service = serviceMap[vm.change.type];
         service.$buildRaw(_.pick(vm.change, "id")).down.$create().$then(response => {
-            humane.success("Upvoted change request");
+            humane.success("Downvoted change request");
             changes.splice(changeindex, 1);
             changeindex -= 1;
             next();

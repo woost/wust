@@ -23,6 +23,7 @@ trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefa
   def selectNode(discourse: Discourse): T
   def applyChange(discourse: Discourse, request: T, post: Post, tx:QueryHandler): Boolean
   def unapplyChange(discourse: Discourse, request: T, post: Post, tx: QueryHandler): Boolean
+  def updateKarma(tx: QueryHandler, request: T, karma: Long): Unit
 
   override def create(context: RequestContext, param: ConnectParameter[Votable]) = context.withUser { user =>
     db.transaction { tx =>
@@ -34,14 +35,15 @@ trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefa
       val votesDef = RelationDefinition(userDef, Votes, requestDef)
       val createdDef = RelationDefinition(userDef, SchemaCreated, postDef)
 
+      //TODO: separate queries for subclasses
       val query = s"""
-      match ${requestDef.toQuery}-[:`${UpdatedToPost.relationType}`|`${DeletedToHidden.relationType}`|`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->${postDef.toQuery}, ${userDef.toQuery}
+      match (user:`${User.label}`)-[updated1:`${UserToUpdated.relationType}`|`${UserToDeleted.relationType}`|`${UserToAddTags.relationType}`|`${UserToRemoveTags.relationType}`]->${requestDef.toQuery}-[updated2:`${UpdatedToPost.relationType}`|`${DeletedToHidden.relationType}`|`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->${postDef.toQuery}, ${userDef.toQuery}
       where ${requestDef.name}.applied = ${PENDING} or ${requestDef.name}.applied = ${INSTANT}
       set ${requestDef.name}._locked = true
-      with ${postDef.name},${userDef.name},${requestDef.name}
+      with ${postDef.name},${userDef.name},${requestDef.name}, updated1, updated2
       optional match ${votesDef.toQuery(false, false)}
       optional match ${createdDef.toQuery(false,false)}
-      return ${createdDef.name},${postDef.name},${requestDef.name},${votesDef.name}
+      return *
       """
 
       val discourse = Discourse(tx.queryGraph(query, createdDef.parameterMap ++ votesDef.parameterMap))
@@ -73,6 +75,7 @@ trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefa
 
         if (success) {
           request.applied = APPLIED
+          updateKarma(tx, request, request.applyThreshold)
           Right(Some(post))
         } else
           Left("Cannot apply changes automatically")
@@ -82,6 +85,7 @@ trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefa
           val success = unapplyChange(discourse, request, post, tx)
           if (success) {
             request.applied = REJECTED
+            updateKarma(tx, request, -request.applyThreshold)
             Right(Some(post))
           } else {
             Left("Cannot unapply changes automatically")
@@ -121,88 +125,153 @@ trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefa
 case class VotesUpdatedAccess(
   sign: Long
   ) extends VotesChangeRequestAccess[Updated] {
-    override def nodeDefinition(uuid: String) = FactoryUuidNodeDefinition(Updated, uuid)
-    override def selectNode(discourse: Discourse) = discourse.updateds.head
-    override def unapplyChange(discourse: Discourse, request: Updated, post: Post, tx:QueryHandler) = {
-      val changesTitle = request.oldTitle != request.newTitle
-      val changesDesc = request.oldDescription != request.newDescription
-      if (changesTitle && post.title != request.newTitle || changesDesc && post.description != request.newDescription) {
-        false
-      } else {
-        if (changesTitle)
-          post.title = request.oldTitle
-        if (changesDesc)
-          post.description = request.oldDescription
 
-        true
-      }
-    }
-    override def applyChange(discourse: Discourse, request: Updated, post: Post, tx:QueryHandler) = {
-      val changesTitle = request.oldTitle != request.newTitle
-      val changesDesc = request.oldDescription != request.newDescription
-      if (changesTitle && post.title != request.oldTitle || changesDesc && post.description != request.oldDescription) {
-        false
-      } else {
-        if (changesTitle)
-          post.title = request.newTitle
-        if (changesDesc)
-          post.description = request.newDescription
+  override def nodeDefinition(uuid: String) = FactoryUuidNodeDefinition(Updated, uuid)
+  override def selectNode(discourse: Discourse) = discourse.updateds.head
+  override def unapplyChange(discourse: Discourse, request: Updated, post: Post, tx:QueryHandler) = {
+    val changesTitle = request.oldTitle != request.newTitle
+    val changesDesc = request.oldDescription != request.newDescription
+    if (changesTitle && post.title != request.newTitle || changesDesc && post.description != request.newDescription) {
+      false
+    } else {
+      if (changesTitle)
+        post.title = request.oldTitle
+      if (changesDesc)
+        post.description = request.oldDescription
 
-        true
-      }
+      true
     }
+  }
+  override def applyChange(discourse: Discourse, request: Updated, post: Post, tx:QueryHandler) = {
+    val changesTitle = request.oldTitle != request.newTitle
+    val changesDesc = request.oldDescription != request.newDescription
+    if (changesTitle && post.title != request.oldTitle || changesDesc && post.description != request.oldDescription) {
+      false
+    } else {
+      if (changesTitle)
+        post.title = request.newTitle
+      if (changesDesc)
+        post.description = request.newDescription
+
+      true
+    }
+  }
+
+  def updateKarma(tx: QueryHandler, request: Updated, karma: Long) {
+    val postDef = ConcreteNodeDefinition(request.endNodeOpt.get)
+    val userDef = ConcreteNodeDefinition(request.startNodeOpt.get)
+
+    val query = s"""
+    match ${userDef.toQuery},
+    (${postDef.name})-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`),
+    (tag: `${Scope.label}`)-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`)
+    with distinct tag, ${userDef.name}
+    merge (${userDef.name})-[r:`${HasKarma.relationType}`]->(tag)
+    on create set r.karma = {karma}
+    on match set r.karma = r.karma + {karma}
+    """
+
+    val params = postDef.parameterMap ++ userDef.parameterMap ++ Map("karma" -> karma)
+
+    tx.query(query, params)
+  }
 }
 
 case class VotesDeletedAccess(
   sign: Long
   ) extends VotesChangeRequestAccess[Deleted] {
-    override def nodeDefinition(uuid: String) = FactoryUuidNodeDefinition(Deleted, uuid)
-    override def selectNode(discourse: Discourse) = discourse.deleteds.head
-    override def unapplyChange(discourse: Discourse, request: Deleted, post: Post, tx:QueryHandler) = {
-      if (post.rawItem.labels.contains(Hidden.label)) {
-        val hidden = Hidden.wrap(post.rawItem)
-        hidden.unhide()
-        true
-      } else {
-        false
-      }
+
+  override def nodeDefinition(uuid: String) = FactoryUuidNodeDefinition(Deleted, uuid)
+  override def selectNode(discourse: Discourse) = discourse.deleteds.head
+  override def unapplyChange(discourse: Discourse, request: Deleted, post: Post, tx:QueryHandler) = {
+    if (post.rawItem.labels.contains(Hidden.label)) {
+      val hidden = Hidden.wrap(post.rawItem)
+      hidden.unhide()
+      true
+    } else {
+      false
     }
-    // we do not have noninstant delete changes, so no applychanges in voting
-    override def applyChange(discourse: Discourse, request: Deleted, post: Post, tx:QueryHandler) = ???
+  }
+  // we do not have noninstant delete changes, so no applychanges in voting
+  override def applyChange(discourse: Discourse, request: Deleted, post: Post, tx:QueryHandler) = ???
+
+  def updateKarma(tx: QueryHandler, request: Deleted, karma: Long) {
+    val postDef = ConcreteNodeDefinition(request.endNodeOpt.get)
+    val userDef = ConcreteNodeDefinition(request.startNodeOpt.get)
+
+    val query = s"""
+    match ${userDef.toQuery},
+    (${postDef.name})-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`),
+    (tag: `${Scope.label}`)-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`)
+    with distinct tag, ${userDef.name}
+    merge (${userDef.name})-[r:`${HasKarma.relationType}`]->(tag)
+    on create set r.karma = {karma}
+    on match set r.karma = r.karma + {karma}
+    """
+
+    val params = postDef.parameterMap ++ userDef.parameterMap ++ Map("karma" -> karma)
+
+    tx.query(query, params)
+  }
 }
 
 case class VotesTagsChangeRequestAccess(
   sign: Long
   ) extends VotesChangeRequestAccess[TagChangeRequest] {
-    override def nodeDefinition(uuid: String) = FactoryUuidNodeDefinition(TagChangeRequest, uuid)
-    override def selectNode(discourse: Discourse) = discourse.tagChangeRequests.head
-    override def unapplyChange(discourse: Discourse, req: TagChangeRequest, post: Post, tx:QueryHandler) = {
-      val tagDef = ConcreteFactoryNodeDefinition(Scope)
-      val tagsDef = RelationDefinition(nodeDefinition(req.uuid), ProposesTag, tagDef)
-      val scope = Discourse(tx.queryGraph(Query(s"match ${tagsDef.toQuery} return ${tagDef.name}", tagsDef.parameterMap))).scopes.head
-      req match {
-        case request: AddTags =>
-          discourse.remove(Tags.matches(scope, post))
-        case request: RemoveTags =>
-          discourse.add(Tags.merge(scope, post))
-      }
 
-      true
-    }
-    override def applyChange(discourse: Discourse, req: TagChangeRequest, post: Post, tx:QueryHandler) = {
-      // we need to get the tag which is connected to the request
-      // TODO: resolve matches startnode via relation in renesca?
-      val tagDef = ConcreteFactoryNodeDefinition(Scope)
-      val tagsDef = RelationDefinition(nodeDefinition(req.uuid), ProposesTag, tagDef)
-      val scope = Discourse(tx.queryGraph(Query(s"match ${tagsDef.toQuery} return ${tagDef.name}", tagsDef.parameterMap))).scopes.head
-      req match {
-        case request: AddTags =>
-          discourse.add(Tags.merge(scope, post))
-        case request: RemoveTags =>
-          discourse.remove(Tags.matches(scope, post))
-      }
+  override def nodeDefinition(uuid: String) = FactoryUuidNodeDefinition(TagChangeRequest, uuid)
+  override def selectNode(discourse: Discourse) = discourse.tagChangeRequests.head
 
-      true
+  override def unapplyChange(discourse: Discourse, req: TagChangeRequest, post: Post, tx:QueryHandler) = {
+    val tagDef = ConcreteFactoryNodeDefinition(Scope)
+    val tagsDef = RelationDefinition(nodeDefinition(req.uuid), ProposesTag, tagDef)
+    val scope = Discourse(tx.queryGraph(Query(s"match ${tagsDef.toQuery} return ${tagDef.name}", tagsDef.parameterMap))).scopes.head
+    req match {
+      case request: AddTags =>
+        discourse.remove(Tags.matches(scope, post))
+      case request: RemoveTags =>
+        discourse.add(Tags.merge(scope, post))
     }
+
+    true
+  }
+
+  override def applyChange(discourse: Discourse, req: TagChangeRequest, post: Post, tx:QueryHandler) = {
+    // we need to get the tag which is connected to the request
+    // TODO: resolve matches startnode via relation in renesca?
+    val tagDef = ConcreteFactoryNodeDefinition(Scope)
+    val tagsDef = RelationDefinition(nodeDefinition(req.uuid), ProposesTag, tagDef)
+    val scope = Discourse(tx.queryGraph(Query(s"match ${tagsDef.toQuery} return ${tagDef.name}", tagsDef.parameterMap))).scopes.head
+    req match {
+      case request: AddTags =>
+        discourse.add(Tags.merge(scope, post))
+      case request: RemoveTags =>
+        discourse.remove(Tags.matches(scope, post))
+    }
+
+    true
+  }
+
+  override def updateKarma(tx: QueryHandler, req: TagChangeRequest, karma: Long) {
+    val tagDef = ConcreteFactoryNodeDefinition(Scope)
+    val tagsDef = RelationDefinition(nodeDefinition(req.uuid), ProposesTag, tagDef)
+    val userDef = req match {
+      case request: AddTags =>
+        ConcreteNodeDefinition(request.startNodeOpt.get)
+      case request: RemoveTags =>
+        ConcreteNodeDefinition(request.startNodeOpt.get)
+    }
+
+    val query = s"""
+    match ${userDef.toQuery}, ${tagsDef.toQuery}
+    merge (${userDef.name})-[r:`${HasKarma.relationType}`]->(${tagDef.name})
+    on create set r.karma = {karma}
+    on match set r.karma = r.karma + {karma}
+    """
+
+    val params = tagsDef.parameterMap ++ userDef.parameterMap ++ Map("karma" -> karma)
+
+    tx.query(query, params)
+  }
 }
 
