@@ -9,23 +9,10 @@ import renesca.schema._
 
 package object types {
 
-  type ConstructRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _, _, _ <: ConstructRelationFactory[START, RELATION, END]]
-
-  type NodeRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _ <: NodeDefinition[START], _ <: NodeDefinition[END], _]
-  type UuidRelationDefinition[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode] = RelationDefinitionBase[START, RELATION, END, _ <: UuidNodeDefinition[START], _ <: UuidNodeDefinition[END], _]
-  type UuidAndNodeRelationDefinition[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _ <: UuidNodeDefinition[START], _ <: NodeDefinition[END], _]
-  type NodeAndUuidRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: UuidNode] = RelationDefinitionBase[START, RELATION, END, _ <: NodeDefinition[START], _ <: UuidNodeDefinition[END], _]
-  type FactoryRelationDefinition[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode] = RelationDefinitionBase[START, RELATION, END, _ <: FactoryNodeDefinition[START], _ <: FactoryNodeDefinition[END], _]
-  type FactoryAndNodeRelationDefinition[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _ <: FactoryNodeDefinition[START], _ <: NodeDefinition[END], _]
-  type NodeAndFactoryRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: UuidNode] = RelationDefinitionBase[START, RELATION, END, _ <: NodeDefinition[START], _ <: FactoryNodeDefinition[END], _]
-  type FactoryUuidRelationDefinition[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode] = RelationDefinitionBase[START, RELATION, END, _ <: FactoryUuidNodeDefinition[START], _ <: FactoryUuidNodeDefinition[END], _]
-  type FactoryUuidAndNodeRelationDefinition[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _ <: FactoryUuidNodeDefinition[START], _ <: NodeDefinition[END], _]
-  type NodeAndFactoryUuidRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: UuidNode] = RelationDefinitionBase[START, RELATION, END, _ <: NodeDefinition[START], _ <: FactoryUuidNodeDefinition[END], _]
-  type FixedRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _ <: FixedNodeDefinition[START], _ <: FixedNodeDefinition[END], _]
-  type NodeAndFixedRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _ <: FixedNodeDefinition[START], _ <: NodeDefinition[END], _]
-  type FixedAndNodeRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _ <: NodeDefinition[START], _ <: FixedNodeDefinition[END], _]
-  type HyperAndNodeRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _ <: HyperNodeDefinitionBase[START], _ <: NodeDefinition[END], _]
-  type NodeAndHyperRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _ <: NodeDefinition[START], _ <: HyperNodeDefinitionBase[END], _]
+  type FixedRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _ <: FixedNodeDefinition[START], _ <: FixedNodeDefinition[END]]
+  type NodeAndFixedRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _ <: FixedNodeDefinition[START], _ <: NodeDefinition[END]]
+  type FixedAndNodeRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _ <: NodeDefinition[START], _ <: FixedNodeDefinition[END]]
+  type NodeRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _ <: NodeDefinition[START], _ <: NodeDefinition[END]]
 
 }
 
@@ -114,11 +101,10 @@ START <: Node,
 RELATION <: AbstractRelation[START, END],
 END <: Node,
 +STARTDEF <: NodeDefinition[START],
-+ENDDEF <: NodeDefinition[END],
-+FACTORY <: AbstractRelationFactory[_ <: Node, _ <: AbstractRelation[_, _], _ <: Node]
++ENDDEF <: NodeDefinition[END]
 ] extends GraphDefinition {
   val startDefinition: STARTDEF
-  val factory: AbstractRelationFactory[START, RELATION, END] with FACTORY
+  val factory: AbstractRelationFactory[START, RELATION, END]
   val endDefinition: ENDDEF
   val nodeUuid: Option[String]
   val uuidVariable = randomVariable
@@ -172,19 +158,18 @@ ENDDEF <: NodeDefinition[END]
   startDefinition: STARTDEF,
   factory: AbstractRelationFactory[START, RELATION, END] with NodeFactory[RELATION],
   endDefinition: ENDDEF,
-  nodeUuid: Option[String] = None) extends HyperNodeDefinitionBase[RELATION] with RelationDefinitionBase[START, RELATION, END, STARTDEF, ENDDEF, AbstractRelationFactory[START, RELATION, END]]
+  nodeUuid: Option[String] = None) extends HyperNodeDefinitionBase[RELATION] with RelationDefinitionBase[START, RELATION, END, STARTDEF, ENDDEF]
 
 case class RelationDefinition[
 START <: Node,
 RELATION <: AbstractRelation[START, END],
 END <: Node,
 STARTDEF <: NodeDefinition[START],
-ENDDEF <: NodeDefinition[END],
-FACTORY <: AbstractRelationFactory[_ <: Node, _ <: AbstractRelation[_ <: Node, _ <: Node], _ <: Node]
+ENDDEF <: NodeDefinition[END]
 ](
   startDefinition: STARTDEF,
-  factory: AbstractRelationFactory[START, RELATION, END] with FACTORY,
-  endDefinition: ENDDEF) extends RelationDefinitionBase[START, RELATION, END, STARTDEF, ENDDEF, AbstractRelationFactory[START, RELATION, END] with FACTORY] {
+  factory: AbstractRelationFactory[START, RELATION, END],
+  endDefinition: ENDDEF) extends RelationDefinitionBase[START, RELATION, END, STARTDEF, ENDDEF] {
   val nodeUuid = None
 }
 
