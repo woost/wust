@@ -17,7 +17,7 @@ trait RemoveTagRequestBase {
 case class PostAddRequest(description: Option[String], title: String, addedTagsOption: Option[List[TagConnectRequest]]) extends AddTagRequestBase
 case class PostUpdateRequest(description: Option[String], title: Option[String], addedTagsOption: Option[List[TagConnectRequest]], removedTagsOption: Option[List[String]]) extends AddTagRequestBase with RemoveTagRequestBase
 
-case class ConnectableUpdateRequest(addedTagsOption: Option[List[TagConnectRequest]], removedTagsOption: Option[List[String]]) extends AddTagRequestBase with RemoveTagRequestBase
+case class ReferenceUpdateRequest(addedTagsOption: Option[List[TagConnectRequest]], removedTagsOption: Option[List[String]]) extends AddTagRequestBase with RemoveTagRequestBase
 
 case class TagAddRequest(title: String)
 case class TagUpdateRequest(description: Option[String])

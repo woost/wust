@@ -1,8 +1,8 @@
 angular.module("wust.services").service("EditService", EditService);
 
-EditService.$inject = ["Post", "Connectable", "Connects", "HistoryService", "store", "DiscourseNode", "ZenService"];
+EditService.$inject = ["Post", "Connectable", "Reference", "HistoryService", "store", "DiscourseNode", "ZenService"];
 
-function EditService(Post, Connectable, Connects, HistoryService, store, DiscourseNode, ZenService) {
+function EditService(Post, Connectable, Reference, HistoryService, store, DiscourseNode, ZenService) {
     let editStore = store.getNamespacedStore("edit");
     let self = this;
 
@@ -15,7 +15,7 @@ function EditService(Post, Connectable, Connects, HistoryService, store, Discour
 
             this.expandedEditor = !!other.expandedEditor;
 
-            this.service = isConnects ? Connects : Post;
+            this.service = isConnects ? Reference : Post;
 
             this.isConnects = isConnects;
 

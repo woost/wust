@@ -7,7 +7,7 @@ GET    /auth/signout              controllers.api.auth.SignUpController.signOut
 -> /posts controllers.api.Posts
 
 -> /connectables controllers.api.Connectables
--> /connects controllers.api.ConnectsCtrl
+-> /references controllers.api.References
 
 -> /scopes controllers.api.Scopes
 

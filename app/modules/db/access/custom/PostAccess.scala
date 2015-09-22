@@ -15,46 +15,11 @@ import play.api.mvc.Results._
 import model.Helpers.tagTitleColor
 import moderation.Moderation
 
-trait ConnectableAccessBase {
-  private def tagConnectRequestToScope(tag: TagConnectRequest) = {
-      if (tag.id.isDefined)
-        Some(Scope.matchesOnUuid(tag.id.get))
-      else if (tag.title.isDefined)
-        Some(Scope.merge(
-          title = tag.title.get,
-          color = tagTitleColor(tag.title.get),
-          merge = Set("title")))
-      else
-        None
-  }
+case class PostAccess() extends NodeAccessDefault[Post] {
 
-  private def tagConnectRequestToClassification(tag: TagConnectRequest) = {
-      if (tag.id.isDefined)
-        Some(Classification.matchesOnUuid(tag.id.get))
-      else if (tag.title.isDefined)
-        Some(Classification.merge(
-          title = tag.title.get,
-          color = tagTitleColor(tag.title.get),
-          merge = Set("title")))
-      else
-        None
-  }
+  val factory = Post
 
-  protected def addScopesToGraph(discourse: Discourse, request: AddTagRequestBase, node: Post) {
-    request.addedTags.flatMap(tagConnectRequestToScope(_)).foreach { tag =>
-      val tags = Tags.merge(tag, node)
-      discourse.add(tags)
-    }
-  }
-
-  protected def addClassifcationsToGraph(discourse: Discourse, request: AddTagRequestBase, node: Connects) {
-    request.addedTags.flatMap(tagConnectRequestToClassification(_)).foreach { tag =>
-      val tags = Classifies.merge(tag, node)
-      discourse.add(tags)
-    }
-  }
-
-  protected def handleInitialChange(contribution: ChangeRequest, user: User, authorBoost: Long, approvalSum: Long) = {
+  private def handleInitialChange(contribution: ChangeRequest, user: User, authorBoost: Long, approvalSum: Long) = {
     if (contribution.canApply(authorBoost)) {
       contribution.approvalSum = authorBoost
       contribution.applied = APPLIED
@@ -70,7 +35,7 @@ trait ConnectableAccessBase {
   }
 
   //TODO: refactor
-  protected def addRequestTagsToGraph(tx: QueryHandler, discourse: Discourse, user: User, post: Post, request: AddTagRequestBase with RemoveTagRequestBase, authorBoost: Long, approvalSum: Long, applyThreshold: Long) {
+  private def addRequestTagsToGraph(tx: QueryHandler, discourse: Discourse, user: User, post: Post, request: AddTagRequestBase with RemoveTagRequestBase, authorBoost: Long, approvalSum: Long, applyThreshold: Long) {
     // TODO: do not get all connected requests if not needed...its just slow
     // because now we write lock every change request connected to the post
     val userDef = ConcreteFactoryNodeDefinition(User)
@@ -151,7 +116,26 @@ trait ConnectableAccessBase {
     existing.changeRequests.foreach(_._locked = false)
   }
 
-  protected def deleteScopesFromGraph(discourse: Discourse, request: RemoveTagRequestBase, node: Post) {
+  private def tagConnectRequestToScope(tag: TagConnectRequest) = {
+      if (tag.id.isDefined)
+        Some(Scope.matchesOnUuid(tag.id.get))
+      else if (tag.title.isDefined)
+        Some(Scope.merge(
+          title = tag.title.get,
+          color = tagTitleColor(tag.title.get),
+          merge = Set("title")))
+      else
+        None
+  }
+
+  private def addScopesToGraph(discourse: Discourse, request: AddTagRequestBase, node: Post) {
+    request.addedTags.flatMap(tagConnectRequestToScope(_)).foreach { tag =>
+      val tags = Tags.merge(tag, node)
+      discourse.add(tags)
+    }
+  }
+
+  private def deleteScopesFromGraph(discourse: Discourse, request: RemoveTagRequestBase, node: Post) {
     request.removedTags.foreach { tagUuid =>
       val tag = Scope.matchesOnUuid(tagUuid)
       discourse.add(tag)
@@ -159,20 +143,6 @@ trait ConnectableAccessBase {
       discourse.remove(tagging)
     }
   }
-
-  protected def deleteClassificationsFromGraph(discourse: Discourse, request: RemoveTagRequestBase, node: Connects) {
-    request.removedTags.foreach { tagUuid =>
-      val tag = Classification.matchesOnUuid(tagUuid)
-      discourse.add(tag)
-      val tagging = Classifies.matches(tag, node)
-      discourse.remove(tagging)
-    }
-  }
-}
-
-case class PostAccess() extends ConnectableAccessBase with NodeAccessDefault[Post] {
-
-  val factory = Post
 
   override def read(context: RequestContext, uuid: String) = {
     import scala.concurrent._
@@ -339,28 +309,6 @@ case class PostAccess() extends ConnectableAccessBase with NodeAccessDefault[Pos
           }
         } getOrElse {
           BadRequest(s"Cannot find Post with uuid '$uuid'")
-        }
-      }
-    }
-  }
-}
-
-case class ConnectsAccess() extends ConnectableAccessBase with NodeReadBase[Connects] {
-  val factory = Connects
-
-  override def update(context: RequestContext, uuid: String) = context.withUser { user =>
-    import formatters.json.EditNodeFormat._
-
-    context.withJson { (request: ConnectableUpdateRequest) =>
-      db.transaction { tx =>
-        val node = Connects.matchesOnUuid(uuid)
-        val discourse = Discourse(node)
-        deleteClassificationsFromGraph(discourse, request, node)
-        addClassifcationsToGraph(discourse, request, node)
-
-        tx.persistChanges(discourse) match {
-          case Some(err) => BadRequest(s"Cannot update Connects with uuid '$uuid': $err'")
-          case _         => Ok(Json.toJson(ClassifiedConnects.shapeResponse(discourse.connects.find(_.uuid == node.uuid).get)))
         }
       }
     }

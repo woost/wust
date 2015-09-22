@@ -65,15 +65,24 @@ object EditNodeFormat {
     ))
   }
 
-  implicit object ConnectsFormat extends Format[Connects] {
+  implicit object ReferenceFormat extends Format[Reference] {
     def reads(json: JsValue) = ???
 
-    def writes(n: Connects) = JsObject(Seq(
-      ("id", JsString(n.uuid)),
-      ("startId", n.startNodeOpt.map(s => JsString(s.uuid)).getOrElse(JsNull)),
-      ("endId", n.endNodeOpt.map(e => JsString(e.uuid)).getOrElse(JsNull)),
-      ("quality", n.startNodeOpt.map(post => JsNumber(n.quality(post.viewCount))).getOrElse(JsNull)),
-      ("tags", Json.toJson(n.rev_classifies.sortBy(_.uuid)))
-    ))
+    def writes(node: Reference) = JsObject(node match {
+      case n:Connects => Seq(
+        ("id", JsString(n.uuid)),
+        // ("startId", n.startNodeOpt.map(s => JsString(s.uuid)).getOrElse(JsNull)),
+        // ("endId", n.endNodeOpt.map(e => JsString(e.uuid)).getOrElse(JsNull)),
+        // ("quality", n.startNodeOpt.map(post => JsNumber(n.quality(post.viewCount))).getOrElse(JsNull)),
+        ("tags", Json.toJson(n.rev_classifies.sortBy(_.uuid)))
+      )
+      case n:Tags => Seq(
+        ("id", JsString(n.uuid)),
+        // ("startId", n.startNodeOpt.map(s => JsString(s.uuid)).getOrElse(JsNull)),
+        // ("endId", n.endNodeOpt.map(e => JsString(e.uuid)).getOrElse(JsNull)),
+        // ("quality", n.endNodeOpt.map(post => JsNumber(n.quality(post.viewCount))).getOrElse(JsNull)),
+        ("tags", Json.toJson(n.rev_classifies.sortBy(_.uuid)))
+      )
+    })
   }
 }

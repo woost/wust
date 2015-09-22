@@ -44,7 +44,7 @@ object TaggedTaggable {
   }
 }
 
-object ClassifiedConnects {
+object ClassifiedReferences {
   def shapeResponse[NODE <: UuidNode](response: NODE): NODE = {
     shapeResponse(List(response)).head
   }
@@ -52,7 +52,7 @@ object ClassifiedConnects {
   def shapeResponse[NODE <: UuidNode](response: Iterable[NODE]): Iterable[NODE] = {
     if(!response.isEmpty) {
       val classDef = ConcreteFactoryNodeDefinition(Classification)
-      val nodeDef = ConcreteFactoryNodeDefinition(Connects)
+      val nodeDef = ConcreteFactoryNodeDefinition(Reference)
       val relDef = RelationDefinition(classDef, Classifies, nodeDef)
 
       val query = s"""

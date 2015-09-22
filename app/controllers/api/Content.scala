@@ -15,10 +15,8 @@ object Connectables extends Nodes[Connectable] {
   )
 }
 
-object ConnectsCtrl extends Nodes[Connects] {
-  val node = NodeDef(ConnectsAccess.apply,
-    "classified" -> (N < EndConnectsAccess.apply)
-  )
+object References extends Nodes[Reference] {
+  val node = NodeDef(ReferenceAccess.apply)
 }
 
 object Posts extends Nodes[Post] {
@@ -34,5 +32,13 @@ object Posts extends Nodes[Post] {
       "up" -> (N < VotesConnectsAccess(1)),
       "neutral" -> (N < VotesConnectsAccess(0))
       ))
+  )
+}
+
+object Scopes extends Nodes[Scope] {
+  val node = NodeDef(TagAccess.apply,
+    "posts" -> (N > StartRelationRead(SchemaTags, Post)),
+    "inherits" -> (N > StartConRelationAccess(Inherits, Scope)),
+    "implements" -> (N < EndConRelationAccess(Inherits, Scope))
   )
 }
