@@ -147,26 +147,7 @@ object Database {
     (start, end)
   }
 
-  def disconnectNodesFor[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinition: FixedRelationDefinition[START, RELATION, END], tx: QueryHandler = db) = {
-    val discourse = itemDiscourseGraph(tx, relationDefinition)
-    discourse.graph.relations.filter {
-      _.relationType == relationDefinition.factory.asInstanceOf[RelationFactory[_, _, _]].relationType
-    }.foreach(discourse.graph.relations -= _)
-    val failure = tx.persistChanges(discourse.graph)
-    failure.isEmpty
-  }
-
-  def disconnectHyperNodesFor[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinition: FixedRelationDefinition[START, RELATION, END], tx: QueryHandler = db) = {
-    val discourse = itemDiscourseGraph(tx, relationDefinition)
-    discourse.graph.nodes.filter {
-      _.labels == relationDefinition.factory.asInstanceOf[HyperRelationFactory[_, _, _, _, _]].labels
-    }.foreach(discourse.graph.nodes -= _)
-    val failure = tx.persistChanges(discourse.graph)
-    failure.isEmpty
-  }
-
   //FIXME: I am an unreliable function if you have a relation to a hyperrelation i will delete that hyperrelation.
-  //but some callers count on me doing so, so i will...
   def disconnectNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinition: FixedRelationDefinition[START, RELATION, END]) = {
     val tx = db.newTransaction()
     val discourse = itemDiscourseGraph(relationDefinition)
