@@ -141,9 +141,9 @@ case class VotesConnectsAccess(sign: Long) extends VotesReferenceAccess[Connects
 
     val query = s"""
     match ${createdDef.toQuery},
-    ${connDef.toQuery}-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`),
-    (tag: `${Scope.label}`)-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`)
-    with distinct tag, ${userDef.name}
+    ${connDef.toQuery}-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)
+    with distinct connectable, ${userDef.name}
+    match (tag: `${Scope.label}`)-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`)
     merge (${userDef.name})-[r:`${HasKarma.relationType}`]->(tag)
     on create set r.karma = {karma}
     on match set r.karma = r.karma + {karma}

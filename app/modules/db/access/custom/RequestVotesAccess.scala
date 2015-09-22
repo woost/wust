@@ -163,9 +163,9 @@ case class VotesUpdatedAccess(
 
     val query = s"""
     match ${userDef.toQuery},
-    (${postDef.name})-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`),
-    (tag: `${Scope.label}`)-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`)
-    with distinct tag, ${userDef.name}
+    ${postDef.toQuery}-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)
+    with distinct connectable, ${userDef.name}
+    match (tag: `${Scope.label}`)-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`)
     merge (${userDef.name})-[r:`${HasKarma.relationType}`]->(tag)
     on create set r.karma = {karma}
     on match set r.karma = r.karma + {karma}
@@ -201,9 +201,9 @@ case class VotesDeletedAccess(
 
     val query = s"""
     match ${userDef.toQuery},
-    (${postDef.name})-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`),
-    (tag: `${Scope.label}`)-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`)
-    with distinct tag, ${userDef.name}
+    ${postDef.toQuery}-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)
+    with distinct connectable, ${userDef.name}
+    match (tag: `${Scope.label}`)-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`)
     merge (${userDef.name})-[r:`${HasKarma.relationType}`]->(tag)
     on create set r.karma = {karma}
     on match set r.karma = r.karma + {karma}
