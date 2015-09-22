@@ -260,7 +260,7 @@ object Database {
 match ${ focusNode.toQuery }-[connects:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(connectable:`${ Connectable.label }`)
 with distinct connectable, connects
 
-match (connectable) where (:`${Connectable.label}`)<-[:`${Connects.startRelationType}`]-(connectable:`${Connects.label}`)-[:`${Connects.endRelationType}`]-(:`${Post.label}`) OR (connectable:`${Post.label}`)
+match (connectable) where (:`${Connectable.label}`)<-[:`${Connects.endRelationType}`]-(connectable:`${Connects.label}`)-[:`${Connects.startRelationType}`]-(:`${Post.label}`) OR (connectable:`${Post.label}`)
 with connectable, connects
 
 optional match (context:`${ Scope.label }`)-[contexttotags:`${ Tags.startRelationType }`]->(tags:`${ Tags.label }`)-[tagstopost:`${ Tags.endRelationType }`]->(connectable:`${ Post.label }`)
