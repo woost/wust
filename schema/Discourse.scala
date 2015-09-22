@@ -141,6 +141,8 @@ object WustSchema {
     def canReject:Boolean = canReject()
   }
 
+  @Relation class Skipped(startNode: User, endNode: ChangeRequest)
+
   //TODO: rename to Edit(-change-request)
   @HyperRelation class Updated(startNode: User, endNode: Post) extends ChangeRequest with HyperConnection {
     val oldTitle:String

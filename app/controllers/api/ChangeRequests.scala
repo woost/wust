@@ -7,7 +7,9 @@ import modules.db.access.custom._
 import modules.requests.dsl._
 
 object InstantRequests extends Nodes[ChangeRequest] {
-  val node = NodeDef("InstantRequests", InstantChangeRequestAccess())
+  val node = NodeDef("InstantRequests", InstantChangeRequestAccess(),
+    "skipped" -> (N < ChangeRequestsSkippedAccess())
+  )
 }
 
 object EditRequests extends Nodes[Updated] {

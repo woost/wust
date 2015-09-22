@@ -31,6 +31,7 @@ case class InstantChangeRequestAccess() extends NodeAccessDefault[ChangeRequest]
       val matcher = s", ${userDef.toQuery}"
       val condition = s"""
       and not((${userDef.name})-[:`${Votes.relationType}`]->(${crDef.name}))
+      and not((${userDef.name})-[:`${Skipped.relationType}`]->(${crDef.name}))
       and not((${userDef.name})-[:`${UserToUpdated.relationType}`|`${UserToDeleted.relationType}`|`${UserToAddTags.relationType}`|`${UserToRemoveTags.relationType}`]->(${crDef.name}))
       """
       (matcher, condition, userDef.parameterMap)
@@ -52,6 +53,20 @@ case class InstantChangeRequestAccess() extends NodeAccessDefault[ChangeRequest]
     val discourse = Discourse(db.queryGraph(query, params))
 
     Ok(Json.toJson(discourse.changeRequests))
+  }
+}
+
+case class ChangeRequestsSkippedAccess() extends EndRelationAccessDefault[User, Skipped, ChangeRequest] {
+  val nodeFactory = User
+
+  override def create(context: RequestContext, param: ConnectParameter[ChangeRequest]) = context.withUser { user =>
+    val cr = ChangeRequest.matchesOnUuid(param.baseUuid)
+    val skipped = Skipped.merge(user, cr)
+    val failure = db.transaction(_.persistChanges(skipped))
+    if (failure.isDefined)
+      BadRequest("Cannot create skipped relation")
+    else
+      NoContent
   }
 }
 
