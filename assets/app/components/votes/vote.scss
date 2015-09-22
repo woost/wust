@@ -3,16 +3,13 @@
 @import "compass/css3/box-shadow";
 
 #vote_component {
-    padding-left: 50px;
-    .undobutton_container {
-        margin-top: 10px;
-        height: 50px;
-      .undobutton {
-      }
-    }
     #description_container {
+        width: 600px;
+        min-width: 600px;
+        max-width: 600px;
+        margin: 20px auto;
+
         @include display-flex(flex);
-        height: 200px;
         .vote-buttons {
             @include display-flex(flex);
             @include justify-content(space-between);
@@ -61,7 +58,6 @@
         #action_container {
             @include display-flex(flex);
             @include flex-direction(column);
-            padding-left: 50px;
             .action {
                 padding: 20px;
                 padding-top: 5px;

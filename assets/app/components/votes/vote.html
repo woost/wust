@@ -1,28 +1,21 @@
 <div id="vote_component">
-    <!-- <div class="undobutton_container"> -->
-    <!--     <div class="undobutton" ng-show="vm.showundo"> -->
-    <!--         <button class="btn btn-default" ng-click="vm.undo()"> -->
-    <!--             <i class="fa fa-1x fa-reply"></i> undo last vote -->
-    <!--         </button> -->
-    <!--     </div> -->
-    <!-- </div> -->
     <h2 ng-if="!vm.change">Nothing to moderate</h2>
     <div id="description_container" ng-if="vm.change">
-        <div style="text-align:center;height:60px;width:60px">
-            <i class="fa fa-3x fa-fw" ng-class="vm.change.icon"></i>
-            <br/> {{vm.change.type}}
-        </div>
+        <!-- <div style="text-align:center;height:60px;width:60px"> -->
+        <!--     <i class="fa fa-3x fa-fw" ng-class="vm.change.icon"></i> -->
+        <!--     <br/> {{vm.change.type}} -->
+        <!-- </div> -->
 
         <div id="action_container" ng-if="::vm.change">
             <div class="vote-buttons">
-                <button class="btn btn-default" ng-click="vm.upvote()">
-                    <i class="fa fa-check-square-o text-success"></i> makes sense
+                <button class="btn btn-danger" ng-click="vm.downvote()">
+                    <i class="fa fa-close"></i> dosn't make sense
                 </button>
-                <button class="btn btn-default" ng-click="vm.next()">
-                    <i class="fa fa-forward text-warning"></i> I don't know
+                <button class="btn btn-warning" ng-click="vm.skip()">
+                    <i class="fa fa-forward"></i> I don't know
                 </button>
-                <button class="btn btn-default" ng-click="vm.downvote()">
-                    <i class="fa fa-close text-danger"></i> dosn't make sense
+                <button class="btn btn-success" ng-click="vm.upvote()">
+                    <i class="fa fa-check-square-o"></i> makes sense
                 </button>
             </div>
 
@@ -45,7 +38,7 @@
                             </h2>
 
                             <div ng-if="vm.is('AddTag')">
-                                <span ng-repeat="tag in vm.change.post.tags.concat([vm.change.tag])" tag-label="tag" class="tag" ng-class="{'existing': tag.id !== vm.change.tag.id}">
+                                <span ng-repeat="tag in vm.change.post.tags.concat([vm.change.tag]) | unique:'id'" tag-label="tag" class="tag" ng-class="{'existing': tag.id !== vm.change.tag.id}">
                                     <i ng-show="tag.id === vm.change.tag.id" class="fa fa-plus right"></i>
                                 </span>
                             </div>

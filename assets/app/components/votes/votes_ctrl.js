@@ -3,15 +3,18 @@ angular.module("wust.components").controller("VotesCtrl", VotesCtrl);
 VotesCtrl.$inject = ["InstantRequests", "RequestsTags", "RequestsEdit", "RequestsDelete"];
 
 function VotesCtrl(InstantRequests, RequestsTags, RequestsEdit, RequestsDelete) {
+    //TODO: voting undo?
+    //TODO: deliver .quality in change.tag, to display the removed tag at the original position in the taglist
+
+
     let vm = this;
+    let pagesize = 5;
+    let loadedFullPage = true;
 
-    let changes = InstantRequests.$search();
-
-    let changeindex = -1;
-    changes.$then( () => {
-            vm.next();
-            vm.showundo = false;
-    });
+    vm.changes = InstantRequests.$search({size: pagesize}).$then( () => {
+        loadedFullPage = vm.changes.length === pagesize;
+        if(vm.changes.length > 0) next();
+    } );
 
     let serviceMap = {
         Delete: RequestsDelete,
@@ -20,44 +23,51 @@ function VotesCtrl(InstantRequests, RequestsTags, RequestsEdit, RequestsDelete) 
         Edit: RequestsEdit
     };
 
-    //TODO: deliver .quality in change.tag, to display the removed tag at the original position in the taglist
-
     vm.upvote = upvote;
     vm.downvote = downvote;
-    vm.next = next;
+    vm.skip = skip;
     vm.is = (actiontype) => vm.change.type === actiontype;
+
+    function next() {
+        vm.change = vm.changes.shift();
+
+        if( vm.change !== undefined ) {
+            vm.showMiddleTab = true;
+            vm.actionclasses = {"action": true};
+            vm.actionclasses[vm.change.type] = true;
+            vm.showDescription = vm.change.oldDescription || vm.change.newDescription || (vm.is("Edit") && vm.description);
+        }
+
+        if( loadedFullPage && vm.changes.length < 3 ) {
+            vm.changes.$refresh().$then(response => {
+                loadedFullPage = vm.changes.length === pagesize;
+                if(vm.change === undefined && vm.changes.length > 0) {
+                    next();
+                }
+            });
+        }
+    }
 
     function upvote() {
         let service = serviceMap[vm.change.type];
         service.$buildRaw(_.pick(vm.change, "id")).up.$create().$then(response => {
             humane.success("Upvoted change request");
-            changes.splice(changeindex, 1);
-            changeindex -= 1;
-            next();
         }, resp => humane.error(resp.$response.data));
+        next();
     }
 
     function downvote() {
         let service = serviceMap[vm.change.type];
         service.$buildRaw(_.pick(vm.change, "id")).down.$create().$then(response => {
             humane.success("Downvoted change request");
-            changes.splice(changeindex, 1);
-            changeindex -= 1;
-            next();
         }, resp => humane.error(resp.$response.data));
+        next();
     }
 
-    function next() {
-        if (changes.length > 0) {
-            changeindex = (changeindex + 1) % changes.length;
-            vm.change = changes[changeindex];
-            vm.showundo = true;
-            vm.showMiddleTab = true;
-            vm.actionclasses = {"action": true};
-            vm.actionclasses[vm.change.type] = true;
-            vm.showDescription = vm.change.oldDescription || vm.change.newDescription || (vm.is("Edit") && vm.description);
-        } else {
-            vm.change = undefined;
-        }
+    function skip() {
+        vm.change.skipped.$create().$then(response => {
+            humane.success("Skipped change request");
+        }, resp => humane.error(resp.$response.data));
+        next();
     }
 }
