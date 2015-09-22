@@ -292,15 +292,30 @@ case class PostAccess() extends ConnectableAccessBase with NodeAccessDefault[Pos
         val createdDef = RelationDefinition(userDef, SchemaCreated, postDef)
 
         val query = s"""
-          match ${postDef.toQuery}
+          match ${userDef.toQuery},
+          ${postDef.toQuery}-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)
+          with distinct connectable, ${userDef.name}
+          match (tag: `${Scope.label}`)-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`)
+          optional match (${userDef.name})-[r:`${HasKarma.relationType}`]->(tag)
           optional match ${createdDef.toQuery(true, false)}
           return *
         """
 
-        val discourse = Discourse(tx.queryGraph(Query(query, createdDef.parameterMap)))
+        val params = createdDef.parameterMap
+        val discourse = Discourse(tx.queryGraph(query, params))
+
         discourse.posts.headOption.map { node =>
           val authorBoost = if (discourse.createds.isEmpty) 0 else Moderation.authorKarmaBoost
-          val karma = 1 // TODO: karma
+          val karma = if (discourse.scopes.isEmpty) {
+            1
+          } else {
+            val ratio = discourse.scopes.map { tag =>
+              val l:Long = tag.inRelationsAs(HasKarma).headOption.map(_.karma).getOrElse(0)
+              l
+            }.sum / discourse.scopes.size
+            ratio max 1
+          }
+
           val approvalSum = karma + authorBoost
           val applyThreshold = Moderation.postChangeThreshold(node.viewCount)
 
