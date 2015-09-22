@@ -25,10 +25,11 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
         }
 
         apply({
-            id, title, description, label, original, tags, localId, referenceNode, newDiscussion, isHyperRelation, classifications, startId, endId, visible
+            id, title, description, label, original, tags, localId, referenceNode, newDiscussion, isHyperRelation, classifications, tagClassifications, startId, endId, visible
         }) {
             tags = tags || [];
             classifications = classifications || [];
+            tagClassifications = tagClassifications || [];
             this.id = id;
             this.visible = visible === undefined ? this.visible : !!visible;
             this.startId = startId;
@@ -42,6 +43,7 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
             this.isHyperRelation = isHyperRelation || false;
             this.tags = angular.copy(tags.map(t => t.$encode ? t.$encode() : t));
             this.classifications = angular.copy(classifications.map(t => t.$encode ? t.$encode() : t));
+            this.tagClassifications = angular.copy(tagClassifications.map(t => t.$encode ? t.$encode() : t));
             this.original = original || {
                 id: this.id,
                 localId: this.localId,
@@ -69,8 +71,12 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
                 dirtyModel = _.omit(_.pick(this, _.keys(this.original)), (v, k) => this.original[k] === v);
 
             delete dirtyModel.tags;
-            let addedTags = _.reject(this.tags, t => t.id && _.any(this.original.tags, _.pick(t, "id"))).map(t => t.id ? _.pick(t, "id") : _.pick(t, "title"));
+            let addedTags = _.reject(this.tags, t => t.id && _.any(this.original.tags, _.pick(t, "id"))).map(t => t.id ? _.pick(t, "id", "classifications") : _.pick(t, "title", "classifications"));
             let removedTags = _.reject(this.original.tags, t => !t.id || _.any(this.tags, _.pick(t, "id"))).map(t => t.id);
+
+            addedTags.forEach(tag => {
+                tag.classifications = this.tagClassifications.concat(tag.classifications);
+            });
 
             if (addedTags.length > 0)
                 dirtyModel.addedTags = addedTags;

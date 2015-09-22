@@ -15,7 +15,7 @@ import play.api.mvc.Results._
 import model.Helpers.tagTitleColor
 import moderation.Moderation
 
-case class PostAccess() extends NodeAccessDefault[Post] {
+case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
 
   val factory = Post
 
@@ -129,9 +129,12 @@ case class PostAccess() extends NodeAccessDefault[Post] {
   }
 
   private def addScopesToGraph(discourse: Discourse, request: AddTagRequestBase, node: Post) {
-    request.addedTags.flatMap(tagConnectRequestToScope(_)).foreach { tag =>
+    request.addedTags.flatMap(req => tagConnectRequestToScope(req).map((req, _))).foreach { case (req, tag) =>
       val tags = Tags.merge(tag, node)
       discourse.add(tags)
+      req.classifications.flatMap(tagConnectRequestToClassification(_)).foreach { classification =>
+        discourse.add(Classifies.merge(classification, tags))
+      }
     }
   }
 

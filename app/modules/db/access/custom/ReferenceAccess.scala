@@ -15,7 +15,21 @@ import play.api.mvc.Results._
 import model.Helpers.tagTitleColor
 import moderation.Moderation
 
-case class ReferenceAccess() extends NodeReadBase[Reference] {
+trait TagAccessHelper {
+  protected def tagConnectRequestToClassification(tag: ClassificationConnectRequest) = {
+    if (tag.id.isDefined)
+      Some(Classification.matchesOnUuid(tag.id.get))
+    else if (tag.title.isDefined)
+      Some(Classification.merge(
+        title = tag.title.get,
+        color = tagTitleColor(tag.title.get),
+        merge = Set("title")))
+    else
+      None
+  }
+}
+
+case class ReferenceAccess() extends NodeReadBase[Reference] with TagAccessHelper {
   val factory = Reference
 
   private def deleteClassificationsFromGraph(discourse: Discourse, request: RemoveTagRequestBase, node: Reference) {
@@ -27,24 +41,13 @@ case class ReferenceAccess() extends NodeReadBase[Reference] {
     }
   }
 
-  private def addClassifcationsToGraph(discourse: Discourse, request: AddTagRequestBase, node: Reference) {
+  private def addClassifcationsToGraph(discourse: Discourse, request: AddClassificationRequestBase, node: Reference) {
     request.addedTags.flatMap(tagConnectRequestToClassification(_)).foreach { tag =>
       val tags = Classifies.merge(tag, node)
       discourse.add(tags)
     }
   }
 
-  private def tagConnectRequestToClassification(tag: TagConnectRequest) = {
-      if (tag.id.isDefined)
-        Some(Classification.matchesOnUuid(tag.id.get))
-      else if (tag.title.isDefined)
-        Some(Classification.merge(
-          title = tag.title.get,
-          color = tagTitleColor(tag.title.get),
-          merge = Set("title")))
-      else
-        None
-  }
 
   override def update(context: RequestContext, uuid: String) = context.withUser { user =>
     import formatters.json.EditNodeFormat._
