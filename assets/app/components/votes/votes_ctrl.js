@@ -8,11 +8,12 @@ function VotesCtrl(InstantRequests, RequestsTags, RequestsEdit, RequestsDelete) 
 
 
     let vm = this;
-    let pagesize = 5;
+    let pageSize = 5;
+    let refreshWhenLessThan = 3;
     let loadedFullPage = true;
 
-    vm.changes = InstantRequests.$search({size: pagesize}).$then( () => {
-        loadedFullPage = vm.changes.length === pagesize;
+    vm.changes = InstantRequests.$search({size: pageSize}).$then( () => {
+        loadedFullPage = vm.changes.length === pageSize;
         if(vm.changes.length > 0) next();
     } );
 
@@ -38,9 +39,9 @@ function VotesCtrl(InstantRequests, RequestsTags, RequestsEdit, RequestsDelete) 
             vm.showDescription = vm.change.oldDescription || vm.change.newDescription || (vm.is("Edit") && vm.description);
         }
 
-        if( loadedFullPage && vm.changes.length < 3 ) {
-            vm.changes.$refresh().$then(response => {
-                loadedFullPage = vm.changes.length === pagesize;
+        if( loadedFullPage && vm.changes.length < refreshWhenLessThan ) {
+            vm.changes.$refresh({skip: vm.changes.length}).$then(response => {
+                loadedFullPage = vm.changes.length === pageSize;
                 if(vm.change === undefined && vm.changes.length > 0) {
                     next();
                 }
