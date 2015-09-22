@@ -20,7 +20,7 @@ trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefa
   val nodeFactory = User
 
   def nodeDefinition(uuid: String): FactoryUuidNodeDefinition[T]
-  def selectNode(discourse: Discourse): T
+  def selectNode(discourse: Discourse): Option[T]
   def applyChange(discourse: Discourse, request: T, post: Post, tx:QueryHandler): Boolean
   def unapplyChange(discourse: Discourse, request: T, post: Post, tx: QueryHandler): Boolean
   def updateKarma(tx: QueryHandler, request: T, karma: Long): Unit
@@ -47,83 +47,85 @@ trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefa
       """
 
       val discourse = Discourse(tx.queryGraph(query, createdDef.parameterMap ++ votesDef.parameterMap))
-      val request = selectNode(discourse)
+      selectNode(discourse).map { request =>
+        val votes = discourse.votes.headOption
+        votes.foreach(request.approvalSum -= _.weight)
 
-      val votes = discourse.votes.headOption
-      votes.foreach(request.approvalSum -= _.weight)
+        val karma = 1 // TODO karma
+        val authorBoost = if (discourse.createds.isEmpty) 0 else Moderation.authorKarmaBoost
+        val weight = sign * (karma + authorBoost)
+        if (weight == 0) {
+          // if there are any existing votes, disconnect them
+          votes.foreach(discourse.remove(_))
+        } else {
+          // we want to vote on the change request with our weight. we merge the
+          // votes relation as we want to override any previous vote. merging is
+          // better than just updating the weight on an existing relation, as it
+          // guarantees uniqueness
+          request.approvalSum += weight
+          val newVotes = Votes.merge(user, request, weight = weight, onMatch = Set("weight"))
+          discourse.add(newVotes)
+        }
 
-      val karma = 1 // TODO karma
-      val authorBoost = if (discourse.createds.isEmpty) 0 else Moderation.authorKarmaBoost
-      val weight = sign * (karma + authorBoost)
-      if (weight == 0) {
-        // if there are any existing votes, disconnect them
-        votes.foreach(discourse.remove(_))
-      } else {
-        // we want to vote on the change request with our weight. we merge the
-        // votes relation as we want to override any previous vote. merging is
-        // better than just updating the weight on an existing relation, as it
-        // guarantees uniqueness
-        request.approvalSum += weight
-        val newVotes = Votes.merge(user, request, weight = weight, onMatch = Set("weight"))
-        discourse.add(newVotes)
-      }
+        val postApplies = if (request.applied == PENDING && request.canApply) {
+          // delete request are never pending, so it is ok to search for posts instead of hidden
+          val post = discourse.posts.head
+          val success = applyChange(discourse, request, post, tx)
 
-      val postApplies = if (request.applied == PENDING && request.canApply) {
-        // delete request are never pending, so it is ok to search for posts instead of hidden
-        val post = discourse.posts.head
-        val success = applyChange(discourse, request, post, tx)
-
-        if (success) {
-          request.applied = APPLIED
-          updateKarma(tx, request, request.applyThreshold)
-          Right(Some(post))
-        } else
-          Left("Cannot apply changes automatically")
-      } else if (request.canReject) {
-        if (request.applied == INSTANT) {
-          val post = discourse.posts.headOption.getOrElse(Post.wrap(discourse.hiddens.head.rawItem))
-          val success = unapplyChange(discourse, request, post, tx)
           if (success) {
-            request.applied = REJECTED
-            updateKarma(tx, request, -request.applyThreshold)
+            request.applied = APPLIED
+            updateKarma(tx, request, request.applyThreshold)
             Right(Some(post))
+          } else
+            Left("Cannot apply changes automatically")
+        } else if (request.canReject) {
+          if (request.applied == INSTANT) {
+            val post = discourse.posts.headOption.getOrElse(Post.wrap(discourse.hiddens.head.rawItem))
+            val success = unapplyChange(discourse, request, post, tx)
+            if (success) {
+              request.applied = REJECTED
+              updateKarma(tx, request, -request.applyThreshold)
+              Right(Some(post))
+            } else {
+              Left("Cannot unapply changes automatically")
+            }
           } else {
-            Left("Cannot unapply changes automatically")
+            request.applied = REJECTED
+            Right(None)
           }
         } else {
-          request.applied = REJECTED
-          Right(None)
+            Right(None)
         }
-      } else {
-          Right(None)
-      }
 
-      postApplies match {
-        case Right(nodeOpt) =>
-          request._locked = false
-          val failure = tx.persistChanges(discourse)
+        postApplies match {
+          case Right(nodeOpt) =>
+            request._locked = false
+            val failure = tx.persistChanges(discourse)
 
-          failure.map(_ => BadRequest("No vote :/")).getOrElse {
-            Ok(JsObject(Seq(
-              ("vote", JsObject(Seq(
-                ("weight", JsNumber(weight))
-              ))),
-              ("applied", JsNumber(request.applied)),
-              ("votes", JsNumber(request.approvalSum)),
-              ("node", nodeOpt.map(Json.toJson(_)).getOrElse(JsNull))
-            )))
-          }
-        case Left(err) =>
-          tx.rollback()
-          //TODO we cannot do anything here, there is no merge conflict resolution
-          //we just do not want to show it to the user again in the votestream,
-          //so we skip the change request
-          db.transaction { tx =>
-            val request = ChangeRequest.matchesOnUuid(param.baseUuid)
-            tx.persistChanges(Skipped.merge(user, request))
-          }
-          BadRequest(err)
+            failure.map(_ => BadRequest("No vote :/")).getOrElse {
+              Ok(JsObject(Seq(
+                ("vote", JsObject(Seq(
+                  ("weight", JsNumber(weight))
+                ))),
+                ("applied", JsNumber(request.applied)),
+                ("votes", JsNumber(request.approvalSum)),
+                ("node", nodeOpt.map(Json.toJson(_)).getOrElse(JsNull))
+              )))
+            }
+          case Left(err) =>
+            tx.rollback()
+            //TODO we cannot do anything here, there is no merge conflict resolution
+            //we just do not want to show it to the user again in the votestream,
+            //so we skip the change request
+            db.transaction { tx =>
+              val request = ChangeRequest.matchesOnUuid(param.baseUuid)
+              tx.persistChanges(Skipped.merge(user, request))
+            }
+            BadRequest(err)
+        }
       }
+    } getOrElse {
+      BadRequest("Cannot vote on outdated request")
     }
   }
 }
@@ -134,7 +136,7 @@ case class VotesUpdatedAccess(
   ) extends VotesChangeRequestAccess[Updated] {
 
   override def nodeDefinition(uuid: String) = FactoryUuidNodeDefinition(Updated, uuid)
-  override def selectNode(discourse: Discourse) = discourse.updateds.head
+  override def selectNode(discourse: Discourse) = discourse.updateds.headOption
   override def unapplyChange(discourse: Discourse, request: Updated, post: Post, tx:QueryHandler) = {
     val changesTitle = request.oldTitle != request.newTitle
     val changesDesc = request.oldDescription != request.newDescription
@@ -189,7 +191,7 @@ case class VotesDeletedAccess(
   ) extends VotesChangeRequestAccess[Deleted] {
 
   override def nodeDefinition(uuid: String) = FactoryUuidNodeDefinition(Deleted, uuid)
-  override def selectNode(discourse: Discourse) = discourse.deleteds.head
+  override def selectNode(discourse: Discourse) = discourse.deleteds.headOption
   override def unapplyChange(discourse: Discourse, request: Deleted, post: Post, tx:QueryHandler) = {
     if (post.rawItem.labels.contains(Hidden.label)) {
       val hidden = Hidden.wrap(post.rawItem)
@@ -227,7 +229,7 @@ case class VotesTagsChangeRequestAccess(
   ) extends VotesChangeRequestAccess[TagChangeRequest] {
 
   override def nodeDefinition(uuid: String) = FactoryUuidNodeDefinition(TagChangeRequest, uuid)
-  override def selectNode(discourse: Discourse) = discourse.tagChangeRequests.head
+  override def selectNode(discourse: Discourse) = discourse.tagChangeRequests.headOption
 
   override def unapplyChange(discourse: Discourse, req: TagChangeRequest, post: Post, tx:QueryHandler) = {
     val tagDef = ConcreteFactoryNodeDefinition(Scope)
