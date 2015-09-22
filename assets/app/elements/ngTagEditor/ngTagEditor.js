@@ -62,25 +62,27 @@ angular.module("wust.elements").directive("tagEditor", function() {
 
                     $element.find("input").on("keydown", function(e) {
                         if (e.which === 9) { /* tab */
-                            if (completeTabbing === undefined) {
-                                if ($scope.suggestions.length > 0) {
-                                    completeTabbing = $scope.search;
-                                    $scope.search = $scope.suggestions[0].title;
-                                    $scope.$apply();
-                                    e.preventDefault();
-                                }
-                            } else {
-                                let idx = _.findIndex($scope.suggestions, {title: $scope.search});
-                                if (idx >= 0) {
-                                    if (idx < $scope.suggestions.length - 1) {
-                                        $scope.search = $scope.suggestions[idx + 1].title;
-                                    } else {
-                                        $scope.search = completeTabbing;
-                                        ignoreNextSuggestion = true;
-                                        completeTabbing = undefined;
+                            if ($scope.search) {
+                                if (completeTabbing === undefined) {
+                                    if ($scope.suggestions.length > 0) {
+                                        completeTabbing = $scope.search;
+                                        $scope.search = $scope.suggestions[0].title;
+                                        $scope.$apply();
+                                        e.preventDefault();
                                     }
-                                    $scope.$apply();
-                                    e.preventDefault();
+                                } else {
+                                    let idx = _.findIndex($scope.suggestions, {title: $scope.search});
+                                    if (idx >= 0) {
+                                        if (idx < $scope.suggestions.length - 1) {
+                                            $scope.search = $scope.suggestions[idx + 1].title;
+                                        } else {
+                                            $scope.search = completeTabbing;
+                                            ignoreNextSuggestion = true;
+                                            completeTabbing = undefined;
+                                        }
+                                        $scope.$apply();
+                                        e.preventDefault();
+                                    }
                                 }
                             }
                         } else if (e.which === 8) { /* backspace */
