@@ -92,6 +92,8 @@ sealed trait NodeDelegates extends NodeLike {
   def descriptionJs = description.orUndefined
 }
 
+@JSExportAll object SortOrder { val QUALITY: Int = 0; val TIME: Int = 1 }
+
 trait NodeBase extends NodeDelegates {
   def classifications: Set[RecordTag]
   @JSExport("classifications") def classificationsJs = classifications.toJSArray
@@ -113,9 +115,26 @@ trait NodeBase extends NodeDelegates {
   @JSExport("inRelations") def inRelationsJs = inRelations.toJSArray
   @JSExport("outRelations") def outRelationsJs = outRelations.toJSArray
   @JSExport("relations") def relationsJs = relations.toJSArray
+
+  private var _predecessorOrder = SortOrder.QUALITY
+  private var _successorOrder = SortOrder.QUALITY
+  @JSExport def predecessorOrder = _predecessorOrder
+  @JSExport def successorOrder = _successorOrder
+  @JSExport def predecessorOrder_=(order: String) = _predecessorOrder = order.toInt
+  @JSExport def successorOrder_=(order: String) = _successorOrder = order.toInt
+
+  def sortRelations(order: Int, relations: Seq[RelationLike]) = {
+    relations.sortBy { relation =>
+      order match {
+        case SortOrder.TIME    => -relation.timestamp
+        case _                 => -relation.quality
+      }
+    }
+  }
+
   //TODO: predecessors are only sorted because of wust
-  @JSExport("predecessors") def predecessorsJs = inRelations.toSeq.sortBy(- _.order).map(_.startNode).toJSArray
-  @JSExport("successors") def successorsJs = outRelations.toSeq.sortBy(- _.order).map(_.endNode).toJSArray
+  @JSExport("predecessors") def predecessorsJs = sortRelations(predecessorOrder, inRelations.toSeq).map(_.startNode).toJSArray
+  @JSExport("successors") def successorsJs = sortRelations(successorOrder, outRelations.toSeq).map(_.endNode).toJSArray
 
   @JSExport("neighbours") def neighboursJs = neighbours.toJSArray
   @JSExport("parallels") def parallelsJs = parallels.toJSArray
@@ -191,7 +210,8 @@ sealed trait RelationLike {
   def endId: String
   var startNode: NodeBase = _
   var endNode: NodeBase = _
-  def order: Double
+  def quality: Double
+  def timestamp: Double
 }
 
 @JSExport
@@ -200,7 +220,8 @@ case class Relation(rawRelation: RawRelation) extends RelationLike {
   def startId = rawRelation.startId
   def endId = rawRelation.endId
 
-  override def order = 0
+  override def quality = 0
+  override def timestamp = 0
 
   @JSExport("startNode") def _startNode: NodeBase = startNode
   @JSExport("endNode") def _endNode: NodeBase = endNode
@@ -286,8 +307,6 @@ sealed trait WrappedGraph[RELATION <: RelationLike] {
 @JSExport
 case class HyperRelation(rawNode: RawNode) extends NodeBase with RelationLike {
   override def classifications = Set.empty
-
-  override def order = quality
 
   @JSExport override def startId = rawNode.startId.get
   @JSExport override def endId = rawNode.endId.get
@@ -425,7 +444,7 @@ class Graph(private[js] val rawGraph: RawGraph) extends WrappedGraph[Relation] {
 
 @JSExport
 @JSExportAll
-class RawNode(val id: String, var title: String, var description: Option[String], val isHyperRelation: Boolean, var quality: Double, val viewCount: Int, val startId: Option[String], val endId: Option[String], var tags: js.Array[RecordTag], val classifications: Set[RecordTag], var vote: Option[js.Any], val timestamp: js.Any) {
+class RawNode(val id: String, var title: String, var description: Option[String], val isHyperRelation: Boolean, var quality: Double, val viewCount: Int, val startId: Option[String], val endId: Option[String], var tags: js.Array[RecordTag], val classifications: Set[RecordTag], var vote: Option[js.Any], val timestamp: Double) {
   def this(n: RecordNode) = this(n.id, n.title.getOrElse(""), n.description.toOption, n.isHyperRelation.getOrElse(false), n.quality.getOrElse(-1), n.viewCount.getOrElse(-1), n.startId.toOption, n.endId.toOption, n.tags, n.classifications.getOrElse(js.Array()).toSet, n.vote.toOption, n.timestamp.getOrElse(0))
   override def toString = s"RawNode($id)"
 
@@ -572,7 +591,7 @@ trait RecordNode extends js.Object {
   def vote: js.UndefOr[js.Any]
 
   //TODO: why can't this be Long?
-  def timestamp: js.UndefOr[js.Any] = js.native
+  def timestamp: js.UndefOr[Double] = js.native
 }
 
 @ScalaJSDefined
