@@ -14,9 +14,8 @@ case class InstantChangeRequestAccess() extends NodeAccessDefault[ChangeRequest]
   val factory = ChangeRequest
 
   override def read(context: RequestContext) = {
-    val page = context.page.getOrElse(0)
     val limit = context.limit
-    val skip = page * limit
+    val skip = context.skip
 
     val crDef = LabelNodeDefinition[TagChangeRequest](ChangeRequest.labels)
     val crTagsDef = RelationDefinition(crDef, ProposesTag, ConcreteFactoryNodeDefinition(Scope))
