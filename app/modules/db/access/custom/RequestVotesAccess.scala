@@ -115,6 +115,13 @@ trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefa
           }
         case Left(err) =>
           tx.rollback()
+          //TODO we cannot do anything here, there is no merge conflict resolution
+          //we just do not want to show it to the user again in the votestream,
+          //so we skip the change request
+          db.transaction { tx =>
+            val request = ChangeRequest.matchesOnUuid(param.baseUuid)
+            tx.persistChanges(Skipped.merge(user, request))
+          }
           BadRequest(err)
       }
     }
