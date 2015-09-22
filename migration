@@ -62,3 +62,10 @@ merge (c:CLASSIFICATION:EXPOSEDNODE:INHERITABLE:TAGLIKE:UUIDNODE {title: "Answer
 
 match (c:CONNECTS)-[:CONNECTSTOCONNECTABLE]->(p:POST) set c.timestamp = p.timestamp;
 
+
+
+match (anon:USER {name: "anonymous"}),(felix:USER {name: "felix"}),(johannes:USER {name: "johannes"}), (anon)-[r:USERTOCREATED]->(action)-[]->(:CONNECTABLE) where id(action) % 2 = 0 delete r create (felix)-[:USERTOCREATED]->(action);
+match (anon:USER {name: "anonymous"}),(felix:USER {name: "felix"}),(johannes:USER {name: "johannes"}), (anon)-[r:USERTOCREATED]->(action)-[]->(:CONNECTABLE) where id(action) % 2 = 1 delete r create (johannes)-[:USERTOCREATED]->(action);
+match (anon:USER {name: "anonymous"}),(felix:USER {name: "felix"}),(johannes:USER {name: "johannes"}), (anon)-[r:USERTOUPDATED]->(action)-[]->(:CONNECTABLE) where id(action) % 2 = 0 delete r create (felix)-[:USERTOUPDATED]->(action);
+match (anon:USER {name: "anonymous"}),(felix:USER {name: "felix"}),(johannes:USER {name: "johannes"}), (anon)-[r:USERTOUPDATED]->(action)-[]->(:CONNECTABLE) where id(action) % 2 = 1 delete r create (johannes)-[:USERTOUPDATED]->(action);
+match (anon:USER {name: "anonymous"}),(felix:USER {name: "felix"}),(johannes:USER {name: "johannes"}), (anon)-[r:USERTOUPDATED|USERTOCREATED]->(action) delete anon, r;
