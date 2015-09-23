@@ -18,7 +18,7 @@ function coloredTagNode(Helpers, ContextService, $rootScope) {
         if (scope.ignoreTags === undefined)
             $rootScope.$on("context.changed", refreshColor);
 
-        scope.$watchCollection("coloredTagNode.tags", refreshColor);
+        scope.$watchCollection(() => scope.coloredTagNode.tags + scope.coloredTagNode.classifications, refreshColor);
 
         function refreshColor() {
             setColor(selectTag(scope.coloredTagNode));
