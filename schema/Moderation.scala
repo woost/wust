@@ -7,6 +7,8 @@ package moderation
 // p: probability for an upvote (needs to be calculated from all votes in the system, I set this to 0.5)
 // u: influence of our prior (I set this to 10)
 
+import model.WustSchema._
+
 object Moderation {
   def log(x:Long):Long = Math.log(x).round
   def sqrt(x:Long):Long = Math.sqrt(x).round
@@ -27,6 +29,18 @@ object Moderation {
   def rejectPostChangeThreshold(applyThreshold: Long) = -applyThreshold / 2
 
   def postQuality(upVotes:Long, downVotes:Long) = (upVotes + votes_u*votes_p) / (downVotes + upVotes + votes_u)
+
+  def karmaSum(scopes: Seq[Scope]) = {
+    if (scopes.isEmpty) {
+      1
+    } else {
+      val ratio = scopes.map { tag =>
+        val l:Long = tag.inRelationsAs(HasKarma).headOption.map(_.karma).getOrElse(0)
+        l
+      }.sum / scopes.size
+      ratio max 1
+    }
+  }
 
   //TODO: user für votestream-votes belohnen?
 

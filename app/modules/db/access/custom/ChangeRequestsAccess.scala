@@ -119,7 +119,6 @@ case class PostTagChangeRequestAccess() extends RelationAccessDefault[Post, TagC
       """
 
       val discourse = Discourse(db.queryGraph(query, postDef.parameterMap ++ votesDef.parameterMap))
-      println(discourse)
       discourse.tagChangeRequests
     }.getOrElse(Seq.empty)))
   }

@@ -4,6 +4,7 @@ import controllers.api.nodes.{HyperConnectParameter, ConnectParameter, RequestCo
 import model.WustSchema.{Created => SchemaCreated, _}
 import modules.db.Database._
 import modules.db._
+import modules.karma._
 import modules.db.access.{EndRelationAccessDefault, EndRelationAccess}
 import play.api.libs.json._
 import renesca.parameter.implicits._
@@ -23,7 +24,7 @@ trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefa
   def selectNode(discourse: Discourse): Option[T]
   def applyChange(discourse: Discourse, request: T, post: Post, tx:QueryHandler): Boolean
   def unapplyChange(discourse: Discourse, request: T, post: Post, tx: QueryHandler): Boolean
-  def updateKarma(tx: QueryHandler, request: T, karma: Long): Unit
+  def updateKarma(request: T, karmaDefinition: KarmaDefinition): Unit
 
   override def create(context: RequestContext, param: ConnectParameter[Votable]) = context.withUser { user =>
     db.transaction { tx =>
@@ -74,7 +75,7 @@ trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefa
 
           if (success) {
             request.applied = APPLIED
-            updateKarma(tx, request, request.applyThreshold)
+            updateKarma(request, KarmaDefinition(request.applyThreshold, "Change request applied"))
             Right(Some(post))
           } else
             Left("Cannot apply changes automatically")
@@ -84,13 +85,14 @@ trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefa
             val success = unapplyChange(discourse, request, post, tx)
             if (success) {
               request.applied = REJECTED
-              updateKarma(tx, request, -request.applyThreshold)
+              updateKarma(request, KarmaDefinition(-request.applyThreshold, "Instant change request rejected"))
               Right(Some(post))
             } else {
               Left("Cannot unapply changes automatically")
             }
           } else {
             request.applied = REJECTED
+            updateKarma(request, KarmaDefinition(-request.applyThreshold, "Proposed change request rejected"))
             Right(None)
           }
         } else {
@@ -166,23 +168,26 @@ case class VotesUpdatedAccess(
     }
   }
 
-  def updateKarma(tx: QueryHandler, request: Updated, karma: Long) {
+  def updateKarma(request: Updated, karmaDefinition: KarmaDefinition) {
     val postDef = ConcreteNodeDefinition(request.endNodeOpt.get)
     val userDef = ConcreteNodeDefinition(request.startNodeOpt.get)
+    val tagDef = ConcreteFactoryNodeDefinition(Scope)
 
     val query = s"""
     match ${userDef.toQuery},
     ${postDef.toQuery}-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)
-    with distinct connectable, ${userDef.name}
-    match (tag: `${Scope.label}`)-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`)
-    merge (${userDef.name})-[r:`${HasKarma.relationType}`]->(tag)
-    on create set r.karma = {karma}
-    on match set r.karma = r.karma + {karma}
+    with distinct connectable, ${userDef.name}, ${postDef.name}
     """
 
-    val params = postDef.parameterMap ++ userDef.parameterMap ++ Map("karma" -> karma)
+    val tagMatch = s"""
+    match ${tagDef.toQuery}-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`)
+    """
 
-    tx.query(query, params)
+    val params = tagDef.parameterMap ++ postDef.parameterMap ++ userDef.parameterMap
+
+    val karmaQuery = KarmaQuery(postDef, userDef, query, params)
+    val karmaTagMatcher = KarmaTagMatcher(tagDef, tagMatch)
+    KarmaUpdate.persist(karmaDefinition, karmaQuery, karmaTagMatcher)
   }
 }
 
@@ -204,23 +209,27 @@ case class VotesDeletedAccess(
   // we do not have noninstant delete changes, so no applychanges in voting
   override def applyChange(discourse: Discourse, request: Deleted, post: Post, tx:QueryHandler) = ???
 
-  def updateKarma(tx: QueryHandler, request: Deleted, karma: Long) {
-    val postDef = ConcreteNodeDefinition(request.endNodeOpt.get)
+  def updateKarma(request: Deleted, karmaDefinition: KarmaDefinition) {
+    // match any label, the post might be hidden or a post (maybe better some common label)
+    val postDef = LabelUuidNodeDefinition[Post](Set.empty, request.endNodeOpt.get.uuid)
     val userDef = ConcreteNodeDefinition(request.startNodeOpt.get)
+    val tagDef = ConcreteFactoryNodeDefinition(Scope)
 
     val query = s"""
     match ${userDef.toQuery},
     ${postDef.toQuery}-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)
-    with distinct connectable, ${userDef.name}
-    match (tag: `${Scope.label}`)-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`)
-    merge (${userDef.name})-[r:`${HasKarma.relationType}`]->(tag)
-    on create set r.karma = {karma}
-    on match set r.karma = r.karma + {karma}
+    with distinct connectable, ${userDef.name}, ${postDef.name}
     """
 
-    val params = postDef.parameterMap ++ userDef.parameterMap ++ Map("karma" -> karma)
+    val tagMatch = s"""
+    match ${tagDef.toQuery}-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`)
+    """
 
-    tx.query(query, params)
+    val params = tagDef.parameterMap ++ postDef.parameterMap ++ userDef.parameterMap
+
+    val karmaQuery = KarmaQuery(postDef, userDef, query, params)
+    val karmaTagMatcher = KarmaTagMatcher(tagDef, tagMatch)
+    KarmaUpdate.persist(karmaDefinition, karmaQuery, karmaTagMatcher)
   }
 }
 
@@ -261,26 +270,30 @@ case class VotesTagsChangeRequestAccess(
     true
   }
 
-  override def updateKarma(tx: QueryHandler, req: TagChangeRequest, karma: Long) {
+  override def updateKarma(req: TagChangeRequest, karmaDefinition: KarmaDefinition) {
     val tagDef = ConcreteFactoryNodeDefinition(Scope)
     val tagsDef = RelationDefinition(nodeDefinition(req.uuid), ProposesTag, tagDef)
-    val userDef = req match {
-      case request: AddTags =>
-        ConcreteNodeDefinition(request.startNodeOpt.get)
-      case request: RemoveTags =>
-        ConcreteNodeDefinition(request.startNodeOpt.get)
+    val (userNode, postNode) = req match {
+      case request: AddTags => (request.startNodeOpt.get, request.endNodeOpt.get)
+      case request: RemoveTags => (request.startNodeOpt.get, request.endNodeOpt.get)
     }
 
+    val userDef = ConcreteNodeDefinition(userNode)
+    val postDef = ConcreteNodeDefinition(postNode)
+
     val query = s"""
-    match ${userDef.toQuery}, ${tagsDef.toQuery}
-    merge (${userDef.name})-[r:`${HasKarma.relationType}`]->(${tagDef.name})
-    on create set r.karma = {karma}
-    on match set r.karma = r.karma + {karma}
+    match ${userDef.toQuery}, ${postDef.toQuery}
     """
 
-    val params = tagsDef.parameterMap ++ userDef.parameterMap ++ Map("karma" -> karma)
+    val tagMatch = s"""
+    match ${tagsDef.toQuery}
+    """
 
-    tx.query(query, params)
+    val params = tagsDef.parameterMap ++ userDef.parameterMap ++ postDef.parameterMap
+
+    val karmaQuery = KarmaQuery(postDef, userDef, query, params)
+    val karmaTagMatcher = KarmaTagMatcher(tagDef, tagMatch)
+    KarmaUpdate.persist(karmaDefinition, karmaQuery, karmaTagMatcher)
   }
 }
 

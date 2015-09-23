@@ -191,7 +191,8 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
 
     val query = s"""
     match ${nodeDef.toQuery}
-    optional match ${tagsDef.toQuery(true, false)}, ${tagClassifiesDef.toQuery(true, false)}
+    optional match ${tagsDef.toQuery(true, false)}
+    optional match ${tagClassifiesDef.toQuery(true, false)}
     $ownVoteCondition
     optional match ${connDef.toQuery(false, true)}, ${classifiesDef.toQuery(true, false)}
     return *

@@ -28,7 +28,8 @@ object TaggedTaggable {
 
       val query = s"""
       match ${ nodeDef.toQuery } where ${ nodeDef.name }.uuid in {nodeUuids}
-      optional match ${ tagsDef.toQuery(true, false) }, ${ tagClassifiesDef.toQuery(true, false) }
+      optional match ${ tagsDef.toQuery(true, false) }
+      optional match ${ tagClassifiesDef.toQuery(true, false) }
       optional match ${ connDef.toQuery(false, true) }, ${ classifiesDef.toQuery(true, false) }
       return *
       """

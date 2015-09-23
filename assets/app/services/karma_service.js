@@ -24,7 +24,7 @@ function KarmaService(User, Auth) {
 
     function refreshKarma() {
         if ( Auth.current.userId ) {
-            User.$buildRaw({id: Auth.current.userId}).karma.$search().$then(response => {
+            User.$buildRaw({id: Auth.current.userId}).karmaContexts.$search().$then(response => {
                 self.karma.tags = response;
                 self.karma.sum = response.length ? _.map(response, r => r.karma).reduce((a,b) => a+b) : 0;
                 listeners.forEach(listener => listener(self.karma));
