@@ -1,5 +1,5 @@
 // gitref: first-part -> master
-// run with:  bin/neo4j-shell -file ~/projects/wust/migration
+// run with:  bin/neo4j-shell -file ~/projects/wust/migration.cql -path data/graph.db
 
 match (u:USER) REMOVE u:DUMMYUSER:REALUSER return u;
 
@@ -51,6 +51,8 @@ match (c:CLASSIFICATION)-[r1:SCOPETOTAGS]->(t:TAGS)-[r2:TAGSTOPOST]->(p:POST) de
 
 match (a:CLASSIFICATION), (b:SCOPE) where id(a) <> id(b) and lower(a.title) = lower(b.title) with a,b match (b)-[r1:SCOPETOTAGS]->(tags:TAGS)-[r2:TAGSTOPOST]->(p:POST) delete b,r1,tags,r2 create (a)-[:CLASSIFIES]->(p);
 
+match (b:CLASSIFICATION {title: "bug"}) set b.title = "Bug";
+
 merge (c:CLASSIFICATION:EXPOSEDNODE:INHERITABLE:TAGLIKE:UUIDNODE {title: "Problem"}) set c.color  = 90  , c.uuid = "PQt1NQ14Ry273rY3LwuO-Q";
 merge (c:CLASSIFICATION:EXPOSEDNODE:INHERITABLE:TAGLIKE:UUIDNODE {title: "Goal"}) set c.color     = 169 , c.uuid = "MTCpdiVnR2ew9r22oYmQEA";
 merge (c:CLASSIFICATION:EXPOSEDNODE:INHERITABLE:TAGLIKE:UUIDNODE {title: "Idea"}) set c.color     = 260 , c.uuid = "RddhZfhpSMeXV0574XXCXA";
@@ -69,3 +71,9 @@ match (anon:USER {name: "anonymous"}),(felix:USER {name: "felix"}),(johannes:USE
 match (anon:USER {name: "anonymous"}),(felix:USER {name: "felix"}),(johannes:USER {name: "johannes"}), (anon)-[r:USERTOUPDATED]->(action)-[]->(:CONNECTABLE) where id(action) % 2 = 0 delete r create (felix)-[:USERTOUPDATED]->(action);
 match (anon:USER {name: "anonymous"}),(felix:USER {name: "felix"}),(johannes:USER {name: "johannes"}), (anon)-[r:USERTOUPDATED]->(action)-[]->(:CONNECTABLE) where id(action) % 2 = 1 delete r create (johannes)-[:USERTOUPDATED]->(action);
 match (anon:USER {name: "anonymous"}),(felix:USER {name: "felix"}),(johannes:USER {name: "johannes"}), (anon)-[r:USERTOUPDATED|USERTOCREATED]->(action) delete anon, r;
+
+
+match (c:CLASSIFICATION)-[classifies:CLASSIFIES]->(p:POST)<-[r1]-(ref:REFERENCE)<-[r2]-(connection) WHERE ((connection:POST) OR (connection:SCOPE)) delete classifies create (c)-[:CLASSIFIES]->(ref);
+
+match (wust:SCOPE {title: "wust"}), (c:CLASSIFICATION)-[classifies:CLASSIFIES]->(p:POST) delete classifies create (c)-[:CLASSIFIES]->(tags:REFERENCE:TAGS:UUIDNODE:VOTABLE {uuid: toString(id(c)) + toString(id(p)) + toString(id(wust)), _locked:false, voteCount: 0 }), (wust)-[:SCOPETOTAGS]->(tags)-[:TAGSTOPOST]->(p) return p;
+
