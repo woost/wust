@@ -610,7 +610,8 @@ trait RecordTag extends js.Object {
   val isContext: Boolean
   val color: Int
   val symbol: js.UndefOr[String]
-  //TODO: own type for classifications
+  //TODO: own type for classifications/tags
+  val tagsId: js.UndefOr[String]
   val classifications: js.UndefOr[js.Array[RecordTag]]
 }
 
