@@ -14,6 +14,8 @@ import renesca.Query
 import play.api.mvc.Results._
 import model.Helpers.tagTitleColor
 import moderation.Moderation
+import scala.concurrent._
+import ExecutionContext.Implicits.global
 
 case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
 
@@ -147,9 +149,28 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
     }
   }
 
+  private def viewPost(node: Post, user: User) = Future {
+    db.transaction { tx =>
+      val postDef = ConcreteNodeDefinition(node)
+      val userDef = ConcreteNodeDefinition(user)
+      val viewedDef = RelationDefinition(userDef, Viewed, postDef)
+      val query = s"match ${postDef.toQuery} set ${postDef.name}._locked = true with ${postDef.name} optional match ${viewedDef.toQuery(true, false)} return *"
+      val discourse = Discourse(tx.queryGraph(Query(query, viewedDef.parameterMap)))
+      val post = discourse.posts.head
+      discourse.vieweds.headOption match {
+        case Some(viewed) =>
+          viewed.timestamp = System.currentTimeMillis
+        case None =>
+          discourse.add(Viewed.merge(user, post))
+          post.viewCount += 1
+      }
+
+      post._locked = false
+      tx.persistChanges(discourse)
+    }
+  }
+
   override def read(context: RequestContext, uuid: String) = {
-    import scala.concurrent._
-    import ExecutionContext.Implicits.global
     import formatters.json.PostFormat._
 
     val tagDef = ConcreteFactoryNodeDefinition(Scope)
@@ -181,33 +202,12 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
     val discourse = Discourse(db.queryGraph(Query(query, params)))
     discourse.posts.headOption match {
       case Some(node) =>
-      if (context.countView) {
-          context.user.foreach { user =>
-            Future {
-              db.transaction { tx =>
-                val postDef = ConcreteNodeDefinition(node)
-                val userDef = ConcreteNodeDefinition(user)
-                val viewedDef = RelationDefinition(userDef, Viewed, postDef)
-                val query = s"match ${postDef.toQuery} set ${postDef.name}._locked = true with ${postDef.name} optional match ${viewedDef.toQuery(true, false)} return *"
-                val discourse = Discourse(tx.queryGraph(Query(query, viewedDef.parameterMap)))
-                val post = discourse.posts.head
-                discourse.vieweds.headOption match {
-                  case Some(viewed) =>
-                    viewed.timestamp = System.currentTimeMillis
-                  case None =>
-                    discourse.add(Viewed.merge(user, post))
-                    post.viewCount += 1
-                }
-
-                post._locked = false
-                tx.persistChanges(discourse)
-              }
-            }
-          }
-        }
+        if (context.countView)
+          context.user.foreach(viewPost(node, _))
 
         Ok(Json.toJson(node))
-      case None => NotFound(s"Cannot find node with uuid '$uuid'")
+      case None =>
+        NotFound(s"Cannot find node with uuid '$uuid'")
     }
   }
 
@@ -281,15 +281,7 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
 
         discourse.posts.headOption.map { node =>
           val authorBoost = if (discourse.createds.isEmpty) 0 else Moderation.authorKarmaBoost
-          val karma = if (discourse.scopes.isEmpty) {
-            1
-          } else {
-            val ratio = discourse.scopes.map { tag =>
-              val l:Long = tag.inRelationsAs(HasKarma).headOption.map(_.karma).getOrElse(0)
-              l
-            }.sum / discourse.scopes.size
-            ratio max 1
-          }
+          val karma = Moderation.karmaSum(discourse.scopes)
 
           val approvalSum = karma + authorBoost
           val applyThreshold = Moderation.postChangeThreshold(node.viewCount)
