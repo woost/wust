@@ -20,7 +20,9 @@
     "broccoli-ng-annotate": "^1.2.0",
     "broccoli-sourcemap-concat": "^1.0.2",
     "broccoli-string-replace": "^0.1.0",
-    "mkdirp": "^0.5.1"
+    "frisby": "^0.8.5",
+    "mkdirp": "^0.5.1",
+    "querystring": "^0.2.0"
   },
   "dependencies": {
     "angular": "^1.4.4",
