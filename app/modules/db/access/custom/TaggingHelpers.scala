@@ -22,15 +22,13 @@ object TaggedTaggable {
       val nodeDef = ConcreteFactoryNodeDefinition(Post)
       val connectsDef = ConcreteFactoryNodeDefinition(Connects)
       val tagsDef = HyperNodeDefinition(tagDef, Tags, nodeDef)
-      val tagClassDef = ConcreteFactoryNodeDefinition(Classification)
-      val tagClassifiesDef = RelationDefinition(tagClassDef, Classifies, tagsDef)
+      val tagClassifiesDef = RelationDefinition(ConcreteFactoryNodeDefinition(Classification), Classifies, tagsDef)
       val connDef = RelationDefinition(nodeDef, PostToConnects, connectsDef)
-      val classDef = ConcreteFactoryNodeDefinition(Classification)
-      val classifiesDef = RelationDefinition(classDef, Classifies, connectsDef)
+      val classifiesDef = RelationDefinition(ConcreteFactoryNodeDefinition(Classification), Classifies, connectsDef)
 
       val query = s"""
       match ${ nodeDef.toQuery } where ${ nodeDef.name }.uuid in {nodeUuids}
-      optional match ${ tagsDef.toQuery(true, false) }
+      optional match ${ tagsDef.toQuery(true, false) }, ${ tagClassifiesDef.toQuery(true, false) }
       optional match ${ connDef.toQuery(false, true) }, ${ classifiesDef.toQuery(true, false) }
       return *
       """
