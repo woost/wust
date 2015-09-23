@@ -36,19 +36,21 @@
     </div>
 
 
-    <a ng-if="vm.karmaTags.length > 0" href="#" ng-click="vm.showKarma = !vm.showKarma" class="showkarma">
-        <i class="fa" ng-class="{'fa-chevron-down': vm.showKarma, 'fa-chevron-right': !vm.showKarma}"></i>
-        Show karma (<span ng-bind="vm.karmaSum"></span>)
-    </a>
-    <div ng-show="vm.showKarma">
-        <span ng-repeat="context in vm.karmaTags" tag-label="context">
-            <span ng-show="context.karma > 0" class="right">{{context.karma}}</span>
-        </span>
-    </div>
 
     <div class="contributions" infinite-scroll="vm.loadMore()" infinite="infinite" promise="vm.contributions" scroll-target="content_view">
         <h3>Contributions</h3>
         <div class="user_detail_box">
+            <a ng-if="vm.karmaTags.length > 0" href="#" ng-click="vm.showKarma = !vm.showKarma" class="showkarma">
+                <i class="fa" ng-class="{'fa-chevron-down': vm.showKarma, 'fa-chevron-right': !vm.showKarma}"></i>
+                Show karma (<span ng-bind="vm.karmaSum"></span>)
+            </a>
+            <div ng-show="vm.showKarma">
+                <span ng-repeat="context in vm.karmaTags" tag-label="context">
+                    <span ng-show="context.karma > 0" class="right">{{context.karma}}</span>
+                </span>
+            </div>
+            <hr>
+
             <div ng-repeat="contribution in vm.contributions | unique:'id' track by contribution.id" small-post node="contribution" class="ng-trans ng-trans-scale-up ease"></div>
             <button class="btn btn-default pull-right ng-hide" ng-click="infinite.manualLoad()" ng-disabled="infinite.loading" ng-hide="infinite.noMore">More</button>
         </div>
