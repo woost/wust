@@ -9,12 +9,18 @@ function KarmaService(User, Auth) {
 
     this.onChange = (handler) => listeners.push(handler);
     this.refreshKarma = refreshKarma;
+    this.karmaInContext = karmaInContext;
     this.karma = {
         tags: [],
         sum: 0
     };
 
     refreshKarma();
+
+    function karmaInContext(context) {
+        let found = _.find(self.karma.tags, t => t.id === context.id);
+        return found ? found.karma : 0;
+    }
 
     function refreshKarma() {
         if ( Auth.current.userId ) {

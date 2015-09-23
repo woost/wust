@@ -1,16 +1,26 @@
+@import "compass/css3/flexbox";
+
 #tag_component {
+    padding-top: 4px;
+    padding-left: 40px;
     height: 100%;
+    @include flex-direction(columns);
+    @include display-flex(flex);
+    .search_box {
+        padding-bottom: 10px;
+    }
     #tag_list_box {
-        height: 100px;
+        padding-right: 10px;
+        width: 350px;
+        height: 100%;
         overflow: auto;
     }
     #tag_ui_view {
-        //TODO: this is probably not the right way to achieve this...
-        height: -moz-calc(100% - 210px);
-        height: -webkit-calc(100% - 210px);
-        height: calc(100% - 210px);
+        padding-left: 10px;
+        @include flex-grow(2);
+        width: 100%;
     }
-    #tag_list_more {
+    .tag_list_more {
         margin-top: 20px;
     }
 }

@@ -2,10 +2,13 @@
     <div tabset class="tabs-above">
         <div tab>
             <div tab-heading>
-                <span tag-label="vm.tag" disable-link></span>
+                Posts
             </div>
             <div class="header">
                 <button class="pull-right btn btn-default" type="button" animation="am-fade-and-scale-down" ng-click="vm.addTagStream()">Stream <i class="fa fa-plus"></i></button>
+                <div tag-label="vm.tag" disable-link>
+                    <span ng-show="vm.tag.karma > 0" class="right">{{vm.tag.karma}}</span>
+                </div>
                 <div ng-if="vm.tag.inherits.length">
                     <b>Inherited:</b>
                     <span ng-repeat="inherits in vm.tag.inherits" tag-label="inherits"></span>
@@ -20,19 +23,19 @@
                 <button class="btn btn-default pull-right ng-hide" ng-click="infinitePosts.manualLoad()" ng-disabled="infinitePosts.loading" ng-hide="infinitePosts.noMore">More</button>
             </div>
         </div>
-        <div tab>
+        <div tab ng-if="::vm.auth.isLoggedIn">
             <div tab-heading class="text_heading">
                 Edit
             </div>
             <div class="tag_editing">
-                <div>
-                    <label>Context</label>
-                    <input type="checkbox" ng-model="vm.tag.isContext" disabled>
-                </div>
-                <div>
-                    <label>Classification </label>
-                    <input type="checkbox" ng-model="vm.tag.isClassification" disabled>
-                </div>
+                <!-- <div> -->
+                <!--     <label>Context</label> -->
+                <!--     <input type="checkbox" ng-model="vm.tag.isContext" disabled> -->
+                <!-- </div> -->
+                <!-- <div> -->
+                <!--     <label>Classification </label> -->
+                <!--     <input type="checkbox" ng-model="vm.tag.isClassification" disabled> -->
+                <!-- </div> -->
                 <div>
                     <label>Inherited</label>
                     <div edit-taglist tags="vm.tag.inherits" on-change="vm.changedInherits(vm.tag.inherits, type, tag)"></div>

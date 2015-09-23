@@ -1,11 +1,14 @@
 <div id="tag_component">
-    <h2 id="tag_list_box" infinite-scroll="vm.loadMoreTags()" infinite="infiniteTags" promise="vm.tags">Tags
-        <span ng-repeat="tag in vm.tags track by tag.id" tag-label="tag"></span>
-
-        <div id="tag_list_more">
-            <button class="btn btn-default pull-right" ng-click="infiniteTags.manualLoad()" ng-disabled="infiniteTags.loading" ng-hide="infiniteTags.noMore">More</button>
+    <div id="tag_list_box" infinite-scroll="vm.loadMoreTags()" infinite="infiniteTags" promise="vm.search.results">
+        <h2>Tags</h2>
+        <div class="search_box ">
+            <input type="text" class="form-control" ng-model="vm.search.query" ng-change='vm.refreshSearch()'>
         </div>
-    </h2>
+
+        <span ng-repeat="tag in vm.search.results track by tag.id" tag-label="tag"></span>
+
+        <button class="tag_list_more btn btn-default pull-right" ng-click="infiniteTags.manualLoad()" ng-disabled="infiniteTags.loading" ng-hide="infiniteTags.noMore">More</button>
+    </div>
 
     <div id="tag_ui_view" ui-view></div>
 </div>

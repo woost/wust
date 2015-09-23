@@ -14,11 +14,7 @@ function ContextService($rootScope, Helpers, KarmaService) {
 
     function updateKarma() {
         self.currentContexts.forEach(context => {
-            let karmaTag =  _.find(KarmaService.karma.tags, t => t.id === context.id);
-            if( karmaTag )
-                context.karma = karmaTag.karma;
-            else
-                context.karma = 0;
+            context.karma = KarmaService.karmaInContext(context);
         });
     }
 
