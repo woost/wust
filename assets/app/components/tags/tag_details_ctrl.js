@@ -1,8 +1,8 @@
 angular.module("wust.components").controller("TagDetailsCtrl", TagDetailsCtrl);
 
-TagDetailsCtrl.$inject = ["$stateParams", "Scope", "Search", "DiscourseNode", "StreamService", "KarmaService", "Auth"];
+TagDetailsCtrl.$inject = ["$stateParams", "Scope", "Search", "DiscourseNode", "StreamService", "Auth", "ContextService"];
 
-function TagDetailsCtrl($stateParams, Scope, Search, DiscourseNode, StreamService, KarmaService, Auth) {
+function TagDetailsCtrl($stateParams, Scope, Search, DiscourseNode, StreamService, Auth, ContextService) {
     let vm = this;
 
     let postSize = 30;
@@ -14,7 +14,9 @@ function TagDetailsCtrl($stateParams, Scope, Search, DiscourseNode, StreamServic
     vm.auth = Auth;
 
     vm.tag = Scope.$find($stateParams.id);
-    vm.tag.$then(() => vm.tag.karma = KarmaService.karmaInContext(vm.tag));
+    vm.tag.$then(() => {
+        ContextService.setContext(vm.tag);
+    });
     //TODO: tags/id/posts should honor inherits relation
     // vm.contributions = vm.tag.posts.$search({
     //     page: postPage,

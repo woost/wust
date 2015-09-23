@@ -6,9 +6,6 @@
             </div>
             <div class="header">
                 <button class="pull-right btn btn-default" type="button" animation="am-fade-and-scale-down" ng-click="vm.addTagStream()">Stream <i class="fa fa-plus"></i></button>
-                <div tag-label="vm.tag" disable-link>
-                    <span ng-show="vm.tag.karma > 0" class="right">{{vm.tag.karma}}</span>
-                </div>
                 <div ng-if="vm.tag.inherits.length">
                     <b>Inherited:</b>
                     <span ng-repeat="inherits in vm.tag.inherits" tag-label="inherits"></span>

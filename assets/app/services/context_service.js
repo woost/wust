@@ -8,6 +8,7 @@ function ContextService($rootScope, Helpers, KarmaService) {
     this.currentContexts = [];
     this.emitChangedEvent = emitChangedEvent;
     this.setContext = setContext;
+    this.setNodeContext = setNodeContext;
     this.contextStyle = {};
 
     KarmaService.onChange(updateKarma);
@@ -18,17 +19,21 @@ function ContextService($rootScope, Helpers, KarmaService) {
         });
     }
 
-    function setContext(node) {
+    function setContext(context) {
+        this.currentContexts.length = 0;
+        this.currentContexts.push(context);
+        updateKarma();
+        this.emitChangedEvent();
+    }
+
+    function setNodeContext(node) {
         let firstContext = Helpers.sortByIdQuality(node.tags)[0];
         if (firstContext && (this.currentContexts.length !== 1 || this.currentContexts.length === 1 && this.currentContexts[0].id !== firstContext.id)) {
-            this.currentContexts.length = 0;
-            this.currentContexts.push(firstContext);
-            this.emitChangedEvent();
+            this.setContext(firstContext);
         }
     }
 
     function emitChangedEvent() {
-        updateKarma();
 
         this.contextStyle["background-color"] = this.currentContexts.length > 0 ? Helpers.navBackgroundColor(this.currentContexts[0]) : undefined;
         this.contextStyle["border-bottom"] = this.currentContexts.length > 0 ? ("1px solid " + Helpers.contextCircleBorderColor(this.currentContexts[0])) : undefined;

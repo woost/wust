@@ -39,7 +39,7 @@ function bigPostCtrl(SidebarService, Post, EditService, ModalEditService, Contex
     vm.onTagApply = onTagApply;
     vm.nodeHasContext = () => _.any(vm.node.tags, "isContext");
 
-    ContextService.setContext(vm.node);
+    ContextService.setNodeContext(vm.node);
 
     function onSave(response) {
         vm.editMode = false;

@@ -31,14 +31,14 @@ function bigTaglistCtrl(Post, ContextService, Auth) {
                 tag.vote = undefined;
                 tag.quality = data.quality;
                 humane.success("Unvoted post in context");
-                ContextService.setContext(vm.node);
+                ContextService.setNodeContext(vm.node);
             }, resp => humane.error(resp.$response.data));
         } else {
             service.up.$create().$then(data => {
                 tag.vote = data.vote;
                 tag.quality = data.quality;
                 humane.success("Upvoted post in context");
-                ContextService.setContext(vm.node);
+                ContextService.setNodeContext(vm.node);
             }, resp => humane.error(resp.$response.data));
         }
     }
