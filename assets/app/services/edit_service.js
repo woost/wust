@@ -31,7 +31,7 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
             classifications = classifications || [];
             tagClassifications = tagClassifications || [];
             this.id = id;
-            this.visible = visible === undefined ? this.visible : !!visible;
+            this.visible = visible === undefined ? !!this.visible : !!visible;
             this.startId = startId;
             this.endId = endId;
             this.localId = localId === undefined ? this.localId : localId;

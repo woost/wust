@@ -25,6 +25,7 @@ function scratchpadCtrl(EditService, SidebarService, ContextService) {
     vm.editList = EditService.list;
     vm.edit = EditService.edit;
     vm.editNewPost = editNewPost;
+    vm.showEdits = false;
 
     vm.newPost = {
         title: ""
