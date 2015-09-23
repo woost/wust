@@ -1,25 +1,25 @@
 angular.module("wust.services").service("ContextService", ContextService);
 
-ContextService.$inject = ["$rootScope", "Helpers", "User", "Auth"];
+ContextService.$inject = ["$rootScope", "Helpers", "KarmaService"];
 
-function ContextService($rootScope, Helpers, User, Auth) {
+function ContextService($rootScope, Helpers, KarmaService) {
     let self = this;
 
     this.currentContexts = [];
     this.emitChangedEvent = emitChangedEvent;
-    this.updateKarma = updateKarma;
     this.setContext = setContext;
     this.contextStyle = {};
 
+    KarmaService.onChange(updateKarma);
+
     function updateKarma() {
-        if( Auth.current.userId ) {
-            User.$buildRaw({id: Auth.current.userId}).karma.$search().$then(response =>
-                    response.forEach(k => {
-                        let context =  _.find(this.currentContexts, c => c.id === k.id);
-                        if( context )
-                            context.karma = k.karma;
-                    }));
-        }
+        self.currentContexts.forEach(context => {
+            let karmaTag =  _.find(KarmaService.karma.tags, t => t.id === context.id);
+            if( karmaTag )
+                context.karma = karmaTag.karma;
+            else
+                context.karma = 0;
+        });
     }
 
     function setContext(node) {
@@ -32,7 +32,8 @@ function ContextService($rootScope, Helpers, User, Auth) {
     }
 
     function emitChangedEvent() {
-        this.updateKarma();
+        updateKarma();
+
         this.contextStyle["background-color"] = this.currentContexts.length > 0 ? Helpers.navBackgroundColor(this.currentContexts[0]) : undefined;
         this.contextStyle["border-bottom"] = this.currentContexts.length > 0 ? ("1px solid " + Helpers.contextCircleBorderColor(this.currentContexts[0])) : undefined;
         $rootScope.$emit("context.changed");
