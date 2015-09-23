@@ -11,10 +11,17 @@
     .neighbours_attachedto {
         width: 280px;
         min-width: 280px;
-
-        .predecessors_connection {
-            float:right;
+        .node_model_list {
+            // arrow touches bigpost
+            padding-right: 0;
+            .list-item {
+                @include display-flex(flex);
+                @include flex-direction(columns);
+                @include align-items(center);
+                @include justify-content(flex-end);
+            }
         }
+
     }
 
     .neighbours_content {
@@ -32,10 +39,15 @@
     .neighbours_followers {
         width: 280px;
         min-width: 280px;
-        text-align: right;
-
-        .followers_connection {
-            float:left;
+        .node_model_list {
+            // arrow touches bigpost
+            padding-left: 0;
+            .list-item {
+                @include display-flex(flex);
+                @include flex-direction(columns);
+                @include align-items(center);
+                @include justify-content(flex-start);
+            }
         }
     }
 
@@ -46,35 +58,42 @@
         }
     }
 
-    .connection {
-        text-align: center;
-
-        //icons are higher than minimum small post height, this prevents float failure
-        height:20px;
-        line-height: 20px;
-        .tools {
-            height: 20px;
-            // margin-bottom: -11px;
-            .button {
-                opacity: 0.5;
-                cursor: pointer;
-            }
-            .button.active, .button:hover {
-                opacity: 1;
-            }
+    .list-item {
+        // we move the margin from small-post to list-item
+        // for the flex-box to center the arrow correctly
+        .small_post_directive {
+            margin-bottom:0;
         }
-
-        .arrow {
-            position:relative;
-            top: -11px;
-            z-index: -1; // put svg below tool buttons
-            .arrowline {
-                stroke-width: 1px;
-                stroke:$graph_relation_color;
+        margin-bottom: 5px;
+        .connection {
+            text-align: center; // position of the tools on the arrow
+            line-height: 10px; // height of the svg arrow
+            .tools {
+                padding-left: 10px; // size of the arrow head
+                height: 0; // should not affect the arrow height and therefore the vertical centering
+                position: relative;
+                top: -20px;
+                .button {
+                    opacity: 0.5;
+                    cursor: pointer;
+                }
+                .button.active, .button:hover {
+                    opacity: 1;
+                }
             }
-            .arrowhead {
-                stroke-width: 1px;
-                fill: $graph_relation_color;
+
+            .arrow {
+                // position:relative;
+                // top: -11px;
+                // z-index: -1; // put svg below tool buttons
+                .arrowline {
+                    stroke-width: 1px;
+                    stroke:$graph_relation_color;
+                }
+                .arrowhead {
+                    stroke-width: 1px;
+                    fill: $graph_relation_color;
+                }
             }
         }
     }

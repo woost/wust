@@ -29,7 +29,7 @@ function coloredTagSvgArrow(Helpers) {
 
         function setColor(tag) {
             let arrowLine = rawElem.children[0];
-            let arrowHead = rawElem.children[1].children[0];
+            let arrowHead = rawElem.children[1];
             if (tag === undefined || tag.id === undefined) {
                 arrowLine.style.stroke = "";
                 arrowHead.style.fill = "";

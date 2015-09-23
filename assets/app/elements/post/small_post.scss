@@ -9,6 +9,9 @@
     min-height: 26px;
 
     margin-bottom: 5px;
+    .small_post_directive {
+        margin-bottom: 5px !important;
+    }
 
     a, a:link {
         word-wrap: break-word;

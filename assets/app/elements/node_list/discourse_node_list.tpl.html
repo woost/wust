@@ -1,4 +1,4 @@
-<div class='discourse_node_list'>
+<div class="discourse_node_list">
     <div class="drop_post_container" ui-on-Drop="vm.nodeModel.add($data)" drop-validate="vm.nodeModel.canAdd($data)" drop-channel="node,hyper_node,scratch_node">
         <div ng-if="vm.isLoading" class="la-ball-triangle-path la-dark la-relative">
             <div></div>
@@ -7,17 +7,19 @@
         </div>
         <div class="node_model_list" ng-switch="::vm.nodeModel.isNested">
             <div ng-switch-when="true">
-                <div ng-repeat='node in vm.nodeModel.list track by node.id'>
+                <div ng-repeat="node in vm.nodeModel.list track by node.id" class="list-item">
                     <span ng-if="vm.templateBefore" ng-include="vm.templateBefore"></span>
                     <span small-post node="node"></span>
-                    <div ng-repeat="nested in node.nestedNodeLists[vm.nodeModel.listId]" discourse-node-list node-model='nested.model'></div>
+                    <div ng-repeat="nested in node.nestedNodeLists[vm.nodeModel.listId]" discourse-node-list node-model="nested.model"></div>
+                    <span ng-if="vm.templateAfter" ng-include="vm.templateAfter"></span>
                 </div>
             </div>
             <div ng-switch-default>
-                <span ng-repeat='node in vm.nodeModel.list track by node.id' class="ng-trans ng-trans-scale-up ease">
+                <div ng-repeat="node in vm.nodeModel.list track by node.id" class="list-item ng-trans ng-trans-scale-up ease">
                     <span ng-if="vm.templateBefore" ng-include="vm.templateBefore"></span>
                     <span small-post node="node"></span>
-                </span>
+                    <span ng-if="vm.templateAfter" ng-include="vm.templateAfter"></span>
+                </div>
             </div>
         </div>
         </div>

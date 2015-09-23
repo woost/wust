@@ -9,7 +9,8 @@ function discourseNodeList() {
         scope: {
             nodeModel: "=",
             isLoading: "=",
-            templateBefore: "@"
+            templateBefore: "@",
+            templateAfter: "@",
         },
         controller: discourseNodeListCtrl,
         controllerAs: "vm",
