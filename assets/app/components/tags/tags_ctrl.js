@@ -31,6 +31,9 @@ function TagsCtrl($stateParams, Search, DiscourseNode) {
         delayedTriggerSearch = setTimeout(() => vm.search.results.$refresh({
             page: tagPage,
             title: vm.search.query
+        }).$then(() => {
+            if (vm.infinite)
+                vm.infinite.initialize();
         }));
     }
 
