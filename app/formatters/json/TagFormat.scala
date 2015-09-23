@@ -24,6 +24,7 @@ object TagFormat {
     )
   )
 
+  //TODO should user rev_Classifies accessor instead of getting tuple as parameter
   def classificationWriter(post: Post, tuple: (Classification, Seq[Connects])): JsObject = {
     val (classification, connectsList) = tuple
     val quality = connectsList.map(c => c.quality(post.viewCount)).sum / connectsList.size
