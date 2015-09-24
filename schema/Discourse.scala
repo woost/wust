@@ -136,11 +136,13 @@ object WustSchema {
   val REJECTED = -1
   val PENDING = 0
   val INSTANT = 1
-  val APPLIED = 2
+  val APPLIED = 2 //TODO: rename to approved
   //TODO: should be called change
   @Node trait ChangeRequest extends Action with Votable {
     val applyThreshold:Long
     var approvalSum:Long = 0
+
+    //TODO: rename to applyStatus
     var applied:Long = PENDING
 
     def rejectThreshold = Moderation.rejectPostChangeThreshold(applyThreshold)
