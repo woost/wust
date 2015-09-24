@@ -1,8 +1,8 @@
 package formatters.json
 
-import model.WustSchema.{User, KarmaLog}
+import model.WustSchema.{User, KarmaLog, LogOnScope}
 import play.api.libs.json._
-import formatters.json.TagFormat.ScopeFormat
+import formatters.json.TagFormat.tagLikeToSeq
 import formatters.json.PostFormat.NodeFormat
 
 object UserFormat {
@@ -17,6 +17,10 @@ object UserFormat {
     ))
   }
 
+  private def logOnScopeWriter(rel: LogOnScope) = JsObject(tagLikeToSeq(rel.endNode) ++ Seq(
+    ("currentKarma", JsNumber(rel.currentKarma))
+  ))
+
   implicit object KarmaLogFormat extends Format[KarmaLog] {
 
     def reads(log: JsValue) = ???
@@ -26,7 +30,7 @@ object UserFormat {
       ("reason", JsString(log.reason)),
       ("timestamp", JsNumber(log.timestamp)),
       ("post", formatters.json.PostFormat.NodeFormat.writes(log.endNodeOpt.get)), //TODO: why need to call it explicitly
-      ("contexts", Json.toJson(log.logOnScopes))
+      ("contexts", JsArray(log.outRelationsAs(LogOnScope).map(logOnScopeWriter(_))))
     ))
   }
 }

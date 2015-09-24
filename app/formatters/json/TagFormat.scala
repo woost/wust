@@ -8,7 +8,7 @@ import renesca.parameter._
 import renesca.parameter.implicits._
 
 object TagFormat {
-  private def tagLikeToSeq(tag: TagLike) = Seq(
+  def tagLikeToSeq(tag: TagLike) = Seq(
     ("id", JsString(tag.uuid)),
     ("title", JsString(tag.title)),
     ("description", JsString(tag.description.getOrElse(""))),
