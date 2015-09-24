@@ -3,7 +3,7 @@ package modules.karma
 import modules.db.Database.db
 import model.Helpers
 import model.WustSchema._
-import modules.db.NodeDefinition
+import modules.db.{QueryContext, NodeDefinition}
 import renesca.QueryHandler
 import renesca.parameter.ParameterMap
 import renesca.parameter.implicits._
@@ -19,7 +19,7 @@ object KarmaUpdate {
   import scala.concurrent.Future
 
   //TODO: log failure
-  def persist(karmaDefinition: KarmaDefinition, karmaQuery: KarmaQuery, karmaTagMatcher: KarmaTagMatcher) = {
+  def persist(karmaDefinition: KarmaDefinition, karmaQuery: KarmaQuery, karmaTagMatcher: KarmaTagMatcher)(implicit ctx: QueryContext) = {
     db.transaction { tx =>
       // TODO: code dup from discourse.scala
       val timestamp = System.currentTimeMillis;
@@ -31,10 +31,10 @@ object KarmaUpdate {
       create (${karmaQuery.userDef.name})-[:`${KarmaLog.startRelationType}`]->(karmaLog $logLabels {karmaProps})-[:`${KarmaLog.endRelationType}`]->(${karmaQuery.postDef.name})
       with *
       ${ karmaTagMatcher.matcher }
-      create (karmaLog)-[:`${LogOnScope.relationType}`]->(${karmaTagMatcher.tagDef.name})
       merge (${karmaQuery.userDef.name})-[r:`${HasKarma.relationType}`]->(${karmaTagMatcher.tagDef.name})
       on create set r.karma = {karmaProps}.karmaChange
       on match set r.karma = r.karma + {karmaProps}.karmaChange
+      create (karmaLog)-[logonscope:`${LogOnScope.relationType}`]->(${karmaTagMatcher.tagDef.name}) set logonscope.currentKarma = r.karma
       """
 
       val params = karmaQuery.params ++ Map(

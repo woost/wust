@@ -15,6 +15,7 @@ import renesca.Query
 object Session extends Controller with Silhouette[User, JWTAuthenticator] with HeaderEnvironmentModule {
   def history() = UserAwareAction { request =>
     request.identity.map { user =>
+      implicit val ctx = new QueryContext
       val userDef = ConcreteNodeDefinition(user)
       val postDef = ConcreteFactoryNodeDefinition(Post)
       val viewedDef = RelationDefinition(userDef, Viewed, postDef)

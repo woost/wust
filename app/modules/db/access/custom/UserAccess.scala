@@ -47,6 +47,7 @@ case class UserContributions() extends RelationAccessDefault[User, Post] {
     val limit = context.limit
     val skip = page * limit
 
+    implicit val ctx = new QueryContext
     val userDef = FactoryUuidNodeDefinition(User, param.baseUuid)
     val postDef = ConcreteFactoryNodeDefinition(Post)
     val tagsDef = HyperNodeDefinition(ConcreteFactoryNodeDefinition(Scope), Tags, postDef)
@@ -76,6 +77,7 @@ case class UserHasKarmaScopes() extends StartRelationAccessDefault[User, HasKarm
   val nodeFactory = Scope
 
   override def read(context: RequestContext, param: ConnectParameter[User]) = {
+    implicit val ctx = new QueryContext
     val userDef = FactoryUuidNodeDefinition(User, param.baseUuid)
     val contextDef = ConcreteFactoryNodeDefinition(Scope)
     val karmaDef = RelationDefinition(userDef, HasKarma, contextDef)
@@ -94,6 +96,7 @@ case class UserHasKarmaLog() extends StartRelationAccessDefault[User, KarmaLog, 
   val nodeFactory = Post
 
   override def read(context: RequestContext, param: ConnectParameter[User]) = {
+    implicit val ctx = new QueryContext
     val userDef = FactoryUuidNodeDefinition(User, param.baseUuid)
     val nodeDef = ConcreteFactoryNodeDefinition(Post)
     val karmaLogDef = HyperNodeDefinition(userDef, KarmaLog, nodeDef)

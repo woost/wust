@@ -19,6 +19,7 @@ class TagAccess extends NodeReadBase[Scope] {
 
   //TODO: should override read for multiple tags, too. so it includes inherits
   override def read(context: RequestContext, uuid: String) = {
+    implicit val ctx = new QueryContext
     val node = FactoryUuidNodeDefinition(factory, uuid)
     val base = ConcreteFactoryNodeDefinition(factory)
     val impl = ConcreteFactoryNodeDefinition(factory)

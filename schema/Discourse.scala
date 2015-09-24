@@ -60,7 +60,9 @@ object WustSchema {
 
 
   // if you add/remove any properties (including inherited), you need to update modules.karma.KarmaStore
-  @Relation class LogOnScope(startNode: KarmaLog, endNode: Scope)
+  @Relation class LogOnScope(startNode: KarmaLog, endNode: Scope) {
+    val currentKarma: Long
+  }
   @HyperRelation class KarmaLog(startNode: User, endNode: Post) extends Timestamp with UuidNode {
     val karmaChange: Long
     val reason: String

@@ -18,6 +18,7 @@ object TaggedTaggable {
 
   def shapeResponse[NODE <: UuidNode](response: Iterable[NODE]): Iterable[NODE] = {
     if(!response.isEmpty) {
+      implicit val ctx = new QueryContext
       val tagDef = ConcreteFactoryNodeDefinition(Scope)
       val nodeDef = ConcreteFactoryNodeDefinition(Post)
       val connectsDef = ConcreteFactoryNodeDefinition(Connects)
@@ -52,6 +53,7 @@ object ClassifiedReferences {
 
   def shapeResponse[NODE <: UuidNode](response: Iterable[NODE]): Iterable[NODE] = {
     if(!response.isEmpty) {
+      implicit val ctx = new QueryContext
       val classDef = ConcreteFactoryNodeDefinition(Classification)
       val nodeDef = ConcreteFactoryNodeDefinition(Reference)
       val relDef = RelationDefinition(classDef, Classifies, nodeDef)

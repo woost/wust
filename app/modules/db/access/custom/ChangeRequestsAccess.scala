@@ -17,6 +17,7 @@ case class InstantChangeRequestAccess() extends NodeAccessDefault[ChangeRequest]
     val limit = context.limit
     val skip = context.skip
 
+    implicit val ctx = new QueryContext
     val crDef = LabelNodeDefinition[TagChangeRequest](ChangeRequest.labels)
     val crTagsDef = RelationDefinition(crDef, ProposesTag, ConcreteFactoryNodeDefinition(Scope))
     val postDef = LabelNodeDefinition[Post](Set.empty) //matching real posts and hidden posts without any label just by their relations
@@ -77,6 +78,7 @@ case class PostUpdatedAccess() extends EndRelationAccessDefault[Updated, Updated
 
   override def read(context: RequestContext, param: ConnectParameter[Post]) = {
     Ok(Json.toJson(context.user.map { user =>
+      implicit val ctx = new QueryContext
       val userDef = ConcreteNodeDefinition(user)
       val updatedDef = ConcreteFactoryNodeDefinition(Updated)
       val postDef = FactoryUuidNodeDefinition(Post, param.baseUuid)
@@ -103,6 +105,7 @@ case class PostTagChangeRequestAccess() extends RelationAccessDefault[Post, TagC
 
   override def read(context: RequestContext, param: ConnectParameter[Post]) = {
     Ok(Json.toJson(context.user.map { user =>
+      implicit val ctx = new QueryContext
       val userDef = ConcreteNodeDefinition(user)
       val updatedDef = ConcreteFactoryNodeDefinition(nodeFactory)
       val postDef = FactoryUuidNodeDefinition(Post, param.baseUuid)

@@ -40,6 +40,7 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
   private def addRequestTagsToGraph(tx: QueryHandler, discourse: Discourse, user: User, post: Post, request: AddTagRequestBase with RemoveTagRequestBase, authorBoost: Long, approvalSum: Long, applyThreshold: Long) {
     // TODO: do not get all connected requests if not needed...its just slow
     // because now we write lock every change request connected to the post
+    implicit val ctx = new QueryContext
     val userDef = ConcreteFactoryNodeDefinition(User)
     val tagDef = ConcreteFactoryNodeDefinition(Scope)
     val requestDef = ConcreteFactoryNodeDefinition(TagChangeRequest)
@@ -151,6 +152,7 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
 
   private def viewPost(node: Post, user: User) = Future {
     db.transaction { tx =>
+      implicit val ctx = new QueryContext
       val postDef = ConcreteNodeDefinition(node)
       val userDef = ConcreteNodeDefinition(user)
       val viewedDef = RelationDefinition(userDef, Viewed, postDef)
@@ -173,6 +175,7 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
   override def read(context: RequestContext, uuid: String) = {
     import formatters.json.PostFormat._
 
+    implicit val ctx = new QueryContext
     val tagDef = ConcreteFactoryNodeDefinition(Scope)
     val nodeDef = FactoryUuidNodeDefinition(factory, uuid)
     val connectsDef = ConcreteFactoryNodeDefinition(Connects)
@@ -263,6 +266,7 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
 
     context.withJson { (request: PostUpdateRequest) =>
       db.transaction { tx =>
+        implicit val ctx = new QueryContext
         val postDef = FactoryUuidNodeDefinition(Post, uuid)
         val userDef = ConcreteNodeDefinition(user)
         val createdDef = RelationDefinition(userDef, SchemaCreated, postDef)

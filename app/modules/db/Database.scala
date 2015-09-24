@@ -42,6 +42,7 @@ object Database {
   }
 
   def nodeDiscourseGraph[NODE <: UuidNode](factory: NodeFactory[NODE], uuids: String*): Discourse = {
+    implicit val ctx = new QueryContext
     if(uuids.isEmpty)
       return discourseGraph(ConcreteFactoryNodeDefinition(factory))
 
@@ -51,6 +52,7 @@ object Database {
   }
 
   def limitedDiscourseNodes[NODE <: UuidNode](skip: Int, limit: Int, factory: NodeFactory[NODE]): (Discourse, Seq[NODE]) = {
+    implicit val ctx = new QueryContext
     val nodeDef = ConcreteFactoryNodeDefinition(factory)
     val discourse = discourseGraphWithReturn(s"${ nodeDef.name } skip $skip limit $limit", nodeDef)
     (discourse, nodesWithType[NODE](discourse.nodes))
@@ -178,7 +180,7 @@ object Database {
 
   // IMPORTANT: we need to write the constancts as doubles to avoid integer arithmetic
   // def tagweight(up:String, down:String) = s"(($up + ${tagweight_p*tagweight_u})/($up + $down + $tagweight_u))"
-  def connectedComponent(focusNode: UuidNodeDefinition[_], identity: Option[User], depth: Int = 5): Discourse = {
+  def connectedComponent(focusNode: UuidNodeDefinition[_], identity: Option[User], depth: Int = 5)(implicit ctx: QueryContext): Discourse = {
     // Tag weights
     // 1. Cypher does not support subqueries yet, so we have to do extra queries for the tag weights.
     // This is not very efficient, because the component is traversed in each query.

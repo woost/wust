@@ -16,13 +16,20 @@ package object types {
 
 }
 
+class QueryContext {
+  var counter = 0
+  def newVariable = {
+    val tmp = counter
+    counter = counter + 1
+    "V" + tmp
+  }
+}
 
 sealed trait GraphDefinition {
+  protected def ctx: QueryContext
   def toQuery: String
-  final val name = randomVariable
   def parameterMap: ParameterMap = Map.empty
-
-  protected def randomVariable = "V" + Helpers.uuidBase64.replace("-", "") // "-" is not allowed as variable identifier
+  final val name = ctx.newVariable
 }
 
 sealed trait NodeDefinition[+NODE <: Node] extends GraphDefinition
@@ -45,7 +52,7 @@ sealed trait HyperNodeDefinitionBase[+NODE <: Node] extends FixedNodeDefinition[
 
 sealed trait UuidNodeDefinition[+NODE <: UuidNode] extends FixedNodeDefinition[NODE] {
   val uuid: String
-  val uuidVariable = randomVariable
+  val uuidVariable = ctx.newVariable
   override def parameterMap = Map(uuidVariable -> uuid)
 }
 
@@ -64,15 +71,15 @@ sealed trait LabelledNodeDefinition[+NODE <: Node] extends FixedNodeDefinition[N
 case class FactoryUuidNodeDefinition[+NODE <: UuidNode](
   factory: NodeFactory[NODE],
   uuid: String
-  ) extends LabelledUuidNodeDefinition[NODE] with FactoryNodeDefinition[NODE]
+  )(implicit val ctx: QueryContext) extends LabelledUuidNodeDefinition[NODE] with FactoryNodeDefinition[NODE]
 
 case class ConcreteFactoryNodeDefinition[+NODE <: Node](
   factory: NodeFactory[NODE]
-  ) extends LabelledNodeDefinition[NODE] with FactoryNodeDefinition[NODE]
+  )(implicit val ctx: QueryContext) extends LabelledNodeDefinition[NODE] with FactoryNodeDefinition[NODE]
 
 case class ConcreteNodeDefinition[+NODE <: UuidNode](
   node: NODE
-  ) extends LabelledUuidNodeDefinition[NODE] {
+  )(implicit val ctx: QueryContext) extends LabelledUuidNodeDefinition[NODE] {
 
   val uuid = node.uuid
   val labels = node.labels
@@ -81,19 +88,19 @@ case class ConcreteNodeDefinition[+NODE <: UuidNode](
 case class LabelUuidNodeDefinition[+NODE <: UuidNode](
   labels: Set[Label],
   uuid: String
-  ) extends LabelledUuidNodeDefinition[NODE]
+  )(implicit val ctx: QueryContext) extends LabelledUuidNodeDefinition[NODE]
 
 case class LabelNodeDefinition[+NODE <: Node](
-  labels: Set[Label]) extends LabelledNodeDefinition[NODE]
+  labels: Set[Label])(implicit val ctx: QueryContext) extends LabelledNodeDefinition[NODE]
 
 case class AnyUuidNodeDefinition[+NODE <: UuidNode](
   uuid: String
-  ) extends UuidNodeDefinition[NODE] {
+  )(implicit val ctx: QueryContext) extends UuidNodeDefinition[NODE] {
 
   override def toQuery = s"($name {uuid: {$uuidVariable}})"
 }
 
-case class AnyNodeDefinition[+NODE <: Node]() extends NodeDefinition[NODE] {
+case class AnyNodeDefinition[+NODE <: Node]()(implicit val ctx: QueryContext) extends NodeDefinition[NODE] {
   override def toQuery: String = s"($name)"
 }
 
@@ -107,12 +114,12 @@ END <: Node,
   val startDefinition: STARTDEF
   val endDefinition: ENDDEF
   val nodeUuid: Option[String]
-  val uuidVariable = randomVariable
+  val uuidVariable = ctx.newVariable
 
   val startName = startDefinition.name
   val endName = endDefinition.name
-  val startRelationName = randomVariable
-  val endRelationName = randomVariable
+  val startRelationName = ctx.newVariable
+  val endRelationName = ctx.newVariable
 
   def relationMatcher: String
 
@@ -170,7 +177,7 @@ ENDDEF <: NodeDefinition[END]
   startDefinition: STARTDEF,
   factory: AbstractRelationFactory[START, RELATION, END] with NodeFactory[RELATION],
   endDefinition: ENDDEF,
-  nodeUuid: Option[String] = None) extends HyperNodeDefinitionBase[RELATION] with SingleRelationDefinitionBase[START, RELATION, END, STARTDEF, ENDDEF]
+  nodeUuid: Option[String] = None)(implicit val ctx: QueryContext) extends HyperNodeDefinitionBase[RELATION] with SingleRelationDefinitionBase[START, RELATION, END, STARTDEF, ENDDEF]
 
 case class RelationDefinition[
 START <: Node,
@@ -181,7 +188,7 @@ ENDDEF <: NodeDefinition[END]
 ](
   startDefinition: STARTDEF,
   factory: AbstractRelationFactory[START, RELATION, END],
-  endDefinition: ENDDEF) extends SingleRelationDefinitionBase[START, RELATION, END, STARTDEF, ENDDEF] {
+  endDefinition: ENDDEF)(implicit val ctx: QueryContext) extends SingleRelationDefinitionBase[START, RELATION, END, STARTDEF, ENDDEF] {
   val nodeUuid = None
 }
 
@@ -195,7 +202,7 @@ ENDDEF <: NodeDefinition[END]
   startDefinition: STARTDEF,
   factories: Seq[HyperRelationFactory[START, _, RELATION, _, END]],
   endDefinition: ENDDEF,
-  nodeUuid: Option[String] = None) extends RelationDefinitionBase[START, RELATION, END, STARTDEF, ENDDEF] {
+  nodeUuid: Option[String] = None)(implicit val ctx: QueryContext) extends RelationDefinitionBase[START, RELATION, END, STARTDEF, ENDDEF] {
 
   def relationMatcher = {
     val (startRelationTypes, labels, endRelationTypes) = factories.map { r =>
@@ -218,7 +225,7 @@ ENDDEF <: NodeDefinition[END]
 ](
   startDefinition: STARTDEF,
   factories: Seq[RelationFactory[START, RELATION, END]],
-  endDefinition: ENDDEF) extends RelationDefinitionBase[START, RELATION, END, STARTDEF, ENDDEF] {
+  endDefinition: ENDDEF)(implicit val ctx: QueryContext) extends RelationDefinitionBase[START, RELATION, END, STARTDEF, ENDDEF] {
 
   val nodeUuid = None
 

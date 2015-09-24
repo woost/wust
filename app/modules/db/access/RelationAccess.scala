@@ -41,10 +41,10 @@ RELATION <: AbstractRelation[START, END],
 END <: UuidNode
 ] extends RelationAccess[START, END] {
 
-  def toNodeDefinition = ConcreteFactoryNodeDefinition(nodeFactory)
-  def toNodeDefinition(uuid: String) = FactoryUuidNodeDefinition(nodeFactory, uuid)
-  def toBaseNodeDefinition(param: ConnectParameter[START]) = FactoryUuidNodeDefinition(param.baseFactory, param.baseUuid)
-  def toBaseNodeDefinition[E <: UuidNode, S <: UuidNode](param: HyperConnectParameter[S, START with AbstractRelation[S, E], E]) = {
+  def toNodeDefinition(implicit ctx: QueryContext) = ConcreteFactoryNodeDefinition(nodeFactory)
+  def toNodeDefinition(uuid: String)(implicit ctx: QueryContext) = FactoryUuidNodeDefinition(nodeFactory, uuid)
+  def toBaseNodeDefinition(param: ConnectParameter[START])(implicit ctx: QueryContext) = FactoryUuidNodeDefinition(param.baseFactory, param.baseUuid)
+  def toBaseNodeDefinition[E <: UuidNode, S <: UuidNode](param: HyperConnectParameter[S, START with AbstractRelation[S, E], E])(implicit ctx: QueryContext) = {
     val start = FactoryUuidNodeDefinition(param.startFactory, param.startUuid)
     val end = FactoryUuidNodeDefinition(param.endFactory, param.endUuid)
     HyperNodeDefinition(start, param.baseFactory, end)
@@ -64,10 +64,10 @@ RELATION <: AbstractRelation[START, END],
 END <: UuidNode
 ] extends RelationAccess[END, START] {
 
-  def toNodeDefinition = ConcreteFactoryNodeDefinition(nodeFactory)
-  def toNodeDefinition(uuid: String) = FactoryUuidNodeDefinition(nodeFactory, uuid)
-  def toBaseNodeDefinition(param: ConnectParameter[END]) = FactoryUuidNodeDefinition(param.baseFactory, param.baseUuid)
-  def toHyperBaseNodeDefinition[E <: UuidNode, S <: UuidNode](param: HyperConnectParameter[S, END with AbstractRelation[S, E], E]) = {
+  def toNodeDefinition(implicit ctx: QueryContext) = ConcreteFactoryNodeDefinition(nodeFactory)
+  def toNodeDefinition(uuid: String)(implicit ctx: QueryContext) = FactoryUuidNodeDefinition(nodeFactory, uuid)
+  def toBaseNodeDefinition(param: ConnectParameter[END])(implicit ctx: QueryContext) = FactoryUuidNodeDefinition(param.baseFactory, param.baseUuid)
+  def toHyperBaseNodeDefinition[E <: UuidNode, S <: UuidNode](param: HyperConnectParameter[S, END with AbstractRelation[S, E], E])(implicit ctx: QueryContext) = {
     val start = FactoryUuidNodeDefinition(param.startFactory, param.startUuid)
     val end = FactoryUuidNodeDefinition(param.endFactory, param.endUuid)
     HyperNodeDefinition(start, param.baseFactory, end)
@@ -101,10 +101,12 @@ END <: UuidNode
   val factory: AbstractRelationFactory[START, RELATION, END]
 
   override def read(context: RequestContext, param: ConnectParameter[START]) = {
+    implicit val ctx = new QueryContext
     pageAwareRead(context, Seq(RelationDefinition(toBaseNodeDefinition(param), factory, toNodeDefinition)))
   }
 
   override def read[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, START with AbstractRelation[S, E], E]) = {
+    implicit val ctx = new QueryContext
     pageAwareRead(context, Seq(RelationDefinition(toBaseNodeDefinition(param), factory, toNodeDefinition)))
   }
 }
@@ -117,10 +119,12 @@ END <: UuidNode
   val factory: AbstractRelationFactory[START, RELATION, END]
 
   override def read(context: RequestContext, param: ConnectParameter[END]) = {
+    implicit val ctx = new QueryContext
     pageAwareRead(context, Seq(RelationDefinition(toNodeDefinition, factory, toBaseNodeDefinition(param))))
   }
 
   override def read[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, END with AbstractRelation[S, E], E]) = {
+    implicit val ctx = new QueryContext
     pageAwareRead(context, Seq(RelationDefinition(toNodeDefinition, factory, toHyperBaseNodeDefinition(param))))
   }
 }
@@ -132,10 +136,12 @@ END <: UuidNode
   val factories: Seq[AbstractRelationFactory[START, AbstractRelation[START, END], END]]
 
   override def read(context: RequestContext, param: ConnectParameter[START]) = {
+    implicit val ctx = new QueryContext
     pageAwareRead(context, factories.map(RelationDefinition(toBaseNodeDefinition(param), _, toNodeDefinition)))
   }
 
   override def read[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, START with AbstractRelation[S, E], E]) = {
+    implicit val ctx = new QueryContext
     pageAwareRead(context, factories.map(RelationDefinition(toBaseNodeDefinition(param), _, toNodeDefinition)))
   }
 }
@@ -147,10 +153,12 @@ END <: UuidNode
   val factories: Seq[AbstractRelationFactory[START, AbstractRelation[START, END], END]]
 
   override def read(context: RequestContext, param: ConnectParameter[END]) = {
+    implicit val ctx = new QueryContext
     pageAwareRead(context, factories.map(RelationDefinition(toNodeDefinition, _, toBaseNodeDefinition(param))))
   }
 
   override def read[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, END with AbstractRelation[S, E], E]) = {
+    implicit val ctx = new QueryContext
     pageAwareRead(context, factories.map(RelationDefinition(toNodeDefinition, _, toHyperBaseNodeDefinition(param))))
   }
 }
@@ -163,6 +171,7 @@ END <: UuidNode
   val factory: AbstractRelationFactory[START, RELATION, END]
 
   override def delete(context: RequestContext, param: ConnectParameter[START], uuid: String) = context.withUser {
+    implicit val ctx = new QueryContext
     val relationDefinition = RelationDefinition(toBaseNodeDefinition(param), factory, toNodeDefinition(uuid))
     if(disconnectNodes(relationDefinition))
       NoContent
@@ -171,6 +180,7 @@ END <: UuidNode
   }
 
   override def delete[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, START with AbstractRelation[S, E], E], uuid: String) = context.withUser {
+    implicit val ctx = new QueryContext
     val relationDefinition = RelationDefinition(toBaseNodeDefinition(param), factory, toNodeDefinition(uuid))
     if(disconnectNodes(relationDefinition))
       NoContent
@@ -187,6 +197,7 @@ END <: UuidNode
   val factory: AbstractRelationFactory[START, RELATION, END]
 
   override def delete(context: RequestContext, param: ConnectParameter[END], uuid: String) = context.withUser {
+    implicit val ctx = new QueryContext
     val relationDefinition = RelationDefinition(toNodeDefinition(uuid), factory, toBaseNodeDefinition(param))
     if(disconnectNodes(relationDefinition))
       NoContent
@@ -195,6 +206,7 @@ END <: UuidNode
   }
 
   override def delete[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, END with AbstractRelation[S, E], E], uuid: String) = context.withUser {
+    implicit val ctx = new QueryContext
     val relationDefinition = RelationDefinition(toNodeDefinition(uuid), factory, toHyperBaseNodeDefinition(param))
     if(disconnectNodes(relationDefinition))
       NoContent
