@@ -37,11 +37,15 @@ trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefa
       val createdDef = RelationDefinition(userDef, SchemaCreated, postDef)
 
       //TODO: separate queries for subclasses
+      //TODO: simpler? locking really needed?
       val query = s"""
-      match (user:`${User.label}`)-[updated1:`${UserToUpdated.relationType}`|`${UserToDeleted.relationType}`|`${UserToAddTags.relationType}`|`${UserToRemoveTags.relationType}`]->${requestDef.toQuery}-[updated2:`${UpdatedToPost.relationType}`|`${DeletedToHidden.relationType}`|`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->${postDef.toQuery}, ${userDef.toQuery}
+      match (user:`${User.label}`)-[updated1:`${UserToUpdated.relationType}`|`${UserToDeleted.relationType}`|`${UserToAddTags.relationType}`|`${UserToRemoveTags.relationType}`]->${requestDef.toQuery}-[updated2:`${UpdatedToPost.relationType}`|`${DeletedToHidden.relationType}`|`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->${postDef.toQuery}
       where ${requestDef.name}.applied = ${PENDING} or ${requestDef.name}.applied = ${INSTANT}
       set ${requestDef.name}._locked = true
-      with ${postDef.name},${userDef.name},${requestDef.name}, updated1, updated2
+      with ${postDef.name}, ${requestDef.name}, updated1, updated2
+      match (${postDef.name})-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`), ${userDef.toQuery}
+      with distinct connectable, ${postDef.name}, ${userDef.name}, ${requestDef.name}, updated1, updated2
+      optional match (${userDef.name})-[r:`${HasKarma.relationType}`]->(tag)
       optional match ${votesDef.toQuery(false, false)}
       optional match ${createdDef.toQuery(false,false)}
       return *
@@ -52,8 +56,9 @@ trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefa
         val votes = discourse.votes.headOption
         votes.foreach(request.approvalSum -= _.weight)
 
-        val karma = 1 // TODO karma
         val authorBoost = if (discourse.createds.isEmpty) 0 else Moderation.authorKarmaBoost
+
+        val karma = Moderation.voteWeightFromScopes(discourse.scopes)
         val weight = sign * (karma + authorBoost)
         if (weight == 0) {
           // if there are any existing votes, disconnect them

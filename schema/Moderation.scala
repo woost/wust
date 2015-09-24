@@ -20,27 +20,24 @@ object Moderation {
 
   val authorKarmaBoost = postChangeThreshold(1000)
 
-  //TODO: reason why vote weight should be logarithmic
-  def voteWeight(votersKarma: Long) = log(votersKarma)
   def postVoteKarma = 1
+
+  def voteWeightFromScopes(scopes: Seq[Scope]) = voteWeight(karmaSum(scopes))
+  //TODO: reason why vote weight should be logarithmic
+  //TODO: negative karmasum: reject changerequests automatically?
+  private def voteWeight(votersKarma: Long) = if (votersKarma > 0) log(votersKarma) max 1 else 1
+  private def karmaSum(scopes: Seq[Scope]) = {
+    scopes.map { tag =>
+      val l:Long = tag.inRelationsAs(HasKarma).headOption.map(_.karma).getOrElse(0)
+      l
+    }.sum
+  }
 
   def postChangeThreshold(viewCount: Long) = sqrt(viewCount)
 
   def rejectPostChangeThreshold(applyThreshold: Long) = -applyThreshold / 2
 
   def postQuality(upVotes:Long, downVotes:Long) = (upVotes + votes_u*votes_p) / (downVotes + upVotes + votes_u)
-
-  def karmaSum(scopes: Seq[Scope]) = {
-    if (scopes.isEmpty) {
-      1
-    } else {
-      val ratio = scopes.map { tag =>
-        val l:Long = tag.inRelationsAs(HasKarma).headOption.map(_.karma).getOrElse(0)
-        l
-      }.sum / scopes.size
-      ratio max 1
-    }
-  }
 
   //TODO: user für votestream-votes belohnen?
 

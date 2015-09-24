@@ -270,7 +270,7 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
         val query = s"""
           match ${userDef.toQuery},
           ${postDef.toQuery}-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)
-          with distinct connectable, ${userDef.name}
+          with distinct ${postDef.name}, connectable, ${userDef.name}
           match (tag: `${Scope.label}`)-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`)
           optional match (${userDef.name})-[r:`${HasKarma.relationType}`]->(tag)
           optional match ${createdDef.toQuery(true, false)}
@@ -282,7 +282,7 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
 
         discourse.posts.headOption.map { node =>
           val authorBoost = if (discourse.createds.isEmpty) 0 else Moderation.authorKarmaBoost
-          val karma = Moderation.karmaSum(discourse.scopes)
+          val karma = Moderation.voteWeightFromScopes(discourse.scopes)
 
           val approvalSum = karma + authorBoost
           val applyThreshold = Moderation.postChangeThreshold(node.viewCount)

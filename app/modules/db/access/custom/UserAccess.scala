@@ -80,7 +80,7 @@ case class UserHasKarmaScopes() extends StartRelationAccessDefault[User, HasKarm
     val contextDef = ConcreteFactoryNodeDefinition(Scope)
     val karmaDef = RelationDefinition(userDef, HasKarma, contextDef)
 
-    val query = s"match ${ karmaDef.toQuery } return *"
+    val query = s"match ${ karmaDef.toQuery } where ${karmaDef.name}.karma <> 0 return *"
     val params = karmaDef.parameterMap
     val discourse = Discourse(db.queryGraph(query, params))
 
