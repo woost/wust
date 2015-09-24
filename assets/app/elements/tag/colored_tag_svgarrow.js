@@ -17,6 +17,8 @@ function coloredTagSvgArrow(Helpers) {
 
         scope.$watchCollection("coloredTagSvgArrow.tags", refreshColor);
 
+        scope.$watchCollection(() => scope.referenceNode.classifications, refreshColor);
+
         function refreshColor() {
             setColor(selectTag(scope.coloredTagSvgArrow, scope.referenceNode));
         }
