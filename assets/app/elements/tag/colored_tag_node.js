@@ -7,7 +7,8 @@ function coloredTagNode(Helpers, ContextService, $rootScope) {
         restrict: "EA",
         scope: {
             coloredTagNode: "=",
-            ignoreTags: "="
+            ignoreTags: "=",
+            big: "@",
         },
         link
     };
@@ -36,7 +37,10 @@ function coloredTagNode(Helpers, ContextService, $rootScope) {
                 rawElem.style.backgroundColor = "";
                 rawElem.style.borderColor = "";
             } else {
-                rawElem.style.backgroundColor = Helpers.postBackgroundColor(tag);
+                if( scope.big )
+                    rawElem.style.backgroundColor = Helpers.bigPostBackgroundColor(tag);
+                else
+                    rawElem.style.backgroundColor = Helpers.smallPostBackgroundColor(tag);
                 rawElem.style.borderColor = Helpers.postBorderColor(tag);
             }
         }

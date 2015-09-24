@@ -6,7 +6,8 @@ angular.module("wust.services").value("Helpers", {
     hashToColor,
     navBackgroundColor,
     postBorderColor,
-    postBackgroundColor,
+    smallPostBackgroundColor,
+    bigPostBackgroundColor,
     classificationLabelBackgroundColor,
     classificationLabelBorderColor,
     classificationCircleBackgroundColor,
@@ -60,7 +61,8 @@ function sortedNodeTags(node) {
 
 function navBackgroundColor(tag) { return hashToColor(tag, 20, 98); }
 
-function postBackgroundColor(tag) { return hashToColor(tag, 20, 99); }
+function smallPostBackgroundColor(tag) { return hashToColor(tag, 20, 99); }
+function bigPostBackgroundColor(tag) { return hashToColor(tag, 10, 99); }
 function postBorderColor(tag) { return hashToColor(tag, 20, 70); }
 
 function classificationLabelBackgroundColor(tag) { return hashToColor(tag, 40, 90); }

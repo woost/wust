@@ -227,9 +227,9 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     if(n.isHyperRelation) return undefined;
 
                     if(n.classifications.length > 0) {
-                        return Helpers.postBackgroundColor(n.classifications[0]);
+                        return Helpers.smallPostBackgroundColor(n.classifications[0]);
                     } else if(n.tags.length > 0)
-                        return Helpers.postBackgroundColor(n.tags[0]);
+                        return Helpers.smallPostBackgroundColor(n.tags[0]);
                     else
                         return undefined;
                 })
