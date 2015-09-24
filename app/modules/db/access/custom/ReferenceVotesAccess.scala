@@ -51,20 +51,16 @@ trait VotesReferenceAccess[T <: Reference] extends EndRelationAccessDefault[User
       if (discourse.createds.isEmpty) {
         val reference = selectNode(discourse, param.startUuid, param.endUuid)
         val votes = discourse.votes.headOption
-        votes.foreach(reference.voteCount -= _.weight)
-
-        val success = if (weight == 0) {
+        if (weight == 0) {
           // if there are any existing votes, disconnect them
           votes.foreach { vote =>
-            updateKarma(tx, reference, KarmaDefinition(-vote.weight, "Unvoted post"))
+            reference.voteCount -= vote.weight
             discourse.remove(vote)
+            updateKarma(tx, reference, KarmaDefinition(-vote.weight, "Unvoted post"))
           }
-          true
-        } else {
-          // we want to vote on the change request with our weight. we merge the
-          // votes relation as we want to override any previous vote. merging is
-          // better than just updating the weight on an existing relation, as it
-          // guarantees uniqueness
+        } else if (votes.isEmpty) {
+          // we want to vote on the change request with our weight if there is
+          // no vote from user. we merge the vote to guarantee uniqueness.
           reference.voteCount += weight
           val newVotes = Votes.merge(user, reference, weight = weight, onMatch = Set("weight"))
           discourse.add(newVotes)
