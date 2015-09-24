@@ -73,17 +73,21 @@ trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefa
           discourse.add(newVotes)
         }
 
-        val postApplies = if (request.applied == PENDING && request.canApply) {
-          // delete request are never pending, so it is ok to search for posts instead of hidden
-          val post = discourse.posts.head
-          val success = applyChange(discourse, request, post, tx)
+        val postApplies = if (request.canApply) {
+          if (request.applied == PENDING) {
+            val post = discourse.posts.head
+            val success = applyChange(discourse, request, post, tx)
 
-          if (success) {
-            request.applied = APPLIED
+            if (success) {
+              request.applied = APPLIED
             updateKarma(request, KarmaDefinition(request.applyThreshold, "Change request applied"))
-            Right(Some(post))
-          } else
-            Left("Cannot apply changes automatically")
+              Right(Some(post))
+            } else
+              Left("Cannot apply changes automatically")
+          } else if (request.applied == INSTANT) {
+              request.applied = APPLIED
+              Right(None)
+          }
         } else if (request.canReject) {
           if (request.applied == INSTANT) {
             val post = discourse.posts.headOption.getOrElse(Post.wrap(discourse.hiddens.head.rawItem))
