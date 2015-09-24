@@ -19,11 +19,18 @@
                 </button>
             </div>
 
+            <h4 class="action-description">
+                <span ng-if="vm.is('Delete')">Delete Post</span>
+                <span ng-if="vm.is('Edit')">Edit Post</span>
+                <span ng-if="vm.is('AddTag')">Add Tag <span tag-label="vm.change.tag"></span></span>
+                <span ng-if="vm.is('RemoveTag')">Remove Tag <span tag-label="vm.change.tag" class="remove"></span></span>
+            </h4>
+
             <div ng-class="vm.actionclasses">
                 <ul tabset class="tabs-above">
                     <li tab>
                         <a tab-heading>Old</a>
-                        <div class="post">
+                        <div class="post" colored-tag-node="vm.change.post" big="true">
                             <h2 class="post-title">{{vm.change.oldTitle}}</h2>
                             <div ng-show="vm.showDescription" class="post-description" markdown="vm.change.oldDescription" ng-show="vm.change.oldDescription"></div>
                         </div>
@@ -31,10 +38,10 @@
                     </li>
                     <li tab active="vm.showMiddleTab">
                         <a tab-heading>Difference</a>
-                        <div class="post">
+                        <div class="post" colored-tag-node="vm.change.post" big="true" ng-class="{remove: vm.is('Delete')}">
                             <h2 class="post-title">
                                 <div ng-if="vm.is('Edit')" word-based-diff source-a="vm.change.oldTitle" source-b="vm.change.newTitle"></div>
-                                <span ng-if="vm.is('AddTag') || vm.is('RemoveTag')">{{vm.change.post.title}}</span>
+                                <span ng-if="vm.is('AddTag') || vm.is('RemoveTag') || vm.is('Delete')">{{vm.change.post.title}}</span>
                             </h2>
 
                             <div ng-if="vm.is('AddTag')">
@@ -56,7 +63,7 @@
                     </li>
                     <li tab>
                         <a tab-heading>New</a>
-                        <div class="post">
+                        <div class="post" colored-tag-node="vm.change.post" big="true">
                             <h2 class="post-title">{{vm.change.newTitle}}</h2>
 
                             <div ng-show="vm.showDescription" class="post-description" markdown="vm.change.newDescription" ng-show="vm.change.newDescription"></div>

@@ -13,12 +13,15 @@
         .vote-buttons {
             @include display-flex(flex);
             @include justify-content(space-between);
-            .btn {
-                margin: 10px;
-            }
         }
 
-        .AddTag, .RemoveTag {
+        .action-description {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        // hide tab bar for these actions
+        .AddTag, .RemoveTag, .Delete {
             ul > li > a {
                 visibility: hidden;
             }
@@ -41,6 +44,10 @@
             }
         }
 
+        .post.remove {
+            @include box-shadow(0 0 0 5px red);
+        }
+
         .AddTag .post .existing.tag .tag-label {
             background-color: #EEE !important;
             border-color: #AAA !important;
@@ -56,6 +63,7 @@
         }
 
         #action_container {
+            width: 600px;
             @include display-flex(flex);
             @include flex-direction(column);
             .action {
