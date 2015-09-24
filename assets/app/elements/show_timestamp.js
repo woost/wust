@@ -16,7 +16,7 @@ function showTimestamp($interval) {
     function link(scope) {
         setTimestamp();
 
-        //backoff time depending on how recent it is
+        //TODO: backoff time depending on how recent it is
         let stopInterval = $interval(setTimestamp, 10 * 1000);
 
         scope.$on("$destroy", () => $interval.cancel(stopInterval));
@@ -34,19 +34,24 @@ function showTimestamp($interval) {
 
             let date = new Date(diff);
             if (diff.sec < 60)
-                scope.ago = diff.sec + " seconds ago";
+                scope.ago = agoString(diff.sec, "second");
             else if (diff.min < 60)
-                scope.ago = diff.min + " minutes ago";
+                scope.ago = agoString(diff.min, "minute");
             else if (diff.hour < 24)
-                scope.ago = diff.hour + " hours ago";
+                scope.ago = agoString(diff.hour, "hour");
             else if (diff.day < 7)
-                scope.ago = diff.day + " days ago";
+                scope.ago = agoString(diff.day, "day");
             else if (diff.week < 4)
-                scope.ago = diff.week + " weeks ago";
+                scope.ago = agoString(diff.week, "week");
             else if (diff.month < 12)
-                scope.ago = diff.month + " months ago";
+                scope.ago = agoString(diff.month, "month");
             else
-                scope.ago = diff.year + " years ago";
+                scope.ago = agoString(diff.year, "year");
+
+            function agoString(num, unit) {
+                let sunit = num === 1 ? unit : unit + "s";
+                return `${num} ${sunit} ago`;
+            }
         }
     }
 }
