@@ -183,23 +183,12 @@ case class VotesUpdatedAccess(
     implicit val ctx = new QueryContext
     val postDef = ConcreteNodeDefinition(request.endNodeOpt.get)
     val userDef = ConcreteNodeDefinition(request.startNodeOpt.get)
-    val tagDef = ConcreteFactoryNodeDefinition(Scope)
 
-    val query = s"""
-    match ${userDef.toQuery},
-    ${postDef.toQuery}-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)
-    with distinct connectable, ${userDef.name}, ${postDef.name}
-    """
-
-    val tagMatch = s"""
-    match ${tagDef.toQuery}-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`)
-    """
-
-    val params = tagDef.parameterMap ++ postDef.parameterMap ++ userDef.parameterMap
+    val query = s"match ${userDef.toQuery}, ${postDef.toQuery}"
+    val params = postDef.parameterMap ++ userDef.parameterMap
 
     val karmaQuery = KarmaQuery(postDef, userDef, query, params)
-    val karmaTagMatcher = KarmaTagMatcher(tagDef, tagMatch)
-    KarmaUpdate.persist(karmaDefinition, karmaQuery, karmaTagMatcher)
+    KarmaUpdate.persistWithConnectedTags(karmaDefinition, karmaQuery)
   }
 }
 
@@ -224,25 +213,14 @@ case class VotesDeletedAccess(
   def updateKarma(request: Deleted, karmaDefinition: KarmaDefinition) {
     implicit val ctx = new QueryContext
     // match any label, the post might be hidden or a post (maybe better some common label)
-    val postDef = LabelUuidNodeDefinition[Post](Set.empty, request.endNodeOpt.get.uuid)
+    val postDef = LabelUuidNodeDefinition[Post](UuidNode.labels, request.endNodeOpt.get.uuid)
     val userDef = ConcreteNodeDefinition(request.startNodeOpt.get)
-    val tagDef = ConcreteFactoryNodeDefinition(Scope)
 
-    val query = s"""
-    match ${userDef.toQuery},
-    ${postDef.toQuery}-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)
-    with distinct connectable, ${userDef.name}, ${postDef.name}
-    """
-
-    val tagMatch = s"""
-    match ${tagDef.toQuery}-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`)
-    """
-
-    val params = tagDef.parameterMap ++ postDef.parameterMap ++ userDef.parameterMap
+    val query = s"match ${userDef.toQuery}, ${postDef.toQuery}"
+    val params = postDef.parameterMap ++ userDef.parameterMap
 
     val karmaQuery = KarmaQuery(postDef, userDef, query, params)
-    val karmaTagMatcher = KarmaTagMatcher(tagDef, tagMatch)
-    KarmaUpdate.persist(karmaDefinition, karmaQuery, karmaTagMatcher)
+    KarmaUpdate.persistWithConnectedTags(karmaDefinition, karmaQuery)
   }
 }
 
@@ -297,19 +275,11 @@ case class VotesTagsChangeRequestAccess(
     val userDef = ConcreteNodeDefinition(userNode)
     val postDef = ConcreteNodeDefinition(postNode)
 
-    val query = s"""
-    match ${userDef.toQuery}, ${postDef.toQuery}
-    """
-
-    val tagMatch = s"""
-    match ${tagsDef.toQuery}
-    """
-
-    val params = tagsDef.parameterMap ++ userDef.parameterMap ++ postDef.parameterMap
+    val query = s"match ${userDef.toQuery}, ${postDef.toQuery}"
+    val params = userDef.parameterMap ++ postDef.parameterMap
 
     val karmaQuery = KarmaQuery(postDef, userDef, query, params)
-    val karmaTagMatcher = KarmaTagMatcher(tagDef, tagMatch)
-    KarmaUpdate.persist(karmaDefinition, karmaQuery, karmaTagMatcher)
+    KarmaUpdate.persistWithProposedTags(karmaDefinition, karmaQuery, tagsDef)
   }
 }
 

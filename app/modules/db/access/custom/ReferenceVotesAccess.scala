@@ -108,19 +108,11 @@ case class VotesTagsAccess(sign: Long) extends VotesReferenceAccess[Tags] {
     val userDef = ConcreteFactoryNodeDefinition(User)
     val createdDef = RelationDefinition(userDef, SchemaCreated, postDef)
 
-    val query = s"""
-    match ${createdDef.toQuery}
-    """
-
-    val tagMatch = s"""
-    match ${tagDef.toQuery}
-    """
-
-    val params = tagDef.parameterMap ++ createdDef.parameterMap
+    val query = s"match ${createdDef.toQuery}"
+    val params = createdDef.parameterMap
 
     val karmaQuery = KarmaQuery(postDef, userDef, query, params)
-    val karmaTagMatcher = KarmaTagMatcher(tagDef, tagMatch)
-    KarmaUpdate.persist(karmaDefinition, karmaQuery, karmaTagMatcher)
+    KarmaUpdate.persistWithTags(karmaDefinition, karmaQuery, tagDef)
   }
 }
 
@@ -137,26 +129,14 @@ case class VotesConnectsAccess(sign: Long) extends VotesReferenceAccess[Connects
 
   override def updateKarma(tx: QueryHandler, reference: Connects, karmaDefinition: KarmaDefinition) {
     implicit val ctx = new QueryContext
-    val connDef = ConcreteNodeDefinition(reference.endNodeOpt.get)
     val postDef = ConcreteNodeDefinition(reference.startNodeOpt.get)
     val userDef = ConcreteFactoryNodeDefinition(User)
     val createdDef = RelationDefinition(userDef, SchemaCreated, postDef)
-    val tagDef = ConcreteFactoryNodeDefinition(Scope)
 
-    val query = s"""
-    match ${createdDef.toQuery},
-    ${connDef.toQuery}-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)
-    with distinct connectable, ${userDef.name}, ${postDef.name}
-    """
-
-    val tagMatch = s"""
-    match ${tagDef.toQuery}-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`)
-    """
-
-    val params = connDef.parameterMap ++ createdDef.parameterMap ++ tagDef.parameterMap
+    val query = s"match ${createdDef.toQuery}"
+    val params = createdDef.parameterMap
 
     val karmaQuery = KarmaQuery(postDef, userDef, query, params)
-    val karmaTagMatcher = KarmaTagMatcher(tagDef, tagMatch)
-    KarmaUpdate.persist(karmaDefinition, karmaQuery, karmaTagMatcher)
+    KarmaUpdate.persistWithConnectedTags(karmaDefinition, karmaQuery)
   }
 }
