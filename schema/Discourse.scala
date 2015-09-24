@@ -132,6 +132,7 @@ object WustSchema {
   @Node trait Action extends UuidNode with Timestamp
   @HyperRelation class Created(startNode: User, endNode: Post) extends Action
 
+  val CONFLICT = -2
   val REJECTED = -1
   val PENDING = 0
   val INSTANT = 1

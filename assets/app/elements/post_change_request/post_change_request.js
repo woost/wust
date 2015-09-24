@@ -24,17 +24,13 @@ class VotingEditor {
         this.vm = vm;
     }
 
-    get list() {
-        return this.vm.changes;
-    }
-
     applyChange(change, response) {
         change.vote = response.vote;
         change.votes = response.votes;
         change.applied = response.applied;
 
         if (change.applied !== 0) {
-            _.remove(this.list, {id:change.id});
+            _.remove(this.vm.changes, {id:change.id});
         }
 
         if (change.applied === -1) {
@@ -49,7 +45,10 @@ class VotingEditor {
         this.vm.service.$buildRaw(change).neutral.$create().$then(val => {
             this.applyChange(change, val);
             humane.success("Unvoted");
-        }, response => humane.error(response.$response.data));
+        }, response => {
+            _.remove(this.vm.changes, {id:change.id});
+            humane.error(response.$response.data);
+        });
     }
 
     up(change) {
@@ -58,7 +57,10 @@ class VotingEditor {
 
         this.vm.service.$buildRaw(change).up.$create().$then(val => {
             this.applyChange(change, val);
-        }, response => humane.error(response.$response.data));
+        }, response => {
+            _.remove(this.vm.changes, {id:change.id});
+            humane.error(response.$response.data);
+        });
     }
 
     down(change) {
@@ -67,7 +69,10 @@ class VotingEditor {
 
         this.vm.service.$buildRaw(change).down.$create().$then(val => {
             this.applyChange(change, val);
-        }, response => humane.error(response.$response.data));
+        }, response => {
+            _.remove(this.vm.changes, {id:change.id});
+            humane.error(response.$response.data);
+        });
     }
 }
 
