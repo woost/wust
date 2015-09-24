@@ -6,6 +6,8 @@
                     <span ng-switch-when="true">Create connection</span>
                     <span ng-switch-default>Edit connection</span>
                 </h3>
+                <span small-post node="vm.currentEditRelation.startNode"></span>
+                <span small-post node="vm.currentEditRelation.endNode"></span>
             </div>
             <div class="modal-body">
                 <div edit-taglist tags="vm.currentEditRelation.tags" set-focus="true" always-show="true" tag-type="classification" existing-only="true"></div>

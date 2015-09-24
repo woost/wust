@@ -42,6 +42,8 @@ function TagRelationEditService($rootScope, $modal, EditService) {
     function showModal(node, disconnectFunc, isCreating = false) {
         currentRelation = EditService.editReference(node);
         currentRelation.isCreating = isCreating;
+        currentRelation.startNode = node.startNode;
+        currentRelation.endNode = node.endNode;
         currentDisconnect = disconnectFunc;
         modalInstance.$promise.then(modalInstance.show);
     }

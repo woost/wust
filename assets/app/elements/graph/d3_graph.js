@@ -1221,6 +1221,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                                 return;
                             }
 
+                            connects.startNode = startNode;
+                            connects.endNode = endNode;
                             TagRelationEditService.show(connects, () => this.disconnectHyperRelation(connects), true);
                         });
                     }
