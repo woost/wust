@@ -19,7 +19,7 @@ object KarmaUpdate {
   import scala.concurrent.Future
 
   //TODO: log failure
-  def persist(karmaDefinition: KarmaDefinition, karmaQuery: KarmaQuery, karmaTagMatcher: KarmaTagMatcher) = Future {
+  def persist(karmaDefinition: KarmaDefinition, karmaQuery: KarmaQuery, karmaTagMatcher: KarmaTagMatcher) = {
     db.transaction { tx =>
       // TODO: code dup from discourse.scala
       val timestamp = System.currentTimeMillis;

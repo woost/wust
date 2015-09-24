@@ -136,7 +136,7 @@ object WustSchema {
   val REJECTED = -1
   val PENDING = 0
   val INSTANT = 1
-  val APPLIED = 2 //TODO: rename to approved
+  val APPROVED = 2
   //TODO: should be called change
   @Node trait ChangeRequest extends Action with Votable {
     val applyThreshold:Long

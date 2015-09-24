@@ -24,7 +24,7 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
   private def handleInitialChange(contribution: ChangeRequest, user: User, authorBoost: Long, approvalSum: Long) = {
     if (contribution.canApply(authorBoost)) {
       contribution.approvalSum = authorBoost
-      contribution.applied = APPLIED
+      contribution.applied = APPROVED
       Some(Votes.merge(user, contribution, weight = authorBoost))
     } else if(contribution.canApply(approvalSum)) {
       contribution.approvalSum = approvalSum
@@ -71,7 +71,7 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
           exist.approvalSum += approvalSum
           discourse.add(Votes.merge(user, exist, weight = approvalSum))
           if (exist.canApply)
-            exist.applied = APPLIED
+            exist.applied = APPROVED
         }
       }
 
@@ -84,7 +84,7 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
       }
 
       crOpt.foreach { cr =>
-        if (cr.applied == INSTANT || cr.applied == APPLIED) {
+        if (cr.applied == INSTANT || cr.applied == APPROVED) {
           discourse.add(Tags.merge(cr.proposesTags.head, post))
         }
       }
@@ -98,7 +98,7 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
           exist.approvalSum += approvalSum
           discourse.add(Votes.merge(user, exist, weight = approvalSum))
           if (exist.canApply)
-            exist.applied = APPLIED
+            exist.applied = APPROVED
         }
       }
 
@@ -110,7 +110,7 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
         remTags
       }
 
-      if (cr.applied == INSTANT || cr.applied == APPLIED) {
+      if (cr.applied == INSTANT || cr.applied == APPROVED) {
         discourse.remove(Tags.matches(cr.proposesTags.head, post))
       }
     }

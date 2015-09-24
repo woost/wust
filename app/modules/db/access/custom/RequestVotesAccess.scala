@@ -73,21 +73,23 @@ trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefa
           discourse.add(newVotes)
         }
 
-        val postApplies = if (request.canApply) {
+        val postApplies:Either[String,Option[Post]] = if (request.canApply) {
           if (request.applied == PENDING) {
             val post = discourse.posts.head
             val success = applyChange(discourse, request, post, tx)
 
             if (success) {
-              request.applied = APPLIED
-            updateKarma(request, KarmaDefinition(request.applyThreshold, "Change request applied"))
+              request.applied = APPROVED
+              updateKarma(request, KarmaDefinition(request.applyThreshold, "Proposed change request approved"))
               Right(Some(post))
-            } else
+            } else {
               Left("Cannot apply changes automatically")
+            }
           } else if (request.applied == INSTANT) {
-              request.applied = APPLIED
-              Right(None)
-          }
+            request.applied = APPROVED
+            updateKarma(request, KarmaDefinition(request.applyThreshold, "Instant change request approved"))
+            Right(None)
+          } else Right(None)
         } else if (request.canReject) {
           if (request.applied == INSTANT) {
             val post = discourse.posts.headOption.getOrElse(Post.wrap(discourse.hiddens.head.rawItem))
