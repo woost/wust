@@ -1,8 +1,7 @@
-<div id="tag_component">
+<div id="tag_component" class="content-component">
     <div id="tag_list_box" infinite-scroll="vm.loadMoreTags()" infinite="vm.infinite" promise="vm.search.results">
-        <h2>Tags</h2>
         <div class="search_box ">
-            <input type="text" class="form-control" ng-model="vm.search.query" ng-change='vm.refreshSearch()'>
+            <input type="text" placeholder="Search tag" class="form-control" ng-model="vm.search.query" ng-change='vm.refreshSearch()'>
         </div>
 
         <span ng-repeat="tag in vm.search.results track by tag.id" tag-label="tag"></span>

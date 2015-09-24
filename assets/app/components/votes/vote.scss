@@ -3,6 +3,11 @@
 @import "compass/css3/box-shadow";
 
 #vote_component {
+    .nochanges {
+        font-size: 30px;
+        color: #aaa;
+    }
+
     #description_container {
         width: 600px;
         min-width: 600px;

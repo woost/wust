@@ -8,7 +8,7 @@
     </div>
     <div d3-graph class="graph_network" ui-on-Drop="vm.addNodeToGraph($data, $event)" drop-channel="node,scratch_node">
         <div id="filter_input">
-            <input type="text" class="form-control" ng-model="vm.search.title" placeholder="filter">
+            <input type="text" class="form-control" ng-model="vm.search.title" placeholder="Filter">
         </div>
     </div>
     <div class="post-preview-frame" ng-class="{left: !vm.d3Info.hoveredNode.onLeftHalf, right: vm.d3Info.hoveredNode.onLeftHalf, top: !vm.d3Info.hoveredNode.onUpperHalf, bottom: vm.d3Info.hoveredNode.onUpperHalf}" ng-show="vm.d3Info.isHovering">

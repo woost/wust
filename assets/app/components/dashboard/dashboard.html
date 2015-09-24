@@ -1,10 +1,7 @@
-<div id="dashboard_component">
+<div id="dashboard_component" class="content-component">
     <div id="posts_view">
         <div id="header_list">
-            <h3>
-                Streams
-                <button class="btn btn-default" type="button" ng-click="vm.newStream()"><i class="fa fa-plus"></i></button>
-            </h3>
+            <button class="btn btn-default" type="button" ng-click="vm.newStream()">New Stream</button>
         </div>
         <div id="stream_list" as-sortable="vm.sortableOptions" ng-model="vm.streams">
             <div class="table container ng-trans ng-trans-scale-up ease as-sortable-item" as-sortable-item ng-repeat="stream in vm.streams">

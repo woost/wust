@@ -4,10 +4,6 @@
 #dashboard_component {
     height: 100%;
     #posts_view {
-        hr {
-            margin-top: 5px;
-            margin-bottom: 5px;
-        }
         #header_list {
             @include display-flex(flex);
             @include justify-content(space-between);

@@ -1,8 +1,6 @@
 @import "compass/css3/flexbox";
 
 #tag_component {
-    padding-top: 4px;
-    padding-left: 40px;
     height: 100%;
     @include flex-direction(columns);
     @include display-flex(flex);
