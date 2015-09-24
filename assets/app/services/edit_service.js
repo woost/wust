@@ -75,7 +75,8 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
             let removedTags = _.reject(this.original.tags, t => !t.id || _.any(this.tags, _.pick(t, "id"))).map(t => t.id);
 
             addedTags.forEach(tag => {
-                tag.classifications = this.tagClassifications.concat(tag.classifications);
+                // TODO: why do we have nulls in classifications?
+                tag.classifications = _.compact(this.tagClassifications.concat(tag.classifications));
             });
 
             if (addedTags.length > 0)
