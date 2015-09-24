@@ -43,7 +43,7 @@ trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefa
       where ${requestDef.name}.applied = ${PENDING} or ${requestDef.name}.applied = ${INSTANT}
       set ${requestDef.name}._locked = true
       with ${postDef.name}, ${requestDef.name}, updated1, updated2
-      match (${postDef.name})-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`), ${userDef.toQuery}
+      optional match (${postDef.name})-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`), ${userDef.toQuery}
       with distinct connectable, ${postDef.name}, ${userDef.name}, ${requestDef.name}, updated1, updated2
       optional match (${userDef.name})-[r:`${HasKarma.relationType}`]->(tag)
       optional match ${votesDef.toQuery(false, false)}
