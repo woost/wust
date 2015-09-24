@@ -190,11 +190,35 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
         setValidityProperties(dirtyModel = this.dirtyModel()) {
             this.isPristine = _.isEmpty(dirtyModel);
             this.isLocal = this.id === undefined;
-            //TODO: share validation code between scala and js
-            this.isValid = this.isHyperRelation || (!_.isEmpty(this.title) && this.title.length <= 140);
-            this.errors = 
 
+            //TODO: share validation code between scala and js
+            let defaultValidity = ValidityEntry("Invalid", true);
+            this.validity = {
+                title: defaultValidity,
+                description: defaultValidity,
+                tags: defaultValidity
+            };
+
+            if (this.isReference) {
+            } else {
+                this.validity.title = ValidityEntry("Title may not be empty", !_.isEmpty(this.title))
+                                        .and(ValidityEntry("Title must be less than 140 characters", this.title.length <= 140));
+
+                if (this.newDiscussion) {
+                    this.validity.tags = ValidityEntry("New discussion needs context", !_.isEmpty(this.tags));
+                }
+            }
+
+            this.isValid = _.every(this.validity, { valid: true });
             this.canSave = this.isValid && (this.isLocal || !this.isPristine);
+
+            function ValidityEntry(errorMsg, valid) {
+                let self = {};
+                self.valid = valid;
+                self.message = valid ? "Success" : errorMsg;
+                self.and = other => self.valid ? other : self;
+                return self;
+            }
         }
 
         unsetValidityProperties() {
