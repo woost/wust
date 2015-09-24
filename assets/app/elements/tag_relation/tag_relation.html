@@ -2,13 +2,16 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title">Select tag:</h3>
+                <h3 class="modal-title" ng-switch="::vm.currentEditRelation.isCreating">
+                    <span ng-switch-when="true">Create connection</span>
+                    <span ng-switch-default>Edit connection</span>
+                </h3>
             </div>
             <div class="modal-body">
                 <div edit-taglist tags="vm.currentEditRelation.tags" set-focus="true" always-show="true" tag-type="classification" existing-only="true"></div>
             </div>
             <div class="modal-footer">
-                <button ng-if="!vm.currentEditRelation.isCreating" class="pull-left btn btn-danger" ng-click="vm.disconnect();$hide()" data-title="disconnect" bs-tooltip><i class="fa fa-trash-o"></i></button>
+                <button ng-if="::!vm.currentEditRelation.isCreating" class="pull-left btn btn-danger" ng-click="vm.disconnect();$hide()" data-title="disconnect" bs-tooltip><i class="fa fa-trash-o"></i></button>
                 <button class="btn btn-default" ng-click="vm.cancel();$hide()">Cancel</button>
                 <button class="btn btn-primary" ng-click="vm.save();$hide()">OK</button>
             </div>
