@@ -8,8 +8,8 @@
                 <div edit-taglist tags="vm.currentEditRelation.tags" set-focus="true" always-show="true" tag-type="classification" existing-only="true"></div>
             </div>
             <div class="modal-footer">
-                <button class="pull-left btn btn-danger" ng-click="vm.disconnect();$hide()" data-title="disconnect" bs-tooltip><i class="fa fa-trash-o"></i></button>
-                <button class="btn btn-default" ng-click="$hide()">Cancel</button>
+                <button ng-if="!vm.currentEditRelation.isCreating" class="pull-left btn btn-danger" ng-click="vm.disconnect();$hide()" data-title="disconnect" bs-tooltip><i class="fa fa-trash-o"></i></button>
+                <button class="btn btn-default" ng-click="vm.cancel();$hide()">Cancel</button>
                 <button class="btn btn-primary" ng-click="vm.save();$hide()">OK</button>
             </div>
         </div>
