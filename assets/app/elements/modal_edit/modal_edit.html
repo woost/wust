@@ -17,7 +17,10 @@
             </div>
             <div class="modal-footer">
                 <span class="btn btn-default" ng-click="$hide()">Cancel</span>
-                <span class="btn btn-success" type="submit" ng-click="vm.save()" ng-disabled="!vm.node.canSave"><i class="fa fa-plus"></i></span>
+                <span class="btn btn-success" type="submit" ng-click="vm.save()" ng-disabled="!vm.node.canSave">
+                    <span ng-if="vm.node.newDiscussion">Start Discussion</span>
+                    <span ng-if="!vm.node.newDiscussion"><i class="fa fa-plus"></i></span>
+                </span>
             </div>
         </div>
     </form>
