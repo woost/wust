@@ -31,6 +31,8 @@ function HistoryService(Session, Post, DiscourseNode) {
         if (this.currentViewComponent === undefined)
             return;
 
+        //TODO: check whether node is tags relation and then update accordingly
+
         let current = this.currentViewComponent.getWrap("graph");
         let existing = _.find(current.nodes, _.pick(node, "id"));
         if (existing !== undefined) {

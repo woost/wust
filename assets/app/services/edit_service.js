@@ -7,7 +7,7 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
     let self = this;
 
     class Session {
-        constructor(other, lazyAdd = false, isConnects = false, newDiscussion = false) {
+        constructor(other, lazyAdd = false, isReference = false, newDiscussion = false) {
             // local id to identify nodes without an id
             this.localId = _.uniqueId();
 
@@ -15,9 +15,9 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
 
             this.expandedEditor = !!other.expandedEditor;
 
-            this.service = isConnects ? Reference : Post;
+            this.service = isReference ? Reference : Post;
 
-            this.isConnects = isConnects;
+            this.isReference = isReference;
 
             this.lazyAdd = lazyAdd;
 
@@ -111,7 +111,7 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
             promise.$then(response => {
                 let data = referenceNode ? response.node : response;
 
-                if (this.isConnects) {
+                if (this.isReference) {
                     data.tags = this.tags;
                     data.startId = this.startId;
                     data.endId = this.endId;
@@ -138,7 +138,7 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
 
                 if(referenceNode) {
                     let connects = _.find(response.graph.nodes, n => n.label === "CONNECTS" && n.startId === data.id && n.endId === referenceNode.id);
-                    let session = editConnects(connects);
+                    let session = editReference(connects);
                     session.tags = this.classifications;
                     data.classifications = [];
                     session.save();
@@ -224,7 +224,7 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
     this.edit = edit;
     this.editAnswer = editAnswer;
     this.editNewDiscussion = editNewDiscussion;
-    this.editConnects = editConnects;
+    this.editReference = editReference;
     this.updateNode = updateNode;
     this.findNode = findNode;
     this.persist = storeEditList;
@@ -315,7 +315,7 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
         return promise;
     }
 
-    function editConnects(node) {
+    function editReference(node) {
         return new Session(node, false, true, false);
     }
 
