@@ -31,7 +31,7 @@
         .parallels {
             .node_model_list > div {
                 @include display-flex(flex);
-                @include justify-content(center);
+                @include justify-content(flex-start);
                 @include flex-direction(row);
                 @include align-items(stretch);
                 @include flex-wrap(wrap);
