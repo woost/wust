@@ -7,51 +7,55 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
     let self = this;
 
     class Session {
-        constructor(other, lazyAdd = false, isReference = false, newDiscussion = false) {
+        constructor(other = {}) {
+
             // local id to identify nodes without an id
             this.localId = _.uniqueId();
-
-            this.apply(other);
+            this.lazyAdd = !!other.lazyAdd;
+            this.isReference = !!other.isReference;
+            this.newDiscussion = !!other.newDiscussion;
 
             this.expandedEditor = !!other.expandedEditor;
+            this.visible = !!other.visible;
+            this.isHyperRelation = !!other.isHyperRelation; //TODO: why am i here?
+            this.startId = other.startId;
+            this.endId = other.endId;
 
-            this.service = isReference ? Reference : Post;
+            this.referenceNode = other.referenceNode;
+            this.classifications = angular.copy((other.classifications || []).map(t => t.$encode ? t.$encode() : t));
+            this.tagClassifications = angular.copy((other.tagClassifications || []).map(t => t.$encode ? t.$encode() : t));
 
-            this.isReference = isReference;
+            this.apply(other);
+            if (other.original)
+                this.original = other.original;
+        }
 
-            this.lazyAdd = lazyAdd;
+        get service() {
+            return this.isReference ? Reference : Post;
+        }
 
-            this.newDiscussion = newDiscussion;
+        unsetOneTimeProperties() {
+            this.newDiscussion = false;
+            this.referenceNode = undefined;
+            this.classifications = [];
+            this.tagClassifications = [];
         }
 
         apply({
-            id, title, description, label, original, tags, localId, referenceNode, newDiscussion, isHyperRelation, classifications, tagClassifications, startId, endId, visible
-        }) {
-            tags = tags || [];
-            classifications = classifications || [];
-            tagClassifications = tagClassifications || [];
+            id, title, description, tags
+        }, isOriginal = false) {
             this.id = id;
-            this.visible = visible === undefined ? !!this.visible : !!visible;
-            this.startId = startId;
-            this.endId = endId;
-            this.localId = localId === undefined ? this.localId : localId;
             this.title = title || "";
             this.description = description || "";
-            this.label = label;
-            this.referenceNode = referenceNode;
-            this.newDiscussion = newDiscussion || false;
-            this.isHyperRelation = isHyperRelation || false;
-            this.tags = angular.copy(tags.map(t => t.$encode ? t.$encode() : t));
-            this.classifications = angular.copy(classifications.map(t => t.$encode ? t.$encode() : t));
-            this.tagClassifications = angular.copy(tagClassifications.map(t => t.$encode ? t.$encode() : t));
-            this.original = original || {
-                id: this.id,
-                localId: this.localId,
+            this.tags = angular.copy((tags || []).map(t => t.$encode ? t.$encode() : t));
+            this.original = isOriginal ? {
                 title: this.title,
                 description: this.description,
-                label: this.label,
-                tags: angular.copy(tags.map(t => t.$encode ? t.$encode() : t)),
-                classifications: angular.copy(classifications.map(t => t.$encode ? t.$encode() : t))
+                tags: angular.copy(this.tags)
+            } : {
+                title: "",
+                description: "",
+                tags: []
             };
 
             this.setValidityProperties();
@@ -63,12 +67,8 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
         }
 
         //TODO: we should rewrite the whole logic here, it is weird and hacky, but it works so i leave it as is :)
-        dirtyModel(saveModel = false) {
-            let dirtyModel;
-            if (saveModel && this.id === undefined)
-                dirtyModel = _.omit(_.pick(this, _.keys(this.original)), v => _.isEmpty(v));
-            else
-                dirtyModel = _.omit(_.pick(this, _.keys(this.original)), (v, k) => this.original[k] === v);
+        dirtyModel() {
+            let dirtyModel = _.omit(_.pick(this, _.keys(this.original)), (v, k) => this.original[k] === v);
 
             delete dirtyModel.tags;
             let addedTags = _.reject(this.tags, t => t.id && _.any(this.original.tags, _.pick(t, "id"))).map(t => t.id ? _.pick(t, "id", "classifications") : _.pick(t, "title", "classifications"));
@@ -84,14 +84,11 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
             if (removedTags.length > 0)
                 dirtyModel.removedTags = removedTags;
 
-            if (("classifications" in dirtyModel) && dirtyModel.classifications.length === 0)
-                delete dirtyModel.classifications;
-
             return dirtyModel;
         }
 
         save() {
-            let dirtyModel = this.dirtyModel(true);
+            let dirtyModel = this.dirtyModel();
             this.setValidityProperties(dirtyModel);
             if (!this.canSave)
                 return;
@@ -114,8 +111,6 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
 
                 if (this.isReference) {
                     data.tags = this.tags;
-                    data.startId = this.startId;
-                    data.endId = this.endId;
                 } else {
                     let appliedRequests = data.requestsTags && _.any(data.requestsTags, "applied") || data.requestsEdit && _.any(data.requestsEdit, "applied");
                     let hasRequests = !_.isEmpty(data.requestsTags) || !_.isEmpty(data.requestsEdit);
@@ -141,11 +136,10 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
                     let connects = _.find(response.graph.nodes, n => n.label === "CONNECTS" && n.startId === data.id && n.endId === referenceNode.id);
                     let session = editReference(connects);
                     session.tags = this.classifications;
-                    data.classifications = [];
                     session.save();
                 }
 
-                this.apply(data);
+                this.apply(data, true);
 
                 if (referenceNode === undefined) {
                     HistoryService.updateCurrentView(this.encode());
@@ -155,6 +149,7 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
                     _.remove(self.list, this);
                 }
 
+                this.unsetOneTimeProperties();
                 storeEditList();
 
             }, response => {
@@ -171,7 +166,9 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
         }
 
         encode() {
-            return this.id === undefined ? _.pick(this, _.keys(this.original)) : this.original;
+            let encoded = _.pick(this, _.keys(this.original));
+            encoded.id = this.id;
+            return encoded;
         }
 
         onChange() {
@@ -179,7 +176,7 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
 
             if (this.lazyAdd) {
                 this.lazyAdd = false;
-                editSession(this);
+                self.list.splice(0, 0, this);
             }
 
             storeEditList();
@@ -195,6 +192,8 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
             this.isLocal = this.id === undefined;
             //TODO: share validation code between scala and js
             this.isValid = this.isHyperRelation || (!_.isEmpty(this.title) && this.title.length <= 140);
+            this.errors = 
+
             this.canSave = this.isValid && (this.isLocal || !this.isPristine);
         }
 
@@ -234,7 +233,7 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
 
     function restoreEditList() {
         //compact if something is really wrong and we have nulls in the localstorage. be forgiving.
-        return _.map(_.compact(editStore.get("list", self.list) || []), s => new Session(s));
+        return _.map(_.compact(editStore.get("list") || []), s => new Session(s));
     }
 
     function clearEditList() {
@@ -249,7 +248,7 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
     function updateNode(localId, node) {
         let existing = findNode(localId);
         if (existing !== undefined) {
-            existing.apply(node);
+            existing.apply(node, true);
             storeEditList();
         }
     }
@@ -282,7 +281,8 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
         } else {
             // lazily add existing nodes, so they only appear in the scratchpad
             // if they were actually edited
-            existing = new Session(node, lazyadd);
+            existing = new Session(node);
+            existing.lazyAdd = true;
         }
 
         if (!lazyadd) {
@@ -317,17 +317,16 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
     }
 
     function editReference(node) {
-        return new Session(node, false, true, false);
-    }
-
-    function editSession(session, index = 0) {
-        self.list.splice(index, 0, session);
+        let session = new Session(node);
+        session.isReference = true;
+        return session;
     }
 
     function editAnswer(node) {
         let existingAnswer = _.find(self.list, elem => elem.isLocal && elem.referenceNode && elem.referenceNode.id === node.id);
         if (existingAnswer === undefined) {
-            let session = new Session({}, true, false, false);
+            let session = new Session();
+            session.lazyAdd = true;
             session.setReference(node);
             return session;
         } else {
@@ -338,8 +337,9 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
     function editNewDiscussion(tags = []) {
         let existingAnswer = _.find(self.list, elem => elem.isLocal && !elem.referenceNode && elem.newDiscussion && _.every(tags, tag => _.any(elem.tags, other => other.id === tag.id)));
         if (existingAnswer === undefined) {
-            let session = new Session({}, true, false, true);
-            session.tags = tags;
+            let session = new Session({tags});
+            session.lazyAdd = true;
+            session.newDiscussion = true;
             return session;
         } else {
             // TODO: what about the tags of the new discussion
@@ -356,12 +356,7 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
         if (node && node.id !== undefined && node.tags === undefined) {
             Post.$buildRaw(_.pick(node, "id")).tags.$search().$then(val => {
                 let encoded = val.$encode();
-                session.original.tags = encoded;
-                //TODO: we should concat, it might actually be the case
-                //that the user already added a new tag before we got the
-                //result, but somehow this does not work?
-                // session.tags.concat(encoded);
-                session.tags = angular.copy(encoded);
+                session.apply(encoded, true);
                 session.onChange();
             });
         }
