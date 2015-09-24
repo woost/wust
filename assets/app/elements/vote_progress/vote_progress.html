@@ -1,8 +1,8 @@
 <uib-progress max="vm.change.applyThreshold - vm.change.rejectThreshold" animate="true">
-    <div style="position:relative;left:-66.66%;border-right:1px solid black">
+    <div style="position:relative;border-right:1px solid black" ng-style="{left: -(100*vm.change.applyThreshold / (vm.change.applyThreshold - vm.change.rejectThreshold))+'%'}">
         <uib-bar style="float:right;" type="danger" value="-vm.change.votes" ng-hide="vm.change.votes >= 0"><span>{{vm.change.votes}} / {{vm.change.rejectThreshold}}</span></uib-bar>
     </div>
-    <div style="position:relative;left:33.33%">
+    <div style="position:relative" ng-style="{left: -(100*vm.change.rejectThreshold / (vm.change.applyThreshold - vm.change.rejectThreshold))+'%'}">
         <uib-bar type="success" value="vm.change.votes" ng-hide="vm.change.votes < 0"><span ng-style="{'color': vm.change.votes === 0 ? 'black' : undefined}">{{vm.change.votes}} / {{vm.change.applyThreshold}}</span></uib-bar>
     </div>
 </uib-progress>
