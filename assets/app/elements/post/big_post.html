@@ -4,7 +4,7 @@
         <button ng-if="::vm.Auth.isLoggedIn" class="fa fa-pencil pull-right btn btn-sm btn-default" ng-click="vm.editMode = true" data-title="edit" bs-tooltip></button>
         <h2 ng-bind="vm.node.title" class="post_title"></h2>
         <div class="additional_info">
-            <span show-timestamp node="vm.node"></span>
+            <span show-timestamp="vm.node.timestamp"></span>
             <span class="pull-right">{{vm.node.viewCount}} views</span>
         </div>
 

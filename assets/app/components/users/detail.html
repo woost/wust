@@ -1,74 +1,42 @@
 <div id="user_detail_component" class="content-component">
-    <h2>Profile</h2>
-    <div class="user_detail_box">
-        <form editable-form name="userForm" onaftersave="vm.saveUser()">
-            <ul class="list-group">
-                <li class="list-group-item">
-                    <div class="badge">
-                        Name
-                    </div>
-                    <div class="show_value" ng-bind="::vm.user.name"></span>
-                </li>
-                <li class="list-group-item">
-                    <div class="badge">
-                        Email
-                    </div>
-                    <div class="show_value" editable-email="vm.user.email" ng-bind="vm.user.email"></span>
-                </li>
-            </ul>
-            <div ng-if="vm.isCurrentUser" class="buttons">
-            <!-- button to show form -->
-            <button type="button" class="btn btn-default" ng-click="userForm.$show()" ng-show="!userForm.$visible">
-                Edit
-            </button>
-            <!-- buttons to submit / cancel form -->
-            <span ng-show="userForm.$visible">
-                <button type="button" class="btn btn-default" ng-disabled="userForm.$waiting" ng-click="userForm.$cancel()">
-                Cancel
-                </button>
-                <button type="submit" class="btn btn-primary" ng-disabled="userForm.$waiting">
-                Save
-                </button>
+    <div class="row"><h2 class="col-sm-12"><i class="fa fa-user"></i> {{::vm.user.name}} ({{vm.karmaSum}})</h2></div>
+    <div class="row">
+        <div class="col-sm-8">
+            <span ng-repeat="context in vm.karmaTags" tag-label="context">
+                <span ng-show="context.karma > 0" class="right">{{context.karma}}</span>
             </span>
-            </div>
+        </div>
 
-        </form>
-    </div>
-
-
-
-    <div class="contributions" infinite-scroll="vm.loadMore()" infinite="infinite" promise="vm.contributions" scroll-target="content_view">
-        <h3>Contributions</h3>
-        <div class="user_detail_box">
-            <div>
-                <a ng-if="vm.karmaTags.length > 0" href="#" ng-click="vm.showKarma = !vm.showKarma">
-                    <i class="fa" ng-class="{'fa-chevron-down': vm.showKarma, 'fa-chevron-right': !vm.showKarma}"></i>
-                    Show karma contexts (<span ng-bind="vm.karmaSum"></span>)
-                </a>
-                <div ng-show="vm.showKarma">
-                    <span ng-repeat="context in vm.karmaTags" tag-label="context">
-                        <span ng-show="context.karma > 0" class="right">{{context.karma}}</span>
-                    </span>
-                </div>
-            </div>
-            <div>
-                <a ng-if="vm.karmaLog.length > 0" href="#" ng-click="vm.showKarmaLog = !vm.showKarmaLog">
-                    <i class="fa" ng-class="{'fa-chevron-down': vm.showKarmaLog, 'fa-chevron-right': !vm.showKarmaLog}"></i>
-                    Show karma log
-                </a>
-                <div ng-show="vm.showKarmaLog">
-                    <div ng-repeat="entry in vm.karmaLog">
-                        {{entry.timestamp}}<b>Change {{entry.karmaChange}}:</b> {{entry.reason}}
-                        <span small-post node="entry.post"></span>
-                        <span ng-repeat="context in entry.contexts" tag-label="context"></span>
+        <div class="col-sm-4">
+            <form editable-form name="userForm" onaftersave="vm.saveUser()">
+                <span>
+                    <i class="fa fa-envelope-o"></i> <span editable-email="vm.user.email" ng-bind="vm.user.email"></span>
+                    <i class="fa fa-pencil" ng-if="vm.isCurrentUser" ng-click="userForm.$show()" ng-show="!userForm.$visible"></i>
+                    <div ng-show="userForm.$visible">
+                        <button type="button" class="btn btn-xs btn-default" ng-disabled="userForm.$waiting" ng-click="userForm.$cancel()">Cancel</button>
+                        <button type="submit" class="btn btn-xs btn-primary" ng-disabled="userForm.$waiting">Save</button>
                     </div>
-                </div>
-            </div>
-            <hr>
-
-            <div ng-repeat="contribution in vm.contributions | unique:'id' track by contribution.id" small-post node="contribution" class="ng-trans ng-trans-scale-up ease"></div>
-            <button class="btn btn-default pull-right ng-hide" ng-click="infinite.manualLoad()" ng-disabled="infinite.loading" ng-hide="infinite.noMore">More</button>
+                </span>
+            </form>
         </div>
     </div>
+
+    <div class="contributions row">
+        <div class="authorship col-sm-4">
+            <h4>Authored</h4>
+            <div ng-repeat="contribution in vm.contributions | unique:'id' track by contribution.id" small-post node="contribution" class="ng-trans ng-trans-scale-up ease"></div>
+        </div>
+        <div class="karma-log col-sm-6">
+            <h4>Moderated</h4>
+            <ul class="list-group">
+                <li ng-repeat="entry in vm.karmaLog" class="list-group-item">
+                    <span class="badge pull-left" ng-class="{'progress-bar-success': entry.karmaChange > 0, 'progress-bar-danger': entry.karmaChange < 0}">{{entry.karmaChange}}</span>
+                    {{entry.reason}}
+                    <span class="pull-right timestamp" show-timestamp="entry.timestamp"></span>
+                    <span small-post node="entry.post"></span>
+                    <span ng-repeat="context in entry.contexts" tag-label="context"></span>
+                </li>
+            </ul>
+        </div>
     </div>
 </div>

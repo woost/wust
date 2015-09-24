@@ -1,16 +1,21 @@
+@import "compass/css3/flexbox";
+
 #user_detail_component {
-    .user_detail_box {
-        width: 600px;
-        .list-group-item {
-            padding: 3px;
-            min-height: 42px;
-            .show_value {
-                padding-top: 7px;
-                padding-left: 13px;
+    .contributions {
+        margin-top: 30px;
+        .authorship {
+            .small_post_directive {
+                width: 200px;
             }
         }
-        .contributions {
-            margin-top: 20px;
+
+        .karma-log {
+            .timestamp {
+                color: #aaa;
+            }
+            .badge {
+                margin-right: 5px;
+            }
         }
     }
 }

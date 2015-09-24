@@ -7,7 +7,7 @@ function showTimestamp($interval) {
         restrict: "A",
         template: "<span ng-bind='ago'></span>",
         scope: {
-            node: "="
+            showTimestamp: "="
         },
         replace: true,
         link
@@ -23,7 +23,7 @@ function showTimestamp($interval) {
 
         function setTimestamp() {
             let diff = {};
-            diff.msec = new Date().getTime() - scope.node.timestamp;
+            diff.msec = new Date().getTime() - scope.showTimestamp;
             diff.sec = Math.round(diff.msec / 1000);
             diff.min = Math.round(diff.sec / 60);
             diff.hour = Math.round(diff.min / 60);
