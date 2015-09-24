@@ -147,7 +147,7 @@ object WustSchema {
 
     def rejectThreshold = Moderation.rejectPostChangeThreshold(applyThreshold)
     def canApply(approvalSum: Long = approvalSum):Boolean = approvalSum >= applyThreshold
-    def canReject(approvalSum: Long = approvalSum):Boolean = approvalSum < rejectThreshold
+    def canReject(approvalSum: Long = approvalSum):Boolean = approvalSum <= rejectThreshold
     def canApply:Boolean = canApply()
     def canReject:Boolean = canReject()
   }
