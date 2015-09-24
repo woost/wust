@@ -29,13 +29,21 @@
         min-width: 400px;
 
         .parallels {
+            .node_model_list > div {
+                @include display-flex(flex);
+                @include justify-content(center);
+                @include flex-direction(row);
+                @include align-items(stretch);
+                @include flex-wrap(wrap);
+            }
             .small_post_directive {
-                width: 200px;
+                width: 190px;
                 vertical-align: top;
                 margin-right: 5px;
             }
         }
     }
+
     .neighbours_followers {
         width: 280px;
         min-width: 280px;
