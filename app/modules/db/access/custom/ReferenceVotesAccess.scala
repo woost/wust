@@ -134,7 +134,7 @@ case class VotesConnectsAccess(sign: Long) extends VotesReferenceAccess[Connects
     HyperNodeDefinition(FactoryUuidNodeDefinition(Post, startUuid), Connects, FactoryUuidNodeDefinition(Connectable, endUuid))
   }
 
-  override def postDefinition(nodeDefinition: HyperNodeDefinitionBase[Connects]) = nodeDefinition.endDefinition.asInstanceOf[NodeDefinition[Post]]
+  override def postDefinition(nodeDefinition: HyperNodeDefinitionBase[Connects]) = nodeDefinition.startDefinition.asInstanceOf[NodeDefinition[Post]]
   override def selectPost(reference: Connects) = reference.startNodeOpt.get
 
   override def updateKarma(tx: QueryHandler, reference: Connects, karmaDefinition: KarmaDefinition) {
