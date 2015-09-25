@@ -20,8 +20,7 @@ object References extends Nodes[Reference] {
 
 object Posts extends Nodes[Post] {
   val node = NodeDef(PostAccess.apply,
-    "requests-edit" -> (N < PostUpdatedAccess.apply),
-    "requests-tags" -> (N <> PostTagChangeRequestAccess.apply),
+    "requests" -> (N <> PostChangeRequestAccess.apply),
     "tags" -> (N < SchemaTags <(EndRelationRead(SchemaTags, Scope),
       "up" -> (N < VotesTagsAccess(1)),
       "neutral" -> (N < VotesTagsAccess(0))

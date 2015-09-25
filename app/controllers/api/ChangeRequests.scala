@@ -12,6 +12,7 @@ object InstantRequests extends Nodes[ChangeRequest] {
   )
 }
 
+//TODO one voting api for all three types
 object EditRequests extends Nodes[Updated] {
   val node = NodeDef("RequestsEdit", NodeNothing(Updated),
     "up" -> (N < VotesUpdatedAccess(1)),

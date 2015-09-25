@@ -24,7 +24,8 @@ object EditNodeFormat {
         ("applyThreshold", JsNumber(n.applyThreshold)),
         ("rejectThreshold", JsNumber(n.rejectThreshold)),
         ("votes", JsNumber(n.approvalSum)),
-        ("applied", JsNumber(n.applied))
+        ("applied", JsNumber(n.applied)),
+        ("type", JsString("Edit"))
       )
       case n: AddTags    => Seq(
         ("id", JsString(n.uuid)),
@@ -34,7 +35,8 @@ object EditNodeFormat {
         ("rejectThreshold", JsNumber(n.rejectThreshold)),
         ("votes", JsNumber(n.approvalSum)),
         ("isRemove", JsBoolean(false)),
-        ("applied", JsNumber(n.applied))
+        ("applied", JsNumber(n.applied)),
+        ("type", JsString("AddTag"))
       )
       case n: RemoveTags    => Seq(
         ("id", JsString(n.uuid)),
@@ -44,7 +46,8 @@ object EditNodeFormat {
         ("rejectThreshold", JsNumber(n.rejectThreshold)),
         ("votes", JsNumber(n.approvalSum)),
         ("isRemove", JsBoolean(true)),
-        ("applied", JsNumber(n.applied))
+        ("applied", JsNumber(n.applied)),
+        ("type", JsString("RemoveTag"))
       )
     })
   }

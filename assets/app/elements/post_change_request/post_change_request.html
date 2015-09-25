@@ -1,6 +1,18 @@
 <div class="post_change_request_directive" ng-if="vm.changes.length > 0">
     <div class="changerequest" ng-repeat="change in vm.changes">
-        <span ng-include="vm.template"></span>
+        <span ng-switch="change.type">
+            <div ng-switch-when="Edit">
+                <b>Title:</b>
+                <div word-based-diff source-a="change.oldTitle" source-b="change.newTitle"></div>
+                <b>Description:</b>
+                <div word-based-diff source-a="change.oldDescription" source-b="change.newDescription"></div>
+            </div>
+            <span ng-switch-default class="tagchange">
+                <span tag-label="change.tag" ng-class="{'removed': change.isRemove}">
+                    <i ng-show="!change.isRemove" class="fa fa-plus right"></i>
+                </span>
+            </span>
+        </span>
 
         <div class="votebar">
             <button class="pull-right btn btn-success btn-xs" ng-class="{ active: change.vote.weight > 0 }" type="button" ng-click="vm.voting.up(change)"><i class="fa fa-check"></i></button>

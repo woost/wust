@@ -7,7 +7,7 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
     let self = this;
 
     class Session {
-        constructor(other = {}) {
+        constructor(other = {}, isOriginal = false) {
 
             // local id to identify nodes without an id
             this.localId = _.uniqueId();
@@ -26,7 +26,7 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
             this.classifications = angular.copy((other.classifications || []).map(t => t.$encode ? t.$encode() : t));
             this.tagClassifications = angular.copy((other.tagClassifications || []).map(t => t.$encode ? t.$encode() : t));
 
-            this.apply(other);
+            this.apply(other, isOriginal);
             if (other.original)
                 this.original = other.original;
         }
@@ -300,19 +300,19 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
         }
 
         let existing;
-        let lazyadd = node.id !== undefined;
+        let hasId = node.id !== undefined;
         if (existingIdx >= 0) {
             existing = self.list[existingIdx];
-            if (!lazyadd)
+            if (!hasId)
                 self.list.splice(existingIdx, 1);
         } else {
             // lazily add existing nodes, so they only appear in the scratchpad
             // if they were actually edited
-            existing = new Session(node);
-            existing.lazyAdd = lazyadd;
+            existing = new Session(node, hasId);
+            existing.lazyAdd = hasId;
         }
 
-        if (!lazyadd) {
+        if (!hasId) {
             self.list.splice(index, 0, existing);
             storeEditList();
         }

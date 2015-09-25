@@ -13,12 +13,11 @@
         <div class="post_description" markdown="vm.node.description" ng-show="vm.node.description"></div>
         <button ng-if="::vm.Auth.isLoggedIn" class="replytool pull-right btn btn-sm btn-default" ng-click='vm.replyTo()' data-title="respond" bs-tooltip><i class="fa fa-plus"></i></button>
     </div>
-    <a ng-if="vm.tagChanges.length > 0 || vm.editChanges.length > 0" href="#" ng-click="vm.showChanges = !vm.showChanges" class="showchanges">
+    <a ng-if="vm.changeRequests.length > 0" href="#" ng-click="vm.showChanges = !vm.showChanges" class="showchanges">
         <i class="fa" ng-class="{'fa-chevron-down': vm.showChanges, 'fa-chevron-right': !vm.showChanges}"></i>
         Show change requests
     </a>
     <div ng-show="vm.showChanges">
-        <post-change-request changes="vm.tagChanges" template="elements/post/post_tag_changes.html" service="vm.RequestsTags" on-apply="vm.onTagApply(tag, isRemove)"></post-change-request>
-        <post-change-request changes="vm.editChanges" template="elements/post/post_edit_changes.html" service="vm.RequestsEdit" on-apply="vm.onApply(node)"></post-change-request>
+        <post-change-request changes="vm.changeRequests" on-tag-apply="vm.onTagApply(tag, isRemove)" on-apply="vm.onApply(node)"></post-change-request>
     </div>
 </div>

@@ -15,28 +15,25 @@ function bigPost() {
     };
 }
 
-bigPostCtrl.$inject = ["SidebarService", "Post", "EditService", "ModalEditService", "ContextService", "RequestsTags", "RequestsEdit", "Auth"];
+bigPostCtrl.$inject = ["Post", "EditService", "ModalEditService", "ContextService", "Auth"];
 
 //TODO: we are using the markdown directive directly and also allow to enter zen
 //mode. both directives will lead to parsing the markdown description, which is
 //not needed. zen mode should reuse the parsed description here.
-function bigPostCtrl(SidebarService, Post, EditService, ModalEditService, ContextService, RequestsTags, RequestsEdit, Auth) {
+function bigPostCtrl(Post, EditService, ModalEditService, ContextService, Auth) {
     let vm = this;
 
     vm.node = vm.component.rootNode;
 
-    vm.RequestsTags = RequestsTags;
-    vm.RequestsEdit = RequestsEdit;
     vm.Auth = Auth;
 
     vm.editNode = EditService.edit(vm.node);
-    vm.editChanges = Post.$buildRaw(vm.node).requestsEdit.$search();
-    vm.tagChanges = Post.$buildRaw(vm.node).requestsTags.$search();
+    vm.changeRequests = Post.$buildRaw(vm.node).requests.$search();
     vm.replyTo = replyTo;
     vm.onSave = onSave;
     vm.onApply = onApply;
-    vm.editMode = false;
     vm.onTagApply = onTagApply;
+    vm.editMode = false;
     vm.nodeHasContext = () => _.any(vm.node.tags, "isContext");
 
     ContextService.setNodeContext(vm.node);
@@ -44,8 +41,7 @@ function bigPostCtrl(SidebarService, Post, EditService, ModalEditService, Contex
     function onSave(response) {
         vm.editMode = false;
         if (response) {
-            vm.editChanges = _.uniq(response.requestsEdit.concat(vm.editChanges), "id").filter(r => !r.applied);
-            vm.tagChanges = _.uniq(response.requestsTags.concat(vm.tagChanges), "id").filter(r => !r.applied);
+            vm.changeRequests = _.uniq(response.requestsEdit.concat(response.requestsTags).concat(vm.changeRequests), "id").filter(r => !r.applied);
         }
     }
 

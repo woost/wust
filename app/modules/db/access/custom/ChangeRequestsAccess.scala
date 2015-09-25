@@ -70,51 +70,23 @@ case class ChangeRequestsSkippedAccess() extends EndRelationAccessDefault[User, 
   }
 }
 
-//TODO: one api to get them all?
-case class PostUpdatedAccess() extends EndRelationAccessDefault[Updated, UpdatedToPost, Post] {
+case class PostChangeRequestAccess() extends RelationAccessDefault[Post, ChangeRequest] {
   import formatters.json.EditNodeFormat.CRFormat
 
-  val nodeFactory = Updated
+  val nodeFactory = ChangeRequestMatches
 
   override def read(context: RequestContext, param: ConnectParameter[Post]) = {
     Ok(Json.toJson(context.user.map { user =>
       implicit val ctx = new QueryContext
       val userDef = ConcreteNodeDefinition(user)
-      val updatedDef = ConcreteFactoryNodeDefinition(Updated)
-      val postDef = FactoryUuidNodeDefinition(Post, param.baseUuid)
-      val relDef = RelationDefinition(updatedDef, UpdatedToPost, postDef)
-      val votesDef = RelationDefinition(userDef, Votes, updatedDef)
-
-      val query = s"""
-      match ${ relDef.toQuery }
-      where ${ updatedDef.name }.applied = ${ PENDING }
-      optional match ${ votesDef.toQuery(true, false) }
-      return *
-      """
-
-      val discourse = Discourse(db.queryGraph(query, relDef.parameterMap ++ votesDef.parameterMap))
-      discourse.updateds
-    }.getOrElse(Seq.empty)))
-  }
-}
-
-case class PostTagChangeRequestAccess() extends RelationAccessDefault[Post, TagChangeRequest] {
-  import formatters.json.EditNodeFormat.CRFormat
-
-  val nodeFactory = TagChangeRequestMatches
-
-  override def read(context: RequestContext, param: ConnectParameter[Post]) = {
-    Ok(Json.toJson(context.user.map { user =>
-      implicit val ctx = new QueryContext
-      val userDef = ConcreteNodeDefinition(user)
-      val updatedDef = ConcreteFactoryNodeDefinition(nodeFactory)
+      val updatedDef = LabelNodeDefinition[TagChangeRequest](nodeFactory.labels)
       val postDef = FactoryUuidNodeDefinition(Post, param.baseUuid)
       val votesDef = RelationDefinition(userDef, Votes, updatedDef)
       val scopeDef = ConcreteFactoryNodeDefinition(Scope)
       val proposes = RelationDefinition(updatedDef, ProposesTag, scopeDef)
 
       val query = s"""
-      match ${ updatedDef.toQuery }-[:`${ AddTags.endRelationType }`|`${ RemoveTags.endRelationType }`]->${ postDef.toQuery }
+      match ${ updatedDef.toQuery }-[:`${ Updated.endRelationType }`|`${ AddTags.endRelationType }`|`${ RemoveTags.endRelationType }`]->${ postDef.toQuery }
       where ${ updatedDef.name }.applied = ${ PENDING }
       optional match ${ votesDef.toQuery(true, false) }
       optional match ${ proposes.toQuery(false, true) }
@@ -122,7 +94,7 @@ case class PostTagChangeRequestAccess() extends RelationAccessDefault[Post, TagC
       """
 
       val discourse = Discourse(db.queryGraph(query, postDef.parameterMap ++ votesDef.parameterMap))
-      discourse.tagChangeRequests
+      discourse.changeRequests
     }.getOrElse(Seq.empty)))
   }
 

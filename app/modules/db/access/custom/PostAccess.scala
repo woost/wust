@@ -291,7 +291,7 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
           val approvalSum = karma + authorBoost
           val applyThreshold = Moderation.postChangeThreshold(node.viewCount)
 
-          if (request.title.isDefined || request.description.isDefined) {
+          if (request.title.isDefined && request.title.get != node.title || request.description.isDefined && request.description != node.description) {
             val contribution = Updated.create(user, node, oldTitle = node.title, newTitle = request.title.getOrElse(node.title), oldDescription = node.description, newDescription = request.description.orElse(node.description), applyThreshold = applyThreshold)
             discourse.add(contribution)
 
