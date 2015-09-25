@@ -7,7 +7,7 @@
     </form>
 
     <div id="edit_list">
-        <div ng-repeat="node in vm.editList | scratchfilter:vm.showEdits" class="ng-trans ng-trans-scale-up ease">
+        <div ng-repeat="node in vm.editList | scratchfilter:vm.showEdits track by node.localId" class="ng-trans ng-trans-scale-up ease">
             <div class="drop_post_container" drop-channel="node,scratch_node,scratch_move" ui-on-Drop="vm.edit($data, $index)">
                 <div collapse-edit-post node="node"></div>
             </div>

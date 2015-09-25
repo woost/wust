@@ -45,7 +45,7 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
         apply({
             id, title, description, tags
         }, isOriginal = false) {
-            this.id = id;
+            this.id = id === undefined ? this.id : id;
             this.title = title || "";
             this.description = description || "";
             this.tags = angular.copy((tags || []).map(t => t.$encode ? t.$encode() : t));
@@ -164,7 +164,7 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
         }
 
         discard() {
-            this.apply(this.original);
+            this.apply(this.original, true);
             this.onChange();
         }
 
