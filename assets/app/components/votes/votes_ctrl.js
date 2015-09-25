@@ -1,8 +1,8 @@
 angular.module("wust.components").controller("VotesCtrl", VotesCtrl);
 
-VotesCtrl.$inject = ["InstantRequests", "ChangeRequests"];
+VotesCtrl.$inject = ["ChangeRequests"];
 
-function VotesCtrl(InstantRequests, ChangeRequests) {
+function VotesCtrl(ChangeRequests) {
     //TODO: voting undo?
     //TODO: deliver .quality in change.tag, to display the removed tag at the original position in the taglist
 
@@ -12,7 +12,7 @@ function VotesCtrl(InstantRequests, ChangeRequests) {
     let refreshWhenLessThan = 3;
     let loadedFullPage = true;
 
-    vm.changes = InstantRequests.$search({size: pageSize}).$then( () => {
+    vm.changes = ChangeRequests.$search({size: pageSize}).$then( () => {
         loadedFullPage = vm.changes.length === pageSize;
         if(vm.changes.length > 0) next();
     } );

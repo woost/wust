@@ -13,8 +13,7 @@ GET    /auth/signout              controllers.api.auth.SignUpController.signOut
 
 -> /users controllers.api.Users
 
--> /requests/change controllers.api.ChangeRequests
--> /requests/instant controllers.api.InstantRequests
+-> /requests controllers.api.ChangeRequests
 
 GET /components/:uuid controllers.api.ConnectedComponents.show(uuid: String)
 
