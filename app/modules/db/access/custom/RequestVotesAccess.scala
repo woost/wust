@@ -13,25 +13,31 @@ import renesca._
 import play.api.mvc.Results._
 import moderation.Moderation
 
-trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefault[User, Votes, Votable] {
-
-  import formatters.json.EditNodeFormat.PostFormat
-
-  val sign: Long
-  val nodeFactory = User
-
-  def nodeDefinition(uuid: String)(implicit ctx: QueryContext): FactoryUuidNodeDefinition[T]
-  def selectNode(discourse: Discourse): Option[T]
+trait ChangeRequestHelper[T <: ChangeRequest] {
   def applyChange(discourse: Discourse, request: T, post: Post, tx:QueryHandler): Boolean
   def unapplyChange(discourse: Discourse, request: T, post: Post, tx: QueryHandler): Boolean
   def updateKarma(request: T, karmaDefinition: KarmaDefinition): Unit
+}
+
+case class VotesChangeRequestAccess(sign: Long) extends EndRelationAccessDefault[User, Votes, Votable] {
+
+  import formatters.json.EditNodeFormat.PostFormat
+
+  val nodeFactory = User
+
+  def requestHelper[T <: ChangeRequest](request: T): ChangeRequestHelper[T] = request match {
+    //TODO: no asInstanceOf?
+    case req: Updated => VotesUpdatedHelper.asInstanceOf[ChangeRequestHelper[T]]
+    case req: Deleted => VotesDeletedHelper.asInstanceOf[ChangeRequestHelper[T]]
+    case req: TagChangeRequest => VotesTagsChangeRequestHelper.asInstanceOf[ChangeRequestHelper[T]]
+  }
 
   override def create(context: RequestContext, param: ConnectParameter[Votable]) = context.withUser { user =>
     db.transaction { tx =>
       // first we match the actual change request and aquire a write lock,
       // which will last for the whole transaction
       implicit val ctx = new QueryContext
-      val requestDef = nodeDefinition(param.baseUuid)
+      val requestDef = FactoryUuidNodeDefinition(ChangeRequest, param.baseUuid)
       val postDef = LabelNodeDefinition[Post](Set.empty)
       val userDef = ConcreteNodeDefinition(user)
       val votesDef = RelationDefinition(userDef, Votes, requestDef)
@@ -53,7 +59,8 @@ trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefa
       """
 
       val discourse = Discourse(tx.queryGraph(query, createdDef.parameterMap ++ votesDef.parameterMap))
-      selectNode(discourse).map { request =>
+      discourse.changeRequests.headOption.map { request =>
+        val helper = requestHelper(request)
         val votes = discourse.votes.headOption
         votes.foreach(request.approvalSum -= _.weight)
 
@@ -77,34 +84,34 @@ trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefa
         val postApplies:Either[String,Option[Post]] = if (request.canApply) {
           if (request.applied == PENDING) {
             val post = discourse.posts.head
-            val success = applyChange(discourse, request, post, tx)
+            val success = helper.applyChange(discourse, request, post, tx)
 
             if (success) {
               request.applied = APPROVED
-              updateKarma(request, KarmaDefinition(request.applyThreshold, "Proposed change request approved"))
+              helper.updateKarma(request, KarmaDefinition(request.applyThreshold, "Proposed change request approved"))
               Right(Some(post))
             } else {
               Left("Cannot apply changes automatically")
             }
           } else if (request.applied == INSTANT) {
             request.applied = APPROVED
-            updateKarma(request, KarmaDefinition(request.applyThreshold, "Instant change request approved"))
+            helper.updateKarma(request, KarmaDefinition(request.applyThreshold, "Instant change request approved"))
             Right(None)
           } else Right(None)
         } else if (request.canReject) {
           if (request.applied == INSTANT) {
             val post = discourse.posts.headOption.getOrElse(Post.wrap(discourse.hiddens.head.rawItem))
-            val success = unapplyChange(discourse, request, post, tx)
+            val success = helper.unapplyChange(discourse, request, post, tx)
             if (success) {
               request.applied = REJECTED
-              updateKarma(request, KarmaDefinition(-request.applyThreshold, "Instant change request rejected"))
+              helper.updateKarma(request, KarmaDefinition(-request.applyThreshold, "Instant change request rejected"))
               Right(Some(post))
             } else {
               Left("Cannot unapply changes automatically")
             }
           } else {
             request.applied = REJECTED
-            updateKarma(request, KarmaDefinition(-request.applyThreshold, "Proposed change request rejected"))
+            helper.updateKarma(request, KarmaDefinition(-request.applyThreshold, "Proposed change request rejected"))
             Right(None)
           }
         } else Right(None)
@@ -144,12 +151,8 @@ trait VotesChangeRequestAccess[T <: ChangeRequest] extends EndRelationAccessDefa
 }
 
 //TODO: we need hyperrelation traits in magic in order to matches on the hyperrelation trait and get correct type: Relation+Node
-case class VotesUpdatedAccess(
-  sign: Long
-  ) extends VotesChangeRequestAccess[Updated] {
+object VotesUpdatedHelper extends ChangeRequestHelper[Updated] {
 
-  override def nodeDefinition(uuid: String)(implicit ctx: QueryContext) = FactoryUuidNodeDefinition(Updated, uuid)
-  override def selectNode(discourse: Discourse) = discourse.updateds.headOption
   override def unapplyChange(discourse: Discourse, request: Updated, post: Post, tx:QueryHandler) = {
     val changesTitle = request.oldTitle != request.newTitle
     val changesDesc = request.oldDescription != request.newDescription
@@ -192,12 +195,8 @@ case class VotesUpdatedAccess(
   }
 }
 
-case class VotesDeletedAccess(
-  sign: Long
-  ) extends VotesChangeRequestAccess[Deleted] {
+object VotesDeletedHelper extends ChangeRequestHelper[Deleted] {
 
-  override def nodeDefinition(uuid: String)(implicit ctx: QueryContext) = FactoryUuidNodeDefinition(Deleted, uuid)
-  override def selectNode(discourse: Discourse) = discourse.deleteds.headOption
   override def unapplyChange(discourse: Discourse, request: Deleted, post: Post, tx:QueryHandler) = {
     if (post.rawItem.labels.contains(Hidden.label)) {
       val hidden = Hidden.wrap(post.rawItem)
@@ -224,17 +223,12 @@ case class VotesDeletedAccess(
   }
 }
 
-case class VotesTagsChangeRequestAccess(
-  sign: Long
-  ) extends VotesChangeRequestAccess[TagChangeRequest] {
-
-  override def nodeDefinition(uuid: String)(implicit ctx: QueryContext) = FactoryUuidNodeDefinition(TagChangeRequest, uuid)
-  override def selectNode(discourse: Discourse) = discourse.tagChangeRequests.headOption
+object VotesTagsChangeRequestHelper extends ChangeRequestHelper[TagChangeRequest] {
 
   override def unapplyChange(discourse: Discourse, req: TagChangeRequest, post: Post, tx:QueryHandler) = {
     implicit val ctx = new QueryContext
     val tagDef = ConcreteFactoryNodeDefinition(Scope)
-    val tagsDef = RelationDefinition(nodeDefinition(req.uuid), ProposesTag, tagDef)
+    val tagsDef = RelationDefinition(ConcreteNodeDefinition(req), ProposesTag, tagDef)
     val scope = Discourse(tx.queryGraph(Query(s"match ${tagsDef.toQuery} return ${tagDef.name}", tagsDef.parameterMap))).scopes.head
     req match {
       case request: AddTags =>
@@ -251,7 +245,7 @@ case class VotesTagsChangeRequestAccess(
     // TODO: resolve matches startnode via relation in renesca?
     implicit val ctx = new QueryContext
     val tagDef = ConcreteFactoryNodeDefinition(Scope)
-    val tagsDef = RelationDefinition(nodeDefinition(req.uuid), ProposesTag, tagDef)
+    val tagsDef = RelationDefinition(ConcreteNodeDefinition(req), ProposesTag, tagDef)
     val scope = Discourse(tx.queryGraph(Query(s"match ${tagsDef.toQuery} return ${tagDef.name}", tagsDef.parameterMap))).scopes.head
     req match {
       case request: AddTags =>
@@ -266,7 +260,7 @@ case class VotesTagsChangeRequestAccess(
   override def updateKarma(req: TagChangeRequest, karmaDefinition: KarmaDefinition) {
     implicit val ctx = new QueryContext
     val tagDef = ConcreteFactoryNodeDefinition(Scope)
-    val tagsDef = RelationDefinition(nodeDefinition(req.uuid), ProposesTag, tagDef)
+    val tagsDef = RelationDefinition(ConcreteNodeDefinition(req), ProposesTag, tagDef)
     val (userNode, postNode) = req match {
       case request: AddTags => (request.startNodeOpt.get, request.endNodeOpt.get)
       case request: RemoveTags => (request.startNodeOpt.get, request.endNodeOpt.get)

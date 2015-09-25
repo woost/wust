@@ -9,7 +9,7 @@ import play.api.mvc._
 object Application extends Controller {
   //TODO create embedding type RequestSchema(ApiDefinition, Seq[NodeSchema])
   val apiDefinition = ApiDefinition("/api/v1", "/live/v1");
-  val nodeSchemas = Seq(Posts, Scopes, Users, Connectables, References, DeleteRequests, EditRequests, TagsRequests, InstantRequests).map(_.nodeSchema)
+  val nodeSchemas = Seq(Posts, Scopes, Users, Connectables, References, ChangeRequests, InstantRequests).map(_.nodeSchema)
 
   private val apiDefinitionJson = Json.toJson(apiDefinition);
   private val nodeSchemasJson = Json.toJson(JsArray(nodeSchemas.map(Json.toJson(_))));

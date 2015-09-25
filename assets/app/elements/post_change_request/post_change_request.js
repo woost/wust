@@ -19,17 +19,13 @@ function postChangeRequest() {
 }
 
 
-postChangeRequestCtrl.$inject = ["RequestsTags", "RequestsEdit"];
+postChangeRequestCtrl.$inject = ["ChangeRequests"];
 
-function postChangeRequestCtrl(RequestsTags, RequestsEdit) {
+function postChangeRequestCtrl(ChangeRequests) {
     let vm = this;
 
     class VotingEditor {
         constructor() {
-        }
-
-        service(change) {
-            return (change.type === "Edit") ? RequestsEdit : RequestsTags;
         }
 
         applyChange(change, response) {
@@ -53,7 +49,7 @@ function postChangeRequestCtrl(RequestsTags, RequestsEdit) {
         }
 
         unvote(change) {
-            this.service(change).$buildRaw(change).neutral.$create().$then(val => {
+            ChangeRequests.$buildRaw(change).neutral.$create().$then(val => {
                 this.applyChange(change, val);
                 humane.success("Unvoted");
             }, response => {
@@ -66,7 +62,7 @@ function postChangeRequestCtrl(RequestsTags, RequestsEdit) {
             if (change.vote && change.vote.weight > 0)
                 return this.unvote(change);
 
-            this.service(change).$buildRaw(change).up.$create().$then(val => {
+            ChangeRequests.$buildRaw(change).up.$create().$then(val => {
                 this.applyChange(change, val);
             }, response => {
                 _.remove(vm.changes, {id:change.id});
@@ -78,7 +74,7 @@ function postChangeRequestCtrl(RequestsTags, RequestsEdit) {
             if (change.vote && change.vote.weight < 0)
                 return this.unvote(change);
 
-            this.service(change).$buildRaw(change).down.$create().$then(val => {
+            ChangeRequests.$buildRaw(change).down.$create().$then(val => {
                 this.applyChange(change, val);
             }, response => {
                 _.remove(vm.changes, {id:change.id});

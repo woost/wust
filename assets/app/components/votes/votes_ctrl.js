@@ -1,8 +1,8 @@
 angular.module("wust.components").controller("VotesCtrl", VotesCtrl);
 
-VotesCtrl.$inject = ["InstantRequests", "RequestsTags", "RequestsEdit", "RequestsDelete"];
+VotesCtrl.$inject = ["InstantRequests", "ChangeRequests"];
 
-function VotesCtrl(InstantRequests, RequestsTags, RequestsEdit, RequestsDelete) {
+function VotesCtrl(InstantRequests, ChangeRequests) {
     //TODO: voting undo?
     //TODO: deliver .quality in change.tag, to display the removed tag at the original position in the taglist
 
@@ -16,13 +16,6 @@ function VotesCtrl(InstantRequests, RequestsTags, RequestsEdit, RequestsDelete) 
         loadedFullPage = vm.changes.length === pageSize;
         if(vm.changes.length > 0) next();
     } );
-
-    let serviceMap = {
-        Delete: RequestsDelete,
-        AddTag: RequestsTags,
-        RemoveTag: RequestsTags,
-        Edit: RequestsEdit
-    };
 
     vm.upvote = upvote;
     vm.downvote = downvote;
@@ -50,16 +43,14 @@ function VotesCtrl(InstantRequests, RequestsTags, RequestsEdit, RequestsDelete) 
     }
 
     function upvote() {
-        let service = serviceMap[vm.change.type];
-        service.$buildRaw(_.pick(vm.change, "id")).up.$create().$then(response => {
+        ChangeRequests.$buildRaw(_.pick(vm.change, "id")).up.$create().$then(response => {
             humane.success("Upvoted change request");
         }, resp => humane.error(resp.$response.data));
         next();
     }
 
     function downvote() {
-        let service = serviceMap[vm.change.type];
-        service.$buildRaw(_.pick(vm.change, "id")).down.$create().$then(response => {
+        ChangeRequests.$buildRaw(_.pick(vm.change, "id")).down.$create().$then(response => {
             humane.success("Downvoted change request");
         }, resp => humane.error(resp.$response.data));
         next();
