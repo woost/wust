@@ -31,16 +31,16 @@ function postChangeRequestCtrl(ChangeRequests) {
         applyChange(change, response) {
             change.vote = response.vote;
             change.votes = response.votes;
-            change.applied = response.applied;
+            change.status = response.status;
 
-            if (change.applied !== 0) {
+            if (change.status !== 0) {
                 _.remove(vm.changes, {id:change.id});
             }
 
-            if (change.applied === -1) {
+            if (change.status === -1) {
                 humane.success("Change request rejected");
             }
-            if (change.applied > 0) {
+            if (change.status > 0) {
                 if (change.type === "Edit")
                     vm.onApply({node: response.node});
                 else

@@ -115,7 +115,7 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
                 if (this.isReference) {
                     data.tags = this.tags;
                 } else {
-                    let appliedRequests = data.requestsTags && _.any(data.requestsTags, "applied") || data.requestsEdit && _.any(data.requestsEdit, "applied");
+                    let appliedRequests = data.requestsTags && _.any(data.requestsTags, "status") || data.requestsEdit && _.any(data.requestsEdit, "status");
                     let hasRequests = !_.isEmpty(data.requestsTags) || !_.isEmpty(data.requestsEdit);
                     if (appliedRequests)
                         humane.success("Updated node");
@@ -126,7 +126,7 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
 
                     let keeped;
                     if (data.requestsTags) {
-                        let removed = data.requestsTags.filter(t => t.isRemove && t.applied).map(t => t.tag.id);
+                        let removed = data.requestsTags.filter(t => t.isRemove && t.status).map(t => t.tag.id);
                         keeped = this.original.tags.filter(t => !_.contains(removed, t.id));
                     } else {
                         keeped = this.original.tags;

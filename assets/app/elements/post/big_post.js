@@ -41,7 +41,7 @@ function bigPostCtrl(Post, EditService, ModalEditService, ContextService, Auth) 
     function onSave(response) {
         vm.editMode = false;
         if (response) {
-            vm.changeRequests = _.uniq(response.requestsEdit.concat(response.requestsTags).concat(vm.changeRequests), "id").filter(r => !r.applied);
+            vm.changeRequests = _.uniq(response.requestsEdit.concat(response.requestsTags).concat(vm.changeRequests), "id").filter(r => !r.status);
         }
     }
 

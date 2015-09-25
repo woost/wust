@@ -39,7 +39,7 @@ case class InstantChangeRequestAccess() extends NodeAccessDefault[ChangeRequest]
 
     val query = s"""
     match ${ crDef.toQuery }-[relation:`${ UpdatedToPost.relationType }`|`${ DeletedToHidden.relationType }`|`${ AddTagsToPost.relationType }`|`${ RemoveTagsToPost.relationType }`]->${ postDef.toQuery } $userMatcher
-    where (${ crDef.name }.applied = ${ INSTANT } OR ${ crDef.name }.applied = ${ PENDING })
+    where (${ crDef.name }.status = ${ INSTANT } OR ${ crDef.name }.status = ${ PENDING })
     $userCondition
     with ${ postDef.name }, relation, ${ crDef.name } order by ${ crDef.name }.timestamp skip ${ skip } limit ${ limit }
     optional match ${ crTagsDef.toQuery(false, true) }
@@ -87,7 +87,7 @@ case class PostChangeRequestAccess() extends RelationAccessDefault[Post, ChangeR
 
       val query = s"""
       match ${ updatedDef.toQuery }-[:`${ Updated.endRelationType }`|`${ AddTags.endRelationType }`|`${ RemoveTags.endRelationType }`]->${ postDef.toQuery }
-      where ${ updatedDef.name }.applied = ${ PENDING }
+      where ${ updatedDef.name }.status = ${ PENDING }
       optional match ${ votesDef.toQuery(true, false) }
       optional match ${ proposes.toQuery(false, true) }
       return *

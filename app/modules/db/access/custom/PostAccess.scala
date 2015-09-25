@@ -24,11 +24,11 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
   private def handleInitialChange(contribution: ChangeRequest, user: User, authorBoost: Long, approvalSum: Long) = {
     if (contribution.canApply(authorBoost)) {
       contribution.approvalSum = authorBoost
-      contribution.applied = APPROVED
+      contribution.status = APPROVED
       Some(Votes.merge(user, contribution, weight = authorBoost))
     } else if(contribution.canApply(approvalSum)) {
       contribution.approvalSum = approvalSum
-      contribution.applied = INSTANT
+      contribution.status = INSTANT
       None
     } else {
       contribution.approvalSum = approvalSum
@@ -47,7 +47,7 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
     val postDef = ConcreteNodeDefinition(post)
     val tagsDef = RelationDefinition(requestDef, ProposesTag, tagDef)
     val votesDef = RelationDefinition(ConcreteNodeDefinition(user), Votes, requestDef)
-    val query = s"match ${userDef.toQuery}-[ut:`${UserToAddTags.relationType}`|`${UserToRemoveTags.relationType}`]->(${requestDef.name} ${requestDef.factory.labels.map(l => s":`$l`").mkString} { applied: ${PENDING} })-[tp:`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->${postDef.toQuery}, ${tagsDef.toQuery(false,true)} optional match ${votesDef.toQuery(true, false)} set ${requestDef.name}._locked = true return *"
+    val query = s"match ${userDef.toQuery}-[ut:`${UserToAddTags.relationType}`|`${UserToRemoveTags.relationType}`]->(${requestDef.name} ${requestDef.factory.labels.map(l => s":`$l`").mkString} { status: ${PENDING} })-[tp:`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->${postDef.toQuery}, ${tagsDef.toQuery(false,true)} optional match ${votesDef.toQuery(true, false)} set ${requestDef.name}._locked = true return *"
     val existing = Discourse(tx.queryGraph(Query(query, votesDef.parameterMap ++ userDef.parameterMap ++ postDef.parameterMap ++ tagsDef.parameterMap)))
 
     discourse.add(existing.nodes: _*)
@@ -72,7 +72,7 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
           exist.approvalSum += approvalSum
           discourse.add(Votes.merge(user, exist, weight = approvalSum))
           if (exist.canApply)
-            exist.applied = APPROVED
+            exist.status = APPROVED
         }
       }
 
@@ -85,7 +85,7 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
       }
 
       crOpt.foreach { cr =>
-        if (cr.applied == INSTANT || cr.applied == APPROVED) {
+        if (cr.status == INSTANT || cr.status == APPROVED) {
           discourse.add(Tags.merge(cr.proposesTags.head, post))
         }
       }
@@ -99,7 +99,7 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
           exist.approvalSum += approvalSum
           discourse.add(Votes.merge(user, exist, weight = approvalSum))
           if (exist.canApply)
-            exist.applied = APPROVED
+            exist.status = APPROVED
         }
       }
 
@@ -111,7 +111,7 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
         remTags
       }
 
-      if (cr.applied == INSTANT || cr.applied == APPROVED) {
+      if (cr.status == INSTANT || cr.status == APPROVED) {
         discourse.remove(Tags.matches(cr.proposesTags.head, post))
       }
     }
@@ -251,7 +251,7 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
         val applyThreshold = Moderation.postChangeThreshold(node.viewCount)
         val hidden = node.hide()
         val deleted = Deleted.create(user, hidden, applyThreshold = applyThreshold)
-        deleted.applied = INSTANT
+        deleted.status = INSTANT
         val failure = tx.persistChanges(hidden, deleted)
         if (failure.isDefined)
           BadRequest("Cannot delete node")

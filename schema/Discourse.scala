@@ -145,7 +145,7 @@ object WustSchema {
     var approvalSum:Long = 0
 
     //TODO: rename to applyStatus
-    var applied:Long = PENDING
+    var status:Long = PENDING
 
     def rejectThreshold = Moderation.rejectPostChangeThreshold(applyThreshold)
     def canApply(approvalSum: Long = approvalSum):Boolean = approvalSum >= applyThreshold

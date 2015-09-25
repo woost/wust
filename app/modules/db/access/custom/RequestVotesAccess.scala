@@ -47,7 +47,7 @@ case class VotesChangeRequestAccess(sign: Long) extends EndRelationAccessDefault
       //TODO: simpler? locking really needed?
       val query = s"""
       match (user:`${User.label}`)-[updated1:`${UserToUpdated.relationType}`|`${UserToDeleted.relationType}`|`${UserToAddTags.relationType}`|`${UserToRemoveTags.relationType}`]->${requestDef.toQuery}-[updated2:`${UpdatedToPost.relationType}`|`${DeletedToHidden.relationType}`|`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->${postDef.toQuery}
-      where ${requestDef.name}.applied = ${PENDING} or ${requestDef.name}.applied = ${INSTANT}
+      where ${requestDef.name}.status = ${PENDING} or ${requestDef.name}.status = ${INSTANT}
       set ${requestDef.name}._locked = true
       with ${postDef.name}, ${requestDef.name}, updated1, updated2
       optional match (${postDef.name})-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`), ${userDef.toQuery}
@@ -82,35 +82,35 @@ case class VotesChangeRequestAccess(sign: Long) extends EndRelationAccessDefault
         }
 
         val postApplies:Either[String,Option[Post]] = if (request.canApply) {
-          if (request.applied == PENDING) {
+          if (request.status == PENDING) {
             val post = discourse.posts.head
             val success = helper.applyChange(discourse, request, post, tx)
 
             if (success) {
-              request.applied = APPROVED
+              request.status = APPROVED
               helper.updateKarma(request, KarmaDefinition(request.applyThreshold, "Proposed change request approved"))
               Right(Some(post))
             } else {
               Left("Cannot apply changes automatically")
             }
-          } else if (request.applied == INSTANT) {
-            request.applied = APPROVED
+          } else if (request.status == INSTANT) {
+            request.status = APPROVED
             helper.updateKarma(request, KarmaDefinition(request.applyThreshold, "Instant change request approved"))
             Right(None)
           } else Right(None)
         } else if (request.canReject) {
-          if (request.applied == INSTANT) {
+          if (request.status == INSTANT) {
             val post = discourse.posts.headOption.getOrElse(Post.wrap(discourse.hiddens.head.rawItem))
             val success = helper.unapplyChange(discourse, request, post, tx)
             if (success) {
-              request.applied = REJECTED
+              request.status = REJECTED
               helper.updateKarma(request, KarmaDefinition(-request.applyThreshold, "Instant change request rejected"))
               Right(Some(post))
             } else {
               Left("Cannot unapply changes automatically")
             }
           } else {
-            request.applied = REJECTED
+            request.status = REJECTED
             helper.updateKarma(request, KarmaDefinition(-request.applyThreshold, "Proposed change request rejected"))
             Right(None)
           }
@@ -126,7 +126,7 @@ case class VotesChangeRequestAccess(sign: Long) extends EndRelationAccessDefault
                 ("vote", JsObject(Seq(
                   ("weight", JsNumber(weight))
                 ))),
-                ("applied", JsNumber(request.applied)),
+                ("status", JsNumber(request.status)),
                 ("votes", JsNumber(request.approvalSum)),
                 ("node", nodeOpt.map(Json.toJson(_)).getOrElse(JsNull))
               )))
@@ -138,7 +138,7 @@ case class VotesChangeRequestAccess(sign: Long) extends EndRelationAccessDefault
             //so we set it to CONFLICT
             db.transaction { tx =>
               val request = ChangeRequest.matchesOnUuid(param.baseUuid)
-              request.applied = CONFLICT
+              request.status = CONFLICT
               tx.persistChanges(request)
             }
             BadRequest(err)
