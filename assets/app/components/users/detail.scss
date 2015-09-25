@@ -1,6 +1,12 @@
 @import "compass/css3/flexbox";
 
 #user_detail_component {
+    .userdetails {
+        .tag-label {
+            display: inline-block;
+            margin-bottom: 5px;
+        }
+    }
     .contributions {
         margin-top: 30px;
         .authorship {

@@ -1,8 +1,8 @@
 <div id="user_detail_component" class="content-component">
     <div class="row"><h2 class="col-sm-12"><i class="fa fa-user"></i> {{::vm.user.name}} ({{vm.karmaSum}})</h2></div>
-    <div class="row">
+    <div class="userdetails row">
         <div class="col-sm-8">
-            <span ng-repeat="context in vm.karmaTags" tag-label="context">
+            <span ng-repeat="context in vm.karmaTags | orderBy:'-karma'" tag-label="context">
                 <span ng-show="context.karma > 0" class="right">{{context.karma}}</span>
             </span>
         </div>
