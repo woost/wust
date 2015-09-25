@@ -21,7 +21,7 @@ trait VotesReferenceAccess[T <: Reference] extends EndRelationAccessDefault[User
   def nodeDefinition(startUuid: String, endUuid: String)(implicit ctx: QueryContext): HyperNodeDefinitionBase[T]
   def postDefinition(nodeDefinition: HyperNodeDefinitionBase[T]): NodeDefinition[Post]
   def selectPost(reference: T): Post
-  def updateKarma(tx: QueryHandler, reference: T, karmaDefinition: KarmaDefinition): Unit
+  def updateKarma(reference: T, karmaDefinition: KarmaDefinition): Unit
 
   override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Votable with AbstractRelation[S,E], E]) = context.withUser { user =>
     db.transaction { tx =>
@@ -52,12 +52,12 @@ trait VotesReferenceAccess[T <: Reference] extends EndRelationAccessDefault[User
       if (discourse.createds.isEmpty) {
         val reference = selectNode(discourse, param.startUuid, param.endUuid)
         val votes = discourse.votes.headOption
-        if (weight == 0) {
+        val karmaDefinition = if (weight == 0) {
           // if there are any existing votes, disconnect them
-          votes.foreach { vote =>
+          votes.map { vote =>
             reference.voteCount -= vote.weight
             discourse.remove(vote)
-            updateKarma(tx, reference, KarmaDefinition(-vote.weight, "Unvoted post"))
+            KarmaDefinition(-vote.weight, "Unvoted post")
           }
         } else if (votes.isEmpty) {
           // we want to vote on the change request with our weight if there is
@@ -65,8 +65,8 @@ trait VotesReferenceAccess[T <: Reference] extends EndRelationAccessDefault[User
           reference.voteCount += weight
           val newVotes = Votes.merge(user, reference, weight = weight, onMatch = Set("weight"))
           discourse.add(newVotes)
-          updateKarma(tx, reference, KarmaDefinition(weight, "Upvoted post"))
-        }
+          Some(KarmaDefinition(weight, "Upvoted post"))
+        } else None
 
         val post = selectPost(reference)
         val quality = reference.quality(post.viewCount)
@@ -74,6 +74,7 @@ trait VotesReferenceAccess[T <: Reference] extends EndRelationAccessDefault[User
         reference._locked = false
         val failure = tx.persistChanges(discourse)
         if (failure.isEmpty) {
+          karmaDefinition.foreach(updateKarma(reference, _))
           Ok(JsObject(Seq(
             ("quality", JsNumber(quality)),
             ("vote", JsObject(Seq(
@@ -101,7 +102,7 @@ case class VotesTagsAccess(sign: Long) extends VotesReferenceAccess[Tags] {
   override def postDefinition(nodeDefinition: HyperNodeDefinitionBase[Tags]) = nodeDefinition.endDefinition.asInstanceOf[NodeDefinition[Post]]
   override def selectPost(reference: Tags) = reference.endNodeOpt.get
 
-  override def updateKarma(tx: QueryHandler, reference: Tags, karmaDefinition: KarmaDefinition) {
+  override def updateKarma(reference: Tags, karmaDefinition: KarmaDefinition) {
     implicit val ctx = new QueryContext
     val tagDef = ConcreteNodeDefinition(reference.startNodeOpt.get)
     val postDef = ConcreteNodeDefinition(reference.endNodeOpt.get)
@@ -127,7 +128,7 @@ case class VotesConnectsAccess(sign: Long) extends VotesReferenceAccess[Connects
   override def postDefinition(nodeDefinition: HyperNodeDefinitionBase[Connects]) = nodeDefinition.startDefinition.asInstanceOf[NodeDefinition[Post]]
   override def selectPost(reference: Connects) = reference.startNodeOpt.get
 
-  override def updateKarma(tx: QueryHandler, reference: Connects, karmaDefinition: KarmaDefinition) {
+  override def updateKarma(reference: Connects, karmaDefinition: KarmaDefinition) {
     implicit val ctx = new QueryContext
     val postDef = ConcreteNodeDefinition(reference.startNodeOpt.get)
     val userDef = ConcreteFactoryNodeDefinition(User)

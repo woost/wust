@@ -14,8 +14,8 @@ import play.api.mvc.Results._
 import moderation.Moderation
 
 trait ChangeRequestHelper[T <: ChangeRequest] {
-  def applyChange(discourse: Discourse, request: T, post: Post, tx:QueryHandler): Boolean
-  def unapplyChange(discourse: Discourse, request: T, post: Post, tx: QueryHandler): Boolean
+  def applyChange(tx: QueryHandler, discourse: Discourse, request: T, post: Post): Boolean
+  def unapplyChange(tx: QueryHandler, discourse: Discourse, request: T, post: Post): Boolean
   def updateKarma(request: T, karmaDefinition: KarmaDefinition): Unit
 }
 
@@ -30,6 +30,40 @@ case class VotesChangeRequestAccess(sign: Long) extends EndRelationAccessDefault
     case req: Updated => VotesUpdatedHelper.asInstanceOf[ChangeRequestHelper[T]]
     case req: Deleted => VotesDeletedHelper.asInstanceOf[ChangeRequestHelper[T]]
     case req: TagChangeRequest => VotesTagsChangeRequestHelper.asInstanceOf[ChangeRequestHelper[T]]
+  }
+
+  def tryApply(tx: QueryHandler, discourse: Discourse, request: ChangeRequest):Either[String,(Option[Post], Option[KarmaDefinition])] = {
+    val helper = requestHelper(request)
+    if (request.canApply) {
+      if (request.status == PENDING) {
+        val post = discourse.posts.head
+        val success = helper.applyChange(tx, discourse, request, post)
+
+        if (success) {
+          request.status = APPROVED
+          Right((Some(post), Some(KarmaDefinition(request.applyThreshold, "Proposed change request approved"))))
+        } else {
+          Left("Cannot apply changes automatically")
+        }
+      } else if (request.status == INSTANT) {
+        request.status = APPROVED
+        Right((None, Some(KarmaDefinition(request.applyThreshold, "Instant change request approved"))))
+      } else Right((None, None))
+    } else if (request.canReject) {
+      if (request.status == INSTANT) {
+        val post = discourse.posts.headOption.getOrElse(Post.wrap(discourse.hiddens.head.rawItem))
+        val success = helper.unapplyChange(tx, discourse, request, post)
+        if (success) {
+          request.status = REJECTED
+          Right((Some(post), Some(KarmaDefinition(-request.applyThreshold, "Instant change request rejected"))))
+        } else {
+          Left("Cannot unapply changes automatically")
+        }
+      } else {
+        request.status = REJECTED
+        Right((None, Some(KarmaDefinition(-request.applyThreshold, "Proposed change request rejected"))))
+      }
+    } else Right((None, None))
   }
 
   override def create(context: RequestContext, param: ConnectParameter[Votable]) = context.withUser { user =>
@@ -81,47 +115,15 @@ case class VotesChangeRequestAccess(sign: Long) extends EndRelationAccessDefault
           discourse.add(newVotes)
         }
 
-        val postApplies:Either[String,Option[Post]] = if (request.canApply) {
-          if (request.status == PENDING) {
-            val post = discourse.posts.head
-            val success = helper.applyChange(discourse, request, post, tx)
-
-            if (success) {
-              request.status = APPROVED
-              helper.updateKarma(request, KarmaDefinition(request.applyThreshold, "Proposed change request approved"))
-              Right(Some(post))
-            } else {
-              Left("Cannot apply changes automatically")
-            }
-          } else if (request.status == INSTANT) {
-            request.status = APPROVED
-            helper.updateKarma(request, KarmaDefinition(request.applyThreshold, "Instant change request approved"))
-            Right(None)
-          } else Right(None)
-        } else if (request.canReject) {
-          if (request.status == INSTANT) {
-            val post = discourse.posts.headOption.getOrElse(Post.wrap(discourse.hiddens.head.rawItem))
-            val success = helper.unapplyChange(discourse, request, post, tx)
-            if (success) {
-              request.status = REJECTED
-              helper.updateKarma(request, KarmaDefinition(-request.applyThreshold, "Instant change request rejected"))
-              Right(Some(post))
-            } else {
-              Left("Cannot unapply changes automatically")
-            }
-          } else {
-            request.status = REJECTED
-            helper.updateKarma(request, KarmaDefinition(-request.applyThreshold, "Proposed change request rejected"))
-            Right(None)
-          }
-        } else Right(None)
+        val postApplies = tryApply(tx, discourse, request)
 
         postApplies match {
-          case Right(nodeOpt) =>
+          case Right((nodeOpt, karmaDefinitionOpt)) =>
             request._locked = false
             val failure = tx.persistChanges(discourse)
 
             failure.map(_ => BadRequest("No vote :/")).getOrElse {
+              karmaDefinitionOpt.foreach(helper.updateKarma(request, _))
               Ok(JsObject(Seq(
                 ("vote", JsObject(Seq(
                   ("weight", JsNumber(weight))
@@ -153,7 +155,7 @@ case class VotesChangeRequestAccess(sign: Long) extends EndRelationAccessDefault
 //TODO: we need hyperrelation traits in magic in order to matches on the hyperrelation trait and get correct type: Relation+Node
 object VotesUpdatedHelper extends ChangeRequestHelper[Updated] {
 
-  override def unapplyChange(discourse: Discourse, request: Updated, post: Post, tx:QueryHandler) = {
+  override def unapplyChange(tx: QueryHandler, discourse: Discourse, request: Updated, post: Post) = {
     val changesTitle = request.oldTitle != request.newTitle
     val changesDesc = request.oldDescription != request.newDescription
     if (changesTitle && post.title != request.newTitle || changesDesc && post.description != request.newDescription) {
@@ -167,7 +169,7 @@ object VotesUpdatedHelper extends ChangeRequestHelper[Updated] {
       true
     }
   }
-  override def applyChange(discourse: Discourse, request: Updated, post: Post, tx:QueryHandler) = {
+  override def applyChange(tx: QueryHandler, discourse: Discourse, request: Updated, post: Post) = {
     val changesTitle = request.oldTitle != request.newTitle
     val changesDesc = request.oldDescription != request.newDescription
     if (changesTitle && post.title != request.oldTitle || changesDesc && post.description != request.oldDescription) {
@@ -197,7 +199,7 @@ object VotesUpdatedHelper extends ChangeRequestHelper[Updated] {
 
 object VotesDeletedHelper extends ChangeRequestHelper[Deleted] {
 
-  override def unapplyChange(discourse: Discourse, request: Deleted, post: Post, tx:QueryHandler) = {
+  override def unapplyChange(tx: QueryHandler, discourse: Discourse, request: Deleted, post: Post) = {
     if (post.rawItem.labels.contains(Hidden.label)) {
       val hidden = Hidden.wrap(post.rawItem)
       hidden.unhide()
@@ -207,7 +209,7 @@ object VotesDeletedHelper extends ChangeRequestHelper[Deleted] {
     }
   }
   // we do not have noninstant delete changes, so no applychanges in voting
-  override def applyChange(discourse: Discourse, request: Deleted, post: Post, tx:QueryHandler) = ???
+  override def applyChange(tx: QueryHandler, discourse: Discourse, request: Deleted, post: Post) = ???
 
   def updateKarma(request: Deleted, karmaDefinition: KarmaDefinition) {
     implicit val ctx = new QueryContext
@@ -225,7 +227,7 @@ object VotesDeletedHelper extends ChangeRequestHelper[Deleted] {
 
 object VotesTagsChangeRequestHelper extends ChangeRequestHelper[TagChangeRequest] {
 
-  override def unapplyChange(discourse: Discourse, req: TagChangeRequest, post: Post, tx:QueryHandler) = {
+  override def unapplyChange(tx: QueryHandler, discourse: Discourse, req: TagChangeRequest, post: Post) = {
     implicit val ctx = new QueryContext
     val tagDef = ConcreteFactoryNodeDefinition(Scope)
     val tagsDef = RelationDefinition(ConcreteNodeDefinition(req), ProposesTag, tagDef)
@@ -240,7 +242,7 @@ object VotesTagsChangeRequestHelper extends ChangeRequestHelper[TagChangeRequest
     true
   }
 
-  override def applyChange(discourse: Discourse, req: TagChangeRequest, post: Post, tx:QueryHandler) = {
+  override def applyChange(tx: QueryHandler, discourse: Discourse, req: TagChangeRequest, post: Post) = {
     // we need to get the tag which is connected to the request
     // TODO: resolve matches startnode via relation in renesca?
     implicit val ctx = new QueryContext
