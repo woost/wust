@@ -2,6 +2,7 @@ angular.module("wust.elements").directive("wordBasedDiff", wordBasedDiff);
 
 wordBasedDiff.$inject = [];
 
+//TODO: used by title and description, but title shouldnt be markdown?
 function wordBasedDiff() {
     return {
         restrict: "EA",
@@ -9,17 +10,18 @@ function wordBasedDiff() {
             sourceA: "=",
             sourceB: "="
         },
-        link
+        link,
+        //TODO: code dup from markdown.js
+        template: "<div class='well well-sm' style='margin: 0px; background-color:#FBFBFB' ng-bind-html='markdown.html'></div>",
     };
 
     function link(scope, element, attrs) {
         let rawElem = element[0];
+        scope.markdown = {};
         scope.$watch(() => scope.sourceA + "///" + scope.sourceB, () =>  {
-            while( rawElem.hasChildNodes() ) rawElem.removeChild(rawElem.lastChild);
+            let diff = JsDiff.diffWords(scope.sourceA, scope.sourceB);
 
-            var diff = JsDiff.diffWords(scope.sourceA, scope.sourceB);
-
-            diff.forEach(function(part){
+            let diffHTML = diff.map(function(part){
                 // green for additions, red for deletions
                 // grey for common parts
                 var color = part.added ? "green" :
@@ -28,8 +30,9 @@ function wordBasedDiff() {
                 span.style.color = color;
                 span.appendChild(document.createTextNode(part.value));
 
-                rawElem.appendChild(span);
-            });
+                return span.outerHTML;
+            }).reduce((a,b) => a + b, "");
+            scope.markdown.html = marked(diffHTML);
         });
     }
 }
