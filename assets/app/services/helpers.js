@@ -59,22 +59,22 @@ function sortedNodeTags(node) {
     return sortByIdQuality(node.classifications).concat(sortByIdQuality(node.tags));
 }
 
-function navBackgroundColor(tag) { return hashToColor(tag, 20, 98); }
+function navBackgroundColor(tag) { return hashToColor(tag, 10, 98); }
 
 function smallPostBackgroundColor(tag) { return hashToColor(tag, 20, 99); }
 function bigPostBackgroundColor(tag) { return hashToColor(tag, 10, 99); }
-function postBorderColor(tag) { return hashToColor(tag, 20, 70); }
+function postBorderColor(tag) { return hashToColor(tag, 30, 68); }
 
 function classificationLabelBackgroundColor(tag) { return hashToColor(tag, 40, 90); }
 function classificationLabelBorderColor(tag) { return hashToColor(tag, 40, 48); }
-function classificationLabelBorderRadius(tag) { return "6px";}
+function classificationLabelBorderRadius(tag) { return "12px";}
 function classificationCircleBackgroundColor(tag) { return hashToColor(tag, 40, 90); }
 function classificationCircleBorderColor(tag) { return hashToColor(tag, 40, 48); }
 
-function contextLabelBackgroundColor(tag) { return hashToColor(tag, 20, 99); }
+function contextLabelBackgroundColor(tag) { return hashToColor(tag, 25, 97); }
 function contextLabelBorderColor(tag) { return hashToColor(tag, 30, 68); }
-function contextCircleBackgroundColor(tag) { return hashToColor(tag, 20, 99); }
-function contextCircleBorderColor(tag) { return hashToColor(tag, 30, 68); }
+function contextCircleBackgroundColor(tag) { return hashToColor(tag, 25, 98); }
+function contextCircleBorderColor(tag) { return hashToColor(tag, 30, 58); }
 function contextCircleBorderRadius(tag) { return "1px";}
 
 function tagTitleColor(title) { return Math.abs(hashCode(title.toLowerCase())) % 360; }

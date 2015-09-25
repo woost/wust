@@ -15,7 +15,7 @@
 
     a, a:link {
         word-wrap: break-word;
-        color: #3e3e3e;
+        color: black;
 
         // prevent multi line links to have space between the lines.
         // else hover is flickering and you cannot click between the lines.
@@ -33,7 +33,7 @@
     }
 
     a:visited {
-        color: #8e8e8e;
+        // color: #8e8e8e;
     }
 
     a:hover, a:active {
