@@ -12,6 +12,10 @@
         width: 350px;
         height: 100%;
         overflow: auto;
+        .tag-label {
+            display: inline-block;
+            margin-bottom: 5px;
+        }
     }
     #tag_ui_view {
         padding-left: 10px;
