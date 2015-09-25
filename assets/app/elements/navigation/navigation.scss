@@ -3,7 +3,7 @@
 #navigation {
     background-color: $nav_normal_background;
     border-width: 0px;
-    border-bottom: 1px solid #DDD;
+    border-bottom: 1px solid $nav_border_color;
     ul.nav li.dropdown:hover > ul.dropdown-menu {
         display: block;
     }
@@ -14,21 +14,19 @@
         color: $nav_normal_color;
         border-left: 1px solid transparent;
         border-right: 1px solid transparent;
-        border-bottom: 1px solid #DDD;
         margin-bottom: -1px;
     }
 
     .navpagelinks a:hover, a.dropdown-toggle:hover {
         color: $nav_hover_color;
         background-color: rgba($nav_hover_background, 0.7);
-        border-bottom: 1px solid #DDD;
     }
     .navpagelinks a.active {
         color: $nav_active_color;
         background-color: $nav_active_background;
         border-bottom:1px solid white;
-        border-left: 1px solid rgba(100, 100, 100, 0.3);
-        border-right: 1px solid rgba(100, 100, 100, 0.3);
+        border-left: 1px solid rgba(100, 100, 100, 0.68);
+        border-right: 1px solid rgba(100, 100, 100, 0.68);
         border-bottom:1px solid white;
     }
 
