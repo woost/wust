@@ -225,13 +225,9 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 .attr("class", d => d.isHyperRelation ? "hyperrelation" : "small_post_directive")
                 .style("background-color", n => {
                     if(n.isHyperRelation) return undefined;
-
-                    if(n.classifications.length > 0) {
-                        return Helpers.smallPostBackgroundColor(n.classifications[0]);
-                    } else if(n.tags.length > 0)
-                        return Helpers.smallPostBackgroundColor(n.tags[0]);
-                    else
-                        return undefined;
+                    let tags = Helpers.sortedNodeTags(n);
+                    if(tags.length === 0) return undefined;
+                    return Helpers.smallPostBackgroundColor(tags[0]);
                 })
                 .style("border-color", n => {
                     let tags = Helpers.sortedNodeTags(n);
