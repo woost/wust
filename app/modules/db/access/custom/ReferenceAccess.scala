@@ -29,7 +29,7 @@ trait TagAccessHelper {
   }
 }
 
-case class ReferenceAccess() extends NodeReadBase[Reference] with TagAccessHelper {
+case class ReferenceAccess() extends NodeAccessDefault[Reference] with TagAccessHelper {
   val factory = Reference
 
   private def deleteClassificationsFromGraph(discourse: Discourse, request: RemoveTagRequestBase, node: Reference) {

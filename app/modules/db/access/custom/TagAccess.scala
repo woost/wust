@@ -2,7 +2,7 @@ package modules.db.access.custom
 
 import controllers.api.nodes.RequestContext
 import formatters.json.RequestFormat._
-import formatters.json.TagFormat._
+import formatters.json.TagFormat
 import model.Helpers.tagTitleColor
 import model.WustSchema.{Created => SchemaCreated, _}
 import modules.db.Database.db
@@ -16,6 +16,7 @@ import renesca.parameter.implicits._
 
 class TagAccess extends NodeReadBase[Scope] {
   val factory = Scope
+  implicit val format = TagFormat.ScopeFormat
 
   //TODO: should override read for multiple tags, too. so it includes inherits
   override def read(context: RequestContext, uuid: String) = {

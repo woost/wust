@@ -5,9 +5,11 @@ import model.WustSchema.{Tags => SchemaTags, _}
 import modules.db.access._
 import modules.db.access.custom._
 import modules.requests.dsl._
+import formatters.json.PostFormat.NodeFormat
+import formatters.json.TagFormat.ScopeFormat
 
 object Connectables extends Nodes[Connectable] {
-  val node = NodeDef(NodeRead(Connectable),
+  val node = NodeDef(NodeNothing(Connectable),
     "connects-from" -> (N < Connects <(EndConnectsAccess.apply,
       "connects-from" -> (N < EndConnectsAccess.apply)
       ))

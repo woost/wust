@@ -1,5 +1,5 @@
 <div class="big_taglist_directive">
     <span ng-repeat="tag in (vm.node | nodetags) track by tag.id" tag-label="tag">
-        <i ng-if="::!tag.isClassification && vm.Auth.isLoggedIn" class="right vote_button fa fa-chevron-up" ng-class="{ active: tag.vote.weight > 0 }" ng-click="vm.upvoteTag(tag)"></i>
+        <i ng-if="::tag.isContext && vm.Auth.isLoggedIn" class="right vote_button fa fa-chevron-up" ng-class="{ active: tag.vote.weight > 0 }" ng-click="vm.upvoteTag(tag)"></i>
     </span>
 </div>

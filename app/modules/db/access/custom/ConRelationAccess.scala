@@ -1,7 +1,6 @@
 package modules.db.access.custom
 
 import controllers.api.nodes.{ConnectParameter, HyperConnectParameter, RequestContext}
-import formatters.json.ApiNodeFormat._
 import model.WustSchema._
 import modules.db.Database.db
 import modules.db.access._
@@ -10,8 +9,10 @@ import play.api.mvc.Result
 import play.api.mvc.Results._
 import renesca.schema._
 
-trait ConstructRelationHelper {
-  protected def persistRelation[T <: UuidNode](discourse: Discourse, result: T): Result = {
+trait ConstructRelationHelper[NODE <: UuidNode] {
+  implicit def format: Format[NODE]
+
+  protected def persistRelation(discourse: Discourse, result: NODE): Result = {
     db.transaction(_.persistChanges(discourse)).map(err =>
       BadRequest(s"Cannot create ConstructRelation: $err'")
     ).getOrElse({
@@ -26,7 +27,7 @@ RELATION <: AbstractRelation[START, END],
 END <: UuidNode
 ](
   factory: ConstructRelationFactory[START, RELATION, END],
-  nodeFactory: UuidNodeMatchesFactory[END]) extends StartRelationReadBase[START, RELATION, END] with StartRelationDeleteBase[START, RELATION, END] with ConstructRelationHelper {
+  nodeFactory: UuidNodeMatchesFactory[END])(implicit val format: Format[END]) extends StartRelationReadBase[START, RELATION, END] with StartRelationDeleteBase[START, RELATION, END] with ConstructRelationHelper[END] {
 
   override def create(context: RequestContext, param: ConnectParameter[START], otherUuid: String) = context.withUser {
     val discourse = Discourse.empty
@@ -54,7 +55,7 @@ RELATION <: AbstractRelation[START, END],
 END <: UuidNode
 ](
   factory: ConstructRelationFactory[START, RELATION, END],
-  nodeFactory: UuidNodeMatchesFactory[START]) extends EndRelationReadBase[START, RELATION, END] with EndRelationDeleteBase[START, RELATION, END] with ConstructRelationHelper {
+  nodeFactory: UuidNodeMatchesFactory[START])(implicit val format: Format[START]) extends EndRelationReadBase[START, RELATION, END] with EndRelationDeleteBase[START, RELATION, END] with ConstructRelationHelper[START] {
 
   override def create(context: RequestContext, param: ConnectParameter[END], otherUuid: String) = context.withUser {
     val discourse = Discourse.empty

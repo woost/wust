@@ -2,6 +2,7 @@ package modules.db.access.custom
 
 import controllers.api.nodes.{ConnectParameter, HyperConnectParameter, RequestContext}
 import formatters.json.ResponseFormat._
+import formatters.json.GraphFormat
 import model.WustSchema._
 import modules.db.Database.db
 import modules.db.access._
@@ -11,21 +12,24 @@ import play.api.mvc.Result
 import play.api.mvc.Results._
 import renesca.schema._
 
-trait ConnectsRelationHelper {
-  protected def persistRelation[T <: Connectable](discourse: Discourse, result: T): Result = {
+trait ConnectsRelationHelper[NODE <: Connectable] {
+  implicit def format: Format[NODE]
+
+  protected def persistRelation(discourse: Discourse, result: NODE): Result = {
     db.transaction(_.persistChanges(discourse)).map(err =>
       BadRequest(s"Cannot connect: $err'")
     ).getOrElse({
       //TODO: Only send partial graph: the created relations!
       //TODO: should only send node if the node was newly created
-      Ok(Json.toJson(ConnectResponse[T](discourse, Some(result))))
+      Ok(Json.toJson(ConnectResponse[NODE](discourse, Some(result))))
     })
   }
 }
 
-case class StartConnectsAccess() extends StartRelationReadBase[Post, Connects, Connectable] with StartRelationDeleteBase[Post, Connects, Connectable] with ConnectsRelationHelper {
+case class StartConnectsAccess() extends StartRelationReadBase[Post, Connects, Connectable] with StartRelationDeleteBase[Post, Connects, Connectable] with ConnectsRelationHelper[Connectable] {
   val factory = Connects
   val nodeFactory = Connectable
+  implicit val format = GraphFormat.ConnectableFormat
 
   val postaccess = PostAccess.apply
 
@@ -45,9 +49,10 @@ case class StartConnectsAccess() extends StartRelationReadBase[Post, Connects, C
   }
 }
 
-case class EndConnectsAccess() extends EndRelationReadBase[Post, Connects, Connectable] with EndRelationDeleteBase[Post, Connects, Connectable] with ConnectsRelationHelper {
+case class EndConnectsAccess() extends EndRelationReadBase[Post, Connects, Connectable] with EndRelationDeleteBase[Post, Connects, Connectable] with ConnectsRelationHelper[Post] {
   val factory = Connects
   val nodeFactory = Post
+  implicit val format = GraphFormat.PostFormat
 
   val postaccess = PostAccess.apply
 

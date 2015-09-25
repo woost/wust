@@ -606,7 +606,6 @@ trait RecordTag extends js.Object {
   var quality: Double
   val title: String
   val description: js.UndefOr[String]
-  val isClassification: Boolean
   val isContext: Boolean
   val color: Int
   val symbol: js.UndefOr[String]

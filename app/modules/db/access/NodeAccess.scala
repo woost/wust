@@ -1,7 +1,6 @@
 package modules.db.access
 
 import controllers.api.nodes.RequestContext
-import formatters.json.ApiNodeFormat._
 import model.WustSchema._
 import modules.db.Database._
 import play.api.libs.json._
@@ -26,7 +25,11 @@ trait NodeAccessDefault[NODE <: UuidNode] extends NodeAccess[NODE] {
   def delete(context: RequestContext, uuid: String) = NotFound("No delete access on Node")
 }
 
-trait NodeReadBase[NODE <: UuidNode] extends NodeAccessDefault[NODE] {
+trait FormattingNode[NODE <: UuidNode] {
+  implicit def format: Format[NODE]
+}
+
+trait NodeReadBase[NODE <: UuidNode] extends NodeAccessDefault[NODE] with FormattingNode[NODE] {
   override def read(context: RequestContext) = {
     context.page.map { page =>
       val skip = page * context.limit
@@ -44,7 +47,7 @@ trait NodeReadBase[NODE <: UuidNode] extends NodeAccessDefault[NODE] {
   }
 }
 
-trait NodeDeleteBase[NODE <: UuidNode] extends NodeAccessDefault[NODE] {
+trait NodeDeleteBase[NODE <: UuidNode] extends NodeAccessDefault[NODE] with FormattingNode[NODE] {
   override def delete(context: RequestContext, uuid: String) = context.withUser {
     val node = factory.matchesOnUuid(uuid)
     val failure = db.transaction(_.persistChanges(Discourse.remove(node)))
@@ -56,9 +59,9 @@ trait NodeDeleteBase[NODE <: UuidNode] extends NodeAccessDefault[NODE] {
 }
 
 case class NodeNothing[NODE <: UuidNode](factory: UuidNodeMatchesFactory[NODE]) extends NodeAccessDefault[NODE]
-case class NodeRead[NODE <: UuidNode](factory: UuidNodeMatchesFactory[NODE]) extends NodeReadBase[NODE]
-case class NodeDelete[NODE <: UuidNode](factory: UuidNodeMatchesFactory[NODE]) extends NodeDeleteBase[NODE]
-case class NodeReadDelete[NODE <: UuidNode](factory: UuidNodeMatchesFactory[NODE]) extends NodeReadBase[NODE] with NodeDeleteBase[NODE]
+case class NodeRead[NODE <: UuidNode](factory: UuidNodeMatchesFactory[NODE])(implicit val format: Format[NODE]) extends NodeReadBase[NODE]
+case class NodeDelete[NODE <: UuidNode](factory: UuidNodeMatchesFactory[NODE])(implicit val format: Format[NODE]) extends NodeDeleteBase[NODE]
+case class NodeReadDelete[NODE <: UuidNode](factory: UuidNodeMatchesFactory[NODE])(implicit val format: Format[NODE]) extends NodeReadBase[NODE] with NodeDeleteBase[NODE]
 
 trait NodeAccessDecorator[NODE <: UuidNode] extends NodeAccess[NODE] with AccessDecoratorControlDefault {
   val self: NodeAccess[NODE]

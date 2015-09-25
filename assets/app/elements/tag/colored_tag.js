@@ -24,16 +24,7 @@ function coloredTag(Helpers) {
             let tag = scope.coloredTag;
             let otherColor = Math.floor(Math.random()*360);
             let otherTag = {color: otherColor, title: ""};
-            if(tag.isClassification) {
-                if(scope.tagtype === "label") {
-                    rawElem.style.backgroundColor = Helpers.classificationLabelBackgroundColor(tag);
-                    rawElem.style.borderColor = Helpers.classificationLabelBorderColor(scope.coloredTag);
-                    rawElem.style.borderRadius = Helpers.classificationLabelBorderRadius();
-                } else if(scope.tagtype === "circle") {
-                    rawElem.style.backgroundColor = Helpers.classificationCircleBackgroundColor(tag);
-                    rawElem.style.border = "1px solid " + Helpers.classificationCircleBorderColor(tag);
-                }
-            } else { // context
+            if(tag.isContext) {
                 if(scope.tagtype === "label") {
                     rawElem.style.backgroundColor = Helpers.contextLabelBackgroundColor(tag);
                     rawElem.style.border = "1px solid " + Helpers.contextLabelBorderColor(tag);
@@ -41,6 +32,15 @@ function coloredTag(Helpers) {
                     rawElem.style.backgroundColor = Helpers.contextCircleBackgroundColor(tag);
                     rawElem.style.border = "1px solid " + Helpers.contextCircleBorderColor(tag);
                     rawElem.style.borderRadius = Helpers.contextCircleBorderRadius();
+                }
+            } else { // classification
+                if(scope.tagtype === "label") {
+                    rawElem.style.backgroundColor = Helpers.classificationLabelBackgroundColor(tag);
+                    rawElem.style.borderColor = Helpers.classificationLabelBorderColor(scope.coloredTag);
+                    rawElem.style.borderRadius = Helpers.classificationLabelBorderRadius();
+                } else if(scope.tagtype === "circle") {
+                    rawElem.style.backgroundColor = Helpers.classificationCircleBackgroundColor(tag);
+                    rawElem.style.border = "1px solid " + Helpers.classificationCircleBorderColor(tag);
                 }
             }
         }

@@ -17,7 +17,7 @@ function tagLabel() {
         controllerAs: "vm",
         bindToController: true,
         link: function (scope, elem, attrs) {
-            scope.vm.disableLink = ("disableLink" in attrs) || scope.vm.tagLabel.isClassification;
+            scope.vm.disableLink = ("disableLink" in attrs) || !scope.vm.tagLabel.isContext;
         }
     };
 }

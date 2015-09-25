@@ -3,6 +3,7 @@ package modules.db.access.custom
 import controllers.api.nodes._
 import formatters.json.RequestFormat._
 import formatters.json.TagFormat.karmaTagWriter
+import formatters.json.UserFormat
 import model.WustSchema.{Created => SchemaCreated, _}
 import modules.db.Database.db
 import modules.db._
@@ -14,7 +15,7 @@ import play.api.mvc.Results._
 class UserAccess extends NodeReadBase[User] {
   val factory = User
 
-  import formatters.json.UserFormat._
+  implicit val format = UserFormat.NodeFormat
 
   override def update(context: RequestContext, uuid: String) = {
     context.withUser { user =>

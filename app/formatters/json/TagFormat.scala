@@ -12,7 +12,6 @@ object TagFormat {
     ("id", JsString(tag.uuid)),
     ("title", JsString(tag.title)),
     ("description", JsString(tag.description.getOrElse(""))),
-    ("isClassification", JsBoolean(tag.isInstanceOf[Classification])),
     ("isContext", JsBoolean(tag.isInstanceOf[Scope])),
     ("color", JsNumber(tag.color)),
     ("symbol", tag.symbol.map(JsString(_)).getOrElse(JsNull))
@@ -52,17 +51,14 @@ object TagFormat {
     def reads(json: JsValue) = ???
 
     def writes(s: Scope) = JsObject(tagLikeToSeq(s) ++ Seq(
-      ("inherits", JsArray(s.inherits.collect{ case t:TagLike => t }.map(tag => JsObject(tagLikeToSeq(tag))))),
-      ("implements", JsArray(s.rev_inherits.collect{ case t:TagLike => t }.map(tag => JsObject(tagLikeToSeq(tag)))))
+      ("inherits", JsArray(s.inherits.collect{ case t:Scope => t }.map(tag => JsObject(tagLikeToSeq(tag))))),
+      ("implements", JsArray(s.rev_inherits.collect{ case t:Scope => t }.map(tag => JsObject(tagLikeToSeq(tag)))))
     ))
   }
 
   implicit object ClassificationFormat extends Format[Classification] {
     def reads(json: JsValue) = ???
 
-    def writes(c: Classification) = JsObject(tagLikeToSeq(c) ++ Seq(
-      ("inherits", JsArray(c.inherits.collect{ case t:TagLike => t }.map(tag => JsObject(tagLikeToSeq(tag))))),
-      ("implements", JsArray(c.rev_inherits.collect{ case t:TagLike => t }.map(tag => JsObject(tagLikeToSeq(tag)))))
-    ))
+    def writes(c: Classification) = JsObject(tagLikeToSeq(c))
   }
 }

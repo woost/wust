@@ -1,7 +1,6 @@
 package modules.db.access
 
 import controllers.api.nodes.{ConnectParameter, HyperConnectParameter, RequestContext}
-import formatters.json.ApiNodeFormat._
 import model.WustSchema._
 import modules.db.Database._
 import modules.db._
@@ -35,6 +34,32 @@ trait RelationAccessDefault[NODE <: UuidNode, OTHER <: UuidNode] extends Relatio
   def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, NODE with AbstractRelation[S, E], E], uuid: String) = NotFound("No create access on HyperRelation")
 }
 
+trait StartRelationReader[
+START <: UuidNode,
+RELATION <: AbstractRelation[START, END],
+END <: UuidNode
+] extends RelationAccess[START, END] with FormattingNode[END] {
+  protected def pageAwareRead(context: RequestContext, relDefs: Seq[NodeAndFixedRelationDefinition[START, RELATION, END]]) = {
+    context.page.map { page =>
+      val skip = page * context.limit
+      Ok(Json.toJson(limitedStartConnectedDiscourseNodes(skip, context.limit, relDefs: _*)))
+    }.getOrElse(Ok(Json.toJson((startConnectedDiscourseNodes(relDefs: _*)))))
+  }
+}
+
+trait EndRelationReader[
+START <: UuidNode,
+RELATION <: AbstractRelation[START, END],
+END <: UuidNode
+] extends RelationAccess[END, START] with FormattingNode[START] {
+  protected def pageAwareRead(context: RequestContext, relDefs: Seq[FixedAndNodeRelationDefinition[START, RELATION, END]]) = {
+    context.page.map { page =>
+      val skip = page * context.limit
+      Ok(Json.toJson(limitedEndConnectedDiscourseNodes(skip, context.limit, relDefs: _*)))
+    }.getOrElse(Ok(Json.toJson(endConnectedDiscourseNodes(relDefs: _*))))
+  }
+}
+
 trait StartRelationAccess[
 START <: UuidNode,
 RELATION <: AbstractRelation[START, END],
@@ -49,13 +74,6 @@ END <: UuidNode
     val end = FactoryUuidNodeDefinition(param.endFactory, param.endUuid)
     HyperNodeDefinition(start, param.baseFactory, end)
   }
-
-  protected def pageAwareRead(context: RequestContext, relDefs: Seq[NodeAndFixedRelationDefinition[START, RELATION, END]]) = {
-    context.page.map { page =>
-      val skip = page * context.limit
-      Ok(Json.toJson(limitedStartConnectedDiscourseNodes(skip, context.limit, relDefs: _*)))
-    }.getOrElse(Ok(Json.toJson((startConnectedDiscourseNodes(relDefs: _*)))))
-  }
 }
 
 trait EndRelationAccess[
@@ -67,17 +85,10 @@ END <: UuidNode
   def toNodeDefinition(implicit ctx: QueryContext) = ConcreteFactoryNodeDefinition(nodeFactory)
   def toNodeDefinition(uuid: String)(implicit ctx: QueryContext) = FactoryUuidNodeDefinition(nodeFactory, uuid)
   def toBaseNodeDefinition(param: ConnectParameter[END])(implicit ctx: QueryContext) = FactoryUuidNodeDefinition(param.baseFactory, param.baseUuid)
-  def toHyperBaseNodeDefinition[E <: UuidNode, S <: UuidNode](param: HyperConnectParameter[S, END with AbstractRelation[S, E], E])(implicit ctx: QueryContext) = {
+  def toBaseNodeDefinition[E <: UuidNode, S <: UuidNode](param: HyperConnectParameter[S, END with AbstractRelation[S, E], E])(implicit ctx: QueryContext) = {
     val start = FactoryUuidNodeDefinition(param.startFactory, param.startUuid)
     val end = FactoryUuidNodeDefinition(param.endFactory, param.endUuid)
     HyperNodeDefinition(start, param.baseFactory, end)
-  }
-
-  protected def pageAwareRead(context: RequestContext, relDefs: Seq[FixedAndNodeRelationDefinition[START, RELATION, END]]) = {
-    context.page.map { page =>
-      val skip = page * context.limit
-      Ok(Json.toJson(limitedEndConnectedDiscourseNodes(skip, context.limit, relDefs: _*)))
-    }.getOrElse(Ok(Json.toJson(endConnectedDiscourseNodes(relDefs: _*))))
   }
 }
 
@@ -97,7 +108,7 @@ trait StartRelationReadBase[
 START <: UuidNode,
 RELATION <: AbstractRelation[START, END],
 END <: UuidNode
-] extends StartRelationAccessDefault[START, RELATION, END] {
+] extends StartRelationAccessDefault[START, RELATION, END] with StartRelationReader[START, RELATION, END] {
   val factory: AbstractRelationFactory[START, RELATION, END]
 
   override def read(context: RequestContext, param: ConnectParameter[START]) = {
@@ -115,7 +126,7 @@ trait EndRelationReadBase[
 START <: UuidNode,
 RELATION <: AbstractRelation[START, END],
 END <: UuidNode
-] extends EndRelationAccessDefault[START, RELATION, END] {
+] extends EndRelationAccessDefault[START, RELATION, END] with EndRelationReader[START, RELATION, END] {
   val factory: AbstractRelationFactory[START, RELATION, END]
 
   override def read(context: RequestContext, param: ConnectParameter[END]) = {
@@ -125,14 +136,14 @@ END <: UuidNode
 
   override def read[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, END with AbstractRelation[S, E], E]) = {
     implicit val ctx = new QueryContext
-    pageAwareRead(context, Seq(RelationDefinition(toNodeDefinition, factory, toHyperBaseNodeDefinition(param))))
+    pageAwareRead(context, Seq(RelationDefinition(toNodeDefinition, factory, toBaseNodeDefinition(param))))
   }
 }
 
 trait StartMultiRelationReadBase[
 START <: UuidNode,
 END <: UuidNode
-] extends StartRelationAccessDefault[START, AbstractRelation[START, END], END] {
+] extends StartRelationAccessDefault[START, AbstractRelation[START, END], END] with StartRelationReader[START, AbstractRelation[START, END], END] {
   val factories: Seq[AbstractRelationFactory[START, AbstractRelation[START, END], END]]
 
   override def read(context: RequestContext, param: ConnectParameter[START]) = {
@@ -149,7 +160,7 @@ END <: UuidNode
 trait EndMultiRelationReadBase[
 START <: UuidNode,
 END <: UuidNode
-] extends EndRelationAccessDefault[START, AbstractRelation[START, END], END] {
+] extends EndRelationAccessDefault[START, AbstractRelation[START, END], END] with EndRelationReader[START, AbstractRelation[START, END], END] {
   val factories: Seq[AbstractRelationFactory[START, AbstractRelation[START, END], END]]
 
   override def read(context: RequestContext, param: ConnectParameter[END]) = {
@@ -159,7 +170,7 @@ END <: UuidNode
 
   override def read[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, END with AbstractRelation[S, E], E]) = {
     implicit val ctx = new QueryContext
-    pageAwareRead(context, factories.map(RelationDefinition(toNodeDefinition, _, toHyperBaseNodeDefinition(param))))
+    pageAwareRead(context, factories.map(RelationDefinition(toNodeDefinition, _, toBaseNodeDefinition(param))))
   }
 }
 
@@ -207,7 +218,7 @@ END <: UuidNode
 
   override def delete[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, END with AbstractRelation[S, E], E], uuid: String) = context.withUser {
     implicit val ctx = new QueryContext
-    val relationDefinition = RelationDefinition(toNodeDefinition(uuid), factory, toHyperBaseNodeDefinition(param))
+    val relationDefinition = RelationDefinition(toNodeDefinition(uuid), factory, toBaseNodeDefinition(param))
     if(disconnectNodes(relationDefinition))
       NoContent
     else
@@ -215,14 +226,14 @@ END <: UuidNode
   }
 }
 
-case class StartRelationRead[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factory: AbstractRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[END]) extends StartRelationReadBase[START, RELATION, END]
-case class EndRelationRead[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factory: AbstractRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[START]) extends EndRelationReadBase[START, RELATION, END]
-case class StartMultiRelationRead[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factories: AbstractRelationFactory[START, RELATION, END]*)(val nodeFactory: UuidNodeMatchesFactory[END]) extends StartMultiRelationReadBase[START, END]
-case class EndMultiRelationRead[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factories: AbstractRelationFactory[START, RELATION, END]*)(val nodeFactory: UuidNodeMatchesFactory[START]) extends EndMultiRelationReadBase[START, END]
+case class StartRelationRead[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factory: AbstractRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[END])(implicit val format: Format[END]) extends StartRelationReadBase[START, RELATION, END]
+case class EndRelationRead[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factory: AbstractRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[START])(implicit val format: Format[START]) extends EndRelationReadBase[START, RELATION, END]
+case class StartMultiRelationRead[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factories: AbstractRelationFactory[START, RELATION, END]*)(val nodeFactory: UuidNodeMatchesFactory[END])(implicit val format: Format[END]) extends StartMultiRelationReadBase[START, END]
+case class EndMultiRelationRead[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factories: AbstractRelationFactory[START, RELATION, END]*)(val nodeFactory: UuidNodeMatchesFactory[START])(implicit val format: Format[START]) extends EndMultiRelationReadBase[START, END]
 case class StartRelationDelete[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factory: AbstractRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[END]) extends StartRelationDeleteBase[START, RELATION, END]
 case class EndRelationDelete[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factory: AbstractRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[START]) extends EndRelationDeleteBase[START, RELATION, END]
-case class StartRelationReadDelete[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factory: AbstractRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[END]) extends StartRelationDeleteBase[START, RELATION, END] with StartRelationReadBase[START, RELATION, END]
-case class EndRelationReadDelete[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factory: AbstractRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[START]) extends EndRelationDeleteBase[START, RELATION, END] with EndRelationReadBase[START, RELATION, END]
+case class StartRelationReadDelete[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factory: AbstractRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[END])(implicit val format: Format[END]) extends StartRelationDeleteBase[START, RELATION, END] with StartRelationReadBase[START, RELATION, END]
+case class EndRelationReadDelete[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factory: AbstractRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[START])(implicit val format: Format[START]) extends EndRelationDeleteBase[START, RELATION, END] with EndRelationReadBase[START, RELATION, END]
 case class StartRelationNothing[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factory: AbstractRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[END]) extends StartRelationAccessDefault[START, RELATION, END]
 case class EndRelationNothing[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factory: AbstractRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[START]) extends EndRelationAccessDefault[START, RELATION, END]
 

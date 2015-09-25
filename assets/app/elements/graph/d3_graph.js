@@ -241,13 +241,13 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                             let tagLabel = document.createElement("span");
                             tagLabel.className = "tag-label nodetag";
 
-                            if( t.isClassification ) {
+                            if( t.isContext ) {
+                                tagLabel.style.backgroundColor = Helpers.contextLabelBackgroundColor(t);
+                                tagLabel.style.border = "1px solid " + Helpers.contextLabelBorderColor(t);
+                            } else { // classification
                                 tagLabel.style.backgroundColor = Helpers.classificationLabelBackgroundColor(t);
                                 tagLabel.style.border = "1px solid " + Helpers.classificationLabelBorderColor(t);
                                 tagLabel.style.borderRadius = Helpers.classificationLabelBorderRadius();
-                            } else { // context
-                                tagLabel.style.backgroundColor = Helpers.contextLabelBackgroundColor(t);
-                                tagLabel.style.border = "1px solid " + Helpers.contextLabelBorderColor(t);
                             }
                             let content = document.createElement("span");
                             content.className = "content";
@@ -270,13 +270,13 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                             let circle = document.createElement("span");
                             circle.className = "tag_circle";
 
-                            if( t.isClassification ) {
-                                circle.style.backgroundColor = Helpers.classificationCircleBackgroundColor(t);
-                                circle.style.border = "1px solid " + Helpers.classificationCircleBorderColor(t);
-                            } else { // context
+                            if( t.isContext ) {
                                 circle.style.backgroundColor = Helpers.contextCircleBackgroundColor(t);
                                 circle.style.border = "1px solid " + Helpers.contextCircleBorderColor(t);
                                 circle.style.borderRadius = Helpers.contextCircleBorderRadius();
+                            } else { // classification
+                                circle.style.backgroundColor = Helpers.classificationCircleBackgroundColor(t);
+                                circle.style.border = "1px solid " + Helpers.classificationCircleBorderColor(t);
                             }
 
                             circleTitle.appendChild(circle);

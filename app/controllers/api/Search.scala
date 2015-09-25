@@ -1,6 +1,6 @@
 package controllers.api
 
-import formatters.json.ApiNodeFormat._
+import formatters.json.ExposedNodeFormat._
 import model.WustSchema.{Tags => SchemaTags, _}
 import modules.db.Database._
 import modules.db._
@@ -66,7 +66,7 @@ object Search extends Controller {
         val inheritTagDef = ConcreteFactoryNodeDefinition(Scope)
         val relationDef = RelationDefinition(inheritTagDef, SchemaTags, nodeDef)
         val condition = if(termMatcher.isEmpty) "" else s"where ${ termMatcher }"
-        val tagDefinition = s"${ inheritTagDef.toQuery }-[:INHERITSTOINHERITABLE|INHERITABLETOINHERITS*0..10]->${ tagDef.toQuery }"
+        val tagDefinition = s"${ inheritTagDef.toQuery }-[:`${Inherits.relationType}`*0..10]->${ tagDef.toQuery }"
 
         Discourse(db.queryGraph(Query(
           s"""match ${ tagDefinition } where (${ tagDef.name }.uuid in {tagUuids})
@@ -84,7 +84,7 @@ object Search extends Controller {
         val inheritTagDefs = tags.map(_ => ConcreteFactoryNodeDefinition(Scope))
         val relationDefs = inheritTagDefs.map(tagDef => RelationDefinition(tagDef, SchemaTags, nodeDef))
         val condition = if(termMatcher.isEmpty) "" else s"where ${ termMatcher }"
-        val tagDefinitions = (tagDefs zip inheritTagDefs).map { case (t, i) => s"${ i.toQuery }-[:INHERITSTOINHERITABLE|INHERITABLETOINHERITS*0..10]->${ t.toQuery }" }.mkString(",")
+        val tagDefinitions = (tagDefs zip inheritTagDefs).map { case (t, i) => s"${ i.toQuery }-[:`${Inherits.relationType}`*0..10]->${ t.toQuery }" }.mkString(",")
 
         //TODO: distinct?
         Discourse(db.queryGraph(Query(
@@ -104,7 +104,7 @@ object Search extends Controller {
       if(label.contains(Post.label.name))
         TaggedTaggable.shapeResponse(discourse.posts)
       else
-        discourse.uuidNodes
+        discourse.exposedNodes
     ))
   }
 }
