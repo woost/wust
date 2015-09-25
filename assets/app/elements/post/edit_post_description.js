@@ -37,7 +37,7 @@ function editPostDescriptionCtrl(DiscourseNode) {
                 // enableSnippets: false,
                 // enableBasicAutocompletion: false,
                 // enableLiveAutocompletion: false,
-                fontFamily: "inconsolata",
+                fontFamily: "Monospace",
                 fontSize: "16px",
                 maxLines: 20,
                 minLines: 10
