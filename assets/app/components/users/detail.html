@@ -28,14 +28,19 @@
             <button class="btn btn-default pull-right ng-hide" ng-click="infinite.manualLoad()" ng-disabled="infinite.loading" ng-hide="infinite.noMore">More</button>
         </div>
         <div class="karma-log col-sm-6">
-            <h4>Moderated</h4>
+            <h4>Karma</h4>
             <ul class="list-group">
-                <li ng-repeat="entry in vm.karmaLog" class="list-group-item">
-                    <span class="badge pull-left" ng-class="{'progress-bar-success': entry.karmaChange > 0, 'progress-bar-danger': entry.karmaChange < 0}">{{entry.karmaChange}}</span>
-                    {{entry.reason}}
-                    <span class="pull-right timestamp" show-timestamp="entry.timestamp"></span>
-                    <span small-post node="entry.post"></span>
-                    <span ng-repeat="context in entry.contexts" tag-label="context"></span>
+                <li ng-repeat="entry in vm.karmaLog | reverse" class="list-group-item">
+                    <div>
+                        <span class="badge pull-left" ng-class="{'progress-bar-success': entry.karmaChange > 0, 'progress-bar-danger': entry.karmaChange < 0}">{{entry.karmaChange}}</span>
+                        in
+                        <span class="pull-right timestamp" show-timestamp="entry.timestamp"></span>
+                        <span ng-repeat="context in entry.contexts" tag-label="context"></span>
+                    </div>
+                    <div class="clearfix reason">
+                        <span class="pull-right" small-post node="entry.post"></span>
+                        {{entry.reason}}
+                    </div>
                 </li>
             </ul>
         </div>

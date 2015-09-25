@@ -1,4 +1,5 @@
 @import "compass/css3/flexbox";
+@import "compass/css3/transform";
 
 #user_detail_component {
     .userdetails {
@@ -16,11 +17,30 @@
         }
 
         .karma-log {
+            .badge {
+                margin-right: 5px;
+                margin-top: 3px;
+            }
+
+            .badge.progress-bar-success:before {
+                content: '+';
+            }
+
             .timestamp {
                 color: #aaa;
             }
-            .badge {
-                margin-right: 5px;
+            .tag-label {
+                display: inline-block;
+                margin-bottom: 5px;
+                // @include transform(scale(0.75));
+            }
+            .small_post_directive {
+                width: 200px;
+                margin-left: 5px;
+            }
+            .reason {
+                margin-top: 5px;
+                font-weight:bold;
             }
         }
     }
