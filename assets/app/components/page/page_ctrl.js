@@ -13,7 +13,7 @@ function PageCtrl(SidebarService, EditService, FullscreenService, $rootScope, Au
 
     function editNode(data) {
         SidebarService.left.visible = true;
-        EditService.edit(data);
+        EditService.edit(data, 0, true);
     }
 
     $rootScope.$on("$stateChangeStart", FullscreenService.hideFullscreens);

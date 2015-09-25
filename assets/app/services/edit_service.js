@@ -26,9 +26,7 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
             this.classifications = angular.copy((other.classifications || []).map(t => t.$encode ? t.$encode() : t));
             this.tagClassifications = angular.copy((other.tagClassifications || []).map(t => t.$encode ? t.$encode() : t));
 
-            this.apply(other, isOriginal);
-            if (other.original)
-                this.original = other.original;
+            this.apply(other, isOriginal, other.original);
         }
 
         get service() {
@@ -44,7 +42,7 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
 
         apply({
             id, title, description, tags
-        }, isOriginal = false) {
+        }, isOriginal = false, defaultOriginal = {}) {
             this.id = id === undefined ? this.id : id;
             this.title = title || "";
             this.description = description || "";
@@ -54,9 +52,9 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
                 description: this.description,
                 tags: angular.copy(this.tags)
             } : {
-                title: "",
-                description: "",
-                tags: []
+                title: defaultOriginal.title || "",
+                description: defaultOriginal.description || "",
+                tags: defaultOriginal.tags || []
             };
 
             this.setValidityProperties();
@@ -257,6 +255,9 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
     this.persist = storeEditList;
     this.forget = clearEditList;
     this.connectNodes = connectNodes;
+    this.scratchpad = {
+        showEdits: false
+    };
 
     function restoreEditList() {
         //compact if something is really wrong and we have nulls in the localstorage. be forgiving.
@@ -289,7 +290,7 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
         });
     }
 
-    function assureSessionExists(node, index) {
+    function assureSessionExists(node, index, visible) {
         let existingIdx = -1;
         if (node === undefined) {
             node = {};
@@ -303,18 +304,25 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
         let hasId = node.id !== undefined;
         if (existingIdx >= 0) {
             existing = self.list[existingIdx];
-            if (!hasId)
+            if (index !== undefined) {
                 self.list.splice(existingIdx, 1);
+                self.list.splice(index, 0, existing);
+                storeEditList();
+            }
         } else {
             // lazily add existing nodes, so they only appear in the scratchpad
             // if they were actually edited
             existing = new Session(node, hasId);
-            existing.lazyAdd = hasId;
+            if (!visible && hasId) {
+                existing.lazyAdd = true;
+            } else {
+                self.list.splice(index === undefined ? 0 : index, 0, existing);
+                storeEditList();
+            }
         }
 
-        if (!hasId) {
-            self.list.splice(index, 0, existing);
-            storeEditList();
+        if (visible) {
+            existing.visible = true;
         }
 
         return existing;
@@ -374,8 +382,8 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
         }
     }
 
-    function edit(node, index = 0) {
-        let session = assureSessionExists(node, index);
+    function edit(node, index, visible = false) {
+        let session = assureSessionExists(node, index, visible);
         //TODO: it might happen that we get a node without tags, for example it
         //happens when a node is dropped because encoding a node does not
         //return nested resources like tags.
