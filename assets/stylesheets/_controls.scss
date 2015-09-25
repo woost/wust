@@ -3,16 +3,19 @@
     padding: 10px;
 }
 
-.wust_form {
-    input.ng-invalid.ng-touched {
-        border: 1px solid red;
-    }
-    input.ng-valid.ng-touched {
-    }
+.is_invalid {
+    // &.ng-touched, .ng-touched {
+        border: 2px solid red !important;
+    // }
 }
 
-input.wust_form_input.ng-invalid.ng-touched {
-    border: 1px solid red;
+.error_message {
+    color: red !important;
+    display: none;
+}
+
+.error_message.show {
+    display: block;
 }
 
 // make contenteditable elements work with webkit

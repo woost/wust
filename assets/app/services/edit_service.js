@@ -20,6 +20,7 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
             this.isHyperRelation = !!other.isHyperRelation; //TODO: why am i here?
             this.startId = other.startId;
             this.endId = other.endId;
+            this.triedSave = !!other.triedSave;
 
             this.referenceNode = other.referenceNode;
             this.classifications = angular.copy((other.classifications || []).map(t => t.$encode ? t.$encode() : t));
@@ -90,8 +91,9 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
         save() {
             let dirtyModel = this.dirtyModel();
             this.setValidityProperties(dirtyModel);
+            this.triedSave = true;
             if (!this.canSave)
-                return;
+                return false;
 
             // we do this in order to disable the form until we saved the node.
             this.unsetValidityProperties();
@@ -107,6 +109,7 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
             }
 
             promise.$then(response => {
+                this.triedSave = false;
                 let data = referenceNode ? response.node : response;
 
                 if (this.isReference) {
