@@ -1,8 +1,8 @@
 angular.module("wust.elements").directive("coloredTagNode", coloredTagNode);
 
-coloredTagNode.$inject = ["Helpers", "ContextService", "$rootScope"];
+coloredTagNode.$inject = ["Helpers", "ContextService"];
 
-function coloredTagNode(Helpers, ContextService, $rootScope) {
+function coloredTagNode(Helpers, ContextService) {
     return {
         restrict: "EA",
         scope: {
@@ -17,7 +17,7 @@ function coloredTagNode(Helpers, ContextService, $rootScope) {
         let rawElem = elem[0];
 
         if (scope.ignoreTags === undefined)
-            $rootScope.$on("context.changed", refreshColor);
+            scope.$on("context.changed", refreshColor);
 
         scope.$watchCollection(() => scope.coloredTagNode.tags + scope.coloredTagNode.classifications, refreshColor);
 

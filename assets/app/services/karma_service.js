@@ -1,13 +1,10 @@
 angular.module("wust.services").service("KarmaService", KarmaService);
 
-KarmaService.$inject = ["User", "Auth"];
+KarmaService.$inject = ["User", "Auth", "$rootScope"];
 
-function KarmaService(User, Auth) {
+function KarmaService(User, Auth, $rootScope) {
     let self = this;
 
-    let listeners = [];
-
-    this.onChange = (handler) => listeners.push(handler);
     this.refreshKarma = refreshKarma;
     this.karmaInContext = karmaInContext;
     this.karma = {
@@ -27,7 +24,7 @@ function KarmaService(User, Auth) {
             User.$buildRaw({id: Auth.current.userId}).karmaContexts.$search().$then(response => {
                 self.karma.tags = response;
                 self.karma.sum = response.length ? _.map(response, r => r.karma).reduce((a,b) => a+b) : 0;
-                listeners.forEach(listener => listener(self.karma));
+                $rootScope.$broadcast("karma.changed");
             });
         }
     }

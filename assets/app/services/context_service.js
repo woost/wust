@@ -11,7 +11,7 @@ function ContextService($rootScope, Helpers, KarmaService) {
     this.setNodeContext = setNodeContext;
     this.contextStyle = {};
 
-    KarmaService.onChange(updateKarma);
+    $rootScope.$on("karma.changed", updateKarma);
 
     function updateKarma() {
         self.currentContexts.forEach(context => {
@@ -34,10 +34,9 @@ function ContextService($rootScope, Helpers, KarmaService) {
     }
 
     function emitChangedEvent() {
-
         this.contextStyle["background-color"] = this.currentContexts.length > 0 ? Helpers.navBackgroundColor(this.currentContexts[0]) : undefined;
         this.contextStyle["border-bottom"] = this.currentContexts.length > 0 ? ("1px solid " + Helpers.contextCircleBorderColor(this.currentContexts[0])) : undefined;
-        $rootScope.$emit("context.changed");
+        $rootScope.$broadcast("context.changed");
     }
 }
 

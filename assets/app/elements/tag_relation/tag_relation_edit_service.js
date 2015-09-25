@@ -1,8 +1,8 @@
 angular.module("wust.elements").service("TagRelationEditService", TagRelationEditService);
 
-TagRelationEditService.$inject = ["$rootScope", "$modal", "EditService"];
+TagRelationEditService.$inject = ["$modal", "EditService"];
 
-function TagRelationEditService($rootScope, $modal, EditService) {
+function TagRelationEditService($modal, EditService) {
     let self = this;
 
     let modalInstance = $modal({

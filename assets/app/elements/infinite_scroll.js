@@ -1,8 +1,8 @@
 angular.module("wust.elements").directive("infiniteScroll", infiniteScroll);
 
-infiniteScroll.$inject = ["$rootScope"];
+infiniteScroll.$inject = [];
 
-function infiniteScroll($rootScope) {
+function infiniteScroll() {
     return {
         scope: {
             infiniteScroll: "&",

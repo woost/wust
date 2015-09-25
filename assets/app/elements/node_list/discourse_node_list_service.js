@@ -11,9 +11,9 @@ function DiscourseNodeList() {
         nodeListDefs[modelName] = modelPath;
     }
 
-    get.$inject = ["$injector", "$rootScope", "DiscourseNode", "EditService"];
+    get.$inject = ["$injector", "DiscourseNode", "EditService"];
 
-    function get($injector, $rootScope, DiscourseNode, EditService) {
+    function get($injector, DiscourseNode, EditService) {
         const PREDECESSORS = 0;
         const SUCCESSORS = 1;
         const PARALLELS = 2;
