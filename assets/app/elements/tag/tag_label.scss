@@ -16,12 +16,13 @@
         cursor: pointer;
     }
 
+    $padding-h: 7px;
     .content {
-        padding: 0 5px !important;
+        padding: 0 $padding-h !important;
     }
 
     .right {
-        padding-right: 5px;
+        padding-right: $padding-h;
     }
 
     a, a:link, a:active, a:visited  {
