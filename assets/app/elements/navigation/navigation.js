@@ -53,7 +53,12 @@ function navigationCtrl($state, Auth, SearchService, ModalEditService, Fullscree
         ModalEditService.show();
     }
 
+    let lastSearch;
     function onSearchBoxChange() {
+        if (lastSearch === SearchService.search.query)
+            return;
+
+        lastSearch = SearchService.search.query;
         if(!SearchService.search.query) {
             SearchService.search.resultsVisible = false;
         } else {
