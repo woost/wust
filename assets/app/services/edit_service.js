@@ -309,7 +309,7 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
             // lazily add existing nodes, so they only appear in the scratchpad
             // if they were actually edited
             existing = new Session(node);
-            existing.lazyAdd = true;
+            existing.lazyAdd = lazyadd;
         }
 
         if (!lazyadd) {
