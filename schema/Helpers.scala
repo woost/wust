@@ -5,6 +5,10 @@ import org.apache.commons.codec.binary.Base64
 
 object Helpers {
 
+  implicit class BooleanWithImplies(bool:Boolean) {
+    final def implies(that:Boolean) = !this.bool || that
+  }
+
   def uuidBase64 = {
     val uuid = java.util.UUID.randomUUID
     val bb = ByteBuffer.wrap(new Array[Byte](16))

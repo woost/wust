@@ -6,6 +6,32 @@ import renesca.schema.macros
 import renesca.Transaction
 import renesca.graph.Label
 import moderation.Moderation
+import Helpers.BooleanWithImplies
+import renesca.schema.Item
+
+trait Validator extends Item {
+  import renesca.parameter.implicits._
+  import renesca.graph.Match
+  import scala.collection.mutable
+
+  case class Validation(errorMessage: String, properties: Seq[String], handler: () => Boolean)
+  private var validations: mutable.ArrayBuffer[Validation] = mutable.ArrayBuffer.empty
+
+  def valid(errorMessage: String, properties: String*)(handler: => Boolean) {
+    validations += Validation(errorMessage, properties, () => handler)
+  }
+
+  override final def validate = {
+    val invalid = validations.view.map { validation =>
+      if (rawItem.origin.kind != Match.kind || validation.properties.flatMap(rawItem.properties.get(_)).size == validation.properties.size)
+        if (validation.handler()) None else Some(validation.errorMessage)
+      else
+        None
+    }.find(_.isDefined)
+
+    invalid.getOrElse(None)
+  }
+}
 
 @macros.GraphSchema
 object WustSchema {
@@ -13,32 +39,8 @@ object WustSchema {
   // TODO: custom local methods for NodeFactory
   // TODO: annotation for hidden defaults?
 
-  @Node trait UuidNode {
+  @Node trait UuidNode extends Validator {
     @unique val uuid: String = Helpers.uuidBase64
-
-    //TODO: move to own trait
-    import renesca.parameter.implicits._
-    import renesca.schema.Node
-    import renesca.graph.Match
-    import scala.collection.mutable
-
-    case class Validation(errorMessage: String, properties: Seq[String], handler: () => Boolean)
-    private var validations: mutable.ArrayBuffer[Validation] = mutable.ArrayBuffer.empty
-
-    def valid(errorMessage: String, properties: String*)(handler: => Boolean) {
-      validations += Validation(errorMessage, properties, () => handler)
-    }
-
-    override def validate = {
-      val invalid = validations.view.map { validation =>
-        if (rawItem.origin.kind != Match.kind || validation.properties.flatMap(rawItem.properties.get(_)).size == validation.properties.size)
-          if (validation.handler()) None else Some(validation.errorMessage)
-        else
-          None
-      }.find(_.isDefined)
-
-      invalid.getOrElse(None)
-    }
   }
 
   //TODO: @Item trait in renesca-magic
@@ -171,13 +173,13 @@ object WustSchema {
     def canReject:Boolean = canReject()
 
     valid("Appliable change requests should be approved", "status", "approvalSum", "applyThreshold") {
-      (!canApply || status == APPROVED)
+      (canApply implies status == APPROVED)
     }
     valid("Rejectable change requests should be rejected", "status", "approvalSum", "applyThreshold") {
-      (!canReject || status == REJECTED)
+      (canReject implies status == REJECTED)
     }
-    valid("Change request status must be in Range", "status", "approvalSum", "applyThreshold") {
-      Seq(CONFLICT,REJECTED,PENDING,INSTANT,APPROVED).contains(status)
+    valid("Change request status must be in Range", "status") {
+      Seq[Long](CONFLICT,REJECTED,PENDING,INSTANT,APPROVED).contains(status)
     }
   }
 
@@ -209,7 +211,7 @@ object WustSchema {
     var _locked: Boolean = false
   }
 
-  @Relation class Votes(startNode: User, endNode: Votable) extends RelationTimestamp {
+  @Relation class Votes(startNode: User, endNode: Votable) extends RelationTimestamp with Validator {
     val weight: Long // Up:>0 or Down:<0
 
     valid("Votes cannot have 0 weight", "weight") { weight != 0 }
