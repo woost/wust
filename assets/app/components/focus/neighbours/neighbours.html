@@ -7,9 +7,15 @@
         <div discourse-node-list node-model='vm.references.model' is-loading="vm.isLoading" class="neighbours_attachedto discourse_node_list_horizontal" template-after="components/focus/neighbours/predecessors_connection.html"></div>
     </div>
     <div class="neighbours_content">
-        <div big-post component="vm.component"></div>
-        <h3 ng-show="vm.parallels.model.list.length > 0">Sibling Posts:</h3>
-        <div discourse-node-list node-model='vm.parallels.model' is-loading="vm.isLoading" class="parallels discourse_node_list_vertical"></div>
+        <div class="rootnode" big-post component="vm.component"></div>
+        <div ng-if="vm.parallels.model.list.length">
+            <div class="btn-group pull-right" ng-model="vm.component.rootNode.parallelsOrder" bs-radio-group>
+                <label class="btn btn-xs btn-default fa fa-sort-amount-desc"><input type="radio" class="btn btn-xs btn-default" value="0"> Votes</label>
+                <label class="btn btn-xs btn-default fa fa-sort-amount-asc"><input type="radio" class="btn btn-xs btn-default" value="1"> Time</label>
+            </div>
+            <h3 ng-show="vm.parallels.model.list.length > 0">Sibling Posts:</h3>
+            <div discourse-node-list node-model='vm.parallels.model' is-loading="vm.isLoading" class="parallels discourse_node_list_vertical"></div>
+        </div>
     </div>
     <div class="text-right">
         <div class="btn-group text-right" ng-model="vm.component.rootNode.predecessorOrder" bs-radio-group>

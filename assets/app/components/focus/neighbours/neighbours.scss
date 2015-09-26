@@ -28,6 +28,10 @@
         width: 600px;
         min-width: 400px;
 
+        .rootnode {
+            margin-bottom: 20px;
+        }
+
         .parallels {
             .node_model_list > div {
                 @include display-flex(flex);

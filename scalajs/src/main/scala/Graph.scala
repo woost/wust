@@ -105,9 +105,9 @@ trait NodeBase extends NodeDelegates {
   def relations = inRelations ++ outRelations
   def predecessors = inRelations.map(_.startNode)
   def successors = outRelations.map(_.endNode)
-
   def neighbours = predecessors ++ successors
   def parallels = successors.flatMap(_.predecessors).filter(_ != this)
+
   @JSExport def inDegree = inRelations.size
   @JSExport def outDegree = outRelations.size
   @JSExport def degree = inDegree + outDegree
@@ -118,10 +118,13 @@ trait NodeBase extends NodeDelegates {
 
   private var _predecessorOrder = SortOrder.QUALITY
   private var _successorOrder = SortOrder.QUALITY
+  private var _parallelsOrder = SortOrder.QUALITY
   @JSExport def predecessorOrder = _predecessorOrder
   @JSExport def successorOrder = _successorOrder
+  @JSExport def parallelsOrder = _parallelsOrder
   @JSExport def predecessorOrder_=(order: String) = _predecessorOrder = order.toInt
   @JSExport def successorOrder_=(order: String) = _successorOrder = order.toInt
+  @JSExport def parallelsOrder_=(order: String) = _parallelsOrder = order.toInt
 
   def sortRelations(order: Int, relations: Seq[RelationLike]) = {
     relations.sortBy { relation =>
@@ -135,9 +138,10 @@ trait NodeBase extends NodeDelegates {
   //TODO: predecessors are only sorted because of wust
   @JSExport("predecessors") def predecessorsJs = sortRelations(predecessorOrder, inRelations.toSeq).map(_.startNode).toJSArray
   @JSExport("successors") def successorsJs = sortRelations(successorOrder, outRelations.toSeq).map(_.endNode).toJSArray
+  //TODO: might need unique for paralles?
+  @JSExport("parallels") def parallelsJs = sortRelations(parallelsOrder, successors.toSeq.flatMap(_.inRelations).diff(inRelations.toSeq)).map(_.startNode).toJSArray
 
   @JSExport("neighbours") def neighboursJs = neighbours.toJSArray
-  @JSExport("parallels") def parallelsJs = parallels.toJSArray
 
   // TODO: I am here because the optimizer+minificator of scalajs in production
   // would otherwise assume that .y is a function even though it isn't. so we
