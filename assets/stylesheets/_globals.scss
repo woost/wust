@@ -6,6 +6,8 @@
     @return lighten(saturate($bgcolor, 10), 10);
 }
 
+$shadow-color: rgba(0,0,0,0.4);
+
 $graph_relation_color: #666;
 
 $post_default_border_color: #AAA;
