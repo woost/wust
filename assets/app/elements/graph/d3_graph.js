@@ -842,6 +842,9 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
         }
 
         drawGraph() {
+            if( this.graph.nodes[0].size.x === 0 )
+                this.recalculateNodeDimensions(this.graph.nodes);
+
             this.drawNodes();
             this.drawRelations();
         }
