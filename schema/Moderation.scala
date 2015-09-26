@@ -33,9 +33,9 @@ object Moderation {
     }.sum
   }
 
-  def postChangeThreshold(viewCount: Long) = sqrt(viewCount)
+  def postChangeThreshold(viewCount: Long) = sqrt(viewCount) max 1
 
-  def rejectPostChangeThreshold(applyThreshold: Long) = -applyThreshold / 2
+  def rejectPostChangeThreshold(applyThreshold: Long) = (-applyThreshold / 2) min -1
 
   def postQuality(upVotes:Long, downVotes:Long) = (upVotes + votes_u*votes_p) / (downVotes + upVotes + votes_u)
 

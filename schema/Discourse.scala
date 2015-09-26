@@ -15,6 +15,30 @@ object WustSchema {
 
   @Node trait UuidNode {
     @unique val uuid: String = Helpers.uuidBase64
+
+    //TODO: move to own trait
+    import renesca.parameter.implicits._
+    import renesca.schema.Node
+    import renesca.graph.Match
+    import scala.collection.mutable
+
+    case class Validation(errorMessage: String, properties: Seq[String], handler: () => Boolean)
+    private var validations: mutable.ArrayBuffer[Validation] = mutable.ArrayBuffer.empty
+
+    def valid(errorMessage: String, properties: String*)(handler: => Boolean) {
+      validations += Validation(errorMessage, properties, () => handler)
+    }
+
+    override def validate = {
+      val invalid = validations.view.map { validation =>
+        if (rawItem.origin.kind != Match.kind || validation.properties.flatMap(rawItem.properties.get(_)).size == validation.properties.size)
+          if (validation.handler()) None else Some(validation.errorMessage)
+        else
+          None
+      }.find(_.isDefined)
+
+      invalid.getOrElse(None)
+    }
   }
 
   //TODO: @Item trait in renesca-magic
@@ -52,6 +76,8 @@ object WustSchema {
   @Node class User extends UuidNode with Identity {
     @unique val name: String
     var email: Option[String]
+
+    valid("Name may not be empty", "name"){ !name.trim.isEmpty }
   }
   @Node class LoginInfo {
     val providerID: String
@@ -81,6 +107,8 @@ object WustSchema {
   @Relation class HasPassword(startNode: LoginInfo, endNode: PasswordInfo)
   @Node class UserGroup extends UuidNode {
     @unique val name: String
+
+    valid("Name may not be empty", "name"){ !name.trim.isEmpty }
   }
   @Relation class MemberOf(startNode: User, endNode: UserGroup)
 
@@ -112,19 +140,9 @@ object WustSchema {
     var _locked: Boolean = false
     var viewCount: Long = 0
 
-    override def validate: Option[String] = {
-      //TODO: challenge validation should work for matches nodes, but they are
-      //weird do not have all properties set before they are resolved.
-      if(!rawItem.properties.isDefinedAt("title"))
-        return None
-
-      if(title.trim.isEmpty)
-        Some("Title may not be blank")
-      else if(title.length > 140)
-             Some("Title may not exceed length of 140 characters")
-      else
-        None
-    }
+    valid("Title may not be blank", "title"){ !title.trim.isEmpty }
+    valid("Title may not exceed length of 140 characters", "title"){ title.length <= 140 }
+    valid("Viewcount must be positive", "viewCount"){ viewCount >= 0 }
   }
 
   @Relation class Viewed(startNode: User, endNode: Post) extends RelationTimestamp
@@ -151,6 +169,10 @@ object WustSchema {
     def canReject(approvalSum: Long = approvalSum):Boolean = approvalSum <= rejectThreshold
     def canApply:Boolean = canApply()
     def canReject:Boolean = canReject()
+
+    valid("Correct status for change request", "status", "approvalSum", "applyThreshold"){
+      (!canApply || status == APPROVED ) && (!canReject || status == REJECTED)
+    }
   }
 
   @Relation class Skipped(startNode: User, endNode: ChangeRequest)
@@ -161,6 +183,8 @@ object WustSchema {
     val newTitle:String
     val oldDescription:Option[String]
     val newDescription:Option[String]
+
+    valid("Change request should change something", "oldTitle", "newTitle", "oldDescription", "newDescription"){ oldTitle != newTitle || oldDescription != newDescription }
   }
 
   @HyperRelation class Deleted(startNode: User, endNode: Hidden) extends ChangeRequest with HyperConnection
@@ -185,6 +209,7 @@ object WustSchema {
   @Node trait Reference extends Votable {
     var voteCount: Long = 0
     def quality(viewCount: Long): Double = Moderation.postQuality(voteCount, viewCount - voteCount)
+    valid("Votecount must be positive", "voteCount"){ voteCount >= 0 }
   }
 
   // generic Tags (base for Tags, Scopes)
@@ -193,6 +218,7 @@ object WustSchema {
     var description: Option[String]
     var color: Long // Hue 0..360, -1 is gray
     var symbol: Option[String]
+    valid("Title of Tags cannot be empty", "title"){ !title.trim.isEmpty }
   }
   @HyperRelation class Tags(startNode: Scope, endNode: Post) extends HyperConnection with UuidNode with Reference
 

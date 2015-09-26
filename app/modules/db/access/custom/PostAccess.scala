@@ -27,7 +27,6 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
       contribution.status = APPROVED
       Some(Votes.merge(user, contribution, weight = authorBoost))
     } else if(contribution.canApply(approvalSum)) {
-      contribution.approvalSum = approvalSum
       contribution.status = INSTANT
       None
     } else {
@@ -78,7 +77,7 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
 
       val crOpt = alreadyExisting orElse tagConnectRequestToScope(tagReq).map { tag =>
         // we create a new change request as there is no existing one here
-        val addTags = AddTags.create(user, post, applyThreshold = applyThreshold, approvalSum = approvalSum)
+        val addTags = AddTags.create(user, post, applyThreshold = applyThreshold)
         discourse.add(addTags, tag, ProposesTag.create(addTags, tag))
         handleInitialChange(addTags, user, authorBoost = authorBoost, approvalSum = approvalSum).foreach(discourse.add(_))
         addTags
@@ -104,7 +103,7 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
       }
 
       val cr = alreadyExisting getOrElse {
-        val remTags = RemoveTags.create(user, post, applyThreshold = applyThreshold, approvalSum = approvalSum)
+        val remTags = RemoveTags.create(user, post, applyThreshold = applyThreshold)
         val tag = Scope.matchesOnUuid(tagReq)
         discourse.add(remTags, tag, ProposesTag.create(remTags, tag))
         handleInitialChange(remTags, user, authorBoost = authorBoost, approvalSum = approvalSum).foreach(discourse.add(_))
@@ -215,10 +214,10 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
     }
   }
 
-  def createNode(context: RequestContext): Option[Post] = context.user.flatMap { user =>
+  def createNode(context: RequestContext): Either[String,Post] = context.user.map { user =>
     import formatters.json.EditNodeFormat._
 
-    context.jsonAs[PostAddRequest].flatMap { request =>
+    context.jsonAs[PostAddRequest].map { request =>
       val discourse = Discourse.empty
 
       val node = Post.create(title = request.title, description = request.description)
@@ -228,16 +227,19 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
       addScopesToGraph(discourse, request, node)
 
       db.transaction(_.persistChanges(discourse)) match {
-        case Some(err) => None
-        case _         => Some(node)
+        case Some(err) => Left(err)
+        case None      => Right(node)
       }
-    }
-  }
+    }.getOrElse(Left("Cannot parse create request"))
+  }.getOrElse(Left("Only for users"))
 
   override def create(context: RequestContext) = context.withUser {
     import formatters.json.EditNodeFormat._
 
-    createNode(context).map(n => Ok(Json.toJson(n))).getOrElse(BadRequest("Cannot create Post"))
+    createNode(context) match {
+      case Left(err) => BadRequest(s"Cannot create Post: $err")
+      case Right(node) => Ok(Json.toJson(node))
+    }
   }
 
   override def delete(context: RequestContext, uuid: String) = context.withUser { user =>
@@ -297,7 +299,7 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
 
             handleInitialChange(contribution, user, authorBoost = authorBoost, approvalSum = approvalSum).foreach(discourse.add(_))
 
-            if (contribution.canApply) {
+            if (contribution.status == INSTANT || contribution.status == APPROVED) {
               request.title.foreach(node.title = _)
               request.description.foreach(d => node.description = if (d.trim.isEmpty) None else Some(d))
             }

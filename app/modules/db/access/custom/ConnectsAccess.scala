@@ -34,7 +34,10 @@ case class StartConnectsAccess() extends StartRelationReadBase[Post, Connects, C
   val postaccess = PostAccess.apply
 
   override def create(context: RequestContext, param: ConnectParameter[Post]) = context.withUser {
-    postaccess.createNode(context).map(n => createRelation(context, param, n)).getOrElse(BadRequest("Cannot create post"))
+    postaccess.createNode(context) match {
+      case Left(err) => BadRequest(s"Cannot create Post: $err")
+      case Right(node) => createRelation(context, param, node)
+    }
   }
 
   private def createRelation(context: RequestContext, param: ConnectParameter[Post], node: Connectable) = {
@@ -57,11 +60,17 @@ case class EndConnectsAccess() extends EndRelationReadBase[Post, Connects, Conne
   val postaccess = PostAccess.apply
 
   override def create(context: RequestContext, param: ConnectParameter[Connectable]) = context.withUser {
-    postaccess.createNode(context).map(n => createRelation(context, param, n)).getOrElse(BadRequest("Cannot create post"))
+    postaccess.createNode(context) match {
+      case Left(err) => BadRequest(s"Cannot create Post: $err")
+      case Right(node) => createRelation(context, param, node)
+    }
   }
 
   override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Connectable with AbstractRelation[S, E], E]) = context.withUser {
-    postaccess.createNode(context).map(n => createRelation(context, param, n)).getOrElse(BadRequest("Cannot create post"))
+    postaccess.createNode(context) match {
+      case Left(err) => BadRequest(s"Cannot create Post: $err")
+      case Right(node) => createRelation(context, param, node)
+    }
   }
 
   private def createRelation(context: RequestContext, param: ConnectParameter[Connectable], node: Post) = {
