@@ -177,12 +177,17 @@
 
         .hyperrelation {
             display: inline-block;
+            // to avoid having 0-size of relations without label:
+            min-width: 1px;
+            min-height: 1px;
             color: $graph_relation_color;
-            border: 1px solid #444;
-            border-radius: 5px;
-            padding: 5px;
+            padding: 0;
             margin: 0;
-            cursor: pointer;
+            .tag-label {
+                display: block !important;
+                text-align: center;
+                margin: 0;
+            }
         }
         .popover {
             margin: 0px;

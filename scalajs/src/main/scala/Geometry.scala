@@ -15,8 +15,9 @@ case class Vec2(
   @JSExport("minus") def -(that:Vec2) = Vec2(this.x - that.x, this.y - that.y)
   @JSExport("times") def *(a:Double) = Vec2(this.x * a, this.y * a)
   @JSExport("div") def /(a:Double) = Vec2(this.x / a, this.y / a)
+  @JSExport def cross(that:Vec2) = this.x * that.y - this.y * that.x
 
-  @JSExport def isInside(r:Rect) = x > r.pos.x && y > r.pos.y && x < r.otherPos.x && y < r.otherPos.y
+  @JSExport def angle = Math.atan2(y, x);
 }
 
 @JSExport
@@ -29,15 +30,17 @@ case class Line(
   @JSExport def y2 = end.y
 
   @JSExport def vector = end - start
+  @JSExport def center = (start + end) / 2
 
-  @JSExport def isInside(r:Rect) = (start isInside r) && (end isInside r)
+  @JSExport def leftOf(p:Vec2) = (vector cross (p - start)) > 0
+  @JSExport def rightOf(p:Vec2) = !leftOf(p)
 
   def intersect(that:Line):Option[Algorithms.LineIntersection] = Algorithms.intersect(this, that)
-  def intersect(r:Rect):Either[Boolean,Seq[Vec2]] = Algorithms.intersect(r, this)
-  def cutBy(r:Rect):Option[Line] = Algorithms.cutLineByRectAtStartOrEnd(this, r)
-  @JSExport("cutBy") def cutBy_js(r:Rect):js.UndefOr[Line] = cutBy(r).orUndefined
-  def clampBy(r:Rect):Option[Line] = Algorithms.clampLineByRect(this, r)
-  @JSExport("clampBy") def clampBy_js(r:Rect):js.UndefOr[Line] = clampBy(r).orUndefined
+  def intersect(r:ConvexPolygon):Either[Boolean,Seq[Vec2]] = Algorithms.intersect(r, this)
+  def cutBy(r:ConvexPolygon):Option[Line] = Algorithms.cutLineByPolyAtStartOrEnd(this, r)
+  @JSExport("cutBy") def cutBy_js(r:ConvexPolygon):js.UndefOr[Line] = cutBy(r).orUndefined
+  def clampBy(r:ConvexPolygon):Option[Line] = Algorithms.clampLineByPoly(this, r)
+  @JSExport("clampBy") def clampBy_js(r:ConvexPolygon):js.UndefOr[Line] = clampBy(r).orUndefined
 
   @JSExport def length = {
     val dx = start.x - end.x
@@ -57,47 +60,84 @@ case class Line(
   override def hashCode = start.hashCode * end.hashCode // multiply to be commutative
 }
 
-@JSExport
-object Rect {
+trait ConvexPolygon {
+  def corners:IndexedSeq[Vec2] // in counter clockwise order
+  lazy val edges:IndexedSeq[Line] = Algorithms.slidingRotate(corners).map( e => Line(e.head,e.last))
+
+  def intersect(line:Line) = Algorithms.intersect(this, line)
+
+  @JSExport def includes(v:Vec2):Boolean = edges.forall(_ rightOf v)
+  @JSExport def includes(l:Line):Boolean = includes(l.start) && includes(l.end)
+  @JSExport def isOverlapping(that:ConvexPolygon):Boolean
 }
 
-@JSExport
-case class Rect(
-  @(JSExport @field) pos:Vec2,
-  @(JSExport @field) size:Vec2) {
+trait Rect extends ConvexPolygon {
+  // center
+  @JSExport def pos:Vec2
   @JSExport def x = pos.x
   @JSExport def y = pos.y
+
+  @JSExport def size:Vec2
   @JSExport def width = size.x
   @JSExport def height = size.y
 
-  @JSExport lazy val otherPos = pos + size
-  @JSExport lazy val center = pos + size / 2
+  @JSExport def angle:Double
 
-  @JSExport def centered = Rect(center - size, size)
+  @JSExport def minCorner:Vec2
+  @JSExport def maxCorner:Vec2
+}
 
-  lazy val corners = Array(
-    pos,
-    Vec2(pos.x + size.x, pos.y),
-    otherPos,
-    Vec2(pos.x, pos.y + size.y)
+object Rect {
+  def apply(pos:Vec2, size:Vec2, angle:Double = 0):Rect = if(angle == 0) AARect(pos, size) else RotatedRect(pos, size, angle)
+}
+
+@JSExport
+case class RotatedRect(pos:Vec2, size:Vec2, angle:Double) extends Rect {
+  import Math.{sin,cos}
+
+  lazy val toRight = Vec2(cos(angle),sin(angle))*(width/2)
+  lazy val toBottom = Vec2(-sin(angle),cos(angle))*(height/2)
+
+  lazy val minCorner = pos - toRight - toBottom
+  lazy val maxCorner = pos + toRight + toBottom
+
+  lazy val corners = Vector(
+    minCorner,
+    pos - toRight + toBottom,
+    maxCorner,
+    pos + toRight - toBottom
   )
 
-  lazy val edges = Array(
-    Line(corners(0), corners(1)),
-    Line(corners(1), corners(2)),
-    Line(corners(2), corners(3)),
-    Line(corners(3), corners(0))
+  def isOverlapping(that:ConvexPolygon):Boolean = ???
+}
+
+@JSExport
+case class AARect(pos:Vec2, size:Vec2) extends Rect {
+  override def angle = 0
+
+  lazy val minCorner = pos - size / 2
+  lazy val maxCorner = pos + size / 2
+
+  override def includes(v:Vec2):Boolean = v.x > minCorner.x && v.y > minCorner.y && v.x < maxCorner.x && v.y < maxCorner.y
+
+  lazy val corners = Vector(
+    minCorner,
+    minCorner + Vec2(size.x, 0),
+    maxCorner,
+    minCorner + Vec2(0, size.y)
   )
 
-  def intersect(that:Line) = Algorithms.intersect(this, that)
-
-  def isOverlapping(that:Rect) = {
-    ((this.x < that.x + that.width) && (this.x + this.width > that.x)) &&
-    ((this.y < that.y + that.width) && (this.y + this.width > that.y))
+  def isOverlapping(that:ConvexPolygon):Boolean = that match {
+    case that:AARect =>
+      ((this.x < that.x + that.width) && (this.x + this.width > that.x)) &&
+      ((this.y < that.y + that.width) && (this.y + this.width > that.y))
+    case poly => ???
   }
 }
 
 object Algorithms {
+  def slidingRotate[T](l:Seq[T]):IndexedSeq[Seq[T]] = (l :+ l.head).sliding(2).toIndexedSeq
+
   case class LineIntersection(pos:Vec2, onLine1:Boolean, onLine2:Boolean)
   def intersect(line1: Line, line2: Line):Option[LineIntersection] = {
     // if the lines intersect, the result contains the x and y of the intersection
@@ -139,48 +179,48 @@ object Algorithms {
    return Some(LineIntersection(Vec2(resultX, resultY), resultOnLine1, resultOnLine2))
   }
 
-  def intersect(rect:Rect, line:Line):Either[Boolean,Seq[Vec2]] = {
+  def intersect(poly:ConvexPolygon, line:Line):Either[Boolean,Seq[Vec2]] = {
     // Left(true) => line is completely inside
     // Left(fals) => line is completely outside
     // Right(pos) => one intersection point
-    val intersections = rect.edges.flatMap { edge =>
+    val intersections = poly.edges.flatMap { edge =>
       (line intersect edge).filter( i => i.onLine1 && i.onLine2 ).map(_.pos)
     }
 
     if( intersections.nonEmpty )
       Right(intersections)
-    else Left(line isInside rect)
+    else Left(poly includes line)
   }
 
-  def cutLineByRectAtStartOrEnd(line:Line, rect:Rect):Option[Line] = {
+  def cutLineByPolyAtStartOrEnd(line:Line, poly:ConvexPolygon):Option[Line] = {
     // Assuming there is only one intersection.
-    // Which means that one line end is inside the rect,
+    // Which means that one line end is inside the poly,
     // the other one outside.
     // If there are two intersections the resulting line
     // can be wrong
-    intersect(rect, line) match {
+    intersect(poly, line) match {
       case Left(true) => None // line inside
       case Left(false) => Some(line) // line outside
       case Right(intersections) =>
-        // with the assumption that the rect covers one line end,
+        // with the assumption that the poly covers one line end,
         // we have exactly one intersection
-        if(line.end isInside rect)
+        if(poly includes line.end)
           Some(Line(line.start, intersections.head))
         else
           Some(Line(intersections.head, line.end))
     }
   }
 
-  def clampLineByRect(line:Line, rect:Rect):Option[Line] = {
-    (line.start isInside rect, line.end isInside rect) match {
+  def clampLineByPoly(line:Line, poly:ConvexPolygon):Option[Line] = {
+    ( poly includes line.start, poly includes line.end) match {
       case (true, true) => Some(line)
-      case (true, false) => Some(Line(line.start, intersect(rect, line).right.get.head))
-      case (false, true) => Some(Line(intersect(rect, line).right.get.head, line.end))
+      case (true, false) => Some(Line(line.start, intersect(poly, line).right.get.head))
+      case (false, true) => Some(Line(intersect(poly, line).right.get.head, line.end))
       case (false, false) =>
-        intersect(rect, line) match {
+        intersect(poly, line) match {
           case Left(_) => None
           case Right(intersections) =>
-            // rectangle is convex, line endpoints lie outside,
+            // polygon is convex, line endpoints lie outside,
             // so we have exactly two intersections
             Some(Line(intersections(0), intersections(1)))
         }

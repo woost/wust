@@ -23,8 +23,9 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 // settings
                 this.visibleConvergence = false;
                 this.debugDraw = false;
-                this.hyperRelationAlignForce = 0.5;
+                this.hyperRelationAlignForce = 1;
                 this.nodeVerticalForceFactor = 2;
+                this.constantEdgeLength = true;
                 this.stopForceOnPan = true;
                 this.stopForceAfterNodeDrag = true;
                 this.connectorLineOvershoot = 0;
@@ -33,7 +34,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.markerUrl = _.endsWith($location.absUrl(), "/graph") ? $location.absUrl() : $location.absUrl() + "graph";
                 this.arrowToResponse = false;
                 this.dragHyperRelations = false;
-                this.constantEdgeLength = true;
 
                 // state
                 this.drawOnTick = this.drawOnTick = this.visibleConvergence;
@@ -129,7 +129,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.d3SvgDefs.append("svg:marker")
                     .attr("id", "graph_arrow")
                     .attr("viewBox", this.arrowToResponse ? "-10 -3 10 6" : "0 -3 10 6") // x y w h
-                    .attr("refX", this.arrowToResponse ? -10 : 10)
+                    .attr("refX", this.arrowToResponse ? -9 : 9)
                     .attr("markerWidth", 15)
                     .attr("markerHeight", 9)
                     .attr("orient", "auto")
@@ -151,6 +151,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
                 // choose the correct transform style for many browsers
                 this.transformCompat = Helpers.cssCompat("transform", "Transform", "transform");
+                this.transformOriginCompat = Helpers.cssCompat("transform-origin", "TransformOrigin", "transform-origin");
 
                 // svg and html each have full-size
                 // containers with enabled pointer events
@@ -760,8 +761,18 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
         }
 
         drawNodes() {
-            this.graph.nodes.forEach((node) => {
-                this.elementInfo.domNodeContainer(node).style[this.transformCompat] = `translate(${node.x - node.size.width / 2}px, ${node.y - node.size.height / 2}px)`;
+            this.graph.nodes.forEach(node => {
+                if(node.isHyperRelation) {
+                    let rect = this.nodeRect(node);
+                    let corner = rect.minCorner;
+                    let angle = rect.angle;
+
+                    this.elementInfo.domNodeContainer(node).style[this.transformOriginCompat] = `${corner.x}px ${corner.y}px`;
+                    this.elementInfo.domNodeContainer(node).style[this.transformCompat] = `rotate(${angle}rad) translate(${corner.x}px, ${corner.y}px)`;
+                } else {
+                    let corner = this.nodeRect(node).minCorner;
+                    this.elementInfo.domNodeContainer(node).style[this.transformCompat] = `translate(${corner.x}px, ${corner.y}px)`;
+                }
             });
         }
 
@@ -774,10 +785,27 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
         }
 
         nodeRect(node) {
-            return geometry.Rect(
-                    geometry.Vec2(node.x, node.y),
-                    node.size
-                    ).centered;
+            if( node.isHyperRelation ) {
+                let angle = geometry.Line(
+                        geometry.Vec2(node.source.x, node.source.y),
+                        geometry.Vec2(node.target.x, node.target.y)
+                        ).vector.angle;
+
+                // never have text written upside-down
+                if(angle > Math.PI / 2 && angle < Math.PI) angle += Math.PI;
+                if(angle < -Math.PI / 2 && angle > -Math.PI) angle += Math.PI;
+
+                return geometry.RotatedRect(
+                        geometry.Vec2(node.x, node.y),
+                        node.size,
+                        angle
+                        );
+            } else {
+                return geometry.AARect(
+                        geometry.Vec2(node.x, node.y),
+                        node.size
+                        );
+            }
         }
 
         cutByRects(line, rect1, rect2) {
