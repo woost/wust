@@ -686,6 +686,13 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             let sourceRect = this.nodeRect(source);
             let targetRect = this.nodeRect(target);
 
+            if( sourceRect.width === 0 || sourceRect.height === 0 ||
+                    targetRect.width === 0 || targetRect.height === 0 ) {
+                // this can happen, when the graph is changed, before it was displayed once.
+                // e.g. when answering in neighbours-view
+                return [line, line.length];
+            }
+
             let cut = this.cutByRects(line, sourceRect, targetRect);
             if(cut) {
                 return [cut, cut.length];
