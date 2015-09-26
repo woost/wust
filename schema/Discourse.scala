@@ -80,7 +80,7 @@ object WustSchema {
     var email: Option[String]
 
     valid("Username may not be empty", "name") { !name.trim.isEmpty }
-    valid("Email address is invalid", "name") { email.contains("@") }
+    valid("Email address is invalid", "email") { email.map(_.contains("@")).getOrElse(true) }
   }
   @Node class LoginInfo {
     val providerID: String
