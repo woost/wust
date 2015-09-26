@@ -316,7 +316,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
                 this.d3NodeConnectTool = this.d3NodeTools.append("div")
                     .attr("class", "nodetool connecttool icon-flow-line")
-                    .style("display", d => (Auth.isLoggedIn && (!d.isHyperRelation || this.arrowToResponse)) ? "inline-block" : "none")
+                    .style("display", d => (Auth.isLoggedIn && d.isHyperRelation.implies(this.arrowToResponse)) ? "inline-block" : "none")
                     .append("div").attr("class", "event-offset-rotate-fix");
 
                 this.d3NodeEditTool = this.d3NodeTools.append("div")
@@ -1170,7 +1170,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             //TODO: fails when zooming/scrolling and dragging at the same time
             this.onDragMoveInit(d, 5, () => this.elementInfo.d3NodeContainer(d).classed({
                 "moving": true
-            }), d => (!d.isHyperRelation || this.dragHyperRelations));
+            }), d => d.isHyperRelation.implies(this.dragHyperRelations));
 
             if (this.isDragging) {
                 // default positioning is center of node.
