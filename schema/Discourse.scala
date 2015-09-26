@@ -77,7 +77,8 @@ object WustSchema {
     @unique val name: String
     var email: Option[String]
 
-    valid("Name may not be empty", "name"){ !name.trim.isEmpty }
+    valid("Username may not be empty", "name") { !name.trim.isEmpty }
+    valid("Email address is invalid", "name") { email.contains("@") }
   }
   @Node class LoginInfo {
     val providerID: String
@@ -97,7 +98,6 @@ object WustSchema {
     var karma: Long = 0
   }
 
-
   @Node class PasswordInfo {
     val hasher: String
     val password: String
@@ -108,7 +108,7 @@ object WustSchema {
   @Node class UserGroup extends UuidNode {
     @unique val name: String
 
-    valid("Name may not be empty", "name"){ !name.trim.isEmpty }
+    valid("Groupname may not be empty", "name") { !name.trim.isEmpty }
   }
   @Relation class MemberOf(startNode: User, endNode: UserGroup)
 
@@ -140,9 +140,9 @@ object WustSchema {
     var _locked: Boolean = false
     var viewCount: Long = 0
 
-    valid("Title may not be blank", "title"){ !title.trim.isEmpty }
-    valid("Title may not exceed length of 140 characters", "title"){ title.length <= 140 }
-    valid("Viewcount must be positive", "viewCount"){ viewCount >= 0 }
+    valid("Title may not be blank", "title") { !title.trim.isEmpty }
+    valid("Title may not exceed length of 140 characters", "title") { title.length <= 140 }
+    valid("ViewCount must be positive", "viewCount") { viewCount >= 0 }
   }
 
   @Relation class Viewed(startNode: User, endNode: Post) extends RelationTimestamp
@@ -170,8 +170,14 @@ object WustSchema {
     def canApply:Boolean = canApply()
     def canReject:Boolean = canReject()
 
-    valid("Correct status for change request", "status", "approvalSum", "applyThreshold"){
-      (!canApply || status == APPROVED ) && (!canReject || status == REJECTED)
+    valid("Appliable change requests should be approved", "status", "approvalSum", "applyThreshold") {
+      (!canApply || status == APPROVED)
+    }
+    valid("Rejectable change requests should be rejected", "status", "approvalSum", "applyThreshold") {
+      (!canReject || status == REJECTED)
+    }
+    valid("Change request status must be in Range", "status", "approvalSum", "applyThreshold") {
+      Seq(CONFLICT,REJECTED,PENDING,INSTANT,APPROVED).contains(status)
     }
   }
 
@@ -184,7 +190,9 @@ object WustSchema {
     val oldDescription:Option[String]
     val newDescription:Option[String]
 
-    valid("Change request should change something", "oldTitle", "newTitle", "oldDescription", "newDescription"){ oldTitle != newTitle || oldDescription != newDescription }
+    valid("Change request should change something", "oldTitle", "newTitle", "oldDescription", "newDescription") {
+      oldTitle != newTitle || oldDescription != newDescription
+    }
   }
 
   @HyperRelation class Deleted(startNode: User, endNode: Hidden) extends ChangeRequest with HyperConnection
@@ -202,14 +210,17 @@ object WustSchema {
   }
 
   @Relation class Votes(startNode: User, endNode: Votable) extends RelationTimestamp {
-    val weight: Long // Up:+1 or Down:-1
+    val weight: Long // Up:>0 or Down:<0
+
+    valid("Votes cannot have 0 weight", "weight") { weight != 0 }
   }
 
   // base class for connects and tags
   @Node trait Reference extends Votable {
     var voteCount: Long = 0
     def quality(viewCount: Long): Double = Moderation.postQuality(voteCount, viewCount - voteCount)
-    valid("Votecount must be positive", "voteCount"){ voteCount >= 0 }
+
+    valid("VoteCount must be positive", "voteCount") { voteCount >= 0 }
   }
 
   // generic Tags (base for Tags, Scopes)
@@ -218,7 +229,9 @@ object WustSchema {
     var description: Option[String]
     var color: Long // Hue 0..360, -1 is gray
     var symbol: Option[String]
-    valid("Title of Tags cannot be empty", "title"){ !title.trim.isEmpty }
+
+    valid("Title of Tags cannot be empty", "title") { !title.trim.isEmpty }
+    valid("Color must be between -1 and 360", "color") { color >= -1 && color <= 360 }
   }
   @HyperRelation class Tags(startNode: Scope, endNode: Post) extends HyperConnection with UuidNode with Reference
 
