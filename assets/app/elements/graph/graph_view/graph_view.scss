@@ -176,6 +176,9 @@
             }
         }
 
+        .nodeframe-hyperrelation {
+            line-height: 0;
+        }
         .hyperrelation {
             display: inline-block;
             // to avoid having 0-size of relations without label:
@@ -184,10 +187,15 @@
             color: $graph_relation_color;
             padding: 0;
             margin: 0;
+            // background: rgba(0,0,0,0.2);
             .tag-label {
-                display: block !important;
+                $scale: 0.7;
+                display: block !important; // triggers line breaks
                 text-align: center;
                 margin: 0;
+                font-size: $scale*100%;
+                line-height: $scale*24px !important;
+                height: $scale*24px !important;
             }
         }
         .popover {
