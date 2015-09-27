@@ -1,9 +1,9 @@
 angular.module("wust.services").service("EditService", EditService);
 
-EditService.$inject = ["Post", "Connectable", "Reference", "HistoryService", "store", "DiscourseNode", "ZenService"];
+EditService.$inject = ["Post", "Connectable", "Reference", "HistoryService", "store", "DiscourseNode", "ZenService", "Auth"];
 
-function EditService(Post, Connectable, Reference, HistoryService, store, DiscourseNode, ZenService) {
-    let editStore = store.getNamespacedStore("edit");
+function EditService(Post, Connectable, Reference, HistoryService, store, DiscourseNode, ZenService, Auth) {
+    let editStore = store.getNamespacedStore(`edit.${Auth.current.userId}`);
     let self = this;
 
     class Session {
