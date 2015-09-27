@@ -274,7 +274,7 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
       match ${userDef.toQuery}
       optional match (tag: `${Scope.label}`)-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`)
       optional match (${userDef.name})-[r:`${HasKarma.relationType}`]->(tag)
-      optional match ${deletedDef.toQuery(true, false)}
+      optional match ${deletedDef.toQuery(true, false)} where ${deletedDef.name}.status = ${PENDING}
       optional match ${votesDef.toQuery(false, false)}
       optional match ${createdDef.toQuery(false, false)}
       set ${deletedDef.name}._locked = true
