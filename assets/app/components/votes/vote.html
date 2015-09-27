@@ -42,7 +42,7 @@
                         <div class="post" colored-tag-node="vm.change.post" big="true" ng-switch="vm.change.type" ng-class="{remove: vm.is('Delete')}">
                             <h2 class="post-title">
                                 <div ng-switch-when="Edit" word-based-diff source-a="vm.change.oldTitle" source-b="vm.change.newTitle"></div>
-                                <span ng-switch-default ng-bind"vm.change.post.title"></span>
+                                <span ng-switch-default ng-bind="vm.change.post.title"></span>
                             </h2>
 
                             <div ng-switch-when="AddTag">
