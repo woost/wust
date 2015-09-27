@@ -141,7 +141,7 @@ trait NodeBase extends NodeDelegates {
   @JSExport("predecessors") def predecessorsJs = sortRelations(predecessorOrder, inRelations.toSeq).map(_.startNode).toJSArray
   @JSExport("successors") def successorsJs = sortRelations(successorOrder, outRelations.toSeq).map(_.endNode).toJSArray
   //TODO: might need unique for paralles?
-  @JSExport("parallels") def parallelsJs = sortRelations(parallelsOrder, successors.toSeq.flatMap(_.inRelations).diff(inRelations.toSeq)).map(_.startNode).toJSArray
+  @JSExport("parallels") def parallelsJs = sortRelations(parallelsOrder, successors.toSeq.flatMap(_.inRelations).diff(inRelations.toSeq)).map(_.startNode).filterNot(_ == this).groupBy(_.id).map(_._2.head).toJSArray
 
   @JSExport("neighbours") def neighboursJs = neighbours.toJSArray
 
