@@ -3,7 +3,7 @@ package modules.db.access.custom
 import controllers.api.nodes.RequestContext
 import formatters.json.RequestFormat._
 import formatters.json.TagFormat
-import model.Helpers.tagTitleColor
+import wust.Shared.tagTitleColor
 import model.WustSchema.{Created => SchemaCreated, _}
 import modules.db.Database.db
 import modules.db._

@@ -51,8 +51,6 @@ trait MyWithFilters extends GlobalSettings {
 
 object Global extends GlobalSettings with MyWithFilters with SecuredSettings with SilhouetteLogger {
 
-  wust.Shared.hello()
-
   override def onNotAuthenticated(request: RequestHeader, lang: Lang): Option[Future[Result]] = {
     // Called when a user is not authenticated.
     // As defined by RFC 2616, the status code of the response should be 401 Unauthorized.

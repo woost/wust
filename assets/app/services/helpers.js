@@ -77,7 +77,7 @@ function contextCircleBackgroundColor(tag) { return hashToColor(tag, 25, 98); }
 function contextCircleBorderColor(tag) { return hashToColor(tag, 30, 58); }
 function contextCircleBorderRadius(tag) { return "1px";}
 
-function tagTitleColor(title) { return Math.abs(hashCode(title.toLowerCase())) % 360; }
+function tagTitleColor(title) { return wust.Shared().tagTitleColor(title); }
 function hashToColor(tag, chromaValue, lightness) {
     // https://vis4.net/blog/posts/avoid-equidistant-hsv-colors/
     let hue = tag.color || tagTitleColor(tag.title); // 0..360

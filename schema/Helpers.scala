@@ -17,7 +17,4 @@ object Helpers {
     // url safe replaces + and / by - and _
     Base64.encodeBase64URLSafeString(bb.array())
   }
-
-  def hashColor(obj:Any) = obj.hashCode.abs % 360
-  def tagTitleColor(title:String) = hashColor(title.toLowerCase)
 }

@@ -71,6 +71,7 @@
     // Custom Globals
     "globals" : {}, // additional predefined global variables
     "predef": [
+        "wust", // shared ScalaJS code
         "_",
         "angular",
         "atmosphere",

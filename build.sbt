@@ -79,8 +79,12 @@ lazy val scalajs = (project in file("scalajs")).settings(
 ).enablePlugins(ScalaJSPlugin, ScalaJSPlay).
   dependsOn(scalajsSharedJs)
 
-lazy val scalajsShared = (crossProject.crossType(CrossType.Pure) in file("scalajs-shared")).
-  settings(scalaVersion := scalaV, scalacOptions ++= scalacOpts).
+// http://www.scala-js.org/doc/sbt/cross-building.html
+lazy val scalajsShared = (crossProject.crossType(CrossType.Pure) in file("scalajs-shared")).settings(
+  scalaVersion := scalaV,
+  scalacOptions ++= scalacOpts,
+  libraryDependencies += "org.scala-js" % "scalajs-stubs_2.11" % "0.6.5"
+).
   jsConfigure(_ enablePlugins ScalaJSPlay).
   jsSettings(sourceMapsBase := baseDirectory.value / "..")
 

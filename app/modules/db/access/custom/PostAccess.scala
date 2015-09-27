@@ -12,7 +12,7 @@ import renesca.parameter.implicits._
 import renesca.QueryHandler
 import renesca.Query
 import play.api.mvc.Results._
-import model.Helpers.tagTitleColor
+import wust.Shared.tagTitleColor
 import moderation.Moderation
 import scala.concurrent._
 import ExecutionContext.Implicits.global
