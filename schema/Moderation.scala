@@ -36,7 +36,7 @@ object Moderation {
     }.sum
   }
 
-  def postChangeThreshold(viewCount: Long):Long = sqrt(viewCount) max 8 // One needs min 256 karma to do instant edits on new posts
+  def postChangeThreshold(viewCount: Long):Long = sqrt(viewCount) + 8 // One needs min 256 karma to do instant edits on new posts
 
   def rejectPostChangeThreshold(applyThreshold: Long):Long = (-applyThreshold / 2) min -1
 
