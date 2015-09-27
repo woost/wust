@@ -1,13 +1,15 @@
-angular.module("wust.elements").directive("coloredTagSvgArrow", coloredTagSvgArrow);
+angular.module("wust.elements").directive("connectsArrow", connectsArrow);
 
-coloredTagSvgArrow.$inject = ["Helpers"];
+connectsArrow.$inject = ["Helpers"];
 
-function coloredTagSvgArrow(Helpers) {
+function connectsArrow(Helpers) {
     return {
-        restrict: "EA",
+        restrict: "E",
+        templateUrl: "elements/tag/connects-arrow.html",
+        replace: true,
         scope: {
-            coloredTagSvgArrow: "=",
-            referenceNode: "=",
+            source: "=",
+            target: "=",
         },
         link
     };
@@ -15,16 +17,14 @@ function coloredTagSvgArrow(Helpers) {
     function link(scope, elem) {
         let rawElem = elem[0];
 
-        scope.$watchCollection("coloredTagSvgArrow.tags", refreshColor);
-
-        scope.$watchCollection(() => scope.referenceNode.classifications, refreshColor);
+        scope.$watchCollection(() => scope.source.classifications, refreshColor);
 
         function refreshColor() {
-            setColor(selectTag(scope.coloredTagSvgArrow, scope.referenceNode));
+            setColor(selectTag(scope.source, scope.target));
         }
 
-        function selectTag(node, referenceNode) {
-            let connects = _.find(referenceNode.outRelations, h => h.endNode.id === node.id);
+        function selectTag(source, target) {
+            let connects = _.find(source.outRelations, h => h.endNode.id === target.id);
             let tags = Helpers.sortedNodeTags(connects);
             return tags[0];
         }
