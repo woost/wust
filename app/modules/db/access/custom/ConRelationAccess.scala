@@ -41,7 +41,7 @@ END <: UuidNode
     val discourse = Discourse.empty
     val start = param.startFactory.matchesOnUuid(param.startUuid)
     val end = param.endFactory.matchesOnUuid(param.endUuid)
-    val base = param.baseFactory.matchesHyperConnection(start, end)
+    val base = param.baseFactory.matchesMatchableRelation(start, end)
     val node = nodeFactory.matchesOnUuid(uuid)
     val relation = factory.mergeConstructRelation(base, node)
     discourse.add(base, relation)
@@ -69,7 +69,7 @@ END <: UuidNode
     val discourse = Discourse.empty
     val start = param.startFactory.matchesOnUuid(param.startUuid)
     val end = param.endFactory.matchesOnUuid(param.endUuid)
-    val base = param.baseFactory.matchesHyperConnection(start, end)
+    val base = param.baseFactory.matchesMatchableRelation(start, end)
     val node = nodeFactory.matchesOnUuid(uuid)
     val relation = factory.mergeConstructRelation(node, base)
     discourse.add(base, relation)

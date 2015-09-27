@@ -46,7 +46,7 @@ case class ConnectParameter[+BASE <: UuidNode](
 case class HyperConnectParameter[START <: UuidNode, +BASE <: UuidNode with AbstractRelation[START, END], END <: UuidNode](
   startFactory: UuidNodeMatchesFactory[START],
   startUuid: String,
-  baseFactory: HyperConnectionFactory[START, BASE, END] with UuidNodeMatchesFactory[BASE],
+  baseFactory: MatchableRelationFactory[START, BASE, END] with UuidNodeMatchesFactory[BASE],
   endFactory: UuidNodeMatchesFactory[END],
   endUuid: String
   )

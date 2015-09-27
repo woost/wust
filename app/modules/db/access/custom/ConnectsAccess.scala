@@ -88,7 +88,7 @@ case class EndConnectsAccess() extends EndRelationReadBase[Post, Connects, Conne
     val discourse = Discourse(node.graph)
     val start = param.startFactory.matchesOnUuid(param.startUuid)
     val end = param.endFactory.matchesOnUuid(param.endUuid)
-    val base = param.baseFactory.matchesHyperConnection(start, end)
+    val base = param.baseFactory.matchesMatchableRelation(start, end)
     val relation = factory.merge(node, base)
     discourse.add(base, node, relation)
     persistRelation(discourse, node)
