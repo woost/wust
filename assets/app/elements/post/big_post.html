@@ -5,7 +5,13 @@
         <h2 ng-bind="vm.node.title" class="post_title"></h2>
         <div class="additional_info">
             <span show-timestamp="vm.node.timestamp"></span>
-            <span class="pull-right">{{vm.node.viewCount}} views</span>
+            <span class="pull-right">
+                <div>{{vm.node.viewCount}} views</div>
+                <div ng-if="::vm.showAuthor">
+                <i class="fa fa-user"></i>
+                <a ui-sref="users.details({id: vm.node.author.id})" ng-bind="vm.node.author.name"></a
+                </div>
+            </span>
         </div>
 
         <div big-taglist node="vm.node" class="taglist"></div>

@@ -27,6 +27,8 @@ function bigPostCtrl($state, Post, EditService, ModalEditService, ContextService
 
     vm.Auth = Auth;
 
+    vm.showAuthor = true;
+
     vm.editNode = EditService.edit(vm.node);
     vm.changeRequests = Post.$buildRaw(vm.node).requests.$search();
     vm.replyTo = replyTo;

@@ -3,6 +3,7 @@ package formatters.json
 import model.WustSchema._
 import play.api.libs.json._
 import formatters.json.TagFormat._
+import formatters.json.UserFormat
 import renesca.graph.{Label, RelationType}
 import renesca.schema._
 import renesca.parameter._
@@ -19,6 +20,7 @@ object PostFormat {
       ("tags", Json.toJson(n.inRelationsAs(Tags).sortBy(_.uuid))),
       ("classifications", JsArray(n.outRelationsAs(PostToConnects).map(_.endNode).flatMap(con => con.rev_classifies.sortBy(_.uuid).map((_, con))).groupBy(_._1).mapValues(_.map(_._2)).map(classificationWriter(n, _)).toSeq)),
       ("timestamp", Json.toJson(JsNumber(n.timestamp))),
+      ("author", n.rev_createds.headOption.map(u => UserFormat.NodeFormat.writes(u)).getOrElse(JsNull)),
       ("viewCount", JsNumber(n.viewCount))
     ))
   }

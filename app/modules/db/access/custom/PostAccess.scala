@@ -191,6 +191,7 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
     implicit val ctx = new QueryContext
     val tagDef = ConcreteFactoryNodeDefinition(Scope)
     val nodeDef = FactoryUuidNodeDefinition(factory, uuid)
+    val createdDef = RelationDefinition(ConcreteFactoryNodeDefinition(User), SchemaCreated, nodeDef)
     val connectsDef = ConcreteFactoryNodeDefinition(Connects)
     val tagsDef = HyperNodeDefinition(tagDef, Tags, nodeDef)
     val tagClassDef = ConcreteFactoryNodeDefinition(Classification)
@@ -211,10 +212,11 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
     optional match ${tagClassifiesDef.toQuery(true, false)}
     $ownVoteCondition
     optional match ${connDef.toQuery(false, true)}, ${classifiesDef.toQuery(true, false)}
+    optional match ${createdDef.toQuery(true, false)}
     return *
     """
 
-    val params = tagsDef.parameterMap ++ connDef.parameterMap ++ tagClassifiesDef.parameterMap ++ classifiesDef.parameterMap ++ ownVoteParams
+    val params = tagsDef.parameterMap ++ connDef.parameterMap ++ tagClassifiesDef.parameterMap ++ createdDef.parameterMap ++ classifiesDef.parameterMap ++ ownVoteParams
 
     val discourse = Discourse(db.queryGraph(Query(query, params)))
     discourse.posts.headOption match {
