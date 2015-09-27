@@ -80,7 +80,7 @@ case class VotesChangeRequestAccess(sign: Long) extends EndRelationAccessDefault
       //TODO: separate queries for subclasses
       //TODO: simpler? locking really needed?
       val query = s"""
-      match (user:`${User.label}`)-[updated1:`${UserToUpdated.relationType}`|`${UserToDeleted.relationType}`|`${UserToAddTags.relationType}`|`${UserToRemoveTags.relationType}`]->${requestDef.toQuery}-[updated2:`${UpdatedToPost.relationType}`|`${DeletedToHidden.relationType}`|`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->${postDef.toQuery}
+      match (user:`${User.label}`)-[updated1:`${Updated.startRelationType}`|`${Deleted.startRelationType}`|`${AddTags.startRelationType}`|`${RemoveTags.startRelationType}`]->${requestDef.toQuery}-[updated2:`${Updated.endRelationType}`|`${Deleted.endRelationType}`|`${AddTags.endRelationType}`|`${RemoveTags.endRelationType}`]->${postDef.toQuery}
       where ${requestDef.name}.status = ${PENDING} or ${requestDef.name}.status = ${INSTANT}
       set ${requestDef.name}._locked = true
       with ${postDef.name}, ${requestDef.name}, updated1, updated2
@@ -208,8 +208,15 @@ object VotesDeletedHelper extends ChangeRequestHelper[Deleted] {
       false
     }
   }
-  // we do not have noninstant delete changes, so no applychanges in voting
-  override def applyChange(tx: QueryHandler, discourse: Discourse, request: Deleted, post: Post) = ???
+
+  override def applyChange(tx: QueryHandler, discourse: Discourse, request: Deleted, post: Post) = {
+    if (!post.rawItem.labels.contains(Hidden.label)) {
+      post.hide()
+      true
+    } else {
+      false
+    }
+  }
 
   def updateKarma(request: Deleted, karmaDefinition: KarmaDefinition) {
     implicit val ctx = new QueryContext
@@ -221,7 +228,7 @@ object VotesDeletedHelper extends ChangeRequestHelper[Deleted] {
     val params = postDef.parameterMap ++ userDef.parameterMap
 
     val karmaQuery = KarmaQuery(postDef, userDef, query, params)
-    KarmaUpdate.persistWithConnectedTags(karmaDefinition, karmaQuery)
+    KarmaUpdate.persistWithConnectedTagsOfHidden(karmaDefinition, karmaQuery)
   }
 }
 

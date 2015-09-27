@@ -15,12 +15,12 @@ function bigPost() {
     };
 }
 
-bigPostCtrl.$inject = ["Post", "EditService", "ModalEditService", "ContextService", "Auth"];
+bigPostCtrl.$inject = ["$state", "Post", "EditService", "ModalEditService", "ContextService", "Auth"];
 
 //TODO: we are using the markdown directive directly and also allow to enter zen
 //mode. both directives will lead to parsing the markdown description, which is
 //not needed. zen mode should reuse the parsed description here.
-function bigPostCtrl(Post, EditService, ModalEditService, ContextService, Auth) {
+function bigPostCtrl($state, Post, EditService, ModalEditService, ContextService, Auth) {
     let vm = this;
 
     vm.node = vm.component.rootNode;
@@ -31,8 +31,11 @@ function bigPostCtrl(Post, EditService, ModalEditService, ContextService, Auth) 
     vm.changeRequests = Post.$buildRaw(vm.node).requests.$search();
     vm.replyTo = replyTo;
     vm.onSave = onSave;
+    vm.onCancel = onCancel;
+    vm.onDelete = onDelete;
     vm.onApply = onApply;
     vm.onTagApply = onTagApply;
+    vm.onDeleteApply = onDeleteApply;
     vm.editMode = false;
     vm.nodeHasContext = () => _.any(vm.node.tags, "isContext");
 
@@ -40,8 +43,20 @@ function bigPostCtrl(Post, EditService, ModalEditService, ContextService, Auth) 
 
     function onSave(response) {
         vm.editMode = false;
-        if (response) {
-            vm.changeRequests = _.uniq(response.requestsEdit.concat(response.requestsTags).concat(vm.changeRequests), "id").filter(r => !r.status);
+        vm.changeRequests = _.uniq(response.requestsEdit.concat(response.requestsTags).concat(vm.changeRequests), "id").filter(r => !r.status);
+    }
+
+    function onCancel() {
+        vm.editMode = false;
+    }
+
+    function onDelete(response) {
+        vm.editMode = false;
+        if (response.$response.status === 204) // NoContent response means node was instantly deleted
+            onDeleteApply();
+        else { // there should be deleterequests
+            //TODO: why can i not reference them via response.requestsDelete like in onSave
+            vm.changeRequests = _.uniq(response.$response.data.requestsDelete.concat(vm.changeRequests), "id").filter(r => !r.status);
         }
     }
 
@@ -49,6 +64,10 @@ function bigPostCtrl(Post, EditService, ModalEditService, ContextService, Auth) 
         vm.node.title = node.title;
         vm.node.description = node.description;
         vm.editNode.apply(vm.node);
+    }
+
+    function onDeleteApply() {
+        $state.go("dashboard");
     }
 
     function onTagApply(tag, isRemove) {

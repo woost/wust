@@ -237,10 +237,11 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
             if (this.isLocal)
                 return;
 
-            return this.service.$buildRaw(_.pick(this, "id")).$destroy().$then(() => {
-                HistoryService.remove(this.id);
-                this.remove();
-                humane.success("Removed node");
+            return this.service.$buildRaw(_.pick(this, "id")).$destroy().$then(data => {
+                if (data.$response.status === 204) { //NoContent response => instant delete
+                    HistoryService.remove(this.id);
+                    this.remove();
+                }
             });
         }
     }

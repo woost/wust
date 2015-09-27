@@ -11,6 +11,7 @@ function postChangeRequest() {
             changes: "=",
             onApply: "&",
             onTagApply: "&",
+            onDeleteApply: "&"
         },
         controller: postChangeRequestCtrl,
         controllerAs: "vm",
@@ -39,10 +40,12 @@ function postChangeRequestCtrl(ChangeRequests) {
 
             if (change.status === -1) {
                 humane.success("Change request rejected");
-            }
-            if (change.status > 0) {
+            } else if (change.status > 0) {
+                humane.success("Change request accepted");
                 if (change.type === "Edit")
                     vm.onApply({node: response.node});
+                else if (change.type === "Delete")
+                    vm.onDeleteApply();
                 else
                     vm.onTagApply({tag: change.tag, isRemove: change.isRemove});
             }
@@ -51,7 +54,6 @@ function postChangeRequestCtrl(ChangeRequests) {
         unvote(change) {
             ChangeRequests.$buildRaw(change).neutral.$create().$then(val => {
                 this.applyChange(change, val);
-                humane.success("Unvoted");
             }, response => {
                 _.remove(vm.changes, {id:change.id});
                 humane.error(response.$response.data);

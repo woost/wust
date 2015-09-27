@@ -60,8 +60,7 @@ case class UserContributions() extends RelationAccessDefault[User, Post] {
     val query = s"""
     match ${ userDef.toQuery }-[r1]->(hyper:`${ SchemaCreated.label }`)-[r2]->${ postDef.toQuery }
     with distinct ${ postDef.name } order by ${ postDef.name }.timestamp skip ${ skip } limit ${ limit }
-    optional match ${ tagsDef.toQuery(true, false) }
-    optional match ${ tagClassifiesDef.toQuery(true, false) }
+    optional match ${ tagsDef.toQuery(true, false) }, ${ tagClassifiesDef.toQuery(true, false) }
     optional match ${ connDef.toQuery(false, true) }, ${ classifiesDef.toQuery(true, false) }
     return *
     """
@@ -99,7 +98,7 @@ case class UserHasKarmaLog() extends StartRelationAccessDefault[User, KarmaLog, 
   override def read(context: RequestContext, param: ConnectParameter[User]) = {
     implicit val ctx = new QueryContext
     val userDef = FactoryUuidNodeDefinition(User, param.baseUuid)
-    val nodeDef = ConcreteFactoryNodeDefinition(Post)
+    val nodeDef = LabelNodeDefinition[Post](Set.empty)
     val karmaLogDef = HyperNodeDefinition(userDef, KarmaLog, nodeDef)
     val logOnScopeDef = RelationDefinition(karmaLogDef, LogOnScope, ConcreteFactoryNodeDefinition(Scope))
 

@@ -204,6 +204,7 @@ ENDDEF <: NodeDefinition[END]
   endDefinition: ENDDEF,
   nodeUuid: Option[String] = None)(implicit val ctx: QueryContext) extends RelationDefinitionBase[START, RELATION, END, STARTDEF, ENDDEF] {
 
+    //.TODO: wrong, should match common hypernodelabel
   def relationMatcher = {
     val (startRelationTypes, labels, endRelationTypes) = factories.map { r =>
       (r.startRelationType, r.label, r.endRelationType)

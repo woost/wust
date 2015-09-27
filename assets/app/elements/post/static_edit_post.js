@@ -9,7 +9,9 @@ function staticEditPost() {
         scope: {
             node: "=",
             alwaysShowTagSuggestions: "@",
-            onFinish: "&"
+            onSave: "&",
+            onCancel: "&",
+            onDelete: "&"
         },
         controller: StaticEditPostCtrl,
         controllerAs: "vm",
@@ -25,16 +27,13 @@ function StaticEditPostCtrl($state) {
     let vm = this;
 
     vm.deleteNode = deleteNode;
-    vm.onSave = onSave;
+    vm.saveNode = saveNode;
 
-    function onSave() {
-        if (vm.onFinish)
-            vm.node.save().$then(data => vm.onFinish({response: data}));
+    function saveNode() {
+        vm.node.save().$then(data => vm.onSave({response: data}));
     }
 
     function deleteNode() {
-        vm.node.deleteNode().$then(() => {
-            $state.go("dashboard");
-        });
+        vm.node.deleteNode().$then(data => vm.onDelete({response: data}));
     }
 }

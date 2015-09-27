@@ -1,5 +1,5 @@
 <div class="big_post_directive clearfix" colored-tag-node="vm.node" big="true" ng-switch="vm.editMode">
-    <div ng-switch-when="true" static-edit-post on-finish="vm.onSave(response)" node="vm.editNode"></div>
+    <div ng-switch-when="true" static-edit-post on-cancel="vm.onCancel()" on-delete="vm.onDelete(response)" on-save="vm.onSave(response)" node="vm.editNode"></div>
     <div ng-switch-default>
         <button ng-if="::vm.Auth.isLoggedIn" class="fa fa-pencil pull-right btn btn-sm btn-default" ng-click="vm.editMode = true" data-title="edit" bs-tooltip></button>
         <h2 ng-bind="vm.node.title" class="post_title"></h2>
@@ -18,6 +18,6 @@
         Show change requests
     </a>
     <div ng-show="vm.showChanges">
-        <post-change-request changes="vm.changeRequests" on-tag-apply="vm.onTagApply(tag, isRemove)" on-apply="vm.onApply(node)"></post-change-request>
+        <post-change-request changes="vm.changeRequests" on-delete-apply="vm.onDeleteApply()" on-tag-apply="vm.onTagApply(tag, isRemove)" on-apply="vm.onApply(node)"></post-change-request>
     </div>
 </div>

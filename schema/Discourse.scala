@@ -63,6 +63,8 @@ object WustSchema {
     }
   }
 
+  //TODO: we should have a maybehidden trait from which hidden and post can inherit
+  //so we do not have to match for UuidNode or Set.empty
   @Node class Hidden extends UuidNode {
     var backupLabels: String = ""
 
@@ -195,7 +197,7 @@ object WustSchema {
     }
   }
 
-  @HyperRelation class Deleted(startNode: User, endNode: Hidden) extends ChangeRequest with MatchableRelation
+  @HyperRelation class Deleted(startNode: User, endNode: Post) extends ChangeRequest with MatchableRelation
 
   @Node trait TagChangeRequest extends ChangeRequest
   @Relation class ProposesTag(startNode: TagChangeRequest, endNode: Scope)

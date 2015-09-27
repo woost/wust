@@ -27,6 +27,15 @@ object EditNodeFormat {
         ("status", JsNumber(n.status)),
         ("type", JsString("Edit"))
       )
+      case n: Deleted        => Seq(
+        ("id", JsString(n.uuid)),
+        ("vote", n.inRelationsAs(Votes).headOption.map(vote => JsObject(Seq(("weight", JsNumber(vote.weight))))).getOrElse(JsNull)),
+        ("applyThreshold", JsNumber(n.applyThreshold)),
+        ("rejectThreshold", JsNumber(n.rejectThreshold)),
+        ("votes", JsNumber(n.approvalSum)),
+        ("status", JsNumber(n.status)),
+        ("type", JsString("Delete"))
+      )
       case n: AddTags    => Seq(
         ("id", JsString(n.uuid)),
         ("tag", n.proposesTags.headOption.map(t => Json.toJson(t)).getOrElse(JsNull)),
@@ -62,7 +71,9 @@ object EditNodeFormat {
       ("tags", Json.toJson(n.inRelationsAs(Tags).sortBy(_.uuid))),
       ("classifications", JsArray(n.outRelationsAs(PostToConnects).map(_.endNode).flatMap(con => con.rev_classifies.sortBy(_.uuid).map((_, con))).groupBy(_._1).mapValues(_.map(_._2)).map(classificationWriter(n, _)).toSeq)),
       ("timestamp", Json.toJson(JsNumber(n.timestamp))),
+      //TODO: merge the three arrays into one?
       ("requestsEdit", Json.toJson(n.inRelationsAs(Updated))),
+      ("requestsDelete", Json.toJson(n.inRelationsAs(Deleted))),
       ("requestsTags", Json.toJson(n.inRelationsAs(AddTags) ++ n.inRelationsAs(RemoveTags))),
       ("viewCount", JsNumber(n.viewCount))
     ))

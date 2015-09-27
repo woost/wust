@@ -26,7 +26,7 @@ object ChangeRequestFormat {
       )
       case n: Deleted        => Seq(
         ("id", JsString(n.uuid)),
-        ("post", n.outRelationsAs(DeletedToHidden).headOption.map(r => Json.toJson(Post.wrap(r.endNode.rawItem))).getOrElse(JsNull)),
+        ("post", n.outRelationsAs(DeletedToPost).headOption.map(r => Json.toJson(Post.wrap(r.endNode.rawItem))).getOrElse(JsNull)),
         ("type", JsString("Delete"))
       )
       case n: AddTags    => Seq(

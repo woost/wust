@@ -46,9 +46,16 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
     val postDef = ConcreteNodeDefinition(post)
     val tagsDef = RelationDefinition(requestDef, ProposesTag, tagDef)
     val votesDef = RelationDefinition(ConcreteNodeDefinition(user), Votes, requestDef)
-    val query = s"match ${userDef.toQuery}-[ut:`${UserToAddTags.relationType}`|`${UserToRemoveTags.relationType}`]->(${requestDef.name} ${requestDef.factory.labels.map(l => s":`$l`").mkString} { status: ${PENDING} })-[tp:`${AddTagsToPost.relationType}`|`${RemoveTagsToPost.relationType}`]->${postDef.toQuery}, ${tagsDef.toQuery(false,true)} optional match ${votesDef.toQuery(true, false)} set ${requestDef.name}._locked = true return *"
-    val existing = Discourse(tx.queryGraph(Query(query, votesDef.parameterMap ++ userDef.parameterMap ++ postDef.parameterMap ++ tagsDef.parameterMap)))
 
+    val query = s"""
+    match ${userDef.toQuery}-[ut:`${AddTags.startRelationType}`|`${RemoveTags.startRelationType}`]->(${requestDef.name} ${requestDef.factory.labels.map(l => s":`$l`").mkString} { status: ${PENDING} })-[tp:`${AddTags.endRelationType}`|`${RemoveTags.endRelationType}`]->${postDef.toQuery}, ${tagsDef.toQuery(false,true)}
+    optional match ${votesDef.toQuery(true, false)}
+    set ${requestDef.name}._locked = true
+    return *
+    """
+
+    val params = votesDef.parameterMap ++ userDef.parameterMap ++ postDef.parameterMap ++ tagsDef.parameterMap
+    val existing = Discourse(tx.queryGraph(query, params))
     discourse.add(existing.nodes: _*)
     discourse.add(existing.relations: _*)
     val existAddTags = existing.addTags
@@ -155,7 +162,14 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
       val postDef = ConcreteNodeDefinition(node)
       val userDef = ConcreteNodeDefinition(user)
       val viewedDef = RelationDefinition(userDef, Viewed, postDef)
-      val query = s"match ${postDef.toQuery} set ${postDef.name}._locked = true with ${postDef.name} optional match ${viewedDef.toQuery(true, false)} return *"
+      val query = s"""
+      match ${postDef.toQuery}
+      set ${postDef.name}._locked = true
+      with ${postDef.name}
+      optional match ${viewedDef.toQuery(true, false)}
+      return *
+      """
+
       val discourse = Discourse(tx.queryGraph(Query(query, viewedDef.parameterMap)))
       val post = discourse.posts.head
       discourse.vieweds.headOption match {
@@ -243,23 +257,65 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
   }
 
   override def delete(context: RequestContext, uuid: String) = context.withUser { user =>
+    import formatters.json.EditNodeFormat._
+
     db.transaction { tx =>
-      val node = Post.matchesOnUuid(uuid)
-      val failure = tx.persistChanges(node)
-      if (failure.isDefined)
-        NotFound(s"Cannot find Post with uuid '$uuid'")
-      else {
-        // TODO: non-instant changes
-        val applyThreshold = Moderation.postChangeThreshold(node.viewCount)
-        val hidden = node.hide()
-        val deleted = Deleted.create(user, hidden, applyThreshold = applyThreshold)
-        deleted.status = INSTANT
-        val failure = tx.persistChanges(hidden, deleted)
+      implicit val ctx = new QueryContext
+      val postDef = FactoryUuidNodeDefinition(Post, uuid)
+      val deletedDef = HyperNodeDefinition(ConcreteFactoryNodeDefinition(User), Deleted, postDef)
+      val userDef = ConcreteNodeDefinition(user)
+      val createdDef = RelationDefinition(userDef, SchemaCreated, postDef)
+      val votesDef = RelationDefinition(userDef, Votes, deletedDef)
+
+      //TODO: sufficient to lock at the end?
+      val query = s"""
+      match ${postDef.toQuery}-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)
+      with distinct ${postDef.name}, connectable
+      match ${userDef.toQuery}
+      optional match (tag: `${Scope.label}`)-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`)
+      optional match (${userDef.name})-[r:`${HasKarma.relationType}`]->(tag)
+      optional match ${deletedDef.toQuery(true, false)}
+      optional match ${votesDef.toQuery(false, false)}
+      optional match ${createdDef.toQuery(false, false)}
+      set ${deletedDef.name}._locked = true
+      return *
+      """
+
+      val params = votesDef.parameterMap ++ createdDef.parameterMap ++ deletedDef.parameterMap
+      val discourse = Discourse(tx.queryGraph(query, params))
+      discourse.posts.headOption.map { post =>
+        val authorBoost = if (discourse.createds.isEmpty) 0 else Moderation.authorKarmaBoost
+        val karma = Moderation.voteWeightFromScopes(discourse.scopes)
+        val approvalSum = karma + authorBoost
+
+        val deleted = discourse.deleteds.headOption.map { deleted =>
+          if (deleted.rev_votes.headOption.isEmpty) {
+            deleted.approvalSum += approvalSum
+            discourse.add(Votes.merge(user, deleted, weight = approvalSum))
+            if (deleted.canApply)
+              deleted.status = APPROVED
+          }
+          deleted
+        }.getOrElse{
+          val applyThreshold = Moderation.postChangeThreshold(post.viewCount)
+          val deleted = Deleted.create(user, post, applyThreshold = applyThreshold)
+          discourse.add(deleted)
+
+          handleInitialChange(deleted, user, authorBoost = authorBoost, approvalSum = approvalSum).foreach(discourse.add(_))
+          if (deleted.status == INSTANT || deleted.status == APPROVED) {
+            post.hide()
+          }
+          deleted
+        }
+
+        val failure = tx.persistChanges(discourse)
         if (failure.isDefined)
-          BadRequest("Cannot delete node")
+          BadRequest("Cannot delete post")
+        else if (deleted.status == PENDING)
+          Ok(Json.toJson(post))
         else
           NoContent
-      }
+      }.getOrElse(NotFound(s"Cannot find Post with uuid '$uuid'"))
     }
   }
 
@@ -274,9 +330,9 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
         val createdDef = RelationDefinition(userDef, SchemaCreated, postDef)
 
         val query = s"""
-          match ${userDef.toQuery},
-          ${postDef.toQuery}-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)
-          with distinct ${postDef.name}, connectable, ${userDef.name}
+          match ${postDef.toQuery}-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)
+          with distinct ${postDef.name}, connectable
+          match ${userDef.toQuery}
           optional match (tag: `${Scope.label}`)-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`)
           optional match (${userDef.name})-[r:`${HasKarma.relationType}`]->(tag)
           optional match ${createdDef.toQuery(true, false)}
@@ -289,7 +345,6 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
         discourse.posts.headOption.map { node =>
           val authorBoost = if (discourse.createds.isEmpty) 0 else Moderation.authorKarmaBoost
           val karma = Moderation.voteWeightFromScopes(discourse.scopes)
-
           val approvalSum = karma + authorBoost
           val applyThreshold = Moderation.postChangeThreshold(node.viewCount)
 

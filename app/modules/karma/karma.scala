@@ -36,6 +36,7 @@ object KarmaUpdate {
       on create set r.karma = {karmaProps}.karmaChange
       on match set r.karma = r.karma + {karmaProps}.karmaChange
       create (karmaLog)-[logonscope:`${LogOnScope.relationType}`]->(${karmaTagQuery.tagDef.name}) set logonscope.currentKarma = r.karma
+      return *
       """
 
       val params = karmaQuery.params ++ karmaTagQuery.params ++ Map(
@@ -47,7 +48,11 @@ object KarmaUpdate {
         )
       )
 
-      tx.query(query, params)
+      try {
+        tx.queryGraph(query, params)
+      } catch {
+        case e: Exception => println("EXCEPTION WHILE UPDATING KARMA:\n" + e)
+      }
     }
   }
 
@@ -70,6 +75,22 @@ object KarmaUpdate {
     match (${karmaQuery.postDef.name})-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)
     with distinct connectable, ${karmaQuery.userDef.name}, ${karmaQuery.postDef.name}, karmaLog
     match ${tagDef.toQuery}-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`)
+    with distinct ${tagDef.name}, ${karmaQuery.userDef.name}, ${karmaQuery.postDef.name}, karmaLog
+    """
+
+    val karmaTagQuery = KarmaTagQuery(tagDef, tagMatch, tagDef.parameterMap)
+    persist(karmaDefinition, karmaQuery, karmaTagQuery)
+  }
+
+  def persistWithConnectedTagsOfHidden(karmaDefinition: KarmaDefinition, karmaQuery: KarmaQuery)(implicit ctx: QueryContext) = {
+    val tagDef = ConcreteFactoryNodeDefinition(Scope)
+
+    val tagMatch = s"""
+    match (${karmaQuery.postDef.name})-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)
+    with distinct connectable, ${karmaQuery.userDef.name}, ${karmaQuery.postDef.name}, karmaLog
+    match ${tagDef.toQuery}
+    where (${tagDef.name})-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`) or (${tagDef.name})-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(${karmaQuery.postDef.name})
+    with distinct ${tagDef.name}, ${karmaQuery.userDef.name}, ${karmaQuery.postDef.name}, karmaLog
     """
 
     val karmaTagQuery = KarmaTagQuery(tagDef, tagMatch, tagDef.parameterMap)
