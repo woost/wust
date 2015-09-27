@@ -27,12 +27,6 @@ object Search extends Controller {
         Some("(?i).*" + tit.replace(" ", ".*") + ".*")
     }
 
-    val startPostMatchPostfix = if(startPost.getOrElse(false)) {
-      s"<-[:`${ SchemaTags.endRelationType }`]-(:`${ SchemaTags.label }`)<-[:`${ SchemaTags.startRelationType }`]-(:`${ Scope.label }`)"
-    } else {
-      ""
-    }
-
     val descrMatcher = titleRegex.flatMap { _ =>
       if(searchDescriptions.getOrElse(false))
         Some(s"${ nodeDef.name }.description =~ {term}")
@@ -51,6 +45,12 @@ object Search extends Controller {
 
     // When Neo4j throws an error because the regexp is incorrect, return an empty Discourse instead
     val discourse = Try(if(tags.isEmpty) {
+      val startPostMatchPostfix = if(startPost.getOrElse(false)) {
+        s"<-[:`${ SchemaTags.endRelationType }`]-(:`${ SchemaTags.label }`)<-[:`${ SchemaTags.startRelationType }`]-(:`${ Scope.label }`)"
+      } else {
+        ""
+      }
+
       val condition = if(termMatcher.isEmpty) "" else s"where ${ termMatcher }"
 
       Discourse(db.queryGraph(Query(
@@ -70,7 +70,7 @@ object Search extends Controller {
 
         Discourse(db.queryGraph(Query(
           s"""match ${ tagDefinition } where (${ tagDef.name }.uuid in {tagUuids})
-          with distinct ${ inheritTagDef.name } match ${ relationDef.toQuery(false, true) }$startPostMatchPostfix
+          with distinct ${ inheritTagDef.name } match ${ relationDef.toQuery(false, true) }
           $condition
           $returnStatement""",
           titleRegex.map(t => Map("term" -> t)).getOrElse(Map.empty) ++ Map("tagUuids" -> tags)
@@ -88,7 +88,7 @@ object Search extends Controller {
 
         //TODO: distinct?
         Discourse(db.queryGraph(Query(
-          s"""match ${ nodeDef.toQuery }$startPostMatchPostfix, ${ tagDefinitions }, ${ relationDefs.map(_.toQuery(false)).mkString(",") }
+          s"""match ${ nodeDef.toQuery }, ${ tagDefinitions }, ${ relationDefs.map(_.toQuery(false)).mkString(",") }
           $condition
           $returnStatement""",
           titleRegex.map(t => Map("term" -> t)).getOrElse(Map.empty) ++ Map("tagUuids" -> tags)
