@@ -9,7 +9,7 @@ object ResponseFormat {
   implicit def connectWrites[NODE <: Connectable] = new Writes[ConnectResponse[NODE]] {
     def writes(resp: ConnectResponse[NODE]) = JsObject(Seq(
       "graph" -> Json.toJson(resp.graph),
-      "node" -> resp.node.map(Json.toJson(_)).getOrElse(JsNull)
+      "node" -> resp.node.map(n => Json.toJson(Connectable.wrap(n.rawItem))).getOrElse(JsNull)
     ))
   }
 }
