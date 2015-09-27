@@ -10,12 +10,13 @@ import modules.db._
 import modules.db.access._
 import modules.requests._
 import play.api.libs.json._
+import play.api.mvc.Result
 import play.api.mvc.Results._
 
 class UserAccess extends NodeReadBase[User] {
   val factory = User
 
-  implicit val format = UserFormat.NodeFormat
+  implicit val format = UserFormat.UserFormat
 
   override def update(context: RequestContext, uuid: String) = {
     context.withUser { user =>
@@ -121,5 +122,59 @@ case class UserHasKarmaLog() extends StartRelationAccessDefault[User, KarmaLog, 
     val discourse = Discourse(db.queryGraph(query, params))
 
     Ok(Json.toJson(discourse.karmaLogs))
+  }
+}
+
+case class UserMarks() extends StartRelationAccessDefault[User, Marks, Post] {
+  import formatters.json.PostFormat._
+
+  val nodeFactory = Post
+
+  //TODO: decorator with baseuuid in callback
+  def allowed(userOpt: Option[User], uuid: String)(handler: => Result) = userOpt.filter(_.uuid == uuid).map(_ => handler).getOrElse(Forbidden("Marks are private"))
+
+  object CreateDelete extends StartConRelationAccessBase[User, Marks, Post] with StartRelationDeleteBase[User, Marks, Post] {
+    implicit val format = PostFormat
+    val nodeFactory = Post
+    val factory = Marks
+  }
+
+  override def delete(context: RequestContext, param: ConnectParameter[User], uuid: String) = allowed(context.user, param.baseUuid) {
+    CreateDelete.delete(context, param, uuid)
+  }
+
+  override def create(context: RequestContext, param: ConnectParameter[User]) = allowed(context.user, param.baseUuid) {
+    CreateDelete.create(context, param)
+  }
+
+  override def create(context: RequestContext, param: ConnectParameter[User], uuid: String) = allowed(context.user, param.baseUuid) {
+    CreateDelete.create(context, param, uuid)
+  }
+
+  override def read(context: RequestContext, param: ConnectParameter[User]) = {
+    implicit val ctx = new QueryContext
+    val userDef = FactoryUuidNodeDefinition(User, param.baseUuid)
+    val nodeDef = ConcreteFactoryNodeDefinition(Post)
+    val marksDef = RelationDefinition(userDef, Marks, nodeDef)
+
+    val tagDef = ConcreteFactoryNodeDefinition(Scope)
+    val connectsDef = ConcreteFactoryNodeDefinition(Connects)
+    val tagsDef = HyperNodeDefinition(tagDef, Tags, nodeDef)
+    val tagClassifiesDef = RelationDefinition(ConcreteFactoryNodeDefinition(Classification), Classifies, tagsDef)
+    val connDef = RelationDefinition(nodeDef, PostToConnects, connectsDef)
+    val classifiesDef = RelationDefinition(ConcreteFactoryNodeDefinition(Classification), Classifies, connectsDef)
+
+    val query = s"""
+    match ${ marksDef.toQuery }
+    optional match ${ tagsDef.toQuery(true, false) }
+    optional match ${ tagClassifiesDef.toQuery(true, false) }
+    optional match ${ connDef.toQuery(false, true) }, ${ classifiesDef.toQuery(true, false) }
+    return *
+    """
+
+    val params = marksDef.parameterMap ++ tagsDef.parameterMap ++ tagClassifiesDef.parameterMap ++ classifiesDef.parameterMap
+    val discourse = Discourse(db.queryGraph(query, params))
+
+    Ok(Json.toJson(discourse.posts))
   }
 }

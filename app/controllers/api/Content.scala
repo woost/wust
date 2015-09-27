@@ -5,7 +5,7 @@ import model.WustSchema.{Tags => SchemaTags, _}
 import modules.db.access._
 import modules.db.access.custom._
 import modules.requests.dsl._
-import formatters.json.PostFormat.NodeFormat
+import formatters.json.PostFormat.PostFormat
 import formatters.json.TagFormat.ScopeFormat
 
 object Connectables extends Nodes[Connectable] {

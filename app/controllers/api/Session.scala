@@ -2,7 +2,7 @@ package controllers.api
 
 import com.mohiva.play.silhouette.api.Silhouette
 import com.mohiva.play.silhouette.impl.authenticators.JWTAuthenticator
-import formatters.json.PostFormat.NodeFormat
+import formatters.json.PostFormat.PostFormat
 import model.WustSchema._
 import modules.auth.HeaderEnvironmentModule
 import modules.db.Database.db

@@ -21,13 +21,13 @@ trait ConstructRelationHelper[NODE <: UuidNode] {
   }
 }
 
-case class StartConRelationAccess[
+trait StartConRelationAccessBase[
 START <: UuidNode,
 RELATION <: AbstractRelation[START, END],
 END <: UuidNode
-](
-  factory: ConstructRelationFactory[START, RELATION, END],
-  nodeFactory: UuidNodeMatchesFactory[END])(implicit val format: Format[END]) extends StartRelationReadBase[START, RELATION, END] with StartRelationDeleteBase[START, RELATION, END] with ConstructRelationHelper[END] {
+] extends StartRelationReadBase[START, RELATION, END] with StartRelationDeleteBase[START, RELATION, END] with ConstructRelationHelper[END] {
+  val factory: ConstructRelationFactory[START, RELATION, END]
+  val nodeFactory: UuidNodeMatchesFactory[END]
 
   override def create(context: RequestContext, param: ConnectParameter[START], otherUuid: String) = context.withUser {
     val discourse = Discourse.empty
@@ -49,13 +49,13 @@ END <: UuidNode
   }
 }
 
-case class EndConRelationAccess[
+trait EndConRelationAccessBase[
 START <: UuidNode,
 RELATION <: AbstractRelation[START, END],
 END <: UuidNode
-](
-  factory: ConstructRelationFactory[START, RELATION, END],
-  nodeFactory: UuidNodeMatchesFactory[START])(implicit val format: Format[START]) extends EndRelationReadBase[START, RELATION, END] with EndRelationDeleteBase[START, RELATION, END] with ConstructRelationHelper[START] {
+] extends EndRelationReadBase[START, RELATION, END] with EndRelationDeleteBase[START, RELATION, END] with ConstructRelationHelper[START] {
+  val factory: ConstructRelationFactory[START, RELATION, END]
+  val nodeFactory: UuidNodeMatchesFactory[START]
 
   override def create(context: RequestContext, param: ConnectParameter[END], otherUuid: String) = context.withUser {
     val discourse = Discourse.empty
@@ -76,3 +76,17 @@ END <: UuidNode
     persistRelation(discourse, node)
   }
 }
+
+case class StartConRelationAccess[
+START <: UuidNode,
+RELATION <: AbstractRelation[START, END],
+END <: UuidNode
+](factory: ConstructRelationFactory[START, RELATION, END],
+  nodeFactory: UuidNodeMatchesFactory[END])(implicit val format: Format[END]) extends StartConRelationAccessBase[START,RELATION,END]
+
+case class EndConRelationAccess[
+START <: UuidNode,
+RELATION <: AbstractRelation[START, END],
+END <: UuidNode
+](factory: ConstructRelationFactory[START, RELATION, END],
+  nodeFactory: UuidNodeMatchesFactory[START])(implicit val format: Format[START]) extends EndConRelationAccessBase[START,RELATION,END]

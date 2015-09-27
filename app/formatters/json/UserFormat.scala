@@ -3,11 +3,10 @@ package formatters.json
 import model.WustSchema.{User, KarmaLog, LogOnScope}
 import play.api.libs.json._
 import formatters.json.TagFormat.tagLikeToSeq
-import formatters.json.PostFormat.NodeFormat
 
 object UserFormat {
 
-  implicit object NodeFormat extends Format[User] {
+  implicit object UserFormat extends Format[User] {
     def reads(user: JsValue) = ???
 
     def writes(user: User) = JsObject(Seq(
@@ -29,7 +28,7 @@ object UserFormat {
       ("karmaChange", JsNumber(log.karmaChange)),
       ("reason", JsString(log.reason)),
       ("timestamp", JsNumber(log.timestamp)),
-      ("post", formatters.json.PostFormat.NodeFormat.writes(log.endNodeOpt.get)), //TODO: why need to call it explicitly
+      ("post", PostFormat.PostFormat.writes(log.endNodeOpt.get)), //TODO: why need to call it explicitly
       ("contexts", JsArray(log.outRelationsAs(LogOnScope).map(logOnScopeWriter(_))))
     ))
   }

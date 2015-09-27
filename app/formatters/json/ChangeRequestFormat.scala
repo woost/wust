@@ -6,10 +6,10 @@ import renesca.graph.{Label, RelationType}
 import renesca.schema._
 import renesca.parameter._
 import renesca.parameter.implicits._
-import formatters.json.TagFormat._
-import formatters.json.PostFormat._
 
 object ChangeRequestFormat {
+  import PostFormat._
+  import TagFormat._
 
   implicit object CRFormat extends Format[ChangeRequest] {
     def reads(json: JsValue) = ???
