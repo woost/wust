@@ -38,6 +38,10 @@ case class InstantChangeRequestAccess() extends NodeAccessDefault[ChangeRequest]
       (matcher, condition, userDef.parameterMap)
     }.getOrElse(("", "", Map.empty))
 
+    //TODO: we need to match the deleted relation separately, as hidden posts
+    //are only allowed for instant deleted requests - actually we should know
+    //which request is responsible for the current deletion.
+    //we currently would show edit and tag requests for already deleted posts.
     val query = s"""
     match ${ crDef.toQuery }-[relation:`${ Updated.endRelationType }`|`${ Deleted.endRelationType }`|`${ AddTags.endRelationType }`|`${ RemoveTags.endRelationType }`]->${ postDef.toQuery } $userMatcher
     where (${ crDef.name }.status = ${ INSTANT } OR ${ crDef.name }.status = ${ PENDING })
@@ -53,6 +57,16 @@ case class InstantChangeRequestAccess() extends NodeAccessDefault[ChangeRequest]
     val params = userParams ++ crDef.parameterMap ++ tagsDef.parameterMap ++ connDef.parameterMap ++ classifiesDef.parameterMap
 
     val discourse = Discourse(db.queryGraph(query, params))
+
+    //HACK: we set the labels of all hidden posts to Post (e.g. an already
+    //deleted post of an instant request) in order to have working
+    //neighbour/relation accessors, as they care about correct labels. this is
+    //important for the formatter to work.
+    //BE CAREFUL: DO NOT PERSIST AFTER THIS POINT
+    discourse.hiddens.foreach { hidden =>
+      hidden.rawItem.labels.clear()
+      hidden.rawItem.labels ++= Post.labels
+    }
 
     Ok(Json.toJson(discourse.changeRequests))
   }
