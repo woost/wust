@@ -323,9 +323,9 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
           match ${postDef.toQuery}-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)
           with distinct ${postDef.name}, connectable
           match ${userDef.toQuery}
+          optional match ${createdDef.toQuery(false, false)}
           optional match (tag: `${Scope.label}`)-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`)
           optional match (${userDef.name})-[r:`${HasKarma.relationType}`]->(tag)
-          optional match ${createdDef.toQuery(true, false)}
           return *
         """
 
