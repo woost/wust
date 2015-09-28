@@ -10,6 +10,9 @@
     $neighbours-min-width: $arrow-length + $small-post-min-width;
     $content-max-width: 600px;
     $content-min-width: 200px;
+    min-width: $neighbours-min-width + $content-min-width + $neighbours-min-width;
+    max-width: $neighbours-max-width + $content-max-width + $neighbours-max-width;
+    margin: 0 auto;
     padding: 20px;
     @include display-flex(flex);
     @include justify-content(center);
