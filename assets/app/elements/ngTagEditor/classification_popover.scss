@@ -1,0 +1,5 @@
+.classification_popover {
+    //TODO: we do not have knowledge about the height of the suggestionbox
+    //and the arrow of the popover is calculated depending on the initial height
+    min-height: 243px;
+}
