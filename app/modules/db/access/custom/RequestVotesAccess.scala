@@ -244,7 +244,7 @@ object VotesTagsChangeRequestHelper extends ChangeRequestHelper[TagChangeRequest
     val query = s"""
     match ${tagsDef.toQuery}
     optional match ${classifiesDef.toQuery(false, true)}
-    return ${tagDef.name}
+    return ${tagDef.name}, ${classDef.name}
     """
 
     Discourse(tx.queryGraph(query, tagsDef.parameterMap))
@@ -258,19 +258,29 @@ object VotesTagsChangeRequestHelper extends ChangeRequestHelper[TagChangeRequest
     req match {
       case request: AddTags =>
         val tags = Tags.matches(scope, post)
-        discourse.remove(tags)
-        classifications.foreach { classification =>
-          discourse.remove(Classifies.matches(classification, tags))
+        if (classifications.size > 0) {
+          discourse.add(tags)
+          classifications.foreach { classification =>
+            discourse.remove(Classifies.matches(classification, tags))
+          }
+        } else {
+          discourse.remove(tags)
         }
       case request: RemoveTags =>
-        //TODO: handle readding of classifications
-        discourse.add(Tags.merge(scope, post))
+        val tags = Tags.merge(scope, post)
+        if (classifications.size > 0) {
+          discourse.add(tags)
+          classifications.foreach { classification =>
+            discourse.add(Classifies.merge(classification, tags))
+          }
+        } else {
+          discourse.remove(Tags.matches(scope, post))
+        }
     }
 
     true
   }
 
-  //TODO: code dup unapply
   override def applyChange(tx: QueryHandler, discourse: Discourse, req: TagChangeRequest, post: Post) = {
     val existing = requestGraph(tx, req)
     val scope = existing.scopes.head
@@ -284,8 +294,16 @@ object VotesTagsChangeRequestHelper extends ChangeRequestHelper[TagChangeRequest
           discourse.add(Classifies.merge(classification, tags))
         }
       case request: RemoveTags =>
-        //TODO: handle removing classifications
-        discourse.remove(Tags.matches(scope, post))
+        //TODO: delete relation if those were the only classifications?
+        val tags = Tags.matches(scope, post)
+        if (classifications.size > 0) {
+          discourse.add(tags)
+          classifications.foreach { classification =>
+            discourse.remove(Classifies.matches(classification, tags))
+          }
+        } else {
+          discourse.remove(tags)
+        }
     }
 
     true
