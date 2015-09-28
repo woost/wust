@@ -54,7 +54,11 @@ case class ReferenceAccess() extends NodeAccessDefault[Reference] with TagAccess
 
     context.withJson { (request: ReferenceUpdateRequest) =>
       db.transaction { tx =>
-        val node = Reference.matchesOnUuid(uuid)
+        //TODO: should rename this + api to connects
+        // just handle connects relations here!
+        // classifications on tags are done separately when editing posts
+        // val node = Reference.matchesOnUuid(uuid)
+        val node = Connects.matchesOnUuid(uuid)
         val discourse = Discourse(node)
         deleteClassificationsFromGraph(discourse, request, node)
         addClassifcationsToGraph(discourse, request, node)
