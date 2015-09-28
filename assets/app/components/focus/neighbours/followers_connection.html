@@ -1,8 +1,7 @@
 <div>
-    <div class="connection">
-        <connects-arrow source="node" target="vm.nodeModel.node"></connects-arrow>
+    <connects-arrow source="node" target="vm.nodeModel.node">
         <div class="tools">
             <span ng-if="::vm.Auth.isLoggedIn" class="fa fa-pencil button" ng-click="vm.editFollowerConnects(node)"></span>
         </div>
-    </div>
+    </connects-arrow>
 </div>

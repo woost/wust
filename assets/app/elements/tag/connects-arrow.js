@@ -7,6 +7,7 @@ function connectsArrow(Helpers) {
         restrict: "E",
         templateUrl: "elements/tag/connects-arrow.html",
         replace: true,
+        transclude: true,
         scope: {
             source: "=",
             target: "=",
@@ -25,13 +26,14 @@ function connectsArrow(Helpers) {
 
         function selectTag(source, target) {
             let connects = _.find(source.outRelations, h => h.endNode.id === target.id);
-            let tags = Helpers.sortedNodeTags(connects);
-            return tags[0];
+            scope.classifications = Helpers.sortedNodeTags(connects);
+            return scope.classifications[0];
         }
 
         function setColor(tag) {
-            let arrowLine = rawElem.children[0];
-            let arrowHead = rawElem.children[1];
+            let svg = rawElem.children[2].children[0];
+            let arrowLine = svg.children[0];
+            let arrowHead = svg.children[1];
             if (tag === undefined || tag.id === undefined) {
                 arrowLine.style.stroke = "";
                 arrowHead.style.fill = "";

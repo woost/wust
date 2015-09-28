@@ -1,9 +1,8 @@
 <div>
-    <div class="connection">
-        <connects-arrow source="vm.nodeModel.node" target="node"></connects-arrow>
+    <connects-arrow source="vm.nodeModel.node" target="node">
         <div class="tools">
             <span ng-if="::vm.Auth.isLoggedIn" class="fa fa-pencil button" ng-click="vm.editPredecessorConnects(node)"></span>
             <span ng-if="::vm.Auth.isLoggedIn" class="vote_button fa fa-chevron-up button" ng-class="{ active: vm.connectsRelations[node.id].vote.weight > 0 }" ng-click="vm.upvoteAnswer(node)" data-title="{{vm.connectsRelations[node.id].quality.toFixed(3)}}" bs-tooltip></span>
         </div>
-    </div>
+    </connects-arrow>
 </div>

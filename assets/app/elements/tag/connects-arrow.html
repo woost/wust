@@ -1,4 +1,10 @@
-<svg width="70" height="10" class="arrow">
-    <path d="M0,5 L 70,5" class="arrowline"></path>
-    <path d="M 1,4.5 L 1,5.5 L11,8 L11,2 Z" class="arrowhead"></path>
-</svg>
+<div class="connection">
+    <div class="classification-container"><span ng-repeat="classification in classifications" tag-label="classification"></span></div>
+    <div class="tool-container"><div ng-transclude></div></div>
+    <div class="arrow-container">
+        <svg width="70" height="10" class="arrow">
+            <path d="M0,5 L 70,5" class="arrowline"></path>
+            <path d="M 1,4.5 L 1,5.5 L11,8 L11,2 Z" class="arrowhead"></path>
+        </svg>
+    </div>
+</div>
