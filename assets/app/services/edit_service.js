@@ -71,13 +71,39 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
             let dirtyModel = _.omit(_.pick(this, _.keys(this.original)), (v, k) => this.original[k] === v);
 
             delete dirtyModel.tags;
-            let addedTags = _.reject(this.tags, t => t.id && _.any(this.original.tags, orig => orig.id === t.id && orig.classifications.map(c => c.id) === t.classifications.map(c => c.id))).map(t => t.id ? _.pick(t, "id", "classifications") : _.pick(t, "title", "classifications"));
-            let removedTags = _.reject(this.original.tags, t => !t.id || _.any(this.tags, _.pick(t, "id"))).map(t => t.id);
+
+
+            let [nonLocalTags, localTags] = _.partition(this.tags, "id");
+            let origTags = nonLocalTags.map(t => {
+                return {
+                    [t.id]: _.find(this.original.tags, _.pick(t, "id"))
+                };
+            }).reduce(_.merge, {});
+
+            let [oldTags, newTags] = _.partition(nonLocalTags, t => origTags[t.id]);
+            let additionTags = oldTags.map(t => {
+                return {
+                    id: t.id,
+                    classifications: _.difference(t.classifications, origTags[t.id].classifications)
+                };
+            }).filter(t => t.classifications.length);
+
+            let missingTags = _.reject(this.original.tags, t => _.any(oldTags, _.pick(t, "id")));
+            let removalTags = oldTags.map(t => {
+                return {
+                    id: t.id,
+                    classifications: _.difference(origTags[t.id].classifications, t.classifications)
+                };
+            }).filter(t => t.classifications.length);
+
+            let addedTags = localTags.map(t => _.pick(t, "title", "classifications")).concat(newTags.map(t => _.pick(t, "id", "classifications"))).concat(additionTags);
+            let removedTags = missingTags.map(t => _.pick("id", "classifications")).concat(removalTags);
 
             addedTags.forEach(tag => {
                 // TODO: why do we have nulls in classifications?
                 tag.classifications = _.compact(this.tagClassifications.concat(tag.classifications)).map(t => _.pick(t, "id"));
             });
+
 
             if (addedTags.length > 0)
                 dirtyModel.addedTags = addedTags;

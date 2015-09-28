@@ -109,16 +109,16 @@ case class EndConnectsAccess() extends EndRelationReadBase[Post, Connects, Conne
 case class ConnectsAccess() extends NodeAccessDefault[Connects] with TagAccessHelper {
   val factory = Connects
 
-  private def deleteClassificationsFromGraph(discourse: Discourse, request: RemoveTagRequestBase, node: Connects) {
-    request.removedTags.foreach { tagUuid =>
-      val tag = Classification.matchesOnUuid(tagUuid)
+  private def deleteClassificationsFromGraph(discourse: Discourse, request: ConnectsUpdateRequest, node: Connects) {
+    request.removedTags.foreach { remTag =>
+      val tag = Classification.matchesOnUuid(remTag.id)
       discourse.add(tag)
       val tagging = Classifies.matches(tag, node)
       discourse.remove(tagging)
     }
   }
 
-  private def addClassifcationsToGraph(discourse: Discourse, request: AddClassificationRequestBase, node: Connects) {
+  private def addClassifcationsToGraph(discourse: Discourse, request: ConnectsUpdateRequest, node: Connects) {
     request.addedTags.flatMap(tagConnectRequestToClassification(_)).foreach { tag =>
       val tags = Classifies.merge(tag, node)
       discourse.add(tags)

@@ -35,7 +35,7 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
   }
 
   //TODO: refactor
-  private def addRequestTagsToGraph(tx: QueryHandler, discourse: Discourse, user: User, post: Post, request: AddTagRequestBase with RemoveTagRequestBase, authorBoost: Long, approvalSum: Long, applyThreshold: Long) {
+  private def addRequestTagsToGraph(tx: QueryHandler, discourse: Discourse, user: User, post: Post, request: PostUpdateRequest, authorBoost: Long, approvalSum: Long, applyThreshold: Long) {
     // TODO: do not get all connected requests if not needed...its just slow
     // because now we write lock every change request connected to the post
     implicit val ctx = new QueryContext
@@ -121,7 +121,7 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
 
       val cr = alreadyExisting getOrElse {
         val remTags = RemoveTags.create(user, post, applyThreshold = applyThreshold)
-        val tag = Scope.matchesOnUuid(tagReq)
+        val tag = Scope.matchesOnUuid(tagReq.id)
         discourse.add(remTags, tag, ProposesTag.create(remTags, tag))
         handleInitialChange(remTags, user, authorBoost = authorBoost, approvalSum = approvalSum).foreach(discourse.add(_))
         remTags
@@ -135,22 +135,13 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
     existing.changeRequests.foreach(_._locked = false)
   }
 
-  private def addScopesToGraph(discourse: Discourse, request: AddTagRequestBase, node: Post) {
+  private def addScopesToGraph(discourse: Discourse, request: PostAddRequest, node: Post) {
     request.addedTags.flatMap(req => tagConnectRequestToScope(req).map((req, _))).foreach { case (req, tag) =>
       val tags = Tags.merge(tag, node)
       discourse.add(tags)
       req.classifications.flatMap(tagConnectRequestToClassification(_)).foreach { classification =>
         discourse.add(Classifies.merge(classification, tags))
       }
-    }
-  }
-
-  private def deleteScopesFromGraph(discourse: Discourse, request: RemoveTagRequestBase, node: Post) {
-    request.removedTags.foreach { tagUuid =>
-      val tag = Scope.matchesOnUuid(tagUuid)
-      discourse.add(tag)
-      val tagging = Tags.matches(tag, node)
-      discourse.remove(tagging)
     }
   }
 
