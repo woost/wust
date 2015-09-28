@@ -1,12 +1,12 @@
 angular.module("wust.services").service("EditService", EditService);
 
-EditService.$inject = ["Post", "Connectable", "Reference", "HistoryService", "store", "DiscourseNode", "ZenService", "Auth"];
+EditService.$inject = ["Session", "Post", "Connectable", "Reference", "HistoryService", "store", "DiscourseNode", "ZenService", "Auth"];
 
-function EditService(Post, Connectable, Reference, HistoryService, store, DiscourseNode, ZenService, Auth) {
+function EditService(Session, Post, Connectable, Reference, HistoryService, store, DiscourseNode, ZenService, Auth) {
     let editStore = store.getNamespacedStore(`edit.${Auth.current.userId}`);
     let self = this;
 
-    class Session {
+    class EditSession {
         constructor(other = {}, isOriginal = false) {
 
             // local id to identify nodes without an id
@@ -140,6 +140,10 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
                     session.save();
                 }
 
+                if (this.visible && this.isLocal) {
+                    Session.marks.add(data.id);
+                }
+
                 this.apply(data, true);
 
                 if (referenceNode === undefined) {
@@ -230,6 +234,10 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
 
         remove() {
             _.remove(self.list, this);
+            if (this.visible && !this.isLocal) {
+                Session.marks.destroy(this.id);
+            }
+
             storeEditList();
         }
 
@@ -262,7 +270,7 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
 
     function restoreEditList() {
         //compact if something is really wrong and we have nulls in the localstorage. be forgiving.
-        return _.map(_.compact(editStore.get("list") || []), s => new Session(s));
+        return _.map(_.compact(editStore.get("list") || []), s => new EditSession(s));
     }
 
     function clearEditList() {
@@ -291,7 +299,7 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
         });
     }
 
-    function assureSessionExists(node, index, visible) {
+    function assureSessionExists(node, visible, index) {
         let existingIdx = -1;
         if (node === undefined) {
             node = {};
@@ -308,23 +316,34 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
             if (index !== undefined) {
                 self.list.splice(existingIdx, 1);
                 self.list.splice(index, 0, existing);
-                storeEditList();
             }
         } else {
             // lazily add existing nodes, so they only appear in the scratchpad
             // if they were actually edited
-            existing = new Session(node, hasId);
+            existing = new EditSession(node, hasId);
+            if (visible && hasId) {
+                Session.marks.add(node.id);
+            }
             if (!visible && hasId) {
                 existing.lazyAdd = true;
             } else {
                 self.list.splice(index === undefined ? 0 : index, 0, existing);
-                storeEditList();
+            }
+        }
+
+        if (hasId) {
+            if (existing.isPristine) {
+                existing.apply(node, true);
+            } else {
+                existing.apply(existing, false, node);
             }
         }
 
         if (visible) {
             existing.visible = true;
         }
+
+        storeEditList();
 
         return existing;
     }
@@ -353,7 +372,7 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
     }
 
     function editReference(node) {
-        let session = new Session(node);
+        let session = new EditSession(node);
         session.isReference = true;
         return session;
     }
@@ -361,7 +380,7 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
     function editAnswer(node) {
         let existingAnswer = _.find(self.list, elem => elem.isLocal && elem.referenceNode && elem.referenceNode.id === node.id);
         if (existingAnswer === undefined) {
-            let session = new Session();
+            let session = new EditSession();
             session.lazyAdd = true;
             session.setReference(node);
             return session;
@@ -373,7 +392,7 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
     function editNewDiscussion(tags = []) {
         let existingAnswer = _.find(self.list, elem => elem.isLocal && !elem.referenceNode && elem.newDiscussion && _.every(tags, tag => _.any(elem.tags, other => other.id === tag.id)));
         if (existingAnswer === undefined) {
-            let session = new Session({tags});
+            let session = new EditSession({tags});
             session.lazyAdd = true;
             session.newDiscussion = true;
             return session;
@@ -383,8 +402,8 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
         }
     }
 
-    function edit(node, index, visible = false) {
-        let session = assureSessionExists(node, index, visible);
+    function edit(node, visible, index) {
+        let session = assureSessionExists(node, !!visible, index);
         //TODO: it might happen that we get a node without tags, for example it
         //happens when a node is dropped because encoding a node does not
         //return nested resources like tags.
@@ -392,7 +411,7 @@ function EditService(Post, Connectable, Reference, HistoryService, store, Discou
         if (node && node.id !== undefined && node.tags === undefined) {
             Post.$buildRaw(_.pick(node, "id")).tags.$search().$then(val => {
                 let encoded = val.$encode();
-                session.apply(encoded, true);
+                session.tags = session.tags.concat(encoded.tags);
                 session.onChange();
             });
         }

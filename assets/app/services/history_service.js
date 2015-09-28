@@ -1,8 +1,8 @@
 angular.module("wust.services").service("HistoryService", HistoryService);
 
-HistoryService.$inject = ["Session", "Post", "DiscourseNode"];
+HistoryService.$inject = ["Auth", "Session", "Post", "DiscourseNode"];
 
-function HistoryService(Session, Post, DiscourseNode) {
+function HistoryService(Auth, Session, Post, DiscourseNode) {
     let maximum = 8;
     let self = this;
 
@@ -16,6 +16,9 @@ function HistoryService(Session, Post, DiscourseNode) {
     this.addConnectToCurrentView = addConnectToCurrentView;
 
     this.currentViewComponent = undefined;
+    if (Auth.isLoggedIn) {
+        load();
+    }
 
     function load() {
         Session.history.$fetch().$then(response => {

@@ -1,8 +1,8 @@
 angular.module("wust.api").service("Auth", Auth);
 
-Auth.$inject = ["$rootScope", "$window", "restmod", "jwtHelper", "store", "HistoryService"];
+Auth.$inject = ["$rootScope", "$window", "restmod", "jwtHelper", "store"];
 
-function Auth($rootScope, $window, restmod, jwtHelper, store, HistoryService) {
+function Auth($rootScope, $window, restmod, jwtHelper, store) {
     let self = this;
 
     let authStore = store.getNamespacedStore("auth");
@@ -17,10 +17,8 @@ function Auth($rootScope, $window, restmod, jwtHelper, store, HistoryService) {
     this.register = _.partial(authenticate, service.signup, "Registered");
     this.logout = logout;
     this.current = authStore.get(userKey) || {};
-    this.checkLoggedIn = checkLoggedIn;
 
     if (checkLoggedIn()) {
-        HistoryService.load();
         this.isLoggedIn = true;
     } else {
         this.isLoggedIn = false;
@@ -32,22 +30,16 @@ function Auth($rootScope, $window, restmod, jwtHelper, store, HistoryService) {
     // this is only needed if storage is available, otherwise we won't share data between buffers.
     if (authStore.storageAvailable) {
         $window.onfocus = () => {
-            let prev = authStore.get(userKey);
+            let prev = authStore.get(userKey) || {};
             delete authStore.inMemoryCache[userKey];
             let response = authStore.get(userKey) || {};
             self.current.identifier = response.identifier;
             self.current.token = response.token;
             self.current.userId = response.userId;
 
-            let loggedIn = checkLoggedIn();
-            if (loggedIn) {
-                if (prev.userId !== self.current.userId)
-                    HistoryService.load();
-            } else {
-                logoutLocally();
-            }
-
-            $rootScope.$apply();
+            checkLoggedIn();
+            if (prev.userId !== self.current.userId)
+                location.reload();
         };
     }
 

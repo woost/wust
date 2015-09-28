@@ -8,10 +8,10 @@
 
     <div id="edit_list">
         <div ng-repeat="node in vm.editList | scratchfilter:vm.options.showEdits track by node.localId" class="ng-trans ng-trans-scale-up ease">
-            <div class="drop_post_container" drop-channel="{{vm.options.showEdits ? '' : 'node,scratch_node,scratch_move'}}" ui-on-Drop="vm.edit($data, vm.editList.indexOf(node), true)">
+            <div class="drop_post_container" drop-channel="{{vm.options.showEdits ? '' : 'node,scratch_node,scratch_move'}}" ui-on-Drop="vm.edit($data, true, vm.editList.indexOf(node))">
                 <div collapse-edit-post node="node"></div>
             </div>
         </div>
-        <div ng-if="!vm.options.showEdits" id="scratch_end_drop_post_container" class="drop_post_container" drop-channel="node" ui-on-Drop="vm.edit($data, vm.editList.length, true)">
+        <div ng-if="!vm.options.showEdits" id="scratch_end_drop_post_container" class="drop_post_container" drop-channel="node" ui-on-Drop="vm.edit($data, true, vm.editList.length)">
     </div>
 </div>

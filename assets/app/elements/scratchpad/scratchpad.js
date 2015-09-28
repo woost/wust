@@ -14,12 +14,16 @@ function scratchpad() {
     };
 }
 
-scratchpadCtrl.$inject = ["EditService", "SidebarService", "ContextService"];
+scratchpadCtrl.$inject = ["Session", "EditService", "SidebarService", "ContextService"];
 
-function scratchpadCtrl(EditService, SidebarService, ContextService) {
+function scratchpadCtrl(Session, EditService, SidebarService, ContextService) {
     let vm = this;
 
     let saveOnEnter = true;
+
+    Session.marks.search().then(posts => {
+        posts.forEach(post => EditService.edit(post, true));
+    });
 
     vm.sidebar = SidebarService;
     vm.editList = EditService.list;
@@ -32,7 +36,7 @@ function scratchpadCtrl(EditService, SidebarService, ContextService) {
     };
 
     function editNewPost() {
-        let session = EditService.edit(vm.newPost, 0, true);
+        let session = EditService.edit(vm.newPost, true, 0);
         session.tags = angular.copy(ContextService.currentContexts);
 
         vm.newPost.title = "";
