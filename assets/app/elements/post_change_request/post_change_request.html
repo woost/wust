@@ -10,10 +10,29 @@
             <div ng-switch-when="Delete">
                 DELETE
             </div>
-            <div ng-switch-default class="tagchange">
-                <span tag-label="change.tag" ng-class="{'removed': change.isRemove}">
-                    <i ng-show="!change.isRemove" class="fa fa-plus right"></i>
+            <div ng-switch-when="AddTag" ng-switch="change.classifications.length">
+                <span ng-switch-when="0">
+                    <b>This belongs into the context </b>
                 </span>
+                <span ng-switch-default>
+                    <b>This is a </b>
+                    <span ng-repeat="classification in change.classifications" tag-label="classification"></span>
+                    <b>in the context of </b>
+                </span>
+                <span tag-label="change.tag">
+                    <i class="fa fa-plus right"></i>
+                </span>
+            </div>
+            <div ng-switch-when="RemoveTag" ng-switch="change.classifications.length">
+                <span ng-switch-when="0">
+                    <b>This does <span style="color:red;">not</span> belong into the context </b>
+                </span>
+                <span ng-switch-default>
+                    <b>This is <span style="color:red;">not</span> a </b>
+                    <span class="removed" ng-repeat="classification in change.classifications" tag-label="classification"></span>
+                    <b>in the context of </b>
+                </span>
+                <span tag-label="change.tag"></span>
             </div>
         </span>
 
