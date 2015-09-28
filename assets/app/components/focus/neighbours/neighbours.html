@@ -1,10 +1,10 @@
 <div id="neighbours_component">
-    <div>
+    <div class="neighbours_attachedto">
         <div class="btn-group" ng-model="vm.component.rootNode.successorOrder" bs-radio-group>
             <label class="btn btn-xs btn-default fa fa-sort-amount-desc"><input type="radio" class="btn btn-xs btn-default" value="0"> Votes</label>
             <label class="btn btn-xs btn-default fa fa-sort-amount-asc"><input type="radio" class="btn btn-xs btn-default" value="1"> Time</label>
         </div>
-        <div discourse-node-list node-model='vm.references.model' is-loading="vm.isLoading" class="neighbours_attachedto discourse_node_list_horizontal" template-after="components/focus/neighbours/predecessors_connection.html"></div>
+        <div discourse-node-list node-model='vm.references.model' is-loading="vm.isLoading" template-after="components/focus/neighbours/predecessors_connection.html"></div>
     </div>
     <div class="neighbours_content">
         <div class="rootnode" big-post component="vm.component"></div>
@@ -17,11 +17,11 @@
             <div discourse-node-list node-model='vm.parallels.model' is-loading="vm.isLoading" class="parallels discourse_node_list_vertical"></div>
         </div>
     </div>
-    <div class="text-right">
-        <div class="btn-group text-right" ng-model="vm.component.rootNode.predecessorOrder" bs-radio-group>
+    <div class="neighbours_followers">
+        <div class="btn-group" ng-model="vm.component.rootNode.predecessorOrder" bs-radio-group>
             <label class="btn btn-xs btn-default fa fa-sort-amount-desc"><input type="radio" class="btn btn-xs btn-default" value="0"> Votes</label>
             <label class="btn btn-xs btn-default fa fa-sort-amount-asc"><input type="radio" class="btn btn-xs btn-default" value="1"> Time</label>
         </div>
-        <div discourse-node-list node-model='vm.replies.model' is-loading="vm.isLoading" class="neighbours_followers discourse_node_list_horizontal" template-before="components/focus/neighbours/followers_connection.html"></div>
-    <div>
+        <div discourse-node-list node-model='vm.replies.model' is-loading="vm.isLoading" template-before="components/focus/neighbours/followers_connection.html"></div>
+    </div>
 </div>

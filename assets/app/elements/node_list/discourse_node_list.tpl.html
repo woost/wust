@@ -9,7 +9,7 @@
             <div ng-switch-when="true">
                 <div ng-repeat="node in vm.nodeModel.list track by node.id" class="list-item">
                     <span ng-if="vm.templateBefore" ng-include="vm.templateBefore"></span>
-                    <span small-post node="node"></span>
+                    <span class="list-item-small-post" small-post node="node"></span>
                     <div ng-repeat="nested in node.nestedNodeLists[vm.nodeModel.listId]" discourse-node-list node-model="nested.model"></div>
                     <span ng-if="vm.templateAfter" ng-include="vm.templateAfter"></span>
                 </div>
@@ -17,7 +17,7 @@
             <div ng-switch-default>
                 <div ng-repeat="node in vm.nodeModel.list track by node.id" class="list-item ng-trans ng-trans-scale-up ease">
                     <span ng-if="vm.templateBefore" ng-include="vm.templateBefore"></span>
-                    <span small-post node="node"></span>
+                    <span class="list-item-small-post" small-post node="node"></span>
                     <span ng-if="vm.templateAfter" ng-include="vm.templateAfter"></span>
                 </div>
             </div>

@@ -9,17 +9,16 @@ main {
         height: inherit;
         @include display-flex(flex);
         @include flex-direction(columns);
+        @include align-content(stretch);
         #left_hand_side, #middle_content, #right_hand_side {
             height: inherit;
         }
         #left_hand_side {
-            @include flex-grow(0);
             width: 0px;
             min-width: 0px;
             overflow-y: auto;
             @include transition(all 100ms ease);
             border-right: $sidebar_border;
-            background: white;
             &.visible {
                 width: 400px;
                 min-width: 400px;
@@ -37,21 +36,23 @@ main {
 
         }
         #right_hand_side {
-            @include flex-grow(0);
             width: 0px;
             min-width: 0px;
+            overflow: hidden;
             @include transition(all 100ms ease);
             border-left: $sidebar_border;
             &.visible {
-                overflow-y: auto;
                 width: 200px;
                 min-width: 200px;
+                overflow-y: auto;
             }
         }
         #middle_content {
+            width: 100%;
+            overflow: auto;
+            @include transition(width 100ms ease);
             #content_view {
                 height: inherit;
-                overflow: auto;
                 .content-component {
                     padding-top: 20px;
                     padding-left: 50px;
@@ -89,9 +90,6 @@ main {
                 color: initial;
                 background-color:white;
             }
-            @include flex-grow(1);
-            min-width: 900px;
-            @include transition(width 100ms ease);
         }
     }
     // make transitions a bit faster
