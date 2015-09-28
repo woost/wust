@@ -106,20 +106,6 @@ case class EndConnectsAccess() extends EndRelationReadBase[Post, Connects, Conne
   }
 }
 
-trait TagAccessHelper {
-  protected def tagConnectRequestToClassification(tag: ClassificationConnectRequest) = {
-    if (tag.id.isDefined)
-      Some(Classification.matchesOnUuid(tag.id.get))
-    else if (tag.title.isDefined)
-      Some(Classification.merge(
-        title = tag.title.get,
-        color = tagTitleColor(tag.title.get),
-        merge = Set("title")))
-    else
-      None
-  }
-}
-
 case class ConnectsAccess() extends NodeAccessDefault[Connects] with TagAccessHelper {
   val factory = Connects
 

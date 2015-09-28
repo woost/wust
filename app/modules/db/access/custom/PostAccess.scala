@@ -125,18 +125,6 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
     existing.changeRequests.foreach(_._locked = false)
   }
 
-  private def tagConnectRequestToScope(tag: TagConnectRequest) = {
-      if (tag.id.isDefined)
-        Some(Scope.matchesOnUuid(tag.id.get))
-      else if (tag.title.isDefined)
-        Some(Scope.merge(
-          title = tag.title.get,
-          color = tagTitleColor(tag.title.get),
-          merge = Set("title")))
-      else
-        None
-  }
-
   private def addScopesToGraph(discourse: Discourse, request: AddTagRequestBase, node: Post) {
     request.addedTags.flatMap(req => tagConnectRequestToScope(req).map((req, _))).foreach { case (req, tag) =>
       val tags = Tags.merge(tag, node)
