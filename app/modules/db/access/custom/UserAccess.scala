@@ -61,7 +61,8 @@ case class UserContributions() extends RelationAccessDefault[User, Post] {
     val query = s"""
     match ${ userDef.toQuery }-[r1]->(hyper:`${ SchemaCreated.label }`)-[r2]->${ postDef.toQuery }
     with distinct ${ postDef.name } order by ${ postDef.name }.timestamp skip ${ skip } limit ${ limit }
-    optional match ${ tagsDef.toQuery(true, false) }, ${ tagClassifiesDef.toQuery(true, false) }
+    optional match ${ tagsDef.toQuery(true, false) }
+    optional match ${ tagClassifiesDef.toQuery(true, false) }
     optional match ${ connDef.toQuery(false, true) }, ${ classifiesDef.toQuery(true, false) }
     return *
     """
