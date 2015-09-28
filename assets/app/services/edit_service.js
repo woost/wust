@@ -1,8 +1,8 @@
 angular.module("wust.services").service("EditService", EditService);
 
-EditService.$inject = ["Session", "Post", "Connectable", "Reference", "HistoryService", "store", "DiscourseNode", "ZenService", "Auth"];
+EditService.$inject = ["Session", "Post", "Connectable", "Connects", "HistoryService", "store", "DiscourseNode", "ZenService", "Auth"];
 
-function EditService(Session, Post, Connectable, Reference, HistoryService, store, DiscourseNode, ZenService, Auth) {
+function EditService(Session, Post, Connectable, Connects, HistoryService, store, DiscourseNode, ZenService, Auth) {
     let editStore = store.getNamespacedStore(`edit.${Auth.current.userId}`);
     let self = this;
 
@@ -12,7 +12,7 @@ function EditService(Session, Post, Connectable, Reference, HistoryService, stor
             // local id to identify nodes without an id
             this.localId = _.uniqueId();
             this.lazyAdd = !!other.lazyAdd;
-            this.isReference = !!other.isReference;
+            this.isConnects = !!other.isConnects;
             this.newDiscussion = !!other.newDiscussion;
 
             this.expandedEditor = !!other.expandedEditor;
@@ -30,7 +30,7 @@ function EditService(Session, Post, Connectable, Reference, HistoryService, stor
         }
 
         get service() {
-            return this.isReference ? Reference : Post;
+            return this.isConnects ? Connects : Post;
         }
 
         unsetOneTimeProperties() {
@@ -110,7 +110,7 @@ function EditService(Session, Post, Connectable, Reference, HistoryService, stor
                 this.triedSave = false;
                 let data = referenceNode ? response.node : response;
 
-                if (this.isReference) {
+                if (this.isConnects) {
                     data.tags = this.tags;
                 } else {
                     let appliedRequests = data.requestsTags && _.any(data.requestsTags, "status") || data.requestsEdit && _.any(data.requestsEdit, "status");
@@ -135,7 +135,7 @@ function EditService(Session, Post, Connectable, Reference, HistoryService, stor
 
                 if(referenceNode) {
                     let connects = _.find(response.graph.nodes, n => n.label === "CONNECTS" && n.startId === data.id && n.endId === referenceNode.id);
-                    let session = editReference(connects);
+                    let session = editConnects(connects);
                     session.tags = this.classifications;
                     session.save();
                 }
@@ -204,7 +204,7 @@ function EditService(Session, Post, Connectable, Reference, HistoryService, stor
                 tags: defaultValidity
             };
 
-            if (this.isReference) {
+            if (this.isConnects) {
             } else {
                 this.validity.title = ValidityEntry("Title may not be empty", !_.isEmpty(this.title))
                                         .and(ValidityEntry("Title must be less than 140 characters", this.title.length <= 140));
@@ -258,7 +258,7 @@ function EditService(Session, Post, Connectable, Reference, HistoryService, stor
     this.edit = edit;
     this.editAnswer = editAnswer;
     this.editNewDiscussion = editNewDiscussion;
-    this.editReference = editReference;
+    this.editConnects = editConnects;
     this.updateNode = updateNode;
     this.findNode = findNode;
     this.persist = storeEditList;
@@ -371,9 +371,9 @@ function EditService(Session, Post, Connectable, Reference, HistoryService, stor
         return promise;
     }
 
-    function editReference(node) {
+    function editConnects(node) {
         let session = new EditSession(node);
-        session.isReference = true;
+        session.isConnects = true;
         return session;
     }
 

@@ -32,7 +32,7 @@ object RequestFormat {
   implicit val connectableUpdateFormat = (
       (__ \ "addedTags").readNullable[List[ClassificationConnectRequest]] and
       (__ \ "removedTags").readNullable[List[String]]
-    )(ReferenceUpdateRequest)
+    )(ConnectsUpdateRequest)
 
   implicit val tagAddFormat = (__ \ "title").read[String].map(TagAddRequest(_))
 

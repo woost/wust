@@ -2,15 +2,22 @@ package modules.db.access.custom
 
 import controllers.api.nodes.{ConnectParameter, HyperConnectParameter, RequestContext}
 import formatters.json.ResponseFormat._
+import formatters.json.RequestFormat._
+import renesca.parameter.implicits._
 import formatters.json.GraphFormat
+import modules.requests._
 import model.WustSchema._
 import modules.db.Database.db
 import modules.db.access._
+import modules.db._
 import modules.requests.ConnectResponse
 import play.api.libs.json._
 import play.api.mvc.Result
 import play.api.mvc.Results._
 import renesca.schema._
+import renesca.Query
+import wust.Shared.tagTitleColor
+
 
 trait ConnectsRelationHelper[NODE <: Connectable] {
   implicit def format: Format[NODE]
@@ -96,5 +103,57 @@ case class EndConnectsAccess() extends EndRelationReadBase[Post, Connects, Conne
 
   override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Connectable with AbstractRelation[S, E], E], uuid: String) = context.withUser {
     createRelation(context, param, nodeFactory.matchesOnUuid(uuid))
+  }
+}
+
+trait TagAccessHelper {
+  protected def tagConnectRequestToClassification(tag: ClassificationConnectRequest) = {
+    if (tag.id.isDefined)
+      Some(Classification.matchesOnUuid(tag.id.get))
+    else if (tag.title.isDefined)
+      Some(Classification.merge(
+        title = tag.title.get,
+        color = tagTitleColor(tag.title.get),
+        merge = Set("title")))
+    else
+      None
+  }
+}
+
+case class ConnectsAccess() extends NodeAccessDefault[Connects] with TagAccessHelper {
+  val factory = Connects
+
+  private def deleteClassificationsFromGraph(discourse: Discourse, request: RemoveTagRequestBase, node: Connects) {
+    request.removedTags.foreach { tagUuid =>
+      val tag = Classification.matchesOnUuid(tagUuid)
+      discourse.add(tag)
+      val tagging = Classifies.matches(tag, node)
+      discourse.remove(tagging)
+    }
+  }
+
+  private def addClassifcationsToGraph(discourse: Discourse, request: AddClassificationRequestBase, node: Connects) {
+    request.addedTags.flatMap(tagConnectRequestToClassification(_)).foreach { tag =>
+      val tags = Classifies.merge(tag, node)
+      discourse.add(tags)
+    }
+  }
+
+  override def update(context: RequestContext, uuid: String) = context.withUser { user =>
+    import formatters.json.EditNodeFormat._
+
+    context.withJson { (request: ConnectsUpdateRequest) =>
+      db.transaction { tx =>
+        val node = Connects.matchesOnUuid(uuid)
+        val discourse = Discourse(node)
+        deleteClassificationsFromGraph(discourse, request, node)
+        addClassifcationsToGraph(discourse, request, node)
+
+        tx.persistChanges(discourse) match {
+          case Some(err) => BadRequest(s"Cannot update Connects with uuid '$uuid': $err'")
+          case _         => Ok(Json.toJson(ClassifiedReferences.shapeResponse(Connects.wrap(node.rawItem))))
+        }
+      }
+    }
   }
 }

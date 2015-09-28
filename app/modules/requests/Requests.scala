@@ -30,7 +30,7 @@ trait AddClassificationRequestBase {
 case class PostAddRequest(description: Option[String], title: String, addedTagsOption: Option[List[TagConnectRequest]]) extends AddTagRequestBase
 case class PostUpdateRequest(description: Option[String], title: Option[String], addedTagsOption: Option[List[TagConnectRequest]], removedTagsOption: Option[List[String]]) extends AddTagRequestBase with RemoveTagRequestBase
 
-case class ReferenceUpdateRequest(addedTagsOption: Option[List[ClassificationConnectRequest]], removedTagsOption: Option[List[String]]) extends AddClassificationRequestBase with RemoveTagRequestBase
+case class ConnectsUpdateRequest(addedTagsOption: Option[List[ClassificationConnectRequest]], removedTagsOption: Option[List[String]]) extends AddClassificationRequestBase with RemoveTagRequestBase
 
 case class TagAddRequest(title: String)
 case class TagUpdateRequest(description: Option[String])

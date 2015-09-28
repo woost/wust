@@ -40,7 +40,7 @@ function TagRelationEditService($modal, EditService) {
     }
 
     function showModal(node, disconnectFunc, isCreating = false) {
-        currentRelation = EditService.editReference(node);
+        currentRelation = EditService.editConnects(node);
         currentRelation.isCreating = isCreating;
         currentRelation.startNode = node.startNode;
         currentRelation.endNode = node.endNode;

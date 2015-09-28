@@ -16,8 +16,8 @@ object Connectables extends Nodes[Connectable] {
   )
 }
 
-object References extends Nodes[Reference] {
-  val node = NodeDef(ReferenceAccess.apply)
+object ConnectsCtrl extends Nodes[Connects] {
+  val node = NodeDef(ConnectsAccess.apply)
 }
 
 object Posts extends Nodes[Post] {
