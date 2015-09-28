@@ -2,6 +2,7 @@
 @import "globals";
 
 #neighbours_component {
+    height:100%;
     $arrow-length: 70px;
     $small-post-max-width: 200px;
     $small-post-min-width: 100px;
@@ -15,21 +16,6 @@
     @include flex-direction(row);
     @include align-items(flex-start);
     @include align-content(stretch);
-    .neighbours_attachedto {
-        max-width: $neighbours-max-width;
-        min-width: $neighbours-min-width;
-        .node_model_list {
-            // arrow touches bigpost
-            padding-right: 0;
-            .list-item {
-                @include display-flex(flex);
-                @include flex-direction(row);
-                @include align-items(center);
-                @include justify-content(flex-end);
-            }
-        }
-
-    }
 
     .neighbours_content {
         max-width: $content-max-width;
@@ -42,7 +28,7 @@
         .parallels {
             .node_model_list > div {
                 @include display-flex(flex);
-                @include justify-content(flex-start);
+                @include justify-content(flex-start); // valign: top
                 @include flex-direction(row);
                 @include align-items(stretch);
                 @include flex-wrap(wrap);
@@ -55,23 +41,38 @@
         }
     }
 
+    .neighbours_attachedto {
+        .node_model_list {
+            // arrow touches bigpost
+            padding-right: 0;
+            .list-item {
+                @include justify-content(flex-end);
+            }
+        }
+
+    }
+
     .neighbours_followers {
-        max-width: $neighbours-max-width;
-        min-width: $neighbours-min-width;
         text-align:right; // for sort button group
         .node_model_list {
             // arrow touches bigpost
             padding-left: 0;
             .list-item {
-                @include display-flex(flex);
-                @include flex-direction(row);
-                @include align-items(center);
                 @include justify-content(flex-start);
             }
         }
     }
 
+    .neighbours_attachedto, .neighbours_followers {
+        width: $neighbours-max-width;
+        max-width: $neighbours-max-width;
+        min-width: $neighbours-min-width;
+    }
+
     .list-item {
+        @include display-flex(flex);
+        @include flex-direction(row);
+        @include align-items(center);
         // we move the margin from small-post to list-item
         // for the flex-box to center the arrow correctly
         .list-item-small-post {
