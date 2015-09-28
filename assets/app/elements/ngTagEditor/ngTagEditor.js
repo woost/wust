@@ -8,7 +8,8 @@ angular.module("wust.elements").directive("tagEditor", function() {
                 onChange: "&",
                 existingOnly: "@",
                 alwaysShow: "@",
-                editClassification: "@"
+                editClassification: "@",
+                placeholder: "@"
             },
             templateUrl: "elements/ngTagEditor/ngTagEditor.html",
             controller: ["$scope", "$attrs", "$element", "$filter",

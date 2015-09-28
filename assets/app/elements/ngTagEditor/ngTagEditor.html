@@ -2,10 +2,10 @@
     <div class="tag-editor" ng-class="{active:focus}" ng-click="setFocus = true">
         <div class="tag-draft">
             <span ng-repeat="tag in tags" tag-label="tag" disable-link>
-                <i ng-if="editClassification" class="fa fa-pencil" ng-click="$event.stopPropagation();" title="Edit scope of post" data-on-change="onChange()" data-tag="tag" data-template-url="elements/ngTagEditor/classification_popover.html" data-container="body" data-placement="right" data-animation="am-flip-x" data-auto-close="1" bs-popover></i>
-                <i class="remove fa fa-close" ng-click="remove($index); $event.stopPropagation();"></i>
+                <i ng-if="editClassification" class="fa fa-pencil" ng-click="$event.stopPropagation();" title="Classify post in context" data-on-change="onChange()" data-tag="tag" data-template-url="elements/ngTagEditor/classification_popover.html" data-container="body" data-placement="right" data-animation="am-flip-x" data-auto-close="1" bs-popover></i>
+                <i class="remove fa fa-close" title="Remove tag" ng-click="remove($index); $event.stopPropagation();"></i>
             </span>
-            <input type="text" class="tag-input" placeholder="Add Tags" ng-focus="focus = true" ng-blur="focus = false; unfocusedInput()" focus-me="setFocus" ng-model="search"/>
+            <input type="text" class="tag-input" placeholder="{{placeholder}}" ng-focus="focus = true" ng-blur="focus = false; unfocusedInput()" focus-me="setFocus" ng-model="search"/>
         </div>
         <div class="tag-suggestions" ng-show="suggestions && (alwaysShow || focus)">
             <span class="title">Suggestions:</span>

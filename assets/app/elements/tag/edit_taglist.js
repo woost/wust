@@ -31,8 +31,35 @@ function editTaglistCtrl(TagSuggestions, DiscourseNode, $q) {
 
     vm.onChangeDistributor = onChangeDistributor;
     vm.searchTags = searchTags;
+    let tagLabel;
+    switch (vm.tagType) {
+        //TODO: expose labels without own node api in schema object from api
+        case "classification":
+            // tagLabel = DiscourseNode.Classification.label;
+            tagLabel = "CLASSIFICATION";
+            vm.placeholder = "Add Classification";
+        break;
+        case "taglike":
+            // tagLabel = DiscourseNode.Classification.label;
+            tagLabel = "TAGLIKE";
+            vm.placeholder = "Add Tag";
+        break;
+        case "context":
+            /* falls through */
+        default:
+            // tagLabel = DiscourseNode.Scope.label;
+            tagLabel = "SCOPE";
+            vm.placeholder = "Add Context";
+        break;
+    }
+
+
 
     function onChangeDistributor(type, tag) {
+        // set isContext for contexts, as the some styles for local tags depend on it
+        if (type === "add")
+            tag.isContext = tagLabel === "SCOPE";
+
         if (vm.onChange)
             vm.onChange({type, tag});
     }
@@ -42,26 +69,7 @@ function editTaglistCtrl(TagSuggestions, DiscourseNode, $q) {
             clearTimeout(delayedTriggerSearch);
 
         return $q((resolve, reject) => {
-            let label;
-            switch (vm.tagType) {
-                //TODO: expose labels without own node api in schema object from api
-                case "classification":
-                    // label = DiscourseNode.Classification.label;
-                    label = "CLASSIFICATION";
-                    break;
-                case "taglike":
-                    // label = DiscourseNode.Classification.label;
-                    label = "TAGLIKE";
-                    break;
-                case "context":
-                    /* falls through */
-                default:
-                    // label = DiscourseNode.Scope.label;
-                    label = "SCOPE";
-                    break;
-            }
-
-            delayedTriggerSearch = setTimeout(() => TagSuggestions.search(term, label).$then(resolve, reject), searchTriggerDelay);
+            delayedTriggerSearch = setTimeout(() => TagSuggestions.search(term, tagLabel).$then(resolve, reject), searchTriggerDelay);
         });
     }
 }
