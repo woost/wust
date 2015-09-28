@@ -489,10 +489,10 @@ object GraphSpec extends TestSuite {
 object TestHelpers {
   var quality = 0.99
   def nextQuality() = {quality *= 0.9;quality}
-  implicit def n(id: String) = new RawNode(id = id, title = "", description = None, isHyperRelation = false, quality = nextQuality(), viewCount = 0, startId = None, endId = None, tags = js.Array(), classifications = Set.empty, vote = None, timestamp = 0)
+  implicit def n(id: String) = new RawNode(id = id, title = "", description = None, isHyperRelation = false, quality = nextQuality(), viewCount = 0, startId = None, endId = None, tags = js.Array(), classifications = Set.empty, vote = None, author = None, timestamp = 0)
 
   implicit def r(t: (String, String)) = new RawRelation(t._1, t._2)
-implicit def h(startId: String, id: String, endId: String) = new RawNode(id = id, title = "", description = None, isHyperRelation = true, quality = nextQuality(), viewCount = 0, startId = Some(startId), endId = Some(endId), tags = js.Array(), classifications = Set.empty, vote = None, timestamp = 0)
+implicit def h(startId: String, id: String, endId: String) = new RawNode(id = id, title = "", description = None, isHyperRelation = true, quality = nextQuality(), viewCount = 0, startId = Some(startId), endId = Some(endId), tags = js.Array(), classifications = Set.empty, vote = None, author = None, timestamp = 0)
   def graph(nodes: Set[RawNode], relations: Set[RawRelation]) = new RawGraph(nodes, relations, nodes.head.id)
 
   val A = n("A")
