@@ -20,7 +20,7 @@
                 <label>Replies to</label>
                 <span small-post node="vm.node.referenceNode"></span>
             </div>
-            <div edit-taglist tags="vm.node.tags" set-focus="vm.focusEditTags" on-change="vm.node.onChange()"></div>
+            <div edit-taglist edit-classification="true" tags="vm.node.tags" set-focus="vm.focusEditTags" on-change="vm.node.onChange()"></div>
             <div edit-post-description node="vm.node"></div>
             <button class="pull-left btn btn-xs btn-danger" ng-click="vm.node.deleteNode();" ng-hide="vm.node.isLocal" data-title="delete" bs-tooltip><i class="fa fa-trash-o"></i></button>
             <button class="pull-left btn btn-xs btn-warning" ng-click="vm.node.discard()" ng-hide="vm.node.isPristine" data-title="discard changes" bs-tooltip><i class="fa fa-undo"></i></button>
