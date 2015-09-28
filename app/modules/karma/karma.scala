@@ -9,6 +9,7 @@ import renesca.QueryHandler
 import renesca.parameter.ParameterMap
 import renesca.parameter.implicits._
 
+//TODO: no matcher string, but different karmaqueries for userdef and postdef or createdDef or accept Seq[GraphDefinition]
 case class KarmaQuery(postDef: NodeDefinition[Post], userDef: NodeDefinition[User], matcher: String, params: ParameterMap)
 
 case class KarmaTagQuery(tagDef: NodeDefinition[Scope], matcher: String, params: ParameterMap)
