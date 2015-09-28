@@ -4,6 +4,7 @@ import scala.collection.mutable
 import scala.scalajs.js
 import scala.scalajs.js.annotation.{ScalaJSDefined, JSExport, JSExportAll}
 import js.JSConverters._
+import wust.Moderation
 
 object ConsoleImport {
   val console = js.Dynamic.global.console
@@ -99,6 +100,13 @@ sealed trait NodeDelegates extends NodeLike {
 trait NodeBase extends NodeDelegates {
   def classifications: Set[RecordTag]
   @JSExport("classifications") def classificationsJs = classifications.toJSArray
+
+  @JSExport
+  val postChangeThreshold:Double = Moderation.postChangeThreshold(viewCount)
+  @JSExport
+  val rejectPostChangeThreshold:Double = Moderation.rejectPostChangeThreshold(postChangeThreshold.toLong)
+  @JSExport
+  def connectedTags = (tags ++ deepSuccessors.filterNot(_.isHyperRelation).flatMap(_.tags)).groupBy(_.id).map(_._2.head).toJSArray
 
   // in- and outrelations are updated whenever the graph is comitted
   var inRelations: Set[RelationLike] = Set.empty

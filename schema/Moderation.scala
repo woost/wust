@@ -9,38 +9,46 @@ package moderation
 
 import model.WustSchema._
 
-object Moderation {
-  // http://stackoverflow.com/questions/3305059/how-do-you-calculate-log-base-2-in-java-for-integers
-  def log2(x:Long):Long = (Math.log(x)/Math.log(2)+1e-10).toLong
-  def log(x:Long):Long = Math.log(x).round
-  def sqrt(x:Long):Long = Math.sqrt(x).round
+//TODO code dub in shared-scalajs: how to share this trait between schema and scalajs-shared project
+trait ModerationBase {
+    // http://stackoverflow.com/questions/3305059/how-do-you-calculate-log-base-2-in-java-for-integers
+    def log2(x:Long):Long = (Math.log(x)/Math.log(2)+1e-10).toLong
+    def log(x:Long):Long = Math.log(x).round
+    def sqrt(x:Long):Long = Math.sqrt(x).round
+
+    val authorKarmaBoost:Long = postChangeThreshold(viewCount = 1024) // author can change its own post until 1024 views
+
+    //TODO: negative karmasum: reject changerequests automatically?
+    def voteWeight(votersKarma: Long):Long = if (votersKarma > 0) log2(votersKarma) max 1 else 1 // log weight from paper WikiTrust
+
+    def postChangeThreshold(viewCount: Long):Long = sqrt(viewCount) + 8 // One needs min 256 karma to do instant edits on new posts
+
+    def rejectPostChangeThreshold(applyThreshold: Long):Long = (-applyThreshold / 2) min -1
+
+    def canApply(approvalSum: Long, applyThreshold: Long):Boolean = approvalSum >= applyThreshold
+    def canReject(approvalSum: Long, rejectThreshold: Long):Boolean = approvalSum <= rejectThreshold
+}
+
+object Moderation extends ModerationBase {
+
   //TODO: is upvote / downvote ratio linear? Or can we expect for example sqrt(views)=upvotes ?
   // Check a HN/Reddit dump to find out
   val votes_p = 0.1 // this is also the default weight, if we have up=0 and down=0
   val votes_u = 10
+  def postQuality(upVotes:Long, downVotes:Long):Double = (upVotes + votes_u*votes_p) / (downVotes + upVotes + votes_u)
 
   //TODO: rate limiting for low karma users
   val initialKarma:Long = 0
 
-  val authorKarmaBoost:Long = postChangeThreshold(viewCount = 1024) // author can change its own post until 1024 views
-
   def postVoteKarma:Long = 1
 
   def voteWeightFromScopes(scopes: Seq[Scope]):Long = voteWeight(karmaSum(scopes))
-  //TODO: negative karmasum: reject changerequests automatically?
-  private def voteWeight(votersKarma: Long):Long = if (votersKarma > 0) log2(votersKarma) max 1 else 1 // log weight from paper WikiTrust
-  private def karmaSum(scopes: Seq[Scope]):Long = {
+  def karmaSum(scopes: Seq[Scope]):Long = {
     scopes.map { tag =>
       val l:Long = tag.inRelationsAs(HasKarma).headOption.map(_.karma).getOrElse(0)
       l
     }.sum
   }
-
-  def postChangeThreshold(viewCount: Long):Long = sqrt(viewCount) + 8 // One needs min 256 karma to do instant edits on new posts
-
-  def rejectPostChangeThreshold(applyThreshold: Long):Long = (-applyThreshold / 2) min -1
-
-  def postQuality(upVotes:Long, downVotes:Long):Double = (upVotes + votes_u*votes_p) / (downVotes + upVotes + votes_u)
 
   //TODO: user für votestream-votes belohnen? -> nein, votes sollen aus intrinsischer motivation kommen
 

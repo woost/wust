@@ -19,21 +19,30 @@ function staticEditPost() {
     };
 }
 
-StaticEditPostCtrl.$inject = ["$state"];
+StaticEditPostCtrl.$inject = ["$state", "$scope", "Auth", "EditService", "KarmaService"];
 
-// expects scope.node to be a session.
-// used by the scratchpad which retrieves a list of sessions from the EditService.
-function StaticEditPostCtrl($state) {
+function StaticEditPostCtrl($state, $scope, Auth, EditService, KarmaService) {
     let vm = this;
 
     vm.deleteNode = deleteNode;
     vm.saveNode = saveNode;
+    vm.editNode = EditService.edit(vm.node);
+
+    let authorBoost = Auth.current.userId == vm.node.author.id ? wust.Moderation().authorKarmaBoost : 0;
+    $scope.$on("component.changed", calculateEditWeight);
+    $scope.$on("karma.changed", calculateEditWeight);
+    calculateEditWeight()
 
     function saveNode() {
-        vm.node.save().$then(data => vm.onSave({response: data}));
+        vm.editNode.save().$then(data => vm.onSave({response: data}));
     }
 
     function deleteNode() {
-        vm.node.deleteNode().$then(data => vm.onDelete({response: data}));
+        vm.editNode.deleteNode().$then(data => vm.onDelete({response: data}));
+    }
+
+    function calculateEditWeight() {
+        vm.editWeight = KarmaService.voteWeightInContexts(vm.node.connectedTags) + authorBoost;
+        vm.canApply = wust.Moderation().canApply(vm.editWeight, vm.node.postChangeThreshold);
     }
 }

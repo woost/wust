@@ -168,8 +168,8 @@ object WustSchema {
     var status:Long = PENDING
 
     def rejectThreshold = Moderation.rejectPostChangeThreshold(applyThreshold)
-    def canApply(approvalSum: Long = approvalSum):Boolean = approvalSum >= applyThreshold
-    def canReject(approvalSum: Long = approvalSum):Boolean = approvalSum <= rejectThreshold
+    def canApply(approvalSum: Long = approvalSum):Boolean = Moderation.canApply(approvalSum, applyThreshold)
+    def canReject(approvalSum: Long = approvalSum):Boolean = Moderation.canReject(approvalSum, rejectThreshold)
     def canApply:Boolean = canApply()
     def canReject:Boolean = canReject()
 

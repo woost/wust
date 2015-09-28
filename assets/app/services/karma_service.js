@@ -7,6 +7,7 @@ function KarmaService(User, Auth, $rootScope) {
 
     this.refreshKarma = refreshKarma;
     this.karmaInContext = karmaInContext;
+    this.voteWeightInContexts = voteWeightInContexts;
     this.karma = {
         tags: [],
         sum: 0
@@ -17,6 +18,11 @@ function KarmaService(User, Auth, $rootScope) {
     function karmaInContext(context) {
         let found = _.find(self.karma.tags, t => t.id === context.id);
         return found ? found.karma : 0;
+    }
+
+    function voteWeightInContexts(contexts) {
+        let sum = contexts.map(context => karmaInContext(context)).reduce((a,b) => a+b, 0);
+        return wust.Moderation().voteWeight(sum);
     }
 
     function refreshKarma() {

@@ -15,12 +15,12 @@ function bigPost() {
     };
 }
 
-bigPostCtrl.$inject = ["$state", "Post", "EditService", "ModalEditService", "ContextService", "Auth"];
+bigPostCtrl.$inject = ["$state", "Post", "ModalEditService", "ContextService", "Auth"];
 
 //TODO: we are using the markdown directive directly and also allow to enter zen
 //mode. both directives will lead to parsing the markdown description, which is
 //not needed. zen mode should reuse the parsed description here.
-function bigPostCtrl($state, Post, EditService, ModalEditService, ContextService, Auth) {
+function bigPostCtrl($state, Post, ModalEditService, ContextService, Auth) {
     let vm = this;
 
     vm.node = vm.component.rootNode;
@@ -29,7 +29,6 @@ function bigPostCtrl($state, Post, EditService, ModalEditService, ContextService
 
     vm.showAuthor = true;
 
-    vm.editNode = EditService.edit(vm.node);
     vm.changeRequests = Post.$buildRaw(vm.node).requests.$search();
     vm.replyTo = replyTo;
     vm.onSave = onSave;
@@ -65,7 +64,6 @@ function bigPostCtrl($state, Post, EditService, ModalEditService, ContextService
     function onApply(node) {
         vm.node.title = node.title;
         vm.node.description = node.description;
-        vm.editNode.apply(vm.node);
     }
 
     function onDeleteApply() {
@@ -77,11 +75,9 @@ function bigPostCtrl($state, Post, EditService, ModalEditService, ContextService
             _.remove(vm.node.tags, _.pick(tag, "id"));
         else
             vm.node.tags.push(tag);
-
-        vm.editNode.apply(vm.node);
     }
 
     function replyTo() {
-        ModalEditService.show(vm.editNode);
+        ModalEditService.show(vm.node);
     }
 }
