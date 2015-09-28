@@ -28,10 +28,10 @@ function StaticEditPostCtrl($state, $scope, Auth, EditService, KarmaService) {
     vm.saveNode = saveNode;
     vm.editNode = EditService.edit(vm.node);
 
-    let authorBoost = Auth.current.userId == vm.node.author.id ? wust.Moderation().authorKarmaBoost : 0;
+    let authorBoost = Auth.current.userId === vm.node.author.id ? wust.Moderation().authorKarmaBoost : 0;
     $scope.$on("component.changed", calculateEditWeight);
     $scope.$on("karma.changed", calculateEditWeight);
-    calculateEditWeight()
+    calculateEditWeight();
 
     function saveNode() {
         vm.editNode.save().$then(data => vm.onSave({response: data}));
