@@ -4,13 +4,11 @@
 #neighbours_component {
     $arrow-length: 70px;
     $small-post-max-width: 200px;
-    $small-post-min-width: 150px;
+    $small-post-min-width: 100px;
     $neighbours-max-width: $arrow-length + $small-post-max-width;
     $neighbours-min-width: $arrow-length + $small-post-min-width;
     $content-max-width: 600px;
     $content-min-width: 200px;
-    min-width: $neighbours-min-width + $content-min-width + $neighbours-min-width;
-    max-width: $neighbours-max-width + $content-max-width + $neighbours-max-width;
     padding: 20px;
     @include display-flex(flex);
     @include justify-content(center);
