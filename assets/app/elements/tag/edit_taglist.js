@@ -12,7 +12,8 @@ function editTaglist() {
             onChange: "&",
             existingOnly: "@",
             alwaysShow: "@",
-            tagType: "@"
+            tagType: "@",
+            editClassification: "@"
         },
         controller: editTaglistCtrl,
         controllerAs: "vm",

@@ -201,7 +201,8 @@ object WustSchema {
   @HyperRelation class Deleted(startNode: User, endNode: Post) extends ChangeRequest with MatchableRelation
 
   @Node trait TagChangeRequest extends ChangeRequest
-  @Relation class ProposesTag(startNode: TagChangeRequest, endNode: Scope)
+  @Relation class ProposesTag(startNode: TagChangeRequest, endNode: Scope) // one-to-one relation
+  @Relation class ProposesClassify(startNode: TagChangeRequest, endNode: Classification) // one-to-many relation
   @HyperRelation class AddTags(startNode: User, endNode: Post) extends TagChangeRequest with MatchableRelation
   @HyperRelation class RemoveTags(startNode: User, endNode: Post) extends TagChangeRequest with MatchableRelation
 

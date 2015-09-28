@@ -233,33 +233,58 @@ object VotesDeletedHelper extends ChangeRequestHelper[Deleted] {
 }
 
 object VotesTagsChangeRequestHelper extends ChangeRequestHelper[TagChangeRequest] {
-
-  override def unapplyChange(tx: QueryHandler, discourse: Discourse, req: TagChangeRequest, post: Post) = {
+  private def requestGraph(tx: QueryHandler, req: TagChangeRequest) = {
     implicit val ctx = new QueryContext
     val tagDef = ConcreteFactoryNodeDefinition(Scope)
-    val tagsDef = RelationDefinition(ConcreteNodeDefinition(req), ProposesTag, tagDef)
-    val scope = Discourse(tx.queryGraph(Query(s"match ${tagsDef.toQuery} return ${tagDef.name}", tagsDef.parameterMap))).scopes.head
+    val classDef = ConcreteFactoryNodeDefinition(Classification)
+    val reqDef = ConcreteNodeDefinition(req)
+    val tagsDef = RelationDefinition(reqDef, ProposesTag, tagDef)
+    val classifiesDef = RelationDefinition(reqDef, ProposesClassify, classDef)
+
+    val query = s"""
+    match ${tagsDef.toQuery}
+    optional match ${classifiesDef.toQuery(false, true)}
+    return ${tagDef.name}
+    """
+
+    Discourse(tx.queryGraph(query, tagsDef.parameterMap))
+  }
+
+  override def unapplyChange(tx: QueryHandler, discourse: Discourse, req: TagChangeRequest, post: Post) = {
+    val existing = requestGraph(tx, req)
+    val scope = existing.scopes.head
+    val classifications = existing.classifications
+
     req match {
       case request: AddTags =>
-        discourse.remove(Tags.matches(scope, post))
+        val tags = Tags.matches(scope, post)
+        discourse.remove(tags)
+        classifications.foreach { classification =>
+          discourse.remove(Classifies.matches(classification, tags))
+        }
       case request: RemoveTags =>
+        //TODO: handle readding of classifications
         discourse.add(Tags.merge(scope, post))
     }
 
     true
   }
 
+  //TODO: code dup unapply
   override def applyChange(tx: QueryHandler, discourse: Discourse, req: TagChangeRequest, post: Post) = {
-    // we need to get the tag which is connected to the request
-    // TODO: resolve matches startnode via relation in renesca?
-    implicit val ctx = new QueryContext
-    val tagDef = ConcreteFactoryNodeDefinition(Scope)
-    val tagsDef = RelationDefinition(ConcreteNodeDefinition(req), ProposesTag, tagDef)
-    val scope = Discourse(tx.queryGraph(Query(s"match ${tagsDef.toQuery} return ${tagDef.name}", tagsDef.parameterMap))).scopes.head
+    val existing = requestGraph(tx, req)
+    val scope = existing.scopes.head
+    val classifications = existing.classifications
+
     req match {
       case request: AddTags =>
-        discourse.add(Tags.merge(scope, post))
+        val tags = Tags.merge(scope, post)
+        discourse.add(tags)
+        classifications.foreach { classification =>
+          discourse.add(Classifies.merge(classification, tags))
+        }
       case request: RemoveTags =>
+        //TODO: handle removing classifications
         discourse.remove(Tags.matches(scope, post))
     }
 

@@ -12,7 +12,6 @@ import renesca.parameter.implicits._
 import renesca.QueryHandler
 import renesca.Query
 import play.api.mvc.Results._
-import wust.Shared.tagTitleColor
 import moderation.Moderation
 import scala.concurrent._
 import ExecutionContext.Implicits.global
@@ -41,14 +40,15 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
     // because now we write lock every change request connected to the post
     implicit val ctx = new QueryContext
     val userDef = ConcreteFactoryNodeDefinition(User)
-    val tagDef = ConcreteFactoryNodeDefinition(Scope)
     val requestDef = ConcreteFactoryNodeDefinition(TagChangeRequest)
     val postDef = ConcreteNodeDefinition(post)
-    val tagsDef = RelationDefinition(requestDef, ProposesTag, tagDef)
+    val tagsDef = RelationDefinition(requestDef, ProposesTag, ConcreteFactoryNodeDefinition(Scope))
+    val classifiesDef = RelationDefinition(requestDef, ProposesClassify, ConcreteFactoryNodeDefinition(Classification))
     val votesDef = RelationDefinition(ConcreteNodeDefinition(user), Votes, requestDef)
 
     val query = s"""
     match ${userDef.toQuery}-[ut:`${AddTags.startRelationType}`|`${RemoveTags.startRelationType}`]->(${requestDef.name} ${requestDef.factory.labels.map(l => s":`$l`").mkString} { status: ${PENDING} })-[tp:`${AddTags.endRelationType}`|`${RemoveTags.endRelationType}`]->${postDef.toQuery}, ${tagsDef.toQuery(false,true)}
+    optional match ${classifiesDef.toQuery(false, true)}
     optional match ${votesDef.toQuery(true, false)}
     set ${requestDef.name}._locked = true
     return *
@@ -91,12 +91,22 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
       }
 
       crOpt.foreach { cr =>
+        //TODO handle subsets or all requests separately?
+        tagReq.classifications.flatMap(tagConnectRequestToClassification(_)).foreach{classification =>
+          discourse.add(ProposesClassify.merge(cr, classification))
+        }
+
         if (cr.status == INSTANT || cr.status == APPROVED) {
-          discourse.add(Tags.merge(cr.proposesTags.head, post))
+          val tags = Tags.merge(cr.proposesTags.head, post)
+          discourse.add(tags)
+          cr.proposesClassifys.foreach{classification =>
+            discourse.add(Classifies.merge(classification, tags))
+          }
         }
       }
     }
 
+    //TODO: deletion of classifications?
     request.removedTags.foreach { tagReq =>
       val alreadyExisting = existRemTags.find(_.proposesTags.head.uuid == tagReq)
 

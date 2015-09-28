@@ -47,6 +47,7 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
             this.title = title || "";
             this.description = description || "";
             this.tags = angular.copy((tags || []).map(t => t.$encode ? t.$encode() : t));
+            this.tags.forEach(t => t.classifications = t.classifications || []);
             this.original = isOriginal ? {
                 title: this.title,
                 description: this.description,
@@ -70,12 +71,12 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
             let dirtyModel = _.omit(_.pick(this, _.keys(this.original)), (v, k) => this.original[k] === v);
 
             delete dirtyModel.tags;
-            let addedTags = _.reject(this.tags, t => t.id && _.any(this.original.tags, _.pick(t, "id"))).map(t => t.id ? _.pick(t, "id", "classifications") : _.pick(t, "title", "classifications"));
+            let addedTags = _.reject(this.tags, t => t.id && _.any(this.original.tags, orig => orig.id === t.id && orig.classifications.map(c => c.id) === t.classifications.map(c => c.id))).map(t => t.id ? _.pick(t, "id", "classifications") : _.pick(t, "title", "classifications"));
             let removedTags = _.reject(this.original.tags, t => !t.id || _.any(this.tags, _.pick(t, "id"))).map(t => t.id);
 
             addedTags.forEach(tag => {
                 // TODO: why do we have nulls in classifications?
-                tag.classifications = _.compact(this.tagClassifications.concat(tag.classifications));
+                tag.classifications = _.compact(this.tagClassifications.concat(tag.classifications)).map(t => _.pick(t, "id"));
             });
 
             if (addedTags.length > 0)

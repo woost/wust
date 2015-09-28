@@ -7,7 +7,8 @@ angular.module("wust.elements").directive("tagEditor", function() {
                 getSuggestions: "&",
                 onChange: "&",
                 existingOnly: "@",
-                alwaysShow: "@"
+                alwaysShow: "@",
+                editClassification: "@"
             },
             templateUrl: "elements/ngTagEditor/ngTagEditor.html",
             controller: ["$scope", "$attrs", "$element", "$filter",

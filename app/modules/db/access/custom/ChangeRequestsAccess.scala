@@ -20,6 +20,7 @@ case class InstantChangeRequestAccess() extends NodeAccessDefault[ChangeRequest]
     implicit val ctx = new QueryContext
     val crDef = LabelNodeDefinition[TagChangeRequest](ChangeRequest.labels)
     val crTagsDef = RelationDefinition(crDef, ProposesTag, ConcreteFactoryNodeDefinition(Scope))
+    val crClassifiesDef = RelationDefinition(crDef, ProposesClassify, ConcreteFactoryNodeDefinition(Classification))
     val postDef = LabelNodeDefinition[Post](Set.empty) //matching real posts and hidden posts without any label just by their relations
     val tagsDef = HyperNodeDefinition(ConcreteFactoryNodeDefinition(Scope), Tags, postDef)
     val connectsDef = ConcreteFactoryNodeDefinition(Connects)
@@ -48,13 +49,14 @@ case class InstantChangeRequestAccess() extends NodeAccessDefault[ChangeRequest]
     $userCondition
     with ${ postDef.name }, relation, ${ crDef.name } order by ${ crDef.name }.timestamp skip ${ skip } limit ${ limit }
     optional match ${ crTagsDef.toQuery(false, true) }
+    optional match ${ crClassifiesDef.toQuery(false, true) }
     optional match ${ tagsDef.toQuery(true, false) }
     optional match ${ tagClassifiesDef.toQuery(true, false) }
     optional match ${ connDef.toQuery(false, true) }, ${ classifiesDef.toQuery(true, false) }
     return *
     """
 
-    val params = userParams ++ crDef.parameterMap ++ tagsDef.parameterMap ++ connDef.parameterMap ++ classifiesDef.parameterMap
+    val params = userParams ++ crDef.parameterMap ++ crTagsDef.parameterMap ++ crClassifiesDef.parameterMap ++ tagsDef.parameterMap ++ connDef.parameterMap ++ classifiesDef.parameterMap
 
     val discourse = Discourse(db.queryGraph(query, params))
 
@@ -98,18 +100,20 @@ case class PostChangeRequestAccess() extends RelationAccessDefault[Post, ChangeR
       val updatedDef = LabelNodeDefinition[TagChangeRequest](nodeFactory.labels)
       val postDef = FactoryUuidNodeDefinition(Post, param.baseUuid)
       val votesDef = RelationDefinition(userDef, Votes, updatedDef)
-      val scopeDef = ConcreteFactoryNodeDefinition(Scope)
-      val proposes = RelationDefinition(updatedDef, ProposesTag, scopeDef)
+      val proposesTagDef = RelationDefinition(updatedDef, ProposesTag, ConcreteFactoryNodeDefinition(Scope))
+      val proposesClassifyDef = RelationDefinition(updatedDef, ProposesClassify, ConcreteFactoryNodeDefinition(Classification))
 
       val query = s"""
       match ${ updatedDef.toQuery }-[:`${ Updated.endRelationType }`|`${ AddTags.endRelationType }`|`${ RemoveTags.endRelationType }`|`${ Deleted.endRelationType }`]->${ postDef.toQuery }
       where ${ updatedDef.name }.status = ${ PENDING }
       optional match ${ votesDef.toQuery(true, false) }
-      optional match ${ proposes.toQuery(false, true) }
+      optional match ${ proposesTagDef.toQuery(false, true) }
+      optional match ${ proposesClassifyDef.toQuery(false, true) }
       return *
       """
 
-      val discourse = Discourse(db.queryGraph(query, postDef.parameterMap ++ votesDef.parameterMap))
+      val params = postDef.parameterMap ++ votesDef.parameterMap ++ proposesTagDef.parameterMap ++ proposesClassifyDef.parameterMap
+      val discourse = Discourse(db.queryGraph(query, params))
       discourse.changeRequests
     }.getOrElse(Seq.empty)))
   }

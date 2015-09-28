@@ -33,12 +33,14 @@ object ChangeRequestFormat {
         ("id", JsString(n.uuid)),
         ("post", n.outRelationsAs(AddTagsToPost).headOption.map(r => Json.toJson(r.endNode)).getOrElse(JsNull)),
         ("tag", n.proposesTags.headOption.map(tag => Json.toJson(tag)).getOrElse(JsNull)),
+        ("classifications", Json.toJson(n.proposesClassifys)),
         ("type", JsString("AddTag"))
       )
       case n: RemoveTags    => Seq(
         ("id", JsString(n.uuid)),
         ("post", n.outRelationsAs(RemoveTagsToPost).headOption.map(r => Json.toJson(r.endNode)).getOrElse(JsNull)),
         ("tag", n.proposesTags.headOption.map(tag => Json.toJson(tag)).getOrElse(JsNull)),
+        ("classifications", Json.toJson(n.proposesClassifys)),
         ("type", JsString("RemoveTag"))
       )
       case n              =>

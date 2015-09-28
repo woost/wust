@@ -4,8 +4,8 @@
         </h2>
         <div validity-info="vm.node" property="title"></div>
     </div>
-    <div edit-taglist always-show="{{vm.alwaysShowTagSuggestions}}" set-focus="vm.focusEditClassifications" tags="vm.node.referenceNode ? vm.node.classifications : vm.node.tagClassifications" on-change="vm.node.onChange()" tag-type="classification" existing-only="true"></div>
-    <div edit-taglist always-show="{{vm.alwaysShowTagSuggestions}}" set-focus="vm.focusEditTags" tags="vm.node.tags" on-change="vm.node.onChange()" ng-class="{'is_invalid': vm.node.triedSave && !vm.node.validity.tags.valid}"></div>
+    <div edit-taglist ng-if="::vm.node.referenceNode !== undefined" always-show="{{vm.alwaysShowTagSuggestions}}" set-focus="vm.focusEditClassifications" tags="vm.node.classifications" on-change="vm.node.onChange()" tag-type="classification" existing-only="true"></div>
+    <div edit-taglist edit-classification="true" always-show="{{vm.alwaysShowTagSuggestions}}" set-focus="vm.focusEditTags" tags="vm.node.tags" on-change="vm.node.onChange()" ng-class="{'is_invalid': vm.node.triedSave && !vm.node.validity.tags.valid}"></div>
     <div validity-info="vm.node" property="tags"></div>
     <div class="text-center" style="cursor:pointer" ng-click="vm.previewEnabled = !vm.previewEnabled" data-title="preview" bs-tooltip><i class="fa" ng-class="{'fa-eye-slash': vm.previewEnabled, 'fa-eye': !vm.previewEnabled}"></i></div>
     <div ng-switch="vm.previewEnabled" class="description">

@@ -39,6 +39,7 @@ object EditNodeFormat {
       case n: AddTags    => Seq(
         ("id", JsString(n.uuid)),
         ("tag", n.proposesTags.headOption.map(t => Json.toJson(t)).getOrElse(JsNull)),
+        ("classifications", Json.toJson(n.proposesClassifys)),
         ("vote", n.inRelationsAs(Votes).headOption.map(vote => JsObject(Seq(("weight", JsNumber(vote.weight))))).getOrElse(JsNull)),
         ("applyThreshold", JsNumber(n.applyThreshold)),
         ("rejectThreshold", JsNumber(n.rejectThreshold)),
@@ -50,6 +51,7 @@ object EditNodeFormat {
       case n: RemoveTags    => Seq(
         ("id", JsString(n.uuid)),
         ("tag", n.proposesTags.headOption.map(t => Json.toJson(t)).getOrElse(JsNull)),
+        ("classifications", Json.toJson(n.proposesClassifys)),
         ("vote", n.inRelationsAs(Votes).headOption.map(vote => JsObject(Seq(("weight", JsNumber(vote.weight))))).getOrElse(JsNull)),
         ("applyThreshold", JsNumber(n.applyThreshold)),
         ("rejectThreshold", JsNumber(n.rejectThreshold)),
