@@ -1,8 +1,8 @@
 angular.module("wust.services").service("HistoryService", HistoryService);
 
-HistoryService.$inject = ["Auth", "Session", "Post", "DiscourseNode"];
+HistoryService.$inject = ["Auth", "Session", "Post", "DiscourseNode", "$rootScope"];
 
-function HistoryService(Auth, Session, Post, DiscourseNode) {
+function HistoryService(Auth, Session, Post, DiscourseNode, $rootScope) {
     let maximum = 8;
     let self = this;
 
@@ -15,9 +15,21 @@ function HistoryService(Auth, Session, Post, DiscourseNode) {
     this.updateCurrentView = updateCurrentView;
     this.addConnectToCurrentView = addConnectToCurrentView;
 
-    this.currentViewComponent = undefined;
+    let currentCommitUnregister, currentViewComponent;
+    this.setCurrentViewComponent = setCurrentViewComponent;
+
     if (Auth.isLoggedIn) {
         load();
+    }
+
+    function setCurrentViewComponent(component) {
+        if (currentCommitUnregister)
+            currentCommitUnregister();
+
+        currentViewComponent = component;
+        currentCommitUnregister = currentViewComponent.onCommit(() => {
+            $rootScope.$broadcast("component.changed");
+        });
     }
 
     function load() {
@@ -31,12 +43,12 @@ function HistoryService(Auth, Session, Post, DiscourseNode) {
     }
 
     function updateCurrentView(node) {
-        if (this.currentViewComponent === undefined)
+        if (currentViewComponent === undefined)
             return;
 
         //TODO: check whether node is tags relation and then update accordingly
 
-        let current = this.currentViewComponent.getWrap("graph");
+        let current = currentViewComponent.getWrap("graph");
         let existing = _.find(current.nodes, _.pick(node, "id"));
         if (existing !== undefined) {
             _.assign(existing, node);
@@ -50,10 +62,10 @@ function HistoryService(Auth, Session, Post, DiscourseNode) {
     }
 
     function addConnectToCurrentView(refId, response) {
-        if (this.currentViewComponent === undefined)
+        if (currentViewComponent === undefined)
             return;
 
-        let current = this.currentViewComponent.getWrap("graph");
+        let current = currentViewComponent.getWrap("graph");
         if (!_.any(current.nodes, {id: refId}))
             return;
 

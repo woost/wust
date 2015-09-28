@@ -54,7 +54,7 @@ function FocusCtrl(Helpers, $stateParams, $state, HistoryService, rootNode, Conn
 
     // we are viewing details about a node, so add it to the nodehistory
     HistoryService.add(vm.graphComponent.rootNode);
-    HistoryService.currentViewComponent = component;
+    HistoryService.setCurrentViewComponent(component);
 
     ConnectedComponents.$find($stateParams.id).$then(response => {
         vm.componentLoading = false;
