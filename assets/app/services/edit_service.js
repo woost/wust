@@ -84,7 +84,7 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
             let additionTags = oldTags.map(t => {
                 return {
                     id: t.id,
-                    classifications: _.difference(t.classifications, origTags[t.id].classifications)
+                    classifications: _.reject(t.classifications, c => _.any(origTags[t.id].classifications, _.pick(c, "id")))
                 };
             }).filter(t => t.classifications.length);
 
@@ -92,7 +92,7 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
             let removalTags = oldTags.map(t => {
                 return {
                     id: t.id,
-                    classifications: _.difference(origTags[t.id].classifications, t.classifications)
+                    classifications: _.reject(origTags[t.id].classifications, c => _.any(t.classifications, _.pick(c, "id")))
                 };
             }).filter(t => t.classifications.length);
 
@@ -102,6 +102,9 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
             addedTags.forEach(tag => {
                 // TODO: why do we have nulls in classifications?
                 tag.classifications = _.compact(this.tagClassifications.concat(tag.classifications)).map(t => _.pick(t, "id"));
+            });
+            removedTags.forEach(tag => {
+                tag.classifications = _.compact(tag.classifications).map(t => _.pick(t, "id"));
             });
 
 
