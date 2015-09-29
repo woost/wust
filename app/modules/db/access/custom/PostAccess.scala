@@ -127,8 +127,21 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
         remTags
       }
 
+      //TODO handle subsets or all requests separately?
+      tagReq.classifications.map(c => Classification.matchesOnUuid(c.id)).foreach{ classification =>
+        discourse.add(ProposesClassify.merge(cr, classification))
+      }
+
       if (cr.status == INSTANT || cr.status == APPROVED) {
-        discourse.remove(Tags.matches(cr.proposesTags.head, post))
+        val tags = Tags.matches(cr.proposesTags.head, post)
+        if (cr.proposesClassifys.isEmpty) {
+          discourse.remove(tags)
+        } else {
+          discourse.add(tags)
+          cr.proposesClassifys.foreach{classification =>
+            discourse.remove(Classifies.matches(classification, tags))
+          }
+        }
       }
     }
 
