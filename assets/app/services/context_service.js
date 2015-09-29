@@ -20,6 +20,8 @@ function ContextService($rootScope, Helpers, KarmaService) {
     }
 
     function setContext(context) {
+        context = angular.copy(context);
+        context.classifications = [];
         this.currentContexts.length = 0;
         this.currentContexts.push(context);
         updateKarma();
