@@ -47,6 +47,7 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
             this.title = title || "";
             this.description = description || "";
             this.tags = angular.copy((tags || []).map(t => t.$encode ? t.$encode() : t));
+            this.tags.forEach(t => t.classifications = t.classifications || []);
             this.original = isOriginal ? {
                 title: this.title,
                 description: this.description,
