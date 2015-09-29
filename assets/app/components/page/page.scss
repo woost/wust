@@ -23,6 +23,7 @@ main {
                 width: 400px;
                 min-width: 400px;
                 &.fullscreen {
+                    background: white; // instead of being transparent. (Transparent would show the sidebar-toggle-buttons)
                     width: 100%;
                     min-width: 100%;
                     z-index: $zindex_sidebar_fullscreen;
