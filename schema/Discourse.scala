@@ -57,7 +57,8 @@ object WustSchema {
 
     def hide() = {
       backupLabels = rawItem.labels.mkString(":")
-      rawItem.labels.clear()
+      //TODO: workaround for rawItem.labels.clear(), which leaves some nodes?!
+      rawItem.labels --= rawItem.labels.toList
       rawItem.labels ++= Hidden.labels
       Hidden.wrap(rawItem)
     }
