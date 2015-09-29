@@ -17,7 +17,7 @@ object ChangeRequestFormat {
     def writes(node: ChangeRequest) = JsObject(node match {
       case n: Updated        => Seq(
         ("id", JsString(n.uuid)),
-        ("post", n.outRelationsAs(UpdatedToPost).headOption.map(r => Json.toJson(r.endNode)).getOrElse(JsNull)),
+        ("post", n.outRelationsAs(UpdatedEnd).headOption.map(r => Json.toJson(r.endNode)).getOrElse(JsNull)),
         ("oldTitle", JsString(n.oldTitle)),
         ("newTitle", JsString(n.newTitle)),
         ("oldDescription", JsString(n.oldDescription.getOrElse(""))),
@@ -26,19 +26,19 @@ object ChangeRequestFormat {
       )
       case n: Deleted        => Seq(
         ("id", JsString(n.uuid)),
-        ("post", n.outRelationsAs(DeletedToPost).headOption.map(r => Json.toJson(r.endNode)).getOrElse(JsNull)),
+        ("post", n.outRelationsAs(DeletedEnd).headOption.map(r => Json.toJson(r.endNode)).getOrElse(JsNull)),
         ("type", JsString("Delete"))
       )
       case n: AddTags    => Seq(
         ("id", JsString(n.uuid)),
-        ("post", n.outRelationsAs(AddTagsToPost).headOption.map(r => Json.toJson(r.endNode)).getOrElse(JsNull)),
+        ("post", n.outRelationsAs(AddTagsEnd).headOption.map(r => Json.toJson(r.endNode)).getOrElse(JsNull)),
         ("tag", n.proposesTags.headOption.map(tag => Json.toJson(tag)).getOrElse(JsNull)),
         ("classifications", Json.toJson(n.proposesClassifys)),
         ("type", JsString("AddTag"))
       )
       case n: RemoveTags    => Seq(
         ("id", JsString(n.uuid)),
-        ("post", n.outRelationsAs(RemoveTagsToPost).headOption.map(r => Json.toJson(r.endNode)).getOrElse(JsNull)),
+        ("post", n.outRelationsAs(RemoveTagsEnd).headOption.map(r => Json.toJson(r.endNode)).getOrElse(JsNull)),
         ("tag", n.proposesTags.headOption.map(tag => Json.toJson(tag)).getOrElse(JsNull)),
         ("classifications", Json.toJson(n.proposesClassifys)),
         ("type", JsString("RemoveTag"))

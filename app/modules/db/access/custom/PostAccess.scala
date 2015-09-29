@@ -198,7 +198,7 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
     val tagsDef = HyperNodeDefinition(tagDef, Tags, nodeDef)
     val tagClassDef = ConcreteFactoryNodeDefinition(Classification)
     val tagClassifiesDef = RelationDefinition(tagClassDef, Classifies, tagsDef)
-    val connDef = RelationDefinition(nodeDef, PostToConnects, connectsDef)
+    val connDef = RelationDefinition(nodeDef, ConnectsStart, connectsDef)
     val classDef = ConcreteFactoryNodeDefinition(Classification)
     val classifiesDef = RelationDefinition(classDef, Classifies, connectsDef)
 

@@ -53,7 +53,7 @@ object TaggedTaggable {
       val connectsDef = ConcreteFactoryNodeDefinition(Connects)
       val tagsDef = HyperNodeDefinition(tagDef, Tags, nodeDef)
       val tagClassifiesDef = RelationDefinition(ConcreteFactoryNodeDefinition(Classification), Classifies, tagsDef)
-      val connDef = RelationDefinition(nodeDef, PostToConnects, connectsDef)
+      val connDef = RelationDefinition(nodeDef, ConnectsStart, connectsDef)
       val classifiesDef = RelationDefinition(ConcreteFactoryNodeDefinition(Classification), Classifies, connectsDef)
 
       val query = s"""

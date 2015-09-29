@@ -71,7 +71,7 @@ object EditNodeFormat {
       ("title", JsString(n.title)),
       ("description", JsString(n.description.getOrElse(""))),
       ("tags", Json.toJson(n.inRelationsAs(Tags).sortBy(_.uuid))),
-      ("classifications", JsArray(n.outRelationsAs(PostToConnects).map(_.endNode).flatMap(con => con.rev_classifies.sortBy(_.uuid).map((_, con))).groupBy(_._1).mapValues(_.map(_._2)).map(classificationWriter(n, _)).toSeq)),
+      ("classifications", JsArray(n.outRelationsAs(ConnectsStart).map(_.endNode).flatMap(con => con.rev_classifies.sortBy(_.uuid).map((_, con))).groupBy(_._1).mapValues(_.map(_._2)).map(classificationWriter(n, _)).toSeq)),
       ("timestamp", Json.toJson(JsNumber(n.timestamp))),
       //TODO: merge the three arrays into one?
       ("requestsEdit", Json.toJson(n.inRelationsAs(Updated))),

@@ -54,7 +54,7 @@ case class UserContributions() extends RelationAccessDefault[User, Post] {
     val postDef = ConcreteFactoryNodeDefinition(Post)
     val tagsDef = HyperNodeDefinition(ConcreteFactoryNodeDefinition(Scope), Tags, postDef)
     val connectsDef = ConcreteFactoryNodeDefinition(Connects)
-    val connDef = RelationDefinition(postDef, PostToConnects, connectsDef)
+    val connDef = RelationDefinition(postDef, ConnectsStart, connectsDef)
     val tagClassifiesDef = RelationDefinition(ConcreteFactoryNodeDefinition(Classification), Classifies, tagsDef)
     val classifiesDef = RelationDefinition(ConcreteFactoryNodeDefinition(Classification), Classifies, connectsDef)
 
@@ -108,7 +108,7 @@ case class UserHasKarmaLog() extends StartRelationAccessDefault[User, KarmaLog, 
     val connectsDef = ConcreteFactoryNodeDefinition(Connects)
     val tagsDef = HyperNodeDefinition(tagDef, Tags, nodeDef)
     val tagClassifiesDef = RelationDefinition(ConcreteFactoryNodeDefinition(Classification), Classifies, tagsDef)
-    val connDef = RelationDefinition(nodeDef, PostToConnects, connectsDef)
+    val connDef = RelationDefinition(nodeDef, ConnectsStart, connectsDef)
     val classifiesDef = RelationDefinition(ConcreteFactoryNodeDefinition(Classification), Classifies, connectsDef)
 
     val query = s"""
@@ -162,7 +162,7 @@ case class UserMarks() extends StartRelationAccessDefault[User, Marks, Post] {
     val connectsDef = ConcreteFactoryNodeDefinition(Connects)
     val tagsDef = HyperNodeDefinition(tagDef, Tags, nodeDef)
     val tagClassifiesDef = RelationDefinition(ConcreteFactoryNodeDefinition(Classification), Classifies, tagsDef)
-    val connDef = RelationDefinition(nodeDef, PostToConnects, connectsDef)
+    val connDef = RelationDefinition(nodeDef, ConnectsStart, connectsDef)
     val classifiesDef = RelationDefinition(ConcreteFactoryNodeDefinition(Classification), Classifies, connectsDef)
 
     val query = s"""

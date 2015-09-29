@@ -24,7 +24,7 @@ case class InstantChangeRequestAccess() extends NodeAccessDefault[ChangeRequest]
     val postDef = LabelNodeDefinition[Post](Set.empty) //matching real posts and hidden posts without any label just by their relations
     val tagsDef = HyperNodeDefinition(ConcreteFactoryNodeDefinition(Scope), Tags, postDef)
     val connectsDef = ConcreteFactoryNodeDefinition(Connects)
-    val connDef = RelationDefinition(postDef, PostToConnects, connectsDef)
+    val connDef = RelationDefinition(postDef, ConnectsStart, connectsDef)
     val tagClassifiesDef = RelationDefinition(ConcreteFactoryNodeDefinition(Classification), Classifies, tagsDef)
     val classifiesDef = RelationDefinition(ConcreteFactoryNodeDefinition(Classification), Classifies, connectsDef)
 
@@ -34,7 +34,7 @@ case class InstantChangeRequestAccess() extends NodeAccessDefault[ChangeRequest]
       val condition = s"""
       and not((${userDef.name})-[:`${Votes.relationType}`]->(${crDef.name}))
       and not((${userDef.name})-[:`${Skipped.relationType}`]->(${crDef.name}))
-      and not((${userDef.name})-[:`${UserToUpdated.relationType}`|`${UserToDeleted.relationType}`|`${UserToAddTags.relationType}`|`${UserToRemoveTags.relationType}`]->(${crDef.name}))
+      and not((${userDef.name})-[:`${UpdatedStart.relationType}`|`${DeletedStart.relationType}`|`${AddTagsStart.relationType}`|`${RemoveTagsStart.relationType}`]->(${crDef.name}))
       """
       (matcher, condition, userDef.parameterMap)
     }.getOrElse(("", "", Map.empty))
