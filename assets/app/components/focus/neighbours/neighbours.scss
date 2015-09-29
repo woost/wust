@@ -21,6 +21,7 @@
     @include align-content(stretch);
 
     .neighbours_content {
+        width: $content-max-width;
         max-width: $content-max-width;
         min-width: $content-min-width;
 
