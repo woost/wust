@@ -3,7 +3,7 @@ package tasks
 import model.WustSchema._
 import renesca.parameter.implicits._
 import org.unbescape.html.HtmlEscape.unescapeHtml
-import model.Helpers.tagTitleColor
+import wust.Shared.tagTitleColor
 
 trait SeedTools {
   val maxTitleLength = 140
