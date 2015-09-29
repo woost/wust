@@ -43,7 +43,7 @@ function DiscourseNodeList() {
                 }
 
                 let self = this;
-                this.component.onCommit(changes => {
+                this.deregisterCommit = this.component.onCommit(changes => {
                     changes.newNodes.forEach(r => {
                         if (r.isHyperRelation) {
                             if (self.connectorType === SUCCESSORS && r.startId === self.node.id)
@@ -57,6 +57,10 @@ function DiscourseNodeList() {
 
             get list() {
                 return this.node[this.nodeProperty];
+            }
+
+            deregister() {
+                this.deregisterCommit();
             }
 
             exists(elem) {

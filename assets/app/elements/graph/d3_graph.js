@@ -101,7 +101,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.force.on("tick", this.tick.bind(this));
 
                 // react on graph changes
-                this.graph.onCommit(this.updateGraph.bind(this));
+                let deregisterCommit = this.graph.onCommit(this.updateGraph.bind(this));
+                scope.$on("$destroy", deregisterCommit);
 
                 this.updateGraph({
                     newNodes: this.graph.nodes

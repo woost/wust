@@ -16,9 +16,9 @@ function focusNeighbours() {
     };
 }
 
-NeighboursCtrl.$inject = ["DiscourseNodeList"];
+NeighboursCtrl.$inject = ["$scope", "DiscourseNodeList"];
 
-function NeighboursCtrl(DiscourseNodeList) {
+function NeighboursCtrl($scope, DiscourseNodeList) {
     let vm = this;
 
     vm.references = DiscourseNodeList.write.Post.successors(vm.component, vm.component.rootNode, "connectsTo");
@@ -26,4 +26,10 @@ function NeighboursCtrl(DiscourseNodeList) {
     vm.replies = DiscourseNodeList.write.Connectable.predecessors(vm.component, vm.component.rootNode, "connectsFrom");
         // .nested(DiscourseNodeList.write.Connectable.predecessors, "connectsFrom");
     vm.parallels = DiscourseNodeList.read.parallels(vm.component, vm.component.rootNode);
+
+    $scope.$on("$destroy", () => {
+        vm.references.model.deregister();
+        vm.replies.model.deregister();
+        vm.parallels.model.deregister();
+    });
 }
