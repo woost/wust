@@ -63,12 +63,14 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
 
     request.addedTags.foreach { tagReq =>
       val alreadyExisting = existAddTags.find { addTag =>
-        if (tagReq.id.isDefined)
+        val sameTag = if (tagReq.id.isDefined)
           addTag.proposesTags.head.uuid == tagReq.id.get
         else if (tagReq.title.isDefined)
           addTag.proposesTags.head.title == tagReq.title.get
         else
           false
+
+        sameTag && tagReq.classifications.flatMap(_.id).toSet == addTag.proposesClassifys.map(_.uuid).toSet
       }
 
       alreadyExisting.foreach { exist =>
@@ -86,16 +88,14 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
         // we create a new change request as there is no existing one here
         val addTags = AddTags.create(user, post, applyThreshold = applyThreshold)
         discourse.add(addTags, tag, ProposesTag.create(addTags, tag))
+        tagReq.classifications.flatMap(tagConnectRequestToClassification(_)).foreach{classification =>
+          discourse.add(ProposesClassify.merge(addTags, classification))
+        }
         handleInitialChange(addTags, user, authorBoost = authorBoost, approvalSum = approvalSum).foreach(discourse.add(_))
         addTags
       }
 
       crOpt.foreach { cr =>
-        //TODO handle subsets or all requests separately?
-        tagReq.classifications.flatMap(tagConnectRequestToClassification(_)).foreach{classification =>
-          discourse.add(ProposesClassify.merge(cr, classification))
-        }
-
         if (cr.status == INSTANT || cr.status == APPROVED) {
           val tags = Tags.merge(cr.proposesTags.head, post)
           discourse.add(tags)
@@ -108,7 +108,9 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
 
     //TODO: deletion of classifications?
     request.removedTags.foreach { tagReq =>
-      val alreadyExisting = existRemTags.find(_.proposesTags.head.uuid == tagReq)
+      val alreadyExisting = existRemTags.find { remTag =>
+        remTag.proposesTags.head.uuid == tagReq && tagReq.classifications.flatMap(_.id).toSet == remTag.proposesClassifys.map(_.uuid).toSet
+      }
 
       alreadyExisting.foreach { exist =>
         if (exist.rev_votes.headOption.isEmpty) {
@@ -123,13 +125,11 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
         val remTags = RemoveTags.create(user, post, applyThreshold = applyThreshold)
         val tag = Scope.matchesOnUuid(tagReq.id)
         discourse.add(remTags, tag, ProposesTag.create(remTags, tag))
+        tagReq.classifications.map(c => Classification.matchesOnUuid(c.id)).foreach{ classification =>
+          discourse.add(ProposesClassify.merge(remTags, classification))
+        }
         handleInitialChange(remTags, user, authorBoost = authorBoost, approvalSum = approvalSum).foreach(discourse.add(_))
         remTags
-      }
-
-      //TODO handle subsets or all requests separately?
-      tagReq.classifications.map(c => Classification.matchesOnUuid(c.id)).foreach{ classification =>
-        discourse.add(ProposesClassify.merge(cr, classification))
       }
 
       if (cr.status == INSTANT || cr.status == APPROVED) {
