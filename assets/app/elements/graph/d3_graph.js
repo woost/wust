@@ -1247,19 +1247,24 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     let endNode = this.arrowToResponse ? this.dragStartNode : this.hoveredNode;
 
                     if(!startNode.isHyperRelation && startNode !== endNode) {
-                        // TODO: we need to make it impossible to drag on self loops and incident relations,
-                        // is assured by backend.
-                        EditService.connectNodes(startNode, endNode).$then(response => {
-                            let connects = _.find(response.graph.nodes, n => n.isHyperRelation && startNode.id === n.startId);
-                            if (connects === undefined) {
-                                console.warn(`cannot find connects relation for tag-modal: ${startNode} -> ${endNode}`);
-                                return;
-                            }
+                        let existingConnects = _.find(this.graph.nodes, n => n.isHyperRelation && n.startId === startNode.id && n.endId === endNode.id);
+                        if (existingConnects) {
+                            // if there already is an existing connection, open the edit relation modal
+                            this.editNode(existingConnects);
+                        } else {
+                            // TODO: we need to make it impossible to drag on self loops and incident relations, is assured by backend.
+                            EditService.connectNodes(startNode, endNode).$then(response => {
+                                let connects = _.find(response.graph.nodes, n => n.isHyperRelation && startNode.id === n.startId && endNode.id === n.endId);
+                                if (connects === undefined) {
+                                    console.warn(`cannot find connects relation for tag-modal: ${startNode} -> ${endNode}`);
+                                    return;
+                                }
 
-                            connects.startNode = startNode;
-                            connects.endNode = endNode;
-                            TagRelationEditService.show(connects, () => this.disconnectHyperRelation(connects), true);
-                        });
+                                connects.startNode = startNode;
+                                connects.endNode = endNode;
+                                TagRelationEditService.show(connects, () => this.disconnectHyperRelation(connects), true);
+                            });
+                        }
                     }
                 }
             }
