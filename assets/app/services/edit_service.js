@@ -165,8 +165,9 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
                         let added = data.requestsTags.filter(t => !t.isRemove && t.status > 0);
                         let [tagAdd, classifyAdd] = _.partition(added, t => _.isEmpty(t.classifications));
                         let addKeeped = this.original.tags.filter(t => !_.any(tagAdd, o => t.tag.id === o.id));
+                        let newAndKeeped = addKeeped.concat(data.tags);
                         classifyAdd.forEach(t => {
-                            let exist = _.find(addKeeped, k => t.tag.id === k.id);
+                            let exist = _.find(newAndKeeped, k => t.tag.id === k.id);
                             exist.classifications = _.uniq(t.classifications.concat(exist.classifications), "id");
                         });
 
