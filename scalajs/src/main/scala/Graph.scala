@@ -194,31 +194,32 @@ class Node(val rawNode: RawNode, inHyperGraph: Boolean) extends NodeBase {
   @JSExport def startId = null
   @JSExport def endId = null
 
+  def sortQualityRecordTags(qualityTags: Set[(Double, Set[RecordTag])]): Set[RecordTag] = {
+    qualityTags.flatMap {
+      case (quality, tags) => tags.map(quality -> _)
+    }.groupBy(_._2.id).values.map(q => q.unzip).map {
+      case (qualities, tags) =>
+        val quality = qualities.sum / qualities.size
+        val tag = tags.head
+        // TODO: this really is a hack, we should create a new tag object!
+        tag.quality = quality
+        tag
+    }.toSet
+  }
+
   override def classifications:Set[RecordTag] = {
     val accessor = if (inHyperGraph) outRelations else successors
     val connects = accessor.collect { case hr: HyperRelation => hr }
 
-    val connectsClassifications = if (connects.isEmpty)
-      rawNode.classifications // already contains quality
-    else {
-      // remove duplicates by id
-      // we have duplicate tags, because one post can be an idea for many other posts
-      connects.map(c => (c.quality, c.tags)).flatMap {
-        case (quality, tags) => tags.map(quality -> _)
-      }.groupBy(_._2.id).values.map(q => q.unzip).map {
-        case (qualities, tags) =>
-          val quality = qualities.sum / qualities.size
-          val tag = tags.head
-          // TODO: this really is a hack, we should create a new tag object!
-          tag.quality = quality
-          tag
-      }.toSet
+    val connectsClassifications = if (connects.isEmpty) {
+      rawNode.classifications.map(c => (c.quality, Set(c)))
+    } else {
+      connects.toSet.map((c: HyperRelation) => (c.quality, c.tags.toSet))
     }
 
-    //TODO quality for tag classifications
-    val tagsClassifications = tags.flatMap(_.classifications.map(_.toSet).getOrElse(Set.empty))
+    val tagsClassifications = tags.filterNot(_.classifications.isEmpty).toSet.map((t: RecordTag) => (t.quality, t.classifications.get.toSet))
 
-    (connectsClassifications ++ tagsClassifications).groupBy(_.id).map(_._2.head).toSet
+    sortQualityRecordTags(connectsClassifications ++ tagsClassifications)
   }
 
   @JSExport def encode() = js.Dynamic.literal(id = id, title = title, description = description.orUndefined, timestamp = timestamp, quality = quality, viewCount = viewCount, classifications = classificationsJs, isHyperRelation = isHyperRelation, tags = tags)
