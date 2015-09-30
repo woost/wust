@@ -82,6 +82,7 @@
         "renesca",
         "geometry",
         "JsDiff",
-        "chroma"
+        "chroma",
+        "hljs",
     ]
 }
