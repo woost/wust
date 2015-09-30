@@ -32,7 +32,7 @@ var compiledStyles = compileSass(stylesTree, {
     sassDir: ".",
 });
 
-var dependencies = mergeTrees(["node_modules", "bower_components", "public"], {overwrite: true});
+var dependencies = mergeTrees(["node_modules", "bower_components", "assets/javascripts"], {overwrite: true});
 
 var staticAssetsCss = funnel("static_assets", {
     include: [ "**/*.css" ],
@@ -122,7 +122,8 @@ var scripts = concat(mergeTrees([appScripts,htmlTemplates,dependencies,staticAss
         min("angular-storage-no-cookies/dist/angular-storage.js"),
         min("angular-restmod/dist/angular-restmod-bundle.js"),
         min("angular-ui-switch/angular-ui-switch.js"),
-        min("highlightjs/highlight.pack.js"),
+
+        "highlightjs/highlight.pack.js",
 
         "lodium/lodium.js",
         "marked/marked.min.js",

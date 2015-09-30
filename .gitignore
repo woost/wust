@@ -15,6 +15,7 @@ tmp
 /.settings
 
 /magic
+/public
 
 /node_modules
 /bower_components
