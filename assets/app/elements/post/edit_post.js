@@ -9,6 +9,7 @@ function editPost() {
         scope: {
             node: "=",
             inputFocus: "=",
+            previewEnabled: "=",
         },
         controller: editPostCtrl,
         controllerAs: "vm",

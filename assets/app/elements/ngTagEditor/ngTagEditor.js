@@ -8,6 +8,7 @@ angular.module("wust.elements").directive("tagEditor", function() {
                 onChange: "&",
                 existingOnly: "@",
                 alwaysShow: "@",
+                emptyShow: "@",
                 editClassification: "@",
                 placeholder: "@"
             },

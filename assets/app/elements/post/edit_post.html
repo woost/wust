@@ -4,9 +4,8 @@
         </h2>
         <div validity-info="vm.node" property="title"></div>
     </div>
-    <div edit-taglist edit-classification="true" always-show="true" set-focus="vm.focusEditTags" tags="vm.node.tags" on-change="vm.node.onChange()" ng-class="{'is_invalid': vm.node.triedSave && !vm.node.validity.tags.valid}"></div>
+    <div edit-taglist edit-classification="true" set-focus="vm.focusEditTags" tags="vm.node.tags" on-change="vm.node.onChange()" ng-class="{'is_invalid': vm.node.triedSave && !vm.node.validity.tags.valid}"></div>
     <div validity-info="vm.node" property="tags"></div>
-    <div class="text-center" style="cursor:pointer" ng-click="vm.previewEnabled = !vm.previewEnabled" data-title="preview" bs-tooltip><i class="fa" ng-class="{'fa-eye-slash': vm.previewEnabled, 'fa-eye': !vm.previewEnabled}"></i></div>
     <div ng-switch="vm.previewEnabled" class="description">
         <div ng-switch-when="true" markdown="vm.node.description"></div>
         <div ng-switch-default edit-post-description node="vm.node"></div>

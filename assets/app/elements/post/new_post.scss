@@ -1,0 +1,40 @@
+.new_post_directive {
+    margin: 0px;
+    .title {
+        outline: none;
+        border-radius: 3px;
+        border: 2px solid transparent;
+        margin-bottom: 10px;
+        &[contenteditable='true']{
+            background: white;
+            border: 1px solid #CCC;
+            padding: 10px;
+            min-height: 55px; // firefox fix
+        }
+        &:focus, &:focus:hover  {
+            background: #FFF;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.15) inset;
+        }
+    }
+
+    // overwrite bootstrap
+    // https://github.com/twbs/bootstrap/blob/b8bc20432f93385989291f2a67112e29b97de682/dist/css/bootstrap.css#L2923-2939
+    .form-inline  {
+        width: 100%;
+        .form-group {
+            width: 100%;
+            input {
+                width: 100%;
+            }
+        }
+        .form-control {
+            width: 100%;
+            display: block;
+        }
+    }
+
+    .ace_editor {
+        border: 1px solid #CCC;
+        border-radius: 3px;
+    }
+}

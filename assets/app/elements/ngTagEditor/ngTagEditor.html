@@ -10,7 +10,7 @@
             </span>
             <input type="text" class="tag-input" placeholder="{{placeholder}}" ng-focus="focus = true" ng-blur="focus = false; unfocusedInput()" focus-me="setFocus" ng-model="search"/>
         </div>
-        <div class="tag-suggestions" ng-show="suggestions && (alwaysShow || focus)">
+        <div class="tag-suggestions" ng-show="suggestions && ((emptyShow && tags.length === 0) || alwaysShow || focus)">
             <span class="title">Suggestions:</span>
             <span ng-repeat="tag in suggestions track by tag.id" tag-label="tag" disable-link ng-mousedown="add(tag)"></span>
         </div>

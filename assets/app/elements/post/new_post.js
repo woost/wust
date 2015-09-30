@@ -9,7 +9,8 @@ function newPost() {
         scope: {
             node: "=",
             inputFocus: "=",
-            alwaysShowTagSuggestions: "@"
+            alwaysShowTagSuggestions: "@",
+            previewEnabled: "=",
         },
         controller: newPostCtrl,
         controllerAs: "vm",

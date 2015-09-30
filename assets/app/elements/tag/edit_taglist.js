@@ -12,6 +12,7 @@ function editTaglist() {
             onChange: "&",
             existingOnly: "@",
             alwaysShow: "@",
+            emptyShow: "@",
             tagType: "@",
             editClassification: "@"
         },

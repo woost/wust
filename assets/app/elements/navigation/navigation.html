@@ -1,7 +1,7 @@
 <nav id="navigation" class="navbar navbar navbar-fixed-top" role="navigation" ng-style="vm.contextStyle">
     <div class="container-fluid">
         <div class="navbar-header">
-            <button ng-if="::vm.Auth.isLoggedIn" id="edit_modal_toggle" type="button" class="btn btn-default navbar-btn" onclick="this.blur()" ng-click="vm.newDiscussion()">New<span class="hidden-xs">&nbsp;Discussion</span></button>
+            <button ng-if="::vm.Auth.isLoggedIn" id="edit_modal_toggle" type="button" class="btn btn-default navbar-btn" onclick="this.blur()" ng-click="vm.newDiscussion()">Start<span class="hidden-xs">&nbsp;Discussion</span></button>
         </div>
 
         <div ng-class="{search_results_visible: vm.search.resultsVisible, has_fullscreen: vm.fullscreen.hasFullscreen}">
