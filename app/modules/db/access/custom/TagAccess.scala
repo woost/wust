@@ -38,7 +38,7 @@ class TagAccess extends NodeReadBase[Scope] {
     discourse.scopes.find(_.uuid == uuid).map(s => Ok(Json.toJson(s))).getOrElse(NotFound(s"Cannot find node with uuid '$uuid'"))
   }
 
-  override def create(context: RequestContext) = {
+  override def create(context: RequestContext) = context.withUser {
     context.withJson { (request: TagAddRequest) =>
       //TODO: should accept description, too.
       //currently only handled by update.
@@ -56,7 +56,7 @@ class TagAccess extends NodeReadBase[Scope] {
     }
   }
 
-  override def update(context: RequestContext, uuid: String) = {
+  override def update(context: RequestContext, uuid: String) = context.withUser {
     context.withJson { (request: TagUpdateRequest) =>
       val node = Scope.matchesOnUuid(uuid)
       //TODO: normally we would want to set it back to None instead of ""
