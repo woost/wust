@@ -8,6 +8,7 @@
             background: white;
             border: 1px solid #CCC;
             padding: 10px;
+            min-height: 55px; // firefox fix
         }
         &:focus, &:focus:hover  {
             background: #FFF;
