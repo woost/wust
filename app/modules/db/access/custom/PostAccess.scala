@@ -13,12 +13,25 @@ import renesca.QueryHandler
 import renesca.Query
 import play.api.mvc.Results._
 import moderation.Moderation
+import wust.Shared.tagTitleColor
 import scala.concurrent._
 import ExecutionContext.Implicits.global
 
-case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
+case class PostAccess() extends NodeAccessDefault[Post] {
 
   val factory = Post
+
+  private def tagConnectRequestToScope(tag: TagConnectRequest) = {
+    if (tag.id.isDefined)
+      Some(Scope.matchesOnUuid(tag.id.get))
+    else if (tag.title.isDefined)
+      Some(Scope.merge(
+        title = tag.title.get,
+        color = tagTitleColor(tag.title.get),
+        merge = Set("title")))
+    else
+      None
+  }
 
   private def handleInitialChange(contribution: ChangeRequest, user: User, authorBoost: Long, approvalSum: Long) = {
     if (contribution.canApply(authorBoost)) {
@@ -70,7 +83,7 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
         else
           false
 
-        sameTag && tagReq.classifications.flatMap(_.id).toSet == addTag.proposesClassifys.map(_.uuid).toSet
+        sameTag && tagReq.classifications.map(_.id).toSet == addTag.proposesClassifys.map(_.uuid).toSet
       }
 
       alreadyExisting.foreach { exist =>
@@ -88,7 +101,7 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
         // we create a new change request as there is no existing one here
         val addTags = AddTags.create(user, post, applyThreshold = applyThreshold)
         discourse.add(addTags, tag, ProposesTag.create(addTags, tag))
-        tagReq.classifications.flatMap(tagConnectRequestToClassification(_)).foreach{classification =>
+        tagReq.classifications.map(c => Classification.matchesOnUuid(c.id)).foreach{classification =>
           discourse.add(ProposesClassify.merge(addTags, classification))
         }
         handleInitialChange(addTags, user, authorBoost = authorBoost, approvalSum = approvalSum).foreach(discourse.add(_))
@@ -107,7 +120,7 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
             else
               false
 
-            sameTag && addTag.proposesClassifys.map(_.uuid).toSet.subsetOf(tagReq.classifications.flatMap(_.id).toSet)
+            sameTag && addTag.proposesClassifys.map(_.uuid).toSet.subsetOf(tagReq.classifications.map(_.id).toSet)
           }.foreach(_.status = CONFLICT)
 
           val tags = Tags.merge(cr.proposesTags.head, post)
@@ -170,7 +183,7 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
     request.addedTags.flatMap(req => tagConnectRequestToScope(req).map((req, _))).foreach { case (req, tag) =>
       val tags = Tags.merge(tag, node)
       discourse.add(tags)
-      req.classifications.flatMap(tagConnectRequestToClassification(_)).foreach { classification =>
+      req.classifications.map(c => Classification.matchesOnUuid(c.id)).foreach { classification =>
         discourse.add(Classifies.merge(classification, tags))
       }
     }

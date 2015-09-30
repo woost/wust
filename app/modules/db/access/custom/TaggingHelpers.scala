@@ -5,35 +5,6 @@ import modules.db.Database._
 import modules.db._
 import renesca.Query
 import renesca.parameter.implicits._
-import modules.requests.{ClassificationConnectRequest, TagConnectRequest}
-import wust.Shared.tagTitleColor
-
-trait TagAccessHelper {
-  //TODO: should this be allowed? adding new classifications with title?
-  protected def tagConnectRequestToClassification(tag: ClassificationConnectRequest) = {
-    if (tag.id.isDefined)
-      Some(Classification.matchesOnUuid(tag.id.get))
-    else if (tag.title.isDefined)
-      Some(Classification.merge(
-        title = tag.title.get,
-        color = tagTitleColor(tag.title.get),
-        merge = Set("title")))
-    else
-      None
-  }
-
-  protected def tagConnectRequestToScope(tag: TagConnectRequest) = {
-    if (tag.id.isDefined)
-      Some(Scope.matchesOnUuid(tag.id.get))
-    else if (tag.title.isDefined)
-      Some(Scope.merge(
-        title = tag.title.get,
-        color = tagTitleColor(tag.title.get),
-        merge = Set("title")))
-    else
-      None
-  }
-}
 
 // adds tags to the results by querying for them and adding them to the graph
 // it might be better to implement this in the nodeaccess/relationaccess directly

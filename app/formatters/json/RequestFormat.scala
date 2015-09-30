@@ -5,22 +5,18 @@ import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
 object RequestFormat {
-  implicit val classificationConnectFormat = (
-    (__ \ "id").readNullable[String] and
-      (__ \ "title").readNullable[String]
-    )(ClassificationConnectRequest)
 
-  implicit val classificationDisconnectFormat = (__ \ "id").read[String].map(ClassificationDisconnectRequest(_))
+  implicit val classificationFormat = (__ \ "id").read[String].map(ClassificationRequest(_))
 
   implicit val tagConnectFormat = (
     (__ \ "id").readNullable[String] and
       (__ \ "title").readNullable[String] and
-      (__ \ "classifications").readNullable[List[ClassificationConnectRequest]]
+      (__ \ "classifications").readNullable[List[ClassificationRequest]]
     )(TagConnectRequest)
 
   implicit val tagDisconnectFormat = (
     (__ \ "id").read[String] and
-      (__ \ "classifications").readNullable[List[ClassificationDisconnectRequest]]
+      (__ \ "classifications").readNullable[List[ClassificationRequest]]
     )(TagDisconnectRequest)
 
   implicit val postAddFormat = (
@@ -37,8 +33,8 @@ object RequestFormat {
     )(PostUpdateRequest)
 
   implicit val connectableUpdateFormat = (
-      (__ \ "addedTags").readNullable[List[ClassificationConnectRequest]] and
-      (__ \ "removedTags").readNullable[List[ClassificationDisconnectRequest]]
+      (__ \ "addedTags").readNullable[List[ClassificationRequest]] and
+      (__ \ "removedTags").readNullable[List[ClassificationRequest]]
     )(ConnectsUpdateRequest)
 
   implicit val tagAddFormat = (__ \ "title").read[String].map(TagAddRequest(_))
