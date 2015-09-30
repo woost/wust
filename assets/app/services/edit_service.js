@@ -24,7 +24,6 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
 
             this.referenceNode = other.referenceNode;
             this.classifications = angular.copy((other.classifications || []).map(t => t.$encode ? t.$encode() : t));
-            this.tagClassifications = angular.copy((other.tagClassifications || []).map(t => t.$encode ? t.$encode() : t));
 
             this.apply(other, isOriginal, other.original);
         }
@@ -37,7 +36,6 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
             this.newDiscussion = false;
             this.referenceNode = undefined;
             this.classifications = [];
-            this.tagClassifications = [];
         }
 
         apply({
@@ -101,7 +99,7 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
 
             addedTags.forEach(tag => {
                 // TODO: why do we have nulls in classifications?
-                tag.classifications = _.compact(this.tagClassifications.concat(tag.classifications)).map(t => _.pick(t, "id"));
+                tag.classifications = _.compact(this.classifications.concat(tag.classifications)).map(t => _.pick(t, "id"));
             });
             removedTags.forEach(tag => {
                 tag.classifications = _.compact(tag.classifications).map(t => _.pick(t, "id"));
@@ -220,7 +218,8 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
         }
 
         onChange() {
-            this.tags.forEach(t => t.classifications = t.classifications || []);
+            this.classifications.forEach(c => c.implicit = true);
+            this.tags.forEach(t => t.classifications = _.uniq((t.classifications || []).filter(c => !c.implicit).concat(this.classifications), "id"));
 
             this.setValidityProperties();
 
