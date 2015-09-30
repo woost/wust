@@ -21,7 +21,7 @@ trait ModerationBase {
     //TODO: negative karmasum: reject changerequests automatically?
     def voteWeight(votersKarma: Long):Long = if (votersKarma > 0) log2(votersKarma) max 1 else 1 // log weight from paper WikiTrust
 
-    def postChangeThreshold(viewCount: Long):Long = sqrt(viewCount) + 2 // One needs min 256 karma to do instant edits on new posts
+    def postChangeThreshold(viewCount: Long):Long = sqrt(viewCount) + 8 // One needs min 256 karma to do instant edits on new posts
 
     def rejectPostChangeThreshold(applyThreshold: Long):Long = (-applyThreshold / 2) min -1
 
