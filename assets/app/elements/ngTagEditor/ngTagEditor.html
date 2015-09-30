@@ -2,7 +2,7 @@
     <div class="tag-editor" ng-class="{active:focus}" ng-click="setFocus = true">
         <div class="tag-draft">
             <span ng-repeat="tag in tags" tag-label="tag" disable-link>
-                <span ng-repeat="classification in tag.classifications" title="{{tag.title}}">
+                <span ng-repeat="classification in tag.classifications" title="{{classification.title}}">
                     <span colored-tag="classification" tagtype="circle" class="tag_circle"></span>
                 </span>
                 <i ng-if="editClassification" class="fa fa-pencil content" ng-click="$event.stopPropagation();" title="Classify post in context" data-on-change="onChange()" data-tag="tag" data-template-url="elements/ngTagEditor/classification_popover.html" data-container="body" data-placement="right" data-animation="am-flip-x" data-auto-close="1" bs-popover></i>
