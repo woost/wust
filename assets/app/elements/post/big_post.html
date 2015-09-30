@@ -24,6 +24,6 @@
         Show open change requests
     </a>
     <div ng-show="vm.showChanges">
-        <post-change-request changes="vm.changeRequests" on-delete-apply="vm.onDeleteApply()" on-tag-apply="vm.onTagApply(tag, isRemove)" on-apply="vm.onApply(node)"></post-change-request>
+        <post-change-request changes="vm.changeRequests" on-delete-apply="vm.onDeleteApply()" on-tag-apply="vm.onTagApply(change)" on-apply="vm.onApply(node)"></post-change-request>
     </div>
 </div>

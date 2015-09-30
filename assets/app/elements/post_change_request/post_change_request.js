@@ -47,7 +47,7 @@ function postChangeRequestCtrl(ChangeRequests) {
                 else if (change.type === "Delete")
                     vm.onDeleteApply();
                 else
-                    vm.onTagApply({tag: change.tag, isRemove: change.isRemove});
+                    vm.onTagApply({change: change});
             }
 
             response.conflictChangeRequests.forEach(cr => _.remove(vm.changes, _.pick(cr, "id")));

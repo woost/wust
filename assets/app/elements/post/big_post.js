@@ -70,11 +70,24 @@ function bigPostCtrl($state, Post, ModalEditService, ContextService, Auth) {
         $state.go("dashboard");
     }
 
-    function onTagApply(tag, isRemove) {
-        if (isRemove)
-            _.remove(vm.node.tags, _.pick(tag, "id"));
-        else
-            vm.node.tags.push(tag);
+    function onTagApply(change) {
+        if (change.isRemove) {
+            if (change.classifications.length > 0) {
+                let exist = _.find(vm.node.tags, _.pick(change.tag, "id"));
+                if (exist)
+                    change.classifications.forEach(c => _.remove(exist.classifications, _.pick(c, "id")));
+            } else {
+                _.remove(vm.node.tags, _.pick(change.tag, "id"));
+            }
+        } else {
+            let exist = _.find(vm.node.tags, _.pick(change.tag, "id"));
+            if (exist) {
+                Array.prototype.push.apply(exist.classifications, change.classifications);
+            } else {
+                change.tag.classifications = change.classifications;
+                vm.node.tags.push(change.tag);
+            }
+        }
     }
 
     function replyTo() {
