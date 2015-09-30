@@ -46,8 +46,12 @@ function postChangeRequestCtrl(ChangeRequests) {
                     vm.onApply({node: response.node});
                 else if (change.type === "Delete")
                     vm.onDeleteApply();
-                else
+                else {
+                    //TODO: need quality in change.tag
+                    let exist = _.find(response.node.tags, t => t.id === change.tag.id);
+                    change.tag = exist ? exist : change.tag;
                     vm.onTagApply({change: change});
+                }
             }
 
             response.conflictChangeRequests.forEach(cr => _.remove(vm.changes, _.pick(cr, "id")));
