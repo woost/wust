@@ -122,7 +122,7 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
     //TODO: deletion of classifications?
     request.removedTags.foreach { tagReq =>
       val alreadyExisting = existRemTags.find { remTag =>
-        remTag.proposesTags.head.uuid == tagReq.id && tagReq.classifications.flatMap(_.id).toSet == remTag.proposesClassifys.map(_.uuid).toSet
+        remTag.proposesTags.head.uuid == tagReq.id && tagReq.classifications.map(_.id).toSet == remTag.proposesClassifys.map(_.uuid).toSet
       }
 
       alreadyExisting.foreach { exist =>
@@ -153,7 +153,7 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
           //disable conlicting change request
           //TODO: code dup
           existRemTags.filter { remTag =>
-            remTag.proposesTags.head.uuid == tagReq.id && (!remTag.proposesClassifys.isEmpty || tagReq.classifications.isEmpty) && remTag.proposesClassifys.map(_.uuid).toSet.subsetOf(tagReq.classifications.map(_.id).toSet)
+            remTag.proposesTags.head.uuid == tagReq.id && (tagReq.classifications.isEmpty || !remTag.proposesClassifys.isEmpty && remTag.proposesClassifys.map(_.uuid).toSet.subsetOf(tagReq.classifications.map(_.id).toSet))
           }.foreach(_.status = CONFLICT)
 
           discourse.add(tags)

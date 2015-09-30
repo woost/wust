@@ -97,7 +97,7 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
             }).filter(t => t.classifications.length);
 
             let addedTags = localTags.map(t => _.pick(t, "title", "classifications")).concat(newTags.map(t => _.pick(t, "id", "classifications"))).concat(additionTags);
-            let removedTags = missingTags.map(t => _.pick("id", "classifications")).concat(removalTags);
+            let removedTags = missingTags.map(t => _.pick(t, "id")).concat(removalTags);
 
             addedTags.forEach(tag => {
                 // TODO: why do we have nulls in classifications?

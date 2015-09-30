@@ -330,7 +330,7 @@ object VotesTagsChangeRequestHelper extends ChangeRequestHelper[TagChangeRequest
         }
 
         existing.addTags.filter(_.uuid != request.uuid).filter { addTag =>
-          addTag.proposesTags.head.uuid == scope.uuid && (!addTag.proposesClassifys.isEmpty || classifications.isEmpty) && addTag.proposesClassifys.toSet.subsetOf(classifications.toSet)
+          addTag.proposesTags.head.uuid == scope.uuid && addTag.proposesClassifys.toSet.subsetOf(classifications.toSet)
         }.foreach { cr =>
           cr.status = CONFLICT
           discourse.add(cr)
@@ -348,7 +348,7 @@ object VotesTagsChangeRequestHelper extends ChangeRequestHelper[TagChangeRequest
         }
 
         existing.removeTags.filter(_.uuid != request.uuid).filter { remTag =>
-          remTag.proposesTags.head.uuid == scope.uuid && (!remTag.proposesClassifys.isEmpty || classifications.isEmpty) && remTag.proposesClassifys.toSet.subsetOf(classifications.toSet)
+          remTag.proposesTags.head.uuid == scope.uuid && (classifications.isEmpty || !remTag.proposesClassifys.isEmpty && remTag.proposesClassifys.toSet.subsetOf(classifications.toSet))
         }.foreach { cr =>
           cr.status = CONFLICT
           discourse.add(cr)
