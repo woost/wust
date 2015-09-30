@@ -23,7 +23,7 @@ function TagSuggestions(Search, DiscourseNode) {
         return Search.$search({
             title: title,
             label: label,
-            size: 8,
+            size: label === "CLASSIFICATION" ? 100 : 8,
             page: 0
         });
     }

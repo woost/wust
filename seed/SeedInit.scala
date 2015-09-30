@@ -21,9 +21,12 @@ object SeedDatabase extends Task with SeedTools {
         mergeClassification("Idea", color = Some(260)),
         mergeClassification("Pro", color = Some(135)),
         mergeClassification("Con", color = Some(21)),
-        mergeClassification("Bug", color = Some(57)),
+        mergeClassification("Bug", color = Some(50)),
         mergeClassification("Question", color = Some(301)),
-        mergeClassification("Answer", color = Some(280))
+        mergeClassification("Answer", color = Some(280)),
+        mergeClassification("Cause", color = Some(70)),
+        mergeClassification("Dependency", color = Some(110)),
+        mergeClassification("Done", color = Some(150))
       )
 
       discourse.add(UserGroup.merge(name = "everyone", merge = Set("name")))
