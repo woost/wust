@@ -50,7 +50,8 @@ object KarmaUpdate {
       )
 
       try {
-        tx.queryGraph(query, params)
+        val d = tx.queryGraph(query, params)
+        println(d)
       } catch {
         case e: Exception => println("EXCEPTION WHILE UPDATING KARMA:\n" + e)
       }
@@ -87,7 +88,7 @@ object KarmaUpdate {
     val tagDef = ConcreteFactoryNodeDefinition(Scope)
 
     val tagMatch = s"""
-    match (${karmaQuery.postDef.name})-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)
+    optional match (${karmaQuery.postDef.name})-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)
     with distinct connectable, ${karmaQuery.userDef.name}, ${karmaQuery.postDef.name}, karmaLog
     match ${tagDef.toQuery}
     where (${tagDef.name})-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`) or (${tagDef.name})-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(${karmaQuery.postDef.name})
