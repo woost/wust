@@ -99,7 +99,7 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
 
             addedTags.forEach(tag => {
                 // TODO: why do we have nulls in classifications?
-                tag.classifications = _.compact(this.classifications).map(t => _.pick(t, "id"));
+                tag.classifications = _.compact(tag.classifications).map(t => _.pick(t, "id"));
             });
             removedTags.forEach(tag => {
                 tag.classifications = _.compact(tag.classifications).map(t => _.pick(t, "id"));
