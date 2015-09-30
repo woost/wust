@@ -5,8 +5,8 @@
                 <span ng-repeat="classification in tag.classifications" title="{{tag.title}}">
                     <span colored-tag="classification" tagtype="circle" class="tag_circle"></span>
                 </span>
-                <i ng-if="editClassification" class="fa fa-pencil" ng-click="$event.stopPropagation();" title="Classify post in context" data-on-change="onChange()" data-tag="tag" data-template-url="elements/ngTagEditor/classification_popover.html" data-container="body" data-placement="right" data-animation="am-flip-x" data-auto-close="1" bs-popover></i>
-                <i class="remove fa fa-close" title="Remove tag" ng-click="remove($index); $event.stopPropagation();"></i>
+                <i ng-if="editClassification" class="fa fa-pencil content" ng-click="$event.stopPropagation();" title="Classify post in context" data-on-change="onChange()" data-tag="tag" data-template-url="elements/ngTagEditor/classification_popover.html" data-container="body" data-placement="right" data-animation="am-flip-x" data-auto-close="1" bs-popover></i>
+                <i class="remove fa fa-close right" title="Remove tag" ng-click="remove($index); $event.stopPropagation();"></i>
             </span>
             <input type="text" class="tag-input" placeholder="{{placeholder}}" ng-focus="focus = true" ng-blur="focus = false; unfocusedInput()" focus-me="setFocus" ng-model="search"/>
         </div>
