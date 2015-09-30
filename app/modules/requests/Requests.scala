@@ -3,6 +3,7 @@ package modules.requests
 // either references a new node (just by title) which should be created or it
 // refers to an existing node via id (then title is ignored)
 //TODO: this should be Either[String,String]!
+//TODO: classifications connect should always be id! not creation via title!
 case class ClassificationConnectRequest(id: Option[String], title: Option[String])
 case class ClassificationDisconnectRequest(id: String)
 case class TagConnectRequest(id: Option[String], title: Option[String], classificationsOption: Option[List[ClassificationConnectRequest]]) {
