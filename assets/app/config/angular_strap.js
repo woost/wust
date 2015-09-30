@@ -7,6 +7,7 @@ function strapConfig($modalProvider, $tooltipProvider) {
     html: true
   });
   angular.extend($tooltipProvider.defaults, {
-    animation: ""
+    animation: "",
+    container: "body"
   });
 }
