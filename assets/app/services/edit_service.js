@@ -218,8 +218,12 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
         }
 
         onChange() {
-            this.classifications.forEach(c => c.implicit = true);
-            this.tags.forEach(t => t.classifications = _.uniq((t.classifications || []).filter(c => !c.implicit).concat(this.classifications), "id"));
+            if (this.newDiscussion || this.referenceNode) {
+                this.classifications.forEach(c => c.implicit = true);
+                this.tags.forEach(t => t.classifications = _.uniq((t.classifications || []).filter(c => !c.implicit).concat(this.classifications), "id"));
+            } else {
+                this.tags.forEach(t => t.classifications = t.classifications || []);
+            }
 
             this.setValidityProperties();
 
