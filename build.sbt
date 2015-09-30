@@ -53,7 +53,8 @@ lazy val schema = (project in file("schema")).
     addCompilerPlugin("org.scalamacros" % "paradise" % paradiseVersion cross CrossVersion.full),
     sources in (Compile,doc) := Seq.empty,
     publishArtifact in (Compile, packageDoc) := false
-  )
+  ).
+    dependsOn(scalajsSharedJs)
 
 // ScalaJs
 // https://github.com/vmunier/play-with-scalajs-example
