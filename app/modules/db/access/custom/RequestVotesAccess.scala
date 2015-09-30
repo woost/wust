@@ -4,6 +4,7 @@ import controllers.api.nodes.{HyperConnectParameter, ConnectParameter, RequestCo
 import model.WustSchema.{Created => SchemaCreated, _}
 import modules.db.Database._
 import modules.db._
+import modules.db.types._
 import modules.karma._
 import modules.db.access.{EndRelationAccessDefault, EndRelationAccess}
 import play.api.libs.json._
@@ -22,6 +23,7 @@ trait ChangeRequestHelper[T <: ChangeRequest] {
 case class VotesChangeRequestAccess(sign: Long) extends EndRelationAccessDefault[User, Votes, Votable] {
 
   import formatters.json.EditNodeFormat.PostFormat
+  import formatters.json.EditNodeFormat.CRFormat
 
   val nodeFactory = User
 
@@ -130,7 +132,8 @@ case class VotesChangeRequestAccess(sign: Long) extends EndRelationAccessDefault
                 ))),
                 ("status", JsNumber(request.status)),
                 ("votes", JsNumber(request.approvalSum)),
-                ("node", nodeOpt.map(Json.toJson(_)).getOrElse(JsNull))
+                ("node", nodeOpt.map(Json.toJson(_)).getOrElse(JsNull)),
+                ("conflictChangeRequests", Json.toJson(discourse.changeRequests.filter(r => r != request && r.status == CONFLICT)))
               )))
             }
           case Left(err) =>
@@ -233,7 +236,7 @@ object VotesDeletedHelper extends ChangeRequestHelper[Deleted] {
 }
 
 object VotesTagsChangeRequestHelper extends ChangeRequestHelper[TagChangeRequest] {
-  private def requestGraph(tx: QueryHandler, req: TagChangeRequest) = {
+  private def requestGraphUnapply(tx: QueryHandler, req: TagChangeRequest) = {
     implicit val ctx = new QueryContext
     val tagDef = ConcreteFactoryNodeDefinition(Scope)
     val classDef = ConcreteFactoryNodeDefinition(Classification)
@@ -250,8 +253,37 @@ object VotesTagsChangeRequestHelper extends ChangeRequestHelper[TagChangeRequest
     Discourse(tx.queryGraph(query, tagsDef.parameterMap))
   }
 
+  private def requestGraphApply(tx: QueryHandler, req: TagChangeRequest, post: Post) = {
+    implicit val ctx = new QueryContext
+    val tagDef = ConcreteFactoryNodeDefinition(Scope)
+    val classDef = ConcreteFactoryNodeDefinition(Classification)
+    val (reqDef: NodeDefinition[TagChangeRequest], reqToPostDef: NodeRelationDefinition[_,_,_]) = req match {
+      case _ :AddTags =>
+        val reqDef = ConcreteFactoryNodeDefinition(AddTags)
+        val relDef = RelationDefinition(reqDef, AddTagsEnd, ConcreteNodeDefinition(post))
+        (reqDef, relDef)
+      case _ :RemoveTags =>
+        val reqDef = ConcreteFactoryNodeDefinition(RemoveTags)
+        val relDef = RelationDefinition(reqDef, RemoveTagsEnd, ConcreteNodeDefinition(post))
+        (reqDef, relDef)
+    }
+
+    val tagsDef = RelationDefinition(reqDef, ProposesTag, tagDef)
+    val classifiesDef = RelationDefinition(reqDef, ProposesClassify, classDef)
+
+    //TODO: locking of other requests?
+    val query = s"""
+    match ${reqToPostDef.toQuery}, ${tagsDef.toQuery(false, true)}
+    where ${reqDef.name}.status = ${PENDING}
+    optional match ${classifiesDef.toQuery(false, true)}
+    return *
+    """
+
+    Discourse(tx.queryGraph(query, reqToPostDef.parameterMap ++ tagsDef.parameterMap ++ classifiesDef.parameterMap))
+  }
+
   override def unapplyChange(tx: QueryHandler, discourse: Discourse, req: TagChangeRequest, post: Post) = {
-    val existing = requestGraph(tx, req)
+    val existing = requestGraphUnapply(tx, req)
     val scope = existing.scopes.head
     val classifications = existing.classifications
 
@@ -282,9 +314,12 @@ object VotesTagsChangeRequestHelper extends ChangeRequestHelper[TagChangeRequest
   }
 
   override def applyChange(tx: QueryHandler, discourse: Discourse, req: TagChangeRequest, post: Post) = {
-    val existing = requestGraph(tx, req)
-    val scope = existing.scopes.head
-    val classifications = existing.classifications
+    val existing = requestGraphApply(tx, req, post)
+    val sameReq = existing.tagChangeRequests.find(_.uuid == req.uuid).get
+    val (scope, classifications) = sameReq match {
+      case addTag: AddTags => (addTag.proposesTags.head, addTag.proposesClassifys)
+      case remTag: RemoveTags => (remTag.proposesTags.head, remTag.proposesClassifys)
+    }
 
     req match {
       case request: AddTags =>
@@ -292,6 +327,13 @@ object VotesTagsChangeRequestHelper extends ChangeRequestHelper[TagChangeRequest
         discourse.add(tags)
         classifications.foreach { classification =>
           discourse.add(Classifies.merge(classification, tags))
+        }
+
+        existing.addTags.filter(_.uuid != request.uuid).filter { addTag =>
+          addTag.proposesTags.head.uuid == scope.uuid && (!addTag.proposesClassifys.isEmpty || classifications.isEmpty) && addTag.proposesClassifys.toSet.subsetOf(classifications.toSet)
+        }.foreach { cr =>
+          cr.status = CONFLICT
+          discourse.add(cr)
         }
       case request: RemoveTags =>
         //TODO: delete relation if those were the only classifications?
@@ -303,6 +345,13 @@ object VotesTagsChangeRequestHelper extends ChangeRequestHelper[TagChangeRequest
           }
         } else {
           discourse.remove(tags)
+        }
+
+        existing.removeTags.filter(_.uuid != request.uuid).filter { remTag =>
+          remTag.proposesTags.head.uuid == scope.uuid && (!remTag.proposesClassifys.isEmpty || classifications.isEmpty) && remTag.proposesClassifys.toSet.subsetOf(classifications.toSet)
+        }.foreach { cr =>
+          cr.status = CONFLICT
+          discourse.add(cr)
         }
     }
 

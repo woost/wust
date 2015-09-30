@@ -49,6 +49,8 @@ function postChangeRequestCtrl(ChangeRequests) {
                 else
                     vm.onTagApply({tag: change.tag, isRemove: change.isRemove});
             }
+
+            response.conflictChangeRequests.forEach(cr => _.remove(vm.changes, _.pick(cr, "id")));
         }
 
         unvote(change) {

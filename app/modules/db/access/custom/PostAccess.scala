@@ -97,6 +97,19 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
 
       crOpt.foreach { cr =>
         if (cr.status == INSTANT || cr.status == APPROVED) {
+          //disable conlicting change request
+          //TODO: code dup
+          existAddTags.filter { addTag =>
+            val sameTag = if (tagReq.id.isDefined)
+              addTag.proposesTags.head.uuid == tagReq.id.get
+            else if (tagReq.title.isDefined)
+              addTag.proposesTags.head.title == tagReq.title.get
+            else
+              false
+
+            sameTag && addTag.proposesClassifys.map(_.uuid).toSet.subsetOf(tagReq.classifications.flatMap(_.id).toSet)
+          }.foreach(_.status = CONFLICT)
+
           val tags = Tags.merge(cr.proposesTags.head, post)
           discourse.add(tags)
           cr.proposesClassifys.foreach{classification =>
@@ -109,7 +122,7 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
     //TODO: deletion of classifications?
     request.removedTags.foreach { tagReq =>
       val alreadyExisting = existRemTags.find { remTag =>
-        remTag.proposesTags.head.uuid == tagReq && tagReq.classifications.flatMap(_.id).toSet == remTag.proposesClassifys.map(_.uuid).toSet
+        remTag.proposesTags.head.uuid == tagReq.id && tagReq.classifications.flatMap(_.id).toSet == remTag.proposesClassifys.map(_.uuid).toSet
       }
 
       alreadyExisting.foreach { exist =>
@@ -137,6 +150,12 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
         if (cr.proposesClassifys.isEmpty) {
           discourse.remove(tags)
         } else {
+          //disable conlicting change request
+          //TODO: code dup
+          existRemTags.filter { remTag =>
+            remTag.proposesTags.head.uuid == tagReq.id && (!remTag.proposesClassifys.isEmpty || tagReq.classifications.isEmpty) && remTag.proposesClassifys.map(_.uuid).toSet.subsetOf(tagReq.classifications.map(_.id).toSet)
+          }.foreach(_.status = CONFLICT)
+
           discourse.add(tags)
           cr.proposesClassifys.foreach{classification =>
             discourse.remove(Classifies.matches(classification, tags))
@@ -145,7 +164,7 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
       }
     }
 
-    existing.changeRequests.foreach(_._locked = false)
+    existing.tagChangeRequests.foreach(_._locked = false)
   }
 
   private def addScopesToGraph(discourse: Discourse, request: PostAddRequest, node: Post) {
