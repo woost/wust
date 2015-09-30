@@ -83,6 +83,6 @@
         "geometry",
         "JsDiff",
         "chroma",
-        "hljs",
+        "hljs"
     ]
 }
