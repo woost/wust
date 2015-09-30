@@ -156,27 +156,24 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
                     if (data.requestsTags) {
                         let removed = data.requestsTags.filter(t => t.isRemove && t.status > 0);
                         let [tagRemove, classifyRemove] = _.partition(removed, t => _.isEmpty(t.classifications));
-                        let removeKeeped = this.original.tags.filter(t => !_.any(tagRemove, o => t.tag.id === o.id));
-                        classifyRemove.forEach(t => {
-                            let exist = _.find(removeKeeped, k => t.tag.id === k.id);
-                            exist.classifications = exist.classifications.filter(c => !_.any(t.classifications, _.pick(c, "id")));
-                        });
 
                         let added = data.requestsTags.filter(t => !t.isRemove && t.status > 0);
                         let [tagAdd, classifyAdd] = _.partition(added, t => _.isEmpty(t.classifications));
-                        let addKeeped = this.original.tags.filter(t => !_.any(tagAdd, o => t.tag.id === o.id));
-                        let newAndKeeped = addKeeped.concat(data.tags);
+
+                        keeped = this.original.tags.filter(t => !_.any(tagAdd, o => t.id === o.tag.id) && !_.any(tagRemove, o => t.id === o.tag.id)).concat(data.tags);
                         classifyAdd.forEach(t => {
-                            let exist = _.find(newAndKeeped, k => t.tag.id === k.id);
+                            let exist = _.find(keeped, k => t.tag.id === k.id);
                             exist.classifications = _.uniq(t.classifications.concat(exist.classifications), "id");
                         });
-
-                        keeped = removeKeeped.concat(addKeeped);
+                        classifyRemove.forEach(t => {
+                            let exist = _.find(keeped, k => t.tag.id === k.id);
+                            exist.classifications = exist.classifications.filter(c => !_.any(t.classifications, _.pick(c, "id")));
+                        });
                     } else {
-                        keeped = this.original.tags;
+                        keeped = this.original.tags.concat(data.tags);
                     }
 
-                    data.tags = _.uniq(keeped.concat(data.tags), "id");
+                    data.tags = _.uniq(keeped, "id");
                 }
 
                 if(referenceNode) {
