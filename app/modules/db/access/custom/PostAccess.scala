@@ -99,7 +99,7 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
         if (cr.status == INSTANT || cr.status == APPROVED) {
           //disable conlicting change request
           //TODO: code dup
-          existAddTags.filter { addTag =>
+          existAddTags.filterNot(alreadyExisting contains _).filter { addTag =>
             val sameTag = if (tagReq.id.isDefined)
               addTag.proposesTags.head.uuid == tagReq.id.get
             else if (tagReq.title.isDefined)
@@ -119,7 +119,6 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
       }
     }
 
-    //TODO: deletion of classifications?
     request.removedTags.foreach { tagReq =>
       val alreadyExisting = existRemTags.find { remTag =>
         remTag.proposesTags.head.uuid == tagReq.id && tagReq.classifications.map(_.id).toSet == remTag.proposesClassifys.map(_.uuid).toSet
@@ -146,16 +145,16 @@ case class PostAccess() extends NodeAccessDefault[Post] with TagAccessHelper {
       }
 
       if (cr.status == INSTANT || cr.status == APPROVED) {
+        //disable conlicting change request
+        //TODO: code dup
+        existRemTags.filterNot(alreadyExisting contains _).filter { remTag =>
+          remTag.proposesTags.head.uuid == tagReq.id && (tagReq.classifications.isEmpty || !remTag.proposesClassifys.isEmpty && remTag.proposesClassifys.map(_.uuid).toSet.subsetOf(tagReq.classifications.map(_.id).toSet))
+        }.foreach(_.status = CONFLICT)
+
         val tags = Tags.matches(cr.proposesTags.head, post)
         if (cr.proposesClassifys.isEmpty) {
           discourse.remove(tags)
         } else {
-          //disable conlicting change request
-          //TODO: code dup
-          existRemTags.filter { remTag =>
-            remTag.proposesTags.head.uuid == tagReq.id && (tagReq.classifications.isEmpty || !remTag.proposesClassifys.isEmpty && remTag.proposesClassifys.map(_.uuid).toSet.subsetOf(tagReq.classifications.map(_.id).toSet))
-          }.foreach(_.status = CONFLICT)
-
           discourse.add(tags)
           cr.proposesClassifys.foreach{classification =>
             discourse.remove(Classifies.matches(classification, tags))
