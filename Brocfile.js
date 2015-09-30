@@ -32,7 +32,7 @@ var compiledStyles = compileSass(stylesTree, {
     sassDir: ".",
 });
 
-var dependencies = mergeTrees(["node_modules", "bower_components"], {overwrite: true});
+var dependencies = mergeTrees(["node_modules", "bower_components", "public"], {overwrite: true});
 
 var staticAssetsCss = funnel("static_assets", {
     include: [ "**/*.css" ],
@@ -77,6 +77,7 @@ var styles = concat(mergeTrees([compiledStyles, dependencies, staticAssetsCss, f
         "ng-sortable/dist/ng-sortable.css",
         "humane-js/themes/libnotify.css",
         "angular-xeditable/dist/css/xeditable.css",
+        "highlightjs/styles/solarized_light.css",
 
         "static_assets_css/**/*.css",
 
@@ -121,6 +122,7 @@ var scripts = concat(mergeTrees([appScripts,htmlTemplates,dependencies,staticAss
         min("angular-storage-no-cookies/dist/angular-storage.js"),
         min("angular-restmod/dist/angular-restmod-bundle.js"),
         min("angular-ui-switch/angular-ui-switch.js"),
+        min("highlightjs/highlight.pack.js"),
 
         "lodium/lodium.js",
         "marked/marked.min.js",
