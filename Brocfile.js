@@ -32,15 +32,15 @@ var compiledStyles = compileSass(stylesTree, {
     sassDir: ".",
 });
 
-var dependencies = mergeTrees(["node_modules", "bower_components", "assets/javascripts"], {overwrite: true});
+var dependencies = mergeTrees(["node_modules", "bower_components", "static_assets/javascripts"], {overwrite: true});
 
 var staticAssetsCss = funnel("static_assets", {
-    include: [ "**/*.css" ],
+    include: [ "*.css" ],
     destDir: "static_assets_css"
 });
 
 var staticAssetsJs = funnel("static_assets", {
-    include: [ "**/*.js" ],
+    include: [ "*.js" ],
     destDir: "static_assets_js"
 });
 
@@ -51,7 +51,7 @@ var images = funnel("assets/images", {
 
 var fonts = mergeTrees([
         flatten(funnel("bower_components", { include: ["font-awesome/fonts/*.woff*" ]}), {destDir: "fonts"}),
-        funnel("static_assets", { include: [ "**/*.woff*" ], destDir: "fonts"}),
+        funnel("static_assets", { include: [ "*.woff*" ], destDir: "fonts"}),
 ]);
 
 var fontCss = replace(mergeTrees([
