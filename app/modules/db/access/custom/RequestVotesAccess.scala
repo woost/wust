@@ -14,6 +14,8 @@ import renesca._
 import play.api.mvc.Results._
 import moderation.Moderation
 
+case class ApplyResponse(changed: Boolean, karmaDefinitionOpt: Option[KarmaDefinition])
+
 case class VotesChangeRequestAccess(sign: Long) extends EndRelationAccessDefault[User, Votes, Votable] {
 
   import formatters.json.EditNodeFormat.PostFormat
@@ -28,36 +30,31 @@ case class VotesChangeRequestAccess(sign: Long) extends EndRelationAccessDefault
     case req: RemoveTags => new VotesRemoveTagsHelper(req)
   }
 
-  def tryApply(tx: QueryHandler, discourse: Discourse, request: ChangeRequest):Either[String,(Option[Post], Option[KarmaDefinition])] = {
+  def tryApply(tx: QueryHandler, discourse: Discourse, request: ChangeRequest):Either[String, ApplyResponse] = {
     val helper = requestHelper(request)
     if (request.canApply) {
       if (request.status == PENDING) {
         val success = helper.applyChange(tx, discourse)
-
         if (success) {
           request.status = APPROVED
-          Right((Some(helper.post), Some(KarmaDefinition(request.applyThreshold, "Proposed change request approved"))))
-        } else {
-          Left("Cannot apply changes automatically")
-        }
+          Right(ApplyResponse(true, Some(KarmaDefinition(request.applyThreshold, "Proposed change request approved"))))
+        } else Left("Cannot apply changes automatically")
       } else if (request.status == INSTANT) {
         request.status = APPROVED
-        Right((None, Some(KarmaDefinition(request.applyThreshold, "Instant change request approved"))))
-      } else Right((None, None))
+        Right(ApplyResponse(false, Some(KarmaDefinition(request.applyThreshold, "Instant change request approved"))))
+      } else Right(ApplyResponse(false, None))
     } else if (request.canReject) {
       if (request.status == INSTANT) {
         val success = helper.unapplyChange(tx, discourse)
         if (success) {
           request.status = REJECTED
-          Right((Some(helper.post), Some(KarmaDefinition(-request.applyThreshold, "Instant change request rejected"))))
-        } else {
-          Left("Cannot unapply changes automatically")
-        }
+          Right(ApplyResponse(true, Some(KarmaDefinition(-request.applyThreshold, "Instant change request rejected"))))
+        } else Left("Cannot unapply changes automatically")
       } else {
         request.status = REJECTED
-        Right((None, Some(KarmaDefinition(-request.applyThreshold, "Proposed change request rejected"))))
+        Right(ApplyResponse(false, Some(KarmaDefinition(-request.applyThreshold, "Proposed change request rejected"))))
       }
-    } else Right((None, None))
+    } else Right(ApplyResponse(false, None))
   }
 
   override def create(context: RequestContext, param: ConnectParameter[Votable]) = context.withUser { user =>
@@ -112,11 +109,12 @@ case class VotesChangeRequestAccess(sign: Long) extends EndRelationAccessDefault
         val postApplies = tryApply(tx, discourse, request)
 
         postApplies match {
-          case Right((nodeOpt, karmaDefinitionOpt)) =>
+          case Right(ApplyResponse(changed, karmaDefinitionOpt)) =>
             request._locked = false
             val failure = tx.persistChanges(discourse)
 
             failure.map(_ => BadRequest("No vote :/")).getOrElse {
+              val nodeResponse = if (changed) Json.toJson(helper.post) else JsNull
               karmaDefinitionOpt.foreach(helper.updateKarma(_))
               Ok(JsObject(Seq(
                 ("vote", JsObject(Seq(
@@ -124,7 +122,7 @@ case class VotesChangeRequestAccess(sign: Long) extends EndRelationAccessDefault
                 ))),
                 ("status", JsNumber(request.status)),
                 ("votes", JsNumber(request.approvalSum)),
-                ("node", nodeOpt.map(Json.toJson(_)).getOrElse(JsNull)),
+                ("node", nodeResponse),
                 ("conflictChangeRequests", Json.toJson(discourse.changeRequests.filter(r => r != request && r.status == CONFLICT)))
               )))
             }
