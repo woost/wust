@@ -46,7 +46,7 @@
 
             <ul class="nav navbar-nav navbar-right">
                 <li class="dropdown">
-                    <a ui-sref="users.details({id: vm.Auth.current.userId})" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                    <a ui-sref="users.details({id: vm.Auth.current.userId})" class="dropdown-toggle" ng-class="::{'disable-link': !vm.Auth.isLoggedIn}" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                         <i class="fa fa-user"></i>
                         <span ng-if="::vm.Auth.isLoggedIn" class="hidden-xs"> {{vm.Auth.current.identifier}} ({{vm.karma.sum}}) </span>
                         <span ng-if="::!vm.Auth.isLoggedIn" class="hidden-xs">Go!</span>
