@@ -9,6 +9,11 @@
     // }
 }
 
+.disable-link {
+    pointer-events: none;
+    cursor: default;
+}
+
 .error_message {
     color: red !important;
     display: none;
