@@ -1,6 +1,10 @@
 @import "globals";
 
 #navigation {
+    .container-fluid {
+        padding-left: 0;
+    }
+
     background-color: $nav_normal_background;
     border-width: 0px;
     border-bottom: 1px solid $nav_border_color;
@@ -10,21 +14,21 @@
     color: $nav_normal_color;
 
     .navpagelinks a:link, .navpagelinks a:hover, .navpagelinks a:visited, .navpagelinks a.active,
-     a.dropdown-toggle:link, a.dropdown-toggle:hover, a.dropdown-toggle:visited {
+     a.dropdown-toggle:link, a.dropdown-toggle:hover, a.dropdown-toggle:visited, .navbar-form {
         color: $nav_normal_color;
         border-left: 1px solid transparent;
         border-right: 1px solid transparent;
         margin-bottom: -1px;
     }
 
-    .navpagelinks a:hover, a.dropdown-toggle:hover {
+    .navpagelinks a:hover, .dropdown:hover {
         color: $nav_hover_color;
         background-color: rgba($nav_hover_background, 0.7);
     }
-    .navpagelinks a.active {
+
+    .navpagelinks a.active, .search_results_visible .search-form {
         color: $nav_active_color;
         background-color: $nav_active_background;
-        border-bottom:1px solid white;
         border-left: 1px solid rgba(100, 100, 100, 0.68);
         border-right: 1px solid rgba(100, 100, 100, 0.68);
         border-bottom:1px solid white;
@@ -42,30 +46,23 @@
         color: #333; //TODO: use bootstrap variable
     }
 
-    #node_search_form {
-        width: 200px;
-        margin-top: 0px;
-        margin-bottom: 0px;
-        height: 50px;
-        .input-group {
-            margin-top: 8px;
-            margin-bottom: 8px;
-            height: 34px;
-        }
-    }
-    .search_results_visible {
-        #node_search_form {
-            background-color: $nav_active_background;
-        }
-    }
     .search_results_visible, .has_fullscreen {
         .nav {
             a.active {
                 color: $nav_normal_color;
                 background-color: transparent;
+                border-color: transparent;
             }
         }
     }
+
+    // make bootstrap margins to paddings to let borders having full height
+    .navbar-form {
+        padding-top: 8px;
+        padding-bottom: 8px;
+        margin-top: 0;
+    }
+
     .context-dropdown {
         h3 {
             padding: 10px 0px;
@@ -83,9 +80,9 @@
             display: none;
         }
     }
-    #edit_modal_toggle {
+    #new_discussion_button {
+        margin-left: 10px;
         margin-right: 10px;
-        margin-left: -6px;
     }
 }
 
