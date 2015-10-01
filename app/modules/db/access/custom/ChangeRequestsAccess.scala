@@ -18,16 +18,16 @@ case class InstantChangeRequestAccess() extends NodeAccessDefault[ChangeRequest]
     val skip = context.skip
 
     implicit val ctx = new QueryContext
-    val crDef = LabelNodeDefinition[TagChangeRequest](ChangeRequest.labels)
-    val crTagsDef = RelationDefinition(crDef, ProposesTag, FactoryNodeDefinition(Scope))
-    val crClassifiesDef = RelationDefinition(crDef, ProposesClassify, FactoryNodeDefinition(Classification))
-    val postDef = LabelNodeDefinition[Post](Set.empty) //matching real posts and hidden posts without any label just by their relations
-    val tagsDef = HyperNodeDefinition(FactoryNodeDefinition(Scope), Tags, postDef)
-    val connectsDef = FactoryNodeDefinition(Connects)
-    val connDef = RelationDefinition(postDef, ConnectsStart, connectsDef)
-    val tagClassifiesDef = RelationDefinition(FactoryNodeDefinition(Classification), Classifies, tagsDef)
-    val classifiesDef = RelationDefinition(FactoryNodeDefinition(Classification), Classifies, connectsDef)
-    val userDef = ConcreteNodeDefinition(user)
+    val crDef = LabelNodeDef[TagChangeRequest](ChangeRequest.labels)
+    val crTagsDef = RelationDef(crDef, ProposesTag, FactoryNodeDef(Scope))
+    val crClassifiesDef = RelationDef(crDef, ProposesClassify, FactoryNodeDef(Classification))
+    val postDef = LabelNodeDef[Post](Set.empty) //matching real posts and hidden posts without any label just by their relations
+    val tagsDef = HyperNodeDef(FactoryNodeDef(Scope), Tags, postDef)
+    val connectsDef = FactoryNodeDef(Connects)
+    val connDef = RelationDef(postDef, ConnectsStart, connectsDef)
+    val tagClassifiesDef = RelationDef(FactoryNodeDef(Classification), Classifies, tagsDef)
+    val classifiesDef = RelationDef(FactoryNodeDef(Classification), Classifies, connectsDef)
+    val userDef = ConcreteNodeDef(user)
 
     //TODO: we need to match the deleted relation separately, as hidden posts
     //are only allowed for instant deleted requests - actually we should know
@@ -88,12 +88,12 @@ case class PostChangeRequestAccess() extends RelationAccessDefault[Post, ChangeR
   override def read(context: RequestContext, param: ConnectParameter[Post]) = {
     Ok(Json.toJson(context.user.map { user =>
       implicit val ctx = new QueryContext
-      val userDef = ConcreteNodeDefinition(user)
-      val updatedDef = LabelNodeDefinition[TagChangeRequest](nodeFactory.labels)
-      val postDef = FactoryUuidNodeDefinition(Post, param.baseUuid)
-      val votesDef = RelationDefinition(userDef, Votes, updatedDef)
-      val proposesTagDef = RelationDefinition(updatedDef, ProposesTag, FactoryNodeDefinition(Scope))
-      val proposesClassifyDef = RelationDefinition(updatedDef, ProposesClassify, FactoryNodeDefinition(Classification))
+      val userDef = ConcreteNodeDef(user)
+      val updatedDef = LabelNodeDef[TagChangeRequest](nodeFactory.labels)
+      val postDef = FactoryUuidNodeDef(Post, param.baseUuid)
+      val votesDef = RelationDef(userDef, Votes, updatedDef)
+      val proposesTagDef = RelationDef(updatedDef, ProposesTag, FactoryNodeDef(Scope))
+      val proposesClassifyDef = RelationDef(updatedDef, ProposesClassify, FactoryNodeDef(Classification))
 
       val query = s"""
       match ${ updatedDef.toQuery }-[:`${ Updated.endRelationType }`|`${ AddTags.endRelationType }`|`${ RemoveTags.endRelationType }`|`${ Deleted.endRelationType }`]->${ postDef.toQuery }

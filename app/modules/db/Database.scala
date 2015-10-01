@@ -44,7 +44,7 @@ object Database {
   def nodeDiscourseGraph[NODE <: UuidNode](factory: NodeFactory[NODE], uuids: String*): Discourse = {
     implicit val ctx = new QueryContext
     if(uuids.isEmpty)
-      return discourseGraph(FactoryNodeDefinition(factory))
+      return discourseGraph(FactoryNodeDef(factory))
 
     val query = s"match (n :`${ factory.label }`) where n.uuid in {uuids} return n limit ${ uuids.size }"
     val params = Map("uuids" -> uuids)
@@ -53,7 +53,7 @@ object Database {
 
   def limitedDiscourseNodes[NODE <: UuidNode](skip: Int, limit: Int, factory: NodeFactory[NODE]): (Discourse, Seq[NODE]) = {
     implicit val ctx = new QueryContext
-    val nodeDef = FactoryNodeDefinition(factory)
+    val nodeDef = FactoryNodeDef(factory)
     val discourse = discourseGraphWithReturn(s"${ nodeDef.name } skip $skip limit $limit", nodeDef)
     (discourse, nodesWithType[NODE](discourse.nodes))
   }
@@ -63,17 +63,17 @@ object Database {
     (discourse, findNodes(discourse, factory, uuids: _*))
   }
 
-  def discourseNodes[START <: UuidNode, END <: UuidNode](startDefinition: UuidNodeDefinition[START], endDefinition: UuidNodeDefinition[END]): (Discourse, (Option[START], Option[END])) = {
+  def discourseNodes[START <: UuidNode, END <: UuidNode](startDefinition: UuidNodeDef[START], endDefinition: UuidNodeDef[END]): (Discourse, (Option[START], Option[END])) = {
     val discourse = itemDiscourseGraph(startDefinition, endDefinition)
     (discourse, findNodes(discourse, startDefinition, endDefinition))
   }
 
-  def discourseNodes[NODE <: UuidNode](definitions: UuidNodeDefinition[NODE]*): (Discourse, Seq[NODE]) = {
+  def discourseNodes[NODE <: UuidNode](definitions: UuidNodeDef[NODE]*): (Discourse, Seq[NODE]) = {
     val discourse = itemDiscourseGraph(definitions: _*)
     (discourse, findNodes(discourse, definitions: _*))
   }
 
-  def startConnectedDiscourseGraph[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinitions: NodeAndFixedRelationDefinition[START, RELATION, END]*): Discourse = {
+  def startConnectedDiscourseGraph[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinitions: NodeAndFixedRelationDef[START, RELATION, END]*): Discourse = {
     val queries = relationDefinitions.map { relationDefinition =>
       val query = s"match ${ relationDefinition.toQuery } return ${ relationDefinition.endDefinition.name }"
       val params = relationDefinition.parameterMap
@@ -82,13 +82,13 @@ object Database {
     Discourse(db.queryGraphs(queries: _*).fold(Graph.empty)(_ merge _))
   }
 
-  def startConnectedDiscourseNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinitions: NodeAndFixedRelationDefinition[START, RELATION, END]*): Seq[END] = {
+  def startConnectedDiscourseNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinitions: NodeAndFixedRelationDef[START, RELATION, END]*): Seq[END] = {
     val discourse = startConnectedDiscourseGraph(relationDefinitions: _*)
     nodesWithType[END](discourse.nodes)
   }
 
   //TODO: need ordering for limit search, otherwise we get duplicates
-  def limitedStartConnectedDiscourseGraph[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](skip: Int, limit: Int, relationDefinitions: NodeAndFixedRelationDefinition[START, RELATION, END]*): Discourse = {
+  def limitedStartConnectedDiscourseGraph[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](skip: Int, limit: Int, relationDefinitions: NodeAndFixedRelationDef[START, RELATION, END]*): Discourse = {
     val queries = relationDefinitions.map { relationDefinition =>
       val query = s"match ${ relationDefinition.toQuery } return ${ relationDefinition.endDefinition.name } skip $skip limit $limit"
       val params = relationDefinition.parameterMap
@@ -97,12 +97,12 @@ object Database {
     Discourse(db.queryGraphs(queries: _*).fold(Graph.empty)(_ merge _))
   }
 
-  def limitedStartConnectedDiscourseNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](skip: Int, limit: Int, relationDefinitions: NodeAndFixedRelationDefinition[START, RELATION, END]*): Seq[END] = {
+  def limitedStartConnectedDiscourseNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](skip: Int, limit: Int, relationDefinitions: NodeAndFixedRelationDef[START, RELATION, END]*): Seq[END] = {
     val discourse = limitedStartConnectedDiscourseGraph(skip, limit, relationDefinitions: _*)
     nodesWithType[END](discourse.nodes)
   }
 
-  def endConnectedDiscourseGraph[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinitions: FixedAndNodeRelationDefinition[START, RELATION, END]*): Discourse = {
+  def endConnectedDiscourseGraph[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinitions: FixedAndNodeRelationDef[START, RELATION, END]*): Discourse = {
     val queries = relationDefinitions.map { relationDefinition =>
       val query = s"match ${ relationDefinition.toQuery } return ${ relationDefinition.startDefinition.name }"
       val params = relationDefinition.parameterMap
@@ -111,12 +111,12 @@ object Database {
     Discourse(db.queryGraphs(queries: _*).fold(Graph.empty)(_ merge _))
   }
 
-  def endConnectedDiscourseNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinitions: FixedAndNodeRelationDefinition[START, RELATION, END]*): Seq[START] = {
+  def endConnectedDiscourseNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinitions: FixedAndNodeRelationDef[START, RELATION, END]*): Seq[START] = {
     val discourse = endConnectedDiscourseGraph(relationDefinitions: _*)
     nodesWithType[START](discourse.nodes)
   }
 
-  def limitedEndConnectedDiscourseGraph[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](skip: Int, limit: Int, relationDefinitions: FixedAndNodeRelationDefinition[START, RELATION, END]*): Discourse = {
+  def limitedEndConnectedDiscourseGraph[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](skip: Int, limit: Int, relationDefinitions: FixedAndNodeRelationDef[START, RELATION, END]*): Discourse = {
     val queries = relationDefinitions.map { relationDefinition =>
       val query = s"match ${ relationDefinition.toQuery } return ${ relationDefinition.startDefinition.name } skip $skip limit $limit"
       val params = relationDefinition.parameterMap
@@ -125,12 +125,12 @@ object Database {
     Discourse(db.queryGraphs(queries: _*).fold(Graph.empty)(_ merge _))
   }
 
-  def limitedEndConnectedDiscourseNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](skip: Int, limit: Int, relationDefinitions: FixedAndNodeRelationDefinition[START, RELATION, END]*): Seq[START] = {
+  def limitedEndConnectedDiscourseNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](skip: Int, limit: Int, relationDefinitions: FixedAndNodeRelationDef[START, RELATION, END]*): Seq[START] = {
     val discourse = limitedEndConnectedDiscourseGraph(skip, limit, relationDefinitions: _*)
     nodesWithType[START](discourse.nodes)
   }
 
-  def deleteNodes[NODE <: UuidNode](definitions: NodeDefinition[NODE]*) {
+  def deleteNodes[NODE <: UuidNode](definitions: NodeDef[NODE]*) {
     val discourse = discourseGraph(definitions: _*)
     if(!discourse.graph.nodes.isEmpty) {
       //TODO clear does not emit changes
@@ -150,7 +150,7 @@ object Database {
   }
 
   //FIXME: I am an unreliable function if you have a relation to a hyperrelation i will delete that hyperrelation.
-  def disconnectNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinition: FixedRelationDefinition[START, RELATION, END]) = {
+  def disconnectNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinition: FixedRelationDef[START, RELATION, END]) = {
     val tx = db.newTransaction()
     val discourse = itemDiscourseGraph(relationDefinition)
     if(discourse.relations.isEmpty && discourse.hyperRelations.size == 1) {
@@ -180,7 +180,7 @@ object Database {
 
   // IMPORTANT: we need to write the constancts as doubles to avoid integer arithmetic
   // def tagweight(up:String, down:String) = s"(($up + ${tagweight_p*tagweight_u})/($up + $down + $tagweight_u))"
-  def connectedComponent(focusNode: UuidNodeDefinition[_], identity: Option[User], depth: Int = 5)(implicit ctx: QueryContext): Discourse = {
+  def connectedComponent(focusNode: UuidNodeDef[_], identity: Option[User], depth: Int = 5)(implicit ctx: QueryContext): Discourse = {
     // Tag weights
     // 1. Cypher does not support subqueries yet, so we have to do extra queries for the tag weights.
     // This is not very efficient, because the component is traversed in each query.

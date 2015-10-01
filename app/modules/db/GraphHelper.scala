@@ -19,11 +19,11 @@ object GraphHelper {
       uuids.flatMap { uuid => nodeWithUuid[NODE](discourse, uuid) }
   }
 
-  def findNodes[START <: UuidNode, END <: UuidNode](discourse: Discourse, startDefinition: UuidNodeDefinition[START], endDefinition: UuidNodeDefinition[END]): (Option[START], Option[END]) = {
+  def findNodes[START <: UuidNode, END <: UuidNode](discourse: Discourse, startDefinition: UuidNodeDef[START], endDefinition: UuidNodeDef[END]): (Option[START], Option[END]) = {
     (nodeWithUuid[START](discourse, startDefinition.uuid), nodeWithUuid[END](discourse, endDefinition.uuid))
   }
 
-  def findNodes[NODE <: UuidNode](discourse: Discourse, definitions: UuidNodeDefinition[NODE]*): Seq[NODE] = {
+  def findNodes[NODE <: UuidNode](discourse: Discourse, definitions: UuidNodeDef[NODE]*): Seq[NODE] = {
     definitions.flatMap(d => nodeWithUuid[NODE](discourse, d.uuid))
   }
 }

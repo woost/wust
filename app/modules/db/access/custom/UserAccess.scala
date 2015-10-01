@@ -45,13 +45,13 @@ case class UserContributions() extends RelationAccessDefault[User, Post] {
     val skip = page * limit
 
     implicit val ctx = new QueryContext
-    val userDef = FactoryUuidNodeDefinition(User, param.baseUuid)
-    val postDef = FactoryNodeDefinition(Post)
-    val tagsDef = HyperNodeDefinition(FactoryNodeDefinition(Scope), Tags, postDef)
-    val connectsDef = FactoryNodeDefinition(Connects)
-    val connDef = RelationDefinition(postDef, ConnectsStart, connectsDef)
-    val tagClassifiesDef = RelationDefinition(FactoryNodeDefinition(Classification), Classifies, tagsDef)
-    val classifiesDef = RelationDefinition(FactoryNodeDefinition(Classification), Classifies, connectsDef)
+    val userDef = FactoryUuidNodeDef(User, param.baseUuid)
+    val postDef = FactoryNodeDef(Post)
+    val tagsDef = HyperNodeDef(FactoryNodeDef(Scope), Tags, postDef)
+    val connectsDef = FactoryNodeDef(Connects)
+    val connDef = RelationDef(postDef, ConnectsStart, connectsDef)
+    val tagClassifiesDef = RelationDef(FactoryNodeDef(Classification), Classifies, tagsDef)
+    val classifiesDef = RelationDef(FactoryNodeDef(Classification), Classifies, connectsDef)
 
     val query = s"""
     match ${ userDef.toQuery }-[r1]->(hyper:`${ SchemaCreated.label }`)-[r2]->${ postDef.toQuery }
@@ -75,9 +75,9 @@ case class UserHasKarmaScopes() extends StartRelationAccessDefault[User, HasKarm
 
   override def read(context: RequestContext, param: ConnectParameter[User]) = {
     implicit val ctx = new QueryContext
-    val userDef = FactoryUuidNodeDefinition(User, param.baseUuid)
-    val contextDef = FactoryNodeDefinition(Scope)
-    val karmaDef = RelationDefinition(userDef, HasKarma, contextDef)
+    val userDef = FactoryUuidNodeDef(User, param.baseUuid)
+    val contextDef = FactoryNodeDef(Scope)
+    val karmaDef = RelationDef(userDef, HasKarma, contextDef)
 
     val query = s"match ${ karmaDef.toQuery } where ${karmaDef.name}.karma <> 0 return *"
     val params = karmaDef.parameterMap
@@ -94,17 +94,17 @@ case class UserHasKarmaLog() extends StartRelationAccessDefault[User, KarmaLog, 
 
   override def read(context: RequestContext, param: ConnectParameter[User]) = {
     implicit val ctx = new QueryContext
-    val userDef = FactoryUuidNodeDefinition(User, param.baseUuid)
-    val nodeDef = LabelNodeDefinition[Post](Set.empty)
-    val karmaLogDef = HyperNodeDefinition(userDef, KarmaLog, nodeDef)
-    val logOnScopeDef = RelationDefinition(karmaLogDef, LogOnScope, FactoryNodeDefinition(Scope))
+    val userDef = FactoryUuidNodeDef(User, param.baseUuid)
+    val nodeDef = LabelNodeDef[Post](Set.empty)
+    val karmaLogDef = HyperNodeDef(userDef, KarmaLog, nodeDef)
+    val logOnScopeDef = RelationDef(karmaLogDef, LogOnScope, FactoryNodeDef(Scope))
 
-    val tagDef = FactoryNodeDefinition(Scope)
-    val connectsDef = FactoryNodeDefinition(Connects)
-    val tagsDef = HyperNodeDefinition(tagDef, Tags, nodeDef)
-    val tagClassifiesDef = RelationDefinition(FactoryNodeDefinition(Classification), Classifies, tagsDef)
-    val connDef = RelationDefinition(nodeDef, ConnectsStart, connectsDef)
-    val classifiesDef = RelationDefinition(FactoryNodeDefinition(Classification), Classifies, connectsDef)
+    val tagDef = FactoryNodeDef(Scope)
+    val connectsDef = FactoryNodeDef(Connects)
+    val tagsDef = HyperNodeDef(tagDef, Tags, nodeDef)
+    val tagClassifiesDef = RelationDef(FactoryNodeDef(Classification), Classifies, tagsDef)
+    val connDef = RelationDef(nodeDef, ConnectsStart, connectsDef)
+    val classifiesDef = RelationDef(FactoryNodeDef(Classification), Classifies, connectsDef)
 
     val query = s"""
     match ${ karmaLogDef.toQuery }, ${ logOnScopeDef.toQuery(false, true) }
@@ -149,16 +149,16 @@ case class UserMarks() extends StartRelationAccessDefault[User, Marks, Post] {
 
   override def read(context: RequestContext, param: ConnectParameter[User]) = {
     implicit val ctx = new QueryContext
-    val userDef = FactoryUuidNodeDefinition(User, param.baseUuid)
-    val nodeDef = FactoryNodeDefinition(Post)
-    val marksDef = RelationDefinition(userDef, Marks, nodeDef)
+    val userDef = FactoryUuidNodeDef(User, param.baseUuid)
+    val nodeDef = FactoryNodeDef(Post)
+    val marksDef = RelationDef(userDef, Marks, nodeDef)
 
-    val tagDef = FactoryNodeDefinition(Scope)
-    val connectsDef = FactoryNodeDefinition(Connects)
-    val tagsDef = HyperNodeDefinition(tagDef, Tags, nodeDef)
-    val tagClassifiesDef = RelationDefinition(FactoryNodeDefinition(Classification), Classifies, tagsDef)
-    val connDef = RelationDefinition(nodeDef, ConnectsStart, connectsDef)
-    val classifiesDef = RelationDefinition(FactoryNodeDefinition(Classification), Classifies, connectsDef)
+    val tagDef = FactoryNodeDef(Scope)
+    val connectsDef = FactoryNodeDef(Connects)
+    val tagsDef = HyperNodeDef(tagDef, Tags, nodeDef)
+    val tagClassifiesDef = RelationDef(FactoryNodeDef(Classification), Classifies, tagsDef)
+    val connDef = RelationDef(nodeDef, ConnectsStart, connectsDef)
+    val classifiesDef = RelationDef(FactoryNodeDef(Classification), Classifies, connectsDef)
 
     val query = s"""
     match ${ marksDef.toQuery }

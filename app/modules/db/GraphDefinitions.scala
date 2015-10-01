@@ -9,10 +9,10 @@ import renesca.schema._
 
 package object types {
 
-  type FixedRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _ <: FixedNodeDefinition[START], _ <: FixedNodeDefinition[END]]
-  type NodeAndFixedRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _ <: FixedNodeDefinition[START], _ <: NodeDefinition[END]]
-  type FixedAndNodeRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _ <: NodeDefinition[START], _ <: FixedNodeDefinition[END]]
-  type NodeRelationDefinition[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefinitionBase[START, RELATION, END, _ <: NodeDefinition[START], _ <: NodeDefinition[END]]
+  type FixedRelationDef[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefBase[START, RELATION, END, _ <: FixedNodeDef[START], _ <: FixedNodeDef[END]]
+  type NodeAndFixedRelationDef[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefBase[START, RELATION, END, _ <: FixedNodeDef[START], _ <: NodeDef[END]]
+  type FixedAndNodeRelationDef[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefBase[START, RELATION, END, _ <: NodeDef[START], _ <: FixedNodeDef[END]]
+  type NodeRelationDef[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefBase[START, RELATION, END, _ <: NodeDef[START], _ <: NodeDef[END]]
 
 }
 
@@ -32,68 +32,68 @@ sealed trait GraphDefinition {
   final val name = ctx.newVariable
 }
 
-sealed trait NodeDefinition[+NODE <: Node] extends GraphDefinition
-sealed trait FixedNodeDefinition[+NODE <: Node] extends NodeDefinition[NODE]
+sealed trait NodeDef[+NODE <: Node] extends GraphDefinition
+sealed trait FixedNodeDef[+NODE <: Node] extends NodeDef[NODE]
 
-sealed trait UuidNodeDefinition[+NODE <: UuidNode] extends FixedNodeDefinition[NODE] {
+sealed trait UuidNodeDef[+NODE <: UuidNode] extends FixedNodeDef[NODE] {
   val uuid: String
   val uuidVariable = ctx.newVariable
   override def parameterMap = Map(uuidVariable -> uuid)
 }
 
-sealed trait LabelledUuidNodeDefinition[+NODE <: UuidNode] extends UuidNodeDefinition[NODE] {
+sealed trait LabelledUuidNodeDef[+NODE <: UuidNode] extends UuidNodeDef[NODE] {
   val labels: Set[Label]
   def toQuery = s"($name ${ labels.map(l => s":`$l`").mkString } {uuid: {$uuidVariable}})"
 }
 
-sealed trait LabelledNodeDefinition[+NODE <: Node] extends NodeDefinition[NODE] {
+sealed trait LabelledNodeDef[+NODE <: Node] extends NodeDef[NODE] {
   val labels: Set[Label]
   def toQuery = s"($name ${ labels.map(l => s":`$l`").mkString })"
 }
 
-case class FactoryUuidNodeDefinition[+NODE <: UuidNode](
+case class FactoryUuidNodeDef[+NODE <: UuidNode](
   factory: NodeFactory[NODE],
   uuid: String
-  )(implicit val ctx: QueryContext) extends LabelledUuidNodeDefinition[NODE] {
+  )(implicit val ctx: QueryContext) extends LabelledUuidNodeDef[NODE] {
   val labels = factory.labels
 }
 
-case class FactoryNodeDefinition[+NODE <: Node](
+case class FactoryNodeDef[+NODE <: Node](
   factory: NodeFactory[NODE]
-  )(implicit val ctx: QueryContext) extends LabelledNodeDefinition[NODE] {
+  )(implicit val ctx: QueryContext) extends LabelledNodeDef[NODE] {
   val labels = factory.labels
 }
 
-case class ConcreteNodeDefinition[+NODE <: UuidNode](
+case class ConcreteNodeDef[+NODE <: UuidNode](
   node: NODE
-  )(implicit val ctx: QueryContext) extends LabelledUuidNodeDefinition[NODE] {
+  )(implicit val ctx: QueryContext) extends LabelledUuidNodeDef[NODE] {
   val uuid = node.uuid
   val labels = node.labels
 }
 
-case class LabelUuidNodeDefinition[+NODE <: UuidNode](
+case class LabelUuidNodeDef[+NODE <: UuidNode](
   labels: Set[Label],
   uuid: String
-  )(implicit val ctx: QueryContext) extends LabelledUuidNodeDefinition[NODE]
+  )(implicit val ctx: QueryContext) extends LabelledUuidNodeDef[NODE]
 
-case class LabelNodeDefinition[+NODE <: Node](
-  labels: Set[Label])(implicit val ctx: QueryContext) extends LabelledNodeDefinition[NODE]
+case class LabelNodeDef[+NODE <: Node](
+  labels: Set[Label])(implicit val ctx: QueryContext) extends LabelledNodeDef[NODE]
 
-sealed trait HyperNodeDefinitionBase[+NODE <: Node] extends FixedNodeDefinition[NODE] {
+sealed trait HyperNodeDefBase[+NODE <: Node] extends FixedNodeDef[NODE] {
   val startName: String
   val endName: String
   val startRelationName: String
   val endRelationName: String
-  val startDefinition: NodeDefinition[_]
-  val endDefinition: NodeDefinition[_]
+  val startDefinition: NodeDef[_]
+  val endDefinition: NodeDef[_]
 }
 
-sealed trait RelationDefinitionBase[
+sealed trait RelationDefBase[
 START <: Node,
 RELATION <: AbstractRelation[START, END],
 END <: Node,
-+STARTDEF <: NodeDefinition[START],
-+ENDDEF <: NodeDefinition[END]
++STARTDEF <: NodeDef[START],
++ENDDEF <: NodeDef[END]
 ] extends GraphDefinition {
   val startDefinition: STARTDEF
   val endDefinition: ENDDEF
@@ -109,12 +109,12 @@ END <: Node,
 
   protected def nodeUuidMatcher = nodeUuid.map(uuid => s"{uuid: {$uuidVariable}}").getOrElse("")
 
-  protected def nodeMatcher(nodeDefinition: NodeDefinition[_]) = nodeDefinition match {
-    case r: HyperNodeDefinition[_, _, _, _, _] => (Some(r.toQuery), s"(${ r.name })")
+  protected def nodeMatcher(nodeDefinition: NodeDef[_]) = nodeDefinition match {
+    case r: HyperNodeDef[_, _, _, _, _] => (Some(r.toQuery), s"(${ r.name })")
     case r                                     => (None, r.toQuery)
   }
 
-  protected def nodeReferencer(nodeDefinition: NodeDefinition[_]) = s"(${ nodeDefinition.name })"
+  protected def nodeReferencer(nodeDefinition: NodeDef[_]) = s"(${ nodeDefinition.name })"
 
   override def parameterMap = startDefinition.parameterMap ++ endDefinition.parameterMap ++ nodeUuid.map(uuid => Map(uuidVariable -> uuid)).getOrElse(Map.empty)
 
@@ -136,13 +136,13 @@ END <: Node,
   }
 }
 
-sealed trait SingleRelationDefinitionBase[
+sealed trait SingleRelationDefBase[
 START <: Node,
 RELATION <: AbstractRelation[START, END],
 END <: Node,
-+STARTDEF <: NodeDefinition[START],
-+ENDDEF <: NodeDefinition[END]
-] extends RelationDefinitionBase[START,RELATION,END,STARTDEF,ENDDEF] {
++STARTDEF <: NodeDef[START],
++ENDDEF <: NodeDef[END]
+] extends RelationDefBase[START,RELATION,END,STARTDEF,ENDDEF] {
   val factory: AbstractRelationFactory[START, RELATION, END]
 
   def relationMatcher = factory match {
@@ -151,27 +151,27 @@ END <: Node,
   }
 }
 
-case class HyperNodeDefinition[
+case class HyperNodeDef[
 START <: Node,
 RELATION <: AbstractRelation[START, END] with UuidNode,
 END <: Node,
-STARTDEF <: NodeDefinition[START],
-ENDDEF <: NodeDefinition[END]
+STARTDEF <: NodeDef[START],
+ENDDEF <: NodeDef[END]
 ](
   startDefinition: STARTDEF,
   factory: AbstractRelationFactory[START, RELATION, END] with NodeFactory[RELATION],
   endDefinition: ENDDEF,
-  nodeUuid: Option[String] = None)(implicit val ctx: QueryContext) extends HyperNodeDefinitionBase[RELATION] with SingleRelationDefinitionBase[START, RELATION, END, STARTDEF, ENDDEF]
+  nodeUuid: Option[String] = None)(implicit val ctx: QueryContext) extends HyperNodeDefBase[RELATION] with SingleRelationDefBase[START, RELATION, END, STARTDEF, ENDDEF]
 
-case class RelationDefinition[
+case class RelationDef[
 START <: Node,
 RELATION <: AbstractRelation[START, END],
 END <: Node,
-STARTDEF <: NodeDefinition[START],
-ENDDEF <: NodeDefinition[END]
+STARTDEF <: NodeDef[START],
+ENDDEF <: NodeDef[END]
 ](
   startDefinition: STARTDEF,
   factory: AbstractRelationFactory[START, RELATION, END],
-  endDefinition: ENDDEF)(implicit val ctx: QueryContext) extends SingleRelationDefinitionBase[START, RELATION, END, STARTDEF, ENDDEF] {
+  endDefinition: ENDDEF)(implicit val ctx: QueryContext) extends SingleRelationDefBase[START, RELATION, END, STARTDEF, ENDDEF] {
   val nodeUuid = None
 }

@@ -18,7 +18,7 @@ object Search extends Controller {
     implicit val ctx = new QueryContext
     // white list, so only exposed nodes can be searched
     val labels = ExposedNode.labels ++ label.map(Label(_))
-    val nodeDef = LabelNodeDefinition(labels)
+    val nodeDef = LabelNodeDef(labels)
 
     val titleRegex = title.flatMap { tit =>
       if(tit.trim.isEmpty)
@@ -62,9 +62,9 @@ object Search extends Controller {
     } else {
       if(tagOr.getOrElse(false)) {
         //TODO: classification need to be matched on the outgoing connects relation of the post
-        val tagDef = FactoryNodeDefinition(Scope)
-        val inheritTagDef = FactoryNodeDefinition(Scope)
-        val relationDef = RelationDefinition(inheritTagDef, SchemaTags, nodeDef)
+        val tagDef = FactoryNodeDef(Scope)
+        val inheritTagDef = FactoryNodeDef(Scope)
+        val relationDef = RelationDef(inheritTagDef, SchemaTags, nodeDef)
         val condition = if(termMatcher.isEmpty) "" else s"where ${ termMatcher }"
         val tagDefinition = s"${ inheritTagDef.toQuery }-[:`${Inherits.relationType}`*0..10]->${ tagDef.toQuery }"
 
@@ -80,9 +80,9 @@ object Search extends Controller {
         )))
       } else {
         //TODO: classification need to be matched on the outgoing connects relation of the post
-        val tagDefs = tags.map(uuid => FactoryUuidNodeDefinition(Scope, uuid))
-        val inheritTagDefs = tags.map(_ => FactoryNodeDefinition(Scope))
-        val relationDefs = inheritTagDefs.map(tagDef => RelationDefinition(tagDef, SchemaTags, nodeDef))
+        val tagDefs = tags.map(uuid => FactoryUuidNodeDef(Scope, uuid))
+        val inheritTagDefs = tags.map(_ => FactoryNodeDef(Scope))
+        val relationDefs = inheritTagDefs.map(tagDef => RelationDef(tagDef, SchemaTags, nodeDef))
         val condition = if(termMatcher.isEmpty) "" else s"where ${ termMatcher }"
         val tagDefinitions = (tagDefs zip inheritTagDefs).map { case (t, i) => s"${ i.toQuery }-[:`${Inherits.relationType}`*0..10]->${ t.toQuery }" }.mkString(",")
 

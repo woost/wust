@@ -62,11 +62,11 @@ case class VotesChangeRequestAccess(sign: Long) extends EndRelationAccessDefault
       // first we match the actual change request and aquire a write lock,
       // which will last for the whole transaction
       implicit val ctx = new QueryContext
-      val requestDef = FactoryUuidNodeDefinition(ChangeRequest, param.baseUuid)
-      val postDef = LabelNodeDefinition[Post](Set.empty)
-      val userDef = ConcreteNodeDefinition(user)
-      val votesDef = RelationDefinition(userDef, Votes, requestDef)
-      val createdDef = RelationDefinition(userDef, SchemaCreated, postDef)
+      val requestDef = FactoryUuidNodeDef(ChangeRequest, param.baseUuid)
+      val postDef = LabelNodeDef[Post](Set.empty)
+      val userDef = ConcreteNodeDef(user)
+      val votesDef = RelationDef(userDef, Votes, requestDef)
+      val createdDef = RelationDef(userDef, SchemaCreated, postDef)
 
       //TODO: separate queries for subclasses
       //TODO: simpler? locking really needed?
@@ -189,8 +189,8 @@ class VotesUpdatedHelper(request: Updated) extends VotesChangeRequestHelper {
 
   def updateKarma(karmaDefinition: KarmaDefinition) {
     implicit val ctx = new QueryContext
-    val postDef = ConcreteNodeDefinition(request.endNodeOpt.get)
-    val userDef = ConcreteNodeDefinition(request.startNodeOpt.get)
+    val postDef = ConcreteNodeDef(request.endNodeOpt.get)
+    val userDef = ConcreteNodeDef(request.startNodeOpt.get)
 
     KarmaUpdate.persistWithConnectedTags(karmaDefinition, KarmaQueryUserPost(userDef, postDef))
   }
@@ -222,8 +222,8 @@ class VotesDeletedHelper(request: Deleted) extends VotesChangeRequestHelper {
   def updateKarma(karmaDefinition: KarmaDefinition) {
     implicit val ctx = new QueryContext
     // match any label, the post might be hidden or a post (maybe better some common label)
-    val postDef = LabelUuidNodeDefinition[Post](UuidNode.labels, request.endNodeOpt.get.uuid)
-    val userDef = ConcreteNodeDefinition(request.startNodeOpt.get)
+    val postDef = LabelUuidNodeDef[Post](UuidNode.labels, request.endNodeOpt.get.uuid)
+    val userDef = ConcreteNodeDef(request.startNodeOpt.get)
 
     KarmaUpdate.persistWithConnectedTagsOfHidden(karmaDefinition, KarmaQueryUserPost(userDef, postDef))
   }
@@ -232,15 +232,15 @@ class VotesDeletedHelper(request: Deleted) extends VotesChangeRequestHelper {
 trait VotesTagsChangeRequestHelper extends VotesChangeRequestHelper {
 
   val request: TagChangeRequest
-  def requestToPostDef()(implicit ctx: QueryContext): NodeRelationDefinition[_ <: TagChangeRequest, _, Post]
+  def requestToPostDef()(implicit ctx: QueryContext): NodeRelationDef[_ <: TagChangeRequest, _, Post]
 
   protected def requestGraphUnapply(tx: QueryHandler) = {
     implicit val ctx = new QueryContext
-    val tagDef = FactoryNodeDefinition(Scope)
-    val classDef = FactoryNodeDefinition(Classification)
-    val reqDef = ConcreteNodeDefinition(request)
-    val tagsDef = RelationDefinition(reqDef, ProposesTag, tagDef)
-    val classifiesDef = RelationDefinition(reqDef, ProposesClassify, classDef)
+    val tagDef = FactoryNodeDef(Scope)
+    val classDef = FactoryNodeDef(Classification)
+    val reqDef = ConcreteNodeDef(request)
+    val tagsDef = RelationDef(reqDef, ProposesTag, tagDef)
+    val classifiesDef = RelationDef(reqDef, ProposesClassify, classDef)
 
     val query = s"""
     match ${tagsDef.toQuery}
@@ -253,14 +253,14 @@ trait VotesTagsChangeRequestHelper extends VotesChangeRequestHelper {
 
   protected def requestGraphApply(tx: QueryHandler) = {
     implicit val ctx = new QueryContext
-    val tagDef = FactoryNodeDefinition(Scope)
-    val classDef = FactoryNodeDefinition(Classification)
+    val tagDef = FactoryNodeDef(Scope)
+    val classDef = FactoryNodeDef(Classification)
 requestToPostDef
     val reqToPostDef = requestToPostDef()
     val reqDef = reqToPostDef.startDefinition
 
-    val tagsDef = RelationDefinition(reqDef, ProposesTag, tagDef)
-    val classifiesDef = RelationDefinition(reqDef, ProposesClassify, classDef)
+    val tagsDef = RelationDef(reqDef, ProposesTag, tagDef)
+    val classifiesDef = RelationDef(reqDef, ProposesClassify, classDef)
 
     //TODO: locking of other requests?
     val query = s"""
@@ -275,15 +275,15 @@ requestToPostDef
 
   override def updateKarma(karmaDefinition: KarmaDefinition) {
     implicit val ctx = new QueryContext
-    val tagDef = FactoryNodeDefinition(Scope)
-    val tagsDef = RelationDefinition(ConcreteNodeDefinition(request), ProposesTag, tagDef)
+    val tagDef = FactoryNodeDef(Scope)
+    val tagsDef = RelationDef(ConcreteNodeDef(request), ProposesTag, tagDef)
     val (userNode, postNode) = request match {
       case request: AddTags => (request.startNodeOpt.get, request.endNodeOpt.get)
       case request: RemoveTags => (request.startNodeOpt.get, request.endNodeOpt.get)
     }
 
-    val userDef = ConcreteNodeDefinition(userNode)
-    val postDef = ConcreteNodeDefinition(postNode)
+    val userDef = ConcreteNodeDef(userNode)
+    val postDef = ConcreteNodeDef(postNode)
 
     KarmaUpdate.persistWithProposedTags(karmaDefinition, KarmaQueryUserPost(userDef, postDef), tagsDef)
   }
@@ -293,7 +293,7 @@ class VotesAddTagsHelper(val request: AddTags) extends VotesTagsChangeRequestHel
 
   override def post = request.endNodeOpt.get
 
-  override def requestToPostDef()(implicit ctx: QueryContext) = RelationDefinition(FactoryNodeDefinition(AddTags), AddTagsEnd, ConcreteNodeDefinition(post))
+  override def requestToPostDef()(implicit ctx: QueryContext) = RelationDef(FactoryNodeDef(AddTags), AddTagsEnd, ConcreteNodeDef(post))
 
   override def unapplyChange(tx: QueryHandler, discourse: Discourse) = {
     val existing = requestGraphUnapply(tx)
@@ -337,7 +337,7 @@ class VotesAddTagsHelper(val request: AddTags) extends VotesTagsChangeRequestHel
 class VotesRemoveTagsHelper(val request: RemoveTags) extends VotesTagsChangeRequestHelper {
   override def post = request.endNodeOpt.get
 
-  override def requestToPostDef()(implicit ctx: QueryContext) = RelationDefinition(FactoryNodeDefinition(RemoveTags), RemoveTagsEnd, ConcreteNodeDefinition(post))
+  override def requestToPostDef()(implicit ctx: QueryContext) = RelationDef(FactoryNodeDef(RemoveTags), RemoveTagsEnd, ConcreteNodeDef(post))
 
   override def unapplyChange(tx: QueryHandler, discourse: Discourse) = {
     val existing = requestGraphUnapply(tx)

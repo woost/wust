@@ -37,12 +37,12 @@ case class PostAccess() extends NodeAccessDefault[Post] {
     // TODO: do not get all connected requests if not needed...its just slow
     // because now we write lock every change request connected to the post
     implicit val ctx = new QueryContext
-    val userDef = FactoryNodeDefinition(User)
-    val requestDef = FactoryNodeDefinition(TagChangeRequest)
-    val postDef = ConcreteNodeDefinition(post)
-    val tagsDef = RelationDefinition(requestDef, ProposesTag, FactoryNodeDefinition(Scope))
-    val classifiesDef = RelationDefinition(requestDef, ProposesClassify, FactoryNodeDefinition(Classification))
-    val votesDef = RelationDefinition(ConcreteNodeDefinition(user), Votes, requestDef)
+    val userDef = FactoryNodeDef(User)
+    val requestDef = FactoryNodeDef(TagChangeRequest)
+    val postDef = ConcreteNodeDef(post)
+    val tagsDef = RelationDef(requestDef, ProposesTag, FactoryNodeDef(Scope))
+    val classifiesDef = RelationDef(requestDef, ProposesClassify, FactoryNodeDef(Classification))
+    val votesDef = RelationDef(ConcreteNodeDef(user), Votes, requestDef)
 
     val query = s"""
     match ${userDef.toQuery}-[ut:`${AddTags.startRelationType}`|`${RemoveTags.startRelationType}`]->(${requestDef.name} ${requestDef.factory.labels.map(l => s":`$l`").mkString} { status: ${PENDING} })-[tp:`${AddTags.endRelationType}`|`${RemoveTags.endRelationType}`]->${postDef.toQuery}, ${tagsDef.toQuery(false,true)}
@@ -168,20 +168,20 @@ case class PostAccess() extends NodeAccessDefault[Post] {
     import formatters.json.PostFormat._
 
     implicit val ctx = new QueryContext
-    val tagDef = FactoryNodeDefinition(Scope)
-    val nodeDef = FactoryUuidNodeDefinition(factory, uuid)
-    val createdDef = RelationDefinition(FactoryNodeDefinition(User), SchemaCreated, nodeDef)
-    val connectsDef = FactoryNodeDefinition(Connects)
-    val tagsDef = HyperNodeDefinition(tagDef, Tags, nodeDef)
-    val tagClassDef = FactoryNodeDefinition(Classification)
-    val tagClassifiesDef = RelationDefinition(tagClassDef, Classifies, tagsDef)
-    val connDef = RelationDefinition(nodeDef, ConnectsStart, connectsDef)
-    val classDef = FactoryNodeDefinition(Classification)
-    val classifiesDef = RelationDefinition(classDef, Classifies, connectsDef)
+    val tagDef = FactoryNodeDef(Scope)
+    val nodeDef = FactoryUuidNodeDef(factory, uuid)
+    val createdDef = RelationDef(FactoryNodeDef(User), SchemaCreated, nodeDef)
+    val connectsDef = FactoryNodeDef(Connects)
+    val tagsDef = HyperNodeDef(tagDef, Tags, nodeDef)
+    val tagClassDef = FactoryNodeDef(Classification)
+    val tagClassifiesDef = RelationDef(tagClassDef, Classifies, tagsDef)
+    val connDef = RelationDef(nodeDef, ConnectsStart, connectsDef)
+    val classDef = FactoryNodeDef(Classification)
+    val classifiesDef = RelationDef(classDef, Classifies, connectsDef)
 
     val (ownVoteCondition, ownVoteParams) = context.user.map { user =>
-      val userDef = ConcreteNodeDefinition(user)
-      val votesDef = RelationDefinition(userDef, Votes, tagsDef)
+      val userDef = ConcreteNodeDef(user)
+      val votesDef = RelationDef(userDef, Votes, tagsDef)
       (s"optional match ${votesDef.toQuery(true,false)}", votesDef.parameterMap)
     }.getOrElse(("", Map.empty))
 
@@ -225,11 +225,11 @@ case class PostAccess() extends NodeAccessDefault[Post] {
 
     db.transaction { tx =>
       implicit val ctx = new QueryContext
-      val postDef = FactoryUuidNodeDefinition(Post, uuid)
-      val deletedDef = HyperNodeDefinition(FactoryNodeDefinition(User), Deleted, postDef)
-      val userDef = ConcreteNodeDefinition(user)
-      val createdDef = RelationDefinition(userDef, SchemaCreated, postDef)
-      val votesDef = RelationDefinition(userDef, Votes, deletedDef)
+      val postDef = FactoryUuidNodeDef(Post, uuid)
+      val deletedDef = HyperNodeDef(FactoryNodeDef(User), Deleted, postDef)
+      val userDef = ConcreteNodeDef(user)
+      val createdDef = RelationDef(userDef, SchemaCreated, postDef)
+      val votesDef = RelationDef(userDef, Votes, deletedDef)
 
       //TODO: sufficient to lock at the end?
       val query = s"""
@@ -289,9 +289,9 @@ case class PostAccess() extends NodeAccessDefault[Post] {
     context.withJson { (request: PostUpdateRequest) =>
       db.transaction { tx =>
         implicit val ctx = new QueryContext
-        val postDef = FactoryUuidNodeDefinition(Post, uuid)
-        val userDef = ConcreteNodeDefinition(user)
-        val createdDef = RelationDefinition(userDef, SchemaCreated, postDef)
+        val postDef = FactoryUuidNodeDef(Post, uuid)
+        val userDef = ConcreteNodeDef(user)
+        val createdDef = RelationDef(userDef, SchemaCreated, postDef)
 
         val query = s"""
           match ${postDef.toQuery}-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)

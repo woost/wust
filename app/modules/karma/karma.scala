@@ -12,17 +12,17 @@ import renesca.parameter.implicits._
 trait KarmaQuery {
   def matcher: String
   def params: ParameterMap
-  def userDef: NodeDefinition[User]
-  def postDef: NodeDefinition[Post]
+  def userDef: NodeDef[User]
+  def postDef: NodeDef[Post]
 }
 
-case class KarmaQueryCreated(createdDef: NodeRelationDefinition[User, Created, Post]) extends KarmaQuery {
+case class KarmaQueryCreated(createdDef: NodeRelationDef[User, Created, Post]) extends KarmaQuery {
   def matcher = createdDef.toQuery
   def params = createdDef.parameterMap
   def userDef = createdDef.startDefinition
   def postDef = createdDef.endDefinition
 }
-case class KarmaQueryUserPost(userDef: NodeDefinition[User], postDef: NodeDefinition[Post]) extends KarmaQuery {
+case class KarmaQueryUserPost(userDef: NodeDef[User], postDef: NodeDef[Post]) extends KarmaQuery {
   def matcher = s"${userDef.toQuery}, ${postDef.toQuery}"
   def params = postDef.parameterMap ++ userDef.parameterMap
 }
@@ -33,7 +33,7 @@ object KarmaUpdate {
   import play.api.libs.concurrent.Execution.Implicits._
   import scala.concurrent.Future
 
-  private case class KarmaTagQuery(tagDef: NodeDefinition[Scope], matcher: String, params: ParameterMap)
+  private case class KarmaTagQuery(tagDef: NodeDef[Scope], matcher: String, params: ParameterMap)
 
   //TODO: log failure
   private def persist(karmaDefinition: KarmaDefinition, karmaQuery: KarmaQuery, karmaTagQuery: KarmaTagQuery)(implicit ctx: QueryContext) = Future {
@@ -73,20 +73,20 @@ object KarmaUpdate {
     }
   }
 
-  def persistWithTags(karmaDefinition: KarmaDefinition, karmaQuery: KarmaQuery, tagDef: NodeDefinition[Scope])(implicit ctx: QueryContext) = {
+  def persistWithTags(karmaDefinition: KarmaDefinition, karmaQuery: KarmaQuery, tagDef: NodeDef[Scope])(implicit ctx: QueryContext) = {
     val tagMatch = s"match ${tagDef.toQuery}"
     val karmaTagQuery = KarmaTagQuery(tagDef, tagMatch, tagDef.parameterMap)
     persist(karmaDefinition, karmaQuery, karmaTagQuery)
   }
 
-  def persistWithProposedTags(karmaDefinition: KarmaDefinition, karmaQuery: KarmaQuery, tagsDef: NodeRelationDefinition[TagChangeRequest, ProposesTag, Scope])(implicit ctx: QueryContext) = {
+  def persistWithProposedTags(karmaDefinition: KarmaDefinition, karmaQuery: KarmaQuery, tagsDef: NodeRelationDef[TagChangeRequest, ProposesTag, Scope])(implicit ctx: QueryContext) = {
     val tagMatch = s"match ${tagsDef.toQuery}"
     val karmaTagQuery = KarmaTagQuery(tagsDef.endDefinition, tagMatch, tagsDef.parameterMap)
     persist(karmaDefinition, karmaQuery, karmaTagQuery)
   }
 
   def persistWithConnectedTags(karmaDefinition: KarmaDefinition, karmaQuery: KarmaQuery)(implicit ctx: QueryContext) = {
-    val tagDef = FactoryNodeDefinition(Scope)
+    val tagDef = FactoryNodeDef(Scope)
 
     val tagMatch = s"""
     match (${karmaQuery.postDef.name})-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)
@@ -100,7 +100,7 @@ object KarmaUpdate {
   }
 
   def persistWithConnectedTagsOfHidden(karmaDefinition: KarmaDefinition, karmaQuery: KarmaQuery)(implicit ctx: QueryContext) = {
-    val tagDef = FactoryNodeDefinition(Scope)
+    val tagDef = FactoryNodeDef(Scope)
 
     val tagMatch = s"""
     optional match (${karmaQuery.postDef.name})-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)

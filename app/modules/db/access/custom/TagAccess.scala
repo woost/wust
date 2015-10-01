@@ -21,11 +21,11 @@ case class TagAccess() extends NodeReadBase[Scope] {
   //TODO: should override read for multiple tags, too. so it includes inherits
   override def read(context: RequestContext, uuid: String) = {
     implicit val ctx = new QueryContext
-    val node = FactoryUuidNodeDefinition(factory, uuid)
-    val base = FactoryNodeDefinition(factory)
-    val impl = FactoryNodeDefinition(factory)
-    val baseInherit = RelationDefinition(base, Inherits, node)
-    val implInherit = RelationDefinition(node, Inherits, impl)
+    val node = FactoryUuidNodeDef(factory, uuid)
+    val base = FactoryNodeDef(factory)
+    val impl = FactoryNodeDef(factory)
+    val baseInherit = RelationDef(base, Inherits, node)
+    val implInherit = RelationDef(node, Inherits, impl)
 
     val query = s"""
     match ${ node.toQuery }

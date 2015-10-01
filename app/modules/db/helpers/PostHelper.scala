@@ -50,9 +50,9 @@ object PostHelper {
   def viewPost(node: Post, user: User) = Future {
     db.transaction { tx =>
       implicit val ctx = new QueryContext
-      val postDef = ConcreteNodeDefinition(node)
-      val userDef = ConcreteNodeDefinition(user)
-      val viewedDef = RelationDefinition(userDef, Viewed, postDef)
+      val postDef = ConcreteNodeDef(node)
+      val userDef = ConcreteNodeDef(user)
+      val viewedDef = RelationDef(userDef, Viewed, postDef)
       val query = s"""
       match ${postDef.toQuery}
       set ${postDef.name}._locked = true

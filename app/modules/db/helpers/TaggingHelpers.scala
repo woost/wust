@@ -19,13 +19,13 @@ object TaggedTaggable {
   def shapeResponse[NODE <: UuidNode](response: Iterable[NODE]): Iterable[NODE] = {
     if(!response.isEmpty) {
       implicit val ctx = new QueryContext
-      val tagDef = FactoryNodeDefinition(Scope)
-      val nodeDef = FactoryNodeDefinition(Post)
-      val connectsDef = FactoryNodeDefinition(Connects)
-      val tagsDef = HyperNodeDefinition(tagDef, Tags, nodeDef)
-      val tagClassifiesDef = RelationDefinition(FactoryNodeDefinition(Classification), Classifies, tagsDef)
-      val connDef = RelationDefinition(nodeDef, ConnectsStart, connectsDef)
-      val classifiesDef = RelationDefinition(FactoryNodeDefinition(Classification), Classifies, connectsDef)
+      val tagDef = FactoryNodeDef(Scope)
+      val nodeDef = FactoryNodeDef(Post)
+      val connectsDef = FactoryNodeDef(Connects)
+      val tagsDef = HyperNodeDef(tagDef, Tags, nodeDef)
+      val tagClassifiesDef = RelationDef(FactoryNodeDef(Classification), Classifies, tagsDef)
+      val connDef = RelationDef(nodeDef, ConnectsStart, connectsDef)
+      val classifiesDef = RelationDef(FactoryNodeDef(Classification), Classifies, connectsDef)
 
       val query = s"""
       match ${ nodeDef.toQuery } where ${ nodeDef.name }.uuid in {nodeUuids}
@@ -54,9 +54,9 @@ object ClassifiedReferences {
   def shapeResponse[NODE <: UuidNode](response: Iterable[NODE]): Iterable[NODE] = {
     if(!response.isEmpty) {
       implicit val ctx = new QueryContext
-      val classDef = FactoryNodeDefinition(Classification)
-      val nodeDef = FactoryNodeDefinition(Reference)
-      val relDef = RelationDefinition(classDef, Classifies, nodeDef)
+      val classDef = FactoryNodeDef(Classification)
+      val nodeDef = FactoryNodeDef(Reference)
+      val relDef = RelationDef(classDef, Classifies, nodeDef)
 
       val query = s"""
       match ${ relDef.toQuery }

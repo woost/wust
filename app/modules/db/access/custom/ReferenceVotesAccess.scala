@@ -18,8 +18,8 @@ trait VotesReferenceAccess[T <: Reference] extends EndRelationAccessDefault[User
   val nodeFactory = User
 
   def selectNode(discourse: Discourse, startUuid: String, endUuid: String): T
-  def nodeDefinition(startUuid: String, endUuid: String)(implicit ctx: QueryContext): HyperNodeDefinitionBase[T]
-  def postDefinition(nodeDefinition: HyperNodeDefinitionBase[T]): NodeDefinition[Post]
+  def nodeDefinition(startUuid: String, endUuid: String)(implicit ctx: QueryContext): HyperNodeDefBase[T]
+  def postDefinition(nodeDefinition: HyperNodeDefBase[T]): NodeDef[Post]
   def selectPost(reference: T): Post
   def updateKarma(reference: T, karmaDefinition: KarmaDefinition): Unit
 
@@ -29,9 +29,9 @@ trait VotesReferenceAccess[T <: Reference] extends EndRelationAccessDefault[User
       val weight = sign * Moderation.postVoteKarma
       implicit val ctx = new QueryContext
       val referenceDef = nodeDefinition(param.startUuid, param.endUuid)
-      val userDef = ConcreteNodeDefinition(user)
-      val votesDef = RelationDefinition(userDef, Votes, referenceDef)
-      val createdDef = RelationDefinition(userDef, SchemaCreated, postDefinition(referenceDef))
+      val userDef = ConcreteNodeDef(user)
+      val votesDef = RelationDef(userDef, Votes, referenceDef)
+      val createdDef = RelationDef(userDef, SchemaCreated, postDefinition(referenceDef))
 
       val query = s"""
       match ${referenceDef.toQuery}
@@ -95,19 +95,19 @@ case class VotesTagsAccess(sign: Long) extends VotesReferenceAccess[Tags] {
 
   override def selectNode(discourse: Discourse, startUuid: String, endUuid: String) = discourse.tags.find(t => t.startNodeOpt.map(_.uuid == startUuid).getOrElse(false) && t.endNodeOpt.map(_.uuid == endUuid).getOrElse(false)).get
 
-  override def nodeDefinition(startUuid: String, endUuid: String)(implicit ctx: QueryContext): HyperNodeDefinitionBase[Tags] = {
-    HyperNodeDefinition(FactoryUuidNodeDefinition(Scope, startUuid), Tags, FactoryUuidNodeDefinition(Post, endUuid))
+  override def nodeDefinition(startUuid: String, endUuid: String)(implicit ctx: QueryContext): HyperNodeDefBase[Tags] = {
+    HyperNodeDef(FactoryUuidNodeDef(Scope, startUuid), Tags, FactoryUuidNodeDef(Post, endUuid))
   }
 
-  override def postDefinition(nodeDefinition: HyperNodeDefinitionBase[Tags]) = nodeDefinition.endDefinition.asInstanceOf[NodeDefinition[Post]]
+  override def postDefinition(nodeDefinition: HyperNodeDefBase[Tags]) = nodeDefinition.endDefinition.asInstanceOf[NodeDef[Post]]
   override def selectPost(reference: Tags) = reference.endNodeOpt.get
 
   override def updateKarma(reference: Tags, karmaDefinition: KarmaDefinition) {
     implicit val ctx = new QueryContext
-    val tagDef = ConcreteNodeDefinition(reference.startNodeOpt.get)
-    val postDef = ConcreteNodeDefinition(reference.endNodeOpt.get)
-    val userDef = FactoryNodeDefinition(User)
-    val createdDef = RelationDefinition(userDef, SchemaCreated, postDef)
+    val tagDef = ConcreteNodeDef(reference.startNodeOpt.get)
+    val postDef = ConcreteNodeDef(reference.endNodeOpt.get)
+    val userDef = FactoryNodeDef(User)
+    val createdDef = RelationDef(userDef, SchemaCreated, postDef)
 
     KarmaUpdate.persistWithTags(karmaDefinition, KarmaQueryCreated(createdDef), tagDef)
   }
@@ -117,18 +117,18 @@ case class VotesConnectsAccess(sign: Long) extends VotesReferenceAccess[Connects
 
   override def selectNode(discourse: Discourse, startUuid: String, endUuid: String) = discourse.connects.find(c => c.startNodeOpt.map(_.uuid == startUuid).getOrElse(false) && c.endNodeOpt.map(_.uuid == endUuid).getOrElse(false)).get
 
-  override def nodeDefinition(startUuid: String, endUuid: String)(implicit ctx: QueryContext): HyperNodeDefinitionBase[Connects] = {
-    HyperNodeDefinition(FactoryUuidNodeDefinition(Post, startUuid), Connects, FactoryUuidNodeDefinition(Connectable, endUuid))
+  override def nodeDefinition(startUuid: String, endUuid: String)(implicit ctx: QueryContext): HyperNodeDefBase[Connects] = {
+    HyperNodeDef(FactoryUuidNodeDef(Post, startUuid), Connects, FactoryUuidNodeDef(Connectable, endUuid))
   }
 
-  override def postDefinition(nodeDefinition: HyperNodeDefinitionBase[Connects]) = nodeDefinition.startDefinition.asInstanceOf[NodeDefinition[Post]]
+  override def postDefinition(nodeDefinition: HyperNodeDefBase[Connects]) = nodeDefinition.startDefinition.asInstanceOf[NodeDef[Post]]
   override def selectPost(reference: Connects) = reference.startNodeOpt.get
 
   override def updateKarma(reference: Connects, karmaDefinition: KarmaDefinition) {
     implicit val ctx = new QueryContext
-    val postDef = ConcreteNodeDefinition(reference.startNodeOpt.get)
-    val userDef = FactoryNodeDefinition(User)
-    val createdDef = RelationDefinition(userDef, SchemaCreated, postDef)
+    val postDef = ConcreteNodeDef(reference.startNodeOpt.get)
+    val userDef = FactoryNodeDef(User)
+    val createdDef = RelationDef(userDef, SchemaCreated, postDef)
 
     KarmaUpdate.persistWithConnectedTags(karmaDefinition, KarmaQueryCreated(createdDef))
   }
