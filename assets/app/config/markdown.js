@@ -12,8 +12,8 @@ function HumaneConfig() {
         sanitize: true, // additionally escape all input html elements
         smartLists: true,
         smartypants: false,
-        highlight: function (code) {
-            return hljs.highlightAuto(code).value;
+        highlight: function (code, lang) {
+            return hljs.highlightAuto(code, lang ? [lang] : undefined).value;
         }
     });
 }
