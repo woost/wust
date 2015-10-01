@@ -168,16 +168,13 @@ case class PostAccess() extends NodeAccessDefault[Post] {
     import formatters.json.PostFormat._
 
     implicit val ctx = new QueryContext
-    val tagDef = FactoryNodeDef(Scope)
     val nodeDef = FactoryUuidNodeDef(factory, uuid)
     val createdDef = RelationDef(FactoryNodeDef(User), SchemaCreated, nodeDef)
+    val tagsDef = HyperNodeDef(FactoryNodeDef(Scope), Tags, nodeDef)
+    val tagClassifiesDef = RelationDef(FactoryNodeDef(Classification), Classifies, tagsDef)
     val connectsDef = FactoryNodeDef(Connects)
-    val tagsDef = HyperNodeDef(tagDef, Tags, nodeDef)
-    val tagClassDef = FactoryNodeDef(Classification)
-    val tagClassifiesDef = RelationDef(tagClassDef, Classifies, tagsDef)
     val connDef = RelationDef(nodeDef, ConnectsStart, connectsDef)
-    val classDef = FactoryNodeDef(Classification)
-    val classifiesDef = RelationDef(classDef, Classifies, connectsDef)
+    val classifiesDef = RelationDef(FactoryNodeDef(Classification), Classifies, connectsDef)
 
     val (ownVoteCondition, ownVoteParams) = context.user.map { user =>
       val userDef = ConcreteNodeDef(user)

@@ -76,8 +76,7 @@ case class UserHasKarmaScopes() extends StartRelationAccessDefault[User, HasKarm
   override def read(context: RequestContext, param: ConnectParameter[User]) = {
     implicit val ctx = new QueryContext
     val userDef = FactoryUuidNodeDef(User, param.baseUuid)
-    val contextDef = FactoryNodeDef(Scope)
-    val karmaDef = RelationDef(userDef, HasKarma, contextDef)
+    val karmaDef = RelationDef(userDef, HasKarma, FactoryNodeDef(Scope))
 
     val query = s"match ${ karmaDef.toQuery } where ${karmaDef.name}.karma <> 0 return *"
     val params = karmaDef.parameterMap

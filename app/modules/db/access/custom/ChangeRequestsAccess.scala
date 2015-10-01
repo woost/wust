@@ -88,10 +88,9 @@ case class PostChangeRequestAccess() extends RelationAccessDefault[Post, ChangeR
   override def read(context: RequestContext, param: ConnectParameter[Post]) = {
     Ok(Json.toJson(context.user.map { user =>
       implicit val ctx = new QueryContext
-      val userDef = ConcreteNodeDef(user)
       val updatedDef = LabelNodeDef[TagChangeRequest](nodeFactory.labels)
       val postDef = FactoryUuidNodeDef(Post, param.baseUuid)
-      val votesDef = RelationDef(userDef, Votes, updatedDef)
+      val votesDef = RelationDef(ConcreteNodeDef(user), Votes, updatedDef)
       val proposesTagDef = RelationDef(updatedDef, ProposesTag, FactoryNodeDef(Scope))
       val proposesClassifyDef = RelationDef(updatedDef, ProposesClassify, FactoryNodeDef(Classification))
 
