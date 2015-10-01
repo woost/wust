@@ -13,7 +13,7 @@ import play.api.libs.json._
 import play.api.mvc.Result
 import play.api.mvc.Results._
 
-class UserAccess extends NodeReadBase[User] {
+case class UserAccess() extends NodeReadBase[User] {
   val factory = User
 
   implicit val format = UserFormat.UserFormat
@@ -34,12 +34,7 @@ class UserAccess extends NodeReadBase[User] {
   }
 }
 
-object UserAccess {
-  def apply = new UserAccess
-}
-
 case class UserContributions() extends RelationAccessDefault[User, Post] {
-
   import formatters.json.PostFormat._
 
   val nodeFactory = Post

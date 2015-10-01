@@ -13,7 +13,7 @@ case class InstantChangeRequestAccess() extends NodeAccessDefault[ChangeRequest]
 
   val factory = ChangeRequest
 
-  override def read(context: RequestContext) = {
+  override def read(context: RequestContext) = context.withUser { user =>
     val limit = context.limit
     val skip = context.skip
 
@@ -27,26 +27,18 @@ case class InstantChangeRequestAccess() extends NodeAccessDefault[ChangeRequest]
     val connDef = RelationDefinition(postDef, ConnectsStart, connectsDef)
     val tagClassifiesDef = RelationDefinition(ConcreteFactoryNodeDefinition(Classification), Classifies, tagsDef)
     val classifiesDef = RelationDefinition(ConcreteFactoryNodeDefinition(Classification), Classifies, connectsDef)
-
-    val (userMatcher, userCondition, userParams) = context.user.map { user =>
-      val userDef = ConcreteNodeDefinition(user)
-      val matcher = s", ${userDef.toQuery}"
-      val condition = s"""
-      and not((${userDef.name})-[:`${Votes.relationType}`]->(${crDef.name}))
-      and not((${userDef.name})-[:`${Skipped.relationType}`]->(${crDef.name}))
-      and not((${userDef.name})-[:`${UpdatedStart.relationType}`|`${DeletedStart.relationType}`|`${AddTagsStart.relationType}`|`${RemoveTagsStart.relationType}`]->(${crDef.name}))
-      """
-      (matcher, condition, userDef.parameterMap)
-    }.getOrElse(("", "", Map.empty))
+    val userDef = ConcreteNodeDefinition(user)
 
     //TODO: we need to match the deleted relation separately, as hidden posts
     //are only allowed for instant deleted requests - actually we should know
     //which request is responsible for the current deletion.
     //we currently would show edit and tag requests for already deleted posts.
     val query = s"""
-    match ${ crDef.toQuery }-[relation:`${ Updated.endRelationType }`|`${ Deleted.endRelationType }`|`${ AddTags.endRelationType }`|`${ RemoveTags.endRelationType }`]->${ postDef.toQuery } $userMatcher
+    match ${ crDef.toQuery }-[relation:`${ Updated.endRelationType }`|`${ Deleted.endRelationType }`|`${ AddTags.endRelationType }`|`${ RemoveTags.endRelationType }`]->${ postDef.toQuery }, ${ userDef.toQuery }
     where (${ crDef.name }.status = ${ INSTANT } OR ${ crDef.name }.status = ${ PENDING })
-    $userCondition
+    and not((${userDef.name})-[:`${Votes.relationType}`]->(${crDef.name}))
+    and not((${userDef.name})-[:`${Skipped.relationType}`]->(${crDef.name}))
+    and not((${userDef.name})-[:`${UpdatedStart.relationType}`|`${DeletedStart.relationType}`|`${AddTagsStart.relationType}`|`${RemoveTagsStart.relationType}`]->(${crDef.name}))
     with ${ postDef.name }, relation, ${ crDef.name } order by ${ crDef.name }.timestamp skip ${ skip } limit ${ limit }
     optional match ${ crTagsDef.toQuery(false, true) }
     optional match ${ crClassifiesDef.toQuery(false, true) }
@@ -56,7 +48,7 @@ case class InstantChangeRequestAccess() extends NodeAccessDefault[ChangeRequest]
     return *
     """
 
-    val params = userParams ++ crDef.parameterMap ++ crTagsDef.parameterMap ++ crClassifiesDef.parameterMap ++ tagsDef.parameterMap ++ connDef.parameterMap ++ classifiesDef.parameterMap
+    val params = userDef.parameterMap ++ crDef.parameterMap ++ crTagsDef.parameterMap ++ crClassifiesDef.parameterMap ++ tagsDef.parameterMap ++ connDef.parameterMap ++ classifiesDef.parameterMap
 
     val discourse = Discourse(db.queryGraph(query, params))
 

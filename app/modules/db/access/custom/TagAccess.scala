@@ -14,7 +14,7 @@ import play.api.mvc.Results._
 import renesca.Query
 import renesca.parameter.implicits._
 
-class TagAccess extends NodeReadBase[Scope] {
+case class TagAccess() extends NodeReadBase[Scope] {
   val factory = Scope
   implicit val format = TagFormat.ScopeFormat
 
@@ -71,8 +71,3 @@ class TagAccess extends NodeReadBase[Scope] {
     }
   }
 }
-
-object TagAccess {
-  def apply = new TagAccess
-}
-

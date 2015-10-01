@@ -40,18 +40,18 @@ case class StartConnectsAccess() extends StartRelationReadBase[Post, Connects, C
 
   val postaccess = PostAccess.apply
 
-  override def create(context: RequestContext, param: ConnectParameter[Post]) = context.withUser {
-    postaccess.createNode(context) match {
-      case Left(err) => BadRequest(s"Cannot create Post: $err")
-      case Right(node) => createRelation(context, param, node)
-    }
-  }
-
   private def createRelation(context: RequestContext, param: ConnectParameter[Post], node: Connectable) = {
     val discourse = Discourse(node.graph)
     val base = param.baseFactory.matchesOnUuid(param.baseUuid)
     discourse.add(base, node, factory.merge(base, node))
     persistRelation(discourse, node)
+  }
+
+  override def create(context: RequestContext, param: ConnectParameter[Post]) = context.withUser {
+    postaccess.createNode(context) match {
+      case Left(err) => BadRequest(s"Cannot create Post: $err")
+      case Right(node) => createRelation(context, param, node)
+    }
   }
 
   override def create(context: RequestContext, param: ConnectParameter[Post], otherUuid: String) = context.withUser {
@@ -65,6 +65,23 @@ case class EndConnectsAccess() extends EndRelationReadBase[Post, Connects, Conne
   implicit val format = GraphFormat.PostFormat
 
   val postaccess = PostAccess.apply
+
+  private def createRelation(context: RequestContext, param: ConnectParameter[Connectable], node: Post) = {
+    val discourse = Discourse(node.graph)
+    val base = param.baseFactory.matchesOnUuid(param.baseUuid)
+    discourse.add(base, node, factory.merge(node, base))
+    persistRelation(discourse, node)
+  }
+
+  private def createRelation[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Connectable with AbstractRelation[S, E], E], node: Post) = {
+    val discourse = Discourse(node.graph)
+    val start = param.startFactory.matchesOnUuid(param.startUuid)
+    val end = param.endFactory.matchesOnUuid(param.endUuid)
+    val base = param.baseFactory.matchesMatchableRelation(start, end)
+    val relation = factory.merge(node, base)
+    discourse.add(base, node, relation)
+    persistRelation(discourse, node)
+  }
 
   override def create(context: RequestContext, param: ConnectParameter[Connectable]) = context.withUser {
     postaccess.createNode(context) match {
@@ -80,26 +97,10 @@ case class EndConnectsAccess() extends EndRelationReadBase[Post, Connects, Conne
     }
   }
 
-  private def createRelation(context: RequestContext, param: ConnectParameter[Connectable], node: Post) = {
-    val discourse = Discourse(node.graph)
-    val base = param.baseFactory.matchesOnUuid(param.baseUuid)
-    discourse.add(base, node, factory.merge(node, base))
-    persistRelation(discourse, node)
-  }
-
   override def create(context: RequestContext, param: ConnectParameter[Connectable], otherUuid: String) = context.withUser {
     createRelation(context, param, nodeFactory.matchesOnUuid(otherUuid))
   }
 
-  private def createRelation[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Connectable with AbstractRelation[S, E], E], node: Post) = {
-    val discourse = Discourse(node.graph)
-    val start = param.startFactory.matchesOnUuid(param.startUuid)
-    val end = param.endFactory.matchesOnUuid(param.endUuid)
-    val base = param.baseFactory.matchesMatchableRelation(start, end)
-    val relation = factory.merge(node, base)
-    discourse.add(base, node, relation)
-    persistRelation(discourse, node)
-  }
 
   override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Connectable with AbstractRelation[S, E], E], uuid: String) = context.withUser {
     createRelation(context, param, nodeFactory.matchesOnUuid(uuid))

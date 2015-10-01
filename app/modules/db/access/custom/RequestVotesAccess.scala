@@ -14,12 +14,6 @@ import renesca._
 import play.api.mvc.Results._
 import moderation.Moderation
 
-trait ChangeRequestHelper[T <: ChangeRequest] {
-  def applyChange(tx: QueryHandler, discourse: Discourse, request: T, post: Post): Boolean
-  def unapplyChange(tx: QueryHandler, discourse: Discourse, request: T, post: Post): Boolean
-  def updateKarma(request: T, karmaDefinition: KarmaDefinition): Unit
-}
-
 case class VotesChangeRequestAccess(sign: Long) extends EndRelationAccessDefault[User, Votes, Votable] {
 
   import formatters.json.EditNodeFormat.PostFormat
@@ -27,23 +21,22 @@ case class VotesChangeRequestAccess(sign: Long) extends EndRelationAccessDefault
 
   val nodeFactory = User
 
-  def requestHelper[T <: ChangeRequest](request: T): ChangeRequestHelper[T] = request match {
-    //TODO: no asInstanceOf?
-    case req: Updated => VotesUpdatedHelper.asInstanceOf[ChangeRequestHelper[T]]
-    case req: Deleted => VotesDeletedHelper.asInstanceOf[ChangeRequestHelper[T]]
-    case req: TagChangeRequest => VotesTagsChangeRequestHelper.asInstanceOf[ChangeRequestHelper[T]]
+  def requestHelper(request: ChangeRequest): VotesChangeRequestHelper = request match {
+    case req: Updated => new VotesUpdatedHelper(req)
+    case req: Deleted => new VotesDeletedHelper(req)
+    case req: AddTags => new VotesAddTagsHelper(req)
+    case req: RemoveTags => new VotesRemoveTagsHelper(req)
   }
 
   def tryApply(tx: QueryHandler, discourse: Discourse, request: ChangeRequest):Either[String,(Option[Post], Option[KarmaDefinition])] = {
     val helper = requestHelper(request)
     if (request.canApply) {
       if (request.status == PENDING) {
-        val post = discourse.posts.head
-        val success = helper.applyChange(tx, discourse, request, post)
+        val success = helper.applyChange(tx, discourse)
 
         if (success) {
           request.status = APPROVED
-          Right((Some(post), Some(KarmaDefinition(request.applyThreshold, "Proposed change request approved"))))
+          Right((Some(helper.post), Some(KarmaDefinition(request.applyThreshold, "Proposed change request approved"))))
         } else {
           Left("Cannot apply changes automatically")
         }
@@ -53,11 +46,10 @@ case class VotesChangeRequestAccess(sign: Long) extends EndRelationAccessDefault
       } else Right((None, None))
     } else if (request.canReject) {
       if (request.status == INSTANT) {
-        val post = discourse.posts.headOption.getOrElse(Post.wrap(discourse.hiddens.head.rawItem))
-        val success = helper.unapplyChange(tx, discourse, request, post)
+        val success = helper.unapplyChange(tx, discourse)
         if (success) {
           request.status = REJECTED
-          Right((Some(post), Some(KarmaDefinition(-request.applyThreshold, "Instant change request rejected"))))
+          Right((Some(helper.post), Some(KarmaDefinition(-request.applyThreshold, "Instant change request rejected"))))
         } else {
           Left("Cannot unapply changes automatically")
         }
@@ -125,7 +117,7 @@ case class VotesChangeRequestAccess(sign: Long) extends EndRelationAccessDefault
             val failure = tx.persistChanges(discourse)
 
             failure.map(_ => BadRequest("No vote :/")).getOrElse {
-              karmaDefinitionOpt.foreach(helper.updateKarma(request, _))
+              karmaDefinitionOpt.foreach(helper.updateKarma(_))
               Ok(JsObject(Seq(
                 ("vote", JsObject(Seq(
                   ("weight", JsNumber(weight))
@@ -137,10 +129,11 @@ case class VotesChangeRequestAccess(sign: Long) extends EndRelationAccessDefault
               )))
             }
           case Left(err) =>
-            tx.rollback()
             //TODO we cannot do anything here, there is no merge conflict resolution
             //we just do not want to show it to the user again in the votestream,
             //so we set it to CONFLICT
+            //TODO maybe not rollback, but keep the new voting?
+            tx.rollback()
             db.transaction { tx =>
               val request = ChangeRequest.matchesOnUuid(param.baseUuid)
               request.status = CONFLICT
@@ -155,10 +148,19 @@ case class VotesChangeRequestAccess(sign: Long) extends EndRelationAccessDefault
   }
 }
 
-//TODO: we need hyperrelation traits in magic in order to matches on the hyperrelation trait and get correct type: Relation+Node
-object VotesUpdatedHelper extends ChangeRequestHelper[Updated] {
+trait VotesChangeRequestHelper {
+  def post: Post
+  def applyChange(tx: QueryHandler, discourse: Discourse): Boolean
+  def unapplyChange(tx: QueryHandler, discourse: Discourse): Boolean
+  def updateKarma(karmaDefinition: KarmaDefinition): Unit
+}
 
-  override def unapplyChange(tx: QueryHandler, discourse: Discourse, request: Updated, post: Post) = {
+//TODO: we need hyperrelation traits in magic in order to matches on the hyperrelation trait and get correct type: Relation+Node
+class VotesUpdatedHelper(request: Updated) extends VotesChangeRequestHelper {
+
+  override def post = request.endNodeOpt.get
+
+  override def unapplyChange(tx: QueryHandler, discourse: Discourse) = {
     val changesTitle = request.oldTitle != request.newTitle
     val changesDesc = request.oldDescription != request.newDescription
     if (changesTitle && post.title != request.newTitle || changesDesc && post.description != request.newDescription) {
@@ -172,7 +174,7 @@ object VotesUpdatedHelper extends ChangeRequestHelper[Updated] {
       true
     }
   }
-  override def applyChange(tx: QueryHandler, discourse: Discourse, request: Updated, post: Post) = {
+  override def applyChange(tx: QueryHandler, discourse: Discourse) = {
     val changesTitle = request.oldTitle != request.newTitle
     val changesDesc = request.oldDescription != request.newDescription
     if (changesTitle && post.title != request.oldTitle || changesDesc && post.description != request.oldDescription) {
@@ -187,7 +189,7 @@ object VotesUpdatedHelper extends ChangeRequestHelper[Updated] {
     }
   }
 
-  def updateKarma(request: Updated, karmaDefinition: KarmaDefinition) {
+  def updateKarma(karmaDefinition: KarmaDefinition) {
     implicit val ctx = new QueryContext
     val postDef = ConcreteNodeDefinition(request.endNodeOpt.get)
     val userDef = ConcreteNodeDefinition(request.startNodeOpt.get)
@@ -196,9 +198,11 @@ object VotesUpdatedHelper extends ChangeRequestHelper[Updated] {
   }
 }
 
-object VotesDeletedHelper extends ChangeRequestHelper[Deleted] {
+class VotesDeletedHelper(request: Deleted) extends VotesChangeRequestHelper {
 
-  override def unapplyChange(tx: QueryHandler, discourse: Discourse, request: Deleted, post: Post) = {
+  override def post = request.endNodeOpt.get
+
+  override def unapplyChange(tx: QueryHandler, discourse: Discourse) = {
     if (post.rawItem.labels.contains(Hidden.label)) {
       val hidden = Hidden.wrap(post.rawItem)
       hidden.unhide()
@@ -208,7 +212,7 @@ object VotesDeletedHelper extends ChangeRequestHelper[Deleted] {
     }
   }
 
-  override def applyChange(tx: QueryHandler, discourse: Discourse, request: Deleted, post: Post) = {
+  override def applyChange(tx: QueryHandler, discourse: Discourse) = {
     if (!post.rawItem.labels.contains(Hidden.label)) {
       post.hide()
       true
@@ -217,7 +221,7 @@ object VotesDeletedHelper extends ChangeRequestHelper[Deleted] {
     }
   }
 
-  def updateKarma(request: Deleted, karmaDefinition: KarmaDefinition) {
+  def updateKarma(karmaDefinition: KarmaDefinition) {
     implicit val ctx = new QueryContext
     // match any label, the post might be hidden or a post (maybe better some common label)
     val postDef = LabelUuidNodeDefinition[Post](UuidNode.labels, request.endNodeOpt.get.uuid)
@@ -227,12 +231,16 @@ object VotesDeletedHelper extends ChangeRequestHelper[Deleted] {
   }
 }
 
-object VotesTagsChangeRequestHelper extends ChangeRequestHelper[TagChangeRequest] {
-  private def requestGraphUnapply(tx: QueryHandler, req: TagChangeRequest) = {
+trait VotesTagsChangeRequestHelper extends VotesChangeRequestHelper {
+
+  val request: TagChangeRequest
+  def requestToPostDef()(implicit ctx: QueryContext): NodeRelationDefinition[_ <: TagChangeRequest, _, Post]
+
+  protected def requestGraphUnapply(tx: QueryHandler) = {
     implicit val ctx = new QueryContext
     val tagDef = ConcreteFactoryNodeDefinition(Scope)
     val classDef = ConcreteFactoryNodeDefinition(Classification)
-    val reqDef = ConcreteNodeDefinition(req)
+    val reqDef = ConcreteNodeDefinition(request)
     val tagsDef = RelationDefinition(reqDef, ProposesTag, tagDef)
     val classifiesDef = RelationDefinition(reqDef, ProposesClassify, classDef)
 
@@ -245,27 +253,20 @@ object VotesTagsChangeRequestHelper extends ChangeRequestHelper[TagChangeRequest
     Discourse(tx.queryGraph(query, tagsDef.parameterMap))
   }
 
-  private def requestGraphApply(tx: QueryHandler, req: TagChangeRequest, post: Post) = {
+  protected def requestGraphApply(tx: QueryHandler) = {
     implicit val ctx = new QueryContext
     val tagDef = ConcreteFactoryNodeDefinition(Scope)
     val classDef = ConcreteFactoryNodeDefinition(Classification)
-    val (reqDef: NodeDefinition[TagChangeRequest], reqToPostDef: NodeRelationDefinition[_,_,_]) = req match {
-      case _ :AddTags =>
-        val reqDef = ConcreteFactoryNodeDefinition(AddTags)
-        val relDef = RelationDefinition(reqDef, AddTagsEnd, ConcreteNodeDefinition(post))
-        (reqDef, relDef)
-      case _ :RemoveTags =>
-        val reqDef = ConcreteFactoryNodeDefinition(RemoveTags)
-        val relDef = RelationDefinition(reqDef, RemoveTagsEnd, ConcreteNodeDefinition(post))
-        (reqDef, relDef)
-    }
+requestToPostDef
+    val reqToPostDef = requestToPostDef()
+    val reqDef = reqToPostDef.startDefinition
 
     val tagsDef = RelationDefinition(reqDef, ProposesTag, tagDef)
     val classifiesDef = RelationDefinition(reqDef, ProposesClassify, classDef)
 
     //TODO: locking of other requests?
     val query = s"""
-    match ${reqToPostDef.toQuery}, ${tagsDef.toQuery(false, true)}
+    match ${requestToPostDef.toQuery}, ${tagsDef.toQuery(false, true)}
     where ${reqDef.name}.status = ${PENDING}
     optional match ${classifiesDef.toQuery(false, true)}
     return *
@@ -274,87 +275,11 @@ object VotesTagsChangeRequestHelper extends ChangeRequestHelper[TagChangeRequest
     Discourse(tx.queryGraph(query, reqToPostDef.parameterMap ++ tagsDef.parameterMap ++ classifiesDef.parameterMap))
   }
 
-  override def unapplyChange(tx: QueryHandler, discourse: Discourse, req: TagChangeRequest, post: Post) = {
-    val existing = requestGraphUnapply(tx, req)
-    val scope = existing.scopes.head
-    val classifications = existing.classifications
-
-    req match {
-      case request: AddTags =>
-        val tags = Tags.matches(scope, post)
-        if (classifications.size > 0) {
-          discourse.add(tags)
-          classifications.foreach { classification =>
-            discourse.remove(Classifies.matches(classification, tags))
-          }
-        } else {
-          discourse.remove(tags)
-        }
-      case request: RemoveTags =>
-        val tags = Tags.merge(scope, post)
-        if (classifications.size > 0) {
-          discourse.add(tags)
-          classifications.foreach { classification =>
-            discourse.add(Classifies.merge(classification, tags))
-          }
-        } else {
-          discourse.remove(Tags.matches(scope, post))
-        }
-    }
-
-    true
-  }
-
-  override def applyChange(tx: QueryHandler, discourse: Discourse, req: TagChangeRequest, post: Post) = {
-    val existing = requestGraphApply(tx, req, post)
-    val sameReq = existing.tagChangeRequests.find(_.uuid == req.uuid).get
-    val (scope, classifications) = sameReq match {
-      case addTag: AddTags => (addTag.proposesTags.head, addTag.proposesClassifys)
-      case remTag: RemoveTags => (remTag.proposesTags.head, remTag.proposesClassifys)
-    }
-
-    req match {
-      case request: AddTags =>
-        val tags = Tags.merge(scope, post)
-        discourse.add(tags)
-        classifications.foreach { classification =>
-          discourse.add(Classifies.merge(classification, tags))
-        }
-
-        existing.addTags.filter(_.uuid != request.uuid).filter { addTag =>
-          addTag.proposesTags.head.uuid == scope.uuid && addTag.proposesClassifys.toSet.subsetOf(classifications.toSet)
-        }.foreach { cr =>
-          cr.status = CONFLICT
-          discourse.add(cr)
-        }
-      case request: RemoveTags =>
-        //TODO: delete relation if those were the only classifications?
-        val tags = Tags.matches(scope, post)
-        if (classifications.size > 0) {
-          discourse.add(tags)
-          classifications.foreach { classification =>
-            discourse.remove(Classifies.matches(classification, tags))
-          }
-        } else {
-          discourse.remove(tags)
-        }
-
-        existing.removeTags.filter(_.uuid != request.uuid).filter { remTag =>
-          remTag.proposesTags.head.uuid == scope.uuid && (classifications.isEmpty || !remTag.proposesClassifys.isEmpty && remTag.proposesClassifys.toSet.subsetOf(classifications.toSet))
-        }.foreach { cr =>
-          cr.status = CONFLICT
-          discourse.add(cr)
-        }
-    }
-
-    true
-  }
-
-  override def updateKarma(req: TagChangeRequest, karmaDefinition: KarmaDefinition) {
+  override def updateKarma(karmaDefinition: KarmaDefinition) {
     implicit val ctx = new QueryContext
     val tagDef = ConcreteFactoryNodeDefinition(Scope)
-    val tagsDef = RelationDefinition(ConcreteNodeDefinition(req), ProposesTag, tagDef)
-    val (userNode, postNode) = req match {
+    val tagsDef = RelationDefinition(ConcreteNodeDefinition(request), ProposesTag, tagDef)
+    val (userNode, postNode) = request match {
       case request: AddTags => (request.startNodeOpt.get, request.endNodeOpt.get)
       case request: RemoveTags => (request.startNodeOpt.get, request.endNodeOpt.get)
     }
@@ -366,3 +291,89 @@ object VotesTagsChangeRequestHelper extends ChangeRequestHelper[TagChangeRequest
   }
 }
 
+class VotesAddTagsHelper(val request: AddTags) extends VotesTagsChangeRequestHelper {
+
+  override def post = request.endNodeOpt.get
+
+  override def requestToPostDef()(implicit ctx: QueryContext) = RelationDefinition(ConcreteFactoryNodeDefinition(AddTags), AddTagsEnd, ConcreteNodeDefinition(post))
+
+  override def unapplyChange(tx: QueryHandler, discourse: Discourse) = {
+    val existing = requestGraphUnapply(tx)
+    val scope = existing.scopes.head
+    val classifications = existing.classifications
+    val tags = Tags.matches(scope, post)
+    if (classifications.size > 0) {
+      discourse.add(tags)
+      classifications.foreach { classification =>
+        discourse.remove(Classifies.matches(classification, tags))
+      }
+    } else {
+      discourse.remove(tags)
+    }
+
+    true
+  }
+
+  override def applyChange(tx: QueryHandler, discourse: Discourse) = {
+    val existing = requestGraphApply(tx)
+    val sameReq = existing.tagChangeRequests.find(_.uuid == request.uuid).get
+    val scope = sameReq.proposesTags.head
+    val classifications = sameReq.proposesClassifys
+    val tags = Tags.merge(scope, post)
+    discourse.add(tags)
+    classifications.foreach { classification =>
+      discourse.add(Classifies.merge(classification, tags))
+    }
+
+    existing.addTags.filter(_.uuid != request.uuid).filter { addTag =>
+      addTag.proposesTags.head.uuid == scope.uuid && addTag.proposesClassifys.toSet.subsetOf(classifications.toSet)
+    }.foreach { cr =>
+      cr.status = CONFLICT
+      discourse.add(cr)
+    }
+
+    true
+  }
+}
+
+class VotesRemoveTagsHelper(val request: RemoveTags) extends VotesTagsChangeRequestHelper {
+  override def post = request.endNodeOpt.get
+
+  override def requestToPostDef()(implicit ctx: QueryContext) = RelationDefinition(ConcreteFactoryNodeDefinition(RemoveTags), RemoveTagsEnd, ConcreteNodeDefinition(post))
+
+  override def unapplyChange(tx: QueryHandler, discourse: Discourse) = {
+    val existing = requestGraphUnapply(tx)
+    val scope = existing.scopes.head
+    val classifications = existing.classifications
+    val tags = Tags.merge(scope, post)
+    if (classifications.size > 0) {
+      discourse.add(tags)
+      classifications.foreach { classification =>
+        discourse.add(Classifies.merge(classification, tags))
+      }
+    } else {
+      discourse.remove(Tags.matches(scope, post))
+    }
+
+    true
+  }
+
+  override def applyChange(tx: QueryHandler, discourse: Discourse) = {
+    val existing = requestGraphApply(tx)
+    val sameReq = existing.tagChangeRequests.find(_.uuid == request.uuid).get
+    val scope = sameReq.proposesTags.head
+    val classifications = sameReq.proposesClassifys
+    //TODO: delete relation if those were the only classifications?
+    val tags = Tags.matches(scope, post)
+    if (classifications.size > 0) {
+      discourse.add(tags)
+      classifications.foreach { classification =>
+        discourse.remove(Classifies.matches(classification, tags))
+      }
+    } else {
+      discourse.remove(tags)
+    }
+
+    true
+  }
+}
