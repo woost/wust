@@ -6,32 +6,17 @@ import play.api.libs.json._
 import model.WustSchema.{Created => SchemaCreated, _}
 import modules.db.Database._
 import modules.db.access._
+import modules.db.helpers.PostHelper
 import modules.db._
 import modules.requests._
 import renesca.parameter.implicits._
 import renesca.QueryHandler
-import renesca.Query
 import play.api.mvc.Results._
 import moderation.Moderation
-import wust.Shared.tagTitleColor
-import scala.concurrent._
-import ExecutionContext.Implicits.global
 
 case class PostAccess() extends NodeAccessDefault[Post] {
 
   val factory = Post
-
-  private def tagConnectRequestToScope(tag: TagConnectRequest) = {
-    if (tag.id.isDefined)
-      Some(Scope.matchesOnUuid(tag.id.get))
-    else if (tag.title.isDefined)
-      Some(Scope.merge(
-        title = tag.title.get,
-        color = tagTitleColor(tag.title.get),
-        merge = Set("title")))
-    else
-      None
-  }
 
   private def handleInitialChange(contribution: ChangeRequest, user: User, authorBoost: Long, approvalSum: Long) = {
     if (contribution.canApply(authorBoost)) {
@@ -97,7 +82,7 @@ case class PostAccess() extends NodeAccessDefault[Post] {
         }
       }
 
-      val crOpt = alreadyExisting orElse tagConnectRequestToScope(tagReq).map { tag =>
+      val crOpt = alreadyExisting orElse PostHelper.tagConnectRequestToScope(tagReq).map { tag =>
         // we create a new change request as there is no existing one here
         val addTags = AddTags.create(user, post, applyThreshold = applyThreshold)
         discourse.add(addTags, tag, ProposesTag.create(addTags, tag))
@@ -179,45 +164,6 @@ case class PostAccess() extends NodeAccessDefault[Post] {
     existing.tagChangeRequests.foreach(_._locked = false)
   }
 
-  private def addScopesToGraph(discourse: Discourse, request: PostAddRequest, node: Post) {
-    request.addedTags.flatMap(req => tagConnectRequestToScope(req).map((req, _))).foreach { case (req, tag) =>
-      val tags = Tags.merge(tag, node)
-      discourse.add(tags)
-      req.classifications.map(c => Classification.matchesOnUuid(c.id)).foreach { classification =>
-        discourse.add(Classifies.merge(classification, tags))
-      }
-    }
-  }
-
-  private def viewPost(node: Post, user: User) = Future {
-    db.transaction { tx =>
-      implicit val ctx = new QueryContext
-      val postDef = ConcreteNodeDefinition(node)
-      val userDef = ConcreteNodeDefinition(user)
-      val viewedDef = RelationDefinition(userDef, Viewed, postDef)
-      val query = s"""
-      match ${postDef.toQuery}
-      set ${postDef.name}._locked = true
-      with ${postDef.name}
-      optional match ${viewedDef.toQuery(true, false)}
-      return *
-      """
-
-      val discourse = Discourse(tx.queryGraph(Query(query, viewedDef.parameterMap)))
-      val post = discourse.posts.head
-      discourse.vieweds.headOption match {
-        case Some(viewed) =>
-          viewed.timestamp = System.currentTimeMillis
-        case None =>
-          discourse.add(Viewed.merge(user, post))
-          post.viewCount += 1
-      }
-
-      post._locked = false
-      tx.persistChanges(discourse)
-    }
-  }
-
   override def read(context: RequestContext, uuid: String) = {
     import formatters.json.PostFormat._
 
@@ -251,11 +197,11 @@ case class PostAccess() extends NodeAccessDefault[Post] {
 
     val params = tagsDef.parameterMap ++ connDef.parameterMap ++ tagClassifiesDef.parameterMap ++ createdDef.parameterMap ++ classifiesDef.parameterMap ++ ownVoteParams
 
-    val discourse = Discourse(db.queryGraph(Query(query, params)))
+    val discourse = Discourse(db.queryGraph(query, params))
     discourse.posts.headOption match {
       case Some(node) =>
         if (context.countView)
-          context.user.foreach(viewPost(node, _))
+          context.user.foreach(PostHelper.viewPost(node, _))
 
         Ok(Json.toJson(node))
       case None =>
@@ -263,32 +209,15 @@ case class PostAccess() extends NodeAccessDefault[Post] {
     }
   }
 
-  def createNode(context: RequestContext): Either[String,Post] = context.user.map { user =>
+  override def create(context: RequestContext) = context.withUser { user =>
     import formatters.json.EditNodeFormat._
 
     context.jsonAs[PostAddRequest].map { request =>
-      val discourse = Discourse.empty
-
-      val node = Post.create(title = request.title, description = request.description)
-      val contribution = SchemaCreated.create(user, node)
-      discourse.add(node, contribution)
-
-      addScopesToGraph(discourse, request, node)
-
-      db.transaction(_.persistChanges(discourse)) match {
-        case Some(err) => Left(err)
-        case None      => Right(node)
+      PostHelper.createPost(request, user) match {
+        case Left(err) => BadRequest(s"Cannot create Post: $err")
+        case Right(node) => Ok(Json.toJson(node))
       }
-    }.getOrElse(Left("Cannot parse create request"))
-  }.getOrElse(Left("Only for users"))
-
-  override def create(context: RequestContext) = context.withUser {
-    import formatters.json.EditNodeFormat._
-
-    createNode(context) match {
-      case Left(err) => BadRequest(s"Cannot create Post: $err")
-      case Right(node) => Ok(Json.toJson(node))
-    }
+    }.getOrElse(BadRequest("Cannot parse create request"))
   }
 
   override def delete(context: RequestContext, uuid: String) = context.withUser { user =>

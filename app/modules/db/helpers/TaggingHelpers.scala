@@ -1,4 +1,4 @@
-package modules.db.access.custom
+package modules.db.helpers
 
 import model.WustSchema._
 import modules.db.Database._

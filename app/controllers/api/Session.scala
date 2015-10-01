@@ -7,7 +7,7 @@ import model.WustSchema._
 import modules.auth.HeaderEnvironmentModule
 import modules.db.Database.db
 import modules.db._
-import modules.db.access.custom.TaggedTaggable
+import modules.db.helpers.TaggedTaggable
 import play.api.libs.json.Json
 import play.api.mvc.Controller
 import renesca.Query

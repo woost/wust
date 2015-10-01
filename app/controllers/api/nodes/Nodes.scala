@@ -28,14 +28,14 @@ case class RequestContext(controller: NodesBase with Controller, user: Option[Us
   }
 
   def withUser(handler: User => Result): Result = {
-    user.map(handler(_)).getOrElse(onlyUsers)
+    user.map(handler(_)).getOrElse(onlyUsersError)
   }
 
   def withUser(handler: => Result): Result = {
-    user.map(_ => handler).getOrElse(onlyUsers)
+    user.map(_ => handler).getOrElse(onlyUsersError)
   }
 
-  private def onlyUsers = Forbidden("Only for users")
+  def onlyUsersError = Forbidden("Only for users")
 }
 
 case class ConnectParameter[+BASE <: UuidNode](

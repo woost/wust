@@ -4,7 +4,7 @@ import formatters.json.ExposedNodeFormat._
 import model.WustSchema.{Tags => SchemaTags, _}
 import modules.db.Database._
 import modules.db._
-import modules.db.access.custom.TaggedTaggable
+import modules.db.helpers.TaggedTaggable
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
 import renesca.Query

@@ -9,6 +9,7 @@ import modules.requests._
 import model.WustSchema._
 import modules.db.Database.db
 import modules.db.access._
+import modules.db.helpers.{PostHelper,ClassifiedReferences}
 import modules.db._
 import modules.requests.ConnectResponse
 import play.api.libs.json._
@@ -31,14 +32,23 @@ trait ConnectsRelationHelper[NODE <: Connectable] {
       Ok(Json.toJson(ConnectResponse[NODE](discourse, Some(result))))
     })
   }
+
+  protected def createPost(context: RequestContext): Either[Result, Post] = context.user.map { user =>
+    import formatters.json.EditNodeFormat._
+
+    context.jsonAs[PostAddRequest].map { request =>
+      PostHelper.createPost(request, user) match {
+        case Left(err) => Left(BadRequest(s"Cannot create Post: $err"))
+        case Right(node) => Right(node)
+      }
+    }.getOrElse(Left(BadRequest("Cannot parse create request")))
+  }.getOrElse(Left(context.onlyUsersError))
 }
 
 case class StartConnectsAccess() extends StartRelationReadBase[Post, Connects, Connectable] with StartRelationDeleteBase[Post, Connects, Connectable] with ConnectsRelationHelper[Connectable] {
   val factory = Connects
   val nodeFactory = Connectable
   implicit val format = GraphFormat.ConnectableFormat
-
-  val postaccess = PostAccess.apply
 
   private def createRelation(context: RequestContext, param: ConnectParameter[Post], node: Connectable) = {
     val discourse = Discourse(node.graph)
@@ -47,11 +57,9 @@ case class StartConnectsAccess() extends StartRelationReadBase[Post, Connects, C
     persistRelation(discourse, node)
   }
 
-  override def create(context: RequestContext, param: ConnectParameter[Post]) = context.withUser {
-    postaccess.createNode(context) match {
-      case Left(err) => BadRequest(s"Cannot create Post: $err")
-      case Right(node) => createRelation(context, param, node)
-    }
+  override def create(context: RequestContext, param: ConnectParameter[Post]) = createPost(context) match {
+    case Left(err) => err
+    case Right(node) => createRelation(context, param, node)
   }
 
   override def create(context: RequestContext, param: ConnectParameter[Post], otherUuid: String) = context.withUser {
@@ -83,18 +91,14 @@ case class EndConnectsAccess() extends EndRelationReadBase[Post, Connects, Conne
     persistRelation(discourse, node)
   }
 
-  override def create(context: RequestContext, param: ConnectParameter[Connectable]) = context.withUser {
-    postaccess.createNode(context) match {
-      case Left(err) => BadRequest(s"Cannot create Post: $err")
-      case Right(node) => createRelation(context, param, node)
-    }
+  override def create(context: RequestContext, param: ConnectParameter[Connectable]) = createPost(context) match {
+    case Left(err) => err
+    case Right(node) => createRelation(context, param, node)
   }
 
-  override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Connectable with AbstractRelation[S, E], E]) = context.withUser {
-    postaccess.createNode(context) match {
-      case Left(err) => BadRequest(s"Cannot create Post: $err")
-      case Right(node) => createRelation(context, param, node)
-    }
+  override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Connectable with AbstractRelation[S, E], E]) = createPost(context) match {
+    case Left(err) => err
+    case Right(node) => createRelation(context, param, node)
   }
 
   override def create(context: RequestContext, param: ConnectParameter[Connectable], otherUuid: String) = context.withUser {
