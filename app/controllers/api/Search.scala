@@ -62,8 +62,8 @@ object Search extends Controller {
     } else {
       if(tagOr.getOrElse(false)) {
         //TODO: classification need to be matched on the outgoing connects relation of the post
-        val tagDef = ConcreteFactoryNodeDefinition(Scope)
-        val inheritTagDef = ConcreteFactoryNodeDefinition(Scope)
+        val tagDef = FactoryNodeDefinition(Scope)
+        val inheritTagDef = FactoryNodeDefinition(Scope)
         val relationDef = RelationDefinition(inheritTagDef, SchemaTags, nodeDef)
         val condition = if(termMatcher.isEmpty) "" else s"where ${ termMatcher }"
         val tagDefinition = s"${ inheritTagDef.toQuery }-[:`${Inherits.relationType}`*0..10]->${ tagDef.toQuery }"
@@ -81,7 +81,7 @@ object Search extends Controller {
       } else {
         //TODO: classification need to be matched on the outgoing connects relation of the post
         val tagDefs = tags.map(uuid => FactoryUuidNodeDefinition(Scope, uuid))
-        val inheritTagDefs = tags.map(_ => ConcreteFactoryNodeDefinition(Scope))
+        val inheritTagDefs = tags.map(_ => FactoryNodeDefinition(Scope))
         val relationDefs = inheritTagDefs.map(tagDef => RelationDefinition(tagDef, SchemaTags, nodeDef))
         val condition = if(termMatcher.isEmpty) "" else s"where ${ termMatcher }"
         val tagDefinitions = (tagDefs zip inheritTagDefs).map { case (t, i) => s"${ i.toQuery }-[:`${Inherits.relationType}`*0..10]->${ t.toQuery }" }.mkString(",")

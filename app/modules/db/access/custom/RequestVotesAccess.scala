@@ -236,8 +236,8 @@ trait VotesTagsChangeRequestHelper extends VotesChangeRequestHelper {
 
   protected def requestGraphUnapply(tx: QueryHandler) = {
     implicit val ctx = new QueryContext
-    val tagDef = ConcreteFactoryNodeDefinition(Scope)
-    val classDef = ConcreteFactoryNodeDefinition(Classification)
+    val tagDef = FactoryNodeDefinition(Scope)
+    val classDef = FactoryNodeDefinition(Classification)
     val reqDef = ConcreteNodeDefinition(request)
     val tagsDef = RelationDefinition(reqDef, ProposesTag, tagDef)
     val classifiesDef = RelationDefinition(reqDef, ProposesClassify, classDef)
@@ -253,8 +253,8 @@ trait VotesTagsChangeRequestHelper extends VotesChangeRequestHelper {
 
   protected def requestGraphApply(tx: QueryHandler) = {
     implicit val ctx = new QueryContext
-    val tagDef = ConcreteFactoryNodeDefinition(Scope)
-    val classDef = ConcreteFactoryNodeDefinition(Classification)
+    val tagDef = FactoryNodeDefinition(Scope)
+    val classDef = FactoryNodeDefinition(Classification)
 requestToPostDef
     val reqToPostDef = requestToPostDef()
     val reqDef = reqToPostDef.startDefinition
@@ -275,7 +275,7 @@ requestToPostDef
 
   override def updateKarma(karmaDefinition: KarmaDefinition) {
     implicit val ctx = new QueryContext
-    val tagDef = ConcreteFactoryNodeDefinition(Scope)
+    val tagDef = FactoryNodeDefinition(Scope)
     val tagsDef = RelationDefinition(ConcreteNodeDefinition(request), ProposesTag, tagDef)
     val (userNode, postNode) = request match {
       case request: AddTags => (request.startNodeOpt.get, request.endNodeOpt.get)
@@ -293,7 +293,7 @@ class VotesAddTagsHelper(val request: AddTags) extends VotesTagsChangeRequestHel
 
   override def post = request.endNodeOpt.get
 
-  override def requestToPostDef()(implicit ctx: QueryContext) = RelationDefinition(ConcreteFactoryNodeDefinition(AddTags), AddTagsEnd, ConcreteNodeDefinition(post))
+  override def requestToPostDef()(implicit ctx: QueryContext) = RelationDefinition(FactoryNodeDefinition(AddTags), AddTagsEnd, ConcreteNodeDefinition(post))
 
   override def unapplyChange(tx: QueryHandler, discourse: Discourse) = {
     val existing = requestGraphUnapply(tx)
@@ -337,7 +337,7 @@ class VotesAddTagsHelper(val request: AddTags) extends VotesTagsChangeRequestHel
 class VotesRemoveTagsHelper(val request: RemoveTags) extends VotesTagsChangeRequestHelper {
   override def post = request.endNodeOpt.get
 
-  override def requestToPostDef()(implicit ctx: QueryContext) = RelationDefinition(ConcreteFactoryNodeDefinition(RemoveTags), RemoveTagsEnd, ConcreteNodeDefinition(post))
+  override def requestToPostDef()(implicit ctx: QueryContext) = RelationDefinition(FactoryNodeDefinition(RemoveTags), RemoveTagsEnd, ConcreteNodeDefinition(post))
 
   override def unapplyChange(tx: QueryHandler, discourse: Discourse) = {
     val existing = requestGraphUnapply(tx)

@@ -19,14 +19,14 @@ case class InstantChangeRequestAccess() extends NodeAccessDefault[ChangeRequest]
 
     implicit val ctx = new QueryContext
     val crDef = LabelNodeDefinition[TagChangeRequest](ChangeRequest.labels)
-    val crTagsDef = RelationDefinition(crDef, ProposesTag, ConcreteFactoryNodeDefinition(Scope))
-    val crClassifiesDef = RelationDefinition(crDef, ProposesClassify, ConcreteFactoryNodeDefinition(Classification))
+    val crTagsDef = RelationDefinition(crDef, ProposesTag, FactoryNodeDefinition(Scope))
+    val crClassifiesDef = RelationDefinition(crDef, ProposesClassify, FactoryNodeDefinition(Classification))
     val postDef = LabelNodeDefinition[Post](Set.empty) //matching real posts and hidden posts without any label just by their relations
-    val tagsDef = HyperNodeDefinition(ConcreteFactoryNodeDefinition(Scope), Tags, postDef)
-    val connectsDef = ConcreteFactoryNodeDefinition(Connects)
+    val tagsDef = HyperNodeDefinition(FactoryNodeDefinition(Scope), Tags, postDef)
+    val connectsDef = FactoryNodeDefinition(Connects)
     val connDef = RelationDefinition(postDef, ConnectsStart, connectsDef)
-    val tagClassifiesDef = RelationDefinition(ConcreteFactoryNodeDefinition(Classification), Classifies, tagsDef)
-    val classifiesDef = RelationDefinition(ConcreteFactoryNodeDefinition(Classification), Classifies, connectsDef)
+    val tagClassifiesDef = RelationDefinition(FactoryNodeDefinition(Classification), Classifies, tagsDef)
+    val classifiesDef = RelationDefinition(FactoryNodeDefinition(Classification), Classifies, connectsDef)
     val userDef = ConcreteNodeDefinition(user)
 
     //TODO: we need to match the deleted relation separately, as hidden posts
@@ -92,8 +92,8 @@ case class PostChangeRequestAccess() extends RelationAccessDefault[Post, ChangeR
       val updatedDef = LabelNodeDefinition[TagChangeRequest](nodeFactory.labels)
       val postDef = FactoryUuidNodeDefinition(Post, param.baseUuid)
       val votesDef = RelationDefinition(userDef, Votes, updatedDef)
-      val proposesTagDef = RelationDefinition(updatedDef, ProposesTag, ConcreteFactoryNodeDefinition(Scope))
-      val proposesClassifyDef = RelationDefinition(updatedDef, ProposesClassify, ConcreteFactoryNodeDefinition(Classification))
+      val proposesTagDef = RelationDefinition(updatedDef, ProposesTag, FactoryNodeDefinition(Scope))
+      val proposesClassifyDef = RelationDefinition(updatedDef, ProposesClassify, FactoryNodeDefinition(Classification))
 
       val query = s"""
       match ${ updatedDef.toQuery }-[:`${ Updated.endRelationType }`|`${ AddTags.endRelationType }`|`${ RemoveTags.endRelationType }`|`${ Deleted.endRelationType }`]->${ postDef.toQuery }

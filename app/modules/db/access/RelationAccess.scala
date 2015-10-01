@@ -66,7 +66,7 @@ RELATION <: AbstractRelation[START, END],
 END <: UuidNode
 ] extends RelationAccess[START, END] {
 
-  def toNodeDefinition(implicit ctx: QueryContext) = ConcreteFactoryNodeDefinition(nodeFactory)
+  def toNodeDefinition(implicit ctx: QueryContext) = FactoryNodeDefinition(nodeFactory)
   def toNodeDefinition(uuid: String)(implicit ctx: QueryContext) = FactoryUuidNodeDefinition(nodeFactory, uuid)
   def toBaseNodeDefinition(param: ConnectParameter[START])(implicit ctx: QueryContext) = FactoryUuidNodeDefinition(param.baseFactory, param.baseUuid)
   def toBaseNodeDefinition[E <: UuidNode, S <: UuidNode](param: HyperConnectParameter[S, START with AbstractRelation[S, E], E])(implicit ctx: QueryContext) = {
@@ -82,7 +82,7 @@ RELATION <: AbstractRelation[START, END],
 END <: UuidNode
 ] extends RelationAccess[END, START] {
 
-  def toNodeDefinition(implicit ctx: QueryContext) = ConcreteFactoryNodeDefinition(nodeFactory)
+  def toNodeDefinition(implicit ctx: QueryContext) = FactoryNodeDefinition(nodeFactory)
   def toNodeDefinition(uuid: String)(implicit ctx: QueryContext) = FactoryUuidNodeDefinition(nodeFactory, uuid)
   def toBaseNodeDefinition(param: ConnectParameter[END])(implicit ctx: QueryContext) = FactoryUuidNodeDefinition(param.baseFactory, param.baseUuid)
   def toBaseNodeDefinition[E <: UuidNode, S <: UuidNode](param: HyperConnectParameter[S, END with AbstractRelation[S, E], E])(implicit ctx: QueryContext) = {

@@ -58,7 +58,7 @@ case class FactoryUuidNodeDefinition[+NODE <: UuidNode](
   val labels = factory.labels
 }
 
-case class ConcreteFactoryNodeDefinition[+NODE <: Node](
+case class FactoryNodeDefinition[+NODE <: Node](
   factory: NodeFactory[NODE]
   )(implicit val ctx: QueryContext) extends LabelledNodeDefinition[NODE] {
   val labels = factory.labels

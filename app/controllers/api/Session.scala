@@ -17,7 +17,7 @@ object Session extends Controller with Silhouette[User, JWTAuthenticator] with H
     request.identity.map { user =>
       implicit val ctx = new QueryContext
       val userDef = ConcreteNodeDefinition(user)
-      val postDef = ConcreteFactoryNodeDefinition(Post)
+      val postDef = FactoryNodeDefinition(Post)
       val viewedDef = RelationDefinition(userDef, Viewed, postDef)
 
       val query = s"match ${ viewedDef.toQuery } return ${ postDef.name } order by ${ viewedDef.name }.timestamp desc limit 8"

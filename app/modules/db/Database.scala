@@ -44,7 +44,7 @@ object Database {
   def nodeDiscourseGraph[NODE <: UuidNode](factory: NodeFactory[NODE], uuids: String*): Discourse = {
     implicit val ctx = new QueryContext
     if(uuids.isEmpty)
-      return discourseGraph(ConcreteFactoryNodeDefinition(factory))
+      return discourseGraph(FactoryNodeDefinition(factory))
 
     val query = s"match (n :`${ factory.label }`) where n.uuid in {uuids} return n limit ${ uuids.size }"
     val params = Map("uuids" -> uuids)
@@ -53,7 +53,7 @@ object Database {
 
   def limitedDiscourseNodes[NODE <: UuidNode](skip: Int, limit: Int, factory: NodeFactory[NODE]): (Discourse, Seq[NODE]) = {
     implicit val ctx = new QueryContext
-    val nodeDef = ConcreteFactoryNodeDefinition(factory)
+    val nodeDef = FactoryNodeDefinition(factory)
     val discourse = discourseGraphWithReturn(s"${ nodeDef.name } skip $skip limit $limit", nodeDef)
     (discourse, nodesWithType[NODE](discourse.nodes))
   }

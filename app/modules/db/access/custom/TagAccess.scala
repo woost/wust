@@ -22,8 +22,8 @@ case class TagAccess() extends NodeReadBase[Scope] {
   override def read(context: RequestContext, uuid: String) = {
     implicit val ctx = new QueryContext
     val node = FactoryUuidNodeDefinition(factory, uuid)
-    val base = ConcreteFactoryNodeDefinition(factory)
-    val impl = ConcreteFactoryNodeDefinition(factory)
+    val base = FactoryNodeDefinition(factory)
+    val impl = FactoryNodeDefinition(factory)
     val baseInherit = RelationDefinition(base, Inherits, node)
     val implInherit = RelationDefinition(node, Inherits, impl)
 

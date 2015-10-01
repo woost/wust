@@ -86,7 +86,7 @@ object KarmaUpdate {
   }
 
   def persistWithConnectedTags(karmaDefinition: KarmaDefinition, karmaQuery: KarmaQuery)(implicit ctx: QueryContext) = {
-    val tagDef = ConcreteFactoryNodeDefinition(Scope)
+    val tagDef = FactoryNodeDefinition(Scope)
 
     val tagMatch = s"""
     match (${karmaQuery.postDef.name})-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)
@@ -100,7 +100,7 @@ object KarmaUpdate {
   }
 
   def persistWithConnectedTagsOfHidden(karmaDefinition: KarmaDefinition, karmaQuery: KarmaQuery)(implicit ctx: QueryContext) = {
-    val tagDef = ConcreteFactoryNodeDefinition(Scope)
+    val tagDef = FactoryNodeDefinition(Scope)
 
     val tagMatch = s"""
     optional match (${karmaQuery.postDef.name})-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)
