@@ -361,7 +361,6 @@ class VotesRemoveTagsHelper(val request: RemoveTags) extends VotesTagsChangeRequ
     val sameReq = existing.tagChangeRequests.find(_.uuid == request.uuid).get
     val scope = sameReq.proposesTags.head
     val classifications = sameReq.proposesClassifys
-    //TODO: delete relation if those were the only classifications?
     val tags = Tags.matches(scope, post)
     if (classifications.size > 0) {
       discourse.add(tags)

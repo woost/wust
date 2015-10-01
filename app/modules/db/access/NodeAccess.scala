@@ -39,7 +39,6 @@ trait NodeReadBase[NODE <: UuidNode] extends NodeAccessDefault[NODE] with Format
 
   override def read(context: RequestContext, uuid: String) = {
     val node = factory.matchesOnUuid(uuid)
-    //TODO method for only resolving matches...
     db.transaction(_.persistChanges(node)) match {
       case Some(err) => NotFound(s"Cannot find node with uuid '$uuid': $err")
       case None      => Ok(Json.toJson(node))

@@ -71,7 +71,7 @@ object EditNodeFormat {
       ("title", JsString(n.title)),
       ("description", JsString(n.description.getOrElse(""))),
       ("tags", Json.toJson(n.inRelationsAs(Tags).sortBy(_.uuid))),
-      ("classifications", JsArray(n.outRelationsAs(ConnectsStart).map(_.endNode).flatMap(con => con.rev_classifies.sortBy(_.uuid).map((_, con))).groupBy(_._1).mapValues(_.map(_._2)).map(classificationWriter(n, _)).toSeq)),
+        ("classifications", classificationConnectsWriter(n)),
       ("timestamp", Json.toJson(JsNumber(n.timestamp))),
       //TODO: merge the three arrays into one?
       ("requestsEdit", Json.toJson(n.inRelationsAs(Updated))),
@@ -87,16 +87,10 @@ object EditNodeFormat {
     def writes(node: Reference) = JsObject(node match {
       case n:Connects => Seq(
         ("id", JsString(n.uuid)),
-        // ("startId", n.startNodeOpt.map(s => JsString(s.uuid)).getOrElse(JsNull)),
-        // ("endId", n.endNodeOpt.map(e => JsString(e.uuid)).getOrElse(JsNull)),
-        // ("quality", n.startNodeOpt.map(post => JsNumber(n.quality(post.viewCount))).getOrElse(JsNull)),
         ("tags", Json.toJson(n.rev_classifies.sortBy(_.uuid)))
       )
       case n:Tags => Seq(
         ("id", JsString(n.uuid)),
-        // ("startId", n.startNodeOpt.map(s => JsString(s.uuid)).getOrElse(JsNull)),
-        // ("endId", n.endNodeOpt.map(e => JsString(e.uuid)).getOrElse(JsNull)),
-        // ("quality", n.endNodeOpt.map(post => JsNumber(n.quality(post.viewCount))).getOrElse(JsNull)),
         ("tags", Json.toJson(n.rev_classifies.sortBy(_.uuid)))
       )
     })

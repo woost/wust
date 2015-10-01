@@ -23,16 +23,16 @@ object TagFormat {
     )
   )
 
-  //TODO should user rev_Classifies accessor instead of getting tuple as parameter
-  def classificationWriter(post: Post, tuple: (Classification, Seq[Connects])): JsObject = {
-    val (classification, connectsList) = tuple
-    val quality = connectsList.map(c => c.quality(post.viewCount)).sum / connectsList.size
-    JsObject(
-      tagLikeToSeq(classification) ++ Seq(
-        ("quality", JsNumber(quality))
+  def classificationConnectsWriter(post: Post) = JsArray({
+    post.outRelationsAs(ConnectsStart).map(_.endNode).flatMap(con => con.rev_classifies.sortBy(_.uuid).map((_, con))).groupBy(_._1).mapValues(_.map(_._2)).map { case (classification, connectsList) =>
+      val quality = connectsList.map(c => c.quality(post.viewCount)).sum / connectsList.size
+      JsObject(
+        tagLikeToSeq(classification) ++ Seq(
+          ("quality", JsNumber(quality))
+        )
       )
-    )
-  }
+    }.toSeq
+  })
 
   implicit object TagsFormat extends Format[Tags] {
     def reads(json: JsValue) = ???

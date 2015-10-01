@@ -3,9 +3,6 @@ package modules.db.access
 import controllers.api.nodes.RequestContext
 import play.api.mvc.Result
 
-//TODO: rename to before_action
-//TODO: maybe have just one accessdecoratorcontrol
-//but we would need a generic here then, but that should work.
 trait AccessDecoratorControlMethods {
   def acceptRequest(context: RequestContext): Option[Result]
   def acceptRequestRead(context: RequestContext): Option[Result]

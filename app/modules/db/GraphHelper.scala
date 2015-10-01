@@ -4,7 +4,6 @@ import model.WustSchema._
 import renesca.schema._
 
 object GraphHelper {
-  //TODO: what hyperrelation uuidnodes? they are not contained in discourse.uuidNodes. why?
   def nodeWithUuid[NODE <: UuidNode](discourse: Discourse, uuid: String): Option[NODE] = discourse.uuidNodes.find(_.uuid == uuid) match {
     case Some(node) => Some(node.asInstanceOf[NODE])
     case None       => None

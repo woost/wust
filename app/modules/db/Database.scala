@@ -18,7 +18,6 @@ object Database {
   )
 
   //TODO: more methods with optional tx
-
   private def discourseGraphWithReturn(returns: String, definitions: GraphDefinition*): Discourse = discourseGraphWithReturn(db, returns, definitions: _*)
   private def discourseGraphWithReturn(tx: QueryHandler, returns: String, definitions: GraphDefinition*): Discourse = {
     if(definitions.isEmpty || returns.isEmpty)
@@ -128,25 +127,6 @@ object Database {
   def limitedEndConnectedDiscourseNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](skip: Int, limit: Int, relationDefinitions: FixedAndNodeRelationDef[START, RELATION, END]*): Seq[START] = {
     val discourse = limitedEndConnectedDiscourseGraph(skip, limit, relationDefinitions: _*)
     nodesWithType[START](discourse.nodes)
-  }
-
-  def deleteNodes[NODE <: UuidNode](definitions: NodeDef[NODE]*) {
-    val discourse = discourseGraph(definitions: _*)
-    if(!discourse.graph.nodes.isEmpty) {
-      //TODO clear does not emit changes
-      //discourse.graph.nodes.clear()
-      discourse.graph.nodes.foreach(discourse.graph.nodes -= _)
-      db.transaction { tx =>
-        tx.persistChanges(discourse.graph)
-        model.WustSchema.deleteConnectsGarbage(tx)
-      }
-    }
-  }
-
-  def connectNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](discourse: Discourse, start: START, factory: ConstructRelationFactory[START, RELATION, END], end: END): (START, END) = {
-    discourse.add(factory.mergeConstructRelation(start, end))
-    db.transaction(_.persistChanges(discourse.graph))
-    (start, end)
   }
 
   //FIXME: I am an unreliable function if you have a relation to a hyperrelation i will delete that hyperrelation.
