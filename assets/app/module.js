@@ -14,6 +14,7 @@ angular.module("wust", [
     "template/progressbar/progressbar.html",
     "mgcrea.ngStrap",
     "ang-drag-drop",
+    "mp.deepBlur",
     "ui.ace",
     "as.sortable",
     "ngSanitize",

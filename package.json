@@ -25,6 +25,7 @@
   "dependencies": {
     "angular": "^1.4.7",
     "angular-animate": "^1.4.7",
+    "angular-deep-blur": "^1.0.6",
     "angular-jwt": "0.0.9",
     "angular-motion": "^0.4.3",
     "angular-native-dragdrop": "^1.1.2",

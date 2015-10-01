@@ -123,6 +123,8 @@ var scripts = concat(mergeTrees([appScripts,htmlTemplates,dependencies,staticAss
         min("angular-restmod/dist/angular-restmod-bundle.js"),
         min("angular-ui-switch/angular-ui-switch.js"),
 
+        "angular-deep-blur/angular-deep-blur.js",
+
         "highlightjs/highlight.pack.js",
 
         "lodium/lodium.js",
