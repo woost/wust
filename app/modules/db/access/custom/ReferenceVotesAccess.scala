@@ -109,11 +109,7 @@ case class VotesTagsAccess(sign: Long) extends VotesReferenceAccess[Tags] {
     val userDef = ConcreteFactoryNodeDefinition(User)
     val createdDef = RelationDefinition(userDef, SchemaCreated, postDef)
 
-    val query = s"match ${createdDef.toQuery}"
-    val params = createdDef.parameterMap
-
-    val karmaQuery = KarmaQuery(postDef, userDef, query, params)
-    KarmaUpdate.persistWithTags(karmaDefinition, karmaQuery, tagDef)
+    KarmaUpdate.persistWithTags(karmaDefinition, KarmaQueryCreated(createdDef), tagDef)
   }
 }
 
@@ -134,10 +130,6 @@ case class VotesConnectsAccess(sign: Long) extends VotesReferenceAccess[Connects
     val userDef = ConcreteFactoryNodeDefinition(User)
     val createdDef = RelationDefinition(userDef, SchemaCreated, postDef)
 
-    val query = s"match ${createdDef.toQuery}"
-    val params = createdDef.parameterMap
-
-    val karmaQuery = KarmaQuery(postDef, userDef, query, params)
-    KarmaUpdate.persistWithConnectedTags(karmaDefinition, karmaQuery)
+    KarmaUpdate.persistWithConnectedTags(karmaDefinition, KarmaQueryCreated(createdDef))
   }
 }

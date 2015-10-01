@@ -9,16 +9,31 @@ import renesca.QueryHandler
 import renesca.parameter.ParameterMap
 import renesca.parameter.implicits._
 
-//TODO: no matcher string, but different karmaqueries for userdef and postdef or createdDef or accept Seq[GraphDefinition]
-case class KarmaQuery(postDef: NodeDefinition[Post], userDef: NodeDefinition[User], matcher: String, params: ParameterMap)
+trait KarmaQuery {
+  def matcher: String
+  def params: ParameterMap
+  def userDef: NodeDefinition[User]
+  def postDef: NodeDefinition[Post]
+}
 
-case class KarmaTagQuery(tagDef: NodeDefinition[Scope], matcher: String, params: ParameterMap)
+case class KarmaQueryCreated(createdDef: NodeRelationDefinition[User, Created, Post]) extends KarmaQuery {
+  def matcher = createdDef.toQuery
+  def params = createdDef.parameterMap
+  def userDef = createdDef.startDefinition
+  def postDef = createdDef.endDefinition
+}
+case class KarmaQueryUserPost(userDef: NodeDefinition[User], postDef: NodeDefinition[Post]) extends KarmaQuery {
+  def matcher = s"${userDef.toQuery}, ${postDef.toQuery}"
+  def params = postDef.parameterMap ++ userDef.parameterMap
+}
 
 case class KarmaDefinition(karmaChange: Long, reason: String)
 
 object KarmaUpdate {
   import play.api.libs.concurrent.Execution.Implicits._
   import scala.concurrent.Future
+
+  private case class KarmaTagQuery(tagDef: NodeDefinition[Scope], matcher: String, params: ParameterMap)
 
   //TODO: log failure
   private def persist(karmaDefinition: KarmaDefinition, karmaQuery: KarmaQuery, karmaTagQuery: KarmaTagQuery)(implicit ctx: QueryContext) = Future {
@@ -29,7 +44,7 @@ object KarmaUpdate {
       val logLabels = KarmaLog.labels.map(l => s":`$l`").mkString
 
       val query = s"""
-      ${ karmaQuery.matcher }
+      match ${ karmaQuery.matcher }
       create (${karmaQuery.userDef.name})-[:`${KarmaLog.startRelationType}`]->(karmaLog $logLabels {karmaProps})-[:`${KarmaLog.endRelationType}`]->(${karmaQuery.postDef.name})
       with ${karmaQuery.userDef.name}, ${karmaQuery.postDef.name}, karmaLog
       ${ karmaTagQuery.matcher }

@@ -192,11 +192,7 @@ object VotesUpdatedHelper extends ChangeRequestHelper[Updated] {
     val postDef = ConcreteNodeDefinition(request.endNodeOpt.get)
     val userDef = ConcreteNodeDefinition(request.startNodeOpt.get)
 
-    val query = s"match ${userDef.toQuery}, ${postDef.toQuery}"
-    val params = postDef.parameterMap ++ userDef.parameterMap
-
-    val karmaQuery = KarmaQuery(postDef, userDef, query, params)
-    KarmaUpdate.persistWithConnectedTags(karmaDefinition, karmaQuery)
+    KarmaUpdate.persistWithConnectedTags(karmaDefinition, KarmaQueryUserPost(userDef, postDef))
   }
 }
 
@@ -227,11 +223,7 @@ object VotesDeletedHelper extends ChangeRequestHelper[Deleted] {
     val postDef = LabelUuidNodeDefinition[Post](UuidNode.labels, request.endNodeOpt.get.uuid)
     val userDef = ConcreteNodeDefinition(request.startNodeOpt.get)
 
-    val query = s"match ${userDef.toQuery}, ${postDef.toQuery}"
-    val params = postDef.parameterMap ++ userDef.parameterMap
-
-    val karmaQuery = KarmaQuery(postDef, userDef, query, params)
-    KarmaUpdate.persistWithConnectedTagsOfHidden(karmaDefinition, karmaQuery)
+    KarmaUpdate.persistWithConnectedTagsOfHidden(karmaDefinition, KarmaQueryUserPost(userDef, postDef))
   }
 }
 
@@ -370,11 +362,7 @@ object VotesTagsChangeRequestHelper extends ChangeRequestHelper[TagChangeRequest
     val userDef = ConcreteNodeDefinition(userNode)
     val postDef = ConcreteNodeDefinition(postNode)
 
-    val query = s"match ${userDef.toQuery}, ${postDef.toQuery}"
-    val params = userDef.parameterMap ++ postDef.parameterMap
-
-    val karmaQuery = KarmaQuery(postDef, userDef, query, params)
-    KarmaUpdate.persistWithProposedTags(karmaDefinition, karmaQuery, tagsDef)
+    KarmaUpdate.persistWithProposedTags(karmaDefinition, KarmaQueryUserPost(userDef, postDef), tagsDef)
   }
 }
 
