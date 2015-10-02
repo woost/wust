@@ -246,12 +246,7 @@ case class PostAccess() extends NodeAccessDefault[Post] {
         val karmaProps = KarmaProperties(authorBoost, voteWeight, applyThreshold)
 
         val deleted = discourse.deleteds.headOption.map { deleted =>
-          if (deleted.rev_votes.headOption.isEmpty) {
-            deleted.approvalSum += karmaProps.approvalSum
-            discourse.add(Votes.merge(user, deleted, weight = karmaProps.approvalSum))
-            if (deleted.canApply)
-              deleted.status = APPROVED
-          }
+          handleExistingChange(discourse, deleted, user, karmaProps)
           deleted
         }.getOrElse{
           val deleted = Deleted.create(user, post, applyThreshold = karmaProps.applyThreshold)
