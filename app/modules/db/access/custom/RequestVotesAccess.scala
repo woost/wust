@@ -91,9 +91,9 @@ case class VotesChangeRequestAccess(sign: Long) extends EndRelationAccessDefault
         votes.foreach(request.approvalSum -= _.weight)
 
         val authorBoost = if (discourse.createds.isEmpty) 0 else Moderation.authorKarmaBoost
+        val voteWeight = Moderation.voteWeightFromScopes(discourse.scopes)
+        val weight = sign * (voteWeight + authorBoost)
 
-        val karma = Moderation.voteWeightFromScopes(discourse.scopes)
-        val weight = sign * (karma + authorBoost)
         if (weight == 0) {
           // if there are any existing votes, disconnect them
           votes.foreach(discourse.remove(_))
