@@ -5,8 +5,6 @@ PageCtrl.$inject = ["SidebarService", "EditService", "FullscreenService", "$root
 function PageCtrl(SidebarService, EditService, FullscreenService, $rootScope, Auth) {
     let vm = this;
 
-    //TODO: allow drag/drop only for Auth.isLoggedIn
-
     vm.sidebar = SidebarService;
     vm.editNode = editNode;
     vm.Auth = Auth;

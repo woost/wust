@@ -5,7 +5,7 @@
                 <i ng-click="vm.node.expandedEditor = !vm.node.expandedEditor; vm.node.onChange()" class="accordion_toggle fa" ng-class="{'fa-chevron-down': vm.node.expandedEditor, 'fa-chevron-right': !vm.node.expandedEditor}"></i>
             </div>
 
-            <div class="center-controls" data-title="click to edit" bs-tooltip ui-draggable="true" drag="vm.node.encode ? vm.node.encode() : vm.node" drag-channel="{{(!vm.node.isLocal || vm.node.canSave) ? 'scratch_node' : 'scratch_move'}}">
+            <div class="center-controls" data-title="click to edit" bs-tooltip ui-draggable="{{::vm.Auth.isLoggedIn}}" drag="vm.node.encode ? vm.node.encode() : vm.node" drag-channel="{{(!vm.node.isLocal || vm.node.canSave) ? 'scratch_node' : 'scratch_move'}}">
                 <h3 contenteditable="true" ng-model="vm.node.title" ng-change="vm.node.onChange()" placeholder="TL;DR" ng-class="{'is_invalid': !vm.node.isValid}" class="title" ng-keydown="vm.redirectEnter($event)">
                 </h3>
             </div>

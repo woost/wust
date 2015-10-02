@@ -16,9 +16,11 @@ function smallPost() {
     };
 }
 
-smallPostCtrl.$inject = [];
+smallPostCtrl.$inject = ["Auth"];
 
-function smallPostCtrl() {
+function smallPostCtrl(Auth) {
     let vm = this;
+
+    vm.Auth = Auth;
 }
 

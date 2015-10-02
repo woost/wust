@@ -15,17 +15,18 @@ function collapseEditPost() {
     };
 }
 
-collapseEditPostCtrl.$inject = [];
+collapseEditPostCtrl.$inject = ["Auth"];
 
 // expects scope.node to be a session.
 // used by the scratchpad which retrieves a list of sessions from the EditService.
-function collapseEditPostCtrl() {
+function collapseEditPostCtrl(Auth) {
     let vm = this;
 
     vm.focusEditTags = false;
     vm.editableChange = editableChange;
     vm.redirectEnter = redirectEnter;
     vm.save = save;
+    vm.Auth = Auth;
 
     function redirectEnter(event) {
         if(event.keyCode === 13) {
