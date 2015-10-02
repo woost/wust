@@ -39,7 +39,6 @@ function discourseNodeListCtrl(Post, TagRelationEditService, Auth) {
         deregisterCommit();
     });
 
-    //TODO: unvote
     function upvoteAnswer(connectable) {
         let connects = findConnects(vm.nodeModel.component.rootNode, connectable);
         vm.connectsRelations[connectable.id] = connects;
