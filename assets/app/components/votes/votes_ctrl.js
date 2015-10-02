@@ -3,7 +3,6 @@ angular.module("wust.components").controller("VotesCtrl", VotesCtrl);
 VotesCtrl.$inject = ["ChangeRequests"];
 
 function VotesCtrl(ChangeRequests) {
-    //TODO: voting undo?
     //TODO: deliver .quality in change.tag, to display the removed tag at the original position in the taglist
 
 

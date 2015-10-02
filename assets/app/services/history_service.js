@@ -46,8 +46,6 @@ function HistoryService(Auth, Session, Post, DiscourseNode, $rootScope) {
         if (currentViewComponent === undefined)
             return;
 
-        //TODO: check whether node is tags relation and then update accordingly
-
         let current = currentViewComponent.getWrap("graph");
         let existing = _.find(current.nodes, _.pick(node, "id"));
         if (existing !== undefined) {

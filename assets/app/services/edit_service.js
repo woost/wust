@@ -445,7 +445,6 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
             session.newDiscussion = true;
             return session;
         } else {
-            // TODO: what about the tags of the new discussion
             return edit(existingAnswer);
         }
     }

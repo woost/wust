@@ -1255,7 +1255,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                             // if there already is an existing connection, open the edit relation modal
                             this.editNode(existingConnects);
                         } else {
-                            // TODO: we need to make it impossible to drag on self loops and incident relations, is assured by backend.
+                            // TODO: we need to make it impossible to drag on incident relations, is assured by backend as long as verbose api is used
                             EditService.connectNodes(startNode, endNode).$then(response => {
                                 let connects = _.find(response.graph.nodes, n => n.isHyperRelation && startNode.id === n.startId && endNode.id === n.endId);
                                 if (connects === undefined) {
