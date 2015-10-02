@@ -45,66 +45,91 @@ object Search extends Controller {
     val termMatcher = Seq(titleMatcher, descrMatcher).flatten.mkString(" or ")
 
     val returnPostfix = sizeOpt.map { limit =>
-      val skip = page * limit;
+      val skip = page * limit
       s"skip $skip limit $limit"
     }.getOrElse("")
-    val returnStatement = s"return ${ nodeDef.name } order by ${ nodeDef.name }.timestamp desc $returnPostfix"
+    val returnStatement = s"${ nodeDef.name } order by ${ nodeDef.name }.timestamp desc $returnPostfix"
 
     // When Neo4j throws an error because the regexp is incorrect, return an empty Discourse instead: Try(...).getOrElse(Discourse.empty)
     val discourse = Try(
-      if(tags.isEmpty) {
-        val startPostMatchPostfix = if(startPost) {
-          s"<-[:`${ SchemaTags.endRelationType }`]-(:`${ SchemaTags.label }`)<-[:`${ SchemaTags.startRelationType }`]-(:`${ Scope.label }`)"
+
+
+    {
+      val (query, params) = if(tags.isEmpty) {
+        val startPostMatch = if(startPost) {
+          s"match ${ nodeDef.toQuery }<-[:`${ SchemaTags.endRelationType }`]-(:`${ SchemaTags.label }`)<-[:`${ SchemaTags.startRelationType }`]-(:`${ Scope.label }`)"
         } else {
           ""
         }
 
         val condition = if(termMatcher.isEmpty) "" else s"where ${ termMatcher }"
-
-        Discourse(db.queryGraph(Query(
-          s"""match ${ nodeDef.toQuery }$startPostMatchPostfix
+        val query = s"""
+          match ${ nodeDef.toQuery }
+          $startPostMatch
           $condition
-          $returnStatement""",
-          titleRegex.map(t => Map("term" -> t)).getOrElse(Map.empty) ++ nodeDef.parameterMap
-        )))
+          return $returnStatement
+          """
+        val params = titleRegex.map(t => Map("term" -> t)).getOrElse(Map.empty) ++ nodeDef.parameterMap
+        (query, params)
       } else {
-      if(tagOr) {
-        //TODO: classification need to be matched on the outgoing connects relation of the post
-        val tagDef = FactoryNodeDef(Scope)
-        val inheritTagDef = FactoryNodeDef(Scope)
-        val relationDef = RelationDef(inheritTagDef, SchemaTags, nodeDef)
-        val condition = if(termMatcher.isEmpty) "" else s"where ${ termMatcher }"
-        val tagDefinition = s"${ inheritTagDef.toQuery }-[:`${Inherits.relationType}`*0..10]->${ tagDef.toQuery }"
 
-        Discourse(db.queryGraph(Query(
-          s"""match ${ tagDefinition } where (${ tagDef.name }.uuid in {tagUuids})
-          with distinct ${ inheritTagDef.name } match ${ relationDef.toQuery(false, true) }
-          $condition
-          $returnStatement""",
-          titleRegex.map(t => Map("term" -> t)).getOrElse(Map.empty) ++ Map("tagUuids" -> tags)
-            ++ relationDef.parameterMap
-            ++ tagDef.parameterMap
-            ++ nodeDef.parameterMap
-        )))
-      } else {
-        //TODO: classification need to be matched on the outgoing connects relation of the post
-        val tagDefs = tags.map(uuid => FactoryUuidNodeDef(Scope, uuid))
-        val inheritTagDefs = tags.map(_ => FactoryNodeDef(Scope))
-        val relationDefs = inheritTagDefs.map(tagDef => RelationDef(tagDef, SchemaTags, nodeDef))
         val condition = if(termMatcher.isEmpty) "" else s"where ${ termMatcher }"
-        val tagDefinitions = (tagDefs zip inheritTagDefs).map { case (t, i) => s"${ i.toQuery }-[:`${Inherits.relationType}`*0..10]->${ t.toQuery }" }.mkString(",")
 
-        //TODO: distinct?
-        Discourse(db.queryGraph(Query(
-          s"""match ${ nodeDef.toQuery }, ${ tagDefinitions }, ${ relationDefs.map(_.toQuery(false)).mkString(",") }
+
+        if(tagOr) {
+          println("tagor")
+          //TODO: classification need to be matched on the outgoing connects relation of the post
+          val inheritTagDef = FactoryNodeDef(Scope)
+          val tagDef = FactoryNodeDef(Scope)
+          val tagDefinition = s"${ inheritTagDef.toQuery }-[:`${ Inherits.relationType }`*0..10]->${ tagDef.toQuery }"
+          val inheritTagQuery =
+            s"""
+            match ${ tagDefinition }
+            where (${ tagDef.name }.uuid in {tagUuids})
+            with distinct ${ inheritTagDef.name }
+            """
+
+          val relationDef = RelationDef(inheritTagDef, SchemaTags, nodeDef)
+          val tagOrMatch = s"""match ${ relationDef.toQuery(false, true) }"""
+
+
+          val query =
+            s"""
+          $inheritTagQuery
+          match ${ nodeDef.toQuery }
+          $tagOrMatch
           $condition
-          $returnStatement""",
-          titleRegex.map(t => Map("term" -> t)).getOrElse(Map.empty) ++ Map("tagUuids" -> tags)
-            ++ relationDefs.flatMap(_.parameterMap)
-            ++ tagDefs.flatMap(_.parameterMap)
-            ++ nodeDef.parameterMap
-        )))
+          return $returnStatement"""
+          val params = titleRegex.map(t => Map("term" -> t)).getOrElse(Map.empty) ++ Map("tagUuids" -> tags) ++ relationDef.parameterMap ++ tagDef.parameterMap ++ nodeDef.parameterMap
+          (query, params)
+        } else {
+          //TODO: classification need to be matched on the outgoing connects relation of the post
+          val tagDefs = tags.map(uuid => FactoryUuidNodeDef(Scope, uuid))
+          val inheritTagDefs = tags.map(_ => FactoryNodeDef(Scope))
+          val tagDefinitions = (tagDefs zip inheritTagDefs).map { case (t, i) => s"${ i.toQuery }-[:`${ Inherits.relationType }`*0..10]->${ t.toQuery }" }.mkString(",")
+          val separateInheritTagQuery = s"""
+          match ${ tagDefinitions }
+          with distinct ${ inheritTagDefs.map(_.name).mkString(",") }
+          """
+          val relationDefs = inheritTagDefs.map(tagDef => RelationDef(tagDef, SchemaTags, nodeDef))
+          val tagAndMatch = s"""match ${ relationDefs.map(_.toQuery(false)).mkString(",") }"""
+
+          val query = s"""
+          $separateInheritTagQuery
+
+          match ${ nodeDef.toQuery }
+          $tagAndMatch
+          $condition
+          return $returnStatement
+          """
+
+          val params = titleRegex.map(t => Map("term" -> t)).getOrElse(Map.empty) ++ Map("tagUuids" -> tags) ++ relationDefs.flatMap(_.parameterMap) ++ tagDefs.flatMap(_.parameterMap) ++ nodeDef.parameterMap
+          (query, params)
+        }
       }
+      // println(query)
+      // println(params)
+      Discourse(db.queryGraph(query, params))
     }).getOrElse(Discourse.empty)
 
     Ok(Json.toJson(
