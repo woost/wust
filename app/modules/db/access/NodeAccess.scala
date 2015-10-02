@@ -66,19 +66,19 @@ trait NodeAccessDecorator[NODE <: UuidNode] extends NodeAccess[NODE] with Access
   val self: NodeAccess[NODE]
 
   override def read(context: RequestContext) = {
-    acceptRequestRead(context).getOrElse(self.read(context))
+    acceptRequestRead(context, None).getOrElse(self.read(context))
   }
   override def read(context: RequestContext, uuid: String) = {
-    acceptRequestRead(context).getOrElse(self.read(context, uuid))
+    acceptRequestRead(context, Some(uuid)).getOrElse(self.read(context, uuid))
   }
   override def create(context: RequestContext) = {
-    acceptRequestWrite(context).getOrElse(self.create(context))
+    acceptRequestWrite(context, None).getOrElse(self.create(context))
   }
   override def update(context: RequestContext, uuid: String) = {
-    acceptRequestWrite(context).getOrElse(self.update(context, uuid))
+    acceptRequestWrite(context, Some(uuid)).getOrElse(self.update(context, uuid))
   }
   override def delete(context: RequestContext, uuid: String) = {
-    acceptRequestWrite(context).getOrElse(self.delete(context, uuid))
+    acceptRequestWrite(context, Some(uuid)).getOrElse(self.delete(context, uuid))
   }
 
   val factory = self.factory

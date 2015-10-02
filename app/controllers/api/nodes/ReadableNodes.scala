@@ -24,11 +24,11 @@ trait ReadableNodes[NODE <: UuidNode] extends NodesBase {
     getHyperSchema(nodeSchema.connectSchemas, path)({
       case c@StartHyperConnectSchema(factory, op, connectSchemas) =>
         getSchema(connectSchemas, nestedPath)(schema =>
-          schema.op.read(context(request), HyperConnectParameter(nodeSchema.op.factory, uuid, c.factory, c.op.nodeFactory, otherUuid))
+          schema.op.read(context(request), StartHyperConnectParameter(nodeSchema.op.factory, uuid, c.factory, c.op.nodeFactory, otherUuid))
         )
       case c@EndHyperConnectSchema(factory, op, connectSchemas)   =>
         getSchema(connectSchemas, nestedPath)(schema =>
-          schema.op.read(context(request), HyperConnectParameter(c.op.nodeFactory, otherUuid, c.factory, nodeSchema.op.factory, uuid))
+          schema.op.read(context(request), EndHyperConnectParameter(nodeSchema.op.factory, uuid, c.factory, c.op.nodeFactory, otherUuid))
         )
     })
   }

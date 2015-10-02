@@ -68,11 +68,11 @@ END <: UuidNode
 
   def toNodeDef(implicit ctx: QueryContext) = FactoryNodeDef(nodeFactory)
   def toNodeDef(uuid: String)(implicit ctx: QueryContext) = FactoryUuidNodeDef(nodeFactory, uuid)
-  def toBaseNodeDef(param: ConnectParameter[START])(implicit ctx: QueryContext) = FactoryUuidNodeDef(param.baseFactory, param.baseUuid)
+  def toBaseNodeDef(param: ConnectParameter[START])(implicit ctx: QueryContext) = FactoryUuidNodeDef(param.factory, param.baseUuid)
   def toBaseNodeDef[E <: UuidNode, S <: UuidNode](param: HyperConnectParameter[S, START with AbstractRelation[S, E], E])(implicit ctx: QueryContext) = {
     val start = FactoryUuidNodeDef(param.startFactory, param.startUuid)
     val end = FactoryUuidNodeDef(param.endFactory, param.endUuid)
-    HyperNodeDef(start, param.baseFactory, end)
+    HyperNodeDef(start, param.factory, end)
   }
 }
 
@@ -84,11 +84,11 @@ END <: UuidNode
 
   def toNodeDef(implicit ctx: QueryContext) = FactoryNodeDef(nodeFactory)
   def toNodeDef(uuid: String)(implicit ctx: QueryContext) = FactoryUuidNodeDef(nodeFactory, uuid)
-  def toBaseNodeDef(param: ConnectParameter[END])(implicit ctx: QueryContext) = FactoryUuidNodeDef(param.baseFactory, param.baseUuid)
+  def toBaseNodeDef(param: ConnectParameter[END])(implicit ctx: QueryContext) = FactoryUuidNodeDef(param.factory, param.baseUuid)
   def toBaseNodeDef[E <: UuidNode, S <: UuidNode](param: HyperConnectParameter[S, END with AbstractRelation[S, E], E])(implicit ctx: QueryContext) = {
     val start = FactoryUuidNodeDef(param.startFactory, param.startUuid)
     val end = FactoryUuidNodeDef(param.endFactory, param.endUuid)
-    HyperNodeDef(start, param.baseFactory, end)
+    HyperNodeDef(start, param.factory, end)
   }
 }
 
@@ -182,7 +182,7 @@ END <: UuidNode
   val factory: MatchableRelationFactory[START, RELATION, END]
 
   override def delete(context: RequestContext, param: ConnectParameter[START], otherUuid: String) = context.withUser {
-    val base = param.baseFactory.matchesOnUuid(param.baseUuid)
+    val base = param.factory.matchesOnUuid(param.baseUuid)
     val node = nodeFactory.matchesOnUuid(otherUuid)
     val relation = factory.matchesMatchableRelation(base, node)
     db.transaction(_.persistChanges(relation)).map(err =>
@@ -193,7 +193,7 @@ END <: UuidNode
   override def delete[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, START with AbstractRelation[S, E], E], uuid: String) = context.withUser {
     val start = param.startFactory.matchesOnUuid(param.startUuid)
     val end = param.endFactory.matchesOnUuid(param.endUuid)
-    val base = param.baseFactory.matchesMatchableRelation(start, end)
+    val base = param.factory.matchesMatchableRelation(start, end)
     val node = nodeFactory.matchesOnUuid(uuid)
     val relation = factory.matchesMatchableRelation(base, node)
     db.transaction(_.persistChanges(relation)).map(err =>
@@ -210,7 +210,7 @@ END <: UuidNode
   val factory: MatchableRelationFactory[START, RELATION, END]
 
   override def delete(context: RequestContext, param: ConnectParameter[END], otherUuid: String) = context.withUser {
-    val base = param.baseFactory.matchesOnUuid(param.baseUuid)
+    val base = param.factory.matchesOnUuid(param.baseUuid)
     val node = nodeFactory.matchesOnUuid(otherUuid)
     val relation = factory.matchesMatchableRelation(node, base)
     db.transaction(_.persistChanges(Discourse.remove(relation))).map(err =>
@@ -221,7 +221,7 @@ END <: UuidNode
   override def delete[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, END with AbstractRelation[S, E], E], uuid: String) = context.withUser {
     val start = param.startFactory.matchesOnUuid(param.startUuid)
     val end = param.endFactory.matchesOnUuid(param.endUuid)
-    val base = param.baseFactory.matchesMatchableRelation(start, end)
+    val base = param.factory.matchesMatchableRelation(start, end)
     val node = nodeFactory.matchesOnUuid(uuid)
     val relation = factory.matchesMatchableRelation(node, base)
     db.transaction(_.persistChanges(Discourse.remove(relation))).map(err =>
@@ -234,12 +234,12 @@ trait StartRelationWriteBase[
 START <: UuidNode,
 RELATION <: ConstructRelation[START, END],
 END <: UuidNode
-] extends StartRelationReadBase[START, RELATION, END] with StartRelationDeleteBase[START, RELATION, END] {
+] extends StartRelationAccessDefault[START, RELATION, END] with FormattingNode[END] {
   val factory: ConstructRelationFactory[START, RELATION, END]
   val nodeFactory: UuidNodeMatchesFactory[END]
 
   override def create(context: RequestContext, param: ConnectParameter[START], otherUuid: String) = context.withUser {
-    val base = param.baseFactory.matchesOnUuid(param.baseUuid)
+    val base = param.factory.matchesOnUuid(param.baseUuid)
     val node = nodeFactory.matchesOnUuid(otherUuid)
     val relation = factory.mergeConstructRelation(base, node)
     db.transaction(_.persistChanges(relation)).map(err =>
@@ -250,7 +250,7 @@ END <: UuidNode
   override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, START with AbstractRelation[S, E], E], uuid: String) = context.withUser {
     val start = param.startFactory.matchesOnUuid(param.startUuid)
     val end = param.endFactory.matchesOnUuid(param.endUuid)
-    val base = param.baseFactory.matchesMatchableRelation(start, end)
+    val base = param.factory.matchesMatchableRelation(start, end)
     val node = nodeFactory.matchesOnUuid(uuid)
     val relation = factory.mergeConstructRelation(base, node)
     db.transaction(_.persistChanges(relation)).map(err =>
@@ -263,12 +263,12 @@ trait EndRelationWriteBase[
 START <: UuidNode,
 RELATION <: ConstructRelation[START, END],
 END <: UuidNode
-] extends EndRelationReadBase[START, RELATION, END] with EndRelationDeleteBase[START, RELATION, END] {
+] extends EndRelationAccessDefault[START, RELATION, END] with FormattingNode[START] {
   val factory: ConstructRelationFactory[START, RELATION, END]
   val nodeFactory: UuidNodeMatchesFactory[START]
 
   override def create(context: RequestContext, param: ConnectParameter[END], otherUuid: String) = context.withUser {
-    val base = param.baseFactory.matchesOnUuid(param.baseUuid)
+    val base = param.factory.matchesOnUuid(param.baseUuid)
     val node = nodeFactory.matchesOnUuid(otherUuid)
     val relation = factory.mergeConstructRelation(node, base)
     db.transaction(_.persistChanges(relation)).map(err =>
@@ -279,7 +279,7 @@ END <: UuidNode
   override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, END with AbstractRelation[S, E], E], uuid: String) = context.withUser {
     val start = param.startFactory.matchesOnUuid(param.startUuid)
     val end = param.endFactory.matchesOnUuid(param.endUuid)
-    val base = param.baseFactory.matchesMatchableRelation(start, end)
+    val base = param.factory.matchesMatchableRelation(start, end)
     val node = nodeFactory.matchesOnUuid(uuid)
     val relation = factory.mergeConstructRelation(node, base)
     db.transaction(_.persistChanges(relation)).map(err =>
@@ -298,35 +298,35 @@ case class StartRelationReadDelete[START <: UuidNode, RELATION <: MatchableRelat
 case class EndRelationReadDelete[START <: UuidNode, RELATION <: MatchableRelation[START, END], END <: UuidNode](factory: MatchableRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[START])(implicit val format: Format[START]) extends EndRelationDeleteBase[START, RELATION, END] with EndRelationReadBase[START, RELATION, END]
 case class StartRelationNothing[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factory: AbstractRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[END]) extends StartRelationAccessDefault[START, RELATION, END]
 case class EndRelationNothing[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factory: AbstractRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[START]) extends EndRelationAccessDefault[START, RELATION, END]
-case class StartRelationWrite[START <: UuidNode, RELATION <: ConstructRelation[START, END], END <: UuidNode ](factory: ConstructRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[END])(implicit val format: Format[END]) extends StartRelationWriteBase[START,RELATION,END]
-case class EndRelationWrite[START <: UuidNode, RELATION <: ConstructRelation[START, END], END <: UuidNode ](factory: ConstructRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[START])(implicit val format: Format[START]) extends EndRelationWriteBase[START,RELATION,END]
+case class StartRelationWrite[START <: UuidNode, RELATION <: ConstructRelation[START, END], END <: UuidNode ](factory: ConstructRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[END])(implicit val format: Format[END]) extends StartRelationWriteBase[START,RELATION,END] with StartRelationDeleteBase[START,RELATION,END] with StartRelationReadBase[START,RELATION,END]
+case class EndRelationWrite[START <: UuidNode, RELATION <: ConstructRelation[START, END], END <: UuidNode ](factory: ConstructRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[START])(implicit val format: Format[START]) extends EndRelationWriteBase[START,RELATION,END] with EndRelationDeleteBase[START,RELATION,END] with EndRelationReadBase[START,RELATION,END]
 
 trait RelationAccessDecorator[NODE <: UuidNode, OTHER <: UuidNode] extends RelationAccess[NODE, OTHER] with AccessDecoratorControlDefault {
   val self: RelationAccess[NODE, OTHER]
 
   override def read(context: RequestContext, param: ConnectParameter[NODE]) = {
-    acceptRequestRead(context).getOrElse(self.read(context, param))
+    acceptRequestRead(context, Some(param.baseUuid)).getOrElse(self.read(context, param))
   }
   override def read[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, NODE with AbstractRelation[S, E], E]) = {
-    acceptRequestRead(context).getOrElse(self.read(context, param))
+    acceptRequestRead(context, Some(param.baseUuid)).getOrElse(self.read(context, param))
   }
   override def delete(context: RequestContext, param: ConnectParameter[NODE], uuid: String) = {
-    acceptRequestWrite(context).getOrElse(self.delete(context, param, uuid))
+    acceptRequestWrite(context, Some(param.baseUuid)).getOrElse(self.delete(context, param, uuid))
   }
   override def delete[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, NODE with AbstractRelation[S, E], E], uuid: String) = {
-    acceptRequestWrite(context).getOrElse(self.delete(context, param, uuid))
+    acceptRequestWrite(context, Some(param.baseUuid)).getOrElse(self.delete(context, param, uuid))
   }
   override def create(context: RequestContext, param: ConnectParameter[NODE]) = {
-    acceptRequestWrite(context).getOrElse(self.create(context, param))
+    acceptRequestWrite(context, Some(param.baseUuid)).getOrElse(self.create(context, param))
   }
   override def create(context: RequestContext, param: ConnectParameter[NODE], uuid: String) = {
-    acceptRequestWrite(context).getOrElse(self.create(context, param, uuid))
+    acceptRequestWrite(context, Some(param.baseUuid)).getOrElse(self.create(context, param, uuid))
   }
   override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, NODE with AbstractRelation[S, E], E]) = {
-    acceptRequestWrite(context).getOrElse(self.create(context, param))
+    acceptRequestWrite(context, Some(param.baseUuid)).getOrElse(self.create(context, param))
   }
   override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, NODE with AbstractRelation[S, E], E], uuid: String) = {
-    acceptRequestWrite(context).getOrElse(self.create(context, param, uuid))
+    acceptRequestWrite(context, Some(param.baseUuid)).getOrElse(self.create(context, param, uuid))
   }
 
   val nodeFactory = self.nodeFactory

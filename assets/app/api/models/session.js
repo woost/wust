@@ -1,9 +1,9 @@
 angular.module("wust.api").service("Session", Session);
 
-Session.$inject = ["restmod", "User", "Auth", "$q"];
+Session.$inject = ["User", "Auth", "$q"];
 
-function Session(restmod, User, Auth, $q) {
-    this.history = restmod.singleton("/session/history");
+function Session(User, Auth, $q) {
+    this.history = () => userOnly(userId => User.$buildRaw({id:userId}).history.$search().$asPromise());
     this.marks = {
         add: id => userOnly(userId => User.$buildRaw({id:userId}).marks.$buildRaw({id}).$save({}).$asPromise()),
         destroy: id => userOnly(userId => User.$buildRaw({id:userId}).marks.$buildRaw({id}).$destroy().$asPromise()),

@@ -10,6 +10,7 @@ object Users extends Nodes[schema.User] {
     "contributions" -> (N <> UserContributions.apply),
     "karma-contexts" -> (N > UserHasKarmaScopes.apply),
     "karma-log" -> (N > UserHasKarmaLog.apply),
-    "marks" -> (N > UserMarks.apply)
+    "marks" -> (N > UserMarks.apply + CheckOwnUser.apply),
+    "history" -> (N > UserHasHistory.apply + CheckOwnUser.apply)
   )
 }

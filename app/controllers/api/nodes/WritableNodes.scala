@@ -32,11 +32,11 @@ trait WritableNodes[NODE <: UuidNode] extends NodesBase {
     getHyperSchema(nodeSchema.connectSchemas, path)({
       case c@StartHyperConnectSchema(factory, op, connectSchemas) =>
         getSchema(connectSchemas, nestedPath)(schema =>
-          schema.op.create(context(request), HyperConnectParameter(nodeSchema.op.factory, uuid, c.factory, c.op.nodeFactory, otherUuid))
+          schema.op.create(context(request), StartHyperConnectParameter(nodeSchema.op.factory, uuid, c.factory, c.op.nodeFactory, otherUuid))
         )
       case c@EndHyperConnectSchema(factory, op, connectSchemas)   =>
         getSchema(connectSchemas, nestedPath)(schema =>
-          schema.op.create(context(request), HyperConnectParameter(c.op.nodeFactory, otherUuid, c.factory, nodeSchema.op.factory, uuid))
+          schema.op.create(context(request), EndHyperConnectParameter(nodeSchema.op.factory, uuid, c.factory, c.op.nodeFactory, otherUuid))
         )
     })
   }
@@ -46,11 +46,11 @@ trait WritableNodes[NODE <: UuidNode] extends NodesBase {
       getHyperSchema(nodeSchema.connectSchemas, path)({
         case c@StartHyperConnectSchema(factory, op, connectSchemas) =>
           getSchema(connectSchemas, nestedPath)(schema =>
-            schema.op.create(context(request), HyperConnectParameter(nodeSchema.op.factory, uuid, c.factory, c.op.nodeFactory, otherUuid), nestedUuid)
+            schema.op.create(context(request), StartHyperConnectParameter(nodeSchema.op.factory, uuid, c.factory, c.op.nodeFactory, otherUuid), nestedUuid)
           )
         case c@EndHyperConnectSchema(factory, op, connectSchemas)   =>
           getSchema(connectSchemas, nestedPath)(schema =>
-            schema.op.create(context(request), HyperConnectParameter(c.op.nodeFactory, otherUuid, c.factory, nodeSchema.op.factory, uuid), nestedUuid)
+            schema.op.create(context(request), EndHyperConnectParameter(nodeSchema.op.factory, uuid, c.factory, c.op.nodeFactory, otherUuid), nestedUuid)
           )
       })
     })

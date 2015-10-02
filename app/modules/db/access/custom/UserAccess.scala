@@ -7,6 +7,7 @@ import formatters.json.UserFormat
 import model.WustSchema.{Created => SchemaCreated, _}
 import modules.db.Database.db
 import modules.db._
+import modules.db.helpers.TaggedTaggable
 import modules.db.access._
 import modules.requests._
 import play.api.libs.json._
@@ -120,31 +121,11 @@ case class UserHasKarmaLog() extends StartRelationAccessDefault[User, KarmaLog, 
   }
 }
 
-case class UserMarks() extends StartRelationAccessDefault[User, Marks, Post] {
-  import formatters.json.PostFormat._
+case class UserMarks() extends StartRelationWriteBase[User, Marks, Post] with StartRelationDeleteBase[User, Marks, Post] {
+  implicit val format = formatters.json.PostFormat.PostFormat
 
   val nodeFactory = Post
-
-  //TODO: decorator with baseuuid in callback
-  def allowed(userOpt: Option[User], uuid: String)(handler: => Result) = userOpt.filter(_.uuid == uuid).map(_ => handler).getOrElse(Forbidden("Marks are private"))
-
-  object CreateDelete extends StartRelationWriteBase[User, Marks, Post] with StartRelationDeleteBase[User, Marks, Post] {
-    implicit val format = PostFormat
-    val nodeFactory = Post
-    val factory = Marks
-  }
-
-  override def delete(context: RequestContext, param: ConnectParameter[User], uuid: String) = allowed(context.user, param.baseUuid) {
-    CreateDelete.delete(context, param, uuid)
-  }
-
-  override def create(context: RequestContext, param: ConnectParameter[User]) = allowed(context.user, param.baseUuid) {
-    CreateDelete.create(context, param)
-  }
-
-  override def create(context: RequestContext, param: ConnectParameter[User], uuid: String) = allowed(context.user, param.baseUuid) {
-    CreateDelete.create(context, param, uuid)
-  }
+  val factory = Marks
 
   override def read(context: RequestContext, param: ConnectParameter[User]) = {
     implicit val ctx = new QueryContext
@@ -171,5 +152,24 @@ case class UserMarks() extends StartRelationAccessDefault[User, Marks, Post] {
     val discourse = Discourse(db.queryGraph(query, params))
 
     Ok(Json.toJson(discourse.posts))
+  }
+}
+
+case class UserHasHistory() extends StartRelationAccessDefault[User, Viewed, Post] {
+  import formatters.json.PostFormat.PostFormat
+
+  val nodeFactory = Post
+
+  override def read(context: RequestContext, param: ConnectParameter[User]) = {
+      implicit val ctx = new QueryContext
+      val userDef = FactoryUuidNodeDef(User, param.baseUuid)
+      val postDef = FactoryNodeDef(Post)
+      val viewedDef = RelationDef(userDef, Viewed, postDef)
+
+      val query = s"match ${ viewedDef.toQuery } return ${ postDef.name } order by ${ viewedDef.name }.timestamp desc limit 8"
+      val params = viewedDef.parameterMap
+      val discourse = Discourse(db.queryGraph(query, params))
+
+      Ok(Json.toJson(TaggedTaggable.shapeResponse(discourse.posts)))
   }
 }

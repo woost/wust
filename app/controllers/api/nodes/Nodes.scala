@@ -39,17 +39,38 @@ case class RequestContext(controller: NodesBase with Controller, user: Option[Us
 }
 
 case class ConnectParameter[+BASE <: UuidNode](
-  baseFactory: UuidNodeMatchesFactory[BASE],
+  factory: UuidNodeMatchesFactory[BASE],
   baseUuid: String
   )
 
-case class HyperConnectParameter[START <: UuidNode, +BASE <: UuidNode with AbstractRelation[START, END], END <: UuidNode](
+trait HyperConnectParameter[START <: UuidNode, +RELATION <: UuidNode with AbstractRelation[START, END], END <: UuidNode] {
+  def baseUuid: String
+  val startFactory: UuidNodeMatchesFactory[START]
+  val startUuid: String
+  val factory: MatchableRelationFactory[START, RELATION, END] with UuidNodeMatchesFactory[RELATION]
+  val endFactory: UuidNodeMatchesFactory[END]
+  val endUuid: String
+}
+
+case class StartHyperConnectParameter[START <: UuidNode, +RELATION <: UuidNode with AbstractRelation[START, END], END <: UuidNode](
   startFactory: UuidNodeMatchesFactory[START],
   startUuid: String,
-  baseFactory: MatchableRelationFactory[START, BASE, END] with UuidNodeMatchesFactory[BASE],
+  factory: MatchableRelationFactory[START, RELATION, END] with UuidNodeMatchesFactory[RELATION],
   endFactory: UuidNodeMatchesFactory[END],
   endUuid: String
-  )
+  ) extends HyperConnectParameter[START, RELATION, END] {
+    def baseUuid = startUuid
+}
+
+case class EndHyperConnectParameter[START <: UuidNode, +RELATION <: UuidNode with AbstractRelation[START, END], END <: UuidNode](
+  endFactory: UuidNodeMatchesFactory[END],
+  endUuid: String,
+  factory: MatchableRelationFactory[START, RELATION, END] with UuidNodeMatchesFactory[RELATION],
+  startFactory: UuidNodeMatchesFactory[START],
+  startUuid: String
+  ) extends HyperConnectParameter[START, RELATION, END] {
+    def baseUuid = endUuid
+}
 
 trait NodesBase extends NestedResourceRouter with DefaultNestedResourceController with Silhouette[User, JWTAuthenticator] with HeaderEnvironmentModule {
 

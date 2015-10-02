@@ -33,7 +33,7 @@ function HistoryService(Auth, Session, Post, DiscourseNode, $rootScope) {
     }
 
     function load() {
-        Session.history.$fetch().$then(response => {
+        Session.history().then(response => {
             self.visited = _.values(response.$encode());
         });
     }

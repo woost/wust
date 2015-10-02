@@ -49,7 +49,7 @@ case class StartConnectsAccess() extends StartRelationReadBase[Post, Connects, C
 
   private def createRelation(context: RequestContext, param: ConnectParameter[Post], discourse: Discourse) = {
     val node = discourse.connectables.head
-    val base = param.baseFactory.matchesOnUuid(param.baseUuid)
+    val base = param.factory.matchesOnUuid(param.baseUuid)
     discourse.add(base, node, factory.merge(base, node))
     persistRelation(discourse, node)
   }
@@ -73,7 +73,7 @@ case class EndConnectsAccess() extends EndRelationReadBase[Post, Connects, Conne
 
   private def createRelation(context: RequestContext, param: ConnectParameter[Connectable], discourse: Discourse) = {
     val node = discourse.posts.head
-    val base = param.baseFactory.matchesOnUuid(param.baseUuid)
+    val base = param.factory.matchesOnUuid(param.baseUuid)
     discourse.add(base, node, factory.merge(node, base))
     persistRelation(discourse, node)
   }
@@ -82,7 +82,7 @@ case class EndConnectsAccess() extends EndRelationReadBase[Post, Connects, Conne
     val start = param.startFactory.matchesOnUuid(param.startUuid)
     val end = param.endFactory.matchesOnUuid(param.endUuid)
     val node = discourse.posts.head
-    val base = param.baseFactory.matchesMatchableRelation(start, end)
+    val base = param.factory.matchesMatchableRelation(start, end)
     val relation = factory.merge(node, base)
     discourse.add(base, node, relation)
     persistRelation(discourse, node)
