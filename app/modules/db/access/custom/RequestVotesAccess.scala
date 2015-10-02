@@ -277,9 +277,10 @@ requestToPostDef
     implicit val ctx = new QueryContext
     val tagDef = FactoryNodeDef(Scope)
     val tagsDef = RelationDef(ConcreteNodeDef(request), ProposesTag, tagDef)
-    val (userNode, postNode) = request match {
-      case request: AddTags => (request.startNodeOpt.get, request.endNodeOpt.get)
-      case request: RemoveTags => (request.startNodeOpt.get, request.endNodeOpt.get)
+    //TODO: no hyperrelationtraits in magic...
+    val (userNode, postNode) = {
+      val hyperRel = request.asInstanceOf[HyperRelation[User, _, _, _, Post]]
+      (hyperRel.startNodeOpt.get, hyperRel.endNodeOpt.get)
     }
 
     val userDef = ConcreteNodeDef(userNode)
