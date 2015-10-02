@@ -14,21 +14,28 @@ import renesca.parameter.implicits._
 import scala.util.Try
 
 object Search extends Controller {
-  def index(page: Option[Int], size: Option[Int], label: Option[String], title: Option[String], searchDescriptions: Option[Boolean], tags: List[String], tagOr: Option[Boolean], startPost: Option[Boolean]) = Action {
+  def index(pageOpt: Option[Int], sizeOpt: Option[Int], labelOpt: Option[String], titleOpt: Option[String], searchDescriptionsOpt: Option[Boolean], tags: List[String], tagOrOpt: Option[Boolean], startPostOpt: Option[Boolean]) = Action {
+
+    val searchDescriptions = searchDescriptionsOpt.getOrElse(false)
+    val page = pageOpt.getOrElse(0)
+    val startPost = startPostOpt.getOrElse(false)
+    val tagOr = tagOrOpt.getOrElse(false)
+
     implicit val ctx = new QueryContext
+
     // white list, so only exposed nodes can be searched
-    val labels = ExposedNode.labels ++ label.map(Label(_))
+    val labels = ExposedNode.labels ++ labelOpt.map(Label(_))
     val nodeDef = LabelNodeDef(labels)
 
-    val titleRegex = title.flatMap { tit =>
-      if(tit.trim.isEmpty)
+    val titleRegex = titleOpt.flatMap { title =>
+      if(title.trim.isEmpty)
         None
       else
-        Some("(?i).*" + tit.replace(" ", ".*") + ".*")
+        Some("(?i).*" + title.replace(" ", ".*") + ".*")
     }
 
     val descrMatcher = titleRegex.flatMap { _ =>
-      if(searchDescriptions.getOrElse(false))
+      if(searchDescriptions)
         Some(s"${ nodeDef.name }.description =~ {term}")
       else
         None
@@ -37,30 +44,31 @@ object Search extends Controller {
     val titleMatcher = titleRegex.map(_ => s"${ nodeDef.name }.title =~ {term}")
     val termMatcher = Seq(titleMatcher, descrMatcher).flatten.mkString(" or ")
 
-    val returnPostfix = size.map { limit =>
-      val skip = page.getOrElse(0) * limit;
+    val returnPostfix = sizeOpt.map { limit =>
+      val skip = page * limit;
       s"skip $skip limit $limit"
     }.getOrElse("")
     val returnStatement = s"return ${ nodeDef.name } order by ${ nodeDef.name }.timestamp desc $returnPostfix"
 
-    // When Neo4j throws an error because the regexp is incorrect, return an empty Discourse instead
-    val discourse = Try(if(tags.isEmpty) {
-      val startPostMatchPostfix = if(startPost.getOrElse(false)) {
-        s"<-[:`${ SchemaTags.endRelationType }`]-(:`${ SchemaTags.label }`)<-[:`${ SchemaTags.startRelationType }`]-(:`${ Scope.label }`)"
+    // When Neo4j throws an error because the regexp is incorrect, return an empty Discourse instead: Try(...).getOrElse(Discourse.empty)
+    val discourse = Try(
+      if(tags.isEmpty) {
+        val startPostMatchPostfix = if(startPost) {
+          s"<-[:`${ SchemaTags.endRelationType }`]-(:`${ SchemaTags.label }`)<-[:`${ SchemaTags.startRelationType }`]-(:`${ Scope.label }`)"
+        } else {
+          ""
+        }
+
+        val condition = if(termMatcher.isEmpty) "" else s"where ${ termMatcher }"
+
+        Discourse(db.queryGraph(Query(
+          s"""match ${ nodeDef.toQuery }$startPostMatchPostfix
+          $condition
+          $returnStatement""",
+          titleRegex.map(t => Map("term" -> t)).getOrElse(Map.empty) ++ nodeDef.parameterMap
+        )))
       } else {
-        ""
-      }
-
-      val condition = if(termMatcher.isEmpty) "" else s"where ${ termMatcher }"
-
-      Discourse(db.queryGraph(Query(
-        s"""match ${ nodeDef.toQuery }$startPostMatchPostfix
-        $condition
-        $returnStatement""",
-        titleRegex.map(t => Map("term" -> t)).getOrElse(Map.empty) ++ nodeDef.parameterMap
-      )))
-    } else {
-      if(tagOr.getOrElse(false)) {
+      if(tagOr) {
         //TODO: classification need to be matched on the outgoing connects relation of the post
         val tagDef = FactoryNodeDef(Scope)
         val inheritTagDef = FactoryNodeDef(Scope)
@@ -101,7 +109,7 @@ object Search extends Controller {
 
     Ok(Json.toJson(
       // we only add attached tags to the result when searching for posts
-      if(label.contains(Post.label.name))
+      if(labelOpt.contains(Post.label.name))
         TaggedTaggable.shapeResponse(discourse.posts)
       else
         discourse.exposedNodes
