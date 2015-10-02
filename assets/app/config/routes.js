@@ -3,9 +3,6 @@ angular.module("wust.config").config(RoutesConfig);
 RoutesConfig.$inject = ["$stateProvider", "$urlRouterProvider", "$locationProvider"];
 
 function RoutesConfig($stateProvider, $urlRouterProvider, $locationProvider) {
-    //TODO: caching of focus resolve...workaround...
-    let lastFocus;
-
     $stateProvider.state("page", {
         abstract: true,
         templateUrl: `components/page/page.html`,
@@ -47,22 +44,6 @@ function RoutesConfig($stateProvider, $urlRouterProvider, $locationProvider) {
         url: "/focus/:id/:type",
         templateUrl: `components/focus/focus.html`,
         controller: "FocusCtrl as vm",
-        resolve: { //TODO: should not use resolve, instead async resolve in focus ctrl
-            rootNode: ["Post","$stateParams","$state", function(Post, $stateParams, $state) {
-                // somehow the resolve method is called every time we change
-                // our url for switching between graph and neighbours view.
-                // so if we are still viewing the same node, we just return
-                // the last focused node, as no new focusctrl is instantiated
-                if ($state.is("focus") && lastFocus && lastFocus.id === $stateParams.id) {
-                    return lastFocus;
-                } else {
-                    lastFocus = Post.$find($stateParams.id, { countView: true });
-                    return lastFocus.$asPromise().catch(response => {
-                        $state.go("dashboard");
-                    });
-                }
-            }]
-        }
     });
 
     $urlRouterProvider.otherwise("/dashboard");

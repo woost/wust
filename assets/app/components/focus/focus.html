@@ -1,13 +1,12 @@
 <div id="focus_component">
-    <div tabset class="tabs-left">
+    <div tabset class="tabs-left" ng-if="::vm.rootNodeLoaded">
         <div tab active="vm.tabViews[0].active">
             <div tab-heading>
                 <i class="icon-dot-circled fa-2x"></i>
             </div>
             <div focus-neighbours component="vm.neighboursComponent" is-loading="vm.componentLoading"></div>
         </div>
-        <div tab active="vm.tabViews[1].active">
-            <div tab-heading>
+        <div tab active="vm.tabViews[1].active"> <div tab-heading>
                 <i class="icon-share fa-2x"></i>
             </div>
             <div focus-graph component="vm.graphComponent" is-loading="vm.componentLoading"></div>

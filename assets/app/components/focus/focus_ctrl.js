@@ -1,21 +1,37 @@
 angular.module("wust.components").controller("FocusCtrl", FocusCtrl);
 
-FocusCtrl.$inject = ["Helpers", "$stateParams", "$state", "HistoryService", "rootNode", "ConnectedComponents", "$q", "$scope"];
+FocusCtrl.$inject = ["Helpers", "Post", "$stateParams", "$state", "HistoryService", "ConnectedComponents", "$q", "$scope"];
 
-function FocusCtrl(Helpers, $stateParams, $state, HistoryService, rootNode, ConnectedComponents, $q, $scope) {
+function FocusCtrl(Helpers, Post, $stateParams, $state, HistoryService, ConnectedComponents, $q, $scope) {
     let vm = this;
 
-    let rawRootNode = rootNode.encode();
+    let rootNodePromise = Post.$find($stateParams.id, { countView: true }).$then(rootNode => {
+        vm.rootNodeLoaded = true;
+        let rawRootNode = rootNode.encode();
+        let graph = {
+            nodes: [rawRootNode],
+            relations: [],
+            $pk: rootNode.id
+        };
+        let component = renesca.js.GraphFactory().fromRecord(graph);
+        vm.graphComponent = component.wrap("graph");
+        vm.neighboursComponent = component.hyperWrap("neighbours");
+        vm.componentLoading = true;
 
-    let graph = {
-        nodes: [rawRootNode],
-        relations: [],
-        $pk: rootNode.id
-    };
-    let component = renesca.js.GraphFactory().fromRecord(graph);
-    vm.graphComponent = component.wrap("graph");
-    vm.neighboursComponent = component.hyperWrap("neighbours");
-    vm.componentLoading = true;
+        // we are viewing details about a node, so add it to the nodehistory
+        HistoryService.add(vm.graphComponent.rootNode);
+        HistoryService.setCurrentViewComponent(component);
+
+    }, () => $state.go("dashboard"));
+
+    ConnectedComponents.$find($stateParams.id).$then(response => {
+        rootNodePromise.$then(() => {
+            vm.componentLoading = false;
+            response.nodes.forEach(n => vm.graphComponent.addNode(n));
+            response.relations.forEach(r => vm.graphComponent.addRelation(r));
+            vm.graphComponent.commit();
+        });
+    }, () => vm.componentLoading = false);
 
     class Tab {
         constructor(index) {
@@ -51,15 +67,4 @@ function FocusCtrl(Helpers, $stateParams, $state, HistoryService, rootNode, Conn
         vm.tabViews[0]._active = true;
         vm.tabViews[1]._active = false;
     }
-
-    // we are viewing details about a node, so add it to the nodehistory
-    HistoryService.add(vm.graphComponent.rootNode);
-    HistoryService.setCurrentViewComponent(component);
-
-    ConnectedComponents.$find($stateParams.id).$then(response => {
-        vm.componentLoading = false;
-        response.nodes.forEach(n => vm.graphComponent.addNode(n));
-        response.relations.forEach(r => vm.graphComponent.addRelation(r));
-        vm.graphComponent.commit();
-    }, () => vm.componentLoading = false);
 }

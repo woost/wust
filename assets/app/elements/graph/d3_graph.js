@@ -14,6 +14,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
         class D3Graph {
             //TODO: rename onClick -> onNodeClick
+            //TODO: use closure and have constants without this, also directly use vm?
             constructor(graph, rootDomElement, onClick = _.noop, onDraw = _.noop) {
                 this.graph = graph;
                 this.rootDomElement = rootDomElement;
@@ -194,9 +195,10 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
             updateGraph(changes) {
                 // console.log("updateGraph("+(this.commitCount+1)+")");
+                //TODO: better have boolean?
                 this.commitCount++;
                 // the first commit is only the rootNode
-                if(this.commitCount <= 1) return;
+                if(vm.isLoading && this.commitCount <= 1) return;
                 // the second commit brings the rest of the graph and triggers the convergence
 
                 //TODO: this really is an unwanted side effect, we should not sort nodes here
@@ -351,6 +353,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.force.start();
 
                 // don't converge, we are triggering this manually in the beginning
+                //TODO why? <= 2
                 if(this.commitCount <= 2) this.force.stop();
 
                 this.registerUIEvents();
