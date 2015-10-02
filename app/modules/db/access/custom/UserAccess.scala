@@ -128,7 +128,7 @@ case class UserMarks() extends StartRelationAccessDefault[User, Marks, Post] {
   //TODO: decorator with baseuuid in callback
   def allowed(userOpt: Option[User], uuid: String)(handler: => Result) = userOpt.filter(_.uuid == uuid).map(_ => handler).getOrElse(Forbidden("Marks are private"))
 
-  object CreateDelete extends StartConRelationAccessBase[User, Marks, Post] with StartRelationDeleteBase[User, Marks, Post] {
+  object CreateDelete extends StartRelationWriteBase[User, Marks, Post] with StartRelationDeleteBase[User, Marks, Post] {
     implicit val format = PostFormat
     val nodeFactory = Post
     val factory = Marks

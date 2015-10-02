@@ -38,7 +38,7 @@ object Posts extends Nodes[Post] {
 object Scopes extends Nodes[Scope] {
   val node = NodeDef(TagAccess.apply,
     "posts" -> (N > StartRelationRead(SchemaTags, Post)),
-    "inherits" -> (N > StartConRelationAccess(Inherits, Scope)),
-    "implements" -> (N < EndConRelationAccess(Inherits, Scope))
+    "inherits" -> (N > StartRelationWrite(Inherits, Scope)),
+    "implements" -> (N < EndRelationWrite(Inherits, Scope))
   )
 }

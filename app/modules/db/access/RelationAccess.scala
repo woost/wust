@@ -176,53 +176,115 @@ END <: UuidNode
 
 trait StartRelationDeleteBase[
 START <: UuidNode,
-RELATION <: AbstractRelation[START, END],
+RELATION <: MatchableRelation[START, END],
 END <: UuidNode
 ] extends StartRelationAccessDefault[START, RELATION, END] {
-  val factory: AbstractRelationFactory[START, RELATION, END]
+  val factory: MatchableRelationFactory[START, RELATION, END]
 
-  override def delete(context: RequestContext, param: ConnectParameter[START], uuid: String) = context.withUser {
-    implicit val ctx = new QueryContext
-    val relationDefinition = RelationDef(toBaseNodeDef(param), factory, toNodeDef(uuid))
-    if(disconnectNodes(relationDefinition))
-      NoContent
-    else
-      BadRequest("Cannot delete relation")
+  override def delete(context: RequestContext, param: ConnectParameter[START], otherUuid: String) = context.withUser {
+    val base = param.baseFactory.matchesOnUuid(param.baseUuid)
+    val node = nodeFactory.matchesOnUuid(otherUuid)
+    val relation = factory.matchesMatchableRelation(base, node)
+    db.transaction(_.persistChanges(relation)).map(err =>
+      BadRequest(s"Cannot delete Relation: $err'")
+    ).getOrElse(NoContent)
   }
 
   override def delete[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, START with AbstractRelation[S, E], E], uuid: String) = context.withUser {
-    implicit val ctx = new QueryContext
-    val relationDefinition = RelationDef(toBaseNodeDef(param), factory, toNodeDef(uuid))
-    if(disconnectNodes(relationDefinition))
-      NoContent
-    else
-      BadRequest("Cannot delete relation")
+    val start = param.startFactory.matchesOnUuid(param.startUuid)
+    val end = param.endFactory.matchesOnUuid(param.endUuid)
+    val base = param.baseFactory.matchesMatchableRelation(start, end)
+    val node = nodeFactory.matchesOnUuid(uuid)
+    val relation = factory.matchesMatchableRelation(base, node)
+    db.transaction(_.persistChanges(relation)).map(err =>
+      BadRequest(s"Cannot delete Relation: $err'")
+    ).getOrElse(NoContent)
   }
 }
 
 trait EndRelationDeleteBase[
 START <: UuidNode,
-RELATION <: AbstractRelation[START, END],
+RELATION <: MatchableRelation[START, END],
 END <: UuidNode
 ] extends EndRelationAccessDefault[START, RELATION, END] {
-  val factory: AbstractRelationFactory[START, RELATION, END]
+  val factory: MatchableRelationFactory[START, RELATION, END]
 
-  override def delete(context: RequestContext, param: ConnectParameter[END], uuid: String) = context.withUser {
-    implicit val ctx = new QueryContext
-    val relationDefinition = RelationDef(toNodeDef(uuid), factory, toBaseNodeDef(param))
-    if(disconnectNodes(relationDefinition))
-      NoContent
-    else
-      BadRequest("Cannot delete relation")
+  override def delete(context: RequestContext, param: ConnectParameter[END], otherUuid: String) = context.withUser {
+    val base = param.baseFactory.matchesOnUuid(param.baseUuid)
+    val node = nodeFactory.matchesOnUuid(otherUuid)
+    val relation = factory.matchesMatchableRelation(node, base)
+    db.transaction(_.persistChanges(Discourse.remove(relation))).map(err =>
+      BadRequest(s"Cannot delete Relation: $err'")
+    ).getOrElse(NoContent)
   }
 
   override def delete[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, END with AbstractRelation[S, E], E], uuid: String) = context.withUser {
-    implicit val ctx = new QueryContext
-    val relationDefinition = RelationDef(toNodeDef(uuid), factory, toBaseNodeDef(param))
-    if(disconnectNodes(relationDefinition))
-      NoContent
-    else
-      BadRequest("Cannot delete relation")
+    val start = param.startFactory.matchesOnUuid(param.startUuid)
+    val end = param.endFactory.matchesOnUuid(param.endUuid)
+    val base = param.baseFactory.matchesMatchableRelation(start, end)
+    val node = nodeFactory.matchesOnUuid(uuid)
+    val relation = factory.matchesMatchableRelation(node, base)
+    db.transaction(_.persistChanges(Discourse.remove(relation))).map(err =>
+      BadRequest(s"Cannot delete Relation: $err'")
+    ).getOrElse(NoContent)
+  }
+}
+
+trait StartRelationWriteBase[
+START <: UuidNode,
+RELATION <: ConstructRelation[START, END],
+END <: UuidNode
+] extends StartRelationReadBase[START, RELATION, END] with StartRelationDeleteBase[START, RELATION, END] {
+  val factory: ConstructRelationFactory[START, RELATION, END]
+  val nodeFactory: UuidNodeMatchesFactory[END]
+
+  override def create(context: RequestContext, param: ConnectParameter[START], otherUuid: String) = context.withUser {
+    val base = param.baseFactory.matchesOnUuid(param.baseUuid)
+    val node = nodeFactory.matchesOnUuid(otherUuid)
+    val relation = factory.mergeConstructRelation(base, node)
+    db.transaction(_.persistChanges(relation)).map(err =>
+      BadRequest(s"Cannot create Relation: $err'")
+    ).getOrElse(Ok(Json.toJson(node)))
+  }
+
+  override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, START with AbstractRelation[S, E], E], uuid: String) = context.withUser {
+    val start = param.startFactory.matchesOnUuid(param.startUuid)
+    val end = param.endFactory.matchesOnUuid(param.endUuid)
+    val base = param.baseFactory.matchesMatchableRelation(start, end)
+    val node = nodeFactory.matchesOnUuid(uuid)
+    val relation = factory.mergeConstructRelation(base, node)
+    db.transaction(_.persistChanges(relation)).map(err =>
+      BadRequest(s"Cannot create Relation: $err'")
+    ).getOrElse(Ok(Json.toJson(node)))
+  }
+}
+
+trait EndRelationWriteBase[
+START <: UuidNode,
+RELATION <: ConstructRelation[START, END],
+END <: UuidNode
+] extends EndRelationReadBase[START, RELATION, END] with EndRelationDeleteBase[START, RELATION, END] {
+  val factory: ConstructRelationFactory[START, RELATION, END]
+  val nodeFactory: UuidNodeMatchesFactory[START]
+
+  override def create(context: RequestContext, param: ConnectParameter[END], otherUuid: String) = context.withUser {
+    val base = param.baseFactory.matchesOnUuid(param.baseUuid)
+    val node = nodeFactory.matchesOnUuid(otherUuid)
+    val relation = factory.mergeConstructRelation(node, base)
+    db.transaction(_.persistChanges(relation)).map(err =>
+      BadRequest(s"Cannot create Relation: $err'")
+    ).getOrElse(Ok(Json.toJson(node)))
+  }
+
+  override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, END with AbstractRelation[S, E], E], uuid: String) = context.withUser {
+    val start = param.startFactory.matchesOnUuid(param.startUuid)
+    val end = param.endFactory.matchesOnUuid(param.endUuid)
+    val base = param.baseFactory.matchesMatchableRelation(start, end)
+    val node = nodeFactory.matchesOnUuid(uuid)
+    val relation = factory.mergeConstructRelation(node, base)
+    db.transaction(_.persistChanges(relation)).map(err =>
+      BadRequest(s"Cannot create Relation: $err'")
+    ).getOrElse(Ok(Json.toJson(node)))
   }
 }
 
@@ -230,12 +292,14 @@ case class StartRelationRead[START <: UuidNode, RELATION <: AbstractRelation[STA
 case class EndRelationRead[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factory: AbstractRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[START])(implicit val format: Format[START]) extends EndRelationReadBase[START, RELATION, END]
 case class StartMultiRelationRead[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factories: AbstractRelationFactory[START, RELATION, END]*)(val nodeFactory: UuidNodeMatchesFactory[END])(implicit val format: Format[END]) extends StartMultiRelationReadBase[START, END]
 case class EndMultiRelationRead[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factories: AbstractRelationFactory[START, RELATION, END]*)(val nodeFactory: UuidNodeMatchesFactory[START])(implicit val format: Format[START]) extends EndMultiRelationReadBase[START, END]
-case class StartRelationDelete[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factory: AbstractRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[END]) extends StartRelationDeleteBase[START, RELATION, END]
-case class EndRelationDelete[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factory: AbstractRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[START]) extends EndRelationDeleteBase[START, RELATION, END]
-case class StartRelationReadDelete[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factory: AbstractRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[END])(implicit val format: Format[END]) extends StartRelationDeleteBase[START, RELATION, END] with StartRelationReadBase[START, RELATION, END]
-case class EndRelationReadDelete[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factory: AbstractRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[START])(implicit val format: Format[START]) extends EndRelationDeleteBase[START, RELATION, END] with EndRelationReadBase[START, RELATION, END]
+case class StartRelationDelete[START <: UuidNode, RELATION <: MatchableRelation[START, END], END <: UuidNode](factory: MatchableRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[END]) extends StartRelationDeleteBase[START, RELATION, END]
+case class EndRelationDelete[START <: UuidNode, RELATION <: MatchableRelation[START, END], END <: UuidNode](factory: MatchableRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[START]) extends EndRelationDeleteBase[START, RELATION, END]
+case class StartRelationReadDelete[START <: UuidNode, RELATION <: MatchableRelation[START, END], END <: UuidNode](factory: MatchableRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[END])(implicit val format: Format[END]) extends StartRelationDeleteBase[START, RELATION, END] with StartRelationReadBase[START, RELATION, END]
+case class EndRelationReadDelete[START <: UuidNode, RELATION <: MatchableRelation[START, END], END <: UuidNode](factory: MatchableRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[START])(implicit val format: Format[START]) extends EndRelationDeleteBase[START, RELATION, END] with EndRelationReadBase[START, RELATION, END]
 case class StartRelationNothing[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factory: AbstractRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[END]) extends StartRelationAccessDefault[START, RELATION, END]
 case class EndRelationNothing[START <: UuidNode, RELATION <: AbstractRelation[START, END], END <: UuidNode](factory: AbstractRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[START]) extends EndRelationAccessDefault[START, RELATION, END]
+case class StartRelationWrite[START <: UuidNode, RELATION <: ConstructRelation[START, END], END <: UuidNode ](factory: ConstructRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[END])(implicit val format: Format[END]) extends StartRelationWriteBase[START,RELATION,END]
+case class EndRelationWrite[START <: UuidNode, RELATION <: ConstructRelation[START, END], END <: UuidNode ](factory: ConstructRelationFactory[START, RELATION, END], nodeFactory: UuidNodeMatchesFactory[START])(implicit val format: Format[START]) extends EndRelationWriteBase[START,RELATION,END]
 
 trait RelationAccessDecorator[NODE <: UuidNode, OTHER <: UuidNode] extends RelationAccess[NODE, OTHER] with AccessDecoratorControlDefault {
   val self: RelationAccess[NODE, OTHER]

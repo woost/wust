@@ -129,35 +129,6 @@ object Database {
     nodesWithType[START](discourse.nodes)
   }
 
-  //FIXME: I am an unreliable function if you have a relation to a hyperrelation i will delete that hyperrelation.
-  def disconnectNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinition: FixedRelationDef[START, RELATION, END]) = {
-    val tx = db.newTransaction()
-    val discourse = itemDiscourseGraph(relationDefinition)
-    if(discourse.relations.isEmpty && discourse.hyperRelations.size == 1) {
-      val label = discourse.hyperRelations.head.label
-      discourse.graph.nodes -= discourse.hyperRelations.head.rawItem
-      val failure = tx.persistChanges(discourse.graph)
-      if(failure.isEmpty) {
-        // here we disconnect a hyperrelation
-        // therefore we garbage collect broken hyperrelations
-        // in our case, only CONNECTS is recursive
-        // TODO: challenge, this is a workaround
-        if(label == Connects.label)
-          model.WustSchema.deleteConnectsGarbage(tx)
-
-        tx.commit()
-        true
-      } else {
-        false
-      }
-    }
-    else {
-      discourse.graph.relations.foreach(discourse.graph.relations -= _)
-      val failure = tx.commit.persistChanges(discourse.graph)
-      failure.isEmpty
-    }
-  }
-
   // IMPORTANT: we need to write the constancts as doubles to avoid integer arithmetic
   // def tagweight(up:String, down:String) = s"(($up + ${tagweight_p*tagweight_u})/($up + $down + $tagweight_u))"
   def connectedComponent(focusNode: UuidNodeDef[_], identity: Option[User], depth: Int = 5)(implicit ctx: QueryContext): Discourse = {
