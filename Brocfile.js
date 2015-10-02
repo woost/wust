@@ -111,7 +111,6 @@ var scripts = concat(mergeTrees([appScripts,htmlTemplates,dependencies,staticAss
         min("angular-strap/dist/angular-strap.tpl.js"),
 
         min("lodash/lodash.js"),
-        min("chroma-js/chroma.js"),
 
         "angular-native-dragdrop/draganddrop.js",
         min("ng-sortable/dist/ng-sortable.js"),
