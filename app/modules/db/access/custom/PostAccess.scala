@@ -210,9 +210,11 @@ case class PostAccess() extends NodeAccessDefault[Post] {
     import formatters.json.EditNodeFormat._
 
     context.jsonAs[PostAddRequest].map { request =>
-      PostHelper.createPost(request, user) match {
-        case Left(err) => BadRequest(s"Cannot create Post: $err")
-        case Right(node) => Ok(Json.toJson(node))
+
+      val discourse = PostHelper.createPost(request, user)
+      db.transaction(_.persistChanges(discourse)) match {
+        case Some(err) => BadRequest(s"Cannot create Post: $err")
+        case None => Ok(Json.toJson(discourse.posts.head))
       }
     }.getOrElse(BadRequest("Cannot parse create request"))
   }

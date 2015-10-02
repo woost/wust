@@ -32,20 +32,15 @@ object PostHelper {
     }
   }
 
-  def createPost(request: PostAddRequest, user: User): Either[String,Post] = {
-    val discourse = Discourse.empty
-
+  def createPost(request: PostAddRequest, user: User): Discourse = {
     val node = Post.create(title = request.title, description = request.description)
     val contribution = Created.create(user, node)
-    discourse.add(node, contribution)
-
+    val discourse = Discourse(contribution)
     addScopesToGraph(discourse, request, node)
 
-    db.transaction(_.persistChanges(discourse)) match {
-      case Some(err) => Left(err)
-      case None      => Right(node)
-    }
+    discourse
   }
+
 
   def viewPost(node: Post, user: User) = Future {
     db.transaction { tx =>

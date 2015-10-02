@@ -33,14 +33,11 @@ trait ConnectsRelationHelper[NODE <: Connectable] {
     })
   }
 
-  protected def createPost(context: RequestContext): Either[Result, Post] = context.user.map { user =>
+  protected def createPost(context: RequestContext): Either[Result, Discourse] = context.user.map { user =>
     import formatters.json.EditNodeFormat._
 
     context.jsonAs[PostAddRequest].map { request =>
-      PostHelper.createPost(request, user) match {
-        case Left(err) => Left(BadRequest(s"Cannot create Post: $err"))
-        case Right(node) => Right(node)
-      }
+      Right(PostHelper.createPost(request, user))
     }.getOrElse(Left(BadRequest("Cannot parse create request")))
   }.getOrElse(Left(context.onlyUsersError))
 }
@@ -50,8 +47,8 @@ case class StartConnectsAccess() extends StartRelationReadBase[Post, Connects, C
   val nodeFactory = Connectable
   implicit val format = GraphFormat.ConnectableFormat
 
-  private def createRelation(context: RequestContext, param: ConnectParameter[Post], node: Connectable) = {
-    val discourse = Discourse(node.graph)
+  private def createRelation(context: RequestContext, param: ConnectParameter[Post], discourse: Discourse) = {
+    val node = discourse.connectables.head
     val base = param.baseFactory.matchesOnUuid(param.baseUuid)
     discourse.add(base, node, factory.merge(base, node))
     persistRelation(discourse, node)
@@ -59,11 +56,11 @@ case class StartConnectsAccess() extends StartRelationReadBase[Post, Connects, C
 
   override def create(context: RequestContext, param: ConnectParameter[Post]) = createPost(context) match {
     case Left(err) => err
-    case Right(node) => createRelation(context, param, node)
+    case Right(discourse) => createRelation(context, param, discourse)
   }
 
   override def create(context: RequestContext, param: ConnectParameter[Post], otherUuid: String) = context.withUser {
-    createRelation(context, param, nodeFactory.matchesOnUuid(otherUuid))
+    createRelation(context, param, Discourse(nodeFactory.matchesOnUuid(otherUuid)))
   }
 }
 
@@ -74,17 +71,17 @@ case class EndConnectsAccess() extends EndRelationReadBase[Post, Connects, Conne
 
   val postaccess = PostAccess.apply
 
-  private def createRelation(context: RequestContext, param: ConnectParameter[Connectable], node: Post) = {
-    val discourse = Discourse(node.graph)
+  private def createRelation(context: RequestContext, param: ConnectParameter[Connectable], discourse: Discourse) = {
+    val node = discourse.posts.head
     val base = param.baseFactory.matchesOnUuid(param.baseUuid)
     discourse.add(base, node, factory.merge(node, base))
     persistRelation(discourse, node)
   }
 
-  private def createRelation[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Connectable with AbstractRelation[S, E], E], node: Post) = {
-    val discourse = Discourse(node.graph)
+  private def createRelation[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Connectable with AbstractRelation[S, E], E], discourse: Discourse) = {
     val start = param.startFactory.matchesOnUuid(param.startUuid)
     val end = param.endFactory.matchesOnUuid(param.endUuid)
+    val node = discourse.posts.head
     val base = param.baseFactory.matchesMatchableRelation(start, end)
     val relation = factory.merge(node, base)
     discourse.add(base, node, relation)
@@ -93,21 +90,21 @@ case class EndConnectsAccess() extends EndRelationReadBase[Post, Connects, Conne
 
   override def create(context: RequestContext, param: ConnectParameter[Connectable]) = createPost(context) match {
     case Left(err) => err
-    case Right(node) => createRelation(context, param, node)
+    case Right(discourse) => createRelation(context, param, discourse)
   }
 
   override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Connectable with AbstractRelation[S, E], E]) = createPost(context) match {
     case Left(err) => err
-    case Right(node) => createRelation(context, param, node)
+    case Right(discourse) => createRelation(context, param, discourse)
   }
 
   override def create(context: RequestContext, param: ConnectParameter[Connectable], otherUuid: String) = context.withUser {
-    createRelation(context, param, nodeFactory.matchesOnUuid(otherUuid))
+    createRelation(context, param, Discourse(nodeFactory.matchesOnUuid(otherUuid)))
   }
 
 
   override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Connectable with AbstractRelation[S, E], E], uuid: String) = context.withUser {
-    createRelation(context, param, nodeFactory.matchesOnUuid(uuid))
+    createRelation(context, param, Discourse(nodeFactory.matchesOnUuid(uuid)))
   }
 }
 
