@@ -6,7 +6,7 @@ import play.api.libs.json._
 import model.WustSchema.{Created => SchemaCreated, _}
 import modules.db.Database._
 import modules.db.access._
-import modules.db.helpers.PostHelper
+import modules.db.helpers.{PostHelper, RequestHelper}
 import modules.db._
 import modules.requests._
 import renesca.parameter.implicits._
@@ -38,17 +38,15 @@ case class PostAccess() extends NodeAccessDefault[Post] {
 
   private def handleAddTags(discourse: Discourse, existAddTags: Seq[AddTags], user: User, post: Post, request: PostUpdateRequest, karmaProps: KarmaProperties) {
     request.addedTags.foreach { tagReq =>
-      val alreadyExistingForSameScope = existAddTags.filter { addTag =>
-        if (tagReq.id.isDefined)
+      val alreadyExisting = existAddTags.find { addTag =>
+        val sameTag = if (tagReq.id.isDefined)
           addTag.proposesTags.head.uuid == tagReq.id.get
         else if (tagReq.title.isDefined)
           addTag.proposesTags.head.title == tagReq.title.get
         else
           false
-      }
 
-      val alreadyExisting = alreadyExistingForSameScope.find { addTag =>
-        tagReq.classifications.map(_.id).toSet == addTag.proposesClassifys.map(_.uuid).toSet
+        sameTag && tagReq.classifications.map(_.id).toSet == addTag.proposesClassifys.map(_.uuid).toSet
       }
 
       alreadyExisting.foreach { exist =>
@@ -75,11 +73,7 @@ case class PostAccess() extends NodeAccessDefault[Post] {
 
       crOpt.foreach { cr =>
         if (cr.status == INSTANT || cr.status == APPROVED) {
-          //disable conflicting change request
-          //TODO: code dup in VoteRequestAccess
-          alreadyExistingForSameScope.filter { addTag =>
-            !alreadyExisting.contains(addTag) && addTag.proposesClassifys.map(_.uuid).toSet.subsetOf(tagReq.classifications.map(_.id).toSet)
-          }.foreach(_.status = CONFLICT)
+          RequestHelper.conflictingAddTags(cr, existAddTags).foreach(_.status = CONFLICT)
 
           val tags = Tags.merge(cr.proposesTags.head, post)
           discourse.add(tags)
@@ -93,10 +87,8 @@ case class PostAccess() extends NodeAccessDefault[Post] {
 
   private def handleRemoveTags(discourse: Discourse, existRemTags: Seq[RemoveTags], user: User, post: Post, request: PostUpdateRequest, karmaProps: KarmaProperties) {
     request.removedTags.foreach { tagReq =>
-      val alreadyExistingForSameScope = existRemTags.filter(_.proposesTags.head.uuid == tagReq.id)
-
-      val alreadyExisting = alreadyExistingForSameScope.find { remTag =>
-        tagReq.classifications.map(_.id).toSet == remTag.proposesClassifys.map(_.uuid).toSet
+      val alreadyExisting = existRemTags.find { remTag =>
+        remTag.proposesTags.head.uuid == tagReq.id && tagReq.classifications.map(_.id).toSet == remTag.proposesClassifys.map(_.uuid).toSet
       }
 
       alreadyExisting.foreach { exist =>
@@ -120,11 +112,7 @@ case class PostAccess() extends NodeAccessDefault[Post] {
       }
 
       if (cr.status == INSTANT || cr.status == APPROVED) {
-        //disable conflicting change request
-        //TODO: code dup in VoteRequestAccess
-        alreadyExistingForSameScope.filter { remTag =>
-          !alreadyExisting.contains(remTag) && (tagReq.classifications.isEmpty || !remTag.proposesClassifys.isEmpty && remTag.proposesClassifys.map(_.uuid).toSet.subsetOf(tagReq.classifications.map(_.id).toSet))
-        }.foreach(_.status = CONFLICT)
+        RequestHelper.conflictingRemoveTags(cr, existRemTags).foreach(_.status = CONFLICT)
 
         val tags = Tags.matches(cr.proposesTags.head, post)
         if (cr.proposesClassifys.isEmpty) {
@@ -160,13 +148,12 @@ case class PostAccess() extends NodeAccessDefault[Post] {
 
     val params = votesDef.parameterMap ++ userDef.parameterMap ++ postDef.parameterMap ++ tagsDef.parameterMap
     val existing = Discourse(tx.queryGraph(query, params))
+    //TODO should only add conflicting change requests + the one we are voting for including its tags
     discourse.add(existing.nodes: _*)
     discourse.add(existing.relations: _*)
-    val existAddTags = existing.addTags
-    val existRemTags = existing.removeTags
 
-    handleAddTags(discourse, existAddTags, user, post, request, karmaProps)
-    handleRemoveTags(discourse, existRemTags, user, post, request, karmaProps)
+    handleAddTags(discourse, existing.addTags, user, post, request, karmaProps)
+    handleRemoveTags(discourse, existing.removeTags, user, post, request, karmaProps)
 
     existing.tagChangeRequests.foreach(_._locked = false)
   }

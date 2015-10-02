@@ -4,6 +4,7 @@ import controllers.api.nodes.{HyperConnectParameter, ConnectParameter, RequestCo
 import model.WustSchema.{Created => SchemaCreated, _}
 import modules.db.Database._
 import modules.db._
+import modules.db.helpers.RequestHelper
 import modules.db.types._
 import modules.karma._
 import modules.db.access.{EndRelationAccessDefault, EndRelationAccess}
@@ -231,8 +232,8 @@ class VotesDeletedHelper(request: Deleted) extends VotesChangeRequestHelper {
 
 trait VotesTagsChangeRequestHelper extends VotesChangeRequestHelper {
 
-  val request: TagChangeRequest
-  def requestToPostDef()(implicit ctx: QueryContext): NodeRelationDef[_ <: TagChangeRequest, _, Post]
+  protected val request: TagChangeRequest
+  protected def requestToPostDef()(implicit ctx: QueryContext): NodeRelationDef[_ <: TagChangeRequest, _, Post]
 
   protected def requestGraphUnapply(tx: QueryHandler) = {
     implicit val ctx = new QueryContext
@@ -290,11 +291,11 @@ requestToPostDef
   }
 }
 
-class VotesAddTagsHelper(val request: AddTags) extends VotesTagsChangeRequestHelper {
+class VotesAddTagsHelper(protected val request: AddTags) extends VotesTagsChangeRequestHelper {
 
   override def post = request.endNodeOpt.get
 
-  override def requestToPostDef()(implicit ctx: QueryContext) = RelationDef(FactoryNodeDef(AddTags), AddTagsEnd, ConcreteNodeDef(post))
+  override protected def requestToPostDef()(implicit ctx: QueryContext) = RelationDef(FactoryNodeDef(AddTags), AddTagsEnd, ConcreteNodeDef(post))
 
   override def unapplyChange(tx: QueryHandler, discourse: Discourse) = {
     val existing = requestGraphUnapply(tx)
@@ -315,7 +316,7 @@ class VotesAddTagsHelper(val request: AddTags) extends VotesTagsChangeRequestHel
 
   override def applyChange(tx: QueryHandler, discourse: Discourse) = {
     val existing = requestGraphApply(tx)
-    val sameReq = existing.tagChangeRequests.find(_.uuid == request.uuid).get
+    val sameReq = existing.addTags.find(_.uuid == request.uuid).get
     val scope = sameReq.proposesTags.head
     val classifications = sameReq.proposesClassifys
     val tags = Tags.merge(scope, post)
@@ -324,9 +325,7 @@ class VotesAddTagsHelper(val request: AddTags) extends VotesTagsChangeRequestHel
       discourse.add(Classifies.merge(classification, tags))
     }
 
-    existing.addTags.filter(_.uuid != request.uuid).filter { addTag =>
-      addTag.proposesTags.head.uuid == scope.uuid && addTag.proposesClassifys.toSet.subsetOf(classifications.toSet)
-    }.foreach { cr =>
+    RequestHelper.conflictingAddTags(sameReq, existing.addTags).foreach { cr =>
       cr.status = CONFLICT
       discourse.add(cr)
     }
@@ -335,10 +334,10 @@ class VotesAddTagsHelper(val request: AddTags) extends VotesTagsChangeRequestHel
   }
 }
 
-class VotesRemoveTagsHelper(val request: RemoveTags) extends VotesTagsChangeRequestHelper {
+class VotesRemoveTagsHelper(protected val request: RemoveTags) extends VotesTagsChangeRequestHelper {
   override def post = request.endNodeOpt.get
 
-  override def requestToPostDef()(implicit ctx: QueryContext) = RelationDef(FactoryNodeDef(RemoveTags), RemoveTagsEnd, ConcreteNodeDef(post))
+  override protected def requestToPostDef()(implicit ctx: QueryContext) = RelationDef(FactoryNodeDef(RemoveTags), RemoveTagsEnd, ConcreteNodeDef(post))
 
   override def unapplyChange(tx: QueryHandler, discourse: Discourse) = {
     val existing = requestGraphUnapply(tx)
@@ -359,7 +358,7 @@ class VotesRemoveTagsHelper(val request: RemoveTags) extends VotesTagsChangeRequ
 
   override def applyChange(tx: QueryHandler, discourse: Discourse) = {
     val existing = requestGraphApply(tx)
-    val sameReq = existing.tagChangeRequests.find(_.uuid == request.uuid).get
+    val sameReq = existing.removeTags.find(_.uuid == request.uuid).get
     val scope = sameReq.proposesTags.head
     val classifications = sameReq.proposesClassifys
     val tags = Tags.matches(scope, post)
@@ -372,9 +371,7 @@ class VotesRemoveTagsHelper(val request: RemoveTags) extends VotesTagsChangeRequ
       discourse.remove(tags)
     }
 
-    existing.removeTags.filter(_.uuid != request.uuid).filter { remTag =>
-      remTag.proposesTags.head.uuid == scope.uuid && (classifications.isEmpty || !remTag.proposesClassifys.isEmpty && remTag.proposesClassifys.toSet.subsetOf(classifications.toSet))
-    }.foreach { cr =>
+    RequestHelper.conflictingRemoveTags(sameReq, existing.removeTags).foreach { cr =>
       cr.status = CONFLICT
       discourse.add(cr)
     }
