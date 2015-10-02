@@ -372,6 +372,13 @@ class VotesRemoveTagsHelper(val request: RemoveTags) extends VotesTagsChangeRequ
       discourse.remove(tags)
     }
 
+    existing.removeTags.filter(_.uuid != request.uuid).filter { remTag =>
+      remTag.proposesTags.head.uuid == scope.uuid && (classifications.isEmpty || !remTag.proposesClassifys.isEmpty && remTag.proposesClassifys.toSet.subsetOf(classifications.toSet))
+    }.foreach { cr =>
+      cr.status = CONFLICT
+      discourse.add(cr)
+    }
+
     true
   }
 }

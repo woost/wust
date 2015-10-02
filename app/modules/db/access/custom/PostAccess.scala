@@ -95,8 +95,8 @@ case class PostAccess() extends NodeAccessDefault[Post] {
 
       crOpt.foreach { cr =>
         if (cr.status == INSTANT || cr.status == APPROVED) {
-          //disable conlicting change request
-          //TODO: code dup
+          //disable conflicting change request
+          //TODO: code dup in VoteRequestAccess
           existAddTags.filterNot(alreadyExisting contains _).filter { addTag =>
             val sameTag = if (tagReq.id.isDefined)
               addTag.proposesTags.head.uuid == tagReq.id.get
@@ -143,8 +143,8 @@ case class PostAccess() extends NodeAccessDefault[Post] {
       }
 
       if (cr.status == INSTANT || cr.status == APPROVED) {
-        //disable conlicting change request
-        //TODO: code dup
+        //disable conflicting change request
+        //TODO: code dup in VoteRequestAccess
         existRemTags.filterNot(alreadyExisting contains _).filter { remTag =>
           remTag.proposesTags.head.uuid == tagReq.id && (tagReq.classifications.isEmpty || !remTag.proposesClassifys.isEmpty && remTag.proposesClassifys.map(_.uuid).toSet.subsetOf(tagReq.classifications.map(_.id).toSet))
         }.foreach(_.status = CONFLICT)
