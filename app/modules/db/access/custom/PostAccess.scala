@@ -22,17 +22,29 @@ case class PostAccess() extends NodeAccessDefault[Post] {
 
   val factory = Post
 
-  private def handleInitialChange(contribution: ChangeRequest, user: User, karmaProps: KarmaProperties) = {
-    if (contribution.canApply(karmaProps.authorBoost)) {
-      contribution.approvalSum = karmaProps.authorBoost
-      contribution.status = APPROVED
-      Some(Votes.merge(user, contribution, weight = karmaProps.authorBoost))
-    } else if(contribution.canApply(karmaProps.approvalSum)) {
-      contribution.status = INSTANT
-      None
+  private def handleInitialChange(discourse: Discourse, request: ChangeRequest, user: User, karmaProps: KarmaProperties) = {
+    if (request.canApply(karmaProps.authorBoost)) {
+      request.approvalSum = karmaProps.authorBoost
+      request.status = APPROVED
+      discourse.add(Votes.merge(user, request, weight = karmaProps.authorBoost))
+    } else if(request.canApply(karmaProps.approvalSum)) {
+      request.status = INSTANT
     } else {
-      contribution.approvalSum = karmaProps.approvalSum
-      Some(Votes.merge(user, contribution, weight = karmaProps.approvalSum))
+      request.approvalSum = karmaProps.approvalSum
+      discourse.add(Votes.merge(user, request, weight = karmaProps.approvalSum))
+    }
+  }
+
+  private def handleExistingChange(discourse: Discourse, request: ChangeRequest, user: User, karmaProps: KarmaProperties) = {
+    // we only get the vote of the current user, so rev_votes is only
+    // defined iff the user already voted on this request
+    if (request.rev_votes.headOption.isEmpty) {
+      request.approvalSum += karmaProps.approvalSum
+      discourse.add(request.relationsAs(ProposesTag): _*)
+      discourse.add(request.relationsAs(ProposesClassify): _*)
+      discourse.add(request, Votes.merge(user, request, weight = karmaProps.approvalSum))
+      if (request.canApply)
+        request.status = APPROVED
     }
   }
 
@@ -49,16 +61,7 @@ case class PostAccess() extends NodeAccessDefault[Post] {
         sameTag && tagReq.classifications.map(_.id).toSet == addTag.proposesClassifys.map(_.uuid).toSet
       }
 
-      alreadyExisting.foreach { exist =>
-        // we only get the vote of the current user, so rev_votes is only
-        // defined iff the user already voted on this request
-        if (exist.rev_votes.headOption.isEmpty) {
-          exist.approvalSum += karmaProps.approvalSum
-          discourse.add(Votes.merge(user, exist, weight = karmaProps.approvalSum))
-          if (exist.canApply)
-            exist.status = APPROVED
-        }
-      }
+      alreadyExisting.foreach(handleExistingChange(discourse, _, user, karmaProps))
 
       val crOpt = alreadyExisting orElse PostHelper.tagConnectRequestToScope(tagReq).map { tag =>
         // we create a new change request as there is no existing one here
@@ -67,13 +70,16 @@ case class PostAccess() extends NodeAccessDefault[Post] {
         tagReq.classifications.map(c => Classification.matchesOnUuid(c.id)).foreach{classification =>
           discourse.add(ProposesClassify.merge(addTags, classification))
         }
-        handleInitialChange(addTags, user, karmaProps).foreach(discourse.add(_))
+        handleInitialChange(discourse, addTags, user, karmaProps)
         addTags
       }
 
       crOpt.foreach { cr =>
         if (cr.status == INSTANT || cr.status == APPROVED) {
-          RequestHelper.conflictingAddTags(cr, existAddTags).foreach(_.status = CONFLICT)
+          RequestHelper.conflictingAddTags(cr, existAddTags).foreach { req =>
+            req.status = CONFLICT
+            discourse.add(req)
+          }
 
           val tags = Tags.merge(cr.proposesTags.head, post)
           discourse.add(tags)
@@ -91,14 +97,7 @@ case class PostAccess() extends NodeAccessDefault[Post] {
         remTag.proposesTags.head.uuid == tagReq.id && tagReq.classifications.map(_.id).toSet == remTag.proposesClassifys.map(_.uuid).toSet
       }
 
-      alreadyExisting.foreach { exist =>
-        if (exist.rev_votes.headOption.isEmpty) {
-          exist.approvalSum += karmaProps.approvalSum
-          discourse.add(Votes.merge(user, exist, weight = karmaProps.approvalSum))
-          if (exist.canApply)
-            exist.status = APPROVED
-        }
-      }
+      alreadyExisting.foreach(handleExistingChange(discourse, _, user, karmaProps))
 
       val cr = alreadyExisting getOrElse {
         val remTags = RemoveTags.create(user, post, applyThreshold = karmaProps.applyThreshold)
@@ -107,12 +106,15 @@ case class PostAccess() extends NodeAccessDefault[Post] {
         tagReq.classifications.map(c => Classification.matchesOnUuid(c.id)).foreach{ classification =>
           discourse.add(ProposesClassify.merge(remTags, classification))
         }
-        handleInitialChange(remTags, user, karmaProps).foreach(discourse.add(_))
+        handleInitialChange(discourse, remTags, user, karmaProps)
         remTags
       }
 
       if (cr.status == INSTANT || cr.status == APPROVED) {
-        RequestHelper.conflictingRemoveTags(cr, existRemTags).foreach(_.status = CONFLICT)
+        RequestHelper.conflictingRemoveTags(cr, existRemTags).foreach { req =>
+          req.status = CONFLICT
+          discourse.add(req)
+        }
 
         val tags = Tags.matches(cr.proposesTags.head, post)
         if (cr.proposesClassifys.isEmpty) {
@@ -148,9 +150,6 @@ case class PostAccess() extends NodeAccessDefault[Post] {
 
     val params = votesDef.parameterMap ++ userDef.parameterMap ++ postDef.parameterMap ++ tagsDef.parameterMap
     val existing = Discourse(tx.queryGraph(query, params))
-    //TODO should only add conflicting change requests + the one we are voting for including its tags
-    discourse.add(existing.nodes: _*)
-    discourse.add(existing.relations: _*)
 
     handleAddTags(discourse, existing.addTags, user, post, request, karmaProps)
     handleRemoveTags(discourse, existing.removeTags, user, post, request, karmaProps)
@@ -257,7 +256,7 @@ case class PostAccess() extends NodeAccessDefault[Post] {
         }.getOrElse{
           val deleted = Deleted.create(user, post, applyThreshold = karmaProps.applyThreshold)
           discourse.add(deleted)
-          handleInitialChange(deleted, user, karmaProps).foreach(discourse.add(_))
+          handleInitialChange(discourse, deleted, user, karmaProps)
           if (deleted.status == INSTANT || deleted.status == APPROVED) {
             post.hide()
           }
@@ -307,7 +306,7 @@ case class PostAccess() extends NodeAccessDefault[Post] {
           if (request.title.isDefined && request.title.get != node.title || request.description.isDefined && request.description != node.description) {
             val contribution = Updated.create(user, node, oldTitle = node.title, newTitle = request.title.getOrElse(node.title), oldDescription = node.description, newDescription = request.description.orElse(node.description), applyThreshold = karmaProps.applyThreshold)
             discourse.add(contribution)
-            handleInitialChange(contribution, user, karmaProps).foreach(discourse.add(_))
+            handleInitialChange(discourse, contribution, user, karmaProps)
             if (contribution.status == INSTANT || contribution.status == APPROVED) {
               request.title.foreach(node.title = _)
               request.description.foreach(d => node.description = if (d.trim.isEmpty) None else Some(d))

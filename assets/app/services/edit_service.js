@@ -147,7 +147,7 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
                         humane.success("Updated node");
                     else if (hasRequests)
                         humane.success("Created change request");
-                    else
+                    else if (!model.id)
                         humane.success("Added new node");
 
                     let keeped;
