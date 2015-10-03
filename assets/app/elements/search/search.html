@@ -10,8 +10,9 @@
                 <label class="col-md-8">Only start posts</label>
                 <span switch ng-model="vm.search.searchStartPost" ng-change="vm.search.triggerSearch()"></span>
             </div>
-            <div edit-taglist placeholder="in all Contexts" tags="vm.search.tagsAll" class="row edit_tags" always-show="true" existing-only="true" on-change="vm.search.triggerSearch()"></div>
-            <div edit-taglist placeholder="in any Context" tags="vm.search.tagsAny" class="row edit_tags" always-show="true" existing-only="true" on-change="vm.search.triggerSearch()"></div>
+            <div edit-taglist placeholder="All Contexts" tags="vm.search.tagsAll" class="row edit_tags" existing-only="true" on-change="vm.search.triggerSearch()"></div>
+            <div edit-taglist placeholder="Any Context" tags="vm.search.tagsAny" class="row edit_tags" existing-only="true" on-change="vm.search.triggerSearch()"></div>
+            <div edit-taglist placeholder="Without Contexts" tags="vm.search.tagsWithout" class="row edit_tags" existing-only="true" on-change="vm.search.triggerSearch()"></div>
             <div id="search_options_bottom">
                 <div ng-show="vm.infinite.noMore && !vm.infinite.loading" class="row">
                     <label class="col-md-4">#Results</label>

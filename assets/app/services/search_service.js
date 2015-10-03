@@ -12,6 +12,7 @@ function SearchService(Search, DiscourseNode) {
         searchStartPost: false,
         tagsAll: [],
         tagsAny: [],
+        tagsWithout: [],
         page: 0,
         size: defaultSize,
 
@@ -68,6 +69,7 @@ function SearchService(Search, DiscourseNode) {
             startPost: this.searchStartPost,
             tagsAll: this.tagsAll.map(t => t.id),
             tagsAny: this.tagsAny.map(t => t.id),
+            tagsWithout: this.tagsWithout.map(t => t.id),
         };
 
         if (this.unlimited) {

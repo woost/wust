@@ -16,7 +16,7 @@ import collection.mutable
 import scala.util.Try
 
 object Search extends Controller {
-def index(labelOpt: Option[String], termOpt: Option[String], searchDescriptionsOpt: Option[Boolean], startPostOpt: Option[Boolean], tagsAll: List[String], tagsAny: List[String], pageOpt: Option[Int], sizeOpt: Option[Int]) = Action {
+def index(labelOpt: Option[String], termOpt: Option[String], searchDescriptionsOpt: Option[Boolean], startPostOpt: Option[Boolean], tagsAll: List[String], tagsAny: List[String], tagsWithout: List[String], pageOpt: Option[Int], sizeOpt: Option[Int]) = Action {
 
     val searchDescriptions = searchDescriptionsOpt.getOrElse(false)
     val page = pageOpt.getOrElse(0)
@@ -90,6 +90,26 @@ def index(labelOpt: Option[String], termOpt: Option[String], searchDescriptionsO
         postMatches += s"""match ${ relationDef.toQuery(false, true) }"""
 
         params += ("tagsAnyUuids" -> tagsAny)
+        params ++= relationDef.parameterMap
+        params ++= tagDef.parameterMap
+    }
+
+    if(tagsWithout.nonEmpty) {
+      //TODO: classification need to be matched on the outgoing connects relation of the post
+      val inheritTagDef = FactoryNodeDef(Scope)
+      val tagDef = FactoryNodeDef(Scope)
+      val tagDefinition = s"${ inheritTagDef.toQuery }-[:`${ Inherits.relationType }`*0..10]->${ tagDef.toQuery }"
+      preQueries +=
+        s"""
+        match ${ tagDefinition }
+        where (${ tagDef.name }.uuid in {tagsWithoutUuids})
+        with distinct ${ inheritTagDef.name }
+        """
+
+        val relationDef = RelationDef(inheritTagDef, SchemaTags, nodeDef)
+        postConditions += s"""not(${ relationDef.toQuery(false, true) })"""
+
+        params += ("tagsWithoutUuids" -> tagsWithout)
         params ++= relationDef.parameterMap
         params ++= tagDef.parameterMap
     }
