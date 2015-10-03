@@ -11,6 +11,12 @@
             border: 1px solid $post_default_border_color;
             border-radius: 4px;
             padding: 15px;
+            .new_post_directive > *:not(:first-child) {
+                margin-top: 10px;
+            }
+            .new_post_directive > *:not(:first-child) {
+                margin-top: 10px;
+            }
             .description {
                 min-height: 200px;
                 .edit_markdown {
