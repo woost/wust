@@ -10,6 +10,8 @@ import play.api.mvc.{Action, Controller}
 import renesca.Query
 import renesca.graph.Label
 import renesca.parameter.implicits._
+import renesca.parameter._
+import collection.mutable
 
 import scala.util.Try
 
@@ -50,87 +52,78 @@ object Search extends Controller {
     }.getOrElse("")
     val returnStatement = s"${ nodeDef.name } order by ${ nodeDef.name }.timestamp desc $returnPostfix"
 
-    // When Neo4j throws an error because the regexp is incorrect, return an empty Discourse instead: Try(...).getOrElse(Discourse.empty)
-    val discourse = Try(
+    val discourse = {
+      val preQueries = mutable.ArrayBuffer.empty[String]
+      val postMatches = mutable.ArrayBuffer.empty[String]
+      val postConditions = mutable.ArrayBuffer.empty[String]
+      var params:ParameterMap = Map.empty[PropertyKey,ParameterValue]
 
+      params ++= nodeDef.parameterMap
 
-    {
-      val (query, params) = if(tags.isEmpty) {
-        val startPostMatch = if(startPost) {
-          s"match ${ nodeDef.toQuery }<-[:`${ SchemaTags.endRelationType }`]-(:`${ SchemaTags.label }`)<-[:`${ SchemaTags.startRelationType }`]-(:`${ Scope.label }`)"
-        } else {
-          ""
-        }
+      if(titleRegex.isDefined)
+        params += ("term" -> titleRegex.get)
 
-        val condition = if(termMatcher.isEmpty) "" else s"where ${ termMatcher }"
-        val query = s"""
-          match ${ nodeDef.toQuery }
-          $startPostMatch
-          $condition
-          return $returnStatement
-          """
-        val params = titleRegex.map(t => Map("term" -> t)).getOrElse(Map.empty) ++ nodeDef.parameterMap
-        (query, params)
-      } else {
+      if(termMatcher.nonEmpty)
+        postConditions +=  termMatcher
 
-        val condition = if(termMatcher.isEmpty) "" else s"where ${ termMatcher }"
+      if(startPost) {
+        postMatches += s"match ${ nodeDef.toQuery }<-[:`${ SchemaTags.endRelationType }`]-(:`${ SchemaTags.label }`)<-[:`${ SchemaTags.startRelationType }`]-(:`${ Scope.label }`)"
+      }
 
-
+      if(tags.nonEmpty){
         if(tagOr) {
-          println("tagor")
           //TODO: classification need to be matched on the outgoing connects relation of the post
           val inheritTagDef = FactoryNodeDef(Scope)
           val tagDef = FactoryNodeDef(Scope)
           val tagDefinition = s"${ inheritTagDef.toQuery }-[:`${ Inherits.relationType }`*0..10]->${ tagDef.toQuery }"
-          val inheritTagQuery =
+          preQueries +=
             s"""
             match ${ tagDefinition }
             where (${ tagDef.name }.uuid in {tagUuids})
             with distinct ${ inheritTagDef.name }
             """
 
-          val relationDef = RelationDef(inheritTagDef, SchemaTags, nodeDef)
-          val tagOrMatch = s"""match ${ relationDef.toQuery(false, true) }"""
+            val relationDef = RelationDef(inheritTagDef, SchemaTags, nodeDef)
+            postMatches += s"""match ${ relationDef.toQuery(false, true) }"""
 
+            params += ("tagUuids" -> tags)
+            params ++= relationDef.parameterMap
+            params ++= tagDef.parameterMap
+          } else {
+            //TODO: classification need to be matched on the outgoing connects relation of the post
+            val tagDefs = tags.map(uuid => FactoryUuidNodeDef(Scope, uuid))
+            val inheritTagDefs = tags.map(_ => FactoryNodeDef(Scope))
+            val tagDefinitions = (tagDefs zip inheritTagDefs).map { case (t, i) => s"${ i.toQuery }-[:`${ Inherits.relationType }`*0..10]->${ t.toQuery }" }.mkString(",")
+            preQueries += s"""
+            match ${ tagDefinitions }
+            with distinct ${ inheritTagDefs.map(_.name).mkString(",") }
+            """
 
-          val query =
-            s"""
-          $inheritTagQuery
-          match ${ nodeDef.toQuery }
-          $tagOrMatch
-          $condition
-          return $returnStatement"""
-          val params = titleRegex.map(t => Map("term" -> t)).getOrElse(Map.empty) ++ Map("tagUuids" -> tags) ++ relationDef.parameterMap ++ tagDef.parameterMap ++ nodeDef.parameterMap
-          (query, params)
-        } else {
-          //TODO: classification need to be matched on the outgoing connects relation of the post
-          val tagDefs = tags.map(uuid => FactoryUuidNodeDef(Scope, uuid))
-          val inheritTagDefs = tags.map(_ => FactoryNodeDef(Scope))
-          val tagDefinitions = (tagDefs zip inheritTagDefs).map { case (t, i) => s"${ i.toQuery }-[:`${ Inherits.relationType }`*0..10]->${ t.toQuery }" }.mkString(",")
-          val separateInheritTagQuery = s"""
-          match ${ tagDefinitions }
-          with distinct ${ inheritTagDefs.map(_.name).mkString(",") }
-          """
-          val relationDefs = inheritTagDefs.map(tagDef => RelationDef(tagDef, SchemaTags, nodeDef))
-          val tagAndMatch = s"""match ${ relationDefs.map(_.toQuery(false)).mkString(",") }"""
+            val relationDefs = inheritTagDefs.map(tagDef => RelationDef(tagDef, SchemaTags, nodeDef))
+            postMatches += s"""match ${ relationDefs.map(_.toQuery(false)).mkString(",") }"""
 
-          val query = s"""
-          $separateInheritTagQuery
-
-          match ${ nodeDef.toQuery }
-          $tagAndMatch
-          $condition
-          return $returnStatement
-          """
-
-          val params = titleRegex.map(t => Map("term" -> t)).getOrElse(Map.empty) ++ Map("tagUuids" -> tags) ++ relationDefs.flatMap(_.parameterMap) ++ tagDefs.flatMap(_.parameterMap) ++ nodeDef.parameterMap
-          (query, params)
-        }
+            params += ("tagUuids" -> tags)
+            params ++= relationDefs.flatMap(_.parameterMap)
+            params ++= tagDefs.flatMap(_.parameterMap)
+          }
       }
+
+      val query = s"""
+      ${preQueries.mkString(" ")}
+      match ${ nodeDef.toQuery }
+      ${postMatches.mkString(" ")}
+      ${if(postConditions.nonEmpty) "where "+ postConditions.mkString(" and ") else ""}
+      return $returnStatement
+      """
+
+      // println("-"*30)
       // println(query)
       // println(params)
-      Discourse(db.queryGraph(query, params))
-    }).getOrElse(Discourse.empty)
+      // println("-"*30)
+      // Discourse(db.queryGraph(query, params))
+      // When Neo4j throws an error because the regexp is incorrect, return an empty Discourse instead
+      Try(Discourse(db.queryGraph(query, params))).getOrElse(Discourse.empty)
+    }
 
     Ok(Json.toJson(
       // we only add attached tags to the result when searching for posts
@@ -138,6 +131,6 @@ object Search extends Controller {
         TaggedTaggable.shapeResponse(discourse.posts)
       else
         discourse.exposedNodes
-    ))
+      ))
   }
 }
