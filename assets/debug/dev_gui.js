@@ -27,7 +27,7 @@ angular.module("wust").run(function(Auth) {
     }
 
     function randomString(length) {
-        return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, length)
+        return Math.random().toString(36).replace(/[^a-z]+/g, "").substr(0, length);
     }
 
     function loginLink(name, link) {
