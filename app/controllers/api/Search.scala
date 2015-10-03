@@ -103,8 +103,6 @@ def index(labelOpt: Option[String], termOpt: Option[String], searchDescriptionsO
         postConditions += s"""not(${ relationDef.toQuery(false, true) })"""
 
         params += ("tagsWithoutUuids" -> tagsWithout)
-        params ++= relationDef.parameterMap
-        params ++= tagDef.parameterMap
     }
 
     val returnPostfix = sizeOpt.map { limit =>
