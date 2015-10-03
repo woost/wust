@@ -18,8 +18,8 @@ object Database {
   )
 
   //TODO: more methods with optional tx
-  private def discourseGraphWithReturn(returns: String, definitions: GraphDefinition*)(implicit ctx: QueryContext): Discourse = discourseGraphWithReturn(db, returns, definitions: _*)
-  private def discourseGraphWithReturn(tx: QueryHandler, returns: String, definitions: GraphDefinition*)(implicit ctx: QueryContext): Discourse = {
+  private def discourseGraphWithReturn(returns: String, definitions: NamedGraphDefinition*)(implicit ctx: QueryContext): Discourse = discourseGraphWithReturn(db, returns, definitions: _*)
+  private def discourseGraphWithReturn(tx: QueryHandler, returns: String, definitions: NamedGraphDefinition*)(implicit ctx: QueryContext): Discourse = {
     if(definitions.isEmpty || returns.isEmpty)
       return Discourse.empty
 
@@ -28,13 +28,13 @@ object Database {
     Discourse(tx.queryGraph(Query(query, ctx.params)))
   }
 
-  def discourseGraph(definitions: GraphDefinition*)(implicit ctx: QueryContext): Discourse = discourseGraph(db, definitions: _*)
-  def discourseGraph(tx: QueryHandler, definitions: GraphDefinition*)(implicit ctx: QueryContext): Discourse = {
+  def discourseGraph(definitions: NamedGraphDefinition*)(implicit ctx: QueryContext): Discourse = discourseGraph(db, definitions: _*)
+  def discourseGraph(tx: QueryHandler, definitions: NamedGraphDefinition*)(implicit ctx: QueryContext): Discourse = {
     discourseGraphWithReturn(tx, "*", definitions: _*)
   }
 
-  def itemDiscourseGraph(definitions: GraphDefinition*)(implicit ctx: QueryContext): Discourse = itemDiscourseGraph(db, definitions: _*)
-  def itemDiscourseGraph[NODE <: Node](tx: QueryHandler, definitions: GraphDefinition*)(implicit ctx: QueryContext): Discourse = {
+  def itemDiscourseGraph(definitions: NamedGraphDefinition*)(implicit ctx: QueryContext): Discourse = itemDiscourseGraph(db, definitions: _*)
+  def itemDiscourseGraph[NODE <: Node](tx: QueryHandler, definitions: NamedGraphDefinition*)(implicit ctx: QueryContext): Discourse = {
     val returns = definitions.map(_.name).mkString(",")
     discourseGraphWithReturn(tx, returns, definitions: _*)
   }

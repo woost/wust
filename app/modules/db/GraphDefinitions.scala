@@ -32,10 +32,13 @@ class QueryContext {
 sealed trait GraphDefinition {
   protected def ctx: QueryContext
   def toPattern: String
+}
+
+sealed trait NamedGraphDefinition extends GraphDefinition {
   final val name = ctx.newVariable
 }
 
-sealed trait NodeDef[+NODE <: Node] extends GraphDefinition
+sealed trait NodeDef[+NODE <: Node] extends NamedGraphDefinition
 sealed trait FixedNodeDef[+NODE <: Node] extends NodeDef[NODE]
 
 sealed trait UuidNodeDef[+NODE <: UuidNode] extends FixedNodeDef[NODE] {
@@ -98,14 +101,12 @@ RELATION <: AbstractRelation[START, END],
 END <: Node,
 +STARTDEF <: NodeDef[START],
 +ENDDEF <: NodeDef[END]
-] extends GraphDefinition {
+] {
   val startDefinition: STARTDEF
   val endDefinition: ENDDEF
 
   val startName = startDefinition.name
   val endName = endDefinition.name
-  val startRelationName = ctx.newVariable
-  val endRelationName = ctx.newVariable
 
   def relationMatcher: String
 
@@ -140,14 +141,36 @@ RELATION <: AbstractRelation[START, END],
 END <: Node,
 +STARTDEF <: NodeDef[START],
 +ENDDEF <: NodeDef[END]
-] extends RelationDefBase[START,RELATION,END,STARTDEF,ENDDEF] {
+] extends RelationDefBase[START,RELATION,END,STARTDEF,ENDDEF] with NamedGraphDefinition {
+
   val factory: AbstractRelationFactory[START, RELATION, END]
+
+  //TODO: should have own class for hyper/normal relation and object to create both through same factory
+  val startRelationName = ctx.newVariable
+  val endRelationName = ctx.newVariable
 
   protected def relationPropertyMatcher: String
 
   def relationMatcher = factory match {
     case r: RelationFactory[_, RELATION, _]            => s"[$name :`${ r.relationType }`]"
     case r: HyperRelationFactory[_, _, RELATION, _, _] => s"[$startRelationName:`${ r.startRelationType }`]->($name ${ r.labels.map(l => s":`$l`").mkString } ${ relationPropertyMatcher })-[$endRelationName:`${ r.endRelationType }`]"
+  }
+}
+
+sealed trait SingleAnonRelationDefBase[
+START <: Node,
+RELATION <: AbstractRelation[START, END],
+END <: Node,
++STARTDEF <: NodeDef[START],
++ENDDEF <: NodeDef[END]
+] extends RelationDefBase[START,RELATION,END,STARTDEF,ENDDEF] {
+  val factory: AbstractRelationFactory[START, RELATION, END]
+
+  protected def relationPropertyMatcher: String
+
+  def relationMatcher = factory match {
+    case r: RelationFactory[_, RELATION, _]            => s"[:`${ r.relationType }`]"
+    case r: HyperRelationFactory[_, _, RELATION, _, _] => s"[:`${ r.startRelationType }`]->(${ r.labels.map(l => s":`$l`").mkString } ${ relationPropertyMatcher })-[:`${ r.endRelationType }`]"
   }
 }
 
@@ -179,6 +202,20 @@ ENDDEF <: NodeDef[END]
   startDefinition: STARTDEF,
   factory: AbstractRelationFactory[START, RELATION, END],
   endDefinition: ENDDEF)(implicit val ctx: QueryContext) extends SingleRelationDefBase[START, RELATION, END, STARTDEF, ENDDEF] {
+
+  val relationPropertyMatcher = ""
+}
+
+case class AnonRelationDef[
+START <: Node,
+RELATION <: AbstractRelation[START, END],
+END <: Node,
+STARTDEF <: NodeDef[START],
+ENDDEF <: NodeDef[END]
+](
+  startDefinition: STARTDEF,
+  factory: AbstractRelationFactory[START, RELATION, END],
+  endDefinition: ENDDEF)(implicit val ctx: QueryContext) extends SingleAnonRelationDefBase[START, RELATION, END, STARTDEF, ENDDEF] {
 
   val relationPropertyMatcher = ""
 }
