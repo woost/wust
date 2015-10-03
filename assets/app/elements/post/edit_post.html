@@ -8,6 +8,6 @@
     <div validity-info="vm.node" property="tags"></div>
     <div ng-switch="vm.previewEnabled" class="description">
         <div ng-switch-when="true" markdown="vm.node.description"></div>
-        <div ng-switch-default edit-markdown="vm.node.description" on-change="vm.node.onChange()"></div>
+        <div ng-switch-default edit-post-description node="vm.node"></div>
     </div>
 </div>
