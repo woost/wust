@@ -34,12 +34,12 @@ trait VotesReferenceAccess[T <: Reference] extends EndRelationAccessDefault[User
       val createdDef = RelationDef(userDef, SchemaCreated, postDefinition(referenceDef))
 
       val query = s"""
-      match ${referenceDef.toQuery}
+      match ${referenceDef.toPattern}
       set ${referenceDef.name}._locked = true
       with ${referenceDef.startName},${referenceDef.startRelationName},${referenceDef.endName},${referenceDef.endRelationName},${referenceDef.name}
-      match ${userDef.toQuery}
-      optional match ${votesDef.toQuery(false, false)}
-      optional match ${createdDef.toQuery(false, false)}
+      match ${userDef.toPattern}
+      optional match ${votesDef.toPattern(false, false)}
+      optional match ${createdDef.toPattern(false, false)}
       return *
       """
 

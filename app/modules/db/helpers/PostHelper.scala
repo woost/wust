@@ -49,10 +49,10 @@ object PostHelper {
       val userDef = ConcreteNodeDef(user)
       val viewedDef = RelationDef(userDef, Viewed, postDef)
       val query = s"""
-      match ${postDef.toQuery}
+      match ${postDef.toPattern}
       set ${postDef.name}._locked = true
       with ${postDef.name}
-      optional match ${viewedDef.toQuery(true, false)}
+      optional match ${viewedDef.toPattern(true, false)}
       return *
       """
 

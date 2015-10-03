@@ -36,8 +36,8 @@ case class UserAccess() extends NodeReadBase[User] {
       ("sum", s"where ${scopeDef.name}.uuid in {scopeUuids}", Map("scopeUuids" -> context.scopes))
 
     val query = s"""
-    match ${userDef.toQuery}
-    optional match ${ hasKarmaDef.toQuery(false, true) }
+    match ${userDef.toPattern}
+    optional match ${ hasKarmaDef.toPattern(false, true) }
     $scopeCondition
     with ${userDef.name}, ${hasKarmaDef.name}, ${aggregateOp}(${hasKarmaDef.name}.karma) as karmaAggregate order by karmaAggregate DESC
     return ${userDef.name}, ${hasKarmaDef.name}
@@ -84,11 +84,11 @@ case class UserContributions() extends RelationAccessDefault[User, Post] {
     val classifiesDef = RelationDef(FactoryNodeDef(Classification), Classifies, connectsDef)
 
     val query = s"""
-    match ${ userDef.toQuery }-[r1]->(hyper:`${ SchemaCreated.label }`)-[r2]->${ postDef.toQuery }
+    match ${ userDef.toPattern }-[r1]->(hyper:`${ SchemaCreated.label }`)-[r2]->${ postDef.toPattern }
     with distinct ${ postDef.name } order by ${ postDef.name }.timestamp skip ${ skip } limit ${ limit }
-    optional match ${ tagsDef.toQuery(true, false) }
-    optional match ${ tagClassifiesDef.toQuery(true, false) }
-    optional match ${ connDef.toQuery(false, true) }, ${ classifiesDef.toQuery(true, false) }
+    optional match ${ tagsDef.toPattern(true, false) }
+    optional match ${ tagClassifiesDef.toPattern(true, false) }
+    optional match ${ connDef.toPattern(false, true) }, ${ classifiesDef.toPattern(true, false) }
     return *
     """
 
@@ -107,7 +107,7 @@ case class UserHasKarmaScopes() extends StartRelationAccessDefault[User, HasKarm
     val userDef = FactoryUuidNodeDef(User, param.baseUuid)
     val karmaDef = RelationDef(userDef, HasKarma, FactoryNodeDef(Scope))
 
-    val query = s"match ${ karmaDef.toQuery } where ${karmaDef.name}.karma <> 0 return *"
+    val query = s"match ${ karmaDef.toPattern } where ${karmaDef.name}.karma <> 0 return *"
     val discourse = Discourse(db.queryGraph(query, ctx.params))
 
     Ok(JsArray(discourse.scopes.map(karmaTagWriter)))
@@ -134,10 +134,10 @@ case class UserHasKarmaLog() extends StartRelationAccessDefault[User, KarmaLog, 
     val classifiesDef = RelationDef(FactoryNodeDef(Classification), Classifies, connectsDef)
 
     val query = s"""
-    match ${ karmaLogDef.toQuery }, ${ logOnScopeDef.toQuery(false, true) }
-    optional match ${ tagsDef.toQuery(true, false) }
-    optional match ${ tagClassifiesDef.toQuery(true, false) }
-    optional match ${ connDef.toQuery(false, true) }, ${ classifiesDef.toQuery(true, false) }
+    match ${ karmaLogDef.toPattern }, ${ logOnScopeDef.toPattern(false, true) }
+    optional match ${ tagsDef.toPattern(true, false) }
+    optional match ${ tagClassifiesDef.toPattern(true, false) }
+    optional match ${ connDef.toPattern(false, true) }, ${ classifiesDef.toPattern(true, false) }
     return * order by ${karmaLogDef.name}.timestamp
     """
 
@@ -167,10 +167,10 @@ case class UserMarks() extends StartRelationWriteBase[User, Marks, Post] with St
     val classifiesDef = RelationDef(FactoryNodeDef(Classification), Classifies, connectsDef)
 
     val query = s"""
-    match ${ marksDef.toQuery }
-    optional match ${ tagsDef.toQuery(true, false) }
-    optional match ${ tagClassifiesDef.toQuery(true, false) }
-    optional match ${ connDef.toQuery(false, true) }, ${ classifiesDef.toQuery(true, false) }
+    match ${ marksDef.toPattern }
+    optional match ${ tagsDef.toPattern(true, false) }
+    optional match ${ tagClassifiesDef.toPattern(true, false) }
+    optional match ${ connDef.toPattern(false, true) }, ${ classifiesDef.toPattern(true, false) }
     return *
     """
 
@@ -191,7 +191,7 @@ case class UserHasHistory() extends StartRelationAccessDefault[User, Viewed, Pos
       val postDef = FactoryNodeDef(Post)
       val viewedDef = RelationDef(userDef, Viewed, postDef)
 
-      val query = s"match ${ viewedDef.toQuery } return ${ postDef.name } order by ${ viewedDef.name }.timestamp desc limit 8"
+      val query = s"match ${ viewedDef.toPattern } return ${ postDef.name } order by ${ viewedDef.name }.timestamp desc limit 8"
       val discourse = Discourse(db.queryGraph(query, ctx.params))
 
       Ok(Json.toJson(TaggedTaggable.shapeResponse(discourse.posts)))

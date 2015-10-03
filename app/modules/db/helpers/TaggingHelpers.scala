@@ -28,10 +28,10 @@ object TaggedTaggable {
       val classifiesDef = RelationDef(FactoryNodeDef(Classification), Classifies, connectsDef)
 
       val query = s"""
-      match ${ nodeDef.toQuery } where ${ nodeDef.name }.uuid in {nodeUuids}
-      optional match ${ tagsDef.toQuery(true, false) }
-      optional match ${ tagClassifiesDef.toQuery(true, false) }
-      optional match ${ connDef.toQuery(false, true) }, ${ classifiesDef.toQuery(true, false) }
+      match ${ nodeDef.toPattern } where ${ nodeDef.name }.uuid in {nodeUuids}
+      optional match ${ tagsDef.toPattern(true, false) }
+      optional match ${ tagClassifiesDef.toPattern(true, false) }
+      optional match ${ connDef.toPattern(false, true) }, ${ classifiesDef.toPattern(true, false) }
       return *
       """
 
@@ -59,7 +59,7 @@ object ClassifiedReferences {
       val relDef = RelationDef(classDef, Classifies, nodeDef)
 
       val query = s"""
-      match ${ relDef.toQuery }
+      match ${ relDef.toPattern }
       where ${ nodeDef.name }.uuid in {nodeUuids}
       return *
       """

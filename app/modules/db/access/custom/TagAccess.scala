@@ -28,9 +28,9 @@ case class TagAccess() extends NodeReadBase[Scope] {
     val implInherit = RelationDef(node, Inherits, impl)
 
     val query = s"""
-    match ${ node.toQuery }
-    optional match ${ baseInherit.toQuery(true, false) }
-    optional match ${ implInherit.toQuery(false, true) }
+    match ${ node.toPattern }
+    optional match ${ baseInherit.toPattern(true, false) }
+    optional match ${ implInherit.toPattern(false, true) }
     return *
     """
 

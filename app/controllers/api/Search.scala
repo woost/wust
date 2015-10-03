@@ -52,28 +52,28 @@ def index(labelOpt: Option[String], termOpt: Option[String], searchDescriptionsO
 
     if(startPost && tagsAll.isEmpty && tagsAny.isEmpty) {
       val tagsDef = RelationDef(FactoryNodeDef(Scope), SchemaTags, nodeDef)
-      postMatches += s"match ${ tagsDef.toQuery }"
+      postMatches += s"match ${ tagsDef.toPattern }"
     }
 
     if(tagsAll.nonEmpty) {
       //TODO: classification need to be matched on the outgoing connects relation of the post
       val tagDefs = tagsAll.map(uuid => FactoryUuidNodeDef(Scope, uuid))
       val inheritTagDefs = tagsAll.map(_ => FactoryNodeDef(Scope))
-      val tagDefinitions = (tagDefs zip inheritTagDefs).map { case (t, i) => s"${ i.toQuery }-[:`${ Inherits.relationType }`*0..10]->${ t.toQuery }" }.mkString(",")
+      val tagDefinitions = (tagDefs zip inheritTagDefs).map { case (t, i) => s"${ i.toPattern }-[:`${ Inherits.relationType }`*0..10]->${ t.toPattern }" }.mkString(",")
       preQueries += s"""
       match ${ tagDefinitions }
       with distinct ${ inheritTagDefs.map(_.name).mkString(",") }
       """
 
       val relationDefs = inheritTagDefs.map(tagDef => RelationDef(tagDef, SchemaTags, nodeDef))
-      postMatches += s"""match ${ relationDefs.map(_.toQuery(false)).mkString(",") }"""
+      postMatches += s"""match ${ relationDefs.map(_.toPattern(false)).mkString(",") }"""
     }
 
     if(tagsAny.nonEmpty) {
       //TODO: classification need to be matched on the outgoing connects relation of the post
       val inheritTagDef = FactoryNodeDef(Scope)
       val tagDef = FactoryNodeDef(Scope)
-      val tagDefinition = s"${ inheritTagDef.toQuery }-[:`${ Inherits.relationType }`*0..10]->${ tagDef.toQuery }"
+      val tagDefinition = s"${ inheritTagDef.toPattern }-[:`${ Inherits.relationType }`*0..10]->${ tagDef.toPattern }"
       preQueries +=
         s"""
         match ${ tagDefinition }
@@ -82,7 +82,7 @@ def index(labelOpt: Option[String], termOpt: Option[String], searchDescriptionsO
         """
 
         val relationDef = RelationDef(inheritTagDef, SchemaTags, nodeDef)
-        postMatches += s"""match ${ relationDef.toQuery(false, true) }"""
+        postMatches += s"""match ${ relationDef.toPattern(false, true) }"""
 
         params += ("tagsAnyUuids" -> tagsAny)
     }
@@ -91,7 +91,7 @@ def index(labelOpt: Option[String], termOpt: Option[String], searchDescriptionsO
       //TODO: classification need to be matched on the outgoing connects relation of the post
       val inheritTagDef = FactoryNodeDef(Scope)
       val tagDef = FactoryNodeDef(Scope)
-      val tagDefinition = s"${ inheritTagDef.toQuery }-[:`${ Inherits.relationType }`*0..10]->${ tagDef.toQuery }"
+      val tagDefinition = s"${ inheritTagDef.toPattern }-[:`${ Inherits.relationType }`*0..10]->${ tagDef.toPattern }"
       preQueries +=
         s"""
         match ${ tagDefinition }
@@ -100,7 +100,7 @@ def index(labelOpt: Option[String], termOpt: Option[String], searchDescriptionsO
         """
 
         val relationDef = RelationDef(inheritTagDef, SchemaTags, nodeDef)
-        postConditions += s"""not(${ relationDef.toQuery(false, true) })"""
+        postConditions += s"""not(${ relationDef.toPattern(false, true) })"""
 
         params += ("tagsWithoutUuids" -> tagsWithout)
     }
@@ -113,7 +113,7 @@ def index(labelOpt: Option[String], termOpt: Option[String], searchDescriptionsO
 
     val query = s"""
     ${preQueries.mkString("\n\n")}
-    match ${ nodeDef.toQuery }
+    match ${ nodeDef.toPattern }
     ${postMatches.mkString("\n")}
     ${if(postConditions.nonEmpty) "where "+ postConditions.mkString("\nand ") else ""}
     return $returnStatement

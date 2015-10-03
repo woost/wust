@@ -34,17 +34,17 @@ case class InstantChangeRequestAccess() extends NodeAccessDefault[ChangeRequest]
     //which request is responsible for the current deletion.
     //we currently would show edit and tag requests for already deleted posts.
     val query = s"""
-    match ${ crDef.toQuery }-[relation:`${ Updated.endRelationType }`|`${ Deleted.endRelationType }`|`${ AddTags.endRelationType }`|`${ RemoveTags.endRelationType }`]->${ postDef.toQuery }, ${ userDef.toQuery }
+    match ${ crDef.toPattern }-[relation:`${ Updated.endRelationType }`|`${ Deleted.endRelationType }`|`${ AddTags.endRelationType }`|`${ RemoveTags.endRelationType }`]->${ postDef.toPattern }, ${ userDef.toPattern }
     where (${ crDef.name }.status = ${ INSTANT } OR ${ crDef.name }.status = ${ PENDING })
     and not((${userDef.name})-[:`${Votes.relationType}`]->(${crDef.name}))
     and not((${userDef.name})-[:`${Skipped.relationType}`]->(${crDef.name}))
     and not((${userDef.name})-[:`${UpdatedStart.relationType}`|`${DeletedStart.relationType}`|`${AddTagsStart.relationType}`|`${RemoveTagsStart.relationType}`]->(${crDef.name}))
     with ${ postDef.name }, relation, ${ crDef.name } order by ${ crDef.name }.timestamp skip ${ skip } limit ${ limit }
-    optional match ${ crTagsDef.toQuery(false, true) }
-    optional match ${ crClassifiesDef.toQuery(false, true) }
-    optional match ${ tagsDef.toQuery(true, false) }
-    optional match ${ tagClassifiesDef.toQuery(true, false) }
-    optional match ${ connDef.toQuery(false, true) }, ${ classifiesDef.toQuery(true, false) }
+    optional match ${ crTagsDef.toPattern(false, true) }
+    optional match ${ crClassifiesDef.toPattern(false, true) }
+    optional match ${ tagsDef.toPattern(true, false) }
+    optional match ${ tagClassifiesDef.toPattern(true, false) }
+    optional match ${ connDef.toPattern(false, true) }, ${ classifiesDef.toPattern(true, false) }
     return *
     """
 
@@ -93,11 +93,11 @@ case class PostChangeRequestAccess() extends RelationAccessDefault[Post, ChangeR
       val proposesClassifyDef = RelationDef(updatedDef, ProposesClassify, FactoryNodeDef(Classification))
 
       val query = s"""
-      match ${ updatedDef.toQuery }-[:`${ Updated.endRelationType }`|`${ AddTags.endRelationType }`|`${ RemoveTags.endRelationType }`|`${ Deleted.endRelationType }`]->${ postDef.toQuery }
+      match ${ updatedDef.toPattern }-[:`${ Updated.endRelationType }`|`${ AddTags.endRelationType }`|`${ RemoveTags.endRelationType }`|`${ Deleted.endRelationType }`]->${ postDef.toPattern }
       where ${ updatedDef.name }.status = ${ PENDING }
-      optional match ${ votesDef.toQuery(true, false) }
-      optional match ${ proposesTagDef.toQuery(false, true) }
-      optional match ${ proposesClassifyDef.toQuery(false, true) }
+      optional match ${ votesDef.toPattern(true, false) }
+      optional match ${ proposesTagDef.toPattern(false, true) }
+      optional match ${ proposesClassifyDef.toPattern(false, true) }
       return *
       """
 

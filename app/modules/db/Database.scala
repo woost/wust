@@ -23,7 +23,7 @@ object Database {
     if(definitions.isEmpty || returns.isEmpty)
       return Discourse.empty
 
-    val matcher = definitions.map(_.toQuery).mkString(",")
+    val matcher = definitions.map(_.toPattern).mkString(",")
     val query = s"match $matcher return $returns"
     Discourse(tx.queryGraph(Query(query, ctx.params)))
   }
@@ -73,7 +73,7 @@ object Database {
 
   def startConnectedDiscourseGraph[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinitions: NodeAndFixedRelationDef[START, RELATION, END]*)(implicit ctx: QueryContext): Discourse = {
     val queries = relationDefinitions.map { relationDefinition =>
-      val query = s"match ${ relationDefinition.toQuery } return ${ relationDefinition.endDefinition.name }"
+      val query = s"match ${ relationDefinition.toPattern } return ${ relationDefinition.endDefinition.name }"
       Query(query, ctx.params)
     }
     Discourse(db.queryGraphs(queries: _*).fold(Graph.empty)(_ merge _))
@@ -87,7 +87,7 @@ object Database {
   //TODO: need ordering for limit search, otherwise we get duplicates
   def limitedStartConnectedDiscourseGraph[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](skip: Int, limit: Int, relationDefinitions: NodeAndFixedRelationDef[START, RELATION, END]*)(implicit ctx: QueryContext): Discourse = {
     val queries = relationDefinitions.map { relationDefinition =>
-      val query = s"match ${ relationDefinition.toQuery } return ${ relationDefinition.endDefinition.name } skip $skip limit $limit"
+      val query = s"match ${ relationDefinition.toPattern } return ${ relationDefinition.endDefinition.name } skip $skip limit $limit"
       Query(query, ctx.params)
     }
     Discourse(db.queryGraphs(queries: _*).fold(Graph.empty)(_ merge _))
@@ -100,7 +100,7 @@ object Database {
 
   def endConnectedDiscourseGraph[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinitions: FixedAndNodeRelationDef[START, RELATION, END]*)(implicit ctx: QueryContext): Discourse = {
     val queries = relationDefinitions.map { relationDefinition =>
-      val query = s"match ${ relationDefinition.toQuery } return ${ relationDefinition.startDefinition.name }"
+      val query = s"match ${ relationDefinition.toPattern } return ${ relationDefinition.startDefinition.name }"
       Query(query, ctx.params)
     }
     Discourse(db.queryGraphs(queries: _*).fold(Graph.empty)(_ merge _))
@@ -113,7 +113,7 @@ object Database {
 
   def limitedEndConnectedDiscourseGraph[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](skip: Int, limit: Int, relationDefinitions: FixedAndNodeRelationDef[START, RELATION, END]*)(implicit ctx: QueryContext): Discourse = {
     val queries = relationDefinitions.map { relationDefinition =>
-      val query = s"match ${ relationDefinition.toQuery } return ${ relationDefinition.startDefinition.name } skip $skip limit $limit"
+      val query = s"match ${ relationDefinition.toPattern } return ${ relationDefinition.startDefinition.name } skip $skip limit $limit"
       Query(query, ctx.params)
     }
     Discourse(db.queryGraphs(queries: _*).fold(Graph.empty)(_ merge _))
@@ -144,7 +144,7 @@ object Database {
     // query undirected connected component of posts with maximum depth
     // depth * 2 because hyperrelation depth
     val query = s"""
-match ${ focusNode.toQuery }-[connects:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(connectable:`${ Connectable.label }`)
+match ${ focusNode.toPattern }-[connects:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(connectable:`${ Connectable.label }`)
 with distinct connectable, connects
 
 match (connectable) where (:`${Connectable.label}`)<-[:`${Connects.endRelationType}`]-(connectable:`${Connects.label}`)-[:`${Connects.startRelationType}`]-(:`${Post.label}`) OR (connectable:`${Post.label}`)

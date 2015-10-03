@@ -141,9 +141,9 @@ case class PostAccess() extends NodeAccessDefault[Post] {
     val votesDef = RelationDef(ConcreteNodeDef(user), Votes, requestDef)
 
     val query = s"""
-    match ${userDef.toQuery}-[ut:`${AddTags.startRelationType}`|`${RemoveTags.startRelationType}`]->(${requestDef.name} ${requestDef.factory.labels.map(l => s":`$l`").mkString} { status: ${PENDING} })-[tp:`${AddTags.endRelationType}`|`${RemoveTags.endRelationType}`]->${postDef.toQuery}, ${tagsDef.toQuery(false,true)}
-    optional match ${classifiesDef.toQuery(false, true)}
-    optional match ${votesDef.toQuery(true, false)}
+    match ${userDef.toPattern}-[ut:`${AddTags.startRelationType}`|`${RemoveTags.startRelationType}`]->(${requestDef.name} ${requestDef.factory.labels.map(l => s":`$l`").mkString} { status: ${PENDING} })-[tp:`${AddTags.endRelationType}`|`${RemoveTags.endRelationType}`]->${postDef.toPattern}, ${tagsDef.toPattern(false,true)}
+    optional match ${classifiesDef.toPattern(false, true)}
+    optional match ${votesDef.toPattern(true, false)}
     set ${requestDef.name}._locked = true
     return *
     """
@@ -171,16 +171,16 @@ case class PostAccess() extends NodeAccessDefault[Post] {
     val ownVoteCondition = context.user.map { user =>
       val userDef = ConcreteNodeDef(user)
       val votesDef = RelationDef(userDef, Votes, tagsDef)
-      s"optional match ${votesDef.toQuery(true,false)}"
+      s"optional match ${votesDef.toPattern(true,false)}"
     }.getOrElse(("", Map.empty))
 
     val query = s"""
-    match ${nodeDef.toQuery}
-    optional match ${tagsDef.toQuery(true, false)}
-    optional match ${tagClassifiesDef.toQuery(true, false)}
+    match ${nodeDef.toPattern}
+    optional match ${tagsDef.toPattern(true, false)}
+    optional match ${tagClassifiesDef.toPattern(true, false)}
     $ownVoteCondition
-    optional match ${connDef.toQuery(false, true)}, ${classifiesDef.toQuery(true, false)}
-    optional match ${createdDef.toQuery(true, false)}
+    optional match ${connDef.toPattern(false, true)}, ${classifiesDef.toPattern(true, false)}
+    optional match ${createdDef.toPattern(true, false)}
     return *
     """
 
@@ -222,14 +222,14 @@ case class PostAccess() extends NodeAccessDefault[Post] {
 
       //TODO: sufficient to lock at the end?
       val query = s"""
-      match ${postDef.toQuery}-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)
+      match ${postDef.toPattern}-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)
       with distinct ${postDef.name}, connectable
-      match ${userDef.toQuery}
+      match ${userDef.toPattern}
       optional match (tag: `${Scope.label}`)-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`)
       optional match (${userDef.name})-[r:`${HasKarma.relationType}`]->(tag)
-      optional match ${deletedDef.toQuery(true, false)} where ${deletedDef.name}.status = ${PENDING}
-      optional match ${votesDef.toQuery(false, false)}
-      optional match ${createdDef.toQuery(false, false)}
+      optional match ${deletedDef.toPattern(true, false)} where ${deletedDef.name}.status = ${PENDING}
+      optional match ${votesDef.toPattern(false, false)}
+      optional match ${createdDef.toPattern(false, false)}
       set ${deletedDef.name}._locked = true
       return *
       """
@@ -276,10 +276,10 @@ case class PostAccess() extends NodeAccessDefault[Post] {
         val createdDef = RelationDef(userDef, SchemaCreated, postDef)
 
         val query = s"""
-          match ${postDef.toQuery}-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)
+          match ${postDef.toPattern}-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)
           with distinct ${postDef.name}, connectable
-          match ${userDef.toQuery}
-          optional match ${createdDef.toQuery(false, false)}
+          match ${userDef.toPattern}
+          optional match ${createdDef.toPattern(false, false)}
           optional match (tag: `${Scope.label}`)-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`)
           optional match (${userDef.name})-[r:`${HasKarma.relationType}`]->(tag)
           return *

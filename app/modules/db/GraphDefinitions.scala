@@ -31,7 +31,7 @@ class QueryContext {
 
 sealed trait GraphDefinition {
   protected def ctx: QueryContext
-  def toQuery: String
+  def toPattern: String
   final val name = ctx.newVariable
 }
 
@@ -47,12 +47,12 @@ sealed trait UuidNodeDef[+NODE <: UuidNode] extends FixedNodeDef[NODE] {
 
 sealed trait LabelledUuidNodeDef[+NODE <: UuidNode] extends UuidNodeDef[NODE] {
   val labels: Set[Label]
-  def toQuery = s"($name ${ labels.map(l => s":`$l`").mkString } {uuid: {$uuidVariable}})"
+  def toPattern = s"($name ${ labels.map(l => s":`$l`").mkString } {uuid: {$uuidVariable}})"
 }
 
 sealed trait LabelledNodeDef[+NODE <: Node] extends NodeDef[NODE] {
   val labels: Set[Label]
-  def toQuery = s"($name ${ labels.map(l => s":`$l`").mkString })"
+  def toPattern = s"($name ${ labels.map(l => s":`$l`").mkString })"
 }
 
 case class FactoryUuidNodeDef[+NODE <: UuidNode](
@@ -110,15 +110,15 @@ END <: Node,
   def relationMatcher: String
 
   protected def nodeMatcher(nodeDefinition: NodeDef[_]) = nodeDefinition match {
-    case r: HyperNodeDef[_, _, _, _, _] => (Some(r.toQuery), s"(${ r.name })")
-    case r                                     => (None, r.toQuery)
+    case r: HyperNodeDef[_, _, _, _, _] => (Some(r.toPattern), s"(${ r.name })")
+    case r                                     => (None, r.toPattern)
   }
 
   protected def nodeReferencer(nodeDefinition: NodeDef[_]) = s"(${ nodeDefinition.name })"
 
-  def toQuery: String = toQuery(true)
-  def toQuery(matchNodes: Boolean): String = toQuery(matchNodes, matchNodes)
-  def toQuery(matchStart: Boolean, matchEnd: Boolean): String = {
+  def toPattern: String = toPattern(true)
+  def toPattern(matchNodes: Boolean): String = toPattern(matchNodes, matchNodes)
+  def toPattern(matchStart: Boolean, matchEnd: Boolean): String = {
     val (startPre, startNode) = if(matchStart)
                                   nodeMatcher(startDefinition)
                                 else

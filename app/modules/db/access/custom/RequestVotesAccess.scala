@@ -72,15 +72,15 @@ case class VotesChangeRequestAccess(sign: Long) extends EndRelationAccessDefault
       //TODO: separate queries for subclasses
       //TODO: simpler? locking really needed?
       val query = s"""
-      match (user:`${User.label}`)-[updated1:`${Updated.startRelationType}`|`${Deleted.startRelationType}`|`${AddTags.startRelationType}`|`${RemoveTags.startRelationType}`]->${requestDef.toQuery}-[updated2:`${Updated.endRelationType}`|`${Deleted.endRelationType}`|`${AddTags.endRelationType}`|`${RemoveTags.endRelationType}`]->${postDef.toQuery}
+      match (user:`${User.label}`)-[updated1:`${Updated.startRelationType}`|`${Deleted.startRelationType}`|`${AddTags.startRelationType}`|`${RemoveTags.startRelationType}`]->${requestDef.toPattern}-[updated2:`${Updated.endRelationType}`|`${Deleted.endRelationType}`|`${AddTags.endRelationType}`|`${RemoveTags.endRelationType}`]->${postDef.toPattern}
       where ${requestDef.name}.status = ${PENDING} or ${requestDef.name}.status = ${INSTANT}
       set ${requestDef.name}._locked = true
       with ${postDef.name}, ${requestDef.name}, updated1, updated2
-      optional match (${postDef.name})-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`), ${userDef.toQuery}
+      optional match (${postDef.name})-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`), ${userDef.toPattern}
       with distinct connectable, ${postDef.name}, ${userDef.name}, ${requestDef.name}, updated1, updated2
       optional match (${userDef.name})-[r:`${HasKarma.relationType}`]->(tag)
-      optional match ${votesDef.toQuery(false, false)}
-      optional match ${createdDef.toQuery(false,false)}
+      optional match ${votesDef.toPattern(false, false)}
+      optional match ${createdDef.toPattern(false,false)}
       return *
       """
 
@@ -244,8 +244,8 @@ trait VotesTagsChangeRequestHelper extends VotesChangeRequestHelper {
     val classifiesDef = RelationDef(reqDef, ProposesClassify, classDef)
 
     val query = s"""
-    match ${tagsDef.toQuery}
-    optional match ${classifiesDef.toQuery(false, true)}
+    match ${tagsDef.toPattern}
+    optional match ${classifiesDef.toPattern(false, true)}
     return ${tagDef.name}, ${classDef.name}
     """
 
@@ -265,9 +265,9 @@ requestToPostDef
 
     //TODO: locking of other requests?
     val query = s"""
-    match ${requestToPostDef.toQuery}, ${tagsDef.toQuery(false, true)}
+    match ${requestToPostDef.toPattern}, ${tagsDef.toPattern(false, true)}
     where ${reqDef.name}.status = ${PENDING}
-    optional match ${classifiesDef.toQuery(false, true)}
+    optional match ${classifiesDef.toPattern(false, true)}
     return *
     """
 
