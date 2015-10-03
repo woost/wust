@@ -16,21 +16,23 @@ function StreamService(Search, DiscourseNode, store, Helpers) {
     this.currentEditStream = undefined;
 
     function restoreList() {
-        _.each(streamStore.get("streams") || [], pushList);
+        _.each(streamStore.get("streams") || [], stream => pushList(stream.tagsAll, stream.tagsWithout));
     }
 
-    function pushList(tags) {
-        if (!_.isArray(tags))
+    function pushList(tagsAll = [], tagsWithout = []) {
+        if (!_.isArray(tagsAll) || !_.isArray(tagsWithout))
             return;
 
         let stream = {
             posts: Search.$search({
                 label: DiscourseNode.Post.label,
-                tagsAll: tags.map(t => t.id),
+                tagsAll: tagsAll.map(t => t.id),
+                tagsWithout: tagsWithout.map(t => t.id),
                 size: 20,
                 page: 0
             }),
-            tags: tags
+            tagsAll: tagsAll,
+            tagsWithout: tagsWithout
         };
 
         self.streams.push(stream);
@@ -39,7 +41,8 @@ function StreamService(Search, DiscourseNode, store, Helpers) {
 
     function refreshStream(stream) {
         stream.posts.$refresh({
-            tags: stream.tags.map(t => t.id)
+            tagsAll: stream.tagsAll.map(t => t.id),
+            tagsWithout: stream.tagsWithout.map(t => t.id)
         });
 
         storeList();
@@ -56,6 +59,9 @@ function StreamService(Search, DiscourseNode, store, Helpers) {
     }
 
     function storeList() {
-        streamStore.set("streams", _.map(self.streams, s => s.tags.map(t => t.encode ? t.encode() : t)));
+        streamStore.set("streams", _.map(self.streams, s => { return {
+            tagsAll: s.tagsAll.map(t => t.encode ? t.encode() : t),
+            tagsWithout: s.tagsWithout.map(t => t.encode ? t.encode() : t)
+        };}));
     }
 }

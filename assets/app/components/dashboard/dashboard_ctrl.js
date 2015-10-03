@@ -22,13 +22,13 @@ function DashboardCtrl(DiscourseNode, StreamService, Search, ContextService, $sc
         tagsAll: ContextService.currentContexts.map(c => c.id),
         size: 30,
         page: 0,
-        startPost: ContextService.currentContexts.length === 0
+        startPost: true
     });
 
     $scope.$on("context.changed", () => {
         vm.recentPosts.$refresh({
-            tags: ContextService.currentContexts.map(c => c.id),
-            startPost: ContextService.currentContexts.length === 0
+            tagsAll: ContextService.currentContexts.map(c => c.id),
+            startPost: true
         });
     });
 
@@ -37,6 +37,6 @@ function DashboardCtrl(DiscourseNode, StreamService, Search, ContextService, $sc
     }
 
     function newStream() {
-        StreamService.push([]);
+        StreamService.push();
     }
 }
