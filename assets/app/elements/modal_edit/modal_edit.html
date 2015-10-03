@@ -7,8 +7,10 @@
                     <span small-post node="vm.node.referenceNode" class="disable-link"></span>
                 </span>
             </div>
-            <div colored-tag-node="vm.node" class="modal-body">
-                <div new-post node="vm.node" input-focus="true" preview-enabled="vm.previewEnabled"></div>
+            <div class="modal-body">
+                <div class="big-post" colored-tag-node="vm.node" big="true">
+                    <div new-post node="vm.node" input-focus="true" preview-enabled="vm.previewEnabled"></div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-default" ng-click="$hide()">Cancel</button>
