@@ -36,8 +36,7 @@ case class UserAccess() extends NodeReadBase[User] {
       ("min", s"where ${scopeDef.name}.uuid in {scopeUuids}", Map("scopeUuids" -> context.scopes))
 
     val query = s"""
-    match ${userDef.toPattern}
-    optional match ${ hasKarmaDef.toPattern(false, true) }
+    match ${ hasKarmaDef.toPattern(true, true) }
     $scopeCondition
     with ${userDef.name}, ${aggregateOp}(
       case ${hasKarmaDef.name}.karma
