@@ -38,11 +38,8 @@ with HeaderEnvironmentModule {
             mailService.sendWelcomeEmail(user)
             result
           }
-        case Some(u) =>
-          Future.successful(Conflict("User already exists"))
-      }.recoverWith {
-        case error => Future.successful(Unauthorized("Couldn't register user"))
-      }
+        case Some(u) => Future.successful(Conflict("User already exists"))
+      }.recoverWith(exceptionHandler)
     }.recoverTotal {
       case error => Future.successful(BadRequest("Couldn't parse register request"))
     }

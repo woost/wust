@@ -1,6 +1,7 @@
 package controllers.api.auth
 
 import com.mohiva.play.silhouette.api.exceptions.AuthenticatorException
+import com.mohiva.play.silhouette.impl.exceptions.{InvalidPasswordException, IdentityNotFoundException}
 import com.mohiva.play.silhouette.api.util.Credentials
 import com.mohiva.play.silhouette.api.{LoginInfo => SLoginInfo, Silhouette, _}
 import com.mohiva.play.silhouette.impl.authenticators.JWTAuthenticator
@@ -35,11 +36,11 @@ with HeaderEnvironmentModule {
               })
             }
           }
-          case None       =>
-            Future.failed(new AuthenticatorException("Couldn't find user"))
+          case None       => Future.failed(new AuthenticatorException("Couldn't find user"))
         }
       }.recoverWith {
-        case error => Future.successful(Unauthorized("Wrong credentials"))
+        case _:IdentityNotFoundException => Future.successful(Unauthorized("User doesn't exist"))
+        case _:InvalidPasswordException => Future.successful(Unauthorized("Wrong password"))
       }
     }.recoverTotal {
       case error => Future.successful(BadRequest("Couldn't parse login request"))
