@@ -43,5 +43,9 @@ angular.module("wust").run(function(Auth) {
             identifier: name,
             password: "hans"
         });
+        Auth.login({
+            identifier: name,
+            password: "hans"
+        });
     }
 });
