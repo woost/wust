@@ -14,7 +14,8 @@ function editTaglist() {
             alwaysShow: "@",
             emptyShow: "@",
             tagType: "@",
-            editClassification: "@"
+            editClassification: "@",
+            placeholder: "@",
         },
         controller: editTaglistCtrl,
         controllerAs: "vm",
@@ -38,19 +39,19 @@ function editTaglistCtrl(TagSuggestions, DiscourseNode, $q) {
         case "classification":
             // tagLabel = DiscourseNode.Classification.label;
             tagLabel = "CLASSIFICATION";
-            vm.placeholder = "Add Classification";
+            vm.placeholder = vm.placeholder || "Add Classification";
         break;
         case "taglike":
             // tagLabel = DiscourseNode.Classification.label;
             tagLabel = "TAGLIKE";
-            vm.placeholder = "Add Tag";
+            vm.placeholder = vm.placeholder || "Add Tag";
         break;
         case "context":
             /* falls through */
         default:
             // tagLabel = DiscourseNode.Scope.label;
             tagLabel = "SCOPE";
-            vm.placeholder = "Add Context";
+            vm.placeholder = vm.placeholder || "Add Context";
         break;
     }
 

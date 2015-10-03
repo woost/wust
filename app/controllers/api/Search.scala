@@ -16,12 +16,11 @@ import collection.mutable
 import scala.util.Try
 
 object Search extends Controller {
-  def index(pageOpt: Option[Int], sizeOpt: Option[Int], labelOpt: Option[String], titleOpt: Option[String], searchDescriptionsOpt: Option[Boolean], tags: List[String], tagOrOpt: Option[Boolean], startPostOpt: Option[Boolean]) = Action {
+def index(labelOpt: Option[String], termOpt: Option[String], searchDescriptionsOpt: Option[Boolean], startPostOpt: Option[Boolean], tagsAll: List[String], tagsAny: List[String], pageOpt: Option[Int], sizeOpt: Option[Int]) = Action {
 
     val searchDescriptions = searchDescriptionsOpt.getOrElse(false)
     val page = pageOpt.getOrElse(0)
     val startPost = startPostOpt.getOrElse(false)
-    val tagOr = tagOrOpt.getOrElse(false)
 
     implicit val ctx = new QueryContext
 
@@ -29,7 +28,7 @@ object Search extends Controller {
     val labels = ExposedNode.labels ++ labelOpt.map(Label(_))
     val nodeDef = LabelNodeDef(labels)
 
-    val titleRegex = titleOpt.flatMap { title =>
+    val termRegex = termOpt.flatMap { title =>
       if(title.trim.isEmpty)
         None
       else
@@ -43,56 +42,56 @@ object Search extends Controller {
 
     params ++= nodeDef.parameterMap
 
-    if(titleRegex.isDefined) {
+    if(termRegex.isDefined) {
       val titleMatcher = s"${ nodeDef.name }.title =~ {term}"
       if( searchDescriptions )
         postConditions += s"$titleMatcher or ${ nodeDef.name }.description =~ {term}"
       else
         postConditions += titleMatcher
 
-      params += ("term" -> titleRegex.get)
+      params += ("term" -> termRegex.get)
     }
 
-    if(startPost) {
-      postMatches += s"match ${ nodeDef.toQuery }<-[:`${ SchemaTags.endRelationType }`]-(:`${ SchemaTags.label }`)<-[:`${ SchemaTags.startRelationType }`]-(:`${ Scope.label }`)"
+    if(startPost && tagsAll.isEmpty && tagsAny.isEmpty) {
+      val tagsDef = RelationDef(FactoryNodeDef(Scope), SchemaTags, nodeDef)
+      postMatches += s"match ${ tagsDef.toQuery }"
     }
 
-    if(tags.nonEmpty){
-      if(tagOr) {
-        //TODO: classification need to be matched on the outgoing connects relation of the post
-        val inheritTagDef = FactoryNodeDef(Scope)
-        val tagDef = FactoryNodeDef(Scope)
-        val tagDefinition = s"${ inheritTagDef.toQuery }-[:`${ Inherits.relationType }`*0..10]->${ tagDef.toQuery }"
-        preQueries +=
-          s"""
-          match ${ tagDefinition }
-          where (${ tagDef.name }.uuid in {tagUuids})
-          with distinct ${ inheritTagDef.name }
-          """
+    if(tagsAll.nonEmpty) {
+      //TODO: classification need to be matched on the outgoing connects relation of the post
+      val tagDefs = tagsAll.map(uuid => FactoryUuidNodeDef(Scope, uuid))
+      val inheritTagDefs = tagsAll.map(_ => FactoryNodeDef(Scope))
+      val tagDefinitions = (tagDefs zip inheritTagDefs).map { case (t, i) => s"${ i.toQuery }-[:`${ Inherits.relationType }`*0..10]->${ t.toQuery }" }.mkString(",")
+      preQueries += s"""
+      match ${ tagDefinitions }
+      with distinct ${ inheritTagDefs.map(_.name).mkString(",") }
+      """
 
-          val relationDef = RelationDef(inheritTagDef, SchemaTags, nodeDef)
-          postMatches += s"""match ${ relationDef.toQuery(false, true) }"""
+      val relationDefs = inheritTagDefs.map(tagDef => RelationDef(tagDef, SchemaTags, nodeDef))
+      postMatches += s"""match ${ relationDefs.map(_.toQuery(false)).mkString(",") }"""
 
-          params += ("tagUuids" -> tags)
-          params ++= relationDef.parameterMap
-          params ++= tagDef.parameterMap
-        } else {
-          //TODO: classification need to be matched on the outgoing connects relation of the post
-          val tagDefs = tags.map(uuid => FactoryUuidNodeDef(Scope, uuid))
-          val inheritTagDefs = tags.map(_ => FactoryNodeDef(Scope))
-          val tagDefinitions = (tagDefs zip inheritTagDefs).map { case (t, i) => s"${ i.toQuery }-[:`${ Inherits.relationType }`*0..10]->${ t.toQuery }" }.mkString(",")
-          preQueries += s"""
-          match ${ tagDefinitions }
-          with distinct ${ inheritTagDefs.map(_.name).mkString(",") }
-          """
+      params ++= relationDefs.flatMap(_.parameterMap)
+      params ++= tagDefs.flatMap(_.parameterMap)
+    }
 
-          val relationDefs = inheritTagDefs.map(tagDef => RelationDef(tagDef, SchemaTags, nodeDef))
-          postMatches += s"""match ${ relationDefs.map(_.toQuery(false)).mkString(",") }"""
+    if(tagsAny.nonEmpty) {
+      //TODO: classification need to be matched on the outgoing connects relation of the post
+      val inheritTagDef = FactoryNodeDef(Scope)
+      val tagDef = FactoryNodeDef(Scope)
+      val tagDefinition = s"${ inheritTagDef.toQuery }-[:`${ Inherits.relationType }`*0..10]->${ tagDef.toQuery }"
+      preQueries +=
+        s"""
+        match ${ tagDefinition }
+        where (${ tagDef.name }.uuid in {tagsAnyUuids})
+        with distinct ${ inheritTagDef.name }
+        """
 
-          params += ("tagUuids" -> tags)
-          params ++= relationDefs.flatMap(_.parameterMap)
-          params ++= tagDefs.flatMap(_.parameterMap)
-        }
+        val relationDef = RelationDef(inheritTagDef, SchemaTags, nodeDef)
+        postMatches += s"""match ${ relationDef.toQuery(false, true) }"""
+
+        params += ("tagsAnyUuids" -> tagsAny)
+        params ++= relationDef.parameterMap
+        params ++= tagDef.parameterMap
     }
 
     val returnPostfix = sizeOpt.map { limit =>
@@ -102,10 +101,10 @@ object Search extends Controller {
     val returnStatement = s"${ nodeDef.name } order by ${ nodeDef.name }.timestamp desc $returnPostfix"
 
     val query = s"""
-    ${preQueries.mkString(" ")}
+    ${preQueries.mkString("\n\n")}
     match ${ nodeDef.toQuery }
-    ${postMatches.mkString(" ")}
-    ${if(postConditions.nonEmpty) "where "+ postConditions.mkString(" and ") else ""}
+    ${postMatches.mkString("\n")}
+    ${if(postConditions.nonEmpty) "where "+ postConditions.mkString("\nand ") else ""}
     return $returnStatement
     """
 

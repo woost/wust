@@ -19,7 +19,7 @@ function DashboardCtrl(DiscourseNode, StreamService, Search, ContextService, $sc
 
     vm.recentPosts = Search.$search({
         label: DiscourseNode.Post.label,
-        tags: ContextService.currentContexts.map(c => c.id),
+        tagsAll: ContextService.currentContexts.map(c => c.id),
         size: 30,
         page: 0,
         startPost: ContextService.currentContexts.length === 0

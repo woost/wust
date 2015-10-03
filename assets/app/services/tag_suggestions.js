@@ -21,7 +21,7 @@ function TagSuggestions(Search, DiscourseNode) {
     }
     function searchTags(title, label) {
         return Search.$search({
-            title: title,
+            term: title,
             label: label,
             size: label === "CLASSIFICATION" ? 100 : 8,
             page: 0

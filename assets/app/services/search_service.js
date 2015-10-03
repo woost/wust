@@ -7,16 +7,17 @@ function SearchService(Search, DiscourseNode) {
     let reloadHandler;
 
     this.search = {
-        resultsVisible: false,
         query: "",
-        results: Search.$collection(),
         searchDescriptions: false,
         searchStartPost: false,
-        tagOr: false,
-        selectedTags: [],
-        waiting: true,
+        tagsAll: [],
+        tagsAny: [],
         page: 0,
         size: defaultSize,
+
+        resultsVisible: false,
+        results: Search.$collection(),
+        waiting: true,
         unlimited: false,
         triggerSearch,
         loadMore,
@@ -62,11 +63,11 @@ function SearchService(Search, DiscourseNode) {
     function getParams() {
         let params = {
             label: DiscourseNode.Post.label,
-            title: this.query,
+            term: this.query,
             searchDescriptions: this.searchDescriptions,
             startPost: this.searchStartPost,
-            tagOr: this.tagOr,
-            tags: this.selectedTags.map(t => t.id),
+            tagsAll: this.tagsAll.map(t => t.id),
+            tagsAny: this.tagsAny.map(t => t.id),
         };
 
         if (this.unlimited) {

@@ -25,7 +25,7 @@ function TagDetailsCtrl($stateParams, Scope, Search, DiscourseNode, StreamServic
     // for now use search api
     vm.contributions = Search.$search({
         label: DiscourseNode.Post.label,
-        tags: [$stateParams.id],
+        tagsAll: [$stateParams.id],
         page: postPage,
         size: postSize
     });

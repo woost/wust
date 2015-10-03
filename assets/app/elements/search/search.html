@@ -3,22 +3,15 @@
     <div id="search_content">
         <div id="search_options">
             <div class="row">
-                <label class="col-md-8">Description</label>
+                <label class="col-md-8">Search descriptions</label>
                 <span switch ng-model="vm.search.searchDescriptions" ng-change="vm.search.triggerSearch()"></span>
             </div>
             <div class="row">
-                <label class="col-md-8">Startpost</label>
+                <label class="col-md-8">Only start posts</label>
                 <span switch ng-model="vm.search.searchStartPost" ng-change="vm.search.triggerSearch()"></span>
             </div>
-            <hr>
-            <div class="row">
-                <label class="col-md-8">Tags</label>
-            </div>
-            <div class="row">
-                <span class="label_like col-md-8">Disjunction</span>
-                <span switch ng-model="vm.search.tagOr" ng-change="vm.search.triggerSearch()"></span>
-            </div>
-            <div edit-taglist tags="vm.search.selectedTags" class="row edit_tags" always-show="true" existing-only="true" on-change="vm.search.triggerSearch()"></div>
+            <div edit-taglist placeholder="in all Contexts" tags="vm.search.tagsAll" class="row edit_tags" always-show="true" existing-only="true" on-change="vm.search.triggerSearch()"></div>
+            <div edit-taglist placeholder="in any Context" tags="vm.search.tagsAny" class="row edit_tags" always-show="true" existing-only="true" on-change="vm.search.triggerSearch()"></div>
             <div id="search_options_bottom">
                 <div ng-show="vm.infinite.noMore && !vm.infinite.loading" class="row">
                     <label class="col-md-4">#Results</label>
