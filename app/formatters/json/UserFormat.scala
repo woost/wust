@@ -1,6 +1,6 @@
 package formatters.json
 
-import model.WustSchema.{User, KarmaLog, LogOnScope}
+import model.WustSchema.{User, KarmaLog, LogOnScope, HasKarma}
 import play.api.libs.json._
 import formatters.json.TagFormat.{tagLikeToSeq, karmaTagWriter}
 
@@ -31,7 +31,7 @@ object UserFormat {
       ("name", JsString(user.name)),
       ("id", JsString(user.uuid)),
       ("email", JsString(user.email.getOrElse(""))),
-      ("hasKarma", JsArray(user.hasKarmas.map(karmaTagWriter(_))))
+      ("hasKarma", JsArray(user.outRelationsAs(HasKarma).map(karmaTagWriter)))
     ))
   }
 }

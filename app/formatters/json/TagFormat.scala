@@ -17,9 +17,9 @@ object TagFormat {
     ("symbol", tag.symbol.map(JsString(_)).getOrElse(JsNull))
   )
 
-  def karmaTagWriter(tag: Scope) = JsObject(
-    tagLikeToSeq(tag) ++ Seq(
-      ("karma", tag.inRelationsAs(HasKarma).headOption.map(has => JsNumber(has.karma)).getOrElse(JsNull))
+  def karmaTagWriter(hasKarma: HasKarma) = JsObject(
+    tagLikeToSeq(hasKarma.endNode) ++ Seq(
+      ("karma", JsNumber(hasKarma.karma))
     )
   )
 
