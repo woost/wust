@@ -36,7 +36,7 @@
                     <form class="search-form navbar-form navbar-left hidden-xs" ng-submit='vm.onSearchBoxChange()'>
                         <div class="form-group has-feedback">
                             <input type="text" placeholder="Search" class="form-control" ng-model="vm.search.query" ng-change='vm.onSearchBoxChange()'>
-                            <i class="fa fa-search form-control-feedback" style="pointer-events:all" ng-click="vm.search.resultsVisible = !vm.search.resultsVisible"></i>
+                            <i class="fa fa-search form-control-feedback" style="pointer-events:all; cursor: pointer;" ng-click="vm.search.resultsVisible = !vm.search.resultsVisible"></i>
                         </div>
                     </form>
                 </li>
