@@ -38,7 +38,7 @@ trait HeaderEnvironmentModule {
       encryptSubject = Play.configuration.getBoolean("silhouette.authenticator.encryptSubject").getOrElse { true },
       //TODO: what to do for production
       //authenticatorIdleTimeout = Play.configuration.getInt("silhouette.authenticator.authenticatorIdleTimeout"), // This feature is disabled by default to prevent the generation of a new JWT on every request
-      authenticatorExpiry = Play.configuration.getInt("silhouette.authenticator.authenticatorExpiry").getOrElse { 12 * 60 * 60 },
+      authenticatorExpiry = Play.configuration.getInt("silhouette.authenticator.authenticatorExpiry").getOrElse { 30 * 24 * 60 * 60 },
       sharedSecret = Play.configuration.getString("application.secret").get)
     new JWTAuthenticatorService(
       settings = settings,
