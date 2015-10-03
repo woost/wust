@@ -46,6 +46,10 @@
         color: #333; //TODO: use bootstrap variable
     }
 
+    .search-form input {
+        width: 150px;
+    }
+
     .search_results_visible, .has_fullscreen {
         .nav {
             a.active {
