@@ -57,8 +57,7 @@ object WustSchema {
 
     def hide() = {
       backupLabels = rawItem.labels.mkString(":")
-      //TODO: workaround for rawItem.labels.clear(), which leaves some nodes?!
-      rawItem.labels --= rawItem.labels.toList
+      rawItem.labels.clear()
       rawItem.labels ++= Hidden.labels
       Hidden.wrap(rawItem)
     }
@@ -118,7 +117,6 @@ object WustSchema {
   }
   @Relation class MemberOf(startNode: User, endNode: UserGroup)
 
-  //TODO: rename
   @Graph trait Discourse {Nodes(User, UserGroup, Post, TagLike, Hidden, Action) }
 
   // relation trait for matching relations via start and endnode
@@ -132,7 +130,6 @@ object WustSchema {
   // Content
   @Node trait Connectable extends ExposedNode
   @HyperRelation class Connects(startNode: Post, endNode: Connectable) extends Connectable with MatchableRelation with Reference with RelationTimestamp
-  //TODO: normal relation instead of hyper relation?
   @Relation class Inherits(startNode: Scope, endNode: Scope) extends ConstructRelation
 
   // post explicitly inherits timestamp to make it cheap to query recent posts
@@ -165,7 +162,6 @@ object WustSchema {
     val applyThreshold:Long
     var approvalSum:Long = 0
 
-    //TODO: rename to applyStatus
     var status:Long = PENDING
 
     def rejectThreshold = Moderation.rejectPostChangeThreshold(applyThreshold)
