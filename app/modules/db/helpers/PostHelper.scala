@@ -56,7 +56,7 @@ object PostHelper {
       return *
       """
 
-      val discourse = Discourse(tx.queryGraph(query, viewedDef.parameterMap))
+      val discourse = Discourse(tx.queryGraph(query, ctx.params))
       val post = discourse.posts.head
       discourse.vieweds.headOption match {
         case Some(viewed) =>

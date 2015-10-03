@@ -148,8 +148,7 @@ case class PostAccess() extends NodeAccessDefault[Post] {
     return *
     """
 
-    val params = votesDef.parameterMap ++ userDef.parameterMap ++ postDef.parameterMap ++ tagsDef.parameterMap
-    val existing = Discourse(tx.queryGraph(query, params))
+    val existing = Discourse(tx.queryGraph(query, ctx.params))
 
     handleAddTags(discourse, existing.addTags, user, post, request, karmaProps)
     handleRemoveTags(discourse, existing.removeTags, user, post, request, karmaProps)
@@ -169,10 +168,10 @@ case class PostAccess() extends NodeAccessDefault[Post] {
     val connDef = RelationDef(nodeDef, ConnectsStart, connectsDef)
     val classifiesDef = RelationDef(FactoryNodeDef(Classification), Classifies, connectsDef)
 
-    val (ownVoteCondition, ownVoteParams) = context.user.map { user =>
+    val ownVoteCondition = context.user.map { user =>
       val userDef = ConcreteNodeDef(user)
       val votesDef = RelationDef(userDef, Votes, tagsDef)
-      (s"optional match ${votesDef.toQuery(true,false)}", votesDef.parameterMap)
+      s"optional match ${votesDef.toQuery(true,false)}"
     }.getOrElse(("", Map.empty))
 
     val query = s"""
@@ -185,9 +184,7 @@ case class PostAccess() extends NodeAccessDefault[Post] {
     return *
     """
 
-    val params = tagsDef.parameterMap ++ connDef.parameterMap ++ tagClassifiesDef.parameterMap ++ createdDef.parameterMap ++ classifiesDef.parameterMap ++ ownVoteParams
-
-    val discourse = Discourse(db.queryGraph(query, params))
+    val discourse = Discourse(db.queryGraph(query, ctx.params))
     discourse.posts.headOption match {
       case Some(node) =>
         if (context.countView)
@@ -237,8 +234,7 @@ case class PostAccess() extends NodeAccessDefault[Post] {
       return *
       """
 
-      val params = votesDef.parameterMap ++ createdDef.parameterMap ++ deletedDef.parameterMap
-      val discourse = Discourse(tx.queryGraph(query, params))
+      val discourse = Discourse(tx.queryGraph(query, ctx.params))
       discourse.posts.headOption.map { post =>
         val authorBoost = if (discourse.createds.isEmpty) 0 else Moderation.authorKarmaBoost
         val voteWeight = Moderation.voteWeightFromScopes(discourse.scopes)
@@ -289,8 +285,7 @@ case class PostAccess() extends NodeAccessDefault[Post] {
           return *
         """
 
-        val params = createdDef.parameterMap
-        val discourse = Discourse(tx.queryGraph(query, params))
+        val discourse = Discourse(tx.queryGraph(query, ctx.params))
 
         discourse.posts.headOption.map { node =>
           val authorBoost = if (discourse.createds.isEmpty) 0 else Moderation.authorKarmaBoost

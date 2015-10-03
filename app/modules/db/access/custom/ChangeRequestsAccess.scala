@@ -48,9 +48,7 @@ case class InstantChangeRequestAccess() extends NodeAccessDefault[ChangeRequest]
     return *
     """
 
-    val params = userDef.parameterMap ++ crDef.parameterMap ++ crTagsDef.parameterMap ++ crClassifiesDef.parameterMap ++ tagsDef.parameterMap ++ connDef.parameterMap ++ classifiesDef.parameterMap
-
-    val discourse = Discourse(db.queryGraph(query, params))
+    val discourse = Discourse(db.queryGraph(query, ctx.params))
 
     //HACK: we set the labels of all hidden posts to Post (e.g. an already
     //deleted post of an instant request) in order to have working
@@ -103,8 +101,7 @@ case class PostChangeRequestAccess() extends RelationAccessDefault[Post, ChangeR
       return *
       """
 
-      val params = postDef.parameterMap ++ votesDef.parameterMap ++ proposesTagDef.parameterMap ++ proposesClassifyDef.parameterMap
-      val discourse = Discourse(db.queryGraph(query, params))
+      val discourse = Discourse(db.queryGraph(query, ctx.params))
       discourse.changeRequests
     }.getOrElse(Seq.empty)))
   }

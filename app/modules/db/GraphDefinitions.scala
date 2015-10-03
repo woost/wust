@@ -1,5 +1,6 @@
 package modules.db
 
+import scala.collection
 import model.Helpers
 import model.WustSchema.{ConstructRelationFactory, UuidNode}
 import renesca.graph.Label
@@ -23,12 +24,14 @@ class QueryContext {
     counter = counter + 1
     "V" + tmp
   }
+
+  private[db] var parameterMap: ParameterMap = Map.empty
+  def params = parameterMap
 }
 
 sealed trait GraphDefinition {
   protected def ctx: QueryContext
   def toQuery: String
-  def parameterMap: ParameterMap = Map.empty
   final val name = ctx.newVariable
 }
 
@@ -38,7 +41,8 @@ sealed trait FixedNodeDef[+NODE <: Node] extends NodeDef[NODE]
 sealed trait UuidNodeDef[+NODE <: UuidNode] extends FixedNodeDef[NODE] {
   val uuid: String
   val uuidVariable = ctx.newVariable
-  override def parameterMap = Map(uuidVariable -> uuid)
+
+  ctx.parameterMap += uuidVariable -> uuid
 }
 
 sealed trait LabelledUuidNodeDef[+NODE <: UuidNode] extends UuidNodeDef[NODE] {
@@ -97,8 +101,6 @@ END <: Node,
 ] extends GraphDefinition {
   val startDefinition: STARTDEF
   val endDefinition: ENDDEF
-  val nodeUuid: Option[String]
-  val uuidVariable = ctx.newVariable
 
   val startName = startDefinition.name
   val endName = endDefinition.name
@@ -107,16 +109,12 @@ END <: Node,
 
   def relationMatcher: String
 
-  protected def nodeUuidMatcher = nodeUuid.map(uuid => s"{uuid: {$uuidVariable}}").getOrElse("")
-
   protected def nodeMatcher(nodeDefinition: NodeDef[_]) = nodeDefinition match {
     case r: HyperNodeDef[_, _, _, _, _] => (Some(r.toQuery), s"(${ r.name })")
     case r                                     => (None, r.toQuery)
   }
 
   protected def nodeReferencer(nodeDefinition: NodeDef[_]) = s"(${ nodeDefinition.name })"
-
-  override def parameterMap = startDefinition.parameterMap ++ endDefinition.parameterMap ++ nodeUuid.map(uuid => Map(uuidVariable -> uuid)).getOrElse(Map.empty)
 
   def toQuery: String = toQuery(true)
   def toQuery(matchNodes: Boolean): String = toQuery(matchNodes, matchNodes)
@@ -145,9 +143,11 @@ END <: Node,
 ] extends RelationDefBase[START,RELATION,END,STARTDEF,ENDDEF] {
   val factory: AbstractRelationFactory[START, RELATION, END]
 
+  protected def relationPropertyMatcher: String
+
   def relationMatcher = factory match {
     case r: RelationFactory[_, RELATION, _]            => s"[$name :`${ r.relationType }`]"
-    case r: HyperRelationFactory[_, _, RELATION, _, _] => s"[$startRelationName:`${ r.startRelationType }`]->($name ${ r.labels.map(l => s":`$l`").mkString } ${ nodeUuidMatcher })-[$endRelationName:`${ r.endRelationType }`]"
+    case r: HyperRelationFactory[_, _, RELATION, _, _] => s"[$startRelationName:`${ r.startRelationType }`]->($name ${ r.labels.map(l => s":`$l`").mkString } ${ relationPropertyMatcher })-[$endRelationName:`${ r.endRelationType }`]"
   }
 }
 
@@ -161,7 +161,13 @@ ENDDEF <: NodeDef[END]
   startDefinition: STARTDEF,
   factory: AbstractRelationFactory[START, RELATION, END] with NodeFactory[RELATION],
   endDefinition: ENDDEF,
-  nodeUuid: Option[String] = None)(implicit val ctx: QueryContext) extends HyperNodeDefBase[RELATION] with SingleRelationDefBase[START, RELATION, END, STARTDEF, ENDDEF]
+  nodeUuid: Option[String] = None)(implicit val ctx: QueryContext) extends HyperNodeDefBase[RELATION] with SingleRelationDefBase[START, RELATION, END, STARTDEF, ENDDEF] {
+
+  val uuidVariable = ctx.newVariable
+  protected def relationPropertyMatcher = nodeUuid.map(uuid => s"{uuid: {$uuidVariable}}").getOrElse("")
+
+  nodeUuid.foreach(uuid => ctx.parameterMap += uuidVariable -> uuid)
+}
 
 case class RelationDef[
 START <: Node,
@@ -173,5 +179,6 @@ ENDDEF <: NodeDef[END]
   startDefinition: STARTDEF,
   factory: AbstractRelationFactory[START, RELATION, END],
   endDefinition: ENDDEF)(implicit val ctx: QueryContext) extends SingleRelationDefBase[START, RELATION, END, STARTDEF, ENDDEF] {
-  val nodeUuid = None
+
+  val relationPropertyMatcher = ""
 }

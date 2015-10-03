@@ -40,8 +40,6 @@ def index(labelOpt: Option[String], termOpt: Option[String], searchDescriptionsO
     val postConditions = mutable.ArrayBuffer.empty[String]
     var params:ParameterMap = Map.empty[PropertyKey,ParameterValue]
 
-    params ++= nodeDef.parameterMap
-
     if(termRegex.isDefined) {
       val titleMatcher = s"${ nodeDef.name }.title =~ {term}"
       if( searchDescriptions )
@@ -69,9 +67,6 @@ def index(labelOpt: Option[String], termOpt: Option[String], searchDescriptionsO
 
       val relationDefs = inheritTagDefs.map(tagDef => RelationDef(tagDef, SchemaTags, nodeDef))
       postMatches += s"""match ${ relationDefs.map(_.toQuery(false)).mkString(",") }"""
-
-      params ++= relationDefs.flatMap(_.parameterMap)
-      params ++= tagDefs.flatMap(_.parameterMap)
     }
 
     if(tagsAny.nonEmpty) {
@@ -90,8 +85,6 @@ def index(labelOpt: Option[String], termOpt: Option[String], searchDescriptionsO
         postMatches += s"""match ${ relationDef.toQuery(false, true) }"""
 
         params += ("tagsAnyUuids" -> tagsAny)
-        params ++= relationDef.parameterMap
-        params ++= tagDef.parameterMap
     }
 
     if(tagsWithout.nonEmpty) {
@@ -135,7 +128,7 @@ def index(labelOpt: Option[String], termOpt: Option[String], searchDescriptionsO
       // println("-"*30)
       // Discourse(db.queryGraph(query, params))
       // When Neo4j throws an error because the regexp is incorrect, return an empty Discourse instead
-      Try(Discourse(db.queryGraph(query, params))).getOrElse(Discourse.empty)
+      Try(Discourse(db.queryGraph(query, ctx.params ++ params))).getOrElse(Discourse.empty)
     }
 
     Ok(Json.toJson(

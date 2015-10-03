@@ -43,8 +43,7 @@ case class UserAccess() extends NodeReadBase[User] {
     return ${userDef.name}, ${hasKarmaDef.name}
     """
 
-    val params = hasKarmaDef.parameterMap ++ scopeParams
-
+    val params = ctx.params ++ scopeParams
     val discourse = Discourse(db.queryGraph(query, params))
     Ok(Json.toJson(discourse.users))
   }
@@ -93,9 +92,7 @@ case class UserContributions() extends RelationAccessDefault[User, Post] {
     return *
     """
 
-    val params = userDef.parameterMap ++ tagsDef.parameterMap ++ connDef.parameterMap ++ tagClassifiesDef.parameterMap ++ classifiesDef.parameterMap
-
-    val discourse = Discourse(db.queryGraph(query, params))
+    val discourse = Discourse(db.queryGraph(query, ctx.params))
     Ok(Json.toJson(discourse.posts))
   }
 
@@ -111,8 +108,7 @@ case class UserHasKarmaScopes() extends StartRelationAccessDefault[User, HasKarm
     val karmaDef = RelationDef(userDef, HasKarma, FactoryNodeDef(Scope))
 
     val query = s"match ${ karmaDef.toQuery } where ${karmaDef.name}.karma <> 0 return *"
-    val params = karmaDef.parameterMap
-    val discourse = Discourse(db.queryGraph(query, params))
+    val discourse = Discourse(db.queryGraph(query, ctx.params))
 
     Ok(JsArray(discourse.scopes.map(karmaTagWriter)))
   }
@@ -145,8 +141,7 @@ case class UserHasKarmaLog() extends StartRelationAccessDefault[User, KarmaLog, 
     return * order by ${karmaLogDef.name}.timestamp
     """
 
-    val params = karmaLogDef.parameterMap ++ logOnScopeDef.parameterMap ++ tagsDef.parameterMap ++ tagClassifiesDef.parameterMap ++ classifiesDef.parameterMap
-    val discourse = Discourse(db.queryGraph(query, params))
+    val discourse = Discourse(db.queryGraph(query, ctx.params))
 
     Ok(Json.toJson(discourse.karmaLogs))
   }
@@ -179,8 +174,7 @@ case class UserMarks() extends StartRelationWriteBase[User, Marks, Post] with St
     return *
     """
 
-    val params = marksDef.parameterMap ++ tagsDef.parameterMap ++ tagClassifiesDef.parameterMap ++ classifiesDef.parameterMap
-    val discourse = Discourse(db.queryGraph(query, params))
+    val discourse = Discourse(db.queryGraph(query, ctx.params))
 
     Ok(Json.toJson(discourse.posts))
   }
@@ -198,8 +192,7 @@ case class UserHasHistory() extends StartRelationAccessDefault[User, Viewed, Pos
       val viewedDef = RelationDef(userDef, Viewed, postDef)
 
       val query = s"match ${ viewedDef.toQuery } return ${ postDef.name } order by ${ viewedDef.name }.timestamp desc limit 8"
-      val params = viewedDef.parameterMap
-      val discourse = Discourse(db.queryGraph(query, params))
+      val discourse = Discourse(db.queryGraph(query, ctx.params))
 
       Ok(Json.toJson(TaggedTaggable.shapeResponse(discourse.posts)))
   }

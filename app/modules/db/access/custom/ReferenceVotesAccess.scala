@@ -43,9 +43,7 @@ trait VotesReferenceAccess[T <: Reference] extends EndRelationAccessDefault[User
       return *
       """
 
-      val params = votesDef.parameterMap ++ createdDef.parameterMap
-
-      val discourse = Discourse(tx.queryGraph(query, params))
+      val discourse = Discourse(tx.queryGraph(query, ctx.params))
 
       // we only match createds to the post from the current user, so if there
       // are created relations, he is the author

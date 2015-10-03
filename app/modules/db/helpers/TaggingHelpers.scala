@@ -35,7 +35,7 @@ object TaggedTaggable {
       return *
       """
 
-      val params = tagsDef.parameterMap ++ connDef.parameterMap ++ tagClassifiesDef.parameterMap ++ classifiesDef.parameterMap ++ Map("nodeUuids" -> response.map(_.uuid).toSeq)
+      val params = ctx.params ++ Map("nodeUuids" -> response.map(_.uuid).toSeq)
 
       val graph = db.queryGraph(Query(query, params.toMap))
       val discourse = Discourse(response.head.graph merge graph)
@@ -63,9 +63,8 @@ object ClassifiedReferences {
       where ${ nodeDef.name }.uuid in {nodeUuids}
       return *
       """
-      val params = nodeDef.parameterMap ++ classDef.parameterMap ++ Map("nodeUuids" -> response.map(_.uuid).toSeq)
-
-      val graph = db.queryGraph(Query(query, params.toMap))
+      val params = ctx.params ++ Map("nodeUuids" -> response.map(_.uuid).toSeq)
+      val graph = db.queryGraph(Query(query, params))
       val discourse = Discourse(response.head.graph merge graph)
       discourse.add(response.toSeq: _*)
     }

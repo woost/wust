@@ -18,24 +18,23 @@ object Database {
   )
 
   //TODO: more methods with optional tx
-  private def discourseGraphWithReturn(returns: String, definitions: GraphDefinition*): Discourse = discourseGraphWithReturn(db, returns, definitions: _*)
-  private def discourseGraphWithReturn(tx: QueryHandler, returns: String, definitions: GraphDefinition*): Discourse = {
+  private def discourseGraphWithReturn(returns: String, definitions: GraphDefinition*)(implicit ctx: QueryContext): Discourse = discourseGraphWithReturn(db, returns, definitions: _*)
+  private def discourseGraphWithReturn(tx: QueryHandler, returns: String, definitions: GraphDefinition*)(implicit ctx: QueryContext): Discourse = {
     if(definitions.isEmpty || returns.isEmpty)
       return Discourse.empty
 
     val matcher = definitions.map(_.toQuery).mkString(",")
     val query = s"match $matcher return $returns"
-    val params = definitions.map(_.parameterMap).reduce(_ ++ _)
-    Discourse(tx.queryGraph(Query(query, params)))
+    Discourse(tx.queryGraph(Query(query, ctx.params)))
   }
 
-  def discourseGraph(definitions: GraphDefinition*): Discourse = discourseGraph(db, definitions: _*)
-  def discourseGraph(tx: QueryHandler, definitions: GraphDefinition*): Discourse = {
+  def discourseGraph(definitions: GraphDefinition*)(implicit ctx: QueryContext): Discourse = discourseGraph(db, definitions: _*)
+  def discourseGraph(tx: QueryHandler, definitions: GraphDefinition*)(implicit ctx: QueryContext): Discourse = {
     discourseGraphWithReturn(tx, "*", definitions: _*)
   }
 
-  def itemDiscourseGraph(definitions: GraphDefinition*): Discourse = itemDiscourseGraph(db, definitions: _*)
-  def itemDiscourseGraph[NODE <: Node](tx: QueryHandler, definitions: GraphDefinition*): Discourse = {
+  def itemDiscourseGraph(definitions: GraphDefinition*)(implicit ctx: QueryContext): Discourse = itemDiscourseGraph(db, definitions: _*)
+  def itemDiscourseGraph[NODE <: Node](tx: QueryHandler, definitions: GraphDefinition*)(implicit ctx: QueryContext): Discourse = {
     val returns = definitions.map(_.name).mkString(",")
     discourseGraphWithReturn(tx, returns, definitions: _*)
   }
@@ -62,69 +61,65 @@ object Database {
     (discourse, findNodes(discourse, factory, uuids: _*))
   }
 
-  def discourseNodes[START <: UuidNode, END <: UuidNode](startDefinition: UuidNodeDef[START], endDefinition: UuidNodeDef[END]): (Discourse, (Option[START], Option[END])) = {
+  def discourseNodes[START <: UuidNode, END <: UuidNode](startDefinition: UuidNodeDef[START], endDefinition: UuidNodeDef[END])(implicit ctx: QueryContext): (Discourse, (Option[START], Option[END])) = {
     val discourse = itemDiscourseGraph(startDefinition, endDefinition)
     (discourse, findNodes(discourse, startDefinition, endDefinition))
   }
 
-  def discourseNodes[NODE <: UuidNode](definitions: UuidNodeDef[NODE]*): (Discourse, Seq[NODE]) = {
+  def discourseNodes[NODE <: UuidNode](definitions: UuidNodeDef[NODE]*)(implicit ctx: QueryContext): (Discourse, Seq[NODE]) = {
     val discourse = itemDiscourseGraph(definitions: _*)
     (discourse, findNodes(discourse, definitions: _*))
   }
 
-  def startConnectedDiscourseGraph[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinitions: NodeAndFixedRelationDef[START, RELATION, END]*): Discourse = {
+  def startConnectedDiscourseGraph[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinitions: NodeAndFixedRelationDef[START, RELATION, END]*)(implicit ctx: QueryContext): Discourse = {
     val queries = relationDefinitions.map { relationDefinition =>
       val query = s"match ${ relationDefinition.toQuery } return ${ relationDefinition.endDefinition.name }"
-      val params = relationDefinition.parameterMap
-      Query(query, params)
+      Query(query, ctx.params)
     }
     Discourse(db.queryGraphs(queries: _*).fold(Graph.empty)(_ merge _))
   }
 
-  def startConnectedDiscourseNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinitions: NodeAndFixedRelationDef[START, RELATION, END]*): Seq[END] = {
+  def startConnectedDiscourseNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinitions: NodeAndFixedRelationDef[START, RELATION, END]*)(implicit ctx: QueryContext): Seq[END] = {
     val discourse = startConnectedDiscourseGraph(relationDefinitions: _*)
     nodesWithType[END](discourse.nodes)
   }
 
   //TODO: need ordering for limit search, otherwise we get duplicates
-  def limitedStartConnectedDiscourseGraph[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](skip: Int, limit: Int, relationDefinitions: NodeAndFixedRelationDef[START, RELATION, END]*): Discourse = {
+  def limitedStartConnectedDiscourseGraph[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](skip: Int, limit: Int, relationDefinitions: NodeAndFixedRelationDef[START, RELATION, END]*)(implicit ctx: QueryContext): Discourse = {
     val queries = relationDefinitions.map { relationDefinition =>
       val query = s"match ${ relationDefinition.toQuery } return ${ relationDefinition.endDefinition.name } skip $skip limit $limit"
-      val params = relationDefinition.parameterMap
-      Query(query, params)
+      Query(query, ctx.params)
     }
     Discourse(db.queryGraphs(queries: _*).fold(Graph.empty)(_ merge _))
   }
 
-  def limitedStartConnectedDiscourseNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](skip: Int, limit: Int, relationDefinitions: NodeAndFixedRelationDef[START, RELATION, END]*): Seq[END] = {
+  def limitedStartConnectedDiscourseNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](skip: Int, limit: Int, relationDefinitions: NodeAndFixedRelationDef[START, RELATION, END]*)(implicit ctx: QueryContext): Seq[END] = {
     val discourse = limitedStartConnectedDiscourseGraph(skip, limit, relationDefinitions: _*)
     nodesWithType[END](discourse.nodes)
   }
 
-  def endConnectedDiscourseGraph[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinitions: FixedAndNodeRelationDef[START, RELATION, END]*): Discourse = {
+  def endConnectedDiscourseGraph[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinitions: FixedAndNodeRelationDef[START, RELATION, END]*)(implicit ctx: QueryContext): Discourse = {
     val queries = relationDefinitions.map { relationDefinition =>
       val query = s"match ${ relationDefinition.toQuery } return ${ relationDefinition.startDefinition.name }"
-      val params = relationDefinition.parameterMap
-      Query(query, params)
+      Query(query, ctx.params)
     }
     Discourse(db.queryGraphs(queries: _*).fold(Graph.empty)(_ merge _))
   }
 
-  def endConnectedDiscourseNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinitions: FixedAndNodeRelationDef[START, RELATION, END]*): Seq[START] = {
+  def endConnectedDiscourseNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinitions: FixedAndNodeRelationDef[START, RELATION, END]*)(implicit ctx: QueryContext): Seq[START] = {
     val discourse = endConnectedDiscourseGraph(relationDefinitions: _*)
     nodesWithType[START](discourse.nodes)
   }
 
-  def limitedEndConnectedDiscourseGraph[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](skip: Int, limit: Int, relationDefinitions: FixedAndNodeRelationDef[START, RELATION, END]*): Discourse = {
+  def limitedEndConnectedDiscourseGraph[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](skip: Int, limit: Int, relationDefinitions: FixedAndNodeRelationDef[START, RELATION, END]*)(implicit ctx: QueryContext): Discourse = {
     val queries = relationDefinitions.map { relationDefinition =>
       val query = s"match ${ relationDefinition.toQuery } return ${ relationDefinition.startDefinition.name } skip $skip limit $limit"
-      val params = relationDefinition.parameterMap
-      Query(query, params)
+      Query(query, ctx.params)
     }
     Discourse(db.queryGraphs(queries: _*).fold(Graph.empty)(_ merge _))
   }
 
-  def limitedEndConnectedDiscourseNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](skip: Int, limit: Int, relationDefinitions: FixedAndNodeRelationDef[START, RELATION, END]*): Seq[START] = {
+  def limitedEndConnectedDiscourseNodes[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](skip: Int, limit: Int, relationDefinitions: FixedAndNodeRelationDef[START, RELATION, END]*)(implicit ctx: QueryContext): Seq[START] = {
     val discourse = limitedEndConnectedDiscourseGraph(skip, limit, relationDefinitions: _*)
     nodesWithType[START](discourse.nodes)
   }
@@ -163,7 +158,7 @@ return connectable,connects,context,tags,contexttotags,tagstopost, classificatio
     """
 
     val useruuid = identity.map(_.uuid).getOrElse("") //TODO: do not write empty string into query
-    val params = focusNode.parameterMap + ("useruuid" -> useruuid)
+    val params = ctx.params + ("useruuid" -> useruuid)
 
     val (graph, table) = db.queryGraphsAndTables(Query(query, params)).head
     val component = Discourse(graph)

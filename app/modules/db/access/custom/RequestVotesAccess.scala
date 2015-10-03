@@ -84,7 +84,7 @@ case class VotesChangeRequestAccess(sign: Long) extends EndRelationAccessDefault
       return *
       """
 
-      val discourse = Discourse(tx.queryGraph(query, createdDef.parameterMap ++ votesDef.parameterMap))
+      val discourse = Discourse(tx.queryGraph(query, ctx.params))
       discourse.changeRequests.headOption.map { request =>
         val helper = requestHelper(request)
         val votes = discourse.votes.headOption
@@ -249,7 +249,7 @@ trait VotesTagsChangeRequestHelper extends VotesChangeRequestHelper {
     return ${tagDef.name}, ${classDef.name}
     """
 
-    Discourse(tx.queryGraph(query, tagsDef.parameterMap))
+    Discourse(tx.queryGraph(query, ctx.params))
   }
 
   protected def requestGraphApply(tx: QueryHandler) = {
@@ -271,7 +271,7 @@ requestToPostDef
     return *
     """
 
-    Discourse(tx.queryGraph(query, reqToPostDef.parameterMap ++ tagsDef.parameterMap ++ classifiesDef.parameterMap))
+    Discourse(tx.queryGraph(query, ctx.params))
   }
 
   override def updateKarma(karmaDefinition: KarmaDefinition) {

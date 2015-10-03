@@ -34,7 +34,7 @@ case class TagAccess() extends NodeReadBase[Scope] {
     return *
     """
 
-    val discourse = Discourse(db.queryGraph(Query(query, baseInherit.parameterMap ++ implInherit.parameterMap)))
+    val discourse = Discourse(db.queryGraph(query, ctx.params))
     discourse.scopes.find(_.uuid == uuid).map(s => Ok(Json.toJson(s))).getOrElse(NotFound(s"Cannot find node with uuid '$uuid'"))
   }
 
