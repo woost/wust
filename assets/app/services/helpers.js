@@ -56,7 +56,8 @@ function sortByIdQuality(tags) {
 }
 
 function sortedNodeTags(node) {
-    return sortByIdQuality(node.classifications).concat(sortByIdQuality(node.tags));
+    let classifications = _.uniq(node.classifications.concat(_.flatten(_.map(node.tags, "classifications"))), "id");
+    return sortByIdQuality(classifications).concat(sortByIdQuality(node.tags));
 }
 
 function navBackgroundColor(tag) { return hashToColor(tag, 10, 98); }
