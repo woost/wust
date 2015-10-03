@@ -39,11 +39,12 @@ with HeaderEnvironmentModule {
             result
           }
         case Some(u) =>
-          Future.successful(Conflict("user already exists"))
+          Future.successful(Conflict("User already exists"))
+      }.recoverWith {
+        case error => Future.successful(Unauthorized("Couldn't register user"))
       }
     }.recoverTotal {
-      case error =>
-        Future.successful(BadRequest(error.toString))
+      case error => Future.successful(BadRequest("Couldn't parse register request"))
     }
   }
 

@@ -38,9 +38,11 @@ with HeaderEnvironmentModule {
           case None       =>
             Future.failed(new AuthenticatorException("Couldn't find user"))
         }
-      }.recoverWith(exceptionHandler)
+      }.recoverWith {
+        case error => Future.successful(Unauthorized("Wrong credentials"))
+      }
     }.recoverTotal {
-      case error => Future.successful(BadRequest(error.toString))
+      case error => Future.successful(BadRequest("Couldn't parse login request"))
     }
   }
 
