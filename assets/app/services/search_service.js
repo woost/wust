@@ -67,9 +67,12 @@ function SearchService(Search, DiscourseNode) {
             term: this.query,
             searchDescriptions: this.searchDescriptions,
             startPost: this.searchStartPost,
-            tagsAll: this.tagsAll.map(t => t.id),
-            tagsAny: this.tagsAny.map(t => t.id),
-            tagsWithout: this.tagsWithout.map(t => t.id),
+            tagsAll: this.tagsAll.filter(t => t.isContext).map(t => t.id),
+            tagsAny: this.tagsAny.filter(t => t.isContext).map(t => t.id),
+            tagsWithout: this.tagsWithout.filter(t => t.isContext).map(t => t.id),
+            classificationsAll: this.tagsAll.filter(t => !t.isContext).map(t => t.id),
+            classificationsAny: this.tagsAny.filter(t => !t.isContext).map(t => t.id),
+            classificationsWithout: this.tagsWithout.filter(t => !t.isContext).map(t => t.id),
         };
 
         if (this.unlimited) {

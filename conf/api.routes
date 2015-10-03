@@ -18,5 +18,5 @@ GET    /auth/signout              controllers.api.auth.SignUpController.signOut
 
 GET /components/:uuid controllers.api.ConnectedComponents.show(uuid: String)
 
-GET /search controllers.api.Search.index(label: Option[String], term: Option[String], searchDescriptions: Option[Boolean], startPost: Option[Boolean], tagsAll: List[String], tagsAny: List[String], tagsWithout: List[String], page: Option[Int], size: Option[Int])
+GET /search controllers.api.Search.index(label: Option[String], term: Option[String], searchDescriptions: Option[Boolean], startPost: Option[Boolean], tagsAll: List[String], tagsAny: List[String], tagsWithout: List[String], classificationsAll: List[String], classificationsAny: List[String], classificationsWithout: List[String], page: Option[Int], size: Option[Int])
 

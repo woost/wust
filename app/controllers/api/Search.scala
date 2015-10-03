@@ -16,18 +16,22 @@ import collection.mutable
 import scala.util.Try
 
 object Search extends Controller {
-  def index(labelOpt: Option[String], termOpt: Option[String], searchDescriptionsOpt: Option[Boolean], startPostOpt: Option[Boolean], tagsAll: List[String], tagsAnyRaw: List[String], tagsWithout: List[String], pageOpt: Option[Int], sizeOpt: Option[Int]) = Action {
+  def index(labelOpt: Option[String], termOpt: Option[String], searchDescriptionsOpt: Option[Boolean], startPostOpt: Option[Boolean], tagsAll: List[String], tagsAnyRaw: List[String], tagsWithout: List[String], classificationsAll: List[String], classificationsAnyRaw: List[String], classificationsWithout: List[String], pageOpt: Option[Int], sizeOpt: Option[Int]) = Action {
 
     val discourse = if(
       (tagsAll intersect tagsWithout).nonEmpty ||
-      (tagsAnyRaw.size > 0 && tagsAnyRaw.toSet == tagsWithout.toSet)
+      (classificationsAll intersect classificationsWithout).nonEmpty ||
+      (tagsAnyRaw.size > 0 && tagsAnyRaw.toSet == tagsWithout.toSet) ||
+      (classificationsAnyRaw.size > 0 && classificationsAnyRaw.toSet == classificationsWithout.toSet)
     ) {
       Discourse.empty
     } else {
+      //TODO: uniq tag and classification ids
       val searchDescriptions = searchDescriptionsOpt.getOrElse(false)
       val page = pageOpt.getOrElse(0)
       val startPost = startPostOpt.getOrElse(false)
       val tagsAny = (tagsAnyRaw diff tagsWithout) diff tagsAll
+      val classificationsAny = (classificationsAnyRaw diff classificationsWithout) diff classificationsAll
 
       implicit val ctx = new QueryContext
 
@@ -94,6 +98,33 @@ object Search extends Controller {
           params += ("tagsAnyUuids" -> tagsAny)
       }
 
+      if(classificationsAny.nonEmpty) {
+        //TODO: classification need to be matched on the outgoing connects relation of the post
+        val classificationDef = FactoryNodeDef(Classification)
+        preQueries += s"""
+        match ${classificationDef.toPattern}
+        where ${classificationDef.name}.uuid in {classificationsAnyUuids}
+        with *
+        """
+
+        val connectsDef = HyperNodeDef(nodeDef, Connects, FactoryNodeDef(Post))
+        val classifiesConnectsDef = AnonRelationDef(classificationDef, Classifies, connectsDef)
+        val tagsDef = HyperNodeDef(FactoryNodeDef(Scope), SchemaTags, nodeDef)
+        val classifiesTagsDef = AnonRelationDef(classificationDef, Classifies, tagsDef)
+        postMatches += s"""
+        optional match ${connectsDef.toPattern(false, true)}
+        optional match ${tagsDef.toPattern(true, false)}
+        with *
+        """
+        postConditions += s"""(
+          (${connectsDef.endName} is not null and ${ classifiesConnectsDef.toPattern(false) })
+          or (${tagsDef.startName} is not null and ${ classifiesTagsDef.toPattern(false) })
+        )"""
+
+        params += ("classificationsAnyUuids" -> classificationsAny)
+      }
+
+      //TODO: FIXME: this does not work with more than one tag
       if(tagsWithout.nonEmpty) {
         //TODO: classification need to be matched on the outgoing connects relation of the post
         val inheritTagDef = FactoryNodeDef(Scope)
@@ -130,7 +161,7 @@ object Search extends Controller {
       // println(query)
       // println(ctx.params ++ params)
       // def parameterToString(p:Any):String = p match {
-      //   case array:List[String] => s"[${array.map(parameterToString).mkString(",")}]"
+      //   // case array:List[String] => s"[${array.map(parameterToString).mkString(",")}]"
       //   case ArrayParameterValue(array) => s"[${array.map(parameterToString).mkString(",")}]"
       //   case StringPropertyValue(str) => s""""${str}""""
       //   case v => v.toString
