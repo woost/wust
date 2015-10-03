@@ -20,7 +20,7 @@ trait SeedTools {
     Tags.create(tag, item)
   }
 
-  def classify(item: Connects, tag: Classification) = {
+  def classify(item: Reference, tag: Classification) = {
     Classifies.create(tag, item)
   }
 

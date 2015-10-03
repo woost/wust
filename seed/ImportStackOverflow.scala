@@ -89,9 +89,11 @@ object ImportStackOverflow extends Task with SeedTools {
         modifyDiscourse { implicit discourse =>
           val question = post(rawQuestion)
           println(s"Importing question: ${question.title}")
-          discourse.add(tag(question, soTag))
-          //TODO: on relation between scope and post
-          //discourse.add(classify(question, questionTag))
+          val tags = tag(question, soTag)
+          discourse.add(
+            tags,
+            classify(tags, questionTag)
+          )
 
           (rawQuestion \ "answers").as[Seq[JsObject]].foreach { rawAnswer =>
             val answer = post(rawAnswer)

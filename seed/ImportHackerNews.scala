@@ -60,17 +60,16 @@ object ImportHackerNews extends Task with SeedTools {
       val hackerNewsScope = mergeScope("HackerNews")
       val startPost = if (hnItem.title.get.startsWith("Ask HN:")) {
         val startPost = createPost(hnItem.title.get.stripPrefix("Ask HN:"), hnItem.text, hnItem.url)
+        val tags = tag(startPost, mergeScope("Ask-HN"))
         discourse.add(
-          //TODO: classify on relation between scope and post
-          // tag(startPost, mergeClassification("Question")),
-          tag(startPost, mergeScope("Ask-HN")),
+          tags,
+          classify(tags, mergeClassification("Question")),
           Inherits.merge(mergeScope("Ask-HN"), hackerNewsScope)
         )
         startPost
       } else if (hnItem.title.get.startsWith("Show HN:")) {
         val startPost = createPost(hnItem.title.get.stripPrefix("Show HN:"), hnItem.text, hnItem.url)
         discourse.add(
-          //TODO: classify on relation between scope and post
           tag(startPost, mergeScope(s"Show-HN")),
           Inherits.merge(mergeScope(s"Show-HN"), hackerNewsScope)
         )
@@ -82,10 +81,6 @@ object ImportHackerNews extends Task with SeedTools {
         )
         startPost
       }
-
-      //TODO: on relation between scope and post
-      // if(hnItem.itemType == "Ask")
-      //   discourse.add(tag(startPost, mergeClassification("Question")))
 
       addDeepChildItems(hnItem, startPost)
       println()
