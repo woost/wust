@@ -19,16 +19,29 @@ angular.module("wust").run(function(Auth) {
         devGui.style.opacity = 0.5;
         document.body.appendChild(devGui);
 
-        var randLogin = rawElem("<a href=\"#\">random login</a>");
-        randLogin.onclick = randomLogin;
-        devGui.appendChild(randLogin);
+        devGui.appendChild(loginLink("a"));
+        devGui.appendChild(loginLink("b"));
+        devGui.appendChild(loginLink("c"));
+        devGui.appendChild(loginLink("d"));
+        devGui.appendChild(loginLink(randomString(5), "random"));
     }
 
-    function randomLogin() {
+    function randomString(length) {
+        return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, length)
+    }
+
+    function loginLink(name, link) {
+        var link = link || name;
+        var randLogin = rawElem("<a href=\"#\" title=\"login as "+name+"\">"+link+"</a> ");
+        randLogin.onclick = function() {loginAs(name);};
+        return randLogin;
+    }
+
+    function loginAs(name) {
         Auth.logout(false);
         Auth.register({
-            identifier: Math.random().toString(36).substring(7),
-            password: "hans"
+            identifier: name,
+            password: "has"
         });
     }
 });
