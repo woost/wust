@@ -44,8 +44,6 @@ sealed trait FixedNodeDef[+NODE <: Node] extends NodeDef[NODE]
 sealed trait UuidNodeDef[+NODE <: UuidNode] extends FixedNodeDef[NODE] {
   val uuid: String
   val uuidVariable = ctx.newVariable
-
-  ctx.parameterMap += uuidVariable -> uuid
 }
 
 sealed trait LabelledUuidNodeDef[+NODE <: UuidNode] extends UuidNodeDef[NODE] {
@@ -63,6 +61,7 @@ case class FactoryUuidNodeDef[+NODE <: UuidNode](
   uuid: String
   )(implicit val ctx: QueryContext) extends LabelledUuidNodeDef[NODE] {
   val labels = factory.labels
+  ctx.parameterMap += uuidVariable -> uuid
 }
 
 case class FactoryNodeDef[+NODE <: Node](
@@ -76,12 +75,15 @@ case class ConcreteNodeDef[+NODE <: UuidNode](
   )(implicit val ctx: QueryContext) extends LabelledUuidNodeDef[NODE] {
   val uuid = node.uuid
   val labels = node.labels
+  ctx.parameterMap += uuidVariable -> uuid
 }
 
 case class LabelUuidNodeDef[+NODE <: UuidNode](
   labels: Set[Label],
   uuid: String
-  )(implicit val ctx: QueryContext) extends LabelledUuidNodeDef[NODE]
+  )(implicit val ctx: QueryContext) extends LabelledUuidNodeDef[NODE] {
+  ctx.parameterMap += uuidVariable -> uuid
+}
 
 case class LabelNodeDef[+NODE <: Node](
   labels: Set[Label])(implicit val ctx: QueryContext) extends LabelledNodeDef[NODE]
