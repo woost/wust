@@ -12,66 +12,6 @@ import play.api.mvc.Results._
 import play.api.mvc.{AnyContent, Controller, Result}
 import renesca.schema._
 
-case class RequestContext(controller: NodesBase with Controller, user: Option[User], json: Option[JsValue], query: Map[String, String]) {
-  def page = query.get("page").map(_.toInt)
-  def size = query.get("size").map(_.toInt)
-  def limit = size.getOrElse(15)
-  def skip = query.get("skip").map(_.toInt).getOrElse(0)
-  def countView = query.get("countView").map(_.toBoolean).getOrElse(false)
-
-  def jsonAs[T](implicit rds: play.api.libs.json.Reads[T]) = {
-    json.flatMap(_.validate[T].asOpt)
-  }
-
-  def withJson[S](handler: S => Result)(implicit rds: play.api.libs.json.Reads[S]) = {
-    jsonAs[S].map(handler(_)).getOrElse(UnprocessableEntity("Cannot parse json body"))
-  }
-
-  def withUser(handler: User => Result): Result = {
-    user.map(handler(_)).getOrElse(onlyUsersError)
-  }
-
-  def withUser(handler: => Result): Result = {
-    user.map(_ => handler).getOrElse(onlyUsersError)
-  }
-
-  def onlyUsersError = Forbidden("Only for users")
-}
-
-case class ConnectParameter[+BASE <: UuidNode](
-  factory: UuidNodeMatchesFactory[BASE],
-  baseUuid: String
-  )
-
-trait HyperConnectParameter[START <: UuidNode, +RELATION <: UuidNode with AbstractRelation[START, END], END <: UuidNode] {
-  def baseUuid: String
-  val startFactory: UuidNodeMatchesFactory[START]
-  val startUuid: String
-  val factory: MatchableRelationFactory[START, RELATION, END] with UuidNodeMatchesFactory[RELATION]
-  val endFactory: UuidNodeMatchesFactory[END]
-  val endUuid: String
-}
-
-case class StartHyperConnectParameter[START <: UuidNode, +RELATION <: UuidNode with AbstractRelation[START, END], END <: UuidNode](
-  startFactory: UuidNodeMatchesFactory[START],
-  startUuid: String,
-  factory: MatchableRelationFactory[START, RELATION, END] with UuidNodeMatchesFactory[RELATION],
-  endFactory: UuidNodeMatchesFactory[END],
-  endUuid: String
-  ) extends HyperConnectParameter[START, RELATION, END] {
-    def baseUuid = startUuid
-}
-
-case class EndHyperConnectParameter[START <: UuidNode, +RELATION <: UuidNode with AbstractRelation[START, END], END <: UuidNode](
-  endFactory: UuidNodeMatchesFactory[END],
-  endUuid: String,
-  factory: MatchableRelationFactory[START, RELATION, END] with UuidNodeMatchesFactory[RELATION],
-  startFactory: UuidNodeMatchesFactory[START],
-  startUuid: String
-  ) extends HyperConnectParameter[START, RELATION, END] {
-    def baseUuid = endUuid
-}
-
 trait NodesBase extends NestedResourceRouter with DefaultNestedResourceController with Silhouette[User, JWTAuthenticator] with HeaderEnvironmentModule {
 
   protected def context(request: UserAwareRequest[AnyContent]) = {

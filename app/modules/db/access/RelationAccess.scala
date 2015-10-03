@@ -41,8 +41,8 @@ END <: UuidNode
 ] extends RelationAccess[START, END] with FormattingNode[END] {
   protected def pageAwareRead(context: RequestContext, relDefs: Seq[NodeAndFixedRelationDef[START, RELATION, END]]) = {
     context.page.map { page =>
-      val skip = page * context.limit
-      Ok(Json.toJson(limitedStartConnectedDiscourseNodes(skip, context.limit, relDefs: _*)))
+      val skip = page * context.sizeWithDefault
+      Ok(Json.toJson(limitedStartConnectedDiscourseNodes(skip, context.sizeWithDefault, relDefs: _*)))
     }.getOrElse(Ok(Json.toJson((startConnectedDiscourseNodes(relDefs: _*)))))
   }
 }
@@ -54,8 +54,8 @@ END <: UuidNode
 ] extends RelationAccess[END, START] with FormattingNode[START] {
   protected def pageAwareRead(context: RequestContext, relDefs: Seq[FixedAndNodeRelationDef[START, RELATION, END]]) = {
     context.page.map { page =>
-      val skip = page * context.limit
-      Ok(Json.toJson(limitedEndConnectedDiscourseNodes(skip, context.limit, relDefs: _*)))
+      val skip = page * context.sizeWithDefault
+      Ok(Json.toJson(limitedEndConnectedDiscourseNodes(skip, context.sizeWithDefault, relDefs: _*)))
     }.getOrElse(Ok(Json.toJson(endConnectedDiscourseNodes(relDefs: _*))))
   }
 }

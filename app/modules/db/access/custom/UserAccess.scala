@@ -13,11 +13,41 @@ import modules.requests._
 import play.api.libs.json._
 import play.api.mvc.Result
 import play.api.mvc.Results._
+import renesca.parameter.implicits._
 
 case class UserAccess() extends NodeReadBase[User] {
   val factory = User
 
   implicit val format = UserFormat.UserFormat
+
+  override def read(context: RequestContext) = {
+    val page = context.page.getOrElse(0)
+    val limit = context.sizeWithDefault
+    val skip = page * limit
+
+    implicit val ctx = new QueryContext
+    val userDef = FactoryNodeDef(User)
+    val scopeDef = FactoryNodeDef(Scope)
+    val hasKarmaDef = RelationDef(userDef, HasKarma, scopeDef)
+
+    val (aggregateOp, scopeCondition, scopeParams) = if (context.scopes.isEmpty)
+      ("sum", "", Map.empty)
+    else
+      ("sum", s"where ${scopeDef.name}.uuid in {scopeUuids}", Map("scopeUuids" -> context.scopes))
+
+    val query = s"""
+    match ${userDef.toQuery}
+    optional match ${ hasKarmaDef.toQuery(false, true) }
+    $scopeCondition
+    with ${userDef.name}, ${hasKarmaDef.name}, ${aggregateOp}(${hasKarmaDef.name}.karma) as karmaAggregate order by karmaAggregate DESC
+    return ${userDef.name}, ${hasKarmaDef.name}
+    """
+
+    val params = hasKarmaDef.parameterMap ++ scopeParams
+
+    val discourse = Discourse(db.queryGraph(query, params))
+    Ok(Json.toJson(discourse.users))
+  }
 
   override def update(context: RequestContext, uuid: String) = {
     context.withUser { user =>
@@ -42,7 +72,7 @@ case class UserContributions() extends RelationAccessDefault[User, Post] {
 
   override def read(context: RequestContext, param: ConnectParameter[User]) = {
     val page = context.page.getOrElse(0)
-    val limit = context.limit
+    val limit = context.sizeWithDefault
     val skip = page * limit
 
     implicit val ctx = new QueryContext
@@ -71,6 +101,7 @@ case class UserContributions() extends RelationAccessDefault[User, Post] {
 
 }
 
+//TODO: include in read users
 case class UserHasKarmaScopes() extends StartRelationAccessDefault[User, HasKarma, Scope] {
   val nodeFactory = Scope
 

@@ -32,8 +32,8 @@ trait FormattingNode[NODE <: UuidNode] {
 trait NodeReadBase[NODE <: UuidNode] extends NodeAccessDefault[NODE] with FormattingNode[NODE] {
   override def read(context: RequestContext) = {
     context.page.map { page =>
-      val skip = page * context.limit
-      Ok(Json.toJson(limitedDiscourseNodes(skip, context.limit, factory)._2))
+      val skip = page * context.sizeWithDefault
+      Ok(Json.toJson(limitedDiscourseNodes(skip, context.sizeWithDefault, factory)._2))
     }.getOrElse(Ok(Json.toJson(discourseNodes(factory)._2)))
   }
 

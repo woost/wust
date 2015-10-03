@@ -1,17 +1,28 @@
 angular.module("wust.components").controller("UserListsCtrl", UserListsCtrl);
 
-UserListsCtrl.$inject = ["User"];
+UserListsCtrl.$inject = ["$scope", "User", "ContextService"];
 
-function UserListsCtrl(User) {
+function UserListsCtrl($scope, User, ContextService) {
     let vm = this;
 
     let size = 20;
     let page = 0;
     vm.loadMore = loadMore;
-    vm.users = User.$search({page, size});
+    vm.users = User.$search(searchParams());
+
+    $scope.$on("context.changed", () => {
+        vm.users.$refresh(searchParams());
+    });
 
     function loadMore() {
         page++;
-        return vm.users.$fetch({page, size});
+        return vm.users.$fetch(searchParams());
+    }
+
+    function searchParams() {
+        return {
+            scopes: ContextService.currentContexts.map(c => c.id),
+            page, size
+        };
     }
 }
