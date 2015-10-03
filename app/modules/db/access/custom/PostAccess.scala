@@ -172,7 +172,7 @@ case class PostAccess() extends NodeAccessDefault[Post] {
       val userDef = ConcreteNodeDef(user)
       val votesDef = RelationDef(userDef, Votes, tagsDef)
       s"optional match ${votesDef.toPattern(true,false)}"
-    }.getOrElse(("", Map.empty))
+    }.getOrElse("")
 
     val query = s"""
     match ${nodeDef.toPattern}
@@ -183,6 +183,7 @@ case class PostAccess() extends NodeAccessDefault[Post] {
     optional match ${createdDef.toPattern(true, false)}
     return *
     """
+println(query)
 
     val discourse = Discourse(db.queryGraph(query, ctx.params))
     discourse.posts.headOption match {
