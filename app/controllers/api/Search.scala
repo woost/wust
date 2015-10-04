@@ -21,8 +21,8 @@ object Search extends Controller {
     val discourse = if(
       (tagsAll intersect tagsWithout).nonEmpty ||
       (classificationsAll intersect classificationsWithout).nonEmpty ||
-      (tagsAnyRaw.size > 0 && tagsAnyRaw.toSet == tagsWithout.toSet) ||
-      (classificationsAnyRaw.size > 0 && classificationsAnyRaw.toSet == classificationsWithout.toSet)
+      (tagsAnyRaw.size > 0 && tagsAnyRaw.toSet.subsetOf(tagsWithout.toSet)) ||
+      (classificationsAnyRaw.size > 0 && classificationsAnyRaw.toSet.subsetOf(classificationsWithout.toSet))
     ) {
       Discourse.empty
     } else {
