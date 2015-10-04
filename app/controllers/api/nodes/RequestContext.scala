@@ -44,29 +44,29 @@ case class ConnectParameter[+BASE <: UuidNode](
   baseUuid: String
   )
 
-trait HyperConnectParameter[START <: UuidNode, +RELATION <: UuidNode with AbstractRelation[START, END], END <: UuidNode] {
+trait HyperConnectParameter[START <: UuidNode, RELATION <: UuidNode with HyperRelation[START, _ <: Relation[START,RELATION], RELATION, _ <: Relation[RELATION,END], END], END <: UuidNode] {
   def baseUuid: String
   val startFactory: UuidNodeMatchesFactory[START]
   val startUuid: String
-  val factory: MatchableRelationFactory[START, RELATION, END] with UuidNodeMatchesFactory[RELATION]
+  val factory: MatchableRelationFactory[START, RELATION, END] with UuidNodeMatchesFactory[RELATION] with HyperRelationFactory[START,_ <: Relation[START,RELATION],RELATION,_ <: Relation[RELATION,END],END]
   val endFactory: UuidNodeMatchesFactory[END]
   val endUuid: String
 }
 
-case class StartHyperConnectParameter[START <: UuidNode, +RELATION <: UuidNode with AbstractRelation[START, END], END <: UuidNode](
+case class StartHyperConnectParameter[START <: UuidNode, RELATION <: UuidNode with HyperRelation[START, _ <: Relation[START,RELATION], RELATION, _ <: Relation[RELATION,END], END], END <: UuidNode](
   startFactory: UuidNodeMatchesFactory[START],
   startUuid: String,
-  factory: MatchableRelationFactory[START, RELATION, END] with UuidNodeMatchesFactory[RELATION],
+  factory: MatchableRelationFactory[START, RELATION, END] with UuidNodeMatchesFactory[RELATION] with HyperRelationFactory[START,_ <: Relation[START,RELATION],RELATION,_ <: Relation[RELATION,END],END],
   endFactory: UuidNodeMatchesFactory[END],
   endUuid: String
   ) extends HyperConnectParameter[START, RELATION, END] {
     def baseUuid = startUuid
 }
 
-case class EndHyperConnectParameter[START <: UuidNode, +RELATION <: UuidNode with AbstractRelation[START, END], END <: UuidNode](
+case class EndHyperConnectParameter[START <: UuidNode, RELATION <: UuidNode with HyperRelation[START, _ <: Relation[START,RELATION], RELATION, _ <: Relation[RELATION,END], END], END <: UuidNode](
   endFactory: UuidNodeMatchesFactory[END],
   endUuid: String,
-  factory: MatchableRelationFactory[START, RELATION, END] with UuidNodeMatchesFactory[RELATION],
+  factory: MatchableRelationFactory[START, RELATION, END] with UuidNodeMatchesFactory[RELATION] with HyperRelationFactory[START,_ <: Relation[START,RELATION],RELATION,_ <: Relation[RELATION,END],END],
   startFactory: UuidNodeMatchesFactory[START],
   startUuid: String
   ) extends HyperConnectParameter[START, RELATION, END] {

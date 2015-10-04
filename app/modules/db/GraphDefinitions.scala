@@ -113,7 +113,7 @@ END <: Node,
   def relationMatcher: String
 
   protected def nodeMatcher(nodeDefinition: NodeDef[_]) = nodeDefinition match {
-    case r: HyperNodeDef[_, _, _, _, _] => (Some(r.toPattern), s"(${ r.name })")
+    case r: HyperNodeDef[_, _, _, _, _, _, _] => (Some(r.toPattern), s"(${ r.name })")
     case r                                     => (None, r.toPattern)
   }
 
@@ -178,13 +178,15 @@ END <: Node,
 
 case class HyperNodeDef[
 START <: Node,
-RELATION <: AbstractRelation[START, END] with UuidNode,
+STARTREL <: Relation[START,RELATION],
+RELATION <: HyperRelation[START, STARTREL, RELATION, ENDREL, END] with UuidNode,
+ENDREL <: Relation[RELATION,END],
 END <: Node,
 STARTDEF <: NodeDef[START],
 ENDDEF <: NodeDef[END]
 ](
   startDefinition: STARTDEF,
-  factory: AbstractRelationFactory[START, RELATION, END] with NodeFactory[RELATION],
+  factory: HyperRelationFactory[START, STARTREL, RELATION, ENDREL, END],
   endDefinition: ENDDEF,
   nodeUuid: Option[String] = None)(implicit val ctx: QueryContext) extends HyperNodeDefBase[RELATION] with SingleRelationDefBase[START, RELATION, END, STARTDEF, ENDDEF] {
 

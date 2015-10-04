@@ -38,23 +38,23 @@ END <: UuidNode
 
 case class StartHyperConnectSchema[
 START <: UuidNode,
-RELATION <: AbstractRelation[START, END] with UuidNode,
+RELATION <: HyperRelation[START, _ <: Relation[START,RELATION], RELATION, _ <: Relation[RELATION,END], END] with UuidNode,
 END <: UuidNode
-](factory: MatchableRelationFactory[START, RELATION, END] with UuidNodeMatchesFactory[RELATION], op: StartRelationAccess[START, RELATION, END], connectSchemas: Map[String, ConnectSchema[RELATION]]) extends NodeSchemaBase[RELATION] with HyperConnectSchema[START]
+](factory: MatchableRelationFactory[START, RELATION, END] with UuidNodeMatchesFactory[RELATION] with HyperRelationFactory[START, _ <: Relation[START,RELATION], RELATION, _ <: Relation[RELATION,END], END], op: StartRelationAccess[START, RELATION, END], connectSchemas: Map[String, ConnectSchema[RELATION]]) extends NodeSchemaBase[RELATION] with HyperConnectSchema[START]
 
 case class EndHyperConnectSchema[
 START <: UuidNode,
-RELATION <: AbstractRelation[START, END] with UuidNode,
+RELATION <: HyperRelation[START, _ <: Relation[START,RELATION], RELATION, _ <: Relation[RELATION,END], END] with UuidNode,
 END <: UuidNode
-](factory: MatchableRelationFactory[START, RELATION, END] with UuidNodeMatchesFactory[RELATION], op: EndRelationAccess[START, RELATION, END], connectSchemas: Map[String, ConnectSchema[RELATION]]) extends NodeSchemaBase[RELATION] with HyperConnectSchema[END]
+](factory: MatchableRelationFactory[START, RELATION, END] with UuidNodeMatchesFactory[RELATION] with HyperRelationFactory[START, _ <: Relation[START,RELATION], RELATION, _ <: Relation[RELATION,END], END], op: EndRelationAccess[START, RELATION, END], connectSchemas: Map[String, ConnectSchema[RELATION]]) extends NodeSchemaBase[RELATION] with HyperConnectSchema[END]
 
 object dsl {
 
   class RightHyperFactoryHolder[
   START <: UuidNode,
-  RELATION <: AbstractRelation[START, END] with UuidNode,
+  RELATION <: HyperRelation[START, _ <: Relation[START,RELATION], RELATION, _ <: Relation[RELATION,END], END] with UuidNode,
   END <: UuidNode
-  ](factory: MatchableRelationFactory[START, RELATION, END] with UuidNodeMatchesFactory[RELATION]) {
+  ](factory: MatchableRelationFactory[START, RELATION, END] with UuidNodeMatchesFactory[RELATION] with HyperRelationFactory[START, _ <: Relation[START,RELATION], RELATION, _ <: Relation[RELATION,END], END]) {
     def >(op: StartRelationAccess[START, RELATION, END], connectSchemas: (String, ConnectSchema[RELATION])*) = {
       StartHyperConnectSchema(factory, op, connectSchemas.toMap)
     }
@@ -62,9 +62,9 @@ object dsl {
 
   class LeftHyperFactoryHolder[
   START <: UuidNode,
-  RELATION <: AbstractRelation[START, END] with UuidNode,
+  RELATION <: HyperRelation[START, _ <: Relation[START,RELATION], RELATION, _ <: Relation[RELATION,END], END] with UuidNode,
   END <: UuidNode
-  ](factory: MatchableRelationFactory[START, RELATION, END] with UuidNodeMatchesFactory[RELATION]) {
+  ](factory: MatchableRelationFactory[START, RELATION, END] with UuidNodeMatchesFactory[RELATION] with HyperRelationFactory[START, _ <: Relation[START,RELATION], RELATION, _ <: Relation[RELATION,END], END]) {
     def <(op: EndRelationAccess[START, RELATION, END], connectSchemas: (String, ConnectSchema[RELATION])*) = {
       EndHyperConnectSchema(factory, op, connectSchemas.toMap)
     }
@@ -153,17 +153,17 @@ object dsl {
 
     def >[
     START <: UuidNode,
-    RELATION <: AbstractRelation[START, END] with UuidNode,
+    RELATION <: HyperRelation[START, _ <: Relation[START,RELATION], RELATION, _ <: Relation[RELATION,END], END] with UuidNode,
     END <: UuidNode
-    ](factory: MatchableRelationFactory[START, RELATION, END] with UuidNodeMatchesFactory[RELATION]) = {
+    ](factory: MatchableRelationFactory[START, RELATION, END] with UuidNodeMatchesFactory[RELATION] with HyperRelationFactory[START, _ <: Relation[START,RELATION], RELATION, _ <: Relation[RELATION,END], END]) = {
       new RightHyperFactoryHolder(factory)
     }
 
     def <[
     START <: UuidNode,
-    RELATION <: AbstractRelation[START, END] with UuidNode,
+    RELATION <: HyperRelation[START, _ <: Relation[START,RELATION], RELATION, _ <: Relation[RELATION,END], END] with UuidNode,
     END <: UuidNode
-    ](factory: MatchableRelationFactory[START, RELATION, END] with UuidNodeMatchesFactory[RELATION]) = {
+    ](factory: MatchableRelationFactory[START, RELATION, END] with UuidNodeMatchesFactory[RELATION] with HyperRelationFactory[START, _ <: Relation[START,RELATION], RELATION, _ <: Relation[RELATION,END], END]) = {
       new LeftHyperFactoryHolder(factory)
     }
   }
