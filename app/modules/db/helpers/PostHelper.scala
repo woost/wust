@@ -38,6 +38,8 @@ object PostHelper {
     val discourse = Discourse(contribution)
     addScopesToGraph(discourse, request, node)
 
+    PostHelper.viewPost(node, user)
+
     discourse
   }
 

@@ -183,7 +183,6 @@ case class PostAccess() extends NodeAccessDefault[Post] {
     optional match ${createdDef.toPattern(true, false)}
     return *
     """
-println(query)
 
     val discourse = Discourse(db.queryGraph(query, ctx.params))
     discourse.posts.headOption match {
@@ -205,7 +204,6 @@ println(query)
         case Some(err) => BadRequest(s"Cannot create Post: $err")
         case None =>
           val post = discourse.posts.head
-          PostHelper.viewPost(post, user)
           Ok(Json.toJson(post))
 
       }
@@ -291,6 +289,8 @@ println(query)
         val discourse = Discourse(tx.queryGraph(query, ctx.params))
 
         discourse.posts.headOption.map { node =>
+          PostHelper.viewPost(node, user)
+
           val authorBoost = if (discourse.createds.isEmpty) 0 else Moderation.authorKarmaBoost
           val voteWeight = Moderation.voteWeightFromScopes(discourse.scopes)
           val applyThreshold = Moderation.postChangeThreshold(node.viewCount)
