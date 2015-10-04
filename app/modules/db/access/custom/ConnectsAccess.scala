@@ -48,7 +48,8 @@ case class StartConnectsAccess() extends StartRelationReadBase[Post, Connects, C
   implicit val format = GraphFormat.ConnectableFormat
 
   private def createRelation(context: RequestContext, param: ConnectParameter[Post], discourse: Discourse) = {
-    val node = discourse.connectables.head
+    //TODO: magic accessor for traits should include matches nodes
+    val node = discourse.connectables.headOption.getOrElse(discourse.nodesAs(ConnectableMatches).head)
     val base = param.factory.matchesOnUuid(param.baseUuid)
     discourse.add(base, node, factory.merge(base, node))
     persistRelation(discourse, node)
