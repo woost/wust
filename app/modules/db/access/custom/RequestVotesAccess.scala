@@ -4,7 +4,7 @@ import controllers.api.nodes.{HyperConnectParameter, ConnectParameter, RequestCo
 import model.WustSchema.{Created => SchemaCreated, _}
 import modules.db.Database._
 import modules.db._
-import modules.db.helpers.RequestHelper
+import modules.db.helpers.{RequestHelper,PostHelper}
 import modules.db.types._
 import modules.karma._
 import modules.db.access.{EndRelationAccessDefault, EndRelationAccess}
@@ -87,6 +87,9 @@ case class VotesChangeRequestAccess(sign: Long) extends EndRelationAccessDefault
       val discourse = Discourse(tx.queryGraph(query, ctx.params))
       discourse.changeRequests.headOption.map { request =>
         val helper = requestHelper(request)
+
+        PostHelper.viewPost(helper.post, user)
+
         val votes = discourse.votes.headOption
         votes.foreach(request.approvalSum -= _.weight)
 

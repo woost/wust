@@ -5,7 +5,7 @@ FocusCtrl.$inject = ["Helpers", "Post", "$stateParams", "$state", "HistoryServic
 function FocusCtrl(Helpers, Post, $stateParams, $state, HistoryService, ConnectedComponents, $q, $scope) {
     let vm = this;
 
-    let rootNodePromise = Post.$find($stateParams.id, { countView: true }).$then(rootNode => {
+    let rootNodePromise = Post.$find($stateParams.id).$then(rootNode => {
         vm.rootNodeLoaded = true;
         let rawRootNode = rootNode.encode();
         let graph = {

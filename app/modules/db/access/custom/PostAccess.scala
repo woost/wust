@@ -188,9 +188,7 @@ println(query)
     val discourse = Discourse(db.queryGraph(query, ctx.params))
     discourse.posts.headOption match {
       case Some(node) =>
-        if (context.countView)
-          context.user.foreach(PostHelper.viewPost(node, _))
-
+        context.user.foreach(PostHelper.viewPost(node, _))
         Ok(Json.toJson(node))
       case None =>
         NotFound(s"Cannot find node with uuid '$uuid'")
@@ -205,7 +203,11 @@ println(query)
       val discourse = PostHelper.createPost(request, user)
       db.transaction(_.persistChanges(discourse)) match {
         case Some(err) => BadRequest(s"Cannot create Post: $err")
-        case None => Ok(Json.toJson(discourse.posts.head))
+        case None =>
+          val post = discourse.posts.head
+          PostHelper.viewPost(post, user)
+          Ok(Json.toJson(post))
+
       }
     }.getOrElse(BadRequest("Cannot parse create request"))
   }

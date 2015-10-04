@@ -18,8 +18,6 @@ case class RequestContext(controller: NodesBase with Controller, user: Option[Us
   def skip = query.get("skip").map(_.toInt)
   def sizeWithDefault = size.getOrElse(15)
 
-  def countView = query.get("countView").map(_.toBoolean).getOrElse(false)
-
   def scopes = query.get("scopes").map(_.split(",").toSeq).getOrElse(Seq.empty)
 
   def jsonAs[T](implicit rds: play.api.libs.json.Reads[T]) = {
