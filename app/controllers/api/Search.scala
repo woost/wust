@@ -49,6 +49,7 @@ object Search extends Controller {
       val preQueries = mutable.ArrayBuffer.empty[String]
       val postMatches = mutable.ArrayBuffer.empty[String]
       val postConditions = mutable.ArrayBuffer.empty[String]
+      val lastQueries = mutable.ArrayBuffer.empty[String]
       var params:ParameterMap = Map.empty[PropertyKey,ParameterValue]
 
       if(termRegex.isDefined) {
@@ -124,7 +125,6 @@ object Search extends Controller {
         params += ("classificationsAnyUuids" -> classificationsAny)
       }
 
-      //TODO: FIXME: this does not work with more than one tag
       if(tagsWithout.nonEmpty) {
         //TODO: classification need to be matched on the outgoing connects relation of the post
         val inheritTagDef = FactoryNodeDef(Scope)
@@ -137,8 +137,10 @@ object Search extends Controller {
           with distinct *
           """
 
-          val relationDef = AnonRelationDef(inheritTagDef, SchemaTags, nodeDef)
-          postConditions += s"""not(${ relationDef.toPattern(false, false) })"""
+          val relationDef = RelationDef(inheritTagDef, SchemaTags, nodeDef)
+          postMatches += s"""optional match ${ relationDef.toPattern(false, false) }"""
+          lastQueries += s"""with ${nodeDef.name}, count(${relationDef.name}) as tagsWithoutCount
+          where tagsWithoutCount = 0"""
 
           params += ("tagsWithoutUuids" -> tagsWithout)
       }
@@ -154,6 +156,7 @@ object Search extends Controller {
       match ${ nodeDef.toPattern }
       ${postMatches.mkString("\n")}
       ${if(postConditions.nonEmpty) "where "+ postConditions.mkString("\nand ") else ""}
+      ${lastQueries.mkString("\n")}
       return $returnStatement
       """
 
