@@ -21,7 +21,7 @@ function UserListsCtrl($scope, User, ContextService) {
 
     function searchParams() {
         return {
-            scopes: ContextService.currentContexts.map(c => c.id).reduce((a,b) => a+","+b, undefined),
+            scopes: ContextService.currentContexts.length ? ContextService.currentContexts.map(c => c.id).reduce((a,b) => a+","+b) : undefined,
             page, size
         };
     }

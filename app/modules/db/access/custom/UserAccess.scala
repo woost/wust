@@ -30,33 +30,41 @@ case class UserAccess() extends NodeReadBase[User] {
     val scopeDef = FactoryNodeDef(Scope)
     val hasKarmaDef = RelationDef(userDef, HasKarma, scopeDef)
 
-    val (aggregateOp, scopeCondition, scopeParams) = if (context.scopes.isEmpty)
-      ("sum", "", Map.empty)
-    else
-      ("min", s"where ${scopeDef.name}.uuid in {scopeUuids}", Map("scopeUuids" -> context.scopes))
+    val discourse = if (context.scopes.isEmpty) {
+      val query = s"""
+      match ${ userDef.toPattern }
+      optional match ${ hasKarmaDef.toPattern(false, true) }
+      with ${userDef.name}, sum(
+        case ${hasKarmaDef.name}.karma
+          when null then 0
+          else ${hasKarmaDef.name}.karma
+        end
+      ) as karmaAggregate order by karmaAggregate DESC
+      optional match ${ hasKarmaDef.toPattern(false, true) }
+      return ${userDef.name}, ${hasKarmaDef.name}
+      """
 
-    val query = s"""
-    match ${ hasKarmaDef.toPattern(true, true) }
-    $scopeCondition
-    with ${userDef.name}, ${aggregateOp}(
-      case ${hasKarmaDef.name}.karma
-        when null then 0
-        else ${hasKarmaDef.name}.karma
-      end
-    ) as karmaAggregate order by karmaAggregate DESC
-    optional match ${ hasKarmaDef.toPattern(false, true) }
-    $scopeCondition
-    return ${userDef.name}, ${hasKarmaDef.name}
-    """
+      Discourse(db.queryGraph(query, ctx.params))
+    } else {
+      val query = s"""
+      match ${ hasKarmaDef.toPattern(true, true) }
+      where ${scopeDef.name}.uuid in {scopeUuids}
+      with ${userDef.name}, sum(${hasKarmaDef.name}.karma) as karmaAggregate, collect(${hasKarmaDef.name}) as karmaDefColl unwind karmaDefColl as karmaDef
+      with ${userDef.name}, karmaAggregate, karmaDefColl, karmaDef, length(karmaDefColl) as karmaDefLength
+      order by karmaAggregate DESC
+      where karmaDefLength = {scopeLength}
+      return ${userDef.name}, karmaDef
+      """
 
-    val params = ctx.params ++ scopeParams
-    val discourse = Discourse(db.queryGraph(query, params))
+      Discourse(db.queryGraph(query, ctx.params ++ Map("scopeUuids" -> context.scopes, "scopeLength" -> context.scopes.size)))
+    }
+
     //TODO: why is the order incorrect?
     // Ok(Json.toJson(discourse.users))
     Ok(Json.toJson(if (context.scopes.isEmpty)
       discourse.users.sortBy(- _.outRelationsAs(HasKarma).map(_.karma).sum)
     else
-      discourse.users.sortBy(- _.outRelationsAs(HasKarma).map(_.karma).padTo(1, 0L).min)
+      discourse.users.sortBy(- _.outRelationsAs(HasKarma).map(_.karma).min)
     ))
   }
 
