@@ -171,9 +171,14 @@ object Search extends Controller {
       // }
       // println((ctx.params ++ params).map{case(k,v) => (s"\\{$k\\}", parameterToString(v))}.foldLeft(query){case (z, (s,r)) => z.replaceAll(s, r)})
       // println("-"*30)
-      // Discourse(db.queryGraph(query, ctx.params ++ params))
-      // When Neo4j throws an error because the regexp is incorrect, return an empty Discourse instead
-      Try(Discourse(db.queryGraph(query, ctx.params ++ params))).getOrElse(Discourse.empty)
+      try{
+        // When Neo4j throws an error because the regexp is incorrect, return an empty Discourse instead
+        Discourse(db.queryGraph(query, ctx.params ++ params))
+      } catch {
+        case e:Exception =>
+          e.printStackTrace()
+          Discourse.empty
+      }
     }
 
     Ok(Json.toJson(
