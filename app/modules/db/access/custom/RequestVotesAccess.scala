@@ -266,18 +266,15 @@ trait VotesTagsChangeRequestHelper extends VotesChangeRequestHelper {
 
   protected def requestGraphApply(tx: QueryHandler) = {
     implicit val ctx = new QueryContext
-    val tagDef = FactoryNodeDef(Scope)
-    val classDef = FactoryNodeDef(Classification)
-requestToPostDef
+
     val reqToPostDef = requestToPostDef()
     val reqDef = reqToPostDef.startDefinition
-
-    val tagsDef = RelationDef(reqDef, ProposesTag, tagDef)
-    val classifiesDef = RelationDef(reqDef, ProposesClassify, classDef)
+    val tagsDef = RelationDef(reqDef, ProposesTag, FactoryNodeDef(Scope))
+    val classifiesDef = RelationDef(reqDef, ProposesClassify, FactoryNodeDef(Classification))
 
     //TODO: locking of other requests?
     val query = s"""
-    match ${requestToPostDef.toPattern}, ${tagsDef.toPattern(false, true)}
+    match ${reqToPostDef.toPattern}, ${tagsDef.toPattern(false, true)}
     where ${reqDef.name}.status = ${PENDING}
     optional match ${classifiesDef.toPattern(false, true)}
     return *
