@@ -1,6 +1,7 @@
 package modules.db.access.custom
 
 import controllers.api.nodes.RequestContext
+import controllers.live.LiveWebSocket
 import formatters.json.RequestFormat._
 import play.api.libs.json._
 import model.WustSchema.{Created => SchemaCreated, _}
@@ -268,6 +269,8 @@ case class PostAccess() extends NodeAccessDefault[Post] {
 
   override def update(context: RequestContext, uuid: String) = context.withUser { user =>
     import formatters.json.EditNodeFormat._
+
+    LiveWebSocket.sendUpdate(uuid)
 
     context.withJson { (request: PostUpdateRequest) =>
       db.transaction { tx =>

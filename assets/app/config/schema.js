@@ -1,11 +1,11 @@
 angular.module("wust.config").config(SchemaConfig);
 
-SchemaConfig.$inject = ["SchemaProvider", "DiscourseNodeProvider", "DiscourseNodeListProvider", "restmodProvider", "LiveProvider"];
+SchemaConfig.$inject = ["SchemaProvider", "DiscourseNodeProvider", "DiscourseNodeListProvider", "restmodProvider", "LiveServiceProvider"];
 
-function SchemaConfig(SchemaProvider, DiscourseNodeProvider, DiscourseNodeListProvider, restmodProvider, LiveProvider) {
+function SchemaConfig(SchemaProvider, DiscourseNodeProvider, DiscourseNodeListProvider, restmodProvider, LiveServiceProvider) {
     let schema = window.globals.schema;
 
-    LiveProvider.setBaseUrl(schema.api.websocketRoot);
+    LiveServiceProvider.setBaseUrl(schema.api.websocketRoot);
 
     restmodProvider.rebase({
         $config: {

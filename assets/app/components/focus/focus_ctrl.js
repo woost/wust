@@ -1,8 +1,8 @@
 angular.module("wust.components").controller("FocusCtrl", FocusCtrl);
 
-FocusCtrl.$inject = ["Helpers", "Post", "$stateParams", "$state", "HistoryService", "ConnectedComponents", "$q", "$scope"];
+FocusCtrl.$inject = ["Helpers", "Post", "$stateParams", "$state", "HistoryService", "ConnectedComponents", "$q", "$scope", "LiveService"];
 
-function FocusCtrl(Helpers, Post, $stateParams, $state, HistoryService, ConnectedComponents, $q, $scope) {
+function FocusCtrl(Helpers, Post, $stateParams, $state, HistoryService, ConnectedComponents, $q, $scope, LiveService) {
     let vm = this;
 
     let rootNodePromise = Post.$find($stateParams.id).$then(rootNode => {
@@ -30,6 +30,8 @@ function FocusCtrl(Helpers, Post, $stateParams, $state, HistoryService, Connecte
             response.nodes.forEach(n => vm.graphComponent.addNode(n));
             response.relations.forEach(r => vm.graphComponent.addRelation(r));
             vm.graphComponent.commit();
+
+            LiveService.registerNodes(vm.graphComponent.nodes);
         });
     }, () => vm.componentLoading = false);
 
