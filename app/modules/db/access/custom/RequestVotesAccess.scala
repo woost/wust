@@ -1,10 +1,11 @@
 package modules.db.access.custom
 
 import controllers.api.nodes.{HyperConnectParameter, ConnectParameter, RequestContext}
+import controllers.live.LiveWebSocket
 import model.WustSchema.{Created => SchemaCreated, _}
 import modules.db.Database._
 import modules.db._
-import modules.db.helpers.{RequestHelper,PostHelper}
+import modules.db.helpers.{RequestHelper,PostHelper,TaggedTaggable}
 import modules.db.types._
 import modules.karma._
 import modules.db.access.{EndRelationAccessDefault, EndRelationAccess}
@@ -116,8 +117,10 @@ case class VotesChangeRequestAccess(sign: Long) extends EndRelationAccessDefault
           case Right(ApplyResponse(changed, karmaDefinitionOpt)) =>
             request._locked = false
             val failure = tx.persistChanges(discourse)
-
             failure.map(_ => BadRequest("No vote :/")).getOrElse {
+              if (changed)
+                helper.sendEvent
+
               val nodeResponse = if (changed) Json.toJson(helper.post) else JsNull
               karmaDefinitionOpt.foreach(helper.updateKarma(_))
               Ok(JsObject(Seq(
@@ -155,6 +158,7 @@ trait VotesChangeRequestHelper {
   def applyChange(tx: QueryHandler, discourse: Discourse): Boolean
   def unapplyChange(tx: QueryHandler, discourse: Discourse): Boolean
   def updateKarma(karmaDefinition: KarmaDefinition): Unit
+  def sendEvent: Unit
 }
 
 //TODO: we need hyperrelation traits in magic in order to matches on the hyperrelation trait and get correct type: Relation+Node
@@ -198,6 +202,9 @@ class VotesUpdatedHelper(request: Updated) extends VotesChangeRequestHelper {
 
     KarmaUpdate.persistWithConnectedTags(karmaDefinition, KarmaQueryUserPost(userDef, postDef))
   }
+
+  //TODO should not use tagged taggable, but the tags/classifications of the post are calculated on the client via change requests
+  def sendEvent = LiveWebSocket.sendPostUpdate(TaggedTaggable.shapeResponse(post))
 }
 
 class VotesDeletedHelper(request: Deleted) extends VotesChangeRequestHelper {
@@ -231,6 +238,8 @@ class VotesDeletedHelper(request: Deleted) extends VotesChangeRequestHelper {
 
     KarmaUpdate.persistWithConnectedTagsOfHidden(karmaDefinition, KarmaQueryUserPost(userDef, postDef))
   }
+
+  def sendEvent = LiveWebSocket.sendPostDelete(post.uuid)
 }
 
 trait VotesTagsChangeRequestHelper extends VotesChangeRequestHelper {
@@ -292,6 +301,9 @@ requestToPostDef
 
     KarmaUpdate.persistWithProposedTags(karmaDefinition, KarmaQueryUserPost(userDef, postDef), tagsDef)
   }
+
+  //TODO should not use tagged taggable, but the tags/classifications of the post are calculated on the client via change requests
+  def sendEvent = LiveWebSocket.sendPostUpdate(TaggedTaggable.shapeResponse(post))
 }
 
 class VotesAddTagsHelper(protected val request: AddTags) extends VotesTagsChangeRequestHelper {

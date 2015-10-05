@@ -7,7 +7,7 @@ import play.api.libs.json._
 import model.WustSchema.{Created => SchemaCreated, _}
 import modules.db.Database._
 import modules.db.access._
-import modules.db.helpers.{PostHelper, RequestHelper}
+import modules.db.helpers.{PostHelper, RequestHelper, TaggedTaggable}
 import modules.db._
 import modules.requests._
 import renesca.parameter.implicits._
@@ -261,16 +261,16 @@ case class PostAccess() extends NodeAccessDefault[Post] {
           BadRequest("Cannot delete post")
         else if (deleted.status == PENDING)
           Ok(Json.toJson(post))
-        else
+        else {
+          LiveWebSocket.sendPostDelete(post.uuid)
           NoContent
+        }
       }.getOrElse(NotFound(s"Cannot find Post with uuid '$uuid'"))
     }
   }
 
   override def update(context: RequestContext, uuid: String) = context.withUser { user =>
     import formatters.json.EditNodeFormat._
-
-    LiveWebSocket.sendUpdate(uuid)
 
     context.withJson { (request: PostUpdateRequest) =>
       db.transaction { tx =>
@@ -311,9 +311,14 @@ case class PostAccess() extends NodeAccessDefault[Post] {
 
           addRequestTagsToGraph(tx, discourse, user, node, request, karmaProps)
 
+          //TODO should not use tagged taggable, but the tags/classifications of the post are calculated on the client via change requests
+
           tx.persistChanges(discourse) match {
             case Some(err) => BadRequest(s"Cannot update Post with uuid '$uuid': $err")
-            case _         => Ok(Json.toJson(node))
+            case _         =>
+              if (discourse.changeRequests.exists(_.status != PENDING))
+                LiveWebSocket.sendPostUpdate(TaggedTaggable.shapeResponse(node))
+              Ok(Json.toJson(node))
           }
         } getOrElse {
           BadRequest(s"Cannot find Post with uuid '$uuid'")

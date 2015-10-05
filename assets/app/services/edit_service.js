@@ -413,7 +413,7 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
         }
 
         promise.$then(response => {
-            HistoryService.addConnectToCurrentView(endNode.id, response);
+            HistoryService.addConnectToCurrentView(response, endNode.id);
         });
 
         return promise;
