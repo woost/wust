@@ -185,8 +185,8 @@ object Search extends Controller {
       ${postMatches.mkString("\n")}
       ${if(postConditions.nonEmpty) s"where ${postConditions.mkString("\nand ")}" else ""}
       ${if(lastWiths.nonEmpty) s"with ${nodeDef.name}, ${lastWiths.mkString(", ")}" else ""}
-      ${if(lastDistinct) s"with distinct ${nodeDef.name}" else ""}
       ${if(lastConditions.nonEmpty) s"where ${lastConditions.mkString("\nand ")}" else ""}
+      ${if(lastDistinct) s"with distinct ${nodeDef.name}" else ""}
       return $returnStatement
       """
 
