@@ -15,7 +15,7 @@ function smallPost(ContextService) {
         bindToController: true,
         link: function (scope, elem) {
             scope.currentContexts = ContextService.currentContexts;
-            scope.$on("context.changed", () => this.currentContexts = ContextService.currentContexts);
+            scope.$on("context.changed", () => scope.currentContexts = ContextService.currentContexts);
         }
     };
 }
