@@ -1,8 +1,8 @@
 angular.module("wust.components").controller("DashboardCtrl", DashboardCtrl);
 
-DashboardCtrl.$inject = ["DiscourseNode", "StreamService", "Search", "ContextService", "$scope"];
+DashboardCtrl.$inject = ["StreamService", "ContextService", "$scope"];
 
-function DashboardCtrl(DiscourseNode, StreamService, Search, ContextService, $scope) {
+function DashboardCtrl(StreamService, ContextService, $scope) {
     let vm = this;
 
     vm.streams = StreamService.streams;
@@ -17,13 +17,7 @@ function DashboardCtrl(DiscourseNode, StreamService, Search, ContextService, $sc
         accept: acceptDrop
     };
 
-    vm.recentPosts = Search.$search({
-        label: DiscourseNode.Post.label,
-        tagsAll: ContextService.currentContexts.map(c => c.id),
-        size: 30,
-        page: 0,
-        startPost: true
-    });
+    vm.recentPosts = StreamService.recentPosts;
 
     $scope.$on("context.changed", () => {
         vm.recentPosts.$refresh({

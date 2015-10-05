@@ -17,6 +17,7 @@ case class NodeRegister(nodes: List[String])
 case class ConnectableUpdate(connectable: Connectable)
 case class ConnectableDelete(connUuid: String)
 case class ConnectsAdd[NODE <: Connectable](baseUuid: String, response: ConnectResponse[NODE])
+case class DashboardUpdate()
 case class KarmaUpdate(karmaLogs: Seq[KarmaLog])
 
 case class OutEvent(kind: String, data: JsValue)
@@ -44,6 +45,11 @@ object LiveWebSocket {
 
   def sendConnectableUpdate(connectable: Connectable) = {
     registerNodesActor ! ConnectableUpdate(connectable)
+    registerUsersActor ! DashboardUpdate()
+  }
+
+  def sendPostAdd(post: Post) = {
+    registerUsersActor ! DashboardUpdate()
   }
 
   def sendConnectableDelete(connUuid: String) = {
@@ -52,6 +58,7 @@ object LiveWebSocket {
 
   def sendConnectsAdd[NODE <: Connectable](baseUuid: String, response: ConnectResponse[NODE]) = {
     registerNodesActor ! ConnectsAdd(baseUuid, response)
+    registerUsersActor ! DashboardUpdate()
   }
 
   def sendKarmaUpdate(karmaLogs: Seq[KarmaLog]) = {
@@ -125,6 +132,9 @@ class RegisterUsersActor extends DispatchActor {
           target ! OutEvent("karmalog", Json.toJson(karmaLogs))
         })
       }
+    case DashboardUpdate() =>
+      println("Got dashboard update trigger")
+      registeredListeners.values.flatten.foreach( _ ! OutEvent("dashboard", JsBoolean(true)))
   }
 }
 

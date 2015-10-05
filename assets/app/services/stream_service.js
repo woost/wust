@@ -1,8 +1,8 @@
 angular.module("wust.services").service("StreamService", StreamService);
 
-StreamService.$inject = ["Search", "DiscourseNode", "store", "Helpers"];
+StreamService.$inject = ["Search", "ContextService", "DiscourseNode", "store", "Helpers", "$state"];
 
-function StreamService(Search, DiscourseNode, store, Helpers) {
+function StreamService(Search, ContextService, DiscourseNode, store, Helpers, $state) {
     let streamStore = store.getNamespacedStore("stream");
     let self = this;
 
@@ -13,7 +13,16 @@ function StreamService(Search, DiscourseNode, store, Helpers) {
     this.remove = removeList;
     this.forget = clearList;
     this.refreshStream = refreshStream;
+    this.refreshDashboard = refreshDashboard;
     this.currentEditStream = undefined;
+
+    this.recentPosts = Search.$search({
+        label: DiscourseNode.Post.label,
+        tagsAll: ContextService.currentContexts.map(c => c.id),
+        size: 30,
+        page: 0,
+        startPost: true
+    });
 
     function restoreList() {
         _.each(streamStore.get("streams") || [], pushList);
@@ -47,6 +56,13 @@ function StreamService(Search, DiscourseNode, store, Helpers) {
             size: 20,
             page: 0,
         };
+    }
+
+    function refreshDashboard(event) {
+        if ($state.is("dashboard")) {
+            self.recentPosts.$refresh();
+            self.streams.forEach(s => s.posts.$refresh());
+        }
     }
 
     function refreshStream(stream) {

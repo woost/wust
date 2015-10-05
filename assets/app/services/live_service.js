@@ -1,4 +1,9 @@
-angular.module("wust.services").provider("LiveService", LiveService);
+angular.module("wust.services").provider("LiveService", LiveService)
+    .run(RunLive);
+
+RunLive.$inject = ["LiveService"];
+
+function RunLive(LiveService) {}
 
 LiveService.$inject = [];
 
@@ -8,17 +13,22 @@ function LiveService() {
 
     this.$get = get;
 
-    get.$inject = ["$rootScope", "HistoryService"];
-    function get($rootScope, HistoryService) {
+    get.$inject = ["$rootScope", "Auth", "HistoryService", "KarmaService", "StreamService"];
+    function get($rootScope, Auth, HistoryService, KarmaService, StreamService) {
         let url = currentUrl();
         let nodesSocket = new WebSocket(`${url}${baseUrl}/nodes`);
-        nodesSocket.onmessage = readEvent;
+        nodesSocket.onmessage = readNodeEvent;
+
+        if (Auth.current.userId) {
+            let usersSocket = new WebSocket(`${url}${baseUrl}/users/${Auth.current.userId}`);
+            usersSocket.onmessage = readUserEvent;
+        }
 
         return {
-            registerNodes, registerUser
+            registerNodes
         };
 
-        function readEvent(message) {
+        function readNodeEvent(message) {
             let event = JSON.parse(message.data);
             $rootScope.$apply(() => {
                 switch (event.kind) {
@@ -35,18 +45,23 @@ function LiveService() {
             });
         }
 
+        function readUserEvent(message) {
+            let event = JSON.parse(message.data);
+            $rootScope.$apply(() => {
+                switch (event.kind) {
+                    case "karmalog":
+                        KarmaService.updateKarma(event.data);
+                        break;
+                    case "dashboard":
+                        StreamService.refreshDashboard(event.data);
+                        break;
+                }
+            });
+        }
+
         function registerNodes(nodes) {
             //TODO: wait until open
             setTimeout(() => nodesSocket.send(JSON.stringify({nodes: nodes.map(n => n.id)})), 50);
-        }
-
-        //TODO deregister?
-        function registerUser(userId, onMessage) {
-            let usersSocket = new WebSocket(`${url}${baseUrl}/users/${userId}`);
-            usersSocket.onmessage = (message) => {
-                let event = JSON.parse(message.data);
-                onMessage(event);
-            };
         }
     }
 

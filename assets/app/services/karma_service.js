@@ -1,11 +1,12 @@
 angular.module("wust.services").service("KarmaService", KarmaService);
 
-KarmaService.$inject = ["User", "Auth", "LiveService", "$rootScope"];
+KarmaService.$inject = ["User", "Auth", "$rootScope"];
 
-function KarmaService(User, Auth, LiveService, $rootScope) {
+function KarmaService(User, Auth, $rootScope) {
     let self = this;
 
     this.refreshKarma = refreshKarma;
+    this.updateKarma = updateKarma;
     this.karmaInContext = karmaInContext;
     this.voteWeightInContexts = voteWeightInContexts;
     this.karma = {
@@ -14,7 +15,6 @@ function KarmaService(User, Auth, LiveService, $rootScope) {
     };
 
     refreshKarma();
-    registerEvent();
 
     function karmaInContext(context) {
         let found = _.find(self.karma.contexts, t => t.id === context.id);
@@ -26,32 +26,25 @@ function KarmaService(User, Auth, LiveService, $rootScope) {
         return wust.Moderation().voteWeight(sum);
     }
 
-    function registerEvent() {
-        if ( Auth.current.userId ) {
-            LiveService.registerUser(Auth.current.userId, event => {
-                switch (event.kind) {
-                    case "karmalog":
-                        let contexts = _.uniq(_.flatten(event.data.map(log => {
-                            return log.contexts.map(c => {
-                                let exist = _.find(self.karma.contexts, {id: c.id}) || c;
-                                if (exist.karma === undefined)
-                                    exist.karma = 0;
+    function updateKarma(data) {
+        let contexts = _.uniq(_.flatten(data.map(log => {
+            return log.contexts.map(c => {
+                let exist = _.find(self.karma.contexts, {id: c.id}) || c;
+                if (exist.karma === undefined)
+                    exist.karma = 0;
 
-                                exist.karma += log.karmaChange;
-                                return exist;
-                            });
-                        })).concat(self.karma.contexts), "id");
-                        updateStats(contexts);
-                        break;
-                }
+                exist.karma += log.karmaChange;
+                return exist;
             });
-        }
+        })).concat(self.karma.contexts), "id");
+
+        updateStats(contexts);
     }
 
     function updateStats(contexts) {
         self.karma.contexts = contexts;
         self.karma.sum = contexts.length ? _.map(contexts, r => r.karma).reduce((a,b) => a+b) : 0;
-        $rootScope.$apply(() => $rootScope.$broadcast("karma.changed"));
+        $rootScope.$broadcast("karma.changed");
     }
 
     function refreshKarma() {

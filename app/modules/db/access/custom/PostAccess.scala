@@ -205,6 +205,7 @@ case class PostAccess() extends NodeAccessDefault[Post] {
         case Some(err) => BadRequest(s"Cannot create Post: $err")
         case None =>
           val post = discourse.posts.head
+          LiveWebSocket.sendPostAdd(post)
           Ok(Json.toJson(post))
 
       }
