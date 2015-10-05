@@ -103,10 +103,10 @@ object Search extends Controller {
         """
 
         lastWiths += s"""count(${connectsDef.name}) + count(${tagsDef.name}) as classificationsAllMatched"""
-        lastConditions += s"""classificationsAllMatched >= {classificationAllCount}"""
+        lastConditions += s"""classificationsAllMatched >= {classificationsAllCount}"""
 
         params += ("classificationsAllUuids" -> classificationsAll)
-        params += ("classificationAllCount" -> classificationsAll.size)
+        params += ("classificationsAllCount" -> classificationsAll.size)
       }
 
       if(contextsAny.nonEmpty) {
@@ -171,6 +171,30 @@ object Search extends Controller {
           lastConditions += s"""contextsWithoutCount = 0"""
 
           params += ("contextsWithoutUuids" -> contextsWithout)
+      }
+
+      if(classificationsWithout.nonEmpty) {
+        val classificationDef = FactoryNodeDef(Classification)
+        preQueries += s"""
+        match ${classificationDef.toPattern}
+        where ${classificationDef.name}.uuid in {classificationsWithoutUuids}
+        with *
+        """
+
+        val connectsDef = HyperNodeDef(nodeDef, Connects, FactoryNodeDef(Post))
+        val classifiesConnectsDef = AnonRelationDef(classificationDef, Classifies, connectsDef)
+        val tagsDef = HyperNodeDef(FactoryNodeDef(Scope), SchemaTags, nodeDef)
+        val classifiesTagsDef = AnonRelationDef(classificationDef, Classifies, tagsDef)
+        postMatches += s"""
+        optional match ${connectsDef.toPattern(false, true)}, ${ classifiesConnectsDef.toPattern(false) }
+        optional match ${tagsDef.toPattern(true, false)}, ${ classifiesTagsDef.toPattern(false) }
+        with *
+        """
+
+        lastWiths += s"""count(${connectsDef.name}) + count(${tagsDef.name}) as classificationsWithoutMatched"""
+        lastConditions += s"""classificationsWithoutMatched = 0"""
+
+        params += ("classificationsWithoutUuids" -> classificationsWithout)
       }
 
       val returnPostfix = sizeOpt.map { limit =>
