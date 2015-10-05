@@ -15,7 +15,7 @@ function LiveService() {
         nodesSocket.onmessage = readEvent;
 
         return {
-            registerNodes
+            registerNodes, registerUser
         };
 
         function readEvent(message) {
@@ -38,6 +38,15 @@ function LiveService() {
         function registerNodes(nodes) {
             //TODO: wait until open
             setTimeout(() => nodesSocket.send(JSON.stringify({nodes: nodes.map(n => n.id)})), 50);
+        }
+
+        //TODO deregister?
+        function registerUser(userId, onMessage) {
+            let usersSocket = new WebSocket(`${url}${baseUrl}/users/${userId}`);
+            usersSocket.onmessage = (message) => {
+                let event = JSON.parse(message.data);
+                onMessage(event);
+            };
         }
     }
 

@@ -1,5 +1,6 @@
 package modules.karma
 
+import controllers.live.LiveWebSocket
 import modules.db.Database.db
 import model.Helpers
 import model.WustSchema._
@@ -41,8 +42,8 @@ object KarmaUpdate {
 
       val query = s"""
       match ${ karmaQuery.matcher }
-      create (${karmaQuery.userDef.name})-[:`${KarmaLog.startRelationType}`]->(karmaLog $logLabels {karmaProps})-[:`${KarmaLog.endRelationType}`]->(${karmaQuery.postDef.name})
-      with ${karmaQuery.userDef.name}, ${karmaQuery.postDef.name}, karmaLog
+      create (${karmaQuery.userDef.name})-[karmaLog1:`${KarmaLog.startRelationType}`]->(karmaLog $logLabels {karmaProps})-[karmaLog2:`${KarmaLog.endRelationType}`]->(${karmaQuery.postDef.name})
+      with ${karmaQuery.userDef.name}, ${karmaQuery.postDef.name}, karmaLog, karmaLog1, karmaLog2
       ${ karmaTagQuery.matcher }
       merge (${karmaQuery.userDef.name})-[r:`${HasKarma.relationType}`]->(${karmaTagQuery.tagDef.name})
       on create set r.karma = {karmaProps}.karmaChange
@@ -61,8 +62,11 @@ object KarmaUpdate {
       )
 
       try {
-        val d = tx.queryGraph(query, params)
-        println(d)
+        val discourse = Discourse(tx.queryGraph(query, params))
+
+        println(discourse)
+        LiveWebSocket.sendKarmaUpdate(discourse.karmaLogs)
+
       } catch {
         case e: Exception => println("EXCEPTION WHILE UPDATING KARMA:\n" + e)
       }
@@ -86,9 +90,9 @@ object KarmaUpdate {
 
     val tagMatch = s"""
     match (${karmaQuery.postDef.name})-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)
-    with distinct connectable, ${karmaQuery.userDef.name}, ${karmaQuery.postDef.name}, karmaLog
+    with distinct connectable, ${karmaQuery.userDef.name}, ${karmaQuery.postDef.name}, karmaLog, karmaLog1, karmaLog2
     match ${tagDef.toPattern}-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`)
-    with distinct ${tagDef.name}, ${karmaQuery.userDef.name}, ${karmaQuery.postDef.name}, karmaLog
+    with distinct ${tagDef.name}, ${karmaQuery.userDef.name}, ${karmaQuery.postDef.name}, karmaLog, karmaLog1, karmaLog2
     """
 
     val karmaTagQuery = KarmaTagQuery(tagDef, tagMatch)
@@ -100,10 +104,10 @@ object KarmaUpdate {
 
     val tagMatch = s"""
     optional match (${karmaQuery.postDef.name})-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)
-    with distinct connectable, ${karmaQuery.userDef.name}, ${karmaQuery.postDef.name}, karmaLog
+    with distinct connectable, ${karmaQuery.userDef.name}, ${karmaQuery.postDef.name}, karmaLog, karmaLog1, karmaLog2
     match ${tagDef.toPattern}
     where (${tagDef.name})-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`) or (${tagDef.name})-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(${karmaQuery.postDef.name})
-    with distinct ${tagDef.name}, ${karmaQuery.userDef.name}, ${karmaQuery.postDef.name}, karmaLog
+    with distinct ${tagDef.name}, ${karmaQuery.userDef.name}, ${karmaQuery.postDef.name}, karmaLog, karmaLog1, karmaLog2
     """
 
     val karmaTagQuery = KarmaTagQuery(tagDef, tagMatch)

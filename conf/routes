@@ -8,7 +8,8 @@ GET /assets/*file controllers.Assets.versioned(path="/public", file:Asset)
 -> /api/v1 api.Routes
 
 # websocket endpoint
-GET /live/v1/nodes controllers.live.LiveWebSocket.socket()
+GET /live/v1/nodes controllers.live.LiveWebSocket.nodeSocket()
+GET /live/v1/users/:uuid controllers.live.LiveWebSocket.userSocket(uuid: String)
 
 # Redirect all unknown routes to the index page
 GET /*any controllers.Application.index(any)

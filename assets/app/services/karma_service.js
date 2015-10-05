@@ -1,8 +1,8 @@
 angular.module("wust.services").service("KarmaService", KarmaService);
 
-KarmaService.$inject = ["User", "Auth", "$rootScope"];
+KarmaService.$inject = ["User", "Auth", "LiveService", "$rootScope"];
 
-function KarmaService(User, Auth, $rootScope) {
+function KarmaService(User, Auth, LiveService, $rootScope) {
     let self = this;
 
     this.refreshKarma = refreshKarma;
@@ -14,6 +14,7 @@ function KarmaService(User, Auth, $rootScope) {
     };
 
     refreshKarma();
+    registerEvent();
 
     function karmaInContext(context) {
         let found = _.find(self.karma.contexts, t => t.id === context.id);
@@ -25,12 +26,38 @@ function KarmaService(User, Auth, $rootScope) {
         return wust.Moderation().voteWeight(sum);
     }
 
+    function registerEvent() {
+        if ( Auth.current.userId ) {
+            LiveService.registerUser(Auth.current.userId, event => {
+                switch (event.kind) {
+                    case "karmalog":
+                        let contexts = _.uniq(_.flatten(event.data.map(log => {
+                            return log.contexts.map(c => {
+                                let exist = _.find(self.karma.contexts, {id: c.id}) || c;
+                                if (exist.karma === undefined)
+                                    exist.karma = 0;
+
+                                exist.karma += log.karmaChange;
+                                return exist;
+                            });
+                        })).concat(self.karma.contexts), "id");
+                        updateStats(contexts);
+                        break;
+                }
+            });
+        }
+    }
+
+    function updateStats(contexts) {
+        self.karma.contexts = contexts;
+        self.karma.sum = contexts.length ? _.map(contexts, r => r.karma).reduce((a,b) => a+b) : 0;
+        $rootScope.$apply(() => $rootScope.$broadcast("karma.changed"));
+    }
+
     function refreshKarma() {
         if ( Auth.current.userId ) {
             User.$buildRaw({id: Auth.current.userId}).karmaContexts.$search().$then(response => {
-                self.karma.contexts = response;
-                self.karma.sum = response.length ? _.map(response, r => r.karma).reduce((a,b) => a+b) : 0;
-                $rootScope.$broadcast("karma.changed");
+                updateStats(response);
             });
         }
     }
