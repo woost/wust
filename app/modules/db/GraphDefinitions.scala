@@ -35,7 +35,7 @@ sealed trait GraphDefinition {
 }
 
 sealed trait NamedGraphDefinition extends GraphDefinition {
-  final val name = ctx.newVariable
+  val name = ctx.newVariable
 }
 
 sealed trait NodeDef[+NODE <: Node] extends NamedGraphDefinition

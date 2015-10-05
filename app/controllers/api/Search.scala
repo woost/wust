@@ -49,7 +49,9 @@ object Search extends Controller {
       val preQueries = mutable.ArrayBuffer.empty[String]
       val postMatches = mutable.ArrayBuffer.empty[String]
       val postConditions = mutable.ArrayBuffer.empty[String]
-      val lastQueries = mutable.ArrayBuffer.empty[String]
+      val lastWiths = mutable.ArrayBuffer.empty[String]
+      val lastConditions = mutable.ArrayBuffer.empty[String]
+      var lastDistinct = false
       var params:ParameterMap = Map.empty[PropertyKey,ParameterValue]
 
       if(termRegex.isDefined) {
@@ -67,8 +69,9 @@ object Search extends Controller {
         postMatches += s"match ${ tagsDef.toPattern }"
       }
 
+      //TODO: FIXME: Wrong for classificationsAll + classificationsAny + tagsAny
+
       if(tagsAll.nonEmpty) {
-        //TODO: classification need to be matched on the outgoing connects relation of the post
         val tagDefs = tagsAll.map(uuid => FactoryUuidNodeDef(Scope, uuid))
         val inheritTagDefs = tagsAll.map(_ => FactoryNodeDef(Scope))
         val tagDefinitions = (tagDefs zip inheritTagDefs).map { case (t, i) => s"${ i.toPattern }-[:`${ Inherits.relationType }`*0..10]->${ t.toPattern }" }.mkString(",")
@@ -81,8 +84,32 @@ object Search extends Controller {
         postMatches += s"""match ${ relationDefs.map(_.toPattern(false)).mkString(",") }"""
       }
 
+      if(classificationsAll.nonEmpty) {
+        val classificationDef = FactoryNodeDef(Classification)
+        preQueries += s"""
+        match ${classificationDef.toPattern}
+        where ${classificationDef.name}.uuid in {classificationsAllUuids}
+        with *
+        """
+
+        val connectsDef = HyperNodeDef(nodeDef, Connects, FactoryNodeDef(Post))
+        val classifiesConnectsDef = AnonRelationDef(classificationDef, Classifies, connectsDef)
+        val tagsDef = HyperNodeDef(FactoryNodeDef(Scope), SchemaTags, nodeDef)
+        val classifiesTagsDef = AnonRelationDef(classificationDef, Classifies, tagsDef)
+        postMatches += s"""
+        optional match ${connectsDef.toPattern(false, true)}, ${ classifiesConnectsDef.toPattern(false) }
+        optional match ${tagsDef.toPattern(true, false)}, ${ classifiesTagsDef.toPattern(false) }
+        with *
+        """
+
+        lastWiths += s"""count(${connectsDef.name}) + count(${tagsDef.name}) as classificationsAllMatched"""
+        lastConditions += s"""classificationsAllMatched >= {classificationAllCount}"""
+
+        params += ("classificationsAllUuids" -> classificationsAll)
+        params += ("classificationAllCount" -> classificationsAll.size)
+      }
+
       if(tagsAny.nonEmpty) {
-        //TODO: classification need to be matched on the outgoing connects relation of the post
         val inheritTagDef = FactoryNodeDef(Scope)
         val tagDef = FactoryNodeDef(Scope)
         val tagDefinition = s"${ inheritTagDef.toPattern }-[:`${ Inherits.relationType }`*0..10]->${ tagDef.toPattern }"
@@ -93,14 +120,13 @@ object Search extends Controller {
           with distinct *
           """
 
-          val relationDef = AnonRelationDef(inheritTagDef, SchemaTags, nodeDef)
-          postMatches += s"""match ${ relationDef.toPattern(false, false) }"""
+          val relationDef = new RelationDef(inheritTagDef, SchemaTags, nodeDef) { override val name = "tagsAnytags"}
+          postMatches += s"""${if(classificationsAny.nonEmpty) "optional" else ""} match ${ relationDef.toPattern(false, false) }"""
 
           params += ("tagsAnyUuids" -> tagsAny)
       }
 
       if(classificationsAny.nonEmpty) {
-        //TODO: classification need to be matched on the outgoing connects relation of the post
         val classificationDef = FactoryNodeDef(Classification)
         preQueries += s"""
         match ${classificationDef.toPattern}
@@ -120,27 +146,29 @@ object Search extends Controller {
         postConditions += s"""(
           (${connectsDef.endName} is not null and ${ classifiesConnectsDef.toPattern(false) })
           or (${tagsDef.startName} is not null and ${ classifiesTagsDef.toPattern(false) })
+          ${if(tagsAny.nonEmpty) "or (tagsAnytags is not null)" else ""}
         )"""
+
+        if(tagsAny.nonEmpty) lastDistinct = true
 
         params += ("classificationsAnyUuids" -> classificationsAny)
       }
 
       if(tagsWithout.nonEmpty) {
-        //TODO: classification need to be matched on the outgoing connects relation of the post
         val inheritTagDef = FactoryNodeDef(Scope)
         val tagDef = FactoryNodeDef(Scope)
         val tagDefinition = s"${ inheritTagDef.toPattern }-[:`${ Inherits.relationType }`*0..10]->${ tagDef.toPattern }"
         preQueries +=
           s"""
           match ${ tagDefinition }
-          where (${ tagDef.name }.uuid in {tagsWithoutUuids})
+          where ${ tagDef.name }.uuid in {tagsWithoutUuids}
           with distinct *
           """
 
           val relationDef = RelationDef(inheritTagDef, SchemaTags, nodeDef)
           postMatches += s"""optional match ${ relationDef.toPattern(false, false) }"""
-          lastQueries += s"""with ${nodeDef.name}, count(${relationDef.name}) as tagsWithoutCount
-          where tagsWithoutCount = 0"""
+          lastWiths += s"""count(${relationDef.name}) as tagsWithoutCount"""
+          lastConditions += s"""tagsWithoutCount = 0"""
 
           params += ("tagsWithoutUuids" -> tagsWithout)
       }
@@ -155,22 +183,24 @@ object Search extends Controller {
       ${preQueries.mkString("\n\n")}
       match ${ nodeDef.toPattern }
       ${postMatches.mkString("\n")}
-      ${if(postConditions.nonEmpty) "where "+ postConditions.mkString("\nand ") else ""}
-      ${lastQueries.mkString("\n")}
+      ${if(postConditions.nonEmpty) s"where ${postConditions.mkString("\nand ")}" else ""}
+      ${if(lastWiths.nonEmpty) s"with ${nodeDef.name}, ${lastWiths.mkString(", ")}" else ""}
+      ${if(lastDistinct) s"with distinct ${nodeDef.name}" else ""}
+      ${if(lastConditions.nonEmpty) s"where ${lastConditions.mkString("\nand ")}" else ""}
       return $returnStatement
       """
 
-      // println("-"*30)
+      println("-"*30)
       // println(query)
       // println(ctx.params ++ params)
-      // def parameterToString(p:Any):String = p match {
-      //   // case array:List[String] => s"[${array.map(parameterToString).mkString(",")}]"
-      //   case ArrayParameterValue(array) => s"[${array.map(parameterToString).mkString(",")}]"
-      //   case StringPropertyValue(str) => s""""${str}""""
-      //   case v => v.toString
-      // }
-      // println((ctx.params ++ params).map{case(k,v) => (s"\\{$k\\}", parameterToString(v))}.foldLeft(query){case (z, (s,r)) => z.replaceAll(s, r)})
-      // println("-"*30)
+      def parameterToString(p:Any):String = p match {
+        // case array:List[String] => s"[${array.map(parameterToString).mkString(",")}]"
+        case ArrayParameterValue(array) => s"[${array.map(parameterToString).mkString(",")}]"
+        case StringPropertyValue(str) => s""""${str}""""
+        case v => v.toString
+      }
+      println((ctx.params ++ params).map{case(k,v) => (s"\\{$k\\}", parameterToString(v))}.foldLeft(query){case (z, (s,r)) => z.replaceAll(s, r)})
+      println("-"*30)
       try{
         // When Neo4j throws an error because the regexp is incorrect, return an empty Discourse instead
         Discourse(db.queryGraph(query, ctx.params ++ params))
