@@ -60,8 +60,8 @@ function withoutTags(tags, ignore) {
     return _.reject(tags, t => _.contains(ignoreIds, t.id));
 }
 
-function sortedNodeTags(node, ignore = []) {
-    let classifications = _.uniq(node.classifications.concat(_.flatten(_.map(node.tags, "classifications"))), "id");
+function sortedNodeTags(node) {
+    let classifications = _.uniq(node.classifications.concat(_.flatten(node.tags.map(t => t.classifications || []))), "id");
     return sortByIdQuality(withoutTags(classifications,ignore)).concat(sortByIdQuality(withoutTags(node.tags, ignore)));
 }
 
