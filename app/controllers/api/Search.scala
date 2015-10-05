@@ -69,19 +69,25 @@ object Search extends Controller {
         postMatches += s"match ${ tagsDef.toPattern }"
       }
 
-      //TODO: FIXME: Wrong for classificationsAll + classificationsAny + contextsAny
-
       if(contextsAll.nonEmpty) {
-        val contextDefs = contextsAll.map(uuid => FactoryUuidNodeDef(Scope, uuid))
-        val inheritContextDefs = contextsAll.map(_ => FactoryNodeDef(Scope))
-        val tagDefinitions = (contextDefs zip inheritContextDefs).map { case (t, i) => s"${ i.toPattern }-[:`${ Inherits.relationType }`*0..10]->${ t.toPattern }" }.mkString(",")
-        preQueries += s"""
-        match ${ tagDefinitions }
-        with distinct *
-        """
+        val inheritContextDef = FactoryNodeDef(Scope)
+        val contextDef = FactoryNodeDef(Scope)
+        val contextPattern = s"${ inheritContextDef.toPattern }-[:`${ Inherits.relationType }`*0..10]->${ contextDef.toPattern }"
+        preQueries +=
+          s"""
+          match ${ contextPattern }
+          where ${ contextDef.name }.uuid in {contextsAllUuids}
+          with distinct *
+          """
 
-        val relationDefs = inheritContextDefs.map(tagDef => RelationDef(tagDef, SchemaTags, nodeDef))
-        postMatches += s"""match ${ relationDefs.map(_.toPattern(false)).mkString(",") }"""
+        val tagsDef = RelationDef(inheritContextDef, SchemaTags, nodeDef)
+        postMatches += s"""match ${ tagsDef.toPattern(false) }"""
+
+        lastWiths += s"""count(${tagsDef.name}) as contextsAllMatchCount"""
+        lastConditions += s"""contextsAllMatchCount >= {contextsAllCount}"""
+
+        params += ("contextsAllUuids" -> contextsAll)
+        params += ("contextsAllCount" -> contextsAll.size)
       }
 
       if(classificationsAll.nonEmpty) {
@@ -102,26 +108,26 @@ object Search extends Controller {
         with *
         """
 
-        lastWiths += s"""count(${connectsDef.name}) + count(${tagsDef.name}) as classificationsAllMatched"""
-        lastConditions += s"""classificationsAllMatched >= {classificationsAllCount}"""
+        lastWiths += s"""count(${connectsDef.name}) + count(${tagsDef.name}) as classificationsAllMatchCount"""
+        lastConditions += s"""classificationsAllMatchCount >= {classificationsAllCount}"""
 
         params += ("classificationsAllUuids" -> classificationsAll)
         params += ("classificationsAllCount" -> classificationsAll.size)
       }
 
       if(contextsAny.nonEmpty) {
-        val inheritTagDef = FactoryNodeDef(Scope)
-        val tagDef = FactoryNodeDef(Scope)
-        val tagDefinition = s"${ inheritTagDef.toPattern }-[:`${ Inherits.relationType }`*0..10]->${ tagDef.toPattern }"
+        val inheritContextDef = FactoryNodeDef(Scope)
+        val contextDef = FactoryNodeDef(Scope)
+        val contextPattern = s"${ inheritContextDef.toPattern }-[:`${ Inherits.relationType }`*0..10]->${ contextDef.toPattern }"
         preQueries +=
           s"""
-          match ${ tagDefinition }
-          where (${ tagDef.name }.uuid in {contextsAnyUuids})
+          match ${ contextPattern }
+          where ${ contextDef.name }.uuid in {contextsAnyUuids}
           with distinct *
           """
 
-          val relationDef = new RelationDef(inheritTagDef, SchemaTags, nodeDef) { override val name = "contextsAnytags"}
-          postMatches += s"""${if(classificationsAny.nonEmpty) "optional" else ""} match ${ relationDef.toPattern(false, false) }"""
+          val tagsDef = new RelationDef(inheritContextDef, SchemaTags, nodeDef) { override val name = "contextsAnytags"}
+          postMatches += s"""${if(classificationsAny.nonEmpty) "optional" else ""} match ${ tagsDef.toPattern(false, false) }"""
 
           params += ("contextsAnyUuids" -> contextsAny)
       }
@@ -155,19 +161,19 @@ object Search extends Controller {
       }
 
       if(contextsWithout.nonEmpty) {
-        val inheritTagDef = FactoryNodeDef(Scope)
-        val tagDef = FactoryNodeDef(Scope)
-        val tagDefinition = s"${ inheritTagDef.toPattern }-[:`${ Inherits.relationType }`*0..10]->${ tagDef.toPattern }"
+        val inheritContextDef = FactoryNodeDef(Scope)
+        val contextDef = FactoryNodeDef(Scope)
+        val contextPattern = s"${ inheritContextDef.toPattern }-[:`${ Inherits.relationType }`*0..10]->${ contextDef.toPattern }"
         preQueries +=
           s"""
-          match ${ tagDefinition }
-          where ${ tagDef.name }.uuid in {contextsWithoutUuids}
+          match ${ contextPattern }
+          where ${ contextDef.name }.uuid in {contextsWithoutUuids}
           with distinct *
           """
 
-          val relationDef = RelationDef(inheritTagDef, SchemaTags, nodeDef)
-          postMatches += s"""optional match ${ relationDef.toPattern(false, false) }"""
-          lastWiths += s"""count(${relationDef.name}) as contextsWithoutCount"""
+          val tagsDef = RelationDef(inheritContextDef, SchemaTags, nodeDef)
+          postMatches += s"""optional match ${ tagsDef.toPattern(false, false) }"""
+          lastWiths += s"""count(${tagsDef.name}) as contextsWithoutCount"""
           lastConditions += s"""contextsWithoutCount = 0"""
 
           params += ("contextsWithoutUuids" -> contextsWithout)
@@ -191,8 +197,8 @@ object Search extends Controller {
         with *
         """
 
-        lastWiths += s"""count(${connectsDef.name}) + count(${tagsDef.name}) as classificationsWithoutMatched"""
-        lastConditions += s"""classificationsWithoutMatched = 0"""
+        lastWiths += s"""count(${connectsDef.name}) + count(${tagsDef.name}) as classificationsWithoutMatchCount"""
+        lastConditions += s"""classificationsWithoutMatchCount = 0"""
 
         params += ("classificationsWithoutUuids" -> classificationsWithout)
       }
