@@ -241,7 +241,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     //TODO: do it with d3 data-joins, or directly with the angular-port
                     if(d.isHyperRelation) {
                         let elem = document.createElement("span");
-                        _.values(Helpers.sortedNodeTags(d)).forEach(t => {
+                        let tags = Helpers.sortedNodeTags(d);
+                        tags.forEach(t => {
                             let tagLabel = document.createElement("span");
                             tagLabel.className = "tag-label nodetag";
 
@@ -266,7 +267,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                         let circleCont = document.createElement("span");
                         circleCont.className = "tag_circle_container pull-right";
                         elem.appendChild(circleCont);
-                        _.values(d.tags).forEach(t => {
+                        d.tags.forEach(t => {
                             let circleTitle = document.createElement("span");
                             circleTitle.className = "tag_circle_title";
                             circleTitle.setAttribute("title", t.title);
