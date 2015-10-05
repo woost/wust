@@ -262,7 +262,7 @@ case class PostAccess() extends NodeAccessDefault[Post] {
         else if (deleted.status == PENDING)
           Ok(Json.toJson(post))
         else {
-          LiveWebSocket.sendPostDelete(post.uuid)
+          LiveWebSocket.sendConnectableDelete(post.uuid)
           NoContent
         }
       }.getOrElse(NotFound(s"Cannot find Post with uuid '$uuid'"))

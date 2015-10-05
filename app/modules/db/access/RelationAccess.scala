@@ -185,7 +185,7 @@ END <: UuidNode
     val base = param.factory.matchesOnUuid(param.baseUuid)
     val node = nodeFactory.matchesOnUuid(otherUuid)
     val relation = factory.matchesMatchableRelation(base, node)
-    db.transaction(_.persistChanges(relation)).map(err =>
+    db.transaction(_.persistChanges(Discourse.remove(relation))).map(err =>
       BadRequest(s"Cannot delete Relation: $err'")
     ).getOrElse(NoContent)
   }
@@ -196,7 +196,7 @@ END <: UuidNode
     val base = param.factory.matchesMatchableRelation(start, end)
     val node = nodeFactory.matchesOnUuid(uuid)
     val relation = factory.matchesMatchableRelation(base, node)
-    db.transaction(_.persistChanges(relation)).map(err =>
+    db.transaction(_.persistChanges(Discourse.remove(relation))).map(err =>
       BadRequest(s"Cannot delete Relation: $err'")
     ).getOrElse(NoContent)
   }

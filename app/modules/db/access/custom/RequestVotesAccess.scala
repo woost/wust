@@ -239,7 +239,7 @@ class VotesDeletedHelper(request: Deleted) extends VotesChangeRequestHelper {
     KarmaUpdate.persistWithConnectedTagsOfHidden(karmaDefinition, KarmaQueryUserPost(userDef, postDef))
   }
 
-  def sendEvent = LiveWebSocket.sendPostDelete(post.uuid)
+  def sendEvent = LiveWebSocket.sendConnectableDelete(post.uuid)
 }
 
 trait VotesTagsChangeRequestHelper extends VotesChangeRequestHelper {

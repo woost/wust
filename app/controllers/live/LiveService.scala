@@ -8,11 +8,14 @@ import akka.actor._
 import play.api.mvc.WebSocket.FrameFormatter
 import model.WustSchema._
 import formatters.json.PostFormat.PostFormat
+import formatters.json.ResponseFormat._
+import modules.requests.ConnectResponse
 
 case class NodeRegister(nodes: List[String])
 
 case class PostUpdate(post: Post)
-case class PostDelete(postUuid: String)
+case class ConnectableDelete(connUuid: String)
+case class ConnectsAdd[NODE <: Connectable](baseUuid: String, response: ConnectResponse[NODE])
 
 case class OutEvent(kind: String, data: JsValue)
 
@@ -35,33 +38,44 @@ object LiveWebSocket {
     registerNodesActor ! PostUpdate(post)
   }
 
-  def sendPostDelete(postUuid: String) = {
-    registerNodesActor ! PostDelete(postUuid)
+  def sendConnectableDelete(connUuid: String) = {
+    registerNodesActor ! ConnectableDelete(connUuid)
+  }
+
+  def sendConnectsAdd[NODE <: Connectable](baseUuid: String, response: ConnectResponse[NODE]) = {
+    registerNodesActor ! ConnectsAdd(baseUuid, response)
   }
 }
 
 class RegisterNodesActor extends Actor {
   import scala.collection.mutable
-  val registeredNodes: mutable.Map[String, mutable.HashSet[ActorRef]] = mutable.HashMap.empty
+
+  private val registeredNodes: mutable.Map[String, mutable.HashSet[ActorRef]] = mutable.HashMap.empty
+
+  private def registerNode(nodeUuid: String) = {
+    val set = registeredNodes.get(nodeUuid).getOrElse {
+      val set = mutable.HashSet.empty[ActorRef]
+      registeredNodes += nodeUuid -> set
+      set
+    }
+    set += sender
+  }
 
   def receive = {
     case NodeRegister(nodes) =>
       println("Register nodes received: " + nodes)
       registeredNodes.values.foreach ( _ -= sender )
-      nodes.foreach { node =>
-        val set = registeredNodes.get(node).getOrElse {
-          val set = mutable.HashSet.empty[ActorRef]
-          registeredNodes += node -> set
-          set
-        }
-        set += sender
-      }
+      nodes.foreach(registerNode(_))
     case PostUpdate(post) =>
       println("Got post update: " + post)
       registeredNodes.get(post.uuid).foreach(_.foreach( _ ! OutEvent("edit", Json.toJson(post)) ))
-    case PostDelete(postUuid) =>
-      println("Got post delete: " + postUuid)
-      registeredNodes.get(postUuid).foreach(_.foreach( _ ! OutEvent("delete", JsString(postUuid)) ))
+    case ConnectableDelete(connUuid) =>
+      println("Got connectable delete: " + connUuid)
+      registeredNodes.get(connUuid).foreach(_.foreach( _ ! OutEvent("delete", JsString(connUuid)) ))
+    case ConnectsAdd(baseUuid, response) =>
+      println("Got connects add on " + baseUuid)
+      registeredNodes.get(baseUuid).foreach(_.foreach( _ ! OutEvent("connects", Json.toJson(response)) ))
+      response.node.foreach(n => registerNode(n.uuid))
   }
 }
 

@@ -1,6 +1,7 @@
 package modules.db.access.custom
 
 import controllers.api.nodes.{ConnectParameter, HyperConnectParameter, RequestContext}
+import controllers.live.LiveWebSocket
 import formatters.json.ResponseFormat._
 import formatters.json.RequestFormat._
 import renesca.parameter.implicits._
@@ -23,14 +24,28 @@ import wust.Shared.tagTitleColor
 trait ConnectsRelationHelper[NODE <: Connectable] {
   implicit def format: Format[NODE]
 
-  protected def persistRelation(discourse: Discourse, result: NODE): Result = {
+  protected def persistRelation(discourse: Discourse, result: NODE, base: Connectable): Result = {
     db.transaction(_.persistChanges(discourse)).map(err =>
       BadRequest(s"Cannot connect: $err'")
-    ).getOrElse({
+    ) getOrElse {
       //TODO: Only send partial graph: the created relations!
       //TODO: should only send node if the node was newly created
-      Ok(Json.toJson(ConnectResponse[NODE](discourse, Some(result))))
-    })
+      val connResponse = ConnectResponse[NODE](discourse, Some(result))
+      LiveWebSocket.sendConnectsAdd(base.uuid, connResponse)
+      Ok(Json.toJson(connResponse))
+    }
+  }
+
+  protected def deleteRelation(discourse: Discourse, relation: Connects): Result = {
+    db.transaction { tx =>
+      tx.persistChanges(discourse) orElse {
+        discourse.remove(relation)
+        tx.persistChanges(discourse)
+      }
+    }.map(err => BadRequest(s"Cannot disconnect: $err")) getOrElse {
+      LiveWebSocket.sendConnectableDelete(relation.uuid)
+      NoContent
+    }
   }
 
   protected def createPost(context: RequestContext): Either[Result, Discourse] = context.user.map { user =>
@@ -52,7 +67,7 @@ case class StartConnectsAccess() extends StartRelationReadBase[Post, Connects, C
     val node = discourse.connectables.headOption.getOrElse(discourse.nodesAs(ConnectableMatches).head)
     val base = param.factory.matchesOnUuid(param.baseUuid)
     discourse.add(base, node, factory.merge(base, node))
-    persistRelation(discourse, node)
+    persistRelation(discourse, node, base)
   }
 
   override def create(context: RequestContext, param: ConnectParameter[Post]) = createPost(context) match {
@@ -62,6 +77,14 @@ case class StartConnectsAccess() extends StartRelationReadBase[Post, Connects, C
 
   override def create(context: RequestContext, param: ConnectParameter[Post], otherUuid: String) = context.withUser {
     createRelation(context, param, Discourse(nodeFactory.matchesOnUuid(otherUuid)))
+  }
+
+  override def delete(context: RequestContext, param: ConnectParameter[Post], otherUuid: String) = context.withUser {
+    val base = param.factory.matchesOnUuid(param.baseUuid)
+    val node = nodeFactory.matchesOnUuid(otherUuid)
+    val relation = factory.matches(base, node)
+    val discourse = Discourse(relation)
+    deleteRelation(discourse, relation)
   }
 }
 
@@ -76,7 +99,7 @@ case class EndConnectsAccess() extends EndRelationReadBase[Post, Connects, Conne
     val node = discourse.posts.head
     val base = param.factory.matchesOnUuid(param.baseUuid)
     discourse.add(base, node, factory.merge(node, base))
-    persistRelation(discourse, node)
+    persistRelation(discourse, node, base)
   }
 
   private def createRelation[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Connectable with AbstractRelation[S, E], E], discourse: Discourse) = {
@@ -86,7 +109,7 @@ case class EndConnectsAccess() extends EndRelationReadBase[Post, Connects, Conne
     val base = param.factory.matchesMatchableRelation(start, end)
     val relation = factory.merge(node, base)
     discourse.add(base, node, relation)
-    persistRelation(discourse, node)
+    persistRelation(discourse, node, base)
   }
 
   override def create(context: RequestContext, param: ConnectParameter[Connectable]) = createPost(context) match {
@@ -103,9 +126,26 @@ case class EndConnectsAccess() extends EndRelationReadBase[Post, Connects, Conne
     createRelation(context, param, Discourse(nodeFactory.matchesOnUuid(otherUuid)))
   }
 
-
   override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Connectable with AbstractRelation[S, E], E], uuid: String) = context.withUser {
     createRelation(context, param, Discourse(nodeFactory.matchesOnUuid(uuid)))
+  }
+
+  override def delete(context: RequestContext, param: ConnectParameter[Connectable], otherUuid: String) = context.withUser {
+    val base = param.factory.matchesOnUuid(param.baseUuid)
+    val node = nodeFactory.matchesOnUuid(otherUuid)
+    val relation = factory.matches(node, base)
+    val discourse = Discourse(relation)
+    deleteRelation(discourse, relation)
+  }
+
+  override def delete[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Connectable with AbstractRelation[S, E], E], uuid: String) = context.withUser {
+    val start = param.startFactory.matchesOnUuid(param.startUuid)
+    val end = param.endFactory.matchesOnUuid(param.endUuid)
+    val base = param.factory.matchesMatchableRelation(start, end)
+    val node = nodeFactory.matchesOnUuid(uuid)
+    val relation = factory.matches(node, base)
+    val discourse = Discourse(base, relation)
+    deleteRelation(discourse, relation)
   }
 }
 
