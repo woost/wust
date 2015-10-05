@@ -206,8 +206,11 @@ object Search extends Controller {
         Discourse(db.queryGraph(query, ctx.params ++ params))
       } catch {
         case e:Exception =>
-          e.printStackTrace()
-          Discourse.empty
+          println(e.getMessage) //TODO: use logger
+          val discourse = Discourse.empty
+          discourse.add(Post.create(s"""Search Error. Please report this to us."""))
+          //TODO: automatically report: request.uri and error message
+          discourse
       }
     }
 
