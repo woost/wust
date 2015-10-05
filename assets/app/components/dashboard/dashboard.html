@@ -9,8 +9,8 @@
                     <div class="as-sortable-item-handle" as-sortable-item-handle>
                         <button class="close pull-right" ng-click="vm.removeStream($index)" type="button" aria-label="Close " data-title="remove stream" bs-tooltip><span aria-hidden="true">&times;</span></button>
                     </div>
-                    <div edit-taglist tags="stream.tagsAll" placeholder="All Contexts" on-change="vm.refreshStream(stream)" existing-only="true"></div>
-                    <div edit-taglist tags="stream.tagsWithout" placeholder="Without Contexts" on-change="vm.refreshStream(stream)" existing-only="true"></div>
+                    <div class="all-tags" edit-taglist tags="stream.tagsAll" tag-type="taglike" placeholder="All Tags" on-change="vm.refreshStream(stream)" existing-only="true"></div>
+                    <div edit-taglist tags="stream.tagsWithout" tag-type="taglike" placeholder="Without Tags" on-change="vm.refreshStream(stream)" existing-only="true"></div>
                     <hr>
                 </div>
                 <div class="table-row body">

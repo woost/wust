@@ -55,9 +55,14 @@ function sortByIdQuality(tags) {
     return _.sortByOrder(tags, ["quality", "id"], ["desc", "asc"]);
 }
 
-function sortedNodeTags(node) {
+function withoutTags(tags, ignore) {
+    let ignoreIds = ignore.map(t => t.id);
+    return _.reject(tags, t => _.contains(ignoreIds, t.id));
+}
+
+function sortedNodeTags(node, ignore = []) {
     let classifications = _.uniq(node.classifications.concat(_.flatten(_.map(node.tags, "classifications"))), "id");
-    return sortByIdQuality(classifications).concat(sortByIdQuality(node.tags));
+    return sortByIdQuality(withoutTags(classifications,ignore)).concat(sortByIdQuality(withoutTags(node.tags, ignore)));
 }
 
 function navBackgroundColor(tag) { return hashToColor(tag, 10, 98); }

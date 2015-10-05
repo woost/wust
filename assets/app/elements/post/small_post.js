@@ -1,8 +1,8 @@
 angular.module("wust.elements").directive("smallPost", smallPost);
 
-smallPost.$inject = [];
+smallPost.$inject = ["ContextService"];
 
-function smallPost() {
+function smallPost(ContextService) {
     return {
         restrict: "A",
         templateUrl: "elements/post/small_post.html",
@@ -12,7 +12,11 @@ function smallPost() {
         },
         controller: smallPostCtrl,
         controllerAs: "vm",
-        bindToController: true
+        bindToController: true,
+        link: function (scope, elem) {
+            scope.currentContexts = ContextService.currentContexts;
+            scope.$on("context.changed", () => this.currentContexts = ContextService.currentContexts);
+        }
     };
 }
 

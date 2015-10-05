@@ -16,19 +16,24 @@ function coloredTagNode(Helpers, ContextService) {
     function link(scope, elem) {
         let rawElem = elem[0];
 
-        if (scope.ignoreTags === undefined)
+        // if (scope.ignoreTags === undefined)
             scope.$on("context.changed", refreshColor);
 
-        scope.$watchCollection(() => scope.coloredTagNode.tags + scope.coloredTagNode.classifications, refreshColor);
+        scope.$watchCollection(() =>
+                scope.ignoreTags +
+                scope.coloredTagNode.tags +
+                scope.coloredTagNode.classifications,
+                refreshColor);
 
         function refreshColor() {
             setColor(selectTag(scope.coloredTagNode));
         }
 
         function selectTag(node) {
-            let tags = Helpers.sortedNodeTags(node, scope.ignoreTags || ContextService.currentContexts);
             // if ignoretags are set, we will filter by them (this is the case for streams and search.
             // otherwise the the current contexts are ignored.
+            // But as an experiment we concat them now.
+            let tags = Helpers.sortedNodeTags(node, (scope.ignoreTags || []).concat(ContextService.currentContexts));
             return tags[0];
         }
 

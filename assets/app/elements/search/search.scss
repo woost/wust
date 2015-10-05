@@ -20,6 +20,9 @@
     #search_content {
         height: 100%;
         @include display-flex(flex);
+        @include flex-direction(row);
+        @include align-items(flex-start);
+        @include align-content(stretch);
         #search_results_view {
             padding-top: 30px;
             height: 100%;
@@ -56,8 +59,8 @@
             }
             #search_options_bottom {
                 width: inherit;
-                position: absolute;
-                bottom: 10px;
+                // position: absolute;
+                // bottom: 10px;
             }
             .inactive {
                 color: #aaa;
