@@ -41,8 +41,7 @@ object TagFormat {
       tagLikeToSeq(tag) ++ Seq(
         ("quality", cat.endNodeOpt.map(post => JsNumber(cat.quality(post.viewCount))).getOrElse(JsNull)),
         ("vote", cat.inRelationsAs(Votes).headOption.map(vote => JsObject(Seq(("weight", JsNumber(vote.weight))))).getOrElse(JsNull)),
-        ("classifications", JsArray(cat.rev_classifies.map(t => JsObject(tagLikeToSeq(t))))),
-        ("tagsId", JsString(cat.uuid))
+        ("classifications", JsArray(cat.rev_classifies.map(t => JsObject(tagLikeToSeq(t)))))
       )
     )).getOrElse(JsNull)
   }
