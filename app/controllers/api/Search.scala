@@ -16,12 +16,12 @@ import collection.mutable
 import scala.util.Try
 
 object Search extends Controller {
-  def index(labelOpt: Option[String], termOpt: Option[String], searchDescriptionsOpt: Option[Boolean], startPostOpt: Option[Boolean], tagsAll: List[String], tagsAnyRaw: List[String], tagsWithout: List[String], classificationsAll: List[String], classificationsAnyRaw: List[String], classificationsWithout: List[String], pageOpt: Option[Int], sizeOpt: Option[Int]) = Action {
+  def index(labelOpt: Option[String], termOpt: Option[String], searchDescriptionsOpt: Option[Boolean], startPostOpt: Option[Boolean], contextsAll: List[String], contextsAnyRaw: List[String], contextsWithout: List[String], classificationsAll: List[String], classificationsAnyRaw: List[String], classificationsWithout: List[String], pageOpt: Option[Int], sizeOpt: Option[Int]) = Action {
 
     val discourse = if(
-      (tagsAll intersect tagsWithout).nonEmpty ||
+      (contextsAll intersect contextsWithout).nonEmpty ||
       (classificationsAll intersect classificationsWithout).nonEmpty ||
-      (tagsAnyRaw.size > 0 && tagsAnyRaw.toSet.subsetOf(tagsWithout.toSet)) ||
+      (contextsAnyRaw.size > 0 && contextsAnyRaw.toSet.subsetOf(contextsWithout.toSet)) ||
       (classificationsAnyRaw.size > 0 && classificationsAnyRaw.toSet.subsetOf(classificationsWithout.toSet))
     ) {
       Discourse.empty
@@ -30,7 +30,7 @@ object Search extends Controller {
       val searchDescriptions = searchDescriptionsOpt.getOrElse(false)
       val page = pageOpt.getOrElse(0)
       val startPost = startPostOpt.getOrElse(false)
-      val tagsAny = (tagsAnyRaw diff tagsWithout) diff tagsAll
+      val contextsAny = (contextsAnyRaw diff contextsWithout) diff contextsAll
       val classificationsAny = (classificationsAnyRaw diff classificationsWithout) diff classificationsAll
 
       implicit val ctx = new QueryContext
@@ -64,23 +64,23 @@ object Search extends Controller {
         params += ("term" -> termRegex.get)
       }
 
-      if(startPost && tagsAll.isEmpty && tagsAny.isEmpty) {
+      if(startPost && contextsAll.isEmpty && contextsAny.isEmpty) {
         val tagsDef = AnonRelationDef(FactoryNodeDef(Scope), SchemaTags, nodeDef)
         postMatches += s"match ${ tagsDef.toPattern }"
       }
 
-      //TODO: FIXME: Wrong for classificationsAll + classificationsAny + tagsAny
+      //TODO: FIXME: Wrong for classificationsAll + classificationsAny + contextsAny
 
-      if(tagsAll.nonEmpty) {
-        val tagDefs = tagsAll.map(uuid => FactoryUuidNodeDef(Scope, uuid))
-        val inheritTagDefs = tagsAll.map(_ => FactoryNodeDef(Scope))
-        val tagDefinitions = (tagDefs zip inheritTagDefs).map { case (t, i) => s"${ i.toPattern }-[:`${ Inherits.relationType }`*0..10]->${ t.toPattern }" }.mkString(",")
+      if(contextsAll.nonEmpty) {
+        val contextDefs = contextsAll.map(uuid => FactoryUuidNodeDef(Scope, uuid))
+        val inheritContextDefs = contextsAll.map(_ => FactoryNodeDef(Scope))
+        val tagDefinitions = (contextDefs zip inheritContextDefs).map { case (t, i) => s"${ i.toPattern }-[:`${ Inherits.relationType }`*0..10]->${ t.toPattern }" }.mkString(",")
         preQueries += s"""
         match ${ tagDefinitions }
         with distinct *
         """
 
-        val relationDefs = inheritTagDefs.map(tagDef => RelationDef(tagDef, SchemaTags, nodeDef))
+        val relationDefs = inheritContextDefs.map(tagDef => RelationDef(tagDef, SchemaTags, nodeDef))
         postMatches += s"""match ${ relationDefs.map(_.toPattern(false)).mkString(",") }"""
       }
 
@@ -109,21 +109,21 @@ object Search extends Controller {
         params += ("classificationAllCount" -> classificationsAll.size)
       }
 
-      if(tagsAny.nonEmpty) {
+      if(contextsAny.nonEmpty) {
         val inheritTagDef = FactoryNodeDef(Scope)
         val tagDef = FactoryNodeDef(Scope)
         val tagDefinition = s"${ inheritTagDef.toPattern }-[:`${ Inherits.relationType }`*0..10]->${ tagDef.toPattern }"
         preQueries +=
           s"""
           match ${ tagDefinition }
-          where (${ tagDef.name }.uuid in {tagsAnyUuids})
+          where (${ tagDef.name }.uuid in {contextsAnyUuids})
           with distinct *
           """
 
-          val relationDef = new RelationDef(inheritTagDef, SchemaTags, nodeDef) { override val name = "tagsAnytags"}
+          val relationDef = new RelationDef(inheritTagDef, SchemaTags, nodeDef) { override val name = "contextsAnytags"}
           postMatches += s"""${if(classificationsAny.nonEmpty) "optional" else ""} match ${ relationDef.toPattern(false, false) }"""
 
-          params += ("tagsAnyUuids" -> tagsAny)
+          params += ("contextsAnyUuids" -> contextsAny)
       }
 
       if(classificationsAny.nonEmpty) {
@@ -146,31 +146,31 @@ object Search extends Controller {
         postConditions += s"""(
           (${connectsDef.endName} is not null and ${ classifiesConnectsDef.toPattern(false) })
           or (${tagsDef.startName} is not null and ${ classifiesTagsDef.toPattern(false) })
-          ${if(tagsAny.nonEmpty) "or (tagsAnytags is not null)" else ""}
+          ${if(contextsAny.nonEmpty) "or (contextsAnytags is not null)" else ""}
         )"""
 
-        if(tagsAny.nonEmpty) lastDistinct = true
+        if(contextsAny.nonEmpty) lastDistinct = true
 
         params += ("classificationsAnyUuids" -> classificationsAny)
       }
 
-      if(tagsWithout.nonEmpty) {
+      if(contextsWithout.nonEmpty) {
         val inheritTagDef = FactoryNodeDef(Scope)
         val tagDef = FactoryNodeDef(Scope)
         val tagDefinition = s"${ inheritTagDef.toPattern }-[:`${ Inherits.relationType }`*0..10]->${ tagDef.toPattern }"
         preQueries +=
           s"""
           match ${ tagDefinition }
-          where ${ tagDef.name }.uuid in {tagsWithoutUuids}
+          where ${ tagDef.name }.uuid in {contextsWithoutUuids}
           with distinct *
           """
 
           val relationDef = RelationDef(inheritTagDef, SchemaTags, nodeDef)
           postMatches += s"""optional match ${ relationDef.toPattern(false, false) }"""
-          lastWiths += s"""count(${relationDef.name}) as tagsWithoutCount"""
-          lastConditions += s"""tagsWithoutCount = 0"""
+          lastWiths += s"""count(${relationDef.name}) as contextsWithoutCount"""
+          lastConditions += s"""contextsWithoutCount = 0"""
 
-          params += ("tagsWithoutUuids" -> tagsWithout)
+          params += ("contextsWithoutUuids" -> contextsWithout)
       }
 
       val returnPostfix = sizeOpt.map { limit =>
