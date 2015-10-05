@@ -118,6 +118,7 @@ case class VotesChangeRequestAccess(sign: Long) extends EndRelationAccessDefault
             request._locked = false
             val failure = tx.persistChanges(discourse)
             failure.map(_ => BadRequest("No vote :/")).getOrElse {
+              tx.commit() // commit to make changes visible to event sender
               if (changed)
                 helper.sendEvent()
 
@@ -203,7 +204,6 @@ class VotesUpdatedHelper(request: Updated) extends VotesChangeRequestHelper {
     KarmaUpdate.persistWithConnectedTags(karmaDefinition, KarmaQueryUserPost(userDef, postDef))
   }
 
-  //TODO should not use tagged taggable, but the tags/classifications of the post are calculated on the client via change requests
   def sendEvent() = LiveWebSocket.sendConnectableUpdate(TaggedTaggable.shapeResponse(post))
 }
 
@@ -299,7 +299,6 @@ trait VotesTagsChangeRequestHelper extends VotesChangeRequestHelper {
     KarmaUpdate.persistWithProposedTags(karmaDefinition, KarmaQueryUserPost(userDef, postDef), tagsDef)
   }
 
-  //TODO should not use tagged taggable, but the tags/classifications of the post are calculated on the client via change requests
   def sendEvent() = LiveWebSocket.sendConnectableUpdate(TaggedTaggable.shapeResponse(post))
 }
 

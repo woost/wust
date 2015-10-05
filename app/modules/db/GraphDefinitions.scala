@@ -10,10 +10,10 @@ import renesca.schema._
 
 package object types {
 
-  type FixedRelationDef[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefBase[START, RELATION, END, _ <: FixedNodeDef[START], _ <: FixedNodeDef[END]]
-  type NodeAndFixedRelationDef[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefBase[START, RELATION, END, _ <: FixedNodeDef[START], _ <: NodeDef[END]]
-  type FixedAndNodeRelationDef[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefBase[START, RELATION, END, _ <: NodeDef[START], _ <: FixedNodeDef[END]]
-  type NodeRelationDef[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = RelationDefBase[START, RELATION, END, _ <: NodeDef[START], _ <: NodeDef[END]]
+  type FixedRelationDef[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = SingleRelationDefBase[START, RELATION, END, _ <: FixedNodeDef[START], _ <: FixedNodeDef[END]]
+  type NodeAndFixedRelationDef[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = SingleRelationDefBase[START, RELATION, END, _ <: FixedNodeDef[START], _ <: NodeDef[END]]
+  type FixedAndNodeRelationDef[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = SingleRelationDefBase[START, RELATION, END, _ <: NodeDef[START], _ <: FixedNodeDef[END]]
+  type NodeRelationDef[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node] = SingleRelationDefBase[START, RELATION, END, _ <: NodeDef[START], _ <: NodeDef[END]]
 
 }
 

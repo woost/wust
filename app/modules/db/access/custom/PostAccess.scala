@@ -311,14 +311,14 @@ case class PostAccess() extends NodeAccessDefault[Post] {
 
           addRequestTagsToGraph(tx, discourse, user, node, request, karmaProps)
 
-          //TODO should not use tagged taggable, but the tags/classifications of the post are calculated on the client via change requests
-
           tx.persistChanges(discourse) match {
             case Some(err) => BadRequest(s"Cannot update Post with uuid '$uuid': $err")
             case _         =>
+              tx.commit() //otherwise taggedtaggable won't see the changes on another transactions
+              val post = TaggedTaggable.shapeResponse(node)
               if (discourse.changeRequests.exists(_.status != PENDING))
-                LiveWebSocket.sendConnectableUpdate(TaggedTaggable.shapeResponse(node))
-              Ok(Json.toJson(node))
+                LiveWebSocket.sendConnectableUpdate(post)
+              Ok(Json.toJson(post))
           }
         } getOrElse {
           BadRequest(s"Cannot find Post with uuid '$uuid'")

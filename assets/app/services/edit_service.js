@@ -138,9 +138,7 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
                 this.triedSave = false;
                 let data = referenceNode ? response.node : response;
 
-                if (this.isConnects) {
-                    data.tags = this.tags;
-                } else {
+                if (!this.isConnects) {
                     let appliedRequests = data.requestsTags && _.any(data.requestsTags, "status") || data.requestsEdit && _.any(data.requestsEdit, "status");
                     let hasRequests = !_.isEmpty(data.requestsTags) || !_.isEmpty(data.requestsEdit);
                     if (appliedRequests)
@@ -150,35 +148,12 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
                     else if (!model.id)
                         humane.success("Added new node");
 
-                    let keeped;
-                    if (data.requestsTags) {
-                        let removed = data.requestsTags.filter(t => t.isRemove && t.status > 0);
-                        let [tagRemove, classifyRemove] = _.partition(removed, t => _.isEmpty(t.classifications));
-
-                        let added = data.requestsTags.filter(t => !t.isRemove && t.status > 0);
-                        let [tagAdd, classifyAdd] = _.partition(added, t => _.isEmpty(t.classifications));
-
-                        keeped = this.original.tags.filter(t => !_.any(tagAdd, o => t.id === o.tag.id) && !_.any(tagRemove, o => t.id === o.tag.id)).concat(data.tags);
-                        classifyAdd.forEach(t => {
-                            let exist = _.find(keeped, k => t.tag.id === k.id);
-                            exist.classifications = _.uniq(t.classifications.concat(exist.classifications), "id");
-                        });
-                        classifyRemove.forEach(t => {
-                            let exist = _.find(keeped, k => t.tag.id === k.id);
-                            exist.classifications = exist.classifications.filter(c => !_.any(t.classifications, _.pick(c, "id")));
-                        });
-                    } else {
-                        keeped = this.original.tags.concat(data.tags);
+                    if(referenceNode) {
+                        let connects = _.find(response.graph.nodes, n => n.label === "CONNECTS" && n.startId === data.id && n.endId === referenceNode.id);
+                        let session = editConnects(connects);
+                        session.tags = this.classifications;
+                        session.save();
                     }
-
-                    data.tags = _.uniq(keeped, "id");
-                }
-
-                if(referenceNode) {
-                    let connects = _.find(response.graph.nodes, n => n.label === "CONNECTS" && n.startId === data.id && n.endId === referenceNode.id);
-                    let session = editConnects(connects);
-                    session.tags = this.classifications;
-                    session.save();
                 }
 
                 if (this.visible && this.isLocal) {
