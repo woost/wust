@@ -17,6 +17,7 @@ case class PostDelete(postUuid: String)
 case class OutEvent(kind: String, data: JsValue)
 
 //TODO: don't send updates to request initiator
+// only users can change something (initiate an event), so we could get the current user from the request, when opening the websocket and then pass the current user to sendPostDelete/sendPostUpdate.
 object LiveWebSocket {
   implicit val inEventFormat = Json.format[NodeRegister]
   implicit val outEventFormat = Json.format[OutEvent]
