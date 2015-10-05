@@ -45,7 +45,7 @@ function TagDetailsCtrl($stateParams, Scope, Search, DiscourseNode, StreamServic
         if(!vm.tag)
             return;
 
-        StreamService.push([vm.tag]);
+        StreamService.push({tagsAll: [vm.tag]});
         humane.success(`Added stream for '${vm.tag.title}'`);
     }
 

@@ -16,34 +16,41 @@ function StreamService(Search, DiscourseNode, store, Helpers) {
     this.currentEditStream = undefined;
 
     function restoreList() {
-        _.each(streamStore.get("streams") || [], stream => pushList(stream.tagsAll, stream.tagsWithout));
+        _.each(streamStore.get("streams") || [], pushList);
     }
 
-    function pushList(tagsAll = [], tagsWithout = []) {
-        if (!_.isArray(tagsAll) || !_.isArray(tagsWithout))
-            return;
+    function pushList(streamDef = {}) {
+        streamDef.tagsAll = streamDef.tagsAll || [];
+        streamDef.tagsAny = streamDef.tagsAny || [];
+        streamDef.tagsWithout = streamDef.tagsWithout || [];
 
         let stream = {
-            posts: Search.$search({
-                label: DiscourseNode.Post.label,
-                tagsAll: tagsAll.map(t => t.id),
-                tagsWithout: tagsWithout.map(t => t.id),
-                size: 20,
-                page: 0
-            }),
-            tagsAll: tagsAll,
-            tagsWithout: tagsWithout
+            posts: Search.$search(searchParams(streamDef)),
+            tagsAll: streamDef.tagsAll,
+            tagsAny: streamDef.tagsAny,
+            tagsWithout: streamDef.tagsWithout,
         };
 
         self.streams.push(stream);
         storeList();
     }
 
+    function searchParams(streamDef) {
+        return {
+            label: DiscourseNode.Post.label,
+            tagsAll: streamDef.tagsAll.filter(t => t.isContext).map(t => t.id),
+            tagsAny: streamDef.tagsAny.filter(t => t.isContext).map(t => t.id),
+            tagsWithout: streamDef.tagsWithout.filter(t => t.isContext).map(t => t.id),
+            classificationsAll: streamDef.tagsAll.filter(t => !t.isContext).map(t => t.id),
+            classificationsAny: streamDef.tagsAny.filter(t => !t.isContext).map(t => t.id),
+            classificationsWithout: streamDef.tagsWithout.filter(t => !t.isContext).map(t => t.id),
+            size: 20,
+            page: 0,
+        };
+    }
+
     function refreshStream(stream) {
-        stream.posts.$refresh({
-            tagsAll: stream.tagsAll.map(t => t.id),
-            tagsWithout: stream.tagsWithout.map(t => t.id)
-        });
+        stream.posts.$refresh(searchParams(stream));
 
         storeList();
     }
@@ -61,7 +68,8 @@ function StreamService(Search, DiscourseNode, store, Helpers) {
     function storeList() {
         streamStore.set("streams", _.map(self.streams, s => { return {
             tagsAll: s.tagsAll.map(t => t.encode ? t.encode() : t),
-            tagsWithout: s.tagsWithout.map(t => t.encode ? t.encode() : t)
+            tagsAny: s.tagsAny.map(t => t.encode ? t.encode() : t),
+            tagsWithout: s.tagsWithout.map(t => t.encode ? t.encode() : t),
         };}));
     }
 }
