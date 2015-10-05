@@ -119,7 +119,7 @@ case class VotesChangeRequestAccess(sign: Long) extends EndRelationAccessDefault
             val failure = tx.persistChanges(discourse)
             failure.map(_ => BadRequest("No vote :/")).getOrElse {
               if (changed)
-                helper.sendEvent
+                helper.sendEvent()
 
               val nodeResponse = if (changed) Json.toJson(helper.post) else JsNull
               karmaDefinitionOpt.foreach(helper.updateKarma(_))
@@ -158,7 +158,7 @@ trait VotesChangeRequestHelper {
   def applyChange(tx: QueryHandler, discourse: Discourse): Boolean
   def unapplyChange(tx: QueryHandler, discourse: Discourse): Boolean
   def updateKarma(karmaDefinition: KarmaDefinition): Unit
-  def sendEvent: Unit
+  def sendEvent(): Unit
 }
 
 //TODO: we need hyperrelation traits in magic in order to matches on the hyperrelation trait and get correct type: Relation+Node
@@ -204,7 +204,7 @@ class VotesUpdatedHelper(request: Updated) extends VotesChangeRequestHelper {
   }
 
   //TODO should not use tagged taggable, but the tags/classifications of the post are calculated on the client via change requests
-  def sendEvent = LiveWebSocket.sendPostUpdate(TaggedTaggable.shapeResponse(post))
+  def sendEvent() = LiveWebSocket.sendConnectableUpdate(TaggedTaggable.shapeResponse(post))
 }
 
 class VotesDeletedHelper(request: Deleted) extends VotesChangeRequestHelper {
@@ -239,7 +239,7 @@ class VotesDeletedHelper(request: Deleted) extends VotesChangeRequestHelper {
     KarmaUpdate.persistWithConnectedTagsOfHidden(karmaDefinition, KarmaQueryUserPost(userDef, postDef))
   }
 
-  def sendEvent = LiveWebSocket.sendConnectableDelete(post.uuid)
+  def sendEvent() = LiveWebSocket.sendConnectableDelete(post.uuid)
 }
 
 trait VotesTagsChangeRequestHelper extends VotesChangeRequestHelper {
@@ -303,7 +303,7 @@ requestToPostDef
   }
 
   //TODO should not use tagged taggable, but the tags/classifications of the post are calculated on the client via change requests
-  def sendEvent = LiveWebSocket.sendPostUpdate(TaggedTaggable.shapeResponse(post))
+  def sendEvent() = LiveWebSocket.sendConnectableUpdate(TaggedTaggable.shapeResponse(post))
 }
 
 class VotesAddTagsHelper(protected val request: AddTags) extends VotesTagsChangeRequestHelper {
