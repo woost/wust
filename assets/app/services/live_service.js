@@ -36,7 +36,8 @@ function LiveService() {
         }
 
         function registerNodes(nodes) {
-            nodesSocket.send(JSON.stringify({nodes: nodes.map(n => n.id)}));
+            //TODO: wait until open
+            setTimeout(() => nodesSocket.send(JSON.stringify({nodes: nodes.map(n => n.id)})), 50);
         }
     }
 
