@@ -52,30 +52,32 @@ class RegisterNodesActor extends Actor {
 
   private val registeredNodes: mutable.Map[String, mutable.HashSet[ActorRef]] = mutable.HashMap.empty
 
-  private def registerNode(nodeUuid: String) = {
+  private def registerNode(nodeUuid: String, targets: ActorRef*) = {
     val set = registeredNodes.get(nodeUuid).getOrElse {
       val set = mutable.HashSet.empty[ActorRef]
       registeredNodes += nodeUuid -> set
       set
     }
-    set += sender
+    set ++= targets
   }
 
   def receive = {
     case NodeRegister(nodes) =>
       println("Register nodes received: " + nodes)
       registeredNodes.values.foreach ( _ -= sender )
-      nodes.foreach(registerNode(_))
+      nodes.foreach(registerNode(_, sender))
     case ConnectableUpdate(post) =>
-      println("Got post update: " + post)
+      println("Got conncetable update: " + post.uuid)
       registeredNodes.get(post.uuid).foreach(_.foreach( _ ! OutEvent("edit", Json.toJson(post)) ))
     case ConnectableDelete(connUuid) =>
       println("Got connectable delete: " + connUuid)
       registeredNodes.get(connUuid).foreach(_.foreach( _ ! OutEvent("delete", JsString(connUuid)) ))
     case ConnectsAdd(baseUuid, response) =>
       println("Got connects add on " + baseUuid)
-      registeredNodes.get(baseUuid).foreach(_.foreach( _ ! OutEvent("connects", Json.toJson(response)) ))
-      response.node.foreach(n => registerNode(n.uuid))
+      registeredNodes.get(baseUuid).foreach { targets =>
+        response.graph.connectables.foreach(n => registerNode(n.uuid, targets.toSeq: _*))
+        targets.foreach( _ ! OutEvent("connects", Json.toJson(response)))
+      }
   }
 }
 

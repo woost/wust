@@ -172,19 +172,17 @@ case class ConnectsAccess() extends NodeAccessDefault[Connects] {
     import formatters.json.EditNodeFormat._
 
     context.withJson { (request: ConnectsUpdateRequest) =>
-      db.transaction { tx =>
-        val node = Connects.matchesOnUuid(uuid)
-        val discourse = Discourse(node)
-        deleteClassificationsFromGraph(discourse, request, node)
-        addClassifcationsToGraph(discourse, request, node)
+      val node = Connects.matchesOnUuid(uuid)
+      val discourse = Discourse(node)
+      deleteClassificationsFromGraph(discourse, request, node)
+      addClassifcationsToGraph(discourse, request, node)
 
-        tx.persistChanges(discourse) match {
-          case Some(err) => BadRequest(s"Cannot update Connects with uuid '$uuid': $err'")
-          case _         => 
-            val connects = ClassifiedReferences.shapeResponse(Connects.wrap(node.rawItem))
-            LiveWebSocket.sendConnectableUpdate(connects)
-            Ok(Json.toJson(connects))
-        }
+      db.transaction(_.persistChanges(discourse)) match {
+        case Some(err) => BadRequest(s"Cannot update Connects with uuid '$uuid': $err'")
+        case _         =>
+          val connects = ClassifiedReferences.shapeResponse(node)
+          LiveWebSocket.sendConnectableUpdate(connects)
+          Ok(Json.toJson(connects))
       }
     }
   }
