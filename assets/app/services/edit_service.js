@@ -420,7 +420,7 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
     }
 
     function editConnects(node) {
-        let session = new EditSession(node);
+        let session = new EditSession(node, true);
         session.isConnects = true;
         return session;
     }
