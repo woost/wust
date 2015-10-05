@@ -317,7 +317,7 @@ case class PostAccess() extends NodeAccessDefault[Post] {
             case Some(err) => BadRequest(s"Cannot update Post with uuid '$uuid': $err")
             case _         =>
               if (discourse.changeRequests.exists(_.status != PENDING))
-                LiveWebSocket.sendPostUpdate(TaggedTaggable.shapeResponse(node))
+                LiveWebSocket.sendConnectableUpdate(TaggedTaggable.shapeResponse(node))
               Ok(Json.toJson(node))
           }
         } getOrElse {

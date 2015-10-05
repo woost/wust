@@ -7,20 +7,20 @@ import play.api.libs.concurrent.Akka
 import akka.actor._
 import play.api.mvc.WebSocket.FrameFormatter
 import model.WustSchema._
-import formatters.json.PostFormat.PostFormat
+import formatters.json.GraphFormat.ConnectableFormat
 import formatters.json.ResponseFormat._
 import modules.requests.ConnectResponse
 
 case class NodeRegister(nodes: List[String])
 
-case class PostUpdate(post: Post)
+case class ConnectableUpdate(connectable: Connectable)
 case class ConnectableDelete(connUuid: String)
 case class ConnectsAdd[NODE <: Connectable](baseUuid: String, response: ConnectResponse[NODE])
 
 case class OutEvent(kind: String, data: JsValue)
 
 //TODO: don't send updates to request initiator
-// only users can change something (initiate an event), so we could get the current user from the request, when opening the websocket and then pass the current user to sendPostDelete/sendPostUpdate.
+// only users can change something (initiate an event), so we could get the current user from the request, when opening the websocket and then pass the current user to event actions
 object LiveWebSocket {
   implicit val inEventFormat = Json.format[NodeRegister]
   implicit val outEventFormat = Json.format[OutEvent]
@@ -34,8 +34,8 @@ object LiveWebSocket {
     LiveWebSocketActor.props(out, registerNodesActor)
   }
 
-  def sendPostUpdate(post: Post) = {
-    registerNodesActor ! PostUpdate(post)
+  def sendConnectableUpdate(connectable: Connectable) = {
+    registerNodesActor ! ConnectableUpdate(connectable)
   }
 
   def sendConnectableDelete(connUuid: String) = {
@@ -66,7 +66,7 @@ class RegisterNodesActor extends Actor {
       println("Register nodes received: " + nodes)
       registeredNodes.values.foreach ( _ -= sender )
       nodes.foreach(registerNode(_))
-    case PostUpdate(post) =>
+    case ConnectableUpdate(post) =>
       println("Got post update: " + post)
       registeredNodes.get(post.uuid).foreach(_.foreach( _ ! OutEvent("edit", Json.toJson(post)) ))
     case ConnectableDelete(connUuid) =>
@@ -92,7 +92,7 @@ class LiveWebSocketActor(out: ActorRef, registerNodesActor: ActorRef) extends Ac
   }
 
   override def postStop() = {
-    registerNodesActor ! NodeRegister(nodes = List.empty)
+    registerNodesActor ! NodeRegister(List.empty)
     println("stopped websocket!");
   }
 }

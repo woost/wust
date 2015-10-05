@@ -180,7 +180,10 @@ case class ConnectsAccess() extends NodeAccessDefault[Connects] {
 
         tx.persistChanges(discourse) match {
           case Some(err) => BadRequest(s"Cannot update Connects with uuid '$uuid': $err'")
-          case _         => Ok(Json.toJson(ClassifiedReferences.shapeResponse(Connects.wrap(node.rawItem))))
+          case _         => 
+            val connects = ClassifiedReferences.shapeResponse(Connects.wrap(node.rawItem))
+            LiveWebSocket.sendConnectableUpdate(connects)
+            Ok(Json.toJson(connects))
         }
       }
     }
