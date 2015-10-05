@@ -38,11 +38,11 @@ trait ConnectsRelationHelper[NODE <: Connectable] {
 
   protected def deleteRelation(discourse: Discourse, relation: Connects): Result = {
     db.transaction { tx =>
-      tx.persistChanges(discourse) orElse {
+      tx.persistChanges(discourse).map(_ => NoContent) orElse {
         discourse.remove(relation)
         tx.persistChanges(discourse)
-      }
-    }.map(err => BadRequest(s"Cannot disconnect: $err")) getOrElse {
+      }.map(err => BadRequest(s"Cannot disconnect: $err"))
+    } getOrElse {
       LiveWebSocket.sendConnectableDelete(relation.uuid)
       NoContent
     }
