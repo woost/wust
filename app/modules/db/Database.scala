@@ -126,7 +126,7 @@ object Database {
 
   // IMPORTANT: we need to write the constancts as doubles to avoid integer arithmetic
   // def tagweight(up:String, down:String) = s"(($up + ${tagweight_p*tagweight_u})/($up + $down + $tagweight_u))"
-  def connectedComponent(focusNode: UuidNodeDef[_], identity: Option[User], depth: Int = 5)(implicit ctx: QueryContext): Discourse = {
+  def connectedComponent(postUuid: String, identity: Option[User], depth: Int = 5): Discourse = {
     // Tag weights
     // 1. Cypher does not support subqueries yet, so we have to do extra queries for the tag weights.
     // This is not very efficient, because the component is traversed in each query.
@@ -140,6 +140,8 @@ object Database {
     //
     // https://groups.google.com/forum/#!topic/neo4j/s1GnCkzINYY
 
+    implicit val ctx = new QueryContext
+    val focusNode = FactoryUuidNodeDef(Post, postUuid)
 
     // query undirected connected component of posts with maximum depth
     // depth * 2 because hyperrelation depth
@@ -163,7 +165,11 @@ return connectable,connects,context,tags,contexttotags,tagstopost, classificatio
     val (graph, table) = db.queryGraphsAndTables(Query(query, params)).head
     val component = Discourse(graph)
 
-    val uuidToNode = component.uuidNodes.map(n => (n.uuid, n)).toMap
+    //TODO: workaround to filter out accidentally matched hidden nodes
+    //BE AWARE: DO NOT PERSIST AFTER THIS POINT, as we delete hidden nodes from the component
+    component.remove(component.hiddens: _*)
+
+    val uuidToNode = component.connectables.map(n => (n.uuid, n)).toMap
     table.rows.foreach { row =>
       val selfanswervotecount = row("selfanswervotecount").asLong
 
