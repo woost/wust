@@ -1,8 +1,8 @@
 angular.module("wust.components").controller("TagsCtrl", TagsCtrl);
 
-TagsCtrl.$inject = ["$stateParams", "Search", "DiscourseNode"];
+TagsCtrl.$inject = ["Search", "DiscourseNode"];
 
-function TagsCtrl($stateParams, Search, DiscourseNode) {
+function TagsCtrl(Search, DiscourseNode) {
     let vm = this;
 
     let tagSize = 30;
