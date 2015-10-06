@@ -19,8 +19,7 @@
                     </a>
                     <ul class="dropdown-menu context-dropdown">
                         <li>
-                            <h3>Select Context</h3>
-                            <div edit-taglist tags="vm.currentContexts" on-change="vm.onContextChange()" tag-type="context" always-show="true" existing-only="true"></div>
+                            <div edit-taglist tags="vm.currentContexts" embed-suggestions="true" placeholder="Select Context" on-change="vm.onContextChange()" tag-type="context" always-show="true" existing-only="true"></div>
                         </li>
                     </ul>
                 </li>

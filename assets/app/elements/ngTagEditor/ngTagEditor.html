@@ -12,7 +12,7 @@
         </span>
         <input type="text" class="tag-input" placeholder="{{placeholder}}" ng-focus="focus = true" ng-blur="unfocusedInput()" focus-me="setFocus" ng-model="search"/>
     </div>
-    <div class="tag-suggestions-wrap">
+    <div ng-class="{'tag-suggestions-wrap': !embedSuggestions}">
         <div class="tag-suggestions ng-trans ng-trans-fade ease" ng-show="suggestions && ((emptyShow && tags.length === 0) || alwaysShow || focus)">
             <span class="title">Suggestions:</span>
             <span ng-repeat="tag in suggestions track by tag.id" tag-label="tag" disable-link ng-mousedown="$event.stopPropagation(); $event.preventDefault();" ng-mouseup="add(tag); setFocus = true;"></span>

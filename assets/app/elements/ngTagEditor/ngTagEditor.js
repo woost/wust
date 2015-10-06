@@ -11,7 +11,8 @@ angular.module("wust.elements").directive("tagEditor", function() {
                 alwaysShow: "@",
                 emptyShow: "@",
                 editClassification: "@",
-                placeholder: "@"
+                placeholder: "@",
+                embedSuggestions: "@"
             },
             templateUrl: "elements/ngTagEditor/ngTagEditor.html",
             controller: ["$scope", "$attrs", "$element", "$filter",

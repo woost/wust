@@ -16,6 +16,7 @@ function editTaglist() {
             tagType: "@",
             editClassification: "@",
             placeholder: "@",
+            embedSuggestions: "@"
         },
         controller: editTaglistCtrl,
         controllerAs: "vm",
