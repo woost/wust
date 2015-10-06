@@ -1,10 +1,19 @@
 .tag-editor-directive {
+    font-family: sans-serif;
+    font-size: 16px;
+    line-height: 38px;
+    &.active {
+        .tag-editor, .tag-suggestions {
+            border-color: #aaa;
+        }
+    }
+    .tag-editor, .tag-suggestions {
+        border: 1px solid #ccc;
+    }
     .tag-editor {
         width: 100%;
         display: block;
-        position: relative;
         margin: 0;
-        border: 1px solid #ccc;
         border-radius: 3px;
         min-height: 40px;
         overflow: hidden;
@@ -12,54 +21,61 @@
         font-size: 16px;
         background-color: #fff;
         cursor: text;
-        font-family: sans-serif;
-        font-size: 16px;
-        line-height: 38px;
+        .tag-label {
+            .remove {
+                font-weight: bold;
+            }
+            .tag_circle {
+                margin-left: 2px;
+            }
+        }
+        .tag-input {
+            display: inline-block;
+            height: 38px;
+            border: 0;
+            margin: 0;
+            padding: 0;
+        }
+        .tag-input:focus {
+            box-shadow: none;
+            outline: none;
+        }
     }
-    .tag-draft {}
+    .tag-suggestions-wrap {
+        position: relative;
+        overflow: visible;
+    }
     .tag-suggestions {
+        padding: 3px;
+        margin-left: 20%;
+        margin-right: 0;
+        width: 80%;
+        border-bottom-left-radius: 3px;
+        border-bottom-right-radius: 3px;
+        border: 1px solid #ccc;
+        border-top: 0px;
         display: block;
-    }
-    .tag-editor .tag-label {
-        .remove {
-            font-weight: bold;
-        }
-        .tag_circle {
-            margin-left: 2px;
-        }
-    }
-    .tag-editor .tag-input {
-        display: inline-block;
-        height: 38px;
-        border: 0;
-        margin: 0;
-        padding: 0;
-    }
-    .tag-editor .tag-input:focus {
-        box-shadow: none;
-        outline: none;
-    }
-    .tag-editor.active {
-        border-color: #aaa;
-    }
-    .tag-editor .tag-suggestions {
+        background: white;
+        position: absolute;
+        left: 0px;
+        top: -1px;
+        z-index: 1;
         cursor: auto;
-    }
-    .tag-editor .tag-suggestions .title {
-        display: block;
-        float: left;
-        height: 25px;
-        margin: 7px 7px 0 0;
-        background-color: transparent;
-        color: #888;
-        font-weight: bold;
-        padding: 0 5px;
-        font-size: 14px;
-        line-height: 25px;
-    }
-
-    .tag-editor .tag-suggestions .tag-label {
-        cursor: pointer;
+        .title {
+            display: block;
+            float: left;
+            height: 25px;
+            margin: 7px 7px 0 0;
+            background-color: transparent;
+            color: #888;
+            font-weight: bold;
+            padding: 0 5px;
+            font-size: 14px;
+            line-height: 25px;
+        }
+        .tag-label {
+            cursor: pointer;
+        }
     }
 }
 

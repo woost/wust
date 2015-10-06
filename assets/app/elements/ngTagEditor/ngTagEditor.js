@@ -1,6 +1,7 @@
 angular.module("wust.elements").directive("tagEditor", function() {
         return {
             restrict: "AE",
+            replace: true,
             scope: {
                 tags: "=",
                 setFocus: "=",

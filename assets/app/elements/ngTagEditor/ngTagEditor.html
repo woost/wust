@@ -1,19 +1,19 @@
-<div class="tag-editor-directive">
-    <div class="tag-editor" ng-class="{active:focus}" ng-click="setFocus = true" deep-blur="focus = false">
-        <div class="tag-draft">
-            <span ng-repeat="tag in tags" tag-label="tag" disable-link>
-                <span ng-repeat="classification in tag.classifications" data-title="{{classification.title}}" bs-tooltip>
-                    <span colored-tag="classification" tagtype="circle" class="tag_circle"></span>
-                </span>
-
-                <span data-title="Classify post in context" bs-tooltip >
-                    <i ng-if="editClassification" class="fa fa-pencil content" ng-mousedown="$event.stopPropagation(); $event.preventDefault();" data-on-change="onChange()" data-tag="tag" data-template-url="elements/ngTagEditor/classification_popover.html" data-container="body" data-placement="right" data-animation="am-flip-x" data-auto-close="1" bs-popover></i>
-                </span>
-                <i class="remove fa fa-close right" data-title="Remove tag" bs-tooltip ng-mousedown="$event.stopPropagation(); $event.preventDefault();" ng-mouseup="remove($index); setFocus = true"></i>
+<div class="tag-editor-directive" ng-class="{active:focus}" >
+    <div class="tag-editor" ng-click="setFocus = true" deep-blur="focus = false">
+        <span ng-repeat="tag in tags" tag-label="tag" disable-link>
+            <span ng-repeat="classification in tag.classifications" data-title="{{classification.title}}" bs-tooltip>
+                <span colored-tag="classification" tagtype="circle" class="tag_circle"></span>
             </span>
-            <input type="text" class="tag-input" placeholder="{{placeholder}}" ng-focus="focus = true" ng-blur="unfocusedInput()" focus-me="setFocus" ng-model="search"/>
-        </div>
-        <div class="tag-suggestions" ng-show="suggestions && ((emptyShow && tags.length === 0) || alwaysShow || focus)">
+
+            <span data-title="Classify post in context" bs-tooltip >
+                <i ng-if="editClassification" class="fa fa-pencil content" ng-mousedown="$event.stopPropagation(); $event.preventDefault();" data-on-change="onChange()" data-tag="tag" data-template-url="elements/ngTagEditor/classification_popover.html" data-container="body" data-placement="right" data-animation="am-flip-x" data-auto-close="1" bs-popover></i>
+            </span>
+            <i class="remove fa fa-close right" data-title="Remove tag" bs-tooltip ng-mousedown="$event.stopPropagation(); $event.preventDefault();" ng-mouseup="remove($index); setFocus = true"></i>
+        </span>
+        <input type="text" class="tag-input" placeholder="{{placeholder}}" ng-focus="focus = true" ng-blur="unfocusedInput()" focus-me="setFocus" ng-model="search"/>
+    </div>
+    <div class="tag-suggestions-wrap">
+        <div class="tag-suggestions ng-trans ng-trans-fade ease" ng-show="suggestions && ((emptyShow && tags.length === 0) || alwaysShow || focus)">
             <span class="title">Suggestions:</span>
             <span ng-repeat="tag in suggestions track by tag.id" tag-label="tag" disable-link ng-mousedown="$event.stopPropagation(); $event.preventDefault();" ng-mouseup="add(tag); setFocus = true;"></span>
         </div>
