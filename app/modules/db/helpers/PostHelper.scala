@@ -35,7 +35,10 @@ object PostHelper {
   def createPost(request: PostAddRequest, user: User): Discourse = {
     val node = Post.create(title = request.title, description = request.description)
     val contribution = Created.create(user, node)
-    val discourse = Discourse(contribution)
+    val viewed = Viewed.create(user, node)
+    node.viewCount = 1
+
+    val discourse = Discourse(viewed, contribution)
     addScopesToGraph(discourse, request, node)
 
     PostHelper.viewPost(node, user)
