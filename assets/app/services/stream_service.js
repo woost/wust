@@ -6,17 +6,21 @@ function StreamService(Search, ContextService, DiscourseNode, store, Helpers, $s
     let streamStore = store.getNamespacedStore("stream");
     let self = this;
 
+
     this.streams = [];
+    let dashboardHasUpdates = true;
     restoreList();
+
     this.push = pushList;
     this.persist = storeList;
     this.remove = removeList;
     this.forget = clearList;
     this.refreshStream = refreshStream;
     this.refreshDashboard = refreshDashboard;
+    this.showDashboard = showDashboard;
     this.currentEditStream = undefined;
 
-    this.recentPosts = Search.$search({
+    this.recentPosts = Search.$collection({
         label: DiscourseNode.Post.label,
         tagsAll: ContextService.currentContexts.map(c => c.id),
         size: 30,
@@ -34,11 +38,17 @@ function StreamService(Search, ContextService, DiscourseNode, store, Helpers, $s
         streamDef.tagsWithout = streamDef.tagsWithout || [];
 
         let stream = {
-            posts: Search.$search(searchParams(streamDef)),
+            posts: Search.$collection(searchParams(streamDef)),
             tagsAll: streamDef.tagsAll,
             tagsAny: streamDef.tagsAny,
             tagsWithout: streamDef.tagsWithout,
         };
+
+        if ($state.is("dashboard")) {
+            stream.posts.$refresh();
+        } else {
+            dashboardHasUpdates = true;
+        }
 
         self.streams.push(stream);
         storeList();
@@ -62,6 +72,16 @@ function StreamService(Search, ContextService, DiscourseNode, store, Helpers, $s
         if ($state.is("dashboard")) {
             self.recentPosts.$refresh();
             self.streams.forEach(s => s.posts.$refresh());
+        } else {
+            dashboardHasUpdates = true;
+        }
+    }
+
+    function showDashboard() {
+        if (dashboardHasUpdates) {
+            self.recentPosts.$refresh();
+            self.streams.forEach(s => s.posts.$refresh());
+            dashboardHasUpdates = false;
         }
     }
 

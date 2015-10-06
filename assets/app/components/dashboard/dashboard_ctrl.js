@@ -5,6 +5,8 @@ DashboardCtrl.$inject = ["StreamService", "ContextService", "$scope"];
 function DashboardCtrl(StreamService, ContextService, $scope) {
     let vm = this;
 
+    StreamService.showDashboard();
+
     vm.streams = StreamService.streams;
     vm.removeStream = StreamService.remove;
     vm.refreshStream = StreamService.refreshStream;
