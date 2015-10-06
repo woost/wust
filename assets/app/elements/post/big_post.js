@@ -29,7 +29,7 @@ function bigPostCtrl($state, Post, ModalEditService, ContextService, Auth) {
 
     vm.showAuthor = true;
 
-    vm.changeRequests = Post.$buildRaw(vm.node).requests.$search();
+    vm.changeRequests = Post.$buildRaw(_.pick(vm.node, "id")).requests.$search();
     vm.replyTo = replyTo;
     vm.onSave = onSave;
     vm.onCancel = onCancel;
