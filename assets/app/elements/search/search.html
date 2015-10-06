@@ -14,10 +14,10 @@
             <div edit-taglist placeholder="Any Tag" tag-type="taglike" tags="vm.search.tagsAny" class="row edit_tags" existing-only="true" on-change="vm.search.triggerSearch()"></div>
             <div edit-taglist placeholder="Without Tags" tag-type="taglike" tags="vm.search.tagsWithout" class="row edit_tags" existing-only="true" on-change="vm.search.triggerSearch()"></div>
             <div id="search_options_bottom">
-                <div ng-show="vm.infinite.noMore && !vm.infinite.loading" class="row">
-                    <label class="col-md-4">#Results</label>
-                    <span class="col-md-6">{{vm.search.results.length}}</span>
-                </div>
+                <!-- <div class="row"> -->
+                <!--     <label class="col-md-4">#Results</label> -->
+                <!--     <span class="col-md-6">{{vm.search.results.length}}</span> -->
+                <!-- </div> -->
                 <div ng-class="{inactive: vm.search.unlimited}">
                     <div class="row">
                         <label class="col-md-4">Page</label>
