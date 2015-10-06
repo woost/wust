@@ -23,7 +23,6 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
             this.triedSave = !!other.triedSave;
 
             this.referenceNode = other.referenceNode;
-            this.classifications = angular.copy((other.classifications || []).map(t => t.$encode ? t.$encode() : t));
 
             this.apply(other, isOriginal, other.original);
         }
@@ -35,7 +34,6 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
         unsetOneTimeProperties() {
             this.newDiscussion = false;
             this.referenceNode = undefined;
-            this.classifications = [];
         }
 
         apply({
@@ -45,7 +43,7 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
             this.title = title || "";
             this.description = description || "";
             this.tags = angular.copy((tags || []).map(t => t.$encode ? t.$encode() : t));
-            this.tags.forEach(t => t.classifications = t.classifications || []);
+            this.tags.forEach(t => t.classifications = _.sortBy(t.classifications, "id") || []);
             this.original = isOriginal ? {
                 title: this.title,
                 description: this.description,
@@ -55,6 +53,8 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
                 description: defaultOriginal.description || "",
                 tags: defaultOriginal.tags || []
             };
+
+            this.tags = this.inferImplicitClassifications();
 
             this.setValidityProperties();
         }
@@ -71,10 +71,19 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
             delete dirtyModel.tags;
 
 
-            let [nonLocalTags, localTags] = _.partition(this.tags, "id");
+            let tagsOnThisSessionNode, originalTagsOnThisSessionNode;
+            if (this.isConnects) {
+                tagsOnThisSessionNode = this.tags;
+                originalTagsOnThisSessionNode = this.original.tags;
+            } else {
+                tagsOnThisSessionNode = _.select(this.tags, t => t.isContext);
+                originalTagsOnThisSessionNode = _.select(this.original.tags, t => t.isContext);
+            }
+
+            let [nonLocalTags, localTags] = _.partition(tagsOnThisSessionNode, "id");
             let origTags = nonLocalTags.map(t => {
                 return {
-                    [t.id]: _.find(this.original.tags, _.pick(t, "id"))
+                    [t.id]: _.find(originalTagsOnThisSessionNode, _.pick(t, "id"))
                 };
             }).reduce(_.merge, {});
 
@@ -86,7 +95,7 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
                 };
             }).filter(t => t.classifications.length);
 
-            let missingTags = _.reject(this.original.tags, t => _.any(oldTags, _.pick(t, "id")));
+            let missingTags = _.reject(originalTagsOnThisSessionNode, t => _.any(oldTags, _.pick(t, "id")));
             let removalTags = oldTags.map(t => {
                 return {
                     id: t.id,
@@ -148,10 +157,12 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
                     else if (!model.id)
                         humane.success("Added new node");
 
+                    // TODO: we should be able to include tags for the connects relation when we are responding.
+                    // currently just send a second request to tag the newly created connects relation
                     if(referenceNode) {
                         let connects = _.find(response.graph.nodes, n => n.label === "CONNECTS" && n.startId === data.id && n.endId === referenceNode.id);
                         let session = editConnects(connects);
-                        session.tags = this.classifications;
+                        session.tags = this.tags.filter(t => !t.isContext);
                         session.save();
                     }
                 }
@@ -192,14 +203,37 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
             return encoded;
         }
 
-        onChange() {
-            if (this.newDiscussion || this.referenceNode) {
-                this.classifications.forEach(c => c.implicit = true);
-                this.tags.forEach(t => t.classifications = _.uniq((t.classifications || []).filter(c => !c.implicit).concat(this.classifications), "id"));
-            } else {
-                this.tags.forEach(t => t.classifications = t.classifications || []);
+        inferImplicitClassifications() {
+            let [tags, classifications] = _.partition(this.tags, t => t.isContext);
+
+            // find common classifications of the tags
+            let commonClassifications = tags.reduce((a,b) => {
+                return {
+                    classifications: a.classifications ? a.classifications.filter(ac => _.any(b.classifications, bc => bc.id === ac.id)) : b.classifications
+                };
+            }, {classifications: undefined}).classifications || [];
+            let implicitClassifications = _.uniq(angular.copy(commonClassifications).concat(classifications), "id");
+
+            implicitClassifications.forEach(c => c.implicit = true);
+            tags.forEach(t => t.classifications = _.uniq((t.classifications || []).filter(c => !c.implicit).concat(implicitClassifications), "id"));
+
+            return _.uniq(this.tags.concat(commonClassifications), "id");
+        }
+
+        //only changes on the tags pass arguments to the onchange function
+        //type and tag are emitted by the ngtageditor
+        //type: remove|add
+        //tag: removed/added tag
+        onChange(type, tag) {
+            if (type !== undefined && tag !== undefined && !tag.isContext) {
+                if (type === "remove")
+                    this.tags.filter(t => t.isContext).forEach(t => _.remove(t.classifications, _.pick(tag, "id")));
+
+                if (type === "removeNested")
+                    _.remove(this.tags, _.pick(tag, "id"));
             }
 
+            this.tags = this.inferImplicitClassifications();
             this.setValidityProperties();
 
             if (this.lazyAdd) {

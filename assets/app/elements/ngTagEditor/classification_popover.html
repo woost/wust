@@ -1,5 +1,5 @@
 <div class="classification_popover popover">
     <div class="arrow"></div>
     <h3 class="popover-title" ng-bind="title" ng-show="title"></h3>
-    <div edit-taglist always-show="true" set-focus="true" tags="tag.classifications" on-change="onChange()" tag-type="classification" existing-only="true"></div>
+    <div edit-taglist always-show="true" set-focus="true" tags="tag.classifications" on-change="onChange({type: type + 'Nested', tag: tag})" embed-suggestions="true" tag-type="classification" existing-only="true"></div>
 </div>

@@ -61,8 +61,8 @@ function withoutTags(tags, ignore) {
 }
 
 function sortedNodeTags(node, ignore = []) {
-    let classifications = _.uniq(node.classifications.concat(_.flatten(node.tags.map(t => t.classifications || []))), "id");
-    return sortByIdQuality(withoutTags(classifications,ignore)).concat(sortByIdQuality(withoutTags(node.tags, ignore)));
+    let classifications = (node.classifications || []).concat(_.flatten(node.tags.map(t => t.classifications || [])));
+    return _.uniq(sortByIdQuality(withoutTags(classifications,ignore)).concat(sortByIdQuality(withoutTags(node.tags, ignore))), "id");
 }
 
 function navBackgroundColor(tag) { return hashToColor(tag, 10, 98); }

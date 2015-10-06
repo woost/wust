@@ -1,7 +1,6 @@
 <div class="new_post_directive">
-    <div edit-taglist edit-classification="true" set-focus="vm.focusEditTags" tags="vm.node.tags" on-change="vm.node.onChange()" ng-class="{'is_invalid': vm.node.triedSave && !vm.node.validity.tags.valid}"></div>
+    <div edit-taglist edit-classification="true" set-focus="vm.focusEditTags" tags="vm.node.tags" on-change="vm.node.onChange(type,tag)" tag-type="taglike" ng-class="{'is_invalid': vm.node.triedSave && !vm.node.validity.tags.valid}"></div>
     <div validity-info="vm.node" property="tags"></div>
-    <div edit-taglist set-focus="vm.focusEditClassifications" tags="vm.node.classifications" on-change="vm.node.onChange()" tag-type="classification" existing-only="true"></div>
 
     <h2 contenteditable="true" maxchars="140" focus-me="vm.inputFocus" ng-keydown="vm.redirectEnter($event)" ng-model="vm.node.title" ng-change="vm.node.onChange()" ng-class="{'is_invalid': vm.node.triedSave && !vm.node.validity.title.valid}" class="title">
     </h2>
