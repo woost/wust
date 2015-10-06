@@ -47,6 +47,7 @@ function HistoryService(Auth, Session, Post, DiscourseNode, $rootScope) {
         if (currentViewComponent === undefined)
             return;
 
+        node = node.encode ? node.encode() : node;
         let current = currentViewComponent.getWrap("graph");
         let existing = _.find(current.nodes, _.pick(node, "id"));
         if (existing !== undefined) {
@@ -87,6 +88,7 @@ function HistoryService(Auth, Session, Post, DiscourseNode, $rootScope) {
     }
 
     function addNode(node) {
+        node = node.encode ? node.encode() : node;
         _.remove(self.visited, n => node.id === n.id);
         self.visited.splice(0, self.visited.length - maximum - 1);
         self.visited.splice(0, 0, node);
