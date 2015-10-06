@@ -12,7 +12,8 @@ angular.module("wust.elements").directive("tagEditor", function() {
                 emptyShow: "@",
                 editClassification: "@",
                 placeholder: "@",
-                embedSuggestions: "@"
+                embedSuggestions: "@",
+                label: "@"
             },
             templateUrl: "elements/ngTagEditor/ngTagEditor.html",
             controller: ["$scope", "$attrs", "$element", "$filter",
@@ -26,7 +27,7 @@ angular.module("wust.elements").directive("tagEditor", function() {
 
                     $scope.$watch("search", function(value) {
                         if (!ignoreNextSuggestion && completeTabbing === undefined) {
-                            $scope.getSuggestions({search: value}).then(val => $scope.suggestions = val);
+                            $scope.getSuggestions({search: value, label: $scope.label}).then(val => $scope.suggestions = val);
                         }
 
                         ignoreNextSuggestion = false;

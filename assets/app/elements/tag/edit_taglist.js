@@ -34,40 +34,38 @@ function editTaglistCtrl(TagSuggestions, DiscourseNode, $q) {
 
     vm.onChangeDistributor = onChangeDistributor;
     vm.searchTags = searchTags;
-    let tagLabel;
     switch (vm.tagType) {
         //TODO: expose labels without own node api in schema object from api
         case "classification":
             // tagLabel = DiscourseNode.Classification.label;
-            tagLabel = "CLASSIFICATION";
+            vm.tagLabel = "CLASSIFICATION";
             vm.placeholder = vm.placeholder || "Add Classification";
         break;
         case "taglike":
             // tagLabel = DiscourseNode.Classification.label;
-            tagLabel = "TAGLIKE";
+            vm.tagLabel = "TAGLIKE";
             vm.placeholder = vm.placeholder || "Add Tag";
         break;
         case "context":
             /* falls through */
         default:
             // tagLabel = DiscourseNode.Scope.label;
-            tagLabel = "SCOPE";
+            vm.tagLabel = "SCOPE";
             vm.placeholder = vm.placeholder || "Add Context";
         break;
     }
 
 
-
     function onChangeDistributor(type, tag) {
         // set isContext for contexts, as the some styles for local tags depend on it
         if (type === "add" && tag.isContext === undefined)
-            tag.isContext = tagLabel === "SCOPE";
+            tag.isContext = vm.tagLabel === "SCOPE";
 
         if (vm.onChange)
             vm.onChange({type, tag});
     }
 
-    function searchTags(term) {
+    function searchTags(term, tagLabel) {
         if(delayedTriggerSearch)
             clearTimeout(delayedTriggerSearch);
 
