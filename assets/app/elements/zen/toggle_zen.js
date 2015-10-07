@@ -7,7 +7,8 @@ function toggleZen(ZenService) {
         restrict: "A",
         templateUrl: "elements/zen/toggle_zen.html",
         scope: {
-            node: "="
+            node: "=",
+            popoverTitle: "@"
         },
         link
     };

@@ -4,18 +4,18 @@
         <button ng-if="::vm.Auth.isLoggedIn" class="fa fa-pencil pull-right btn btn-sm btn-default" ng-click="vm.editMode = true" data-title="Edit" bs-tooltip></button>
         <h2 ng-bind="vm.node.title" class="post_title"></h2>
         <div class="additional_info">
-            <span show-timestamp="vm.node.timestamp"></span>
-            <span class="pull-right">
+            <div class="pull-right">
                 <div>{{vm.node.viewCount}} views</div>
                 <div ng-if="::vm.showAuthor">
-                <i class="fa fa-user"></i>
-                <a ui-sref="users.details({id: vm.node.author.id})" ng-bind="vm.node.author.name"></a
+                    <i class="fa fa-user"></i>
+                    <a ui-sref="users.details({id: vm.node.author.id})" ng-bind="vm.node.author.name"></a>
                 </div>
-            </span>
+                <div toggle-zen node="vm.node" ng-show="vm.node.description"></div>
+            </div>
+            <div show-timestamp="vm.node.timestamp"></div>
         </div>
 
         <div big-taglist node="vm.node" class="taglist"></div>
-        <span toggle-zen node="vm.node" class="pull-right" ng-show="vm.node.description"></span>
         <div class="post_description" markdown="vm.node.description" ng-show="vm.node.description"></div>
         <button ng-if="::vm.Auth.isLoggedIn" class="replytool pull-right btn btn-sm btn-default" ng-click='vm.replyTo()' data-title="Respond" bs-tooltip><i class="fa fa-plus"></i></button>
     </div>

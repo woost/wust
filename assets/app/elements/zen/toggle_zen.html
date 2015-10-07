@@ -1,4 +1,4 @@
 <span ng-switch="preview.active">
-    <span ng-switch-when="true" class="fa fa-eye-slash" style="cursor:pointer" ng-click="service.hide()" data-title="Deactivate distraction free reading" bs-tooltip></span>
-    <span ng-switch-default class="fa fa-eye text-muted" style="cursor:pointer" ng-click="service.show(node)" data-title="Activate distraction free reading" bs-tooltip></span>
+    <span ng-switch-when="true" class="fa fa-eye-slash" style="cursor:pointer" ng-click="service.hide()" data-title="{{popoverTitle || 'Deactivate distraction free reading'}}" bs-tooltip></span>
+    <span ng-switch-default class="fa fa-eye text-muted" style="cursor:pointer" ng-click="service.show(node)" data-title="{{popoverTitle || 'Activate distraction free reading'}}" bs-tooltip></span>
 </span>
