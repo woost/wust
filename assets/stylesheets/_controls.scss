@@ -14,11 +14,6 @@
 
 .error_message {
     color: red !important;
-    display: none;
-}
-
-.error_message.show {
-    display: block;
 }
 
 // make contenteditable elements work with webkit

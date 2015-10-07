@@ -34,7 +34,9 @@ function StaticEditPostCtrl($state, $scope, Auth, EditService, KarmaService) {
     calculateEditWeight();
 
     function saveNode() {
-        vm.editNode.save().$then(data => vm.onSave({response: data}));
+        let promise = vm.editNode.save();
+        if (promise)
+            promise.$then(data => vm.onSave({response: data}));
     }
 
     function deleteNode() {
