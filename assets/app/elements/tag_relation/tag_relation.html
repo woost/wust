@@ -10,7 +10,7 @@
                 <span small-post node="vm.currentEditRelation.endNode"></span>
             </div>
             <div class="modal-body">
-                <div edit-taglist tags="vm.currentEditRelation.tags" set-focus="true" always-show="true" tag-type="classification" existing-only="true"></div>
+                <div edit-taglist tags="vm.currentEditRelation.tags" set-focus="true" always-show="true" embed-suggestions="true" tag-type="classification" existing-only="true"></div>
             </div>
             <div class="modal-footer">
                 <button ng-if="::!vm.currentEditRelation.isCreating" class="pull-left btn btn-danger" ng-click="vm.disconnect();$hide()" data-title="Disconnect" bs-tooltip><i class="fa fa-trash-o"></i></button>
