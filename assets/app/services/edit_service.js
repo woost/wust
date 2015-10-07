@@ -217,7 +217,7 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
             implicitClassifications.forEach(c => c.implicit = true);
             tags.forEach(t => t.classifications = _.uniq((t.classifications || []).filter(c => !c.implicit).concat(implicitClassifications), "id"));
 
-            return _.uniq(this.tags.concat(commonClassifications), "id");
+            return _.uniq(this.tags.concat(commonClassifications), t => t.id || t.title); //TODO in some esoteric cases, this can fail
         }
 
         //only changes on the tags pass arguments to the onchange function

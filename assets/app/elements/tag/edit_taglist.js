@@ -58,8 +58,8 @@ function editTaglistCtrl(TagSuggestions, DiscourseNode, $q) {
 
     function onChangeDistributor(type, tag) {
         // set isContext for contexts, as the some styles for local tags depend on it
-        if (type === "add" && tag.isContext === undefined)
-            tag.isContext = vm.tagLabel === "SCOPE";
+        if (type === "add" && tag.isContext === undefined && tag.id === undefined)
+            tag.isContext = true;
 
         if (vm.onChange)
             vm.onChange({type, tag});
