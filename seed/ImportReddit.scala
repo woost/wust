@@ -24,8 +24,8 @@ object ImportReddit extends Task with SeedTools {
   val redditScope = mergeScope("Reddit", color = Some(210))
 
   dbContext { implicit db =>
-    val subreddits = List("lifeprotips", "scala", "neo4j")
     val limit = 10
+    val subreddits = List("lifeprotips", "scala", "neo4j", "programming")
 
     for(subreddit <- subreddits) {
       println(s"importing comments from subreddit /r/$subreddit")
