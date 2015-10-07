@@ -41,16 +41,21 @@ function scratchpadCtrl($state, HistoryService, Session, EditService, SidebarSer
         return vm.editList.filter(s => s.visible);
     }
 
-    function loadGraph() {
+    function loadGraph(ownState = false) {
         let scratchNodes = scratchpadNodes();
         if (_.isEmpty(scratchNodes))
             return;
 
-        let firstNode = scratchNodes[0];
-        let restNodes = scratchNodes.slice(1, scratchNodes.length);
-        $state.go("focus", { id: firstNode.id, type: "graph" }).then(() => {
-            _.defer(() => HistoryService.addNodesToCurrentView(restNodes));
-        });
+        //TODO: should be able to load components of scratchpad nodes into graph
+        if (ownState) {
+            let firstNode = scratchNodes[0];
+            let restNodes = scratchNodes.slice(1, scratchNodes.length);
+            $state.go("focus", { id: firstNode.id, type: "graph" }).then(() => {
+                _.defer(() => HistoryService.addNodesToCurrentView(restNodes));
+            });
+        } else {
+            HistoryService.addNodesToCurrentView(scratchNodes);
+        }
     }
 
     function editNewPost() {
