@@ -16,14 +16,14 @@ function FocusCtrl(Helpers, Post, $stateParams, $state, HistoryService, Connecte
                 relations: [],
                 $pk: rootNode.id
             };
-            let component = renesca.js.GraphFactory().fromRecord(graph);
-            vm.graphComponent = component.wrap("graph");
-            vm.neighboursComponent = component.hyperWrap("neighbours");
+            vm.component = renesca.js.GraphFactory().fromRecord(graph);
+            vm.graphComponent = vm.component.wrap("graph");
+            vm.neighboursComponent = vm.component.hyperWrap("neighbours");
             vm.componentLoading = true;
 
             // we are viewing details about a node, so add it to the nodehistory
             HistoryService.add(vm.graphComponent.rootNode);
-            HistoryService.setCurrentViewComponent(component);
+            HistoryService.setCurrentViewComponent(vm.component);
 
         }, () => $state.go("dashboard"));
 
@@ -35,6 +35,11 @@ function FocusCtrl(Helpers, Post, $stateParams, $state, HistoryService, Connecte
                 vm.graphComponent.commit();
 
                 LiveService.registerNodes(vm.graphComponent.nodes);
+
+                if (vm.tabViews[2].active && vm.component.urlResources.length === 0) {
+                    vm.tabViews[2]._active = false;
+                    vm.tabViews[0].active = true;
+                }
             });
         }, () => vm.componentLoading = false);
     }
@@ -55,6 +60,8 @@ function FocusCtrl(Helpers, Post, $stateParams, $state, HistoryService, Connecte
                     // switching to graph by tabs
                     // console.log("focusCtrl: sending display_graph");
                     $scope.$broadcast("display_graph");
+                } else if (this.index === 2) {
+                    $state.transitionTo("focus", { type: "links" }, { inherit: true, notify: false });
                 } else {
                     $state.transitionTo("focus", { type: "" }, { inherit: true, notify: false });
                 }
@@ -64,13 +71,20 @@ function FocusCtrl(Helpers, Post, $stateParams, $state, HistoryService, Connecte
         }
     }
 
-    vm.tabViews = _.map([0, 1], i => new Tab(i));
+    vm.tabViews = _.map([0, 1, 2], i => new Tab(i));
     if ($stateParams.type === "graph") {
         // opening graph by url
         vm.tabViews[0]._active = false;
         vm.tabViews[1]._active = true;
+        vm.tabViews[2]._active = false;
+    } else if ($stateParams.type === "links") {
+        // opening graph by url
+        vm.tabViews[0]._active = false;
+        vm.tabViews[1]._active = false;
+        vm.tabViews[2]._active = true;
     } else {
         vm.tabViews[0]._active = true;
         vm.tabViews[1]._active = false;
+        vm.tabViews[2]._active = false;
     }
 }

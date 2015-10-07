@@ -4,12 +4,21 @@
             <div tab-heading>
                 <i class="icon-dot-circled fa-2x"></i>
             </div>
-            <div focus-neighbours component="vm.neighboursComponent" is-loading="vm.componentLoading"></div>
+            <div class="tab_body" focus-neighbours component="vm.neighboursComponent" is-loading="vm.componentLoading"></div>
         </div>
-        <div tab active="vm.tabViews[1].active"> <div tab-heading>
+        <div tab active="vm.tabViews[1].active">
+            <div tab-heading>
                 <i class="icon-share fa-2x"></i>
             </div>
-            <div focus-graph component="vm.graphComponent" is-loading="vm.componentLoading"></div>
+            <div class="tab_body" focus-graph component="vm.graphComponent" is-loading="vm.componentLoading"></div>
+        </div>
+        <div tab active="vm.tabViews[2].active" ng-show="vm.component.urlResources.length">
+            <div tab-heading>
+                <i class="fa-link fa-2x"></i>
+            </div>
+            <div class="list-group">
+                <a class="list-group-item" ng-repeat="urlResource in vm.component.urlResources" href="{{urlResource}}" ng-bind="urlResource"></a>
+            <div>
         </div>
     </div>
 </div>

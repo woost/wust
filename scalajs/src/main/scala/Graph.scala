@@ -266,6 +266,9 @@ sealed trait WrappedGraph[RELATION <: RelationLike] {
   var nonHyperRelationNodes: js.Array[Node] = _
   var rootNode: NodeBase = _ // eigentlich soll das auch ne node sein...egal
 
+  @JSExport
+  def urlResources = rawGraph.urlResources
+
   // propagations upwards, coming from rawGraph
   private[js] def rawAdd(node: RawNode)
   private[js] def rawAdd(relation: RawRelation)
@@ -567,6 +570,7 @@ class RawGraph(private[js] var nodes: Set[RawNode], private[js] var relations: S
   }
 
   def commit() {
+    urlResourcesCacher.invalidate()
     val changes = RawGraphChanges(currentNewNodes, currentNewRelations)
     wrappers.values.foreach(_.rawCommit(changes))
     currentNewNodes = Set.empty[RawNode]
@@ -589,6 +593,12 @@ class RawGraph(private[js] var nodes: Set[RawNode], private[js] var relations: S
     nodes.filter(n => n.isHyperRelation && (n.startId.get == node.id || n.endId.get == node.id))
   }
 
+  val urlRegex = """(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]""".r
+  def urlResources = urlResourcesCacher()
+  def urlResourcesCacher = Cacher(() => {
+    val descriptions = nodes.filterNot(_.isHyperRelation).flatMap(_.description).mkString(" ")
+    (urlRegex findAllIn descriptions).toList.distinct.toJSArray
+  })
 
   override def toString = s"Graph(${ nodes.map(_.id).mkString(",") }, ${ relations.map(r => r.startId + "->" + r.endId).mkString(",") })"
 }

@@ -11,11 +11,10 @@
     .nav > li > a {
         padding: 3px;
     }
-
     .tab-content {
         overflow: auto;
     }
-    .tab-pane > div {
+    .tab-pane > .tab_body {
         height: inherit;
     }
 }
