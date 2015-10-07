@@ -38,19 +38,19 @@ function editTaglistCtrl(TagSuggestions, DiscourseNode, $q) {
         //TODO: expose labels without own node api in schema object from api
         case "classification":
             // tagLabel = DiscourseNode.Classification.label;
-            vm.tagLabel = "CLASSIFICATION";
+            vm.tagLabels = ["CLASSIFICATION"];
             vm.placeholder = vm.placeholder || "Add Classification";
         break;
         case "taglike":
             // tagLabel = DiscourseNode.Classification.label;
-            vm.tagLabel = "TAGLIKE";
+            vm.tagLabels = ["CLASSIFICATION", "SCOPE"];
             vm.placeholder = vm.placeholder || "Add Tag";
         break;
         case "context":
             /* falls through */
         default:
             // tagLabel = DiscourseNode.Scope.label;
-            vm.tagLabel = "SCOPE";
+            vm.tagLabels = ["SCOPE"];
             vm.placeholder = vm.placeholder || "Add Context";
         break;
     }
@@ -65,12 +65,14 @@ function editTaglistCtrl(TagSuggestions, DiscourseNode, $q) {
             vm.onChange({type, tag});
     }
 
-    function searchTags(term, tagLabel) {
+    function searchTags(term) {
         if(delayedTriggerSearch)
             clearTimeout(delayedTriggerSearch);
 
         return $q((resolve, reject) => {
-            delayedTriggerSearch = setTimeout(() => TagSuggestions.search(term, tagLabel).$then(resolve, reject), searchTriggerDelay);
+            delayedTriggerSearch = setTimeout(() => $q.all(vm.tagLabels.map(tagLabel => {
+                return TagSuggestions.search(term, tagLabel).$asPromise();
+            })).then(resolve, reject), searchTriggerDelay);
         });
     }
 }

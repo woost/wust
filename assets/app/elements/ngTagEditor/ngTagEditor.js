@@ -13,7 +13,7 @@ angular.module("wust.elements").directive("tagEditor", function() {
                 editClassification: "@",
                 placeholder: "@",
                 embedSuggestions: "@",
-                label: "@"
+                dualSuggestions: "@"
             },
             templateUrl: "elements/ngTagEditor/ngTagEditor.html",
             controller: ["$scope", "$attrs", "$element", "$filter",
@@ -27,7 +27,9 @@ angular.module("wust.elements").directive("tagEditor", function() {
 
                     $scope.$watch("search", function(value) {
                         if (!ignoreNextSuggestion && completeTabbing === undefined) {
-                            $scope.getSuggestions({search: value, label: $scope.label}).then(val => $scope.suggestions = val);
+                            $scope.getSuggestions({search: value}).then(vals => {
+                                $scope.suggestions = vals;
+                            });
                         }
 
                         ignoreNextSuggestion = false;
@@ -44,9 +46,10 @@ angular.module("wust.elements").directive("tagEditor", function() {
                         if (_.trim(tag.title).length === 0)
                             return;
 
+                        let allSuggestions = _.flatten($scope.suggestions);
                         completeTabbing = undefined;
                         let tagTitleLC = tag.title.toLowerCase();
-                        tag = _.find($scope.suggestions, t => t.title.toLowerCase() === tagTitleLC) || tag;
+                        tag = _.find(allSuggestions, t => t.title.toLowerCase() === tagTitleLC) || tag;
                         tag = tag.encode ? tag.encode() : tag;
                         if ($scope.existingOnly && tag.id === undefined)
                             return;
@@ -68,19 +71,20 @@ angular.module("wust.elements").directive("tagEditor", function() {
 
                     $element.find("input").on("keydown", function(e) {
                         if (e.which === 9) { /* tab */
+                            let allSuggestions = _.flatten($scope.suggestions);
                             if ($scope.search) {
                                 if (completeTabbing === undefined) {
-                                    if ($scope.suggestions.length > 0) {
+                                    if (allSuggestions.length > 0) {
                                         completeTabbing = $scope.search;
-                                        $scope.search = $scope.suggestions[0].title;
+                                        $scope.search = allSuggestions[0].title;
                                         $scope.$apply();
                                         e.preventDefault();
                                     }
                                 } else {
-                                    let idx = _.findIndex($scope.suggestions, {title: $scope.search});
+                                    let idx = _.findIndex(allSuggestions, {title: $scope.search});
                                     if (idx >= 0) {
-                                        if (idx < $scope.suggestions.length - 1) {
-                                            $scope.search = $scope.suggestions[idx + 1].title;
+                                        if (idx < allSuggestions.length - 1) {
+                                            $scope.search = allSuggestions[idx + 1].title;
                                         } else {
                                             $scope.search = completeTabbing;
                                             ignoreNextSuggestion = true;
