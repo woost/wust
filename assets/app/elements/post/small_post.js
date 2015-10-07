@@ -1,8 +1,8 @@
 angular.module("wust.elements").directive("smallPost", smallPost);
 
-smallPost.$inject = ["ContextService"];
+smallPost.$inject = ["ContextService", "$animate"];
 
-function smallPost(ContextService) {
+function smallPost(ContextService, $animate) {
     return {
         restrict: "A",
         templateUrl: "elements/post/small_post.html",
@@ -16,6 +16,11 @@ function smallPost(ContextService) {
         link: function (scope, elem) {
             scope.currentContexts = ContextService.currentContexts;
             scope.$on("context.changed", () => scope.currentContexts = ContextService.currentContexts);
+
+            scope.$watch("node", function(node) {
+                elem[0].classList.add("element_changed");
+                console.log("i triggered");
+            });
         }
     };
 }

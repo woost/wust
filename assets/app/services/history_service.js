@@ -1,8 +1,8 @@
 angular.module("wust.services").service("HistoryService", HistoryService);
 
-HistoryService.$inject = ["Auth", "Session", "Post", "DiscourseNode", "$rootScope"];
+HistoryService.$inject = ["$animate", "Auth", "Session", "Post", "DiscourseNode", "$rootScope"];
 
-function HistoryService(Auth, Session, Post, DiscourseNode, $rootScope) {
+function HistoryService($animate, Auth, Session, Post, DiscourseNode, $rootScope) {
     let maximum = 8;
     let self = this;
 
@@ -48,7 +48,7 @@ function HistoryService(Auth, Session, Post, DiscourseNode, $rootScope) {
             return;
 
         node = node.encode ? node.encode() : node;
-        let current = currentViewComponent.getWrap("graph");
+        let current = currentViewComponent.getWrap("neighbours");
         let existing = _.find(current.nodes, _.pick(node, "id"));
         if (existing !== undefined) {
             _.assign(existing, node);

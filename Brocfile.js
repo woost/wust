@@ -78,6 +78,7 @@ var styles = concat(mergeTrees([compiledStyles, dependencies, staticAssetsCss, f
         "humane-js/themes/libnotify.css",
         "angular-xeditable/dist/css/xeditable.css",
         "highlightjs/styles/solarized_light.css",
+        "animate.css/animate.min.css",
 
         "static_assets_css/**/*.css",
 
