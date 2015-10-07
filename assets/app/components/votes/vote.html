@@ -9,20 +9,20 @@
         <div id="action_container" ng-if="::vm.change">
             <div class="vote-buttons">
                 <button class="btn btn-danger" ng-click="vm.downvote()">
-                    <i class="fa fa-close"></i> dosn't make sense
+                    <i class="fa fa-close"></i> Dosn't make sense
                 </button>
                 <button class="btn btn-warning" ng-click="vm.skip()">
                     <i class="fa fa-forward"></i> I don't know
                 </button>
                 <button class="btn btn-success" ng-click="vm.upvote()">
-                    <i class="fa fa-check-square-o"></i> makes sense
+                    <i class="fa fa-check-square-o"></i> Makes sense
                 </button>
             </div>
 
             <h4 class="action-description" ng-switch="vm.change.type">
-                <span ng-switch-when="Delete">Delete </span>
-                <span ng-switch-when="Edit">Edit </span>
-                <span ng-switch-when="AddTag">Add Tag to <span tag-label="vm.change.tag"></span></span>
+                <span ng-switch-when="Delete">Delete Post</span>
+                <span ng-switch-when="Edit">Edit Post</span>
+                <span ng-switch-when="AddTag">Add Tag <span tag-label="vm.change.tag"></span> to Post</span>
                 <span ng-switch-when="RemoveTag">Remove Tag from <span tag-label="vm.change.tag" class="remove"></span></span>
                 <span small-post node="vm.change.post"></span>
             </h4>
@@ -33,6 +33,7 @@
                         <a tab-heading>Old</a>
                         <div class="post" colored-tag-node="vm.change.post" big="true">
                             <h2 class="post-title" ng-bind="vm.change.oldTitle"></h2>
+                            <span ng-repeat="tag in (vm.change.post | nodetags) track by tag.id" tag-label="tag"></span>
                             <div ng-show="vm.showDescription" class="post-description" markdown="vm.change.oldDescription" ng-show="vm.change.oldDescription"></div>
                         </div>
 
@@ -44,6 +45,7 @@
                                 <div ng-switch-when="Edit" word-based-diff source-a="vm.change.oldTitle" source-b="vm.change.newTitle"></div>
                                 <span ng-switch-default ng-bind="vm.change.post.title"></span>
                             </h2>
+                            <span ng-repeat="tag in (vm.change.post | nodetags) track by tag.id" tag-label="tag"></span>
 
                             <div ng-switch-when="AddTag">
                                 <span ng-repeat="tag in vm.change.post.tags.concat([vm.change.tag]) | unique:'id'" tag-label="tag" class="tag" ng-class="{'existing': tag.id !== vm.change.tag.id}">
@@ -66,6 +68,7 @@
                         <a tab-heading>New</a>
                         <div class="post" colored-tag-node="vm.change.post" big="true">
                             <h2 class="post-title" ng-bind="vm.change.newTitle"></h2>
+                            <span ng-repeat="tag in (vm.change.post | nodetags) track by tag.id" tag-label="tag"></span>
 
                             <div ng-show="vm.showDescription" class="post-description" markdown="vm.change.newDescription" ng-show="vm.change.newDescription"></div>
                         </div>
