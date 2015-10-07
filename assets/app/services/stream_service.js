@@ -1,8 +1,8 @@
 angular.module("wust.services").service("StreamService", StreamService);
 
-StreamService.$inject = ["Search", "ContextService", "DiscourseNode", "store", "Helpers", "$state"];
+StreamService.$inject = ["Search", "DiscourseNode", "store", "Helpers", "$state"];
 
-function StreamService(Search, ContextService, DiscourseNode, store, Helpers, $state) {
+function StreamService(Search, DiscourseNode, store, Helpers, $state) {
     let streamStore = store.getNamespacedStore("stream");
     let self = this;
 
@@ -20,16 +20,8 @@ function StreamService(Search, ContextService, DiscourseNode, store, Helpers, $s
     this.showDashboard = showDashboard;
     this.currentEditStream = undefined;
 
-    this.recentPosts = Search.$collection({
-        label: DiscourseNode.Post.label,
-        tagsAll: ContextService.currentContexts.map(c => c.id),
-        size: 30,
-        page: 0,
-        startPost: true
-    });
-
     function restoreList() {
-        _.each(streamStore.get("streams") || [], pushList);
+        _.each(streamStore.get("streams") || [{}], pushList);
     }
 
     function pushList(streamDef = {}) {
@@ -70,7 +62,6 @@ function StreamService(Search, ContextService, DiscourseNode, store, Helpers, $s
 
     function refreshDashboard(event) {
         if ($state.is("dashboard")) {
-            self.recentPosts.$refresh();
             self.streams.forEach(s => s.posts.$refresh());
         } else {
             dashboardHasUpdates = true;
@@ -79,7 +70,6 @@ function StreamService(Search, ContextService, DiscourseNode, store, Helpers, $s
 
     function showDashboard() {
         if (dashboardHasUpdates) {
-            self.recentPosts.$refresh();
             self.streams.forEach(s => s.posts.$refresh());
             dashboardHasUpdates = false;
         }

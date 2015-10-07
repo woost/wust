@@ -19,15 +19,6 @@ function DashboardCtrl(StreamService, ContextService, $scope) {
         accept: acceptDrop
     };
 
-    vm.recentPosts = StreamService.recentPosts;
-
-    $scope.$on("context.changed", () => {
-        vm.recentPosts.$refresh({
-            tagsAll: ContextService.currentContexts.map(c => c.id),
-            startPost: true
-        });
-    });
-
     function acceptDrop(sourceItemHandleScope, destSortableScope, destItemScope) {
         return sourceItemHandleScope.$parent.$parent.$id === destSortableScope.$id;
     }
