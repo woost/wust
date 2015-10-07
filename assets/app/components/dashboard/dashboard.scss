@@ -30,8 +30,8 @@
                 width: 400px;
                 height: 500px;
                 max-height: 500px;
-                .all-tags {
-                    margin-bottom: 5px;
+                .tag-editor {
+                    margin-top: 5px;
                 }
             }
         }
@@ -41,15 +41,14 @@
             @include flex-wrap(wrap);
             @include flex-direction(columns);
             .header {
+                padding-bottom: 10px;
                 .as-sortable-item-handle {
                     display:inline-block;
                     width: 100%;
                     padding-top: 5px;
                 }
-
-                .edit_button {
-                    padding: 5px;
-                    padding-right: 10px;
+                .edit-button {
+                    margin-top: -5px;
                 }
             }
             .body {
