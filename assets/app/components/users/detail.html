@@ -8,7 +8,7 @@
         </div>
 
         <div class="col-sm-4">
-            <form editable-form name="userForm" onaftersave="vm.saveUser()">
+            <form editable-form name="userForm" onaftersave="vm.saveUser()" ng-if="vm.isCurrentUser || vm.user.email">
                 <span>
                     <i class="fa fa-envelope-o"></i> <span editable-email="vm.user.email" ng-bind="vm.user.email"></span>
                     <i class="fa fa-pencil" ng-if="vm.isCurrentUser" ng-click="userForm.$show()" ng-show="!userForm.$visible"></i>
