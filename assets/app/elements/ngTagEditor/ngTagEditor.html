@@ -5,10 +5,10 @@
                 <span colored-tag="classification" tagtype="circle" class="tag_circle"></span>
             </span>
 
-            <span data-title="Classify post in context" bs-tooltip >
-                <i ng-if="editClassification && tag.isContext" class="fa fa-pencil content" ng-mousedown="$event.stopPropagation(); $event.preventDefault();" data-on-change="onChange({type: type, tag: tag})" data-tag="tag" data-template-url="elements/ngTagEditor/classification_popover.html" data-container="body" data-placement="right" data-animation="am-flip-x" data-auto-close="1" bs-popover></i>
+            <span data-title="Classify post in context" bs-tooltip>
+                <i ng-if="editClassification && tag.isContext" class="fa fa-pencil content" ng-click="focus = true; setFocus = true; $event.stopPropagation(); $event.preventDefault()" data-on-change="onChange({type: type, tag: tag})" data-tag="tag" data-template-url="elements/ngTagEditor/classification_popover.html" data-container="body" data-placement="right" data-animation="am-flip-x" data-auto-close="1" bs-popover></i>
             </span>
-            <i class="remove fa fa-close right" data-title="Remove tag" bs-tooltip ng-mousedown="$event.stopPropagation(); $event.preventDefault();" ng-mouseup="remove($index); setFocus = true"></i>
+            <i class="remove fa fa-close right" data-title="Remove tag" bs-tooltip ng-mousedown="$event.stopPropagation(); $event.preventDefault();" ng-mouseup="remove($index)"></i>
         </span>
         <input type="text" class="tag-input" placeholder="{{placeholder}}" ng-focus="focus = true" ng-blur="unfocusedInput()" focus-me="setFocus" ng-model="search"/>
     </div>
