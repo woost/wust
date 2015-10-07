@@ -14,9 +14,9 @@ function scratchpad() {
     };
 }
 
-scratchpadCtrl.$inject = ["Session", "EditService", "SidebarService", "ContextService"];
+scratchpadCtrl.$inject = ["$state", "HistoryService", "Session", "EditService", "SidebarService", "ContextService"];
 
-function scratchpadCtrl(Session, EditService, SidebarService, ContextService) {
+function scratchpadCtrl($state, HistoryService, Session, EditService, SidebarService, ContextService) {
     let vm = this;
 
     let saveOnEnter = true;
@@ -29,11 +29,29 @@ function scratchpadCtrl(Session, EditService, SidebarService, ContextService) {
     vm.editList = EditService.list;
     vm.edit = EditService.edit;
     vm.editNewPost = editNewPost;
+    vm.loadGraph = loadGraph;
     vm.options = EditService.scratchpad;
+    vm.scratchpadNodes = scratchpadNodes;
 
     vm.newPost = {
         title: ""
     };
+
+    function scratchpadNodes() {
+        return vm.editList.filter(s => s.visible);
+    }
+
+    function loadGraph() {
+        let scratchNodes = scratchpadNodes();
+        if (_.isEmpty(scratchNodes))
+            return;
+
+        let firstNode = scratchNodes[0];
+        let restNodes = scratchNodes.slice(1, scratchNodes.length);
+        $state.go("focus", { id: firstNode.id, type: "graph" }).then(() => {
+            _.defer(() => HistoryService.addNodesToCurrentView(restNodes));
+        });
+    }
 
     function editNewPost() {
         let session = EditService.edit(vm.newPost, true, 0);

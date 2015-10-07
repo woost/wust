@@ -1,6 +1,9 @@
 <div id="scratchpad_component">
     <button type="button" class="btn btn-default fa fa-arrows-alt pull-right" onclick="this.blur()" ng-model="vm.sidebar.left.fullscreen" bs-checkbox data-title="Toggle fullscreen" bs-tooltip placement="bottom"></button>
-    <button class="pull-right btn btn-xs btn-default" onclick="this.blur()" ng-model="vm.options.showEdits" bs-checkbox>Edits</button>
+    <div class="pull-right btn-group-vertical">
+        <button class="btn btn-xs btn-default" onclick="this.blur()" ng-model="vm.options.showEdits" bs-checkbox>Edits</button>
+        <button class="btn btn-xs btn-default" ng-click="vm.loadGraph()" ng-disabled="scratchpadNodes.length === 0">Graph</button>
+    </div>
 
     <form ng-submit="vm.options.showEdits = false; vm.editNewPost()" class="new_post_title">
         <input class="form-control" ng-model="vm.newPost.title" placeholder="TL;DR">

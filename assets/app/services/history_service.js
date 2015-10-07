@@ -15,6 +15,7 @@ function HistoryService(Auth, Session, Post, DiscourseNode, $rootScope) {
     this.updateCurrentView = updateCurrentView;
     this.addConnectToCurrentView = addConnectToCurrentView;
     this.removeFromCurrentView = removeFromCurrentView;
+    this.addNodesToCurrentView = addNodesToCurrentView;
 
     let currentCommitUnregister, currentViewComponent;
     this.setCurrentViewComponent = setCurrentViewComponent;
@@ -59,6 +60,15 @@ function HistoryService(Auth, Session, Post, DiscourseNode, $rootScope) {
         if (existingVisit !== undefined) {
             _.assign(existingVisit, node);
         }
+    }
+
+    function addNodesToCurrentView(nodes) {
+        if (currentViewComponent === undefined)
+            return;
+
+        let current = currentViewComponent.getWrap("graph");
+        nodes.forEach(n => current.addNode(n));
+        current.commit();
     }
 
     function addConnectToCurrentView(response, refId) {
