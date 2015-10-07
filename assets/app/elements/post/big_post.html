@@ -1,7 +1,7 @@
 <div class="big_post_directive clearfix" colored-tag-node="vm.node" big="true" ng-switch="vm.editMode">
     <div ng-switch-when="true" static-edit-post on-cancel="vm.onCancel()" on-delete="vm.onDelete(response)" on-save="vm.onSave(response)" node="vm.node"></div>
     <div ng-switch-default>
-        <button ng-if="::vm.Auth.isLoggedIn" class="fa fa-pencil pull-right btn btn-sm btn-default" ng-click="vm.editMode = true" data-title="edit" bs-tooltip></button>
+        <button ng-if="::vm.Auth.isLoggedIn" class="fa fa-pencil pull-right btn btn-sm btn-default" ng-click="vm.editMode = true" data-title="Edit" bs-tooltip></button>
         <h2 ng-bind="vm.node.title" class="post_title"></h2>
         <div class="additional_info">
             <span show-timestamp="vm.node.timestamp"></span>
@@ -17,7 +17,7 @@
         <div big-taglist node="vm.node" class="taglist"></div>
         <span toggle-zen node="vm.node" class="pull-right" ng-show="vm.node.description"></span>
         <div class="post_description" markdown="vm.node.description" ng-show="vm.node.description"></div>
-        <button ng-if="::vm.Auth.isLoggedIn" class="replytool pull-right btn btn-sm btn-default" ng-click='vm.replyTo()' data-title="respond" bs-tooltip><i class="fa fa-plus"></i></button>
+        <button ng-if="::vm.Auth.isLoggedIn" class="replytool pull-right btn btn-sm btn-default" ng-click='vm.replyTo()' data-title="Respond" bs-tooltip><i class="fa fa-plus"></i></button>
     </div>
     <a ng-if="vm.changeRequests.length > 0" href="#" ng-click="vm.showChanges = !vm.showChanges" class="showchanges">
         <i class="fa" ng-class="{'fa-chevron-down': vm.showChanges, 'fa-chevron-right': !vm.showChanges}"></i>

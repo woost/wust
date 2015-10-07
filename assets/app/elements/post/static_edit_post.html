@@ -1,11 +1,11 @@
 <div class="static_edit_post_directive">
     <div class="buttons">
-        <button class="btn btn-sm btn-success pull-right" ng-click="vm.saveNode()" ng-disabled="vm.editNode.isPristine" data-title="save" bs-tooltip><i class="fa fa-check"></i> Save</button>
+        <button class="btn btn-sm btn-success pull-right" ng-click="vm.saveNode()" ng-disabled="vm.editNode.isPristine" data-title="Save" bs-tooltip><i class="fa fa-check"></i> Save</button>
         <button class="btn btn-sm btn-default pull-right button-margin-right" ng-click="vm.previewEnabled = !vm.previewEnabled" onclick="this.blur()" ng-model="vm.previewEnabled" bs-checkbox>
             <i class="fa" ng-class="{'fa-eye-slash': vm.previewEnabled, 'fa-eye': !vm.previewEnabled}"></i> Preview
         </button>
         <button class="btn btn-sm btn-default pull-right button-margin-right" ng-click="vm.onCancel()">Cancel</button>
-        <button class="btn btn-sm btn-danger" ng-click="vm.deleteNode()" ng-hide="vm.editNode.isLocal" data-title="delete" bs-tooltip><i class="fa fa-trash-o"></i></button>
+        <button class="btn btn-sm btn-danger" ng-click="vm.deleteNode()" ng-hide="vm.editNode.isLocal" data-title="Delete" bs-tooltip><i class="fa fa-trash-o"></i></button>
     </div>
     <div class="edit-area" edit-post preview-enabled="vm.previewEnabled" node="vm.editNode"></div>
     <progressbar max="vm.node.postChangeThreshold" type="{{vm.canApply && 'success'}}" value="vm.editWeight"><span style="color:white; white-space:nowrap;">{{vm.canApply ? 'Instant change' : vm.editWeight + '/' + vm.node.postChangeThreshold}}</span></progressbar>
