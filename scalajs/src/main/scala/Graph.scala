@@ -593,7 +593,7 @@ class RawGraph(private[js] var nodes: Set[RawNode], private[js] var relations: S
     nodes.filter(n => n.isHyperRelation && (n.startId.get == node.id || n.endId.get == node.id))
   }
 
-  val urlRegex = """(www\.|(https?|ftp|file)://)[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]""".r
+  val urlRegex = """(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]""".r
   def urlResources = urlResourcesCacher()
   def urlResourcesCacher = Cacher(() => {
     val descriptions = nodes.filterNot(_.isHyperRelation).flatMap(_.description).mkString(" ")
