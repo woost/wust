@@ -316,23 +316,28 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
                 this.d3NodeFocusTool = this.d3NodeTools.append("div")
                     .attr("class", "nodetool focustool icon-dot-circled")
+                    .attr("title", "Focus Node")
                     .style("display", d => (d.isHyperRelation) ? "none" : "inline-block");
 
                 this.d3NodeReplyTool = this.d3NodeTools.append("div")
                     .attr("class", "nodetool replytool fa fa-plus")
+                    .attr("title", "Respond")
                     .style("display", d => (Auth.isLoggedIn) ? "inline-block" : "none");
 
                 this.d3NodeConnectTool = this.d3NodeTools.append("div")
                     .attr("class", "nodetool connecttool icon-flow-line")
+                    .attr("title", "Drag to connect with other Node")
                     .style("display", d => (Auth.isLoggedIn && d.isHyperRelation.implies(this.arrowToResponse)) ? "inline-block" : "none")
                     .append("div").attr("class", "event-offset-rotate-fix");
 
                 this.d3NodeEditTool = this.d3NodeTools.append("div")
                     .attr("class", "nodetool edittool fa fa-pencil")
+                    .attr("title", "Edit Connection")
                     .style("display", d => (Auth.isLoggedIn && d.isHyperRelation) ? "inline-block" : "none");
 
                 this.d3NodePinTool = this.d3NodeTools.append("div")
                     .attr("class", "nodetool pintool fa fa-thumb-tack")
+                    .attr("title", "Toggle Stickiness")
                     .style("display", d => (d.isHyperRelation && !this.dragHyperRelations) ? "none" : "inline-block");
 
 
