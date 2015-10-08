@@ -32,7 +32,7 @@ function coloredTagNode(Helpers, ContextService) {
         function selectTag(node) {
             // if ignoretags are set, we will filter by them (this is the case for streams and search.
             // otherwise the the current contexts are ignored.
-            let tags = Helpers.sortedNodeTags(node, scope.ignoreTags || ContextService.currentContexts);
+            let tags = Helpers.sortedNodeTags(node, scope.ignoreTags || []);
             return tags[0];
         }
 
