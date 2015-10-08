@@ -6,8 +6,9 @@
     border-radius: 4px;
     padding: 1px 7px 1px 7px;
     background-color: white;
-    min-height: 26px;
     font-weight: normal;
+    font-size: 14px;
+    line-height: 20px;
     vertical-align: middle;
 
     margin-bottom: 5px;
@@ -53,8 +54,8 @@
     .tag_circle_container {
         pointer-events: all;
         margin-left: 5px;
-        // adjust vertical center
-        padding-bottom: 3px;
+        line-height: 0px;
+        padding-top: 4px;
         .tag_circle_title {
             display: inline-block;
             padding-left: 1px;
