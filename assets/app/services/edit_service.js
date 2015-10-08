@@ -226,11 +226,16 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
         //tag: removed/added tag
         onChange(type, tag) {
             if (type !== undefined && tag !== undefined && !tag.isContext) {
-                if (type === "remove")
+                if (type === "remove") // remove classifications
                     this.tags.filter(t => t.isContext).forEach(t => _.remove(t.classifications, _.pick(tag, "id")));
 
-                if (type === "removeNested")
+                if (type === "removeNested") { // remove classifcation in context
+                    this.tags.filter(t => t.isContext).forEach(t => {
+                        let c = _.find(t.classifications, _.pick(tag, "id"));
+                        if(c) c.implicit = false;
+                    });
                     _.remove(this.tags, _.pick(tag, "id"));
+                }
             }
 
             this.tags = this.inferImplicitClassifications();
