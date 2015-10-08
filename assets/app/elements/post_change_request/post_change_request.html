@@ -3,7 +3,7 @@
         <span ng-switch="change.type">
             <div ng-switch-when="Edit">
                 <span ng-if="change.oldTitle != change.newTitle">
-                    <b>Edit TL;DR:</b>
+                    <b>Edit Summary:</b>
                     <h2 class="title-diff" word-based-diff source-a="change.oldTitle" source-b="change.newTitle"></h2>
                 </span>
                 <span ng-if="change.oldDescription != change.newDescription">
