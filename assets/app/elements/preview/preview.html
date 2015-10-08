@@ -1,4 +1,5 @@
 <div class="post-preview">
+    <span ng-transclude></span>
     <h2 ng-bind="vm.node.title"></h2>
     <div ng-if="vm.node.description" ng-switch="vm.trim">
         <div ng-switch-when="undefined" markdown="vm.node.description"></div>

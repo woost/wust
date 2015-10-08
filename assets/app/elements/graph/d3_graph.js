@@ -1349,7 +1349,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             get: () => d3Graph.hoveredNode && !d3Graph.hoveredNode.isHyperRelation && !d3Graph.isDragging
         },
         fixedPreview: {
-            get: () => d3Graph.fixedPreview
+            get: () => d3Graph.fixedPreview,
+            set: (v) => d3Graph.fixedPreview = v
         }
     });
 }

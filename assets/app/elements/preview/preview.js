@@ -6,6 +6,7 @@ function preview() {
     return {
         restrict: "A",
         replace: true,
+        transclude: true,
         templateUrl: "elements/preview/preview.html",
         scope: {
             node: "=",
