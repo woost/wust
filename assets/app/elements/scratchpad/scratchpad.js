@@ -14,9 +14,9 @@ function scratchpad() {
     };
 }
 
-scratchpadCtrl.$inject = ["$state", "HistoryService", "Session", "EditService", "SidebarService", "ContextService"];
+scratchpadCtrl.$inject = ["$state", "HistoryService", "Session", "EditService", "SidebarService", "ContextService", "$q", "ConnectedComponents"];
 
-function scratchpadCtrl($state, HistoryService, Session, EditService, SidebarService, ContextService) {
+function scratchpadCtrl($state, HistoryService, Session, EditService, SidebarService, ContextService, $q, ConnectedComponents) {
     let vm = this;
 
     let saveOnEnter = true;
@@ -41,21 +41,16 @@ function scratchpadCtrl($state, HistoryService, Session, EditService, SidebarSer
         return vm.editList.filter(s => s.visible);
     }
 
-    function loadGraph(ownState = false) {
+    function loadGraph() {
         let scratchNodes = scratchpadNodes();
         if (_.isEmpty(scratchNodes))
             return;
 
-        //TODO: should be able to load components of scratchpad nodes into graph
-        if (ownState) {
-            let firstNode = scratchNodes[0];
-            let restNodes = scratchNodes.slice(1, scratchNodes.length);
-            $state.go("focus", { id: firstNode.id, type: "graph" }).then(() => {
-                _.defer(() => HistoryService.addNodesToCurrentView(restNodes));
-            });
-        } else {
-            HistoryService.addNodesToCurrentView(scratchNodes);
-        }
+        $q.all(scratchNodes.map(node => ConnectedComponents.$find(node.id, {depth: 1}).$asPromise())).then(results => {
+            let nodes = _.flatten(results.map(r => r.nodes));
+            let relations = _.flatten(results.map(r => r.relations));
+            HistoryService.addNodesToCurrentView(nodes, relations);
+        });
     }
 
     function editNewPost() {

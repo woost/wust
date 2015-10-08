@@ -62,12 +62,13 @@ function HistoryService(Auth, Session, Post, DiscourseNode, $rootScope) {
         }
     }
 
-    function addNodesToCurrentView(nodes) {
+    function addNodesToCurrentView(nodes = [], relations = []) {
         if (currentViewComponent === undefined)
             return;
 
         let current = currentViewComponent.getWrap("graph");
         nodes.forEach(n => current.addNode(n));
+        relations.forEach(n => current.addRelation(n));
         current.commit();
     }
 
