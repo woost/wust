@@ -12,6 +12,11 @@
     cursor: default;
 }
 
+[contenteditable='true'][placeholder]:empty:before {
+    content: attr(placeholder);
+    color: #A9A9A9;
+}
+
 .error_message {
     color: red !important;
 }
