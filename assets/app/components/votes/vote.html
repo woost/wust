@@ -23,17 +23,22 @@
                 <span ng-switch-when="Delete">Delete Post <span small-post node="vm.change.post"></span></span>
                 <span ng-switch-when="Edit">Edit Post <span small-post node="vm.change.post"></span></span>
                 <span ng-switch-when="AddTag">
-
                     Put Post <span small-post node="vm.change.post"></span>
+                    <!-- TODO: FIXME: context color does not change for next context -->
+                    in context <span tag-label="vm.change.tag"></span>
 
                     <span ng-if="vm.change.classifications.length">
                         as a <span ng-repeat="classification in vm.change.classifications" tag-label="classification"></span>
                     </span>
-
-                    in context <span tag-label="vm.change.tag"></span>
                 </span>
 
-                <span ng-switch-when="RemoveTag">Take Post <span small-post node="vm.change.post"></span> out of context <span tag-label="vm.change.tag" class="remove"></span></span>
+                <span ng-switch-when="RemoveTag">
+                    Take Post <span small-post node="vm.change.post"></span>
+                    out of context <span tag-label="vm.change.tag" ng-class="{removed: !vm.change.classifications.length}"></span>
+                    <span ng-if="vm.change.classifications.length">
+                        as a <span ng-repeat="classification in vm.change.classifications" class="removed" tag-label="classification"></span>
+                    </span>
+                </span>
 
             </h3>
 
@@ -50,7 +55,7 @@
                     </li>
                     <li tab active="vm.showMiddleTab">
                         <a tab-heading>Difference</a>
-                        <div class="post" colored-tag-node="vm.change.post" big="true" ng-switch="vm.change.type" ng-class="{remove: vm.is('Delete')}">
+                        <div class="post" colored-tag-node="vm.change.post" big="true" ng-switch="vm.change.type" ng-class="{'removed-post': vm.is('Delete')}">
                             <h2 class="post-title">
                                 <div ng-if="vm.is('Edit')" word-based-diff source-a="vm.change.oldTitle" source-b="vm.change.newTitle"></div>
                                 <span  ng-if="!vm.is('Edit')" ng-bind="vm.change.post.title"></span>
@@ -63,7 +68,7 @@
 
                             <div ng-switch-when="RemoveTag">
                                 <span ng-repeat="tag in vm.change.post.tags" tag-label="tag" class="tag"></span>
-                                <span tag-label="vm.change.tag" class="tag removed"></span>
+                                <span tag-label="vm.change.tag" class="tag" ng-class="{removed: !vm.change.classifications.length}"></span>
                             </div>
 
                             <div ng-show="vm.showDescription" class="well well-sm post-description">
