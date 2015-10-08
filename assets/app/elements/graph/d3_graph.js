@@ -25,7 +25,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.visibleConvergence = false;
                 this.debugDraw = false;
                 this.hyperRelationAlignForce = 1;
-                this.nodeVerticalForceFactor = 2;
+                this.nodeVerticalForceFactor = 0;
                 this.constantEdgeLength = true;
                 this.stopForceOnPan = true;
                 this.stopForceAfterNodeDrag = true;
@@ -65,7 +65,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     .linkStrength(this.constantEdgeLength ? 0.0 : 3.0) // rigidity, 0, because we handle this ourselves in tick()
                     .friction(0.92)
                     .linkDistance(50) // weak geometric constraint. Pushes nodes to achieve this distance
-                    .charge(-1500)
+                    .charge(d => d.degree > 0 ? -1500 : -50)
                     .chargeDistance(1000)
                     .gravity(0.001)
                     .theta(0.8)
@@ -166,7 +166,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     this.d3SvgContainer.append("circle")
                         .attr("cx", this.width / 2)
                         .attr("cy", this.height / 2)
-                        .attr("r", 20)
+                        .attr("r", 30)
                         .style("fill", "#7B00D6");
 
                     // draw origin
