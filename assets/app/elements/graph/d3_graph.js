@@ -13,12 +13,11 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
         let vm = scope.vm;
 
         class D3Graph {
-            //TODO: rename onClick -> onNodeClick
             //TODO: use closure and have constants without this, also directly use vm?
-            constructor(graph, rootDomElement, onClick = _.noop, onDraw = _.noop) {
+            constructor(graph, rootDomElement, focusNode = _.noop, onDraw = _.noop) {
                 this.graph = graph;
                 this.rootDomElement = rootDomElement;
-                this.onClick = onClick;
+                this.focusNode = focusNode;
                 this.onDraw = onDraw;
 
                 // settings
@@ -315,6 +314,10 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.d3NodeTools = this.d3NodeContainerWithData.append("div")
                     .attr("class", "nodetools");
 
+                this.d3NodeFocusTool = this.d3NodeTools.append("div")
+                    .attr("class", "nodetool focustool icon-dot-circled")
+                    .style("display", d => (d.isHyperRelation) ? "none" : "inline-block");
+
                 this.d3NodeReplyTool = this.d3NodeTools.append("div")
                     .attr("class", "nodetool replytool fa fa-plus")
                     .style("display", d => (Auth.isLoggedIn) ? "inline-block" : "none");
@@ -451,6 +454,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
             this.d3Node.call(this.dragMove);
             this.d3Node.on("dblclick", this.loadMoreNodes.bind(this));
+            this.d3NodeFocusTool.on("click", this.stopPropagationAfter(this.focusNode.bind(this))).call(this.disableDrag);
             this.d3NodePinTool.on("click", this.stopPropagationAfter(this.toggleFixed.bind(this))).call(this.disableDrag);
             this.d3NodeConnectTool.call(this.dragConnect);
             this.d3NodeEditTool.on("click", this.stopPropagationAfter(this.editNode.bind(this))).call(this.disableDrag);
@@ -1326,7 +1330,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
         }
     }
 
-    let d3Graph = new D3Graph(vm.graph, element[0], vm.onClick, vm.onDraw);
+    let d3Graph = new D3Graph(vm.graph, element[0], vm.focusNode, vm.onDraw);
     d3Graph.init();
 
     // expose some methods to the embedding directive

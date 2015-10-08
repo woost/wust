@@ -24,7 +24,7 @@ function graphViewCtrl($scope, $stateParams, $filter, EditService, $state) {
 
     vm.isConverged = false;
     vm.addNodeToGraph = addNodeToGraph;
-    vm.onClick = onClick;
+    vm.focusNode = focusNode;
     vm.onDraw = () => $scope.$apply(() => vm.isConverged = true);
     vm.search = {
         title: ""
@@ -63,7 +63,7 @@ function graphViewCtrl($scope, $stateParams, $filter, EditService, $state) {
         vm.d3Info.positionNode(wrappedNode, event.offsetX, event.offsetY);
     }
 
-    function onClick(node) {
+    function focusNode(node) {
         $state.go("focus", { id: node.id, type: "" });
     }
 }
