@@ -33,6 +33,7 @@ case class UserAccess() extends NodeReadBase[User] {
     val discourse = if (context.scopes.isEmpty) {
       val query = s"""
       match ${ userDef.toPattern }
+      with ${userDef.name} skip $skip limit $limit
       optional match ${ hasKarmaDef.toPattern(false, true) }
       with ${userDef.name}, sum(
         case ${hasKarmaDef.name}.karma
@@ -41,7 +42,7 @@ case class UserAccess() extends NodeReadBase[User] {
         end
       ) as karmaAggregate order by karmaAggregate DESC
       optional match ${ hasKarmaDef.toPattern(false, true) }
-      return ${userDef.name}, ${hasKarmaDef.name}
+      return ${hasKarmaDef.name}, ${userDef.name}
       """
 
       Discourse(db.queryGraph(query, ctx.params))
@@ -49,11 +50,12 @@ case class UserAccess() extends NodeReadBase[User] {
       val query = s"""
       match ${ hasKarmaDef.toPattern(true, true) }
       where ${scopeDef.name}.uuid in {scopeUuids}
+      with ${hasKarmaDef.name}, ${userDef.name} skip $skip limit $limit
       with ${userDef.name}, sum(${hasKarmaDef.name}.karma) as karmaAggregate, collect(${hasKarmaDef.name}) as karmaDefColl unwind karmaDefColl as karmaDef
       with ${userDef.name}, karmaAggregate, karmaDefColl, karmaDef, length(karmaDefColl) as karmaDefLength
       order by karmaAggregate DESC
       where karmaDefLength = {scopeLength}
-      return ${userDef.name}, karmaDef
+      return ${hasKarmaDef.name}, ${userDef.name}
       """
 
       Discourse(db.queryGraph(query, ctx.params ++ Map("scopeUuids" -> context.scopes, "scopeLength" -> context.scopes.size)))
