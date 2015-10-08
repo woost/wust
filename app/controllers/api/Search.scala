@@ -77,7 +77,7 @@ object Search extends Controller {
           s"""
           match ${ inheritancePath }
           where ${ askedContextDef.name }.uuid in {$uuidParamName}
-          with ${inheritedContextDef.name}, ${askedContextDef.name}
+          with *
           """
         params += (uuidParamName-> contexts)
 
