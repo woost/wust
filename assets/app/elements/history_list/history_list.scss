@@ -1,4 +1,7 @@
+@import "globals";
+
 #history_list {
+    background: $history_background_color;
     width: 200px; // fixed, because 100% stretches the content when hiding
     height: 100%;
     padding: 5px;
