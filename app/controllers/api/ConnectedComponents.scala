@@ -11,8 +11,8 @@ import play.api.libs.json.Json
 import play.api.mvc.Controller
 
 object ConnectedComponents extends Controller with Silhouette[User, JWTAuthenticator] with HeaderEnvironmentModule {
-  def show(uuid: String) = UserAwareAction { request =>
-    val discourse = connectedComponent(uuid, request.identity)
+  def show(uuid: String, depth: Option[Int]) = UserAwareAction { request =>
+    val discourse = connectedComponent(uuid, request.identity, depth.getOrElse(5))
     if(discourse.nodes.isEmpty)
       NotFound(s"Cannot find node with uuid '$uuid'")
     else

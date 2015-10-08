@@ -1,8 +1,8 @@
 angular.module("wust.elements").directive("d3Graph", d3Graph);
 
-d3Graph.$inject = ["$window", "DiscourseNode", "Helpers", "$location", "$filter", "Post", "ModalEditService", "EditService", "TagRelationEditService", "$q", "Auth"];
+d3Graph.$inject = ["$window", "DiscourseNode", "Helpers", "$location", "$filter", "Post", "ModalEditService", "EditService", "TagRelationEditService", "$q", "Auth", "ConnectedComponents", "LiveService"];
 
-function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, ModalEditService, EditService, TagRelationEditService, $q, Auth) {
+function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, ModalEditService, EditService, TagRelationEditService, $q, Auth, ConnectedComponents, LiveService) {
     return {
         restrict: "A",
         scope: false,
@@ -449,11 +449,23 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 });
 
             this.d3Node.call(this.dragMove);
+            this.d3Node.on("dblclick", this.loadMoreNodes.bind(this));
             this.d3NodePinTool.on("click", this.stopPropagationAfter(this.toggleFixed.bind(this))).call(this.disableDrag);
             this.d3NodeConnectTool.call(this.dragConnect);
             this.d3NodeEditTool.on("click", this.stopPropagationAfter(this.editNode.bind(this))).call(this.disableDrag);
             this.d3NodeReplyTool.on("click", this.stopPropagationAfter(this.replyToNode.bind(this))).call(this.disableDrag);
             // this.d3NodeDeleteTool.on("click", this.stopPropagationAfter(this.removeNode.bind(this))).call(this.disableDrag);
+        }
+
+
+        loadMoreNodes(d) {
+            ConnectedComponents.$find(d.id, {depth: 1}).$then(response => {
+                response.nodes.forEach(n => this.graph.addNode(n));
+                response.relations.forEach(r => this.graph.addRelation(r));
+                this.graph.commit();
+
+                LiveService.registerNodes(this.graph.nodes);
+            });
         }
 
 
@@ -1294,8 +1306,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.setFixed(d);
             } else {
                 // onClick event on node is triggered here
-                if (!d.isHyperRelation)
-                    this.onClick(d);
+                // if (!d.isHyperRelation)
+                //     this.onClick(d);
 
                 // if the user just clicked, the position should be reset.
                 // unsetFixed(graph, force, d);
