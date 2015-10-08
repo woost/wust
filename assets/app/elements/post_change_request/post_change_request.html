@@ -7,32 +7,27 @@
                 <b>Description:</b>
                 <pre word-based-diff source-a="change.oldDescription" source-b="change.newDescription"></pre>
             </div>
-            <div ng-switch-when="Delete">
-                DELETE
-            </div>
-            <div ng-switch-when="AddTag" ng-switch="change.classifications.length">
-                <span ng-switch-when="0">
-                    <b>This belongs into the context </b>
-                </span>
-                <span ng-switch-default>
-                    <b>This is a </b>
+            <div ng-switch-when="Delete"><b>
+                    Delete this Post
+            </b></div>
+            <div ng-switch-when="AddTag">
+                <b>Put into context </b>
+                <span tag-label="change.tag"></span>
+                <span ng-if="change.classifications.length">
+                    <b>as a</b>
                     <span ng-repeat="classification in change.classifications" tag-label="classification"></span>
-                    <b>in the context of </b>
-                </span>
-                <span tag-label="change.tag">
-                    <i class="fa fa-plus right"></i>
                 </span>
             </div>
             <div ng-switch-when="RemoveTag" ng-switch="change.classifications.length">
+                <b>Take out of context</b>
                 <span ng-switch-when="0">
-                    <b>This does <span style="color:red;">not</span> belong into the context </b>
+                    <span class="removed" tag-label="change.tag"></span>
                 </span>
                 <span ng-switch-default>
-                    <b>This is <span style="color:red;">not</span> a </b>
+                    <span tag-label="change.tag"></span>
+                    <b>as a </b>
                     <span class="removed" ng-repeat="classification in change.classifications" tag-label="classification"></span>
-                    <b>in the context of </b>
                 </span>
-                <span tag-label="change.tag"></span>
             </div>
         </span>
 

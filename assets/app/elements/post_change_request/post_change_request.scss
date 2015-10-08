@@ -27,6 +27,10 @@
                 text-decoration: line-through;
             }
             @include box-shadow(0 0 0 5px red);
+            margin-left: 5px;
+            margin-right: 5px;
+            margin-top: 3px;
+            margin-top: 3px;
         }
     }
 }
