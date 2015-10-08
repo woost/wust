@@ -12,7 +12,7 @@
                                 <span ng-repeat="tag in stream.tagsAll" tag-label="tag"></span>
                             </span>
                             <button class="edit-button btn btn-sm btn-default pull-right" onclick="this.blur()" ng-model="stream.showEdit" bs-checkbox><i class="fa fa-pencil"></i></button>
-                            <button ng-show="stream.showEdit" class="btn btn-sm btn-danger pull-left" ng-click="vm.removeStream($index)" data-title="Remove Stream" bs-tooltip><i class="fa fa-trash-o"></i></button>
+                            <button ng-show="stream.showEdit" class="btn btn-sm btn-danger edit-button pull-left" ng-click="vm.removeStream($index)" data-title="Remove Stream" bs-tooltip><i class="fa fa-trash-o"></i></button>
                         </div>
                         <div ng-if="stream.showEdit">
                             <div class="taglist" edit-taglist tags="stream.tagsAll" tag-type="taglike" placeholder="All Tags" on-change="vm.refreshStream(stream)" existing-only="true"></div>
