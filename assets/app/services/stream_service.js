@@ -21,7 +21,11 @@ function StreamService(Search, DiscourseNode, Auth, store, Helpers, $state) {
     this.currentEditStream = undefined;
 
     function restoreList() {
-        _.each(streamStore.get("streams") || [{}], pushList);
+        let streams = streamStore.get("streams") || [];
+        if (_.isEmpty(streams))
+            streams.push({});
+
+        _.each(streams, pushList);
     }
 
     function pushList(streamDef = {}) {
