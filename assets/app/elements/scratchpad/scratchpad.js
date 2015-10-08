@@ -14,9 +14,9 @@ function scratchpad() {
     };
 }
 
-scratchpadCtrl.$inject = ["$state", "HistoryService", "Session", "EditService", "SidebarService", "ContextService", "$q", "ConnectedComponents"];
+scratchpadCtrl.$inject = ["$state", "$stateParams", "HistoryService", "Session", "EditService", "SidebarService", "ContextService", "$q", "ConnectedComponents"];
 
-function scratchpadCtrl($state, HistoryService, Session, EditService, SidebarService, ContextService, $q, ConnectedComponents) {
+function scratchpadCtrl($state, $stateParams, HistoryService, Session, EditService, SidebarService, ContextService, $q, ConnectedComponents) {
     let vm = this;
 
     let saveOnEnter = true;
@@ -46,11 +46,21 @@ function scratchpadCtrl($state, HistoryService, Session, EditService, SidebarSer
         if (_.isEmpty(scratchNodes))
             return;
 
-        $q.all(scratchNodes.map(node => ConnectedComponents.$find(node.id, {depth: 1}).$asPromise())).then(results => {
-            let nodes = _.flatten(results.map(r => r.nodes));
-            let relations = _.flatten(results.map(r => r.relations));
-            HistoryService.addNodesToCurrentView(nodes, relations);
-        });
+        if ($state.is("focus", { id: $stateParams.id, type: "graph" })) {
+            loadIntoGraph(scratchNodes);
+        } else {
+            let firstNode = scratchNodes[0];
+            let restNodes = scratchNodes.slice(1, scratchNodes.length);
+            $state.go("focus", { id: firstNode.id, type: "graph" }).then(() => loadIntoGraph(restNodes));
+        }
+
+        function loadIntoGraph(nodes) {
+            $q.all(scratchNodes.map(node => ConnectedComponents.$find(node.id, {depth: 1}).$asPromise())).then(results => {
+                let nodes = _.flatten(results.map(r => r.nodes));
+                let relations = _.flatten(results.map(r => r.relations));
+                HistoryService.addNodesToCurrentView(nodes, relations);
+            });
+        }
     }
 
     function editNewPost() {
