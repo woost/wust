@@ -11,7 +11,7 @@
             <input type="text" class="form-control" ng-model="vm.search.title" placeholder="Filter">
         </div>
     </div>
-    <div class="post-preview-frame" ng-class="{left: !vm.d3Info.hoveredNode.onLeftHalf, right: vm.d3Info.hoveredNode.onLeftHalf, top: !vm.d3Info.hoveredNode.onUpperHalf, bottom: vm.d3Info.hoveredNode.onUpperHalf}" ng-show="vm.d3Info.isHovering">
-        <div preview node="vm.d3Info.hoveredNode"></div>
+    <div class="post-preview-frame" ng-class="{left: !(vm.d3Info.hoveredNode || vm.d3Info.fixedPreview).onLeftHalf, right: (vm.d3Info.hoveredNode || vm.d3Info.fixedPreview).onLeftHalf, top: !vm.d3Info.hoveredNode.onUpperHalf, bottom: vm.d3Info.hoveredNode.onUpperHalf}" ng-show="vm.d3Info.isHovering || vm.d3Info.fixedPreview">
+        <div preview node="vm.d3Info.hoveredNode || vm.d3Info.fixedPreview"></div>
     </div>
 </div>

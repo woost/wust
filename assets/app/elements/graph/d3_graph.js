@@ -39,6 +39,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 // state
                 this.drawOnTick = this.drawOnTick = this.visibleConvergence;
                 this.hoveredNode = undefined;
+                this.fixedPreview = false;
                 this.width = rootDomElement.offsetWidth;
                 this.height = rootDomElement.offsetHeight;
                 this.dragInitiated = false; // if dragStart was triggered with the correct mouse button
@@ -1306,8 +1307,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.setFixed(d);
             } else {
                 // onClick event on node is triggered here
-                // if (!d.isHyperRelation)
-                //     this.onClick(d);
+                if (!d.isHyperRelation)
+                    this.fixedPreview = this.fixedPreview === d ? undefined : d;
 
                 // if the user just clicked, the position should be reset.
                 // unsetFixed(graph, force, d);
@@ -1342,10 +1343,13 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
     Object.defineProperties(vm.d3Info, {
         hoveredNode: {
-            get: () => d3Graph.hoveredNode
+            get: () => (d3Graph.hoveredNode && !d3Graph.hoveredNode.isHyperRelation && !d3Graph.isDragging) ? d3Graph.hoveredNode : undefined
         },
         isHovering: {
             get: () => d3Graph.hoveredNode && !d3Graph.hoveredNode.isHyperRelation && !d3Graph.isDragging
+        },
+        fixedPreview: {
+            get: () => d3Graph.fixedPreview
         }
     });
 }
