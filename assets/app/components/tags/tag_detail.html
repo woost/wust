@@ -6,14 +6,18 @@
             </div>
             <div class="header">
                 <button class="pull-right btn btn-default" type="button" animation="am-fade-and-scale-down" ng-click="vm.addTagStream()"><i class="fa fa-plus"></i> Create stream with this tag</button>
-                <div ng-if="vm.tag.inherits.length">
-                    <b>Inherited:</b>
-                    <span ng-repeat="inherits in vm.tag.inherits" tag-label="inherits"></span>
-                </div>
-                <div ng-if="vm.tag.implements.length">
-                    <b>Implemented:</b>
+                <span ng-repeat="inherits in vm.tag.inherits" tag-label="inherits"></span>
+                <span ng-if="vm.tag.inherits.length">
+                    <b>contains</b>
+                </span>
+                <span show="vm.tag.implements.length || vm.tag.inherits.length" tag-label="vm.tag"></span>
+                <span ng-if="vm.tag.implements.length">
+                    <b>
+                        <span ng-show="vm.tag.implements.length && vm.tag.inherits.length">which</span>
+                        contains
+                    </b>
                     <span ng-repeat="implements in vm.tag.implements" tag-label="implements"></span>
-                </div>
+                </span>
             </div>
             <div id="tag_detail_box" infinite-scroll="vm.loadMorePosts()" infinite="infinitePosts" promise="vm.contributions" scroll-target="middle_content">
                 <div ng-repeat="contribution in vm.contributions | unique:'id' track by contribution.id" small-post node="contribution" ignore-tags="::[vm.tag]" class="ng-trans ng-trans-scale-up ease"></div>
@@ -26,9 +30,9 @@
             </div>
             <div class="tag_editing">
                 <div>
-                    <label>Inherited</label>
+                    <label>Is contained by</label>
                     <div edit-taglist tags="vm.tag.inherits" on-change="vm.changedInherits(vm.tag.inherits, type, tag)"></div>
-                    <label>Implemented</label>
+                    <label>Contains</label>
                     <div edit-taglist tags="vm.tag.implements" on-change="vm.changedInherits(vm.tag.implements, type, tag)"></div>
                 </div>
             </div>
