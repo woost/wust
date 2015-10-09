@@ -92,6 +92,11 @@
                 border-color: $drag_active_color !important;
             }
 
+            .sticky-preview .small_post_directive {
+                background-color: #666 !important;
+                color: white;
+            }
+
             .nodetools {
                 position: absolute;
                 top: -32px;
@@ -232,10 +237,13 @@
         .post-preview {
             background: #FEFEFE;
             margin: 15px;
-            border: 1px solid #DDD;
+            border: 1px solid #949494;
             border-radius: 5px;
             padding: 10px;
             word-wrap: break-word;
+            .close {
+                margin-left: 10px;
+            }
         }
     }
 }
