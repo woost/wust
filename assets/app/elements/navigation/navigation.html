@@ -3,7 +3,7 @@
         <div ng-class="{search_results_visible: vm.search.resultsVisible, has_fullscreen: vm.fullscreen.hasFullscreen}">
             <ul class="navpagelinks nav navbar-nav navbar-left">
                 <li><a ui-sref="dashboard" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()">
-                        <i class="fa fa-newspaper-o"></i><span class="hidden-sm hidden-xs">&nbsp;Dashboard</span></a></li>
+                        <i class="fa fa-home"></i><span class="hidden-sm hidden-xs">&nbsp;Dashboard</span></a></li>
                 <li><a ng-if="!vm.currentContexts.length" ui-sref="tags" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()">
                         <i class="fa fa-tags"></i><span class="hidden-sm hidden-xs">&nbsp;Browse</span></a></li>
                 <li><a ng-if="vm.currentContexts.length" ui-sref="tags.details({id: vm.currentContexts[0].id})" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()">
