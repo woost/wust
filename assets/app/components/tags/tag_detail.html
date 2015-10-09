@@ -31,9 +31,9 @@
             <div class="tag_editing">
                 <div>
                     <label>Is contained by</label>
-                    <div edit-taglist tags="vm.tag.inherits" on-change="vm.changedInherits(vm.tag.inherits, type, tag)"></div>
+                    <div edit-taglist tags="vm.tag.inherits" existing-only="true" on-change="vm.changedInherits(vm.tag.inherits, type, tag)"></div>
                     <label>Contains</label>
-                    <div edit-taglist tags="vm.tag.implements" on-change="vm.changedInherits(vm.tag.implements, type, tag)"></div>
+                    <div edit-taglist tags="vm.tag.implements" existing-only="true" on-change="vm.changedInherits(vm.tag.implements, type, tag)"></div>
                 </div>
             </div>
         </div>
