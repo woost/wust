@@ -10,7 +10,7 @@
                         <i class="fa fa-tags"></i><span class="hidden-sm hidden-xs">&nbsp;Browse</span></a></li>
                 <li><a ng-if="::vm.Auth.isLoggedIn" ui-sref="vote" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()">
                         <i class="fa fa-sort"></i><span class="hidden-sm hidden-xs">&nbsp;Moderation</span></a></li>
-                <li class="hidden-xs dropdown">
+                <li class="hidden hidden-xs dropdown">
                     <a href="#" class="dropdown-toggle">
                         <span ng-repeat="context in vm.currentContexts" tag-label="context" disable-link>
                             <span ng-show="context.karma > 0" class="right">{{context.karma}}</span>
