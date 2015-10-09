@@ -533,6 +533,11 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
         }
 
         calculateNodeRootiness() {
+            if( this.graph.nonHyperRelationNodes.length === 1 ) {
+                this.graph.nonHyperRelationNodes[0].rootiness = 0;
+                return;
+            }
+
             // bring nodes in order by calculating the difference between following and
             // leading nodes. Then assign numbers from -(nodes.length/2) to +(nodes.length/2).
             // This is used as force to pull nodes upwards or downwards.
