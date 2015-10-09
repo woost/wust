@@ -5,6 +5,8 @@
     width: 200px; // fixed, because 100% stretches the content when hiding
     height: 100%;
     padding: 5px;
+    overflow-y: auto;
+
     .small_post_directive {
         max-width: 100%;
         width: 100%;

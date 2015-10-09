@@ -47,7 +47,7 @@ main {
             &.visible {
                 width: 200px;
                 min-width: 200px;
-                overflow-y: auto;
+                // overflow-y: auto; // we do this in history-list to not be overlapped by the scrollbar
             }
         }
         #middle_content {
