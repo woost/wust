@@ -1,19 +1,19 @@
 <div id="focus_component">
     <div tabset class="tabs-left" ng-if="::vm.rootNodeLoaded">
         <div tab active="vm.tabViews[0].active">
-            <div tab-heading>
+            <div tab-heading data-title="Focus View" bs-tooltip>
                 <i class="icon-dot-circled fa-2x"></i>
             </div>
             <div class="tab_body" focus-neighbours component="vm.neighboursComponent" is-loading="vm.componentLoading"></div>
         </div>
         <div tab active="vm.tabViews[1].active">
-            <div tab-heading>
+            <div tab-heading data-title="Graph View" bs-tooltip>
                 <i class="icon-share fa-2x"></i>
             </div>
             <div class="tab_body" focus-graph component="vm.graphComponent" is-loading="vm.componentLoading"></div>
         </div>
         <div tab active="vm.tabViews[2].active" ng-show="vm.component.urlResources.length">
-            <div class="text-center" tab-heading>
+            <div class="text-center" style="height: 39px; line-height: 50px" tab-heading data-title="Links" bs-tooltip>
                 <i class="fa fa-link fa-2x"></i>
             </div>
             <div class="focus_url_resources">
