@@ -38,7 +38,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 // state
                 this.drawOnTick = this.drawOnTick = this.visibleConvergence;
                 this.hoveredNode = undefined;
-                this.fixedPreview = false;
+                this.stickyPreview = false;
                 this.width = rootDomElement.offsetWidth;
                 this.height = rootDomElement.offsetHeight;
                 this.dragInitiated = false; // if dragStart was triggered with the correct mouse button
@@ -1308,6 +1308,25 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             });
         }
 
+        setStickyPreview(d) {
+            let elementInfo = this.elementInfo;
+            function setClass(node, value) {
+                elementInfo.d3NodeContainer(node).classed({
+                    "sticky-preview": value
+                });
+            }
+
+            if (d === undefined || !d.isHyperRelation) {
+                if( this.stickyPreview === d ) {
+                    setClass(d, false);
+                    this.stickyPreview = undefined;
+                } else {
+                    if(this.stickyPreview) setClass(this.stickyPreview, false);
+                    if(d) setClass(d, true); // d can be undefined when unsetting stickyPreview
+                    this.stickyPreview = d;
+                }
+            }
+        }
 
         onDragMoveEnd(d) {
             d.fixed &= ~6; // copied from force.drag
@@ -1316,8 +1335,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.setFixed(d);
             } else {
                 // onClick event on node is triggered here
-                if (!d.isHyperRelation)
-                    this.fixedPreview = this.fixedPreview === d ? undefined : d;
+                this.setStickyPreview(d);
 
                 // if the user just clicked, the position should be reset.
                 // unsetFixed(graph, force, d);
@@ -1357,9 +1375,9 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
         isHovering: {
             get: () => d3Graph.hoveredNode && !d3Graph.hoveredNode.isHyperRelation && !d3Graph.isDragging
         },
-        fixedPreview: {
-            get: () => d3Graph.fixedPreview,
-            set: (v) => d3Graph.fixedPreview = v
+        stickyPreview: {
+            get: () => d3Graph.stickyPreview,
+            set: (v) => d3Graph.setStickyPreview(v)
         }
     });
 }
