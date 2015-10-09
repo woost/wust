@@ -101,7 +101,7 @@ function HistoryService(Auth, Session, Post, DiscourseNode, $rootScope) {
     function addNode(node) {
         node = node.encode ? node.encode() : node;
         _.remove(self.visited, n => node.id === n.id);
-        self.visited.splice(0, self.visited.length - maximum - 1);
         self.visited.splice(0, 0, node);
+        self.visited.splice(maximum, self.visited.length - maximum);
     }
 }
