@@ -40,7 +40,7 @@ function bigPostCtrl($state, Post, ModalEditService, ContextService, Auth) {
     vm.editMode = false;
     vm.nodeHasContext = () => _.any(vm.node.tags, "isContext");
 
-    ContextService.setNodeContext(vm.node);
+    // ContextService.setNodeContext(vm.node);
 
     function onSave(response) {
         vm.editMode = false;

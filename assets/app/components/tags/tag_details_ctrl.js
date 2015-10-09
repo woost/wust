@@ -14,9 +14,10 @@ function TagDetailsCtrl($stateParams, Scope, Search, DiscourseNode, StreamServic
     vm.auth = Auth;
 
     vm.tag = Scope.$find($stateParams.id);
-    vm.tag.$then(() => {
-        ContextService.setContext(vm.tag);
-    });
+    // vm.tag.$then(() => {
+    //     ContextService.setContext(vm.tag);
+    // });
+
     //TODO: tags/id/posts should honor inherits relation
     // vm.contributions = vm.tag.posts.$search({
     //     page: postPage,
