@@ -2,9 +2,13 @@
 
 .modal_edit {
     .modal-header {
-        .small_post_directive {
+        .reference-node {
             margin-left: 20px;
             width: 200px;
+            display: inline-block;
+            .node_dispatcher {
+                margin-left: 0px;
+            }
         }
     }
     .modal-body {
