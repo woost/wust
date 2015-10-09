@@ -23,8 +23,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 // settings
                 this.visibleConvergence = false;
                 this.debugDraw = false;
-                this.hyperRelationAlignForce = 1;
-                this.nodeVerticalForceFactor = 0;
+                this.hyperRelationAlignForceFactor = 1;
+                this.rootinessForceFactor = 60;
                 this.constantEdgeLength = true;
                 this.stopForceOnPan = true;
                 this.stopForceAfterNodeDrag = true;
@@ -181,8 +181,14 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     .attr("id", "hypernodes-then-nodes")
                     .attr("class", "nodecontainer");
 
+                if( this.debugDraw )
+                    this.d3NodeContainer.style("opacity", 0.5);
+
                 // contains all relations
-                this.d3RelationPath = this.d3SvgContainer.append("g").attr("id", "relationContainer");
+                this.d3RelationContainer = this.d3SvgContainer.append("g").attr("id", "relationContainer");
+
+                if( this.debugDraw )
+                this.d3NodeForceVectorContainer = this.d3SvgContainer.append("g").attr("id", "NodeForceVectorContainer");
 
                 this.d3ConnectorLine = this.d3SvgContainer.append("line").classed({
                     "connectorline": true
@@ -206,7 +212,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 //nodes are drawn on top of the hypernodes in the svg
                 this.graph.setNodes(_.sortBy(this.graph.nodes, n => !n.isHyperRelation));
 
-                this.calculateNodeVerticalForce();
+                this.calculateNodeRootiness();
                 this.setInitialNodePositions();
 
                 // console.log("------ update graph");
@@ -217,9 +223,15 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     .selectAll("div")
                     .data(this.graph.nodes, (d) => d.id);
 
-                this.d3RelationPathWithData = this.d3RelationPath
+                this.d3RelationPathWithData = this.d3RelationContainer
                     .selectAll("path")
                     .data(this.graph.relations, (d) => d.startId + " --> " + d.endId);
+
+                if(this.debugDraw) {
+                    this.d3NodeForceVectorsWithData = this.d3NodeForceVectorContainer
+                        .selectAll("path")
+                        .data(this.graph.nodes, (d) => d.id);
+                }
 
                 // add nodes
                 this.d3NodeFrame = this.d3NodeContainerWithData.enter()
@@ -234,8 +246,13 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     return Helpers.smallPostBackgroundColor(tags[0]);
                 })
                 .style("border-color", n => {
+                    if( this.debugDraw ) return Math.sign(n.rootiness) > 0 ? "lightblue" : "pink";
+
                     let tags = Helpers.sortedNodeTags(n);
                     return !n.isHyperRelation && tags.length > 0 ? Helpers.postBorderColor(tags[0]) : undefined;
+                })
+                .style("border-width", n => {
+                    if( this.debugDraw ) return (10*Math.abs(n.rootiness)) + "px";
                 })
                 .html(d => {
                     //TODO: do it with d3 data-joins, or directly with the angular-port
@@ -309,6 +326,15 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                             d3.select(this).style("marker-end", "url(" + self.markerUrl + "#graph_arrow)");
                     });
 
+                if( this.debugDraw ) {
+                    this.d3NodeForceVectorsWithData.enter()
+                        .append("path")
+                        .attr("class", "svgrelation")
+                        .each(function(node) {
+                            d3.select(this).style("marker-end", "url(" + self.markerUrl + "#graph_arrow)");
+                        });
+                }
+
 
                 // tool buttons
                 this.d3NodeTools = this.d3NodeContainerWithData.append("div")
@@ -346,10 +372,11 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
                 /// remove nodes and relations
                 this.d3NodeContainerWithData.exit().remove();
-                this.d3RelationPathWithData.exit().remove(); //
+                this.d3RelationPathWithData.exit().remove();
+                if( this.debugDraw ) this.d3NodeForceVectorsWithData.exit().remove();
 
                 // console.log(graph.nodes.map(n => n.id.slice(0,3)),d3NodeContainer.node());
-                // console.log(graph.relations,d3RelationPath.node());
+                // console.log(graph.relations,d3RelationContainer.node());
 
 
                 this.updateGraphRefs();
@@ -495,8 +522,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             let squareFactor = 100 * Math.sqrt(this.graph.nodes.length);
             _(this.graph.nonHyperRelationNodes).filter(n => isNaN(n.x) || isNaN(n.y)).each(n => {
                 let hash = Math.abs(Helpers.hashCode(n.id));
-                n.x = squareFactor * (hash & 0xfff) / 0xfff + this.width / 2 - squareFactor / 2;
-                n.y = squareFactor * n.verticalForce / this.graph.nonHyperRelationNodes.length + this.height / 2 - squareFactor / 2;
+                n.x = squareFactor * n.rootiness / this.graph.nonHyperRelationNodes.length + this.height / 2 - squareFactor / 2;
+                n.y = squareFactor * (hash & 0xfff) / 0xfff + this.width / 2 - squareFactor / 2;
             }).value();
 
             _(this.graph.hyperRelations).filter(n => isNaN(n.x) || isNaN(n.y)).each(n => {
@@ -505,16 +532,34 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             }).value();
         }
 
-        calculateNodeVerticalForce() {
+        calculateNodeRootiness() {
             // bring nodes in order by calculating the difference between following and
             // leading nodes. Then assign numbers from -(nodes.length/2) to +(nodes.length/2).
             // This is used as force to pull nodes upwards or downwards.
+            let max = 0;
+            let min = 9999999;
             this.graph.nonHyperRelationNodes.forEach(node => {
-                let deepReplies = node.deepSuccessors.length - node.deepPredecessors.length;
-                node.verticalForce = deepReplies;
+                let deepReplies = node.deepPredecessors.length - node.deepSuccessors.length;
+                deepReplies = Math.sign(deepReplies) * Math.log(Math.abs(deepReplies) + 1);
+                node.rootiness = deepReplies;
+                max = Math.max(max, deepReplies);
+                min = Math.min(min, deepReplies);
             });
 
-            _.sortBy(this.graph.nonHyperRelationNodes, "verticalForce").forEach((n, i) => n.verticalForce = i);
+            // normalize
+            let sum = this.graph.nonHyperRelationNodes.map(n => n.rootiness).reduce((a,b) => a + b);
+            let count = this.graph.nonHyperRelationNodes.length;
+            let avg = sum / count;
+            this.graph.nonHyperRelationNodes.forEach((n) => {
+                n.rootiness -= avg; // center around 0
+            });
+            max -= avg;
+            min -= avg;
+            let dist = Math.max(Math.abs(max), Math.abs(min));
+
+            this.graph.nonHyperRelationNodes.forEach((n) => {
+                n.rootiness = n.rootiness / dist; // [-1, 1]
+            });
         }
 
         converge(onConvergeFinish = _.noop) {
@@ -642,6 +687,12 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 newElementInfo.d3NodeFrame[n.id] = d3.select(newElementInfo.domNodeFrame[n.id]);
             });
 
+            // if(this.debugDraw) {
+            //     this.graph.nodes.forEach((n, i) => {
+            //TODO: write force vector svg path into node
+            //     });
+            // }
+
             this.graph.relations.forEach((r, i) => {
                 let id = r.startId + r.endId;
                 newElementInfo.domPath[id] = this.d3RelationPathWithData[0][i];
@@ -666,7 +717,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
         straightenHyperRelations(e) {
             // push hypernodes towards the center between its start/end node
-            let pullStrength = e.alpha * this.hyperRelationAlignForce;
+            let pullStrength = e.alpha * this.hyperRelationAlignForceFactor;
             this.graph.hyperRelations.forEach(node => {
                 if (!node.fixed) {
                     let start = node.source;
@@ -697,11 +748,11 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             });
         }
 
-        applyVerticalNodeForce(e) {
+        applyRootinessForce(e) {
             // pull nodes with more more children up
             this.graph.nonHyperRelationNodes.forEach(node => {
                 if (node.fixed !== true) {
-                    node.y += (node.verticalForce - this.graph.nonHyperRelationNodes.length / 2) * e.alpha * this.nodeVerticalForceFactor;
+                    node.x -= node.rootiness * e.alpha * this.rootinessForceFactor;
                 }
             });
         }
@@ -782,7 +833,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
         // applies all kinds of additional forces
         tick(e) {
             this.straightenHyperRelations(e);
-            this.applyVerticalNodeForce(e);
+            this.applyRootinessForce(e);
             if(this.constantEdgeLength)
                 this.pushConstantEdgeLength(e);
             else {
@@ -790,8 +841,11 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             }
 
 
-            if (this.drawOnTick)
+            if (this.drawOnTick) {
                 this.drawGraph();
+                if( this.debugDraw )
+                    this.drawForceVectors();
+            }
         }
 
         drawNodes() {
@@ -874,6 +928,15 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
             this.drawNodes();
             this.drawRelations();
+        }
+
+        drawForceVectors() {
+            this.graph.nodes.forEach(node => {
+                // let line = geometry.Line(geometry.Vec2(node.px, node.py), geometry.Vec2(node.x, node.y));
+                // let pathAttr = `M ${line.x1} ${line.y1} L ${line.x2} ${line.y2}`;
+                // let domPath = this.elementInfo.domPath(relation);
+                // domPath.setAttribute("d", pathAttr);
+            });
         }
 
         // zoom into graph
@@ -1115,10 +1178,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
         setNodePositionFromOffset(node, x, y) {
             let scale = this.zoom.scale();
             let translate = this.zoom.translate();
-            node.x = (x - translate[0]) / scale;
-            node.y = (y - translate[1]) / scale;
-            node.px = node.x;
-            node.py = node.y;
+            node.x = node.px = (x - translate[0]) / scale;
+            node.y = node.py = (y - translate[1]) / scale;
         }
 
         // used to decide where to place preview
@@ -1204,8 +1265,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 // but we let node stay under grabbed position.
                 let event = d3.event.sourceEvent;
                 let scale = this.zoom.scale();
-                d.px = this.dragStartNodeX + (event.clientX - this.dragStartMouseX) / scale;
-                d.py = this.dragStartNodeY + (event.clientY - this.dragStartMouseY) / scale;
+                d.x = d.px = this.dragStartNodeX + (event.clientX - this.dragStartMouseX) / scale;
+                d.y = d.py = this.dragStartNodeY + (event.clientY - this.dragStartMouseY) / scale;
                 this.force.resume(); // restart annealing
             }
         }
