@@ -168,6 +168,9 @@ return connectable,connects,context,tags,contexttotags,tagstopost, classificatio
     //TODO: workaround to filter out accidentally matched hidden nodes
     //BE AWARE: DO NOT PERSIST AFTER THIS POINT, as we delete hidden nodes from the component
     component.remove(component.hiddens: _*)
+    while (component.hyperRelations.exists(hr => hr.startNodeOpt.isEmpty || hr.endNodeOpt.isEmpty)) {
+      component.remove(component.hyperRelations.filter(hr => hr.startNodeOpt.isEmpty || hr.endNodeOpt.isEmpty): _*)
+    }
 
     val uuidToNode = component.connectables.map(n => (n.uuid, n)).toMap
     table.rows.foreach { row =>
