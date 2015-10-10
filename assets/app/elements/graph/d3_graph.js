@@ -21,11 +21,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.onDraw = onDraw;
 
                 // settings
-                this.visibleConvergence = false;
-                this.debugDraw = false;
-                this.hyperRelationAlignForceFactor = 1;
-                this.rootinessForceFactor = 60;
-                this.constantEdgeLength = true;
                 this.stopForceOnPan = true;
                 this.stopForceAfterNodeDrag = true;
                 this.connectorLineOvershoot = 0;
@@ -34,13 +29,38 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.markerUrl = _.endsWith($location.absUrl(), "/graph") ? $location.absUrl() : $location.absUrl() + "graph";
                 this.arrowToResponse = false;
                 this.dragHyperRelations = false;
+                this.fixRootNodeAfterConverge = false;
+                this.focusRootNodeAfterConverge = true;
+
+                // Simulation settings
+                this.width = rootDomElement.offsetWidth;
+                this.height = rootDomElement.offsetHeight;
+                this.visibleConvergence = false;
+                this.continuousConvergence = false && this.visibleConvergence;
+                this.debugDraw = false;
+                this.hyperRelationAlignForceFactor = 1;
+                this.rootinessForceFactor = 20;
+                this.constantEdgeLength = true;
+                this.linkStrength = 10; // originally this.force.linkStrength
+                this.force = d3.layout.force()
+                    .size([this.width, this.height])
+                    .nodes(graph.nodes)
+                    .links(graph.relations)
+                    .linkStrength(this.constantEdgeLength ? 0.0 : this.linkStrength) // rigidity, 0, because we handle this ourselves in tick()
+                    .friction(0.92)
+                    .linkDistance(40) // weak geometric constraint. Pushes nodes to achieve this distance
+                    .charge(d => d.degree > 0 ? -1500 : -50)
+                    .chargeDistance(1000)
+                    .gravity(0.001)
+                    .theta(0.8)
+                    .alpha(0.1);
+                this.zoom = d3.behavior.zoom().scaleExtent([0.1, 3]); // min/max zoom level
 
                 // state
                 this.drawOnTick = this.drawOnTick = this.visibleConvergence;
+                this.converged = false;
                 this.hoveredNode = undefined;
-                this.stickyPreview = false;
-                this.width = rootDomElement.offsetWidth;
-                this.height = rootDomElement.offsetHeight;
+                this.stickyPreview = undefined;
                 this.dragInitiated = false; // if dragStart was triggered with the correct mouse button
                 this.commitCount = 0;
                 this.displayed = $q.defer();
@@ -55,22 +75,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.dragStartMouseY = undefined;
                 this.dragStartOffsetX = undefined;
                 this.dragStartOffsetY = undefined;
-
-                this.linkStrength = 3; // originally this.force.linkStrength
-
-                this.force = d3.layout.force()
-                    .size([this.width, this.height])
-                    .nodes(graph.nodes)
-                    .links(graph.relations)
-                    .linkStrength(this.constantEdgeLength ? 0.0 : 3.0) // rigidity, 0, because we handle this ourselves in tick()
-                    .friction(0.92)
-                    .linkDistance(20) // weak geometric constraint. Pushes nodes to achieve this distance
-                    .charge(d => d.degree > 0 ? -1500 : -50)
-                    .chargeDistance(1000)
-                    .gravity(0.001)
-                    .theta(0.8)
-                    .alpha(0.1);
-                this.zoom = d3.behavior.zoom().scaleExtent([0.1, 3]); // min/max zoom level
 
                 // old config
                 // .linkStrength(3) // rigidity
@@ -167,13 +171,15 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                         .attr("cx", this.width / 2)
                         .attr("cy", this.height / 2)
                         .attr("r", 30)
-                        .style("fill", "#7B00D6");
+                        .style("fill", "#7B00D6")
+                        .style("opacity", 0.2);
 
                     // draw origin
                     this.d3SvgContainer.append("circle")
                         .attr("cx", 0)
                         .attr("cy", 0)
-                        .attr("r", 20);
+                        .attr("r", 20)
+                        .style("opacity", 0.2);
                 }
 
                 // contains all nodes
@@ -182,7 +188,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     .attr("class", "nodecontainer");
 
                 if( this.debugDraw )
-                    this.d3NodeContainer.style("opacity", 0.5);
+                    this.d3NodeContainer.style("opacity", 0.7);
 
                 // contains all relations
                 this.d3RelationContainer = this.d3SvgContainer.append("g").attr("id", "relationContainer");
@@ -253,6 +259,9 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 })
                 .style("border-width", n => {
                     if( this.debugDraw ) return (10*Math.abs(n.rootiness)) + "px";
+                })
+                .style("border-style", n => {
+                    if( this.debugDraw ) return "solid";
                 })
                 .html(d => {
                     //TODO: do it with d3 data-joins, or directly with the angular-port
@@ -522,8 +531,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             let squareFactor = 100 * Math.sqrt(this.graph.nodes.length);
             _(this.graph.nonHyperRelationNodes).filter(n => isNaN(n.x) || isNaN(n.y)).each(n => {
                 let hash = Math.abs(Helpers.hashCode(n.id));
-                n.x = squareFactor * n.rootiness / this.graph.nonHyperRelationNodes.length + this.height / 2 - squareFactor / 2;
-                n.y = squareFactor * (hash & 0xfff) / 0xfff + this.width / 2 - squareFactor / 2;
+                n.x = squareFactor * -n.rootiness / this.graph.nonHyperRelationNodes.length + this.width / 2 - squareFactor / 2;
+                n.y = squareFactor * (hash & 0xfff) / 0xfff + this.height / 2 - squareFactor / 2;
             }).value();
 
             _(this.graph.hyperRelations).filter(n => isNaN(n.x) || isNaN(n.y)).each(n => {
@@ -533,8 +542,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
         }
 
         calculateNodeRootiness() {
-            if( this.graph.nonHyperRelationNodes.length === 1 ) {
-                this.graph.nonHyperRelationNodes[0].rootiness = 0;
+            if( this.graph.nodes.length === 1 ) {
+                this.graph.nodes[0].rootiness = 0;
                 return;
             }
 
@@ -543,26 +552,26 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             // This is used as force to pull nodes upwards or downwards.
             let max = 0;
             let min = 9999999;
-            this.graph.nonHyperRelationNodes.forEach(node => {
-                let deepReplies = node.deepPredecessors.length - node.deepSuccessors.length;
-                deepReplies = Math.sign(deepReplies) * Math.log(Math.abs(deepReplies) + 1);
-                node.rootiness = deepReplies;
-                max = Math.max(max, deepReplies);
-                min = Math.min(min, deepReplies);
+            function invsqr(x) {return 1 / (x*x + 1);}
+            this.graph.nodes.forEach(node => {
+                let weight = invsqr(node.deepSuccessors.length) - invsqr(node.deepPredecessors.length);
+                node.rootiness = weight;
+                max = Math.max(max, weight);
+                min = Math.min(min, weight);
             });
 
             // normalize
-            let sum = this.graph.nonHyperRelationNodes.map(n => n.rootiness).reduce((a,b) => a + b);
-            let count = this.graph.nonHyperRelationNodes.length;
+            let sum = this.graph.nodes.map(n => n.rootiness).reduce((a,b) => a + b);
+            let count = this.graph.nodes.length;
             let avg = sum / count;
-            this.graph.nonHyperRelationNodes.forEach((n) => {
+            this.graph.nodes.forEach((n) => {
                 n.rootiness -= avg; // center around 0
             });
             max -= avg;
             min -= avg;
             let dist = Math.max(Math.abs(max), Math.abs(min));
 
-            this.graph.nonHyperRelationNodes.forEach((n) => {
+            this.graph.nodes.forEach((n) => {
                 n.rootiness = n.rootiness / dist; // [-1, 1]
             });
         }
@@ -629,23 +638,26 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.resizeContainers();
                 this.recalculateNodeDimensions(this.graph.nodes);
             }
+
+            if( this.visibleConvergence )
+                vm.isConverged = true;
         }
 
         afterConverge() {
             this.resizeContainers();
 
-            this.setFixed(this.graph.rootNode);
+            if( this.fixRootNodeAfterConverge )
+                this.setFixed(this.graph.rootNode);
 
             this.drawOnTick = true;
             this.onDraw();
 
-            if (this.visibleConvergence)
-                this.focusMarkedNodes();
-            else
+            if (!this.visibleConvergence)
                 this.focusMarkedNodes(0);
 
             this.d3HtmlContainer.classed({ "converged": true });
             this.d3SvgContainer.classed({ "converged": true });
+            this.converged = true;
         }
 
         updateGraphRefs() {
@@ -755,9 +767,9 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
         applyRootinessForce(e) {
             // pull nodes with more more children up
-            this.graph.nonHyperRelationNodes.forEach(node => {
+            this.graph.nodes.forEach(node => {
                 if (node.fixed !== true) {
-                    node.x -= node.rootiness * e.alpha * this.rootinessForceFactor;
+                    node.x -= Math.sqrt(this.graph.nodes.length) * node.rootiness * e.alpha * this.rootinessForceFactor;
                 }
             });
         }
@@ -837,19 +849,25 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
         // tick function, called in each step in the force calculation,
         // applies all kinds of additional forces
         tick(e) {
-            this.straightenHyperRelations(e);
-            this.applyRootinessForce(e);
+            if(this.rootinessForceFactor > 0) this.applyRootinessForce(e);
             if(this.constantEdgeLength)
                 this.pushConstantEdgeLength(e);
             else {
                 this.graph.relations.forEach( relation => relation.line = this.cutLineLength(relation)[0] );
             }
+            if(this.hyperRelationAlignForceFactor > 0) this.straightenHyperRelations(e);
 
 
             if (this.drawOnTick) {
                 this.drawGraph();
                 if( this.debugDraw )
                     this.drawForceVectors();
+            }
+            if( this.continuousConvergence ) {
+                this.force.alpha(0.1);
+            }
+            if( this.visibleConvergence && !this.converged ) {
+                this.focusMarkedNodes(0);
             }
         }
 
@@ -928,11 +946,13 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
         }
 
         drawGraph() {
-            if( this.graph.nodes[0].size.x === 0 )
-                this.recalculateNodeDimensions(this.graph.nodes);
+            if( this.graph.nodes[0].size !== undefined ) {
+                if( this.graph.nodes[0].size.x === 0 )
+                    this.recalculateNodeDimensions(this.graph.nodes);
 
-            this.drawNodes();
-            this.drawRelations();
+                this.drawNodes();
+                this.drawRelations();
+            }
         }
 
         drawForceVectors() {
@@ -1009,7 +1029,11 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     // console.log("data is here, converge!");
 
                     // so focus the rootNode
-                    this.converge(() => setTimeout(() => this.focusRootNode(), 700));
+
+                        this.converge(() => {
+                            if( this.focusRootNodeAfterConverge )
+                                setTimeout(() => this.focusRootNode(), 700);
+                        });
                 });
             });
         }
