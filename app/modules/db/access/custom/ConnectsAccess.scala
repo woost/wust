@@ -11,6 +11,7 @@ import model.WustSchema.{Created => SchemaCreated, _}
 import modules.db.Database.db
 import modules.db.access._
 import modules.db.helpers.{PostHelper,ClassifiedReferences}
+import modules.db.types._
 import modules.db._
 import modules.requests.ConnectResponse
 import play.api.libs.json._
@@ -22,20 +23,45 @@ import wust.Shared.tagTitleColor
 import moderation.Moderation
 
 trait ConnectsHelper {
-  protected def canEditConnects(connects: Connects, scopes: Seq[Scope]) = {
-    val startNode = connects.startNodeOpt.get
+  protected def canEditConnects(startNode: Post, scopes: Seq[Scope]) = {
     val authorBoost = if (startNode.rev_createds.isEmpty) 0 else Moderation.authorKarmaBoost
     val voteWeight = Moderation.voteWeightFromScopes(scopes)
     val applyThreshold = Moderation.postChangeThreshold(startNode.viewCount)
     Moderation.canApply(voteWeight + authorBoost, applyThreshold)
   }
 
-  protected def getConnectsWithKarma(user: User, uuid: String) = {
-    implicit val ctx = new QueryContext
+  protected def getConnectsWithKarma(user: User, startDef: UuidNodeDef[Post], endDef: NodeDef[Connectable])(implicit ctx: QueryContext): (Discourse, Option[(Post, Connectable)]) = {
     val userDef = ConcreteNodeDef(user)
-    val postDef = FactoryNodeDef(Post)
-    val createdDef = RelationDef(userDef, SchemaCreated, postDef)
-    val connectsDef = HyperNodeDef(postDef, Connects, FactoryNodeDef(Connectable), Some(uuid))
+    val createdDef = RelationDef(userDef, SchemaCreated, startDef)
+    val query = s"""
+    match ${startDef.toPattern},
+    (${startDef.name})-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)
+    with distinct connectable, ${startDef.name}
+    match ${userDef.toPattern}
+    match ${endDef.toPattern}
+    optional match ${createdDef.toPattern(false, false)}
+    optional match (tag: `${Scope.label}`)-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`)
+    optional match (${userDef.name})-[hasKarma:`${HasKarma.relationType}`]->(tag)
+    return ${startDef.name}, ${endDef.name}, ${userDef.name}, ${createdDef.startRelationName}, ${createdDef.name}, ${createdDef.endRelationName}, tag, hasKarma
+    """
+
+    val discourse = Discourse(db.queryGraph(query, ctx.params))
+    if (discourse.nodes.isEmpty)
+      (discourse, None)
+    else {
+      val post = discourse.posts.find(_.uuid == startDef.uuid).get
+      val connectable = endDef match {
+        case n:UuidNodeDef[_] => discourse.connectables.find(_.uuid == n.uuid).get
+        case n:HyperNodeDef[_,_,_,_,_] => discourse.connects.head
+      }
+
+      (discourse, Some((post, connectable)))
+    }
+  }
+
+  protected def getConnectsWithKarma(user: User, connectsDef: NodeRelationDef[Post, Connects, Connectable])(implicit ctx: QueryContext): (Discourse, Option[Connects]) = {
+    val userDef = ConcreteNodeDef(user)
+    val createdDef = RelationDef(userDef, SchemaCreated, connectsDef.startDefinition)
     val query = s"""
     match ${connectsDef.toPattern},
     (${connectsDef.startName})-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)
@@ -48,7 +74,10 @@ trait ConnectsHelper {
     """
 
     val discourse = Discourse(db.queryGraph(query, ctx.params))
-    (discourse, discourse.connects.find(_.uuid == uuid).get)
+    if (discourse.nodes.isEmpty)
+      (discourse, None)
+    else
+      (discourse, Some((discourse.connects.find(c => c.startNodeOpt.isDefined && c.endNodeOpt.isDefined).get)))
   }
 }
 
@@ -102,14 +131,32 @@ case class StartConnectsAccess() extends StartRelationReadBase[Post, Connects, C
     persistRelation(discourse, node, base)
   }
 
+  private def persistRelationChecked(user: User, start: UuidNodeDef[Post], end: NodeDef[Connectable])(implicit ctx: QueryContext) = {
+    getConnectsWithKarma(user, start, end) match {
+      case (discourse, Some((startNode, endNode))) =>
+        if (canEditConnects(startNode, discourse.scopes)) {
+          discourse.add(factory.merge(startNode, endNode))
+          persistRelation(discourse, endNode, startNode)
+        } else {
+          Unauthorized("Not enough karma to connect node")
+        }
+      case _ => BadRequest("Could not find nodes to connect")
+    }
+  }
+
+  private def createRelationChecked(context: RequestContext, param: ConnectParameter[Post], uuid: String) = context.withUser { user =>
+    implicit val ctx = new QueryContext
+    val node = FactoryUuidNodeDef(nodeFactory, uuid)
+    val base = FactoryUuidNodeDef(param.factory, param.baseUuid)
+    persistRelationChecked(user, base, node)
+  }
+
   override def create(context: RequestContext, param: ConnectParameter[Post]) = createPost(context) match {
     case Left(err) => err
     case Right(discourse) => createRelation(context, param, discourse)
   }
 
-  override def create(context: RequestContext, param: ConnectParameter[Post], otherUuid: String) = context.withUser {
-    createRelation(context, param, Discourse(nodeFactory.matchesOnUuid(otherUuid)))
-  }
+  override def create(context: RequestContext, param: ConnectParameter[Post], uuid: String) = createRelationChecked(context, param, uuid)
 
   override def delete(context: RequestContext, param: ConnectParameter[Post], otherUuid: String) = context.withUser {
     val base = param.factory.matchesOnUuid(param.baseUuid)
@@ -144,6 +191,35 @@ case class EndConnectsAccess() extends EndRelationReadBase[Post, Connects, Conne
     persistRelation(discourse, node, base)
   }
 
+  private def persistRelationChecked(user: User, start: UuidNodeDef[Post], end: NodeDef[Connectable])(implicit ctx: QueryContext) = {
+    getConnectsWithKarma(user, start, end) match {
+      case (discourse, Some((startNode, endNode))) =>
+        if (canEditConnects(startNode, discourse.scopes)) {
+          discourse.add(factory.merge(startNode, endNode))
+          persistRelation(discourse, startNode, endNode)
+        } else {
+          Unauthorized("Not enough karma to connect node")
+        }
+      case _ => BadRequest("Could not find nodes to connect")
+    }
+  }
+
+  private def createRelationChecked(context: RequestContext, param: ConnectParameter[Connectable], uuid: String) = context.withUser { user =>
+    implicit val ctx = new QueryContext
+    val node = FactoryUuidNodeDef(nodeFactory, uuid)
+    val base = FactoryUuidNodeDef(param.factory, param.baseUuid)
+    persistRelationChecked(user, node, base)
+  }
+
+  private def createRelationChecked[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Connectable with AbstractRelation[S, E], E], uuid: String) = context.withUser { user =>
+    implicit val ctx = new QueryContext
+    val start = FactoryUuidNodeDef(param.startFactory, param.startUuid)
+    val end = FactoryUuidNodeDef(param.endFactory, param.endUuid)
+    val node = FactoryUuidNodeDef(nodeFactory, uuid)
+    val base = HyperNodeDef(start, param.factory, end)
+    persistRelationChecked(user, node, base)
+  }
+
   override def create(context: RequestContext, param: ConnectParameter[Connectable]) = createPost(context) match {
     case Left(err) => err
     case Right(discourse) => createRelation(context, param, discourse)
@@ -154,13 +230,9 @@ case class EndConnectsAccess() extends EndRelationReadBase[Post, Connects, Conne
     case Right(discourse) => createRelation(context, param, discourse)
   }
 
-  override def create(context: RequestContext, param: ConnectParameter[Connectable], otherUuid: String) = context.withUser {
-    createRelation(context, param, Discourse(nodeFactory.matchesOnUuid(otherUuid)))
-  }
+  override def create(context: RequestContext, param: ConnectParameter[Connectable], uuid: String) = createRelationChecked(context, param, uuid)
 
-  override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Connectable with AbstractRelation[S, E], E], uuid: String) = context.withUser {
-    createRelation(context, param, Discourse(nodeFactory.matchesOnUuid(uuid)))
-  }
+  override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Connectable with AbstractRelation[S, E], E], uuid: String) = createRelationChecked(context, param, uuid)
 
   override def delete(context: RequestContext, param: ConnectParameter[Connectable], otherUuid: String) = context.withUser {
     val base = param.factory.matchesOnUuid(param.baseUuid)
@@ -202,21 +274,25 @@ case class ConnectsAccess() extends NodeAccessDefault[Connects] with ConnectsHel
     import formatters.json.EditNodeFormat._
 
     context.withJson { (request: ConnectsUpdateRequest) =>
-      val (discourse, connects) = getConnectsWithKarma(user, uuid)
+      implicit val ctx = new QueryContext
+      val connectsDef = HyperNodeDef(FactoryNodeDef(Post), Connects, FactoryNodeDef(Connectable), Some(uuid))
+      getConnectsWithKarma(user, connectsDef) match {
+        case (discourse, Some(connects)) =>
+          if (canEditConnects(connects.startNodeOpt.get, discourse.scopes)) {
+            deleteClassificationsFromGraph(discourse, request, connects)
+            addClassifcationsToGraph(discourse, request, connects)
 
-      if (canEditConnects(connects, discourse.scopes)) {
-        deleteClassificationsFromGraph(discourse, request, connects)
-        addClassifcationsToGraph(discourse, request, connects)
-
-        db.transaction(_.persistChanges(discourse)) match {
-          case Some(err) => BadRequest(s"Cannot update Connects with uuid '$uuid': $err'")
-          case _         =>
-            val connectsWithClass = ClassifiedReferences.shapeResponse(connects)
-            LiveWebSocket.sendConnectableUpdate(connectsWithClass)
-            Ok(Json.toJson(connectsWithClass))
-        }
-      } else {
-        Unauthorized("Not enough karma to edit relation")
+            db.transaction(_.persistChanges(discourse)) match {
+              case Some(err) => BadRequest(s"Cannot update Connects with uuid '$uuid': $err")
+              case _         =>
+                val connectsWithClass = ClassifiedReferences.shapeResponse(connects)
+                LiveWebSocket.sendConnectableUpdate(connectsWithClass)
+                Ok(Json.toJson(connectsWithClass))
+            }
+          } else {
+            Unauthorized("Not enough karma to edit relation")
+          }
+        case _ => BadRequest(s"Cannot find Connects with uuid '$uuid'")
       }
     }
   }
