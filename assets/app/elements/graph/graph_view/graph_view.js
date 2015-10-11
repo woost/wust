@@ -17,9 +17,9 @@ function graphView() {
     };
 }
 
-graphViewCtrl.$inject = ["$scope", "$stateParams", "$filter", "EditService", "$state"];
+graphViewCtrl.$inject = ["$scope", "$stateParams", "$filter", "EditService", "$state", "ConnectedComponents"];
 
-function graphViewCtrl($scope, $stateParams, $filter, EditService, $state) {
+function graphViewCtrl($scope, $stateParams, $filter, EditService, $state, ConnectedComponents) {
     let vm = this;
 
     vm.isConverged = false;
@@ -56,11 +56,14 @@ function graphViewCtrl($scope, $stateParams, $filter, EditService, $state) {
     }
 
     function placeNodeInGraph(node, event) {
-        vm.graph.addNode(node);
-        vm.graph.commit();
+        ConnectedComponents.$find(node.id, {depth: 1}).$then(result => {
+            result.nodes.forEach(node => vm.graph.addNode(node));
+            result.relations.forEach(relation => vm.graph.addRelation(relation));
+            vm.graph.commit();
 
-        let wrappedNode = vm.graph.nodeById(node.id);
-        vm.d3Info.positionNode(wrappedNode, event.offsetX, event.offsetY);
+            let wrappedNode = vm.graph.nodeById(node.id);
+            vm.d3Info.positionNode(wrappedNode, event.offsetX, event.offsetY);
+        });
     }
 
     function focusNode(node) {
