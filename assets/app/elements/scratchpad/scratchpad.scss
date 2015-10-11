@@ -1,3 +1,5 @@
+@import "compass/css3/flexbox";
+
 #scratchpad_component {
     height: 100%;
     padding: 5px;
@@ -21,6 +23,10 @@
         }
     }
     #edit_list {
+        @include display-flex(flex);
+        @include flex-direction(row);
+        @include align-items(flex-start);
+        @include flex-wrap(wrap);
         padding-top: 10px;
     }
     .editable-click {
