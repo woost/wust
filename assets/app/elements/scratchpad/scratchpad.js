@@ -32,6 +32,7 @@ function scratchpadCtrl($state, $stateParams, HistoryService, Session, EditServi
     vm.loadGraph = loadGraph;
     vm.options = EditService.scratchpad;
     vm.scratchpadNodes = scratchpadNodes;
+    vm.selectedTags = [];
 
     vm.newPost = {
         title: ""
@@ -66,7 +67,7 @@ function scratchpadCtrl($state, $stateParams, HistoryService, Session, EditServi
 
     function editNewPost() {
         let session = EditService.edit(vm.newPost, true, 0);
-        session.tags = angular.copy(ContextService.currentContexts);
+        session.tags = angular.copy(vm.selectedTags);
 
         vm.newPost.title = "";
 

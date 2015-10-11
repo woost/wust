@@ -9,6 +9,8 @@
         <input class="form-control" ng-model="vm.newPost.title" placeholder="Summary">
     </form>
 
+    <div edit-taglist class="edit_tags" tag-type="taglike" tags="vm.selectedTags"></div>
+
     <div id="edit_list">
         <div ng-repeat="node in vm.editList | scratchfilter:vm.options.showEdits track by node.localId" class="ng-trans ng-trans-scale-up ease">
             <div class="drop_post_container" drop-channel="{{vm.options.showEdits ? '' : 'node,scratch_node,scratch_move'}}" ui-on-Drop="vm.edit($data, true, vm.editList.indexOf(node))">
