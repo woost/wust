@@ -61,6 +61,9 @@ function withoutTags(tags, ignore) {
 }
 
 function sortedNodeTags(node, ignore = []) {
+    if (node === undefined)
+        return [];
+
     let classifications = (node.classifications || []).concat(_.flatten(node.tags.map(t => t.classifications || [])));
     return _.uniq(sortByIdQuality(withoutTags(classifications,ignore)).concat(sortByIdQuality(withoutTags(node.tags, ignore))), "id");
 }
