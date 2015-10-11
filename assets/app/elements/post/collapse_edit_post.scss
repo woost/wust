@@ -71,9 +71,12 @@
                     color: #FF8700;
                 }
                 .tag_circle_container {
+                    @include display-flex(flex);
+                    @include flex-direction(row);
+                    @include align-items(flex-start);
+                    @include flex-wrap(wrap);
                     line-height: 0px;
                     width: 100%;
-                    text-align: right;
                 }
             }
         }
