@@ -1,12 +1,10 @@
 <div class="new_post_directive">
-    <div edit-taglist edit-classification="true" set-focus="vm.focusEditTags" tags="vm.node.tags" on-change="vm.node.onChange(type,tag)" tag-type="taglike" ng-class="{'is_invalid': vm.node.triedSave && !vm.node.validity.tags.valid}"></div>
-    <div validity-info="vm.node" property="tags"></div>
-
-    <h2 contenteditable="true" placeholder="Summary" maxchars="140" focus-me="vm.inputFocus" ng-keydown="vm.redirectEnter($event)" ng-model="vm.node.title" ng-change="vm.node.onChange()" ng-class="{'is_invalid': vm.node.triedSave && !vm.node.validity.title.valid}" class="title"></h2>
+    <h2 contenteditable="true" placeholder="Summarize your post" maxchars="140" focus-me="vm.inputFocus" ng-keydown="vm.redirectEnter($event)" ng-model="vm.node.title" ng-change="vm.node.onChange()" ng-class="{'is_invalid': vm.node.triedSave && !vm.node.validity.title.valid}" class="title"></h2>
     <div validity-info="vm.node" property="title"></div>
 
-    <div ng-switch="vm.previewEnabled" class="description">
-        <div ng-switch-when="true" markdown="vm.node.description"></div>
-        <div ng-switch-default edit-post-description node="vm.node"></div>
-    </div>
+    <div edit-taglist placeholder="Categorize your post" edit-classification="true" set-focus="vm.focusEditTags" tags="vm.node.tags" on-change="vm.node.onChange(type,tag)" tag-type="taglike" ng-class="{'is_invalid': vm.node.triedSave && !vm.node.validity.tags.valid}" empty-show="true" embed-suggestions="true"></div>
+    <div validity-info="vm.node" property="tags"></div>
+
+
+    <div edit-post-description node="vm.node"></div>
 </div>

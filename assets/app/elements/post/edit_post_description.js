@@ -7,7 +7,8 @@ function editPostDescription() {
         restrict: "A",
         templateUrl: "elements/post/edit_post_description.html",
         scope: {
-            node: "="
+            node: "=",
+            placeholder: "@",
         },
         controller: editPostDescriptionCtrl,
         controllerAs: "vm",
@@ -53,7 +54,7 @@ function editPostDescriptionCtrl(DiscourseNode) {
             editor.renderer.emptyMessageNode = null;
         } else if (shouldShow && !node) {
             node = editor.renderer.emptyMessageNode = document.createElement("div");
-            node.textContent = "Optional description";
+            node.textContent = "Would you like to point out any details?"; //TODO: use vm.placeholder
             node.className = "ace_invisible ace_emptyMessage";
             node.style.padding = "10px";
             editor.renderer.scroller.appendChild(node);

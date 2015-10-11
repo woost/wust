@@ -2,9 +2,12 @@
     <form class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <span ng-if="vm.node.referenceNode">
-                    <label>Responding to</label>
+                <span class="response-header" ng-if="vm.node.referenceNode">
+                    <h1>Respond to</h1>
                     <span small-post node="vm.node.referenceNode" class="disable-link reference-node"></span>
+                </span>
+                <span ng-if="!vm.node.referenceNode">
+                    <h1 class="text-center">Start Discussion</h1>
                 </span>
             </div>
             <div class="modal-body" colored-tag-node="vm.node" big="true">
@@ -12,12 +15,9 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-default" ng-click="$hide()">Cancel</button>
-                <button class="btn btn-default" ng-click="vm.previewEnabled = !vm.previewEnabled" onclick="this.blur()" ng-model="vm.previewEnabled" bs-checkbox>
-                    <i class="fa" ng-class="{'fa-eye-slash': vm.previewEnabled, 'fa-eye': !vm.previewEnabled}"></i> Preview
-                </button>
-                <button class="btn btn-success" type="submit" ng-click="vm.save()">
+                <button class="btn btn-default" type="submit" ng-click="vm.save()">
                     <span ng-if="::vm.node.newDiscussion">Start Discussion</span>
-                    <span ng-if="::!vm.node.newDiscussion"><i class="fa fa-plus"></i></span>
+                    <span ng-if="::!vm.node.newDiscussion">Respond</span>
                 </button>
             </div>
         </div>

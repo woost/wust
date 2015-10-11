@@ -5,8 +5,5 @@
     </div>
     <div edit-taglist edit-classification="true" tag-type="taglike" set-focus="vm.focusEditTags" tags="vm.node.tags" on-change="vm.node.onChange(type, tag)" ng-class="{'is_invalid': vm.node.triedSave && !vm.node.validity.tags.valid}"></div>
     <div validity-info="vm.node" property="tags"></div>
-    <div ng-switch="vm.previewEnabled" class="description">
-        <div ng-switch-when="true" markdown="vm.node.description"></div>
-        <div ng-switch-default edit-post-description node="vm.node"></div>
-    </div>
+    <div edit-post-description node="vm.node"></div>
 </div>

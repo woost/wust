@@ -1,7 +1,13 @@
 @import "globals";
+@import "compass/css3/flexbox";
 
 .modal_edit {
     .modal-header {
+        .response-header {
+            @include display-flex(flex);
+            @include justify-content(center); // halign
+            @include align-items(center); // valign
+        }
         .reference-node {
             margin-left: 20px;
             width: 200px;
