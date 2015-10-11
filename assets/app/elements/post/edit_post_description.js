@@ -40,8 +40,8 @@ function editPostDescriptionCtrl(DiscourseNode) {
                 // enableLiveAutocompletion: false,
                 fontFamily: "Monospace",
                 fontSize: "16px",
-                maxLines: 20,
-                minLines: 10
+                // maxLines: 20,
+                // minLines: 10
             }
         }
     };

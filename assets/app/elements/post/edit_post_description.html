@@ -1,8 +1,10 @@
-<div ng-switch="vm.previewEnabled || vm.previewHovered" class="description">
-    <div ng-switch-when="true" markdown="vm.node.description"></div>
-    <div ng-switch-default class="edit_post_description_directive" ui-ace="vm.ace.options" placeholder="Any important details?" ng-change="vm.node.onChange()" ng-model="vm.node.description"></div>
-</div>
-<div class="text-right">
-    Format with <a href="https://en.wikipedia.org/wiki/Markdown#Example" target="_blank"><i class="fa fa-markdown"></i>Markdown</a>.
-    <button class="btn btn-xs btn-default" ng-mouseout="vm.previewHovered = false" ng-mouseover="vm.previewHovered = true" ng-click="vm.previewEnabled = !vm.previewEnabled" onclick="this.blur()" ng-model="vm.previewEnabled" bs-checkbox>Preview</button>
+<div class="edit_post_description">
+    <div ng-switch="vm.previewEnabled || vm.previewHovered" class="description">
+        <div ng-switch-when="true" markdown="vm.node.description"></div>
+        <div ng-switch-default ui-ace="vm.ace.options" placeholder="Any important details?" ng-change="vm.node.onChange()" ng-model="vm.node.description"></div>
+    </div>
+    <div class="text-right">
+        Format with <a href="https://en.wikipedia.org/wiki/Markdown#Example" target="_blank"><i class="fa fa-markdown"></i>Markdown</a>.
+        <button class="btn btn-xs btn-default" ng-mouseout="vm.previewHovered = false" ng-mouseover="vm.previewHovered = true" ng-click="vm.previewEnabled = !vm.previewEnabled" onclick="this.blur()" ng-model="vm.previewEnabled" bs-checkbox>Preview</button>
+    </div>
 </div>

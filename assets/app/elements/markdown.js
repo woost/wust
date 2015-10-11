@@ -10,7 +10,8 @@ function markdown() {
     return {
         restrict: "EA",
         //TODO: declare background color in css
-        template: "<div class='well well-sm' style='margin: 0px; background-color:#FBFBFB' ng-bind-html='markdownHTML'></div>",
+        replace: true,
+        template: "<div class='well well-sm' style='margin: 0px; height: 100%; overflow: auto; background-color:#FBFBFB' ng-bind-html='markdownHTML'></div>",
         scope: {
             markdown: "="
         },

@@ -1,4 +1,10 @@
-.edit_post_description_directive {
+.edit_post_description {
+    .description {
+        height: 300px;
+    }
+    .ace_editor {
+        height: 100%;
+    }
     .ace_content {
         padding-top: 10px;
 
