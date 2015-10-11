@@ -7,7 +7,7 @@ import formatters.json.RequestFormat._
 import renesca.parameter.implicits._
 import formatters.json.GraphFormat
 import modules.requests._
-import model.WustSchema._
+import model.WustSchema.{Created => SchemaCreated, _}
 import modules.db.Database.db
 import modules.db.access._
 import modules.db.helpers.{PostHelper,ClassifiedReferences}
@@ -19,9 +19,40 @@ import play.api.mvc.Results._
 import renesca.schema._
 import renesca.Query
 import wust.Shared.tagTitleColor
+import moderation.Moderation
 
+trait ConnectsHelper {
+  protected def canEditConnects(connects: Connects, scopes: Seq[Scope]) = {
+    val startNode = connects.startNodeOpt.get
+    val authorBoost = if (startNode.rev_createds.isEmpty) 0 else Moderation.authorKarmaBoost
+    val voteWeight = Moderation.voteWeightFromScopes(scopes)
+    val applyThreshold = Moderation.postChangeThreshold(startNode.viewCount)
+    Moderation.canApply(voteWeight + authorBoost, applyThreshold)
+  }
 
-trait ConnectsRelationHelper[NODE <: Connectable] {
+  protected def getConnectsWithKarma(user: User, uuid: String) = {
+    implicit val ctx = new QueryContext
+    val userDef = ConcreteNodeDef(user)
+    val postDef = FactoryNodeDef(Post)
+    val createdDef = RelationDef(userDef, SchemaCreated, postDef)
+    val connectsDef = HyperNodeDef(postDef, Connects, FactoryNodeDef(Connectable), Some(uuid))
+    val query = s"""
+    match ${connectsDef.toPattern},
+    (${connectsDef.startName})-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)
+    with distinct connectable, ${connectsDef.startName}, ${connectsDef.startRelationName}, ${connectsDef.name}, ${connectsDef.endRelationName}, ${connectsDef.endName}
+    match ${userDef.toPattern}
+    optional match ${createdDef.toPattern(false, false)}
+    optional match (tag: `${Scope.label}`)-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`)
+    optional match (${userDef.name})-[hasKarma:`${HasKarma.relationType}`]->(tag)
+    return ${connectsDef.startName}, ${connectsDef.startRelationName}, ${connectsDef.name}, ${connectsDef.endRelationName}, ${connectsDef.endName}, ${userDef.name}, ${createdDef.startRelationName}, ${createdDef.name}, ${createdDef.endRelationName}, tag, hasKarma
+    """
+
+    val discourse = Discourse(db.queryGraph(query, ctx.params))
+    (discourse, discourse.connects.find(_.uuid == uuid).get)
+  }
+}
+
+trait ConnectsRelationHelper[NODE <: Connectable] extends ConnectsHelper {
   implicit def format: Format[NODE]
 
   protected def persistRelation(discourse: Discourse, result: NODE, base: Connectable): Result = {
@@ -36,7 +67,8 @@ trait ConnectsRelationHelper[NODE <: Connectable] {
     }
   }
 
-  protected def deleteRelation(discourse: Discourse, relation: Connects): Result = {
+  protected def deleteRelation(relation: Connects): Result = {
+    val discourse = Discourse(relation)
     db.transaction { tx =>
       tx.persistChanges(discourse).map(_ => NoContent) orElse {
         discourse.remove(relation)
@@ -84,7 +116,7 @@ case class StartConnectsAccess() extends StartRelationReadBase[Post, Connects, C
     val node = nodeFactory.matchesOnUuid(otherUuid)
     val relation = factory.matches(base, node)
     val discourse = Discourse(relation)
-    deleteRelation(discourse, relation)
+    deleteRelation(relation)
   }
 }
 
@@ -134,8 +166,7 @@ case class EndConnectsAccess() extends EndRelationReadBase[Post, Connects, Conne
     val base = param.factory.matchesOnUuid(param.baseUuid)
     val node = nodeFactory.matchesOnUuid(otherUuid)
     val relation = factory.matches(node, base)
-    val discourse = Discourse(relation)
-    deleteRelation(discourse, relation)
+    deleteRelation(relation)
   }
 
   override def delete[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Connectable with AbstractRelation[S, E], E], uuid: String) = context.withUser {
@@ -144,12 +175,11 @@ case class EndConnectsAccess() extends EndRelationReadBase[Post, Connects, Conne
     val base = param.factory.matchesMatchableRelation(start, end)
     val node = nodeFactory.matchesOnUuid(uuid)
     val relation = factory.matches(node, base)
-    val discourse = Discourse(base, relation)
-    deleteRelation(discourse, relation)
+    deleteRelation(relation)
   }
 }
 
-case class ConnectsAccess() extends NodeAccessDefault[Connects] {
+case class ConnectsAccess() extends NodeAccessDefault[Connects] with ConnectsHelper {
   val factory = Connects
 
   private def deleteClassificationsFromGraph(discourse: Discourse, request: ConnectsUpdateRequest, node: Connects) {
@@ -172,17 +202,21 @@ case class ConnectsAccess() extends NodeAccessDefault[Connects] {
     import formatters.json.EditNodeFormat._
 
     context.withJson { (request: ConnectsUpdateRequest) =>
-      val node = Connects.matchesOnUuid(uuid)
-      val discourse = Discourse(node)
-      deleteClassificationsFromGraph(discourse, request, node)
-      addClassifcationsToGraph(discourse, request, node)
+      val (discourse, connects) = getConnectsWithKarma(user, uuid)
 
-      db.transaction(_.persistChanges(discourse)) match {
-        case Some(err) => BadRequest(s"Cannot update Connects with uuid '$uuid': $err'")
-        case _         =>
-          val connects = ClassifiedReferences.shapeResponse(node)
-          LiveWebSocket.sendConnectableUpdate(connects)
-          Ok(Json.toJson(connects))
+      if (canEditConnects(connects, discourse.scopes)) {
+        deleteClassificationsFromGraph(discourse, request, connects)
+        addClassifcationsToGraph(discourse, request, connects)
+
+        db.transaction(_.persistChanges(discourse)) match {
+          case Some(err) => BadRequest(s"Cannot update Connects with uuid '$uuid': $err'")
+          case _         =>
+            val connectsWithClass = ClassifiedReferences.shapeResponse(connects)
+            LiveWebSocket.sendConnectableUpdate(connectsWithClass)
+            Ok(Json.toJson(connectsWithClass))
+        }
+      } else {
+        Unauthorized("Not enough karma to edit relation")
       }
     }
   }
