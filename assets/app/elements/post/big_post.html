@@ -15,7 +15,7 @@
             <div show-timestamp="vm.node.timestamp"></div>
         </div>
 
-        <div big-taglist node="vm.node" class="taglist"></div>
+        <div big-taglist node="vm.node"></div>
         <div class="post_description" markdown="vm.node.description" ng-show="vm.node.description"></div>
         <button ng-if="::vm.Auth.isLoggedIn" class="replytool pull-right btn btn-sm btn-default" ng-click='vm.replyTo()' data-title="Respond" bs-tooltip>Respond</button>
     </div>

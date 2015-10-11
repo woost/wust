@@ -1,6 +1,10 @@
 @import "globals";
 
 .big_taglist_directive {
+    .tag-label {
+        display: inline-block;
+        margin-bottom: 5px;
+    }
     .vote_button:hover {
         color: $vote_button_hover_color;
     }
