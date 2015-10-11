@@ -84,6 +84,8 @@ trait ConnectsHelper {
 trait ConnectsRelationHelper[NODE <: Connectable] extends ConnectsHelper {
   implicit def format: Format[NODE]
 
+  protected def forwardPersistRelation(discourse: Discourse, startNode: Post, endNode: Connectable): Result
+
   protected def persistRelation(discourse: Discourse, result: NODE, base: Connectable): Result = {
     db.transaction(_.persistChanges(discourse)).map(err =>
       BadRequest(s"Cannot connect: $err'")
@@ -96,16 +98,33 @@ trait ConnectsRelationHelper[NODE <: Connectable] extends ConnectsHelper {
     }
   }
 
-  protected def deleteRelation(relation: Connects): Result = {
-    val discourse = Discourse(relation)
-    db.transaction { tx =>
-      tx.persistChanges(discourse).map(_ => NoContent) orElse {
-        discourse.remove(relation)
-        tx.persistChanges(discourse)
-      }.map(err => BadRequest(s"Cannot disconnect: $err"))
-    } getOrElse {
-      LiveWebSocket.sendConnectableDelete(relation.uuid)
-      NoContent
+  protected def persistRelationChecked(user: User, start: UuidNodeDef[Post], end: NodeDef[Connectable])(implicit ctx: QueryContext) = {
+    getConnectsWithKarma(user, start, end) match {
+      case (discourse, Some((startNode, endNode))) =>
+        if (canEditConnects(startNode, discourse.scopes)) {
+          discourse.add(Connects.merge(startNode, endNode))
+          forwardPersistRelation(discourse, startNode, endNode)
+        } else {
+          Unauthorized("Not enough karma to connect node")
+        }
+      case _ => BadRequest("Could not find nodes to connect")
+    }
+  }
+
+  protected def deleteRelationChecked(user: User, start: UuidNodeDef[Post], end: NodeDef[Connectable])(implicit ctx: QueryContext): Result = {
+    val relationDef = RelationDef(start, Connects, end)
+    getConnectsWithKarma(user, relationDef) match {
+      case (discourse, Some(connects)) =>
+        if (canEditConnects(connects.startNodeOpt.get, discourse.scopes)) {
+          discourse.remove(connects)
+          db.transaction(_.persistChanges(discourse)).map(err => BadRequest(s"Cannot disconnect: $err")).getOrElse {
+            LiveWebSocket.sendConnectableDelete(connects.uuid)
+            NoContent
+          }
+        } else {
+          Unauthorized("Not enough karma to disconnect node")
+        }
+      case _ => NoContent
     }
   }
 
@@ -131,24 +150,12 @@ case class StartConnectsAccess() extends StartRelationReadBase[Post, Connects, C
     persistRelation(discourse, node, base)
   }
 
-  private def persistRelationChecked(user: User, start: UuidNodeDef[Post], end: NodeDef[Connectable])(implicit ctx: QueryContext) = {
-    getConnectsWithKarma(user, start, end) match {
-      case (discourse, Some((startNode, endNode))) =>
-        if (canEditConnects(startNode, discourse.scopes)) {
-          discourse.add(factory.merge(startNode, endNode))
-          persistRelation(discourse, endNode, startNode)
-        } else {
-          Unauthorized("Not enough karma to connect node")
-        }
-      case _ => BadRequest("Could not find nodes to connect")
-    }
-  }
+  protected def forwardPersistRelation(discourse: Discourse, startNode: Post, endNode: Connectable): Result = persistRelation(discourse, endNode, startNode)
 
-  private def createRelationChecked(context: RequestContext, param: ConnectParameter[Post], uuid: String) = context.withUser { user =>
-    implicit val ctx = new QueryContext
+  private def neighbourDefs(param: ConnectParameter[Post], uuid: String)(implicit ctx: QueryContext) = {
     val node = FactoryUuidNodeDef(nodeFactory, uuid)
     val base = FactoryUuidNodeDef(param.factory, param.baseUuid)
-    persistRelationChecked(user, base, node)
+    (base, node)
   }
 
   override def create(context: RequestContext, param: ConnectParameter[Post]) = createPost(context) match {
@@ -156,14 +163,16 @@ case class StartConnectsAccess() extends StartRelationReadBase[Post, Connects, C
     case Right(discourse) => createRelation(context, param, discourse)
   }
 
-  override def create(context: RequestContext, param: ConnectParameter[Post], uuid: String) = createRelationChecked(context, param, uuid)
+  override def create(context: RequestContext, param: ConnectParameter[Post], uuid: String) = context.withUser { user =>
+    implicit val ctx = new QueryContext
+    val (start, end) = neighbourDefs(param, uuid)
+    persistRelationChecked(user, start, end)
+  }
 
-  override def delete(context: RequestContext, param: ConnectParameter[Post], otherUuid: String) = context.withUser {
-    val base = param.factory.matchesOnUuid(param.baseUuid)
-    val node = nodeFactory.matchesOnUuid(otherUuid)
-    val relation = factory.matches(base, node)
-    val discourse = Discourse(relation)
-    deleteRelation(relation)
+  override def delete(context: RequestContext, param: ConnectParameter[Post], uuid: String) = context.withUser { user =>
+    implicit val ctx = new QueryContext
+    val (start, end) = neighbourDefs(param, uuid)
+    deleteRelationChecked(user, start, end)
   }
 }
 
@@ -191,33 +200,20 @@ case class EndConnectsAccess() extends EndRelationReadBase[Post, Connects, Conne
     persistRelation(discourse, node, base)
   }
 
-  private def persistRelationChecked(user: User, start: UuidNodeDef[Post], end: NodeDef[Connectable])(implicit ctx: QueryContext) = {
-    getConnectsWithKarma(user, start, end) match {
-      case (discourse, Some((startNode, endNode))) =>
-        if (canEditConnects(startNode, discourse.scopes)) {
-          discourse.add(factory.merge(startNode, endNode))
-          persistRelation(discourse, startNode, endNode)
-        } else {
-          Unauthorized("Not enough karma to connect node")
-        }
-      case _ => BadRequest("Could not find nodes to connect")
-    }
-  }
+  protected def forwardPersistRelation(discourse: Discourse, startNode: Post, endNode: Connectable): Result = persistRelation(discourse, startNode, endNode)
 
-  private def createRelationChecked(context: RequestContext, param: ConnectParameter[Connectable], uuid: String) = context.withUser { user =>
-    implicit val ctx = new QueryContext
+  private def neighbourDefs(param: ConnectParameter[Connectable], uuid: String)(implicit ctx: QueryContext) = {
     val node = FactoryUuidNodeDef(nodeFactory, uuid)
     val base = FactoryUuidNodeDef(param.factory, param.baseUuid)
-    persistRelationChecked(user, node, base)
+    (node, base)
   }
 
-  private def createRelationChecked[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Connectable with AbstractRelation[S, E], E], uuid: String) = context.withUser { user =>
-    implicit val ctx = new QueryContext
+  private def neighbourDefs[S <: UuidNode, E <: UuidNode](param: HyperConnectParameter[S, Connectable with AbstractRelation[S, E], E], uuid: String)(implicit ctx: QueryContext) = {
     val start = FactoryUuidNodeDef(param.startFactory, param.startUuid)
     val end = FactoryUuidNodeDef(param.endFactory, param.endUuid)
     val node = FactoryUuidNodeDef(nodeFactory, uuid)
     val base = HyperNodeDef(start, param.factory, end)
-    persistRelationChecked(user, node, base)
+    (node, base)
   }
 
   override def create(context: RequestContext, param: ConnectParameter[Connectable]) = createPost(context) match {
@@ -230,24 +226,28 @@ case class EndConnectsAccess() extends EndRelationReadBase[Post, Connects, Conne
     case Right(discourse) => createRelation(context, param, discourse)
   }
 
-  override def create(context: RequestContext, param: ConnectParameter[Connectable], uuid: String) = createRelationChecked(context, param, uuid)
-
-  override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Connectable with AbstractRelation[S, E], E], uuid: String) = createRelationChecked(context, param, uuid)
-
-  override def delete(context: RequestContext, param: ConnectParameter[Connectable], otherUuid: String) = context.withUser {
-    val base = param.factory.matchesOnUuid(param.baseUuid)
-    val node = nodeFactory.matchesOnUuid(otherUuid)
-    val relation = factory.matches(node, base)
-    deleteRelation(relation)
+  override def create(context: RequestContext, param: ConnectParameter[Connectable], uuid: String) = context.withUser { user =>
+    implicit val ctx = new QueryContext
+    val (start, end) = neighbourDefs(param, uuid)
+    persistRelationChecked(user, start, end)
   }
 
-  override def delete[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Connectable with AbstractRelation[S, E], E], uuid: String) = context.withUser {
-    val start = param.startFactory.matchesOnUuid(param.startUuid)
-    val end = param.endFactory.matchesOnUuid(param.endUuid)
-    val base = param.factory.matchesMatchableRelation(start, end)
-    val node = nodeFactory.matchesOnUuid(uuid)
-    val relation = factory.matches(node, base)
-    deleteRelation(relation)
+  override def create[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Connectable with AbstractRelation[S, E], E], uuid: String) = context.withUser { user =>
+    implicit val ctx = new QueryContext
+    val (start, end) = neighbourDefs(param, uuid)
+    persistRelationChecked(user, start, end)
+  }
+
+  override def delete(context: RequestContext, param: ConnectParameter[Connectable], uuid: String) = context.withUser { user =>
+    implicit val ctx = new QueryContext
+    val (start, end) = neighbourDefs(param, uuid)
+    deleteRelationChecked(user, start, end)
+  }
+
+  override def delete[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Connectable with AbstractRelation[S, E], E], uuid: String) = context.withUser { user =>
+    implicit val ctx = new QueryContext
+    val (start, end) = neighbourDefs(param, uuid)
+    deleteRelationChecked(user, start, end)
   }
 }
 
