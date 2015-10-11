@@ -123,7 +123,7 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
             return dirtyModel;
         }
 
-        save() {
+        save(keepNode = false) {
             let dirtyModel = this.dirtyModel();
             this.setValidityProperties(dirtyModel);
             this.triedSave = true;
@@ -177,6 +177,7 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
                     HistoryService.updateCurrentView(this.encode());
                 }
 
+                this.visible = keepNode || this.visible;
                 if (!this.visible) {
                     _.remove(self.list, this);
                 }

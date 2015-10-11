@@ -42,7 +42,7 @@ function collapseEditPostCtrl(Auth) {
             vm.tagSearch = "";
         }
 
-        vm.node.save();
+        vm.node.save(true);
     }
 
     function editableChange(data) {
