@@ -1379,7 +1379,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                                 connects.startNode = startNode;
                                 connects.endNode = endNode;
                                 TagRelationEditService.show(connects, () => this.disconnectHyperRelation(connects), true);
-                            });
+                            }, response => humane.error(response.$response.data));
                         }
                     }
                 }
