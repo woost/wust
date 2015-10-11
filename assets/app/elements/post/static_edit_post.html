@@ -6,9 +6,9 @@
     </div>
     <div class="edit-area" edit-post preview-enabled="vm.previewEnabled" node="vm.editNode"></div>
     <progressbar max="vm.node.postChangeThreshold" type="success" value="vm.editWeight">
-    <span style="color:black; white-space:nowrap; padding-left: 5px;" ng-switch="vm.canApply">
-        <span ng-switch-when="true">You have enough Karma. This change will be applied instantly.</span>
-        <span ng-switch-default>This will become a change request, starting with {{vm.editWeight}} of {{vm.node.postChangeThreshold}} Votes.</span>
-    </span>
+        <span style="color:black; white-space:nowrap; padding-left: 5px;" ng-switch="vm.canApply">
+            <span ng-switch-when="true">You have enough Karma. This change will be applied instantly.</span>
+            <span ng-switch-default>This will become a change request, starting with {{vm.editWeight}} of {{vm.node.postChangeThreshold}} Votes.</span>
+        </span>
     </progressbar>
 </div>
