@@ -40,8 +40,7 @@ trait ConnectsHelper {
     match ${userDef.toPattern}
     match ${endDef.toPattern}
     optional match ${createdDef.toPattern(false, false)}
-    optional match (tag: `${Scope.label}`)-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`)
-    optional match (${userDef.name})-[hasKarma:`${HasKarma.relationType}`]->(tag)
+    optional match (tag: `${Scope.label}`)-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`), (${userDef.name})-[hasKarma:`${HasKarma.relationType}`]->(tag)
     return ${startDef.name}, ${endDef.name}, ${userDef.name}, ${createdDef.startRelationName}, ${createdDef.name}, ${createdDef.endRelationName}, tag, hasKarma
     """
 
@@ -61,12 +60,14 @@ trait ConnectsHelper {
     with distinct connectable, ${connectsDef.startName}, ${connectsDef.startRelationName}, ${connectsDef.name}, ${connectsDef.endRelationName}, ${connectsDef.endName}
     match ${userDef.toPattern}
     optional match ${createdDef.toPattern(false, false)}
-    optional match (tag: `${Scope.label}`)-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`)
-    optional match (${userDef.name})-[hasKarma:`${HasKarma.relationType}`]->(tag)
+    optional match (tag: `${Scope.label}`)-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`), (${userDef.name})-[hasKarma:`${HasKarma.relationType}`]->(tag)
     return ${connectsDef.startName}, ${connectsDef.startRelationName}, ${connectsDef.name}, ${connectsDef.endRelationName}, ${connectsDef.endName}, ${userDef.name}, ${createdDef.startRelationName}, ${createdDef.name}, ${createdDef.endRelationName}, tag, hasKarma
     """
 
     val discourse = Discourse(db.queryGraph(query, ctx.params))
+    println(discourse)
+    println(discourse.connects)
+    println(discourse.connects.map(c => c.startNodeOpt.toString + c.endNodeOpt.toString))
     (discourse, discourse.connects.find(c => c.startNodeOpt.isDefined && c.endNodeOpt.isDefined))
   }
 }
