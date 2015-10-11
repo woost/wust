@@ -26,11 +26,12 @@ function scratchpadCtrl($state, $stateParams, HistoryService, Session, EditServi
     });
 
     vm.sidebar = SidebarService;
-    vm.editList = EditService.list;
+    vm.editServiceList = EditService.list;
+    vm.editedList = EditService.editedList;
+    vm.scratchList = EditService.scratchList;
     vm.edit = EditService.edit;
     vm.editNewPost = editNewPost;
     vm.loadGraph = loadGraph;
-    vm.options = EditService.scratchpad;
     vm.scratchpadNodes = scratchpadNodes;
     vm.selectedTags = [];
 
@@ -39,22 +40,21 @@ function scratchpadCtrl($state, $stateParams, HistoryService, Session, EditServi
     };
 
     function scratchpadNodes() {
-        return vm.editList.filter(s => s.visible);
+        return vm.scratchList().filter(s => !s.isLocal);
     }
 
     function loadGraph() {
-        vm.options.showEdits = false;
         let scratchNodes = scratchpadNodes();
         if (_.isEmpty(scratchNodes))
             return;
 
-        if ($state.is("focus", { id: $stateParams.id, type: "graph" })) {
-            loadIntoGraph(scratchNodes);
-        } else {
+        // if ($state.is("focus", { id: $stateParams.id, type: "graph" })) {
+        //     loadIntoGraph(scratchNodes);
+        // } else {
             let firstNode = scratchNodes[0];
             let restNodes = scratchNodes.slice(1, scratchNodes.length);
             $state.go("focus", { id: firstNode.id, type: "graph" }).then(() => loadIntoGraph(restNodes));
-        }
+        // }
 
         function loadIntoGraph(nodes) {
             $q.all(scratchNodes.map(node => ConnectedComponents.$find(node.id, {depth: 1}).$asPromise())).then(results => {

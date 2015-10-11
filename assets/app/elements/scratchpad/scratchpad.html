@@ -1,22 +1,39 @@
 <div id="scratchpad_component">
     <button type="button" class="btn btn-default fa fa-arrows-alt pull-right" onclick="this.blur()" ng-model="vm.sidebar.left.fullscreen" bs-checkbox data-title="Toggle fullscreen" bs-tooltip placement="bottom"></button>
-    <div class="pull-right btn-group-vertical">
-        <button class="btn btn-xs btn-default" onclick="this.blur()" ng-model="vm.options.showEdits" bs-checkbox>Edits</button>
-        <button class="btn btn-xs btn-default" ng-click="vm.loadGraph()" ng-disabled="scratchpadNodes.length === 0">Graph</button>
-    </div>
+    <div tabset class="tabs-above">
+        <div tab>
+            <div tab-heading>
+                Scratchpad
+            </div>
+            <div class="tab_body">
+                <button class="graph_button pull-right btn btn-default" ng-click="vm.loadGraph()" ng-disabled="scratchpadNodes.length === 0">Load Graph</button>
 
-    <form ng-submit="vm.options.showEdits = false; vm.editNewPost()" class="new_post_title">
-        <input class="form-control" ng-model="vm.newPost.title" placeholder="Summary">
-    </form>
+                <form ng-submit="vm.editNewPost()" class="new_post_title">
+                    <input class="form-control" ng-model="vm.newPost.title" placeholder="Summary">
+                </form>
 
-    <div edit-taglist class="edit_tags" tag-type="taglike" tags="vm.selectedTags"></div>
-
-    <div id="edit_list">
-        <div ng-repeat="node in vm.editList | scratchfilter:vm.options.showEdits track by node.localId" class="ng-trans ng-trans-scale-up ease">
-            <div class="drop_post_container" drop-channel="{{vm.options.showEdits ? '' : 'node,scratch_node,scratch_move'}}" ui-on-Drop="vm.edit($data, true, vm.editList.indexOf(node))">
-                <div collapse-edit-post node="node"></div>
+                <div edit-taglist class="edit_tags" tag-type="taglike" tags="vm.selectedTags"></div>
+                <div class="edit_list">
+                    <div ng-repeat="node in vm.scratchList() track by node.localId" class="ng-trans ng-trans-scale-up ease">
+                        <div class="drop_post_container" drop-channel="node,scratch_node,scratch_move" ui-on-Drop="vm.edit($data, true, vm.editServiceList.indexOf(node))">
+                            <div collapse-edit-post node="node"></div>
+                        </div>
+                    </div>
+                    <div id="scratch_end_drop_post_container" class="drop_post_container" drop-channel="node" ui-on-Drop="vm.edit($data, true, vm.editServiceList.length)"></div>
+                </div>
             </div>
         </div>
-        <div ng-if="!vm.options.showEdits" id="scratch_end_drop_post_container" class="drop_post_container" drop-channel="node" ui-on-Drop="vm.edit($data, true, vm.editList.length)">
+        <div tab>
+            <div tab-heading>
+                Edited posts
+            </div>
+            <div class="tab_body">
+                <div class="edit_list">
+                    <div ng-repeat="node in vm.editedList() track by node.localId" class="ng-trans ng-trans-scale-up ease">
+                        <div collapse-edit-post node="node"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

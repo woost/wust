@@ -4,16 +4,22 @@
     height: 100%;
     padding: 5px;
     .new_post_title {
-        padding-top: 3px;
+        padding: 3px;
         width: 280px;
-    }
-    .edit_tags {
-        width: 360px;
-        padding-top: 20px;
-        padding-left: 10px;
+        padding-bottom: 10px;
         padding-right: 10px;
     }
-    #edit_list {
+    .edit_tags {
+        padding: 3px;
+        width: 360px;
+    }
+    .graph_button {
+        margin-top: 3px;
+    }
+    .tab_body {
+        padding-top: 5px;
+    }
+    .edit_list {
         @include display-flex(flex);
         @include flex-direction(row);
         @include align-items(flex-start);

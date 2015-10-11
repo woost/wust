@@ -326,9 +326,8 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
     this.persist = storeEditList;
     this.forget = clearEditList;
     this.connectNodes = connectNodes;
-    this.scratchpad = {
-        showEdits: false
-    };
+    this.editedList = () => this.list.filter(s => !s.visible && !s.isPristine);
+    this.scratchList = () => this.list.filter(s => s.visible);
 
     function restoreEditList() {
         //compact if something is really wrong and we have nulls in the localstorage. be forgiving.
