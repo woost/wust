@@ -271,7 +271,7 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
                 this.validity.title = ValidityEntry("Title may not be empty", !_.isEmpty(this.title))
                                         .and(ValidityEntry("Title must be less than 140 characters", this.title.length <= 140));
 
-                if (this.newDiscussion) {
+                if (this.referenceNode === undefined) {
                     this.validity.tags = ValidityEntry("New discussion needs context", !_.isEmpty(this.tags.filter(t => t.isContext)));
                 }
             }
