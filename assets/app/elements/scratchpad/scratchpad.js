@@ -42,6 +42,7 @@ function scratchpadCtrl($state, $stateParams, HistoryService, Session, EditServi
     }
 
     function loadGraph() {
+        vm.options.showEdits = false;
         let scratchNodes = scratchpadNodes();
         if (_.isEmpty(scratchNodes))
             return;
