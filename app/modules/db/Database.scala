@@ -156,7 +156,8 @@ optional match (context:`${ Scope.label }`)-[contexttotags:`${ Tags.startRelatio
 optional match (classification:`${ Classification.label }`)-[classifies:`${ Classifies.relationType }`]->(connectable:`${ Connects.label }`)
 optional match (tagclassification:`${ Classification.label }`)-[tagclassifies:`${ Classifies.relationType }`]->(tags)
 optional match (:`${ User.label }` {uuid: {useruuid}})-[selfanswervoted :`${ Votes.relationType }`]->(connectable:`${ Connects.label }`)
-return connectable,connects,context,tags,contexttotags,tagstopost, classification, classifies, count(selfanswervoted) as selfanswervotecount,tagclassification,tagclassifies
+optional match (author:`${ User.label }`)-[authorStart :`${ Created.startRelationType }`]->(created:`${ Created.label }`)-[authorEnd: `${ Created.endRelationType }`]->(connectable:`${Post.label}`)
+return connectable,connects,context,tags,contexttotags,tagstopost, classification, classifies, count(selfanswervoted) as selfanswervotecount,tagclassification,tagclassifies, author, authorStart, created, authorEnd
     """
 
     val useruuid = identity.map(_.uuid).getOrElse("") //TODO: do not write empty string into query

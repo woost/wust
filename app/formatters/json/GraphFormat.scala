@@ -8,6 +8,7 @@ import renesca.graph.{Label, RelationType}
 import renesca.schema._
 import renesca.parameter._
 import renesca.parameter.implicits._
+import formatters.json.UserFormat
 
 object GraphFormat {
   implicit def LabelToString(label: Label): String = label.name
@@ -56,6 +57,7 @@ object GraphFormat {
       ("description", JsString(post.description.getOrElse(""))),
       ("tags", Json.toJson(post.inRelationsAs(Tags))),
       ("timestamp", Json.toJson(JsNumber(post.timestamp))),
+      ("author", post.rev_createds.headOption.map(u => UserFormat.UserFormat.writes(u)).getOrElse(JsNull)),
       ("viewcount", JsNumber(post.viewCount))
     ))
   }
