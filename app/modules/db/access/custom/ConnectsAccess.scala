@@ -46,17 +46,10 @@ trait ConnectsHelper {
     """
 
     val discourse = Discourse(db.queryGraph(query, ctx.params))
-    if (discourse.nodes.isEmpty)
-      (discourse, None)
-    else {
-      val post = discourse.posts.find(_.uuid == startDef.uuid).get
-      val connectable = endDef match {
-        case n:UuidNodeDef[_] => discourse.connectables.find(_.uuid == n.uuid).get
-        case n:HyperNodeDef[_,_,_,_,_] => discourse.connects.head
-      }
-
-      (discourse, Some((post, connectable)))
-    }
+    val postConnOpt = discourse.posts.find(_.uuid == startDef.uuid).flatMap(post => {
+      discourse.connectables.find(_.uuid != startDef.uuid).map(conn => (post, conn))
+    })
+    (discourse, postConnOpt)
   }
 
   protected def getConnectsWithKarma(user: User, connectsDef: NodeRelationDef[Post, Connects, Connectable])(implicit ctx: QueryContext): (Discourse, Option[Connects]) = {
@@ -74,10 +67,7 @@ trait ConnectsHelper {
     """
 
     val discourse = Discourse(db.queryGraph(query, ctx.params))
-    if (discourse.nodes.isEmpty)
-      (discourse, None)
-    else
-      (discourse, Some((discourse.connects.find(c => c.startNodeOpt.isDefined && c.endNodeOpt.isDefined).get)))
+    (discourse, discourse.connects.find(c => c.startNodeOpt.isDefined && c.endNodeOpt.isDefined))
   }
 }
 
