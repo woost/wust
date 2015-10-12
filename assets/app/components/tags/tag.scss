@@ -1,13 +1,16 @@
+@import "globals";
 @import "compass/css3/flexbox";
 
 #tag_component {
     height: 100%;
+    padding: 0px;
     @include flex-direction(columns);
     @include display-flex(flex);
     .search_box {
         padding-bottom: 10px;
     }
     #tag_list_box {
+        border-right: $taglist_border;
         padding-right: 10px;
         width: 350px;
         height: 100%;
