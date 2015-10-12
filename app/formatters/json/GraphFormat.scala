@@ -8,7 +8,6 @@ import renesca.graph.{Label, RelationType}
 import renesca.schema._
 import renesca.parameter._
 import renesca.parameter.implicits._
-import formatters.json.UserFormat
 
 object GraphFormat {
   implicit def LabelToString(label: Label): String = label.name
