@@ -122,7 +122,7 @@ object Search extends Controller {
           val (askedContextDef, inheritedContextDef) = matchInheritedContexts(contextsAll, "contextsAllUuids")
           val tagsDef = RelationDef(inheritedContextDef, SchemaTags, nodeDef)
           postMatches += s"""match ${ tagsDef.toPattern(false) }"""
-          lastWiths += s"""count(distinct ${askedContextDef.name}) as contextsAllMatchCount, ${tagsDef.name} as contextsAllTags"""
+          lastWiths += s"""count(distinct ${askedContextDef.name}) as contextsAllMatchCount, collect(${tagsDef.name}) as contextsAllTagsColl"""
           lastConditions += s"""contextsAllMatchCount >= {contextsAllCount}"""
           params += ("contextsAllCount" -> contextsAll.size)
         }
@@ -171,7 +171,7 @@ object Search extends Controller {
       }.getOrElse("")
       val returnStatement = if (contextsAll.nonEmpty && sortByQuality)
         s"""
-        with min(contextsAllTags.voteCount) as tagVoteCount, ${ nodeDef.name } order by ${Moderation.postQualityString("tagVoteCount", nodeDef.name + ".viewCount")} desc $returnPostfix
+        with unwind contextsAllTagsColl as contextsAllTags, min(contextsAllTags.voteCount) as tagVoteCount, ${ nodeDef.name } order by ${Moderation.postQualityString("tagVoteCount", nodeDef.name + ".viewCount")} desc $returnPostfix
         return ${nodeDef.name}
         """
       else
