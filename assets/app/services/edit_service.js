@@ -202,6 +202,7 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
         encode() {
             let encoded = _.pick(this, _.keys(this.original));
             encoded.id = this.id;
+            encoded.localId = this.localId;
             return encoded;
         }
 
