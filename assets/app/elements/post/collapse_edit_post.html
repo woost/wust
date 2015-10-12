@@ -25,7 +25,7 @@
                 <label>Replies to</label>
                 <span small-post node="vm.node.referenceNode"></span>
             </div>
-            <div edit-taglist edit-classification="true" tag-type="taglike" tags="vm.node.tags" set-focus="vm.focusEditTags" on-change="vm.node.onChange(type,tag)"></div>
+            <div edit-taglist edit-classification="true" tag-type="taglike" tags="vm.node.tags" set-focus="vm.focusEditTags" on-change="vm.node.onChange(type,tag)" ng-class="{'is_invalid': vm.node.triedSave && !vm.node.validity.tags.valid}"></div>
             <div validity-info="vm.node" property="tags"></div>
             <div edit-post-description node="vm.node"></div>
             <button class="pull-left btn btn-xs btn-danger" ng-click="vm.node.deleteNode();" ng-disabled="vm.node.isLocal" data-title="Delete" bs-tooltip><i class="fa fa-trash-o"></i></button>
