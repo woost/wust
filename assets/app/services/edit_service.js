@@ -21,6 +21,7 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
             this.startId = other.startId;
             this.endId = other.endId;
             this.triedSave = !!other.triedSave;
+            this.isSaving = false;
 
             this.referenceNode = other.referenceNode;
 
@@ -130,9 +131,7 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
             if (!this.canSave)
                 return false;
 
-            // we do this in order to disable the form until we saved the node.
-            this.unsetValidityProperties();
-
+            this.isSaving = true;
             let model = _.pick(this, "id");
 
             let referenceNode = this.referenceNode;
@@ -144,6 +143,7 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
             }
 
             promise.$then(response => {
+                this.isSaving = false;
                 this.triedSave = false;
                 let data = referenceNode ? response.node : response;
 
@@ -187,6 +187,7 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
 
             }, response => {
                 humane.error(response.$response.data);
+                this.isSaving = false;
                 this.setValidityProperties();
             });
 

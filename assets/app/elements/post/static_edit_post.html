@@ -1,6 +1,6 @@
 <div class="static_edit_post_directive">
     <div class="buttons">
-        <button class="btn btn-sm btn-default pull-right" ng-click="vm.saveNode()" ng-disabled="vm.editNode.isPristine" data-title="Save" bs-tooltip>Save</button>
+        <button class="btn btn-sm btn-default pull-right" ng-click="vm.saveNode()" ng-disabled="vm.editNode.isPristine || vm.editNode.isSaving" data-title="Save" bs-tooltip>Save</button>
         <button class="btn btn-sm btn-default pull-right button-margin-right" ng-click="vm.onCancel()">Cancel</button>
         <button class="btn btn-sm btn-danger" ng-click="vm.deleteNode()" ng-hide="vm.editNode.isLocal" data-title="Delete" bs-tooltip><i class="fa fa-trash-o"></i></button>
     </div>
