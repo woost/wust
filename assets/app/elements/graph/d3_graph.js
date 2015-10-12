@@ -564,16 +564,13 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             let sum = this.graph.nodes.map(n => n.rootiness).reduce((a,b) => a + b);
             let count = this.graph.nodes.length;
             let avg = sum / count;
-            this.graph.nodes.forEach((n) => {
-                n.rootiness -= avg; // center around 0
-            });
+            this.graph.nodes.forEach(n => n.rootiness -= avg); // center around 0
             max -= avg;
             min -= avg;
-            let dist = Math.max(Math.abs(max), Math.abs(min));
 
-            this.graph.nodes.forEach((n) => {
-                n.rootiness = n.rootiness / dist; // [-1, 1]
-            });
+            let dist = Math.max(Math.abs(max), Math.abs(min));
+            if( dist > 0)
+                this.graph.nodes.forEach(n => n.rootiness = n.rootiness / dist); // [-1, 1]
         }
 
         converge(onConvergeFinish = _.noop) {
@@ -795,7 +792,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 // when cut is not defined, the nodes are overlapping.
                 // clamped is the line that is covered by the intersection of the nodes
                 // the length is negative to push the nodes away from each other
-                let clamped = line.clampBy(sourceRect).clampBy(targetRect);
+                let clamped = this.clampByRects(line, sourceRect, targetRect);
                 return [geometry.Line(clamped.end, clamped.start), -clamped.length];
             }
         }
@@ -922,6 +919,12 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
         cutByRects(line, rect1, rect2) {
             let cut = line.cutBy(rect1);
             cut = cut ? cut.cutBy(rect2) : undefined;
+            return cut;
+        }
+
+        clampByRects(line, rect1, rect2) {
+            let cut = line.clampBy(rect1);
+            cut = cut ? cut.clampBy(rect2) : undefined;
             return cut;
         }
 
