@@ -36,7 +36,7 @@ function contenteditable() {
         };
 
         element.bind("blur keyup change", function() {
-            scope.$apply(() => ngModel.$setViewValue(element.text()));
+            ngModel.$setViewValue(element.text());
         });
     }
   };
