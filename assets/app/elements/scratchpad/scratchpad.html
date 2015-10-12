@@ -6,7 +6,7 @@
                 Scratchpad
             </div>
             <div class="tab_body">
-                <button class="graph_button pull-right btn btn-default" ng-click="vm.loadGraph()" ng-disabled="scratchpadNodes.length === 0">Load Graph</button>
+                <button class="graph_button pull-right btn btn-default" ng-click="vm.loadGraph()" ng-disabled="vm.scratchpadNodes().length === 0">Load Graph</button>
 
                 <form ng-submit="vm.editNewPost()" class="new_post_title">
                     <input class="form-control" ng-model="vm.newPost.title" placeholder="Summary">
