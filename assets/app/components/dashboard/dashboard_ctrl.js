@@ -20,7 +20,7 @@ function DashboardCtrl(StreamService, ContextService, $scope) {
     };
 
     function acceptDrop(sourceItemHandleScope, destSortableScope, destItemScope) {
-        return sourceItemHandleScope.$parent.$parent.$id === destSortableScope.$id;
+        return destItemScope !== undefined && sourceItemHandleScope.$parent.$parent.$id === destSortableScope.$id;
     }
 
     function newStream() {
