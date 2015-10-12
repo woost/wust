@@ -27,6 +27,7 @@ function TagDetailsCtrl($stateParams, Scope, Search, DiscourseNode, StreamServic
     vm.contributions = Search.$search({
         label: DiscourseNode.Post.label,
         tagsAll: [$stateParams.id],
+        sortOrder: wust.SortOrder().QUALITY,
         page: postPage,
         size: postSize
     });
