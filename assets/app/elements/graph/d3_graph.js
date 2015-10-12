@@ -21,6 +21,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.onDraw = onDraw;
 
                 // settings
+                this.nodeClickAction = d => this.focusNode(d);
+                this.nodeLongPressAction = d => this.setStickyPreview(d);
                 this.stopForceOnPan = true;
                 this.stopForceAfterNodeDrag = true;
                 this.connectorLineOvershoot = 0;
@@ -31,6 +33,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.dragHyperRelations = false;
                 this.fixRootNodeAfterConverge = false;
                 this.focusRootNodeAfterConverge = true;
+                this.longPressTime = 500;
 
                 // Simulation settings
                 this.width = rootDomElement.offsetWidth;
@@ -62,6 +65,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.hoveredNode = undefined;
                 this.stickyPreview = undefined;
                 this.dragInitiated = false; // if dragStart was triggered with the correct mouse button
+                this.longPressTimer = undefined;
                 this.commitCount = 0;
                 this.displayed = $q.defer();
                 this.gotAllInitialData = $q.defer();
@@ -349,10 +353,10 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.d3NodeTools = this.d3NodeContainerWithData.append("div")
                     .attr("class", "nodetools");
 
-                this.d3NodeFocusTool = this.d3NodeTools.append("div")
-                    .attr("class", "nodetool focustool icon-dot-circled")
-                    .attr("title", "Focus Node")
-                    .style("display", d => (d.isHyperRelation) ? "none" : "inline-block");
+                // this.d3NodeFocusTool = this.d3NodeTools.append("div")
+                //     .attr("class", "nodetool focustool icon-dot-circled")
+                //     .attr("title", "Focus Node")
+                //     .style("display", d => (d.isHyperRelation || ) ? "none" : "inline-block");
 
                 this.d3NodeReplyTool = this.d3NodeTools.append("div")
                     .attr("class", "nodetool replytool fa fa-plus")
@@ -372,7 +376,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
                 this.d3NodePinTool = this.d3NodeTools.append("div")
                     .attr("class", "nodetool pintool fa fa-thumb-tack")
-                    .attr("title", "Toggle Stickiness")
+                    .attr("title", "Pin (stop moving)")
                     .style("display", d => (d.isHyperRelation && !this.dragHyperRelations) ? "none" : "inline-block");
 
 
@@ -394,7 +398,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.force.nodes(this.graph.nodes); // nodes and relations get replaced instead of just changed by scalajs
                 this.force.links(this.graph.relations); // that's why we need to set the new references
 
-                // reinitialize the simulation, because we changes nodes and relations
+                // reinitialize the simulation, because we change nodes and relations
                 // https://github.com/mbostock/d3/blob/78e0a4bb81a6565bf61e3ef1b898ef8377478766/src/layout/force.js#L274
                 this.force.start();
 
@@ -495,7 +499,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
             this.d3Node.call(this.dragMove);
             this.d3Node.on("dblclick", this.loadMoreNodes.bind(this));
-            this.d3NodeFocusTool.on("click", this.stopPropagationAfter(this.focusNode.bind(this))).call(this.disableDrag);
+            // this.d3NodeFocusTool.on("click", this.stopPropagationAfter(this.focusNode.bind(this))).call(this.disableDrag);
             this.d3NodePinTool.on("click", this.stopPropagationAfter(this.toggleFixed.bind(this))).call(this.disableDrag);
             this.d3NodeConnectTool.call(this.dragConnect);
             this.d3NodeEditTool.on("click", this.stopPropagationAfter(this.editNode.bind(this))).call(this.disableDrag);
@@ -1248,6 +1252,13 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
         //TODO: rename d to something meaningful in all d3 code
         onDragMoveStart(d) {
+            clearTimeout(this.longPressTimer);
+            this.longPressTimer = undefined;
+            this.longPressTimer = setTimeout(() => {
+                clearTimeout(this.longPressTimer);
+                this.longPressTimer = undefined;
+                this.nodeLongPressAction(d);
+            }, this.longPressTime);
             this.onDragStartInit(d);
 
             d.fixed |= 2; // copied from force.drag
@@ -1427,8 +1438,11 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 // if we were dragging before, the node should be fixed
                 this.setFixed(d);
             } else {
-                // onClick event on node is triggered here
-                this.setStickyPreview(d);
+                // if the longPressTimer is still active
+                // and the longPressAction is not triggered yet
+                if( this.longPressTimer )
+                    this.nodeClickAction(d);
+
 
                 // if the user just clicked, the position should be reset.
                 // unsetFixed(graph, force, d);
