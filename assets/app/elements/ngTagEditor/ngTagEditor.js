@@ -12,8 +12,7 @@ angular.module("wust.elements").directive("tagEditor", function() {
                 emptyShow: "@",
                 editClassification: "@",
                 placeholder: "@",
-                embedSuggestions: "@",
-                dualSuggestions: "@"
+                embedSuggestions: "@"
             },
             templateUrl: "elements/ngTagEditor/ngTagEditor.html",
             controller: ["$scope", "$attrs", "$element", "$filter",
@@ -21,6 +20,16 @@ angular.module("wust.elements").directive("tagEditor", function() {
                     $scope.focus = false;
                     $scope.suggestions = [];
                     $scope.search = $scope.search || "";
+                    if ($scope.embedSuggestions) {
+                        $scope.suggestionLimit = 20;
+                    } else {
+                        $scope.$watch("focus", function(value) {
+                            if (value)
+                                $scope.suggestionLimit = 20;
+                            else
+                                $scope.suggestionLimit = 5;
+                        });
+                    }
 
                     let completeTabbing, ignoreNextSuggestion;
                     $scope.getSuggestions = $scope.getSuggestions ? $scope.getSuggestions : function() { return []; };
@@ -28,7 +37,7 @@ angular.module("wust.elements").directive("tagEditor", function() {
                     $scope.$watch("search", function(value) {
                         if (!ignoreNextSuggestion && completeTabbing === undefined) {
                             $scope.getSuggestions({search: value}).then(vals => {
-                                $scope.suggestions = vals;
+                                $scope.suggestions = vals[0].concat(vals[1] || []);
                             });
                         }
 
