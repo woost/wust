@@ -4,7 +4,7 @@
 .tag-editor-directive {
     font-family: sans-serif;
     font-size: 16px;
-    line-height: 38px;
+    line-height: 35px;
     &.active {
         .tag-editor, .tag-suggestions {
             border-color: #aaa;
@@ -34,7 +34,7 @@
         }
         .tag-input {
             display: inline-block;
-            height: 38px;
+            height: 35px;
             border: 0;
             margin: 0;
             padding: 0;
@@ -49,9 +49,9 @@
         overflow: visible;
         .tag-suggestions {
             margin-top: 0;
-            margin-left: 10%;
-            margin-right: 10%;
-            width: 80%;
+            margin-left: 7%;
+            margin-right: 7%;
+            width: 86%;
             border-bottom-left-radius: 3px;
             border-bottom-right-radius: 3px;
             @include box-shadow(0 12px 20px $shadow-color);
@@ -62,11 +62,11 @@
         }
     }
     .tag-suggestions {
-        min-height: 45px;
+        min-height: 43px;
         margin-top: -3px;
-        padding-top: 3px;
-        padding-right: 10px;
-        padding-left: 10px;
+        padding-top: 0px;
+        padding-right: 8px;
+        padding-left: 8px;
         padding-bottom: 3px;
         border: 1px solid #ccc;
         display: block;
@@ -77,7 +77,8 @@
             display: block;
             float: left;
             height: 25px;
-            margin: 7px 7px 0 0;
+            padding-left: 0px;
+            margin-top: 5px;
             background-color: transparent;
             color: #888;
             font-weight: bold;
