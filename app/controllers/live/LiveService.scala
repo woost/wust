@@ -91,7 +91,7 @@ trait DispatchActor extends Actor {
 class RegisterNodesActor extends DispatchActor {
   override def receive = super.receive orElse {
     case ConnectableUpdate(post) =>
-      println("Got conncetable update: " + post.uuid)
+      println("Got connectable update: " + post.uuid)
       registeredListeners.get(post.uuid).foreach(_.foreach( _ ! OutEvent("edit", Json.toJson(post)) ))
     case ConnectableDelete(connUuid) =>
       println("Got connectable delete: " + connUuid)
