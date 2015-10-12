@@ -22,9 +22,6 @@ function StreamService(Search, DiscourseNode, Auth, store, Helpers, $state) {
 
     function restoreList() {
         let streams = streamStore.get("streams") || [];
-        if (_.isEmpty(streams))
-            streams.push({});
-
         _.each(streams, pushList);
     }
 
