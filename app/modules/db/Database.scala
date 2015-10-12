@@ -125,7 +125,6 @@ object Database {
   }
 
   // IMPORTANT: we need to write the constancts as doubles to avoid integer arithmetic
-  // def tagweight(up:String, down:String) = s"(($up + ${tagweight_p*tagweight_u})/($up + $down + $tagweight_u))"
   def connectedComponent(postUuid: String, identity: Option[User], depth: Int): Discourse = {
     // Tag weights
     // 1. Cypher does not support subqueries yet, so we have to do extra queries for the tag weights.

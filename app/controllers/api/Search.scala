@@ -12,11 +12,13 @@ import renesca.graph.Label
 import renesca.parameter.implicits._
 import renesca.parameter._
 import collection.mutable
+import moderation.Moderation
+import wust.SortOrder
 
 import scala.util.Try
 
 object Search extends Controller {
-  def index(labelOpt: Option[String], termOpt: Option[String], searchDescriptionsOpt: Option[Boolean], startPostOpt: Option[Boolean], contextsAll: List[String], contextsAnyRaw: List[String], contextsWithout: List[String], classificationsAll: List[String], classificationsAnyRaw: List[String], classificationsWithout: List[String], pageOpt: Option[Int], sizeOpt: Option[Int]) = Action {
+  def index(labelOpt: Option[String], termOpt: Option[String], searchDescriptionsOpt: Option[Boolean], startPostOpt: Option[Boolean], contextsAll: List[String], contextsAnyRaw: List[String], contextsWithout: List[String], classificationsAll: List[String], classificationsAnyRaw: List[String], classificationsWithout: List[String], pageOpt: Option[Int], sizeOpt: Option[Int], sortOrder: Option[Int]) = Action {
 
     val discourse = if(
       (contextsAll intersect contextsWithout).nonEmpty ||
@@ -32,6 +34,7 @@ object Search extends Controller {
       val startPost = startPostOpt.getOrElse(false)
       val contextsAny = (contextsAnyRaw diff contextsWithout) diff contextsAll
       val classificationsAny = (classificationsAnyRaw diff classificationsWithout) diff classificationsAll
+      val sortByQuality = sortOrder.map(_ == SortOrder.QUALITY).getOrElse(false)
 
       implicit val ctx = new QueryContext
 
@@ -119,7 +122,7 @@ object Search extends Controller {
           val (askedContextDef, inheritedContextDef) = matchInheritedContexts(contextsAll, "contextsAllUuids")
           val tagsDef = RelationDef(inheritedContextDef, SchemaTags, nodeDef)
           postMatches += s"""match ${ tagsDef.toPattern(false) }"""
-          lastWiths += s"""count(distinct ${askedContextDef.name}) as contextsAllMatchCount"""
+          lastWiths += s"""count(distinct ${askedContextDef.name}) as contextsAllMatchCount, ${tagsDef.name} as contextsAllTags"""
           lastConditions += s"""contextsAllMatchCount >= {contextsAllCount}"""
           params += ("contextsAllCount" -> contextsAll.size)
         }
@@ -166,7 +169,14 @@ object Search extends Controller {
         val skip = page * limit
         s"skip $skip limit $limit"
       }.getOrElse("")
-      val returnStatement = s"${ nodeDef.name } order by ${ nodeDef.name }.timestamp desc $returnPostfix"
+      val returnStatement = if (contextsAll.nonEmpty && sortByQuality)
+        s"""
+        with min(contextsAllTags.voteCount) as tagVoteCount, ${ nodeDef.name } order by ${Moderation.postQualityString("tagVoteCount", nodeDef.name + ".viewCount")} desc $returnPostfix
+        return ${nodeDef.name}
+        """
+      else
+        s"return ${ nodeDef.name } order by ${ nodeDef.name }.timestamp desc $returnPostfix"
+
 
       val query = s"""
       ${preQueries.mkString("\n\n")}
@@ -176,8 +186,9 @@ object Search extends Controller {
       ${if(lastWiths.nonEmpty) s"with ${nodeDef.name}, ${lastWiths.mkString(", ")}" else ""}
       ${if(lastConditions.nonEmpty) s"where ${lastConditions.mkString("\nand ")}" else ""}
       ${if(lastDistinct) s"with distinct ${nodeDef.name}" else ""}
-      return $returnStatement
+      $returnStatement
       """
+
 
       // println("-"*30)
       // // println(query)

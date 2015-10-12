@@ -5,6 +5,7 @@ import scala.scalajs.js
 import scala.scalajs.js.annotation.{ScalaJSDefined, JSExport, JSExportAll}
 import js.JSConverters._
 import wust.Moderation
+import wust.SortOrder
 
 object ConsoleImport {
   val console = js.Dynamic.global.console
@@ -94,8 +95,6 @@ sealed trait NodeDelegates extends NodeLike {
   @JSExport("description")
   def descriptionJs = description.orUndefined
 }
-
-@JSExportAll object SortOrder { val QUALITY: Int = 0; val TIME: Int = 1 }
 
 trait NodeBase extends NodeDelegates {
   def classifications: Set[RecordTag]

@@ -3,6 +3,14 @@
     <div id="search_content">
         <div id="search_options">
             <div class="row">
+                <label class="col-md-6">Sort order</label>
+                <div class="btn-group" style="line-height: 10px;" ng-model="vm.search.sortOrder" bs-radio-group>
+                    <label class="btn btn-xs btn-default fa fa-sort-amount-desc"><input type="radio" ng-click="vm.search.triggerSearch()" class="btn btn-xs btn-default" value="0"> Votes</label>
+                    <label class="btn btn-xs btn-default fa fa-sort-amount-asc"><input type="radio" ng-click="vm.search.triggerSearch()" class="btn btn-xs btn-default" value="1"> Time</label>
+                </div>
+            </div>
+            <hr>
+            <div class="row">
                 <label class="col-md-8">Search descriptions</label>
                 <span switch ng-model="vm.search.searchDescriptions" ng-change="vm.search.triggerSearch()"></span>
             </div>
@@ -18,17 +26,15 @@
                 <!--     <label class="col-md-4">#Results</label> -->
                 <!--     <span class="col-md-6">{{vm.search.results.length}}</span> -->
                 <!-- </div> -->
-                <div ng-class="{inactive: vm.search.unlimited}">
-                    <div class="row">
-                        <label class="col-md-4">Page</label>
-                        <span class="number_value col-md-6">{{vm.infinite.currentPage}} / {{vm.infinite.maxPage == -1 ? vm.search.page + '…' : vm.infinite.maxPage}}</span>
-                    </div>
-                    <div class="row">
-                        <span class="label_like col-md-4">Size</span>
-                        <span class="col-md-6">
-                            <input type="number" class="input" min="1" max="500" ng-model="vm.search.size" ng-change="vm.search.triggerSearch()" ng-disabled="vm.search.unlimited">
-                        </span>
-                    </div>
+                <div class="row">
+                    <label class="col-md-4">Page</label>
+                    <span class="number_value col-md-6">{{vm.infinite.currentPage}} / {{vm.infinite.maxPage == -1 ? vm.search.page + '…' : vm.infinite.maxPage}}</span>
+                </div>
+                <div class="row">
+                    <span class="label_like col-md-4">Size</span>
+                    <span class="col-md-6">
+                        <input type="number" class="input" min="1" max="500" ng-model="vm.search.size" ng-change="vm.search.triggerSearch()" ng-disabled="vm.search.unlimited">
+                    </span>
                 </div>
                 <!-- <div class="row"> -->
                 <!--     <span class="label_like col-md-6">Unlimited</span> -->

@@ -16,7 +16,8 @@ object Moderation extends ModerationBase {
   // Check a HN/Reddit dump to find out
   val votes_p = 0.1 // this is also the default weight, if we have up=0 and down=0
   val votes_u = 10
-  def postQuality(upVotes:Long, downVotes:Long):Double = (upVotes + votes_u*votes_p) / (downVotes + upVotes + votes_u)
+  def postQuality(upVotes:Long, downVotes:Long):Double = (upVotes + votes_u * votes_p) / (downVotes + upVotes + votes_u)
+  def postQualityString(upVotes:String, viewCount:String):String = s"(($upVotes + $votes_u * $votes_p) / ($viewCount - $upVotes + $upVotes + $votes_u))"
 
   //TODO: rate limiting for low karma users
   val initialKarma:Long = 0

@@ -15,7 +15,7 @@ function SearchService(Search, DiscourseNode) {
         tagsWithout: [],
         page: 0,
         size: defaultSize,
-
+        sortOrder: wust.SortOrder().TIME,
         resultsVisible: false,
         results: Search.$collection(),
         waiting: true,
@@ -24,7 +24,6 @@ function SearchService(Search, DiscourseNode) {
         loadMore,
         onReload
     };
-
     _.bindAll(this.search);
 
     function triggerSearch() {
@@ -73,6 +72,7 @@ function SearchService(Search, DiscourseNode) {
             classificationsAll: this.tagsAll.filter(t => !t.isContext).map(t => t.id),
             classificationsAny: this.tagsAny.filter(t => !t.isContext).map(t => t.id),
             classificationsWithout: this.tagsWithout.filter(t => !t.isContext).map(t => t.id),
+            sortOrder: this.sortOrder,
         };
 
         if (this.unlimited) {
