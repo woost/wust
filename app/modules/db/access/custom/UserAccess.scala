@@ -104,10 +104,11 @@ case class UserContributions() extends RelationAccessDefault[User, Post] {
     val connDef = RelationDef(postDef, ConnectsStart, connectsDef)
     val tagClassifiesDef = RelationDef(FactoryNodeDef(Classification), Classifies, tagsDef)
     val classifiesDef = RelationDef(FactoryNodeDef(Classification), Classifies, connectsDef)
+    val createdDef = RelationDef(userDef, SchemaCreated, postDef)
 
     val query = s"""
-    match ${ userDef.toPattern }-[r1]->(hyper:`${ SchemaCreated.label }`)-[r2]->${ postDef.toPattern }
-    with distinct ${ postDef.name } order by ${ postDef.name }.timestamp skip ${ skip } limit ${ limit }
+    match ${createdDef.toPattern}
+    with distinct ${ postDef.name } order by ${ postDef.name }.timestamp DESC skip ${ skip } limit ${ limit }
     optional match ${ tagsDef.toPattern(true, false) }
     optional match ${ tagClassifiesDef.toPattern(true, false) }
     optional match ${ connDef.toPattern(false, true) }, ${ classifiesDef.toPattern(true, false) }
