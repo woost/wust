@@ -171,7 +171,8 @@ object Search extends Controller {
       }.getOrElse("")
       val returnStatement = if (contextsAll.nonEmpty && sortByQuality)
         s"""
-        with unwind contextsAllTagsColl as contextsAllTags, min(contextsAllTags.voteCount) as tagVoteCount, ${ nodeDef.name } order by ${Moderation.postQualityString("tagVoteCount", nodeDef.name + ".viewCount")} desc $returnPostfix
+        unwind contextsAllTagsColl as contextsAllTags
+        with min(contextsAllTags.voteCount) as tagVoteCount, ${ nodeDef.name } order by ${Moderation.postQualityString("tagVoteCount", nodeDef.name + ".viewCount")} desc $returnPostfix
         return ${nodeDef.name}
         """
       else
