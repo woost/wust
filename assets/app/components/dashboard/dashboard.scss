@@ -3,99 +3,98 @@
 
 #dashboard_component {
     height: 100%;
-    #posts_view {
-        #header_list {
-            @include display-flex(flex);
-            @include justify-content(space-between);
+    .new-stream-button {
+        text-align: center;
+        font-size: 20px;
+        cursor: pointer;
+        opacity: 0.5;
+        span {
+            padding-top: 150px;
             width: 100%;
-            .container {
-                border: $stream_border;
-                border-radius: 5px;
-                height: 250px;
-                max-height: 250px;
-                margin: 20px;
-            }
         }
-        #stream_list {
-            @include display-flex(flex);
-            @include flex-wrap(wrap);
-            @include flex-direction(rows);
-            @include justify-content(flex-start);
-            width: 100%;
-            margin: 0 auto;
-            .as-sortable-item, .as-sortable-placeholder {
-                margin: 10px;
-            }
-            .container {
-                width: 400px;
-                height: 500px;
-                max-height: 500px;
-                .tag-editor {
-                    margin-top: 5px;
-                }
-            }
+        &:hover {
+            opacity: 1;
+        }
+    }
+    #stream_list {
+        @include display-flex(flex);
+        @include flex-wrap(wrap);
+        @include flex-direction(rows);
+        @include justify-content(flex-start);
+        width: 100%;
+        margin: 0 auto;
+        .as-sortable-item, .as-sortable-placeholder {
+            margin: 10px;
         }
         .container {
-            padding: 8px;
-            @include display-flex(flex);
-            @include flex-wrap(wrap);
-            @include flex-direction(columns);
-            .header {
-                padding-bottom: 10px;
-                .as-sortable-item-handle {
-                    display:inline-block;
-                    width: 100%;
-                    padding-top: 5px;
-                }
-                .edit-button {
-                    margin-top: -5px;
-                }
+            width: 400px;
+            height: 500px;
+            max-height: 500px;
+            .tag-editor {
+                margin-top: 5px;
             }
-            .body {
-                overflow: auto;
+        }
+    }
+    .container {
+        padding: 8px;
+        @include display-flex(flex);
+        @include flex-wrap(wrap);
+        @include flex-direction(columns);
+        .header {
+            padding-bottom: 10px;
+            .as-sortable-item-handle {
+                display:inline-block;
+                width: 100%;
+                padding-top: 5px;
+            }
+            .edit-button {
+                margin-top: -5px;
+            }
+        }
+        .body {
+            overflow: auto;
+            height: 100%;
+            max-height: 100%;
+            .body-content-wrapper {
                 height: 100%;
-                max-height: 100%;
-                .body-content-wrapper {
+                .body-content-inner-wrapper {
                     height: 100%;
-                    .body-content-inner-wrapper {
-                        height: 100%;
-                        position: relative;
-                        .body-content {
-                            position: absolute;
-                            overflow: auto;
-                            top: 0;
-                            bottom: 0;
-                            left: 0;
-                            right: 0;
-                            .small_post_directive {
-                                width: 100%;
-                            }
+                    position: relative;
+                    .body-content {
+                        position: absolute;
+                        overflow: auto;
+                        top: 0;
+                        bottom: 0;
+                        left: 0;
+                        right: 0;
+                        .small_post_directive {
+                            width: 100%;
                         }
                     }
                 }
             }
         }
+    }
 
-        .recent_container {
-            padding: 30px 40px 0px 40px;
-            .small_post_directive {
-                width: 200px;
-                vertical-align: top;
-                margin-right: 5px;
-            }
+    .recent_container {
+        padding: 30px 40px 0px 40px;
+        .small_post_directive {
+            width: 200px;
+            vertical-align: top;
+            margin-right: 5px;
         }
-        // http://blogs.msdn.com/b/kurlak/archive/2015/02/20/filling-the-remaining-height-of-a-container-while-handling-overflow-in-css.aspx
-        .table {
-            display: table;
-        }
+    }
+    // http://blogs.msdn.com/b/kurlak/archive/2015/02/20/filling-the-remaining-height-of-a-container-while-handling-overflow-in-css.aspx
+    .table {
+        display: table;
+    }
 
-        .table-row {
-            display: table-row;
-        }
+    .table-row {
+        display: table-row;
+    }
 
-        .table-cell {
-            display: table-cell;
-        }
+    .table-cell {
+        display: table-cell;
     }
 }
 

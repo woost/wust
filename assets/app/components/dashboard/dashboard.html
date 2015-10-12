@@ -1,36 +1,32 @@
 <div id="dashboard_component" class="content-component">
-    <div id="posts_view">
-        <div id="header_list">
-            <button class="btn btn-default" type="button" ng-click="vm.newStream()">New Stream</button>
-        </div>
-        <div id="stream_list" as-sortable="vm.sortableOptions" ng-model="vm.streams">
-            <div class="table container ng-trans ng-trans-scale-up ease as-sortable-item" as-sortable-item ng-repeat="stream in vm.streams">
-                <div class="table-row">
-                    <div class="header">
-                        <div class="as-sortable-item-handle" as-sortable-item-handle>
-                            <span ng-if="!stream.showEdit">
-                                <span ng-repeat="tag in stream.tagsAll" tag-label="tag"></span>
-                            </span>
-                            <button class="edit-button btn btn-sm btn-default pull-right" onclick="this.blur()" ng-model="stream.showEdit" bs-checkbox><i class="fa fa-pencil"></i></button>
-                            <button ng-show="stream.showEdit" class="btn btn-sm btn-danger edit-button pull-left" ng-click="vm.removeStream($index)" data-title="Remove Stream" bs-tooltip><i class="fa fa-trash-o"></i></button>
-                        </div>
-                        <div ng-if="stream.showEdit">
-                            <div class="taglist" edit-taglist tags="stream.tagsAll" tag-type="taglike" placeholder="All Tags" on-change="vm.refreshStream(stream)" existing-only="true"></div>
-                            <div class="taglist" edit-taglist tags="stream.tagsAny" tag-type="taglike" placeholder="Any Tags" on-change="vm.refreshStream(stream)" existing-only="true"></div>
-                            <div class="tag-editor" edit-taglist tags="stream.tagsWithout" tag-type="taglike" placeholder="Without Tags" on-change="vm.refreshStream(stream)" existing-only="true"></div>
-                        </div>
+    <div id="stream_list" as-sortable="vm.sortableOptions" ng-model="vm.streams">
+        <div class="table container ng-trans ng-trans-scale-up ease as-sortable-item" as-sortable-item ng-repeat="stream in vm.streams">
+            <div class="table-row">
+                <div class="header">
+                    <div class="as-sortable-item-handle" as-sortable-item-handle>
+                        <span ng-if="!stream.showEdit">
+                            <span ng-repeat="tag in stream.tagsAll" tag-label="tag"></span>
+                        </span>
+                        <button class="edit-button btn btn-sm btn-default pull-right" onclick="this.blur()" ng-model="stream.showEdit" bs-checkbox><i class="fa fa-pencil"></i></button>
+                        <button ng-show="stream.showEdit" class="btn btn-sm btn-danger edit-button pull-left" ng-click="vm.removeStream($index)" data-title="Remove Stream" bs-tooltip><i class="fa fa-trash-o"></i></button>
+                    </div>
+                    <div ng-if="stream.showEdit">
+                        <div class="taglist" edit-taglist tags="stream.tagsAll" tag-type="taglike" placeholder="All Tags" on-change="vm.refreshStream(stream)" existing-only="true"></div>
+                        <div class="taglist" edit-taglist tags="stream.tagsAny" tag-type="taglike" placeholder="Any Tags" on-change="vm.refreshStream(stream)" existing-only="true"></div>
+                        <div class="tag-editor" edit-taglist tags="stream.tagsWithout" tag-type="taglike" placeholder="Without Tags" on-change="vm.refreshStream(stream)" existing-only="true"></div>
                     </div>
                 </div>
-                <div class="table-row body">
-                    <div class="table-cell body-content-wrapper">
-                        <div class="body-content-inner-wrapper">
-                            <div class="body-content">
-                                <div ng-repeat="post in stream.posts track by post.id" small-post node="post" ignore-tags="stream.tagsAll" class="ng-trans ng-trans-scale-up ease"></div>
-                            </div>
+            </div>
+            <div class="table-row body">
+                <div class="table-cell body-content-wrapper">
+                    <div class="body-content-inner-wrapper">
+                        <div class="body-content">
+                            <div ng-repeat="post in stream.posts track by post.id" small-post node="post" ignore-tags="stream.tagsAll" class="ng-trans ng-trans-scale-up ease"></div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        <div class="as-sortable-placeholder container new-stream-button" ng-click="vm.newStream()"><span>New Stream</span></div>
     </div>
 </div>
