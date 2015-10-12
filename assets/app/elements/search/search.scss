@@ -3,30 +3,28 @@
 @import "compass/css3/flexbox";
 
 #search_component {
-    background: white;
-    border-bottom-left-radius: 10px;
-    border-bottom-right-radius: 10px;
-    box-shadow: 0px 2px 2px 2px #aaa;
     position: absolute;
     left: 10px;
     right: 10px;
-    bottom: 20px;
     top: 50px;
-    height: 90%;
+    height: 100%;
+    min-height: 480px;
+    padding-bottom: 75px;
     z-index: $zindex_search;
-    & > button {
-        padding: 5px;
-    }
     #search_content {
+        background: white;
+        border-bottom-left-radius: 10px;
+        border-bottom-right-radius: 10px;
+        box-shadow: 0px 2px 2px 2px #aaa;
         height: 100%;
         @include display-flex(flex);
         @include flex-direction(row);
         @include align-items(flex-start);
         @include align-content(stretch);
         #search_results_view {
-            padding-top: 30px;
             height: 100%;
             width: 100%;
+            padding-bottom: 25px;
             #search_results {
                 padding-left: 20px;
                 overflow: auto;
@@ -57,11 +55,11 @@
             .input {
                 width: 40px;
             }
-            #search_options_bottom {
-                width: inherit;
-                position: absolute;
-                bottom: 10px;
-            }
+            // #search_options_bottom {
+                // width: inherit;
+                // position: absolute;
+                // padding-left: 70px;
+            // }
             .inactive {
                 color: #aaa;
             }
@@ -69,6 +67,7 @@
         .search_indicator {
             padding: 30px;
             .search_status {
+                padding-top: 30px;
                 font-size: 30px;
                 color: #aaa;
             }

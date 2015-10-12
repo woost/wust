@@ -1,5 +1,4 @@
 <div ng-if="vm.search.resultsVisible" class="ng-trans ng-trans-slide-up ease" id="search_component">
-    <button class="close view_close_button pull-right" ng-click="vm.search.resultsVisible = false" type="button" aria-label="Close " data-title="Hide scratchpad" bs-tooltip><span aria-hidden="true">&times;</span></button>
     <div id="search_content">
         <div id="search_options">
             <div class="row">
@@ -21,6 +20,7 @@
             <div edit-taglist placeholder="All Tags" tag-type="taglike" tags="vm.search.tagsAll" class="row edit_tags" existing-only="true" on-change="vm.search.triggerSearch()"></div>
             <div edit-taglist placeholder="Any Tag" tag-type="taglike" tags="vm.search.tagsAny" class="row edit_tags" existing-only="true" on-change="vm.search.triggerSearch()"></div>
             <div edit-taglist placeholder="Without Tags" tag-type="taglike" tags="vm.search.tagsWithout" class="row edit_tags" existing-only="true" on-change="vm.search.triggerSearch()"></div>
+            <hr>
             <div id="search_options_bottom">
                 <!-- <div class="row"> -->
                 <!--     <label class="col-md-4">#Results</label> -->
@@ -46,6 +46,7 @@
             </div>
         </div>
         <div id="search_results_view">
+            <button class="close view_close_button" ng-click="vm.search.resultsVisible = false" type="button" aria-label="Close " data-title="Hide Search" bs-tooltip><span aria-hidden="true">&times;</span></button>
             <!-- TODO: this does break the animation of the search overlay. but the ng-if here would be good, as the small-post would then not trigger any watchers. -->
             <!-- <div ng-if="vm.search.resultsVisible"> -->
             <span class="search_indicator" ng-show="vm.search.results.length === 0">

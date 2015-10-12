@@ -10,7 +10,6 @@
     width: calc(100% - 400px) !important;
 }
 #zen_component {
-    padding: 20px;
     left: 0px;
     background: white;
     width: 100%;
@@ -22,8 +21,14 @@
     z-index: $zindex_zen;
     overflow: auto;
     .zenetized_preview {
+        padding: 20px;
         max-width: 650px;
         margin: auto;
         padding: 10px 40px;
+    }
+    .status_button {
+        padding-left: 5px;
+        padding-top: 5px;
+        cursor: pointer;
     }
 }

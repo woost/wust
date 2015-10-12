@@ -18,7 +18,7 @@
             }
             .center-controls {
                 display: block;
-                padding-right: 10px;
+                padding-right: 5px;
                 a, a:active, a:visited, a:focus {
                     &.editable-click {
                         padding-left: 6px;
@@ -90,6 +90,9 @@
             &.collapsing {
                 transition-duration: 200ms;
             }
+        }
+        .edit_description {
+            padding-bottom: 5px;
         }
     }
 }
