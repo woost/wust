@@ -71,7 +71,7 @@ function editTaglistCtrl(TagSuggestions, DiscourseNode, $q) {
 
         return $q((resolve, reject) => {
             delayedTriggerSearch = setTimeout(() => $q.all(vm.tagLabels.map(tagLabel => {
-                return TagSuggestions.search(term, tagLabel).$asPromise();
+                return TagSuggestions.search(term, tagLabel);
             })).then(resolve, reject), searchTriggerDelay);
         });
     }
