@@ -20,12 +20,14 @@ object SeedDatabase extends Task with SeedTools {
         mergeClassification("Goal", color = Some(169)),
         mergeClassification("Idea", color = Some(260)),
         mergeClassification("Pro", color = Some(135)),
-        mergeClassification("Con", color = Some(21)),
-        mergeClassification("Bug", color = Some(50)),
+        mergeClassification("Contra", color = Some(21)),
+        // mergeClassification("Bug", color = Some(50)),
         mergeClassification("Question", color = Some(301)),
-        mergeClassification("Answer", color = Some(280)),
-        mergeClassification("Cause", color = Some(70)),
-        mergeClassification("Dependency", color = Some(110)),
+        // mergeClassification("Answer", color = Some(280)),
+        mergeClassification("Task", color = Some(280)),
+        mergeClassification("Consequence", color = Some(70)),
+        // mergeClassification("Dependency", color = Some(110)),
+        mergeClassification("Hypothese", color = Some(110)),
         mergeClassification("Done", color = Some(150))
       )
 
