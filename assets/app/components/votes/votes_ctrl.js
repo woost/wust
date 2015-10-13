@@ -11,9 +11,11 @@ function VotesCtrl(ChangeRequests) {
     let refreshWhenLessThan = 3;
     let loadedFullPage = true;
 
+    vm.isLoading = true;
     vm.changes = ChangeRequests.$search({size: pageSize}).$then( () => {
         loadedFullPage = vm.changes.length === pageSize;
         if(vm.changes.length > 0) next();
+        vm.isLoading = false;
     } );
 
     vm.upvote = upvote;
@@ -32,32 +34,34 @@ function VotesCtrl(ChangeRequests) {
         }
 
         if( loadedFullPage && vm.changes.length < refreshWhenLessThan ) {
+            vm.isLoading = true;
             vm.changes.$refresh({skip: vm.changes.length}).$then(response => {
                 loadedFullPage = vm.changes.length === pageSize;
                 if(vm.change === undefined && vm.changes.length > 0) {
                     next();
                 }
+                vm.isLoading = false;
             });
         }
     }
 
     function upvote() {
         ChangeRequests.$buildRaw(_.pick(vm.change, "id")).up.$create().$then(response => {
-            humane.success("Upvoted change request");
+            // humane.success("Upvoted change request");
         }, resp => humane.error(resp.$response.data));
         next();
     }
 
     function downvote() {
         ChangeRequests.$buildRaw(_.pick(vm.change, "id")).down.$create().$then(response => {
-            humane.success("Downvoted change request");
+            // humane.success("Downvoted change request");
         }, resp => humane.error(resp.$response.data));
         next();
     }
 
     function skip() {
         vm.change.skipped.$create().$then(response => {
-            humane.success("Skipped change request");
+            // humane.success("Skipped change request");
         }, resp => humane.error(resp.$response.data));
         next();
     }
