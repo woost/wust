@@ -16,19 +16,19 @@ object SeedDatabase extends Task with SeedTools {
 
     modifyDiscourse { implicit discourse =>
       discourse.add(
-        mergeClassification("Problem", color = Some(90)),
-        mergeClassification("Goal", color = Some(169)),
-        mergeClassification("Idea", color = Some(260)),
-        mergeClassification("Pro", color = Some(135)),
-        mergeClassification("Contra", color = Some(21)),
+        mergeClassification("Problem", color = Some(90), symbol = "fa fa-flask"),
+        mergeClassification("Goal", color = Some(169), symbol = "fa fa-crosshairs"),
+        mergeClassification("Idea", color = Some(260), symbol = "fa fa-lightbulb-o"),
+        mergeClassification("Pro", color = Some(135), symbol = "fa fa-thumbs-o-up"),
+        mergeClassification("Contra", color = Some(21), symbol = "fa fa-thumbs-o-down"),
         // mergeClassification("Bug", color = Some(50)),
-        mergeClassification("Question", color = Some(301)),
+        mergeClassification("Question", color = Some(301), symbol = "fa fa-question"),
         // mergeClassification("Answer", color = Some(280)),
-        mergeClassification("Task", color = Some(280)),
-        mergeClassification("Consequence", color = Some(70)),
+        mergeClassification("Task", color = Some(280), symbol = "fa fa-list-ul"),
+        mergeClassification("Consequence", color = Some(70), symbol = "fa fa-arrow-right"),
         // mergeClassification("Dependency", color = Some(110)),
-        mergeClassification("Hypothese", color = Some(110)),
-        mergeClassification("Done", color = Some(150))
+        // mergeClassification("Hypothesis", color = Some(110)),
+        mergeClassification("Done", color = Some(150), symbol = "fa fa-check")
       )
 
       discourse.add(UserGroup.merge(name = "everyone", merge = Set("name")))

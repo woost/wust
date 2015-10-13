@@ -230,7 +230,6 @@ object WustSchema {
     @unique val title: String
     var description: Option[String]
     var color: Long // Hue 0..360, -1 is gray
-    var symbol: Option[String]
 
     valid("Title of Tags cannot be empty", "title") { !title.trim.isEmpty }
     valid("Color must be between -1 and 360", "color") { color >= -1 && color <= 360 }
@@ -238,7 +237,10 @@ object WustSchema {
   @HyperRelation class Tags(startNode: Scope, endNode: Post) extends MatchableRelation with UuidNode with Reference
 
   // Tags
-  @Node class Classification extends TagLike
+  @Node class Classification extends TagLike {
+    val symbol: String // css class name, like "fa fa-lightbulb" or "icon-bla"
+    // val precendence: Int
+  }
 
   @Relation class Classifies(startNode: Classification, endNode: Reference)
 

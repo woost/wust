@@ -63,7 +63,7 @@ object ImportHackerNews extends Task with SeedTools {
         val tags = tag(startPost, mergeScope("Ask-HN"))
         discourse.add(
           tags,
-          classify(tags, mergeClassification("Question")),
+          classify(tags, matchClassification("Question")),
           Inherits.merge(mergeScope("Ask-HN"), hackerNewsScope)
         )
         startPost

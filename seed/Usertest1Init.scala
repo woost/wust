@@ -10,9 +10,9 @@ object Usertest1Init extends Task with SeedTools {
 
   dbContext { implicit db =>
     modifyDiscourse { discourse =>
-      val problem = mergeClassification("Problem")
-      val question = mergeClassification("Question")
-      val pro = mergeClassification("Pro")
+      val problem = matchClassification("Problem")
+      val question = matchClassification("Question")
+      val pro = matchClassification("Pro")
 
       val rootnode = createPost("Was denkt ihr über Wäsche?")
       val stinken = createPost("Meine Wäsche stinkt.")

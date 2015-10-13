@@ -13,9 +13,13 @@ object TagFormat {
     ("title", JsString(tag.title)),
     ("description", JsString(tag.description.getOrElse(""))),
     ("isContext", JsBoolean(tag.isInstanceOf[Scope])),
-    ("color", JsNumber(tag.color)),
-    ("symbol", tag.symbol.map(JsString(_)).getOrElse(JsNull))
-  )
+    ("color", JsNumber(tag.color))
+  ) ++ (tag match {
+    case c: Classification => Seq(
+      ("symbol", JsString(c.symbol))
+    )
+    case _ => Seq.empty
+  })
 
   def karmaTagWriter(hasKarma: HasKarma) = JsObject(
     tagLikeToSeq(hasKarma.endNode) ++ Seq(
