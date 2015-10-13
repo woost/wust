@@ -1257,7 +1257,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             this.longPressTimer = setTimeout(() => {
                 clearTimeout(this.longPressTimer);
                 this.longPressTimer = undefined;
-                this.nodeLongPressAction(d);
+                if( !this.isDragging )
+                    this.nodeLongPressAction(d);
             }, this.longPressTime);
             this.onDragStartInit(d);
 
