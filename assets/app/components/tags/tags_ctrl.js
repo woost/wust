@@ -1,8 +1,8 @@
 angular.module("wust.components").controller("TagsCtrl", TagsCtrl);
 
-TagsCtrl.$inject = ["Search", "DiscourseNode"];
+TagsCtrl.$inject = ["Search", "DiscourseNode", "$state"];
 
-function TagsCtrl(Search, DiscourseNode) {
+function TagsCtrl(Search, DiscourseNode, $state) {
     let vm = this;
 
     let tagSize = 30;
@@ -12,6 +12,7 @@ function TagsCtrl(Search, DiscourseNode) {
 
     vm.loadMoreTags = loadMoreTags;
     vm.refreshSearch = refreshSearch;
+    vm.state = $state;
 
     vm.search = {
         query: "",
@@ -21,7 +22,6 @@ function TagsCtrl(Search, DiscourseNode) {
             size: tagSize
         }),
     };
-
 
     function refreshSearch() {
         tagPage = 0;

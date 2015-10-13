@@ -4,7 +4,7 @@
             <input type="text" placeholder="Search tag" class="form-control" ng-model="vm.search.query" ng-change='vm.refreshSearch()'>
         </div>
 
-        <span ng-repeat="tag in vm.search.results track by tag.id" tag-label="tag"></span>
+        <span ng-repeat="tag in vm.search.results track by tag.id" tag-label="tag" ng-class="{active: tag.id === vm.state.params.id}"></span>
 
         <button class="tag_list_more btn btn-default pull-right" ng-click="vm.infinite.manualLoad()" ng-disabled="vm.infinite.loading" ng-hide="vm.infinite.noMore">More</button>
     </div>
