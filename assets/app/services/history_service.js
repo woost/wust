@@ -1,8 +1,8 @@
 angular.module("wust.services").service("HistoryService", HistoryService);
 
-HistoryService.$inject = ["Auth", "Session", "Post", "DiscourseNode", "$rootScope"];
+HistoryService.$inject = ["Auth", "Session", "Post", "DiscourseNode", "$rootScope", "$state"];
 
-function HistoryService(Auth, Session, Post, DiscourseNode, $rootScope) {
+function HistoryService(Auth, Session, Post, DiscourseNode, $rootScope, $state) {
     let maximum = 8;
     let self = this;
 
@@ -90,8 +90,16 @@ function HistoryService(Auth, Session, Post, DiscourseNode, $rootScope) {
             return;
 
         let current = currentViewComponent.getWrap("graph");
-        current.removeNode(nodeId);
-        current.commit();
+        if (current.rootNode.id === nodeId) {
+            // TODO: not possible to have a component without a rootnode, so just notify the user, that the node was deleted
+            if ($state.is("focus"))
+                humane.success("Currently viewed Post has been deleted");
+        } else {
+            current.removeNode(nodeId);
+            current.commit();
+        }
+
+        _.remove(self.visited, { id: nodeId });
     }
 
     function removeNode(id) {
