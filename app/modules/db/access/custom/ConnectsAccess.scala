@@ -65,9 +65,6 @@ trait ConnectsHelper {
     """
 
     val discourse = Discourse(db.queryGraph(query, ctx.params))
-    println(discourse)
-    println(discourse.connects)
-    println(discourse.connects.map(c => c.startNodeOpt.toString + c.endNodeOpt.toString))
     (discourse, discourse.connects.find(c => c.startNodeOpt.isDefined && c.endNodeOpt.isDefined))
   }
 }
