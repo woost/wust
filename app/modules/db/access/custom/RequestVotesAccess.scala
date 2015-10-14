@@ -32,29 +32,29 @@ case class VotesChangeRequestAccess(sign: Long) extends EndRelationAccessDefault
     case req: RemoveTags => new VotesRemoveTagsHelper(req)
   }
 
-  def tryApply(tx: QueryHandler, discourse: Discourse, request: ChangeRequest):Either[String, ApplyResponse] = {
+  def tryApply(tx: QueryHandler, discourse: Discourse, request: ChangeRequest, description: String):Either[String, ApplyResponse] = {
     val helper = requestHelper(request)
     if (request.canApply) {
       if (request.status == PENDING) {
         val success = helper.applyChange(tx, discourse)
         if (success) {
           request.status = APPROVED
-          Right(ApplyResponse(true, Some(KarmaDefinition(request.applyThreshold, "Proposed change request approved"))))
+          Right(ApplyResponse(true, Some(KarmaDefinition(request.applyThreshold, s"Proposed change request approved: $description"))))
         } else Left("Cannot apply changes automatically")
       } else if (request.status == INSTANT) {
         request.status = APPROVED
-        Right(ApplyResponse(false, Some(KarmaDefinition(request.applyThreshold, "Instant change request approved"))))
+        Right(ApplyResponse(false, Some(KarmaDefinition(request.applyThreshold, s"Instant change request approved: $description"))))
       } else Right(ApplyResponse(false, None))
     } else if (request.canReject) {
       if (request.status == INSTANT) {
         val success = helper.unapplyChange(tx, discourse)
         if (success) {
           request.status = REJECTED
-          Right(ApplyResponse(true, Some(KarmaDefinition(-request.applyThreshold, "Instant change request rejected"))))
+          Right(ApplyResponse(true, Some(KarmaDefinition(-request.applyThreshold, s"Instant change request rejected: $description"))))
         } else Left("Cannot unapply changes automatically")
       } else {
         request.status = REJECTED
-        Right(ApplyResponse(false, Some(KarmaDefinition(-request.applyThreshold, "Proposed change request rejected"))))
+        Right(ApplyResponse(false, Some(KarmaDefinition(-request.applyThreshold, s"Proposed change request rejected: $description"))))
       }
     } else Right(ApplyResponse(false, None))
   }
@@ -111,7 +111,7 @@ case class VotesChangeRequestAccess(sign: Long) extends EndRelationAccessDefault
           discourse.add(newVotes)
         }
 
-        val postApplies = tryApply(tx, discourse, request)
+        val postApplies = tryApply(tx, discourse, request, helper.description)
 
         postApplies match {
           case Right(ApplyResponse(changed, karmaDefinitionOpt)) =>
@@ -160,10 +160,13 @@ trait VotesChangeRequestHelper {
   def unapplyChange(tx: QueryHandler, discourse: Discourse): Boolean
   def updateKarma(karmaDefinition: KarmaDefinition): Unit
   def sendEvent(): Unit
+  def description: String
 }
 
 //TODO: we need hyperrelation traits in magic in order to matches on the hyperrelation trait and get correct type: Relation+Node
 class VotesUpdatedHelper(request: Updated) extends VotesChangeRequestHelper {
+
+  override def description = "Edited Post"
 
   override def post = request.endNodeOpt.get
 
@@ -208,6 +211,8 @@ class VotesUpdatedHelper(request: Updated) extends VotesChangeRequestHelper {
 }
 
 class VotesDeletedHelper(request: Deleted) extends VotesChangeRequestHelper {
+
+  override def description = "Deleted Post"
 
   override def post = request.endNodeOpt.get
 
@@ -304,6 +309,8 @@ trait VotesTagsChangeRequestHelper extends VotesChangeRequestHelper {
 
 class VotesAddTagsHelper(protected val request: AddTags) extends VotesTagsChangeRequestHelper {
 
+  override def description = "Added Tag to Post"
+
   override def post = request.endNodeOpt.get
 
   override protected def requestToPostDef()(implicit ctx: QueryContext) = RelationDef(FactoryNodeDef(AddTags), AddTagsEnd, ConcreteNodeDef(post))
@@ -346,6 +353,9 @@ class VotesAddTagsHelper(protected val request: AddTags) extends VotesTagsChange
 }
 
 class VotesRemoveTagsHelper(protected val request: RemoveTags) extends VotesTagsChangeRequestHelper {
+
+  override def description = "Removed Tag from Post"
+
   override def post = request.endNodeOpt.get
 
   override protected def requestToPostDef()(implicit ctx: QueryContext) = RelationDef(FactoryNodeDef(RemoveTags), RemoveTagsEnd, ConcreteNodeDef(post))

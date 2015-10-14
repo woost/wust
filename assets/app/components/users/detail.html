@@ -37,9 +37,10 @@
                         <span class="pull-right timestamp" show-timestamp="entry.timestamp"></span>
                         <span ng-repeat="context in entry.contexts" tag-label="context"></span>
                     </div>
-                    <div class="clearfix reason">
+                    <div class="clearfix description">
                         <span class="pull-right" small-post node="entry.post"></span>
-                        {{entry.reason}}
+                        <b ng-bind="entry.reason.split(': ')[0]"></b>
+                        <p ng-bind="entry.reason.split(': ')[1]"></p>
                     </div>
                 </li>
             </ul>
