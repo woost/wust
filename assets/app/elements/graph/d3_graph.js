@@ -1438,6 +1438,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             if (this.isDragging) {
                 // if we were dragging before, the node should be fixed
                 this.setFixed(d);
+                this.force.resume();
             } else {
                 // if the longPressTimer is still active
                 // and the longPressAction is not triggered yet
