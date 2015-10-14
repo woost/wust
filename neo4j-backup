@@ -1,2 +1,2 @@
 #!/bin/bash
-echo "dump match (n) optional match (n)-[r]-() return n,r;" | neo4j-shell > $(date +"%Y-%m-%d-backup.cql")
+echo "dump match (n) optional match (n)-[r]-() return n,r;" | neo4j-shell > $(date +"%Y-%m-%d-%H-%M-%S-backup.cql")
