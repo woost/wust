@@ -27,7 +27,7 @@ object ImportStackOverflow extends Task with SeedTools {
   val baseurl = s"http://api.stackexchange.com/2.2"
 
   val questionTag = matchClassification("Question")
-  val answerTag = matchClassification("Answer")
+  val answerTag = matchClassification("Idea")
   val soTag = mergeScope("StackExchange")
   //TODO: tag per site
   //TODO: ignore "untagged"
