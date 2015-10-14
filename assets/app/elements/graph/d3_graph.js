@@ -54,7 +54,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     .linkDistance(40) // weak geometric constraint. Pushes nodes to achieve this distance
                     .charge(d => d.degree > 0 ? -1500 : -50)
                     .chargeDistance(1000)
-                    .gravity(0.001)
+                    .gravity(0.1)
                     .theta(0.8)
                     .alpha(0.1);
                 this.zoom = d3.behavior.zoom().scaleExtent([0.1, 3]); // min/max zoom level
