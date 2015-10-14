@@ -17,7 +17,7 @@
 
         <div big-taglist node="vm.node"></div>
         <div class="post_description" markdown="vm.node.description" ng-show="vm.node.description"></div>
-        <button ng-if="::vm.Auth.isLoggedIn" class="replytool pull-right btn btn-sm btn-default" ng-click='vm.replyTo()' data-title="Respond" bs-tooltip>Respond</button>
+        <button ng-if="::vm.Auth.isLoggedIn" class="replytool pull-right btn btn-sm btn-default" ng-click='vm.replyTo()'>Respond</button>
     </div>
     <a ng-if="vm.changeRequests.length > 0" href="#" ng-click="vm.showChanges = !vm.showChanges" class="showchanges">
         <i class="fa" ng-class="{'fa-chevron-down': vm.showChanges, 'fa-chevron-right': !vm.showChanges}"></i>
