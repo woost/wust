@@ -21,7 +21,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.onDraw = onDraw;
 
                 // settings
-                this.nodeClickAction = d => this.focusNode(d);
+                this.nodeClickAction = d => {if(!d.isHyperRelation) this.focusNode(d);};
                 this.nodeLongPressAction = d => this.setStickyPreview(d);
                 this.stopForceOnPan = true;
                 this.stopForceAfterNodeDrag = true;
