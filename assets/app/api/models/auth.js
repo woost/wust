@@ -7,16 +7,24 @@ function Auth($rootScope, $window, restmod, jwtHelper, store) {
 
     let authStore = store.getNamespacedStore("auth");
     let userKey = "currentUser";
+    let messageKey = "welcomeMessage";
+
     let service = {
         signup: restmod.model("/auth/signup"),
         signin: restmod.model("/auth/signin"),
         signout: restmod.singleton("/auth/signout")
     };
 
-    this.login = _.partial(authenticate, service.signin, "Logged in");
-    this.register = _.partial(authenticate, service.signup, "Registered");
+    this.login = _.partial(authenticate, service.signin, undefined);
+    this.register = _.partial(authenticate, service.signup, "Successfully registered account");
     this.logout = logout;
     this.current = authStore.get(userKey) || {};
+
+    let welcomeMessage = authStore.get(messageKey);
+    if (welcomeMessage) {
+        authStore.set(messageKey, undefined);
+        humane.success(welcomeMessage);
+    }
 
     if (checkLoggedIn()) {
         this.isLoggedIn = true;
@@ -59,6 +67,9 @@ function Auth($rootScope, $window, restmod, jwtHelper, store) {
     function authenticate(model, message, user) {
         model.$create(user).$then(response => {
             authStore.set(userKey, _.pick(response, "identifier", "userId", "token"));
+            if (message)
+                authStore.set(messageKey, message);
+
             location.reload();
         }, resp => humane.error(resp.$response.data));
     }
