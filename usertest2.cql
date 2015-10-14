@@ -1,9 +1,11 @@
 begin
 create index on :`CHANGEREQUEST`(`status`)
+create index on :`CREATEREQUEST`(`applied`)
 create index on :`LOGININFO`(`providerID`)
 create index on :`TIMESTAMP`(`timestamp`)
 create constraint on (n:`LOGININFO`) assert n.`providerKey` is unique
 create constraint on (n:`TAGLIKE`) assert n.`title` is unique
+create constraint on (n:`TEST`) assert n.`title` is unique
 create constraint on (n:`USERGROUP`) assert n.`name` is unique
 create constraint on (n:`USER`) assert n.`name` is unique
 create constraint on (n:`UUIDNODE`) assert n.`uuid` is unique
