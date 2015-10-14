@@ -25,7 +25,7 @@ object SeedDatabase extends Task with SeedTools {
         mergeClassification("Question", color = Some(301), symbol = "fa fa-question"),
         // mergeClassification("Answer", color = Some(280)),
         mergeClassification("Task", color = Some(280), symbol = "fa fa-list-ul"),
-        mergeClassification("Consequence", color = Some(70), symbol = "fa fa-arrow-right"),
+        mergeClassification("Cause", color = Some(70), symbol = "fa fa-arrow-left"),
         // mergeClassification("Dependency", color = Some(110)),
         // mergeClassification("Hypothesis", color = Some(110)),
         mergeClassification("Done", color = Some(150), symbol = "fa fa-check")
