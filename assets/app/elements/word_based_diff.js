@@ -23,7 +23,7 @@ function wordBasedDiff() {
                 // green for additions, red for deletions
                 // grey for common parts
                 var color = part.added ? "green" :
-                    part.removed ? "red" : "#AAA";
+                    part.removed ? "#EF1B1B" : "#AAA";
                 var span = document.createElement("span");
                 span.style.color = color;
                 span.appendChild(document.createTextNode(part.value));
