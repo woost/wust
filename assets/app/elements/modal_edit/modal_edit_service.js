@@ -32,7 +32,10 @@ function ModalEditService($modal, EditService, $state, ContextService) {
         if (promise) {
             if (currentNode.referenceNode === undefined) {
                 promise.$then(() => {
-                    $state.go("focus", _.pick(currentNode, "id"));
+                    $state.go("focus", {
+                        id: currentNode.id,
+                        type: ""
+                    });
                     hideModal();
                 });
             } else {
