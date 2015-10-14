@@ -39,8 +39,9 @@ function coloredTag(Helpers) {
                     rawElem.style.borderColor = Helpers.classificationLabelBorderColor(scope.coloredTag);
                     rawElem.style.borderRadius = Helpers.classificationLabelBorderRadius();
                 } else if(scope.tagtype === "circle") {
-                    rawElem.style.backgroundColor = Helpers.classificationCircleBackgroundColor(tag);
-                    rawElem.style.border = "1px solid " + Helpers.classificationCircleBorderColor(tag);
+                    // rawElem.style.backgroundColor = Helpers.classificationCircleBackgroundColor(tag);
+                    // rawElem.style.border = "1px solid " + Helpers.classificationCircleBorderColor(tag);
+                    // rawElem.style.color = Helpers.classificationCircleBorderColor(tag);
                 }
             }
         }

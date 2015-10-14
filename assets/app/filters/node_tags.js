@@ -1,9 +1,22 @@
-angular.module("wust.filters").filter("nodetags", nodetags);
+angular.module("wust.filters")
+    .filter("nodetags", nodetags)
+    .filter("nodecontexts", nodecontexts)
+    .filter("nodeclassifications", nodeclassifications);
 
 nodetags.$inject = ["Helpers"];
 
 function nodetags(Helpers) {
-  return (node, ignoreTags = []) => {
-      return _.reject(Helpers.sortedNodeTags(node), i => _.any(ignoreTags, _.pick(i, "id")));
-  };
+    return Helpers.sortedNodeTags;
+}
+
+nodecontexts.$inject = ["Helpers"];
+
+function nodecontexts(Helpers) {
+    return Helpers.sortedNodeContexts;
+}
+
+nodeclassifications.$inject = ["Helpers"];
+
+function nodeclassifications(Helpers) {
+    return Helpers.sortedNodeClassifications;
 }
