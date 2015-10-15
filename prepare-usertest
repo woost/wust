@@ -1,0 +1,13 @@
+#!/bin/bash -e
+neo4j console &
+NEO4JPID=$!
+echo "building production assets"
+./prodassets
+echo "building backend"
+sbt stage
+echo "starting server"
+target/universal/stage/bin/wust
+kill $NEO4JPID
+sleep 5
+
+
