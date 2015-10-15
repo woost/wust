@@ -8,7 +8,7 @@
             <a ng-bind="vm.node.title" ui-sref="focus({id: vm.node.id})"></a>
             <span class="tag_circle_container pull-right">
                 <span ng-repeat="tag in (vm.node | nodetags:vm.ignoreTags)" class="tag_circle_title" data-title="{{tag.title}}" bs-tooltip>
-                    <span colored-tag="tag" tagtype="circle" class="tag_circle" ng-class="tag.isContext ? '' : tag.symbol"></span>
+                    <span colored-tag="tag" tagtype="circle" class="tag_circle" ng-class="tag.isContext || true ? '' : tag.symbol"></span>
                 </span>
             </span>
         </span>
