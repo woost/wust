@@ -2,6 +2,8 @@
 neo4j-shell -file usertest2.cql
 ffmpeg -y -f alsa -ac 1 -i pulse -f x11grab -r 25 -s `xdpyinfo | grep 'dimensions:'|awk '{print $2}'` -i :0.0 -acodec libvorbis -b:a 128k -c:v libx264 -crf 23 -preset superfast -vsync 1 capture-$(date +"%Y-%m-%d-%H-%M-%S").mkv &
 FFMPEGPID=$!
-chromium --incognito --disable-extensions --high-dpi-support=1 --force-device-scale-factor=1 http://localhost:9000/focus/drplTzjjQnKUbLezdznd8w/
+TMP=$(mktemp -d)
+chromium --user-data-dir=$TMP --disable-default-apps --disable-infobars --disable-save-password-bubble --no-first-run --no-default-browser-check --disable-translate --disable-suggestions-service --incognito --disable-extensions --high-dpi-support=1 --force-device-scale-factor=1 --use-system-title-bar http://localhost:9000/focus/drplTzjjQnKUbLezdznd8w/
+rm -r $TMP
 kill $FFMPEGPID
 sleep 10
