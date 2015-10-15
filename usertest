@@ -1,0 +1,10 @@
+#!/bin/bash -e
+neo4j console &
+sleep 10
+neo4j-shell -file usertest2.cql
+./prodassets
+sbt stage
+target/universal/stage/bin/wust &
+sleep 5
+chromium --incognito --disable-extensions --high-dpi-support=1 --force-device-scale-factor=1 http://localhost:9000/focus/drplTzjjQnKUbLezdznd8w/
+
