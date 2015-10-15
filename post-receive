@@ -14,7 +14,7 @@ cd ../app
 
 ./buildproduction || exit 1
 
-[ -x ../usertest/enable ] && ../usertest/enable
+[ -x ../usertest/enable ] && ../usertest/enable >&- 2>&- &
 
 target/universal/stage/bin/wust >&- 2>&- &
 
