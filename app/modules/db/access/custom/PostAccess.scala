@@ -169,26 +169,38 @@ case class PostAccess() extends NodeAccessDefault[Post] {
     val connDef = RelationDef(nodeDef, ConnectsStart, connectsDef)
     val classifiesDef = RelationDef(FactoryNodeDef(Classification), Classifies, connectsDef)
 
-    val ownVoteCondition = context.user.map { user =>
+    val userMatcher = context.user.map { user =>
       val userDef = ConcreteNodeDef(user)
+      val viewedDef = RelationDef(userDef, Viewed, nodeDef)
       val votesDef = RelationDef(userDef, Votes, tagsDef)
-      s"optional match ${votesDef.toPattern(true,false)}"
+
+      s"""
+      optional match ${viewedDef.toPattern(true, false)}
+      optional match ${votesDef.toPattern(true,false)}
+      """
     }.getOrElse("")
 
     val query = s"""
     match ${nodeDef.toPattern}
     optional match ${tagsDef.toPattern(true, false)}
     optional match ${tagClassifiesDef.toPattern(true, false)}
-    $ownVoteCondition
     optional match ${connDef.toPattern(false, true)}, ${classifiesDef.toPattern(true, false)}
     optional match ${createdDef.toPattern(true, false)}
+    $userMatcher
     return *
     """
 
     val discourse = Discourse(db.queryGraph(query, ctx.params))
     discourse.posts.headOption match {
       case Some(node) =>
-        context.user.foreach(PostHelper.viewPost(node, _))
+        context.user.foreach { user =>
+          // The post is viewed as a future, because it has to block for incrementing the viewCount
+          // So, we increment the viewcount for the user in the response
+          if (node.rev_vieweds.isEmpty)
+            node.viewCount += 1
+
+          PostHelper.viewPost(node, user)
+        }
         Ok(Json.toJson(node))
       case None =>
         NotFound(s"Cannot find node with uuid '$uuid'")
