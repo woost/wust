@@ -112,7 +112,6 @@ create _318-[:`HASLOGIN`]->_317
 create _318-[:`MEMBEROF`]->_309
 create _318-[:`VIEWED` {`timestamp`:1444840088671}]->_314
 create _318-[:`HASKARMA` {`karma`:51}]->_313
-create _318-[:`SKIPPED`]->_355
 create _320-[:`CONNECTSSTART`]->_322
 create _321-[:`CREATEDEND`]->_320
 create _322-[:`CONNECTSEND`]->_314
