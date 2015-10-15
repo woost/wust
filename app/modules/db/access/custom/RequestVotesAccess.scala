@@ -79,7 +79,8 @@ case class VotesChangeRequestAccess(sign: Long) extends EndRelationAccessDefault
       with ${postDef.name}, ${requestDef.name}, updated1, updated2
       optional match (${postDef.name})-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`), ${userDef.toPattern}
       with distinct connectable, ${postDef.name}, ${userDef.name}, ${requestDef.name}, updated1, updated2
-      optional match (${userDef.name})-[r:`${HasKarma.relationType}`]->(tag)
+      optional match (${userDef.name})-[r:`${HasKarma.relationType}`]->(tag: `SCOPE`)
+      with distinct tag, connectable, ${postDef.name}, ${userDef.name}, ${requestDef.name}, updated1, updated2
       optional match ${votesDef.toPattern(false, false)}
       optional match ${createdDef.toPattern(false,false)}
       return *
