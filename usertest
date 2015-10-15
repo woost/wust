@@ -7,8 +7,8 @@ ffmpeg -y -f alsa -ac 1 -i pulse -f x11grab -r 25 -s `xdpyinfo | grep 'dimension
 FFMPEGPID=$!
 
 TMP=$(mktemp -d)
-[ "$(hostname)" = "beef" ] && SCALE=1.5 || SCALE=1
-chromium --user-data-dir=$TMP --disable-default-apps --disable-infobars --disable-save-password-bubble --no-first-run --no-default-browser-check --disable-translate --disable-suggestions-service --incognito --disable-extensions --high-dpi-support=1 --force-device-scale-factor=$SCALE http://localhost:9000/focus/drplTzjjQnKUbLezdznd8w/
+[ "$(hostname)" = "beef" ] && SCALE=1.2 || SCALE=1
+chromium --user-data-dir=$TMP --disable-infobars --disable-translate --d --disable-save-password-bubble --no-first-run --no-default-browser-check --high-dpi-support=1 --force-device-scale-factor=$SCALE http://localhost:9000/focus/drplTzjjQnKUbLezdznd8w/
 rm -r $TMP
 
 kill $FFMPEGPID
