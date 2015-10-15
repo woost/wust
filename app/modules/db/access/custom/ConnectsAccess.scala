@@ -34,8 +34,8 @@ trait ConnectsHelper {
     val userDef = ConcreteNodeDef(user)
     val createdDef = RelationDef(userDef, SchemaCreated, startDef)
     val query = s"""
-    match ${startDef.toPattern},
-    (${startDef.name})-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)
+    match ${startDef.toPattern}
+    match (${startDef.name})-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)
     with distinct connectable, ${startDef.name}
     match ${userDef.toPattern}
     match ${endDef.toPattern}
@@ -55,8 +55,8 @@ trait ConnectsHelper {
     val userDef = ConcreteNodeDef(user)
     val createdDef = RelationDef(userDef, SchemaCreated, connectsDef.startDefinition)
     val query = s"""
-    match ${connectsDef.toPattern},
-    (${connectsDef.startName})-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)
+    match ${connectsDef.toPattern}
+    match (${connectsDef.startName})-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)
     with distinct connectable, ${connectsDef.startName}, ${connectsDef.startRelationName}, ${connectsDef.name}, ${connectsDef.endRelationName}, ${connectsDef.endName}
     match ${userDef.toPattern}
     optional match ${createdDef.toPattern(false, false)}
