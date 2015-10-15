@@ -286,6 +286,7 @@ case class PostAccess() extends NodeAccessDefault[Post] {
           match ${userDef.toPattern}
           optional match ${createdDef.toPattern(false, false)}
           optional match (tag: `${Scope.label}`)-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`)
+          with distinct tag, ${postDef.name}, connectable, ${userDef.name}, ${createdDef.name}
           optional match (${userDef.name})-[r:`${HasKarma.relationType}`]->(tag)
           return *
         """
