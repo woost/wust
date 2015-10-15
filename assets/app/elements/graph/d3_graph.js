@@ -277,6 +277,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                             tagLabel.className = "tag-label nodetag";
 
                             if( t.isContext ) {
+                                // TODO: this can never happen, right?
                                 tagLabel.style.backgroundColor = Helpers.contextLabelBackgroundColor(t);
                                 tagLabel.style.border = "1px solid " + Helpers.contextLabelBorderColor(t);
                             } else { // classification
