@@ -1,5 +1,5 @@
 <div id="vote_component" class="content-component">
-    <p class="pull-right col-md-3">Here you can see changes made by other users. You can decide whether these changes should be accepted or rejected.</p>
+    <p class="pull-right" style="width: 250px">Here you can see changes made by other users. You can decide whether these changes should be accepted or rejected.</p>
     <h2 ng-if="vm.isLoading && !vm.change" class="text-muted">Loading</h2>
     <h2 ng-if="!vm.isLoading && !vm.change" class="text-muted">Nothing to moderate</h2>
     <div id="description_container" ng-if="vm.change">
