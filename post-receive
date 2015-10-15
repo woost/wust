@@ -9,11 +9,11 @@ export PATH="$PATH:$HOME/.node_modules/bin"
 source $HOME/export_neo4j_pass
 
 cd ../app
+
+[ -f target/universal/stage/RUNNING_PID ] && kill $(cat target/universal/stage/RUNNING_PID)
+
 ./buildproduction || exit 1
 
-killall java
-sleep 2
-killall -9 java
 
 target/universal/stage/bin/wust >&- 2>&- &
 
