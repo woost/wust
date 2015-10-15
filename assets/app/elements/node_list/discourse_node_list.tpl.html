@@ -7,11 +7,14 @@
         </div>
         <div class="node_model_list" ng-switch="::vm.nodeModel.isNested">
             <div ng-switch-when="true">
-                <div ng-repeat="node in vm.nodeModel.list track by node.id" class="list-item">
-                    <span ng-if="vm.templateBefore" ng-include="vm.templateBefore"></span>
-                    <span class="list-item-small-post" small-post node="node"></span>
-                    <div ng-repeat="nested in node.nestedNodeLists[vm.nodeModel.listId]" discourse-node-list node-model="nested.model"></div>
-                    <span ng-if="vm.templateAfter" ng-include="vm.templateAfter"></span>
+                <div ng-repeat="node in vm.nodeModel.list track by node.id">
+                    <div class="list-item">
+                        <span ng-if="vm.templateBefore" ng-include="vm.templateBefore"></span>
+                        <span class="list-item-small-post" small-post node="node">
+                            <div class="inner-list" ng-repeat="nested in node.nestedNodeLists[vm.nodeModel.listId]" discourse-node-list node-model="nested.model" template-before="{{vm.templateBefore}}" template-after="{{vm.templateAfter}}"></div>
+                        </span>
+                        <span ng-if="vm.templateAfter" ng-include="vm.templateAfter"></span>
+                    </div>
                 </div>
             </div>
             <div ng-switch-default>

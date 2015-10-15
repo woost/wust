@@ -10,6 +10,7 @@ function smallPost(ContextService) {
             node: "=",
             ignoreTags: "="
         },
+        transclude: true,
         controller: smallPostCtrl,
         controllerAs: "vm",
         bindToController: true,

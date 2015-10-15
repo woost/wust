@@ -1,4 +1,5 @@
 @import "compass/css3/flexbox";
+@import "compass/css3/transform";
 @import "globals";
 
 #neighbours_component {
@@ -49,6 +50,18 @@
         padding-top: 15px;
     }
 
+    .inner-list {
+        .discourse_node_list {
+            padding-top: 0px;
+            .small_post_directive {
+                width: 125px;
+            }
+            .drop_post_container {
+                min-height: 8px;
+            }
+        }
+    }
+
     .neighbours_attachedto {
         .node_model_list {
             // arrow touches bigpost
@@ -61,6 +74,9 @@
     }
 
     .neighbours_followers {
+        .inner-list {
+            margin-left: -7px;
+        }
         text-align:right; // for sort button group
         .node_model_list {
             // arrow touches bigpost
@@ -108,6 +124,7 @@
                 margin-right: 2px;
                 margin-top: 10px;
                 margin-bottom: 10px;
+                z-index: 1; // put above svg arrow container
                 .tag-label {
                     $scale: 0.7;
                     display: block !important; // triggers line breaks
@@ -126,7 +143,6 @@
                 width: 0;
                 position: relative;
                 left: -$arrow-length;
-                z-index: -1; // put svg below tool buttons
                 .arrow {
                     .arrowline {
                         stroke-width: 1px;
@@ -146,6 +162,7 @@
                 top: -8px;
                 left: -$arrow-length;
                 text-align: center; // position of the tools on the arrow
+                z-index: 1; // put above svg arrow container
                 .tools {
                     width: $arrow-length;
                     padding-left: 10px; // arrow head

@@ -1,1 +1,4 @@
-<span ng-include="'elements/post/small_post.tpl.html'"></span>
+<span class="small_post_directive node" colored-tag-node="vm.node" ignore-tags="vm.ignoreTags" ui-draggable="{{::vm.Auth.isLoggedIn}}" drag="vm.node.encode ? vm.node.encode() : vm.node" drag-channel="{{vm.node.isHyperRelation? 'hyper_node' : 'node'}}" stop-drag-propagation>
+    <span ng-include="'elements/post/small_post.tpl.html'"></span>
+    <span ng-transclude></span>
+</span>
