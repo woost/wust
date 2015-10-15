@@ -139,7 +139,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.d3SvgDefs.append("svg:marker")
                     .attr("id", "graph_arrow")
                     .attr("viewBox", this.arrowToResponse ? "-10 -3 10 6" : "0 -3 10 6") // x y w h
-                    .attr("refX", this.arrowToResponse ? -9 : 9)
+                    .attr("refX", this.arrowToResponse ? -10 : 10)
                     .attr("markerWidth", 15)
                     .attr("markerHeight", 9)
                     .attr("orient", "auto")
