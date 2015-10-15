@@ -6,5 +6,9 @@ neo4j-shell -file usertest2.cql
 sbt stage
 target/universal/stage/bin/wust &
 sleep 5
+
+ffmpeg -y -f alsa -ac 1 -i pulse -f x11grab -r 25 -s `xdpyinfo | grep 'dimensions:'|awk '{print $2}'` -i :0.0 -acodec libvorbis -b:a 128k -c:v libx264 -crf 23 -preset superfast -vsync 1 capture-$(date +"%Y-%m-%d-%H-%M-%S").mkv &
 chromium --incognito --disable-extensions --high-dpi-support=1 --force-device-scale-factor=1 http://localhost:9000/focus/drplTzjjQnKUbLezdznd8w/
+trap '[ -n "$(jobs -pr)" ] && kill $(jobs -pr)' INT QUIT TERM EXIT
+sleep 10
 
