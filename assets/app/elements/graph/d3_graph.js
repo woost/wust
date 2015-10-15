@@ -51,7 +51,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     .links(graph.relations)
                     .linkStrength(this.constantEdgeLength ? 0.0 : this.linkStrength) // rigidity, 0, because we handle this ourselves in tick()
                     .friction(0.92)
-                    .linkDistance(40) // weak geometric constraint. Pushes nodes to achieve this distance
+                    .linkDistance(this.contstantEdgeLength ? 40 : 90) // weak geometric constraint. Pushes nodes to achieve this distance
                     .charge(d => d.degree > 0 ? -1500 : -50)
                     .chargeDistance(1000)
                     .gravity(0.1)
