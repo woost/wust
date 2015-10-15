@@ -297,7 +297,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                         let circleCont = document.createElement("span");
                         circleCont.className = "tag_circle_container pull-right";
                         elem.appendChild(circleCont);
-                        d.tags.forEach(t => {
+                        console.log(d.tags, d.classifications);
+                        (d.tags.concat(d.classifications)).forEach(t => {
                             let circleTitle = document.createElement("span");
                             circleTitle.className = "tag_circle_title";
                             circleTitle.setAttribute("title", t.title);
