@@ -241,6 +241,7 @@ case class PostAccess() extends NodeAccessDefault[Post] {
       with distinct ${postDef.name}, connectable
       match ${userDef.toPattern}
       optional match (tag: `${Scope.label}`)-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`)
+      with distinct tag, ${postDef.name}, connectable, ${userDef.name}
       optional match (${userDef.name})-[r:`${HasKarma.relationType}`]->(tag)
       optional match ${deletedDef.toPattern(true, false)} where ${deletedDef.name}.status = ${PENDING}
       optional match ${votesDef.toPattern(false, false)}
