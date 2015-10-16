@@ -21,6 +21,7 @@ object Search extends Controller {
   def index(labelOpt: Option[String], termOpt: Option[String], searchDescriptionsOpt: Option[Boolean], startPostOpt: Option[Boolean], contextsAll: List[String], contextsAnyRaw: List[String], contextsWithout: List[String], classificationsAll: List[String], classificationsAnyRaw: List[String], classificationsWithout: List[String], pageOpt: Option[Int], sizeOpt: Option[Int], sortOrder: Option[Int]) = Action {
 
     val discourse = if(
+      sizeOpt.map(_ == 0).getOrElse(false) ||
       (contextsAll intersect contextsWithout).nonEmpty ||
       (classificationsAll intersect classificationsWithout).nonEmpty ||
       (contextsAnyRaw.size > 0 && contextsAnyRaw.toSet.subsetOf(contextsWithout.toSet)) ||
