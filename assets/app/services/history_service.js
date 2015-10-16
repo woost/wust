@@ -91,13 +91,15 @@ function HistoryService(Auth, Session, Post, DiscourseNode, $rootScope, $state) 
 
         let current = currentViewComponent.getWrap("graph");
         if (current.rootNode.id === nodeId) {
-            // TODO: not possible to have a component without a rootnode, so just notify the user, that the node was deleted
-            if ($state.is("focus"))
-                humane.success("Currently viewed Post has been deleted");
+            current.rootNode.isDeleted = true;
+            //TODO:why set on both?!
+            let current2 = currentViewComponent.getWrap("neighbours");
+            current2.rootNode.isDeleted = true;
         } else {
             current.removeNode(nodeId);
-            current.commit();
         }
+
+        current.commit();
 
         _.remove(self.visited, { id: nodeId });
     }

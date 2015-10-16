@@ -312,7 +312,7 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
 
             return this.service.$buildRaw(_.pick(this, "id")).$destroy().$then(data => {
                 if (data.$response.status === 204) { //NoContent response => instant delete
-                    HistoryService.remove(this.id);
+                    HistoryService.removeFromCurrentView(this.id);
                     this.remove();
                 }
             });

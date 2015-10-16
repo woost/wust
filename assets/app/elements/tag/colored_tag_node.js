@@ -22,7 +22,8 @@ function coloredTagNode(Helpers, ContextService) {
         scope.$watchCollection(() =>
                 scope.ignoreTags +
                 scope.coloredTagNode.tags +
-                scope.coloredTagNode.classifications,
+                scope.coloredTagNode.classifications +
+                scope.coloredTagNode.isDeleted,
                 refreshColor);
 
         function refreshColor() {
@@ -30,6 +31,9 @@ function coloredTagNode(Helpers, ContextService) {
         }
 
         function selectTag(node) {
+            if (node.isDeleted)
+                return;
+
             // if ignoretags are set, we will filter by them (this is the case for streams and search.
             // otherwise the the current contexts are ignored.
             let tags = Helpers.sortedNodeTags(node, scope.ignoreTags || []);

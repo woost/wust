@@ -4,10 +4,10 @@
 
 .big_post_directive {
     &.deleted {
-        background: #aaa !important;
+        background-color: #aaa !important;
         color: #666 !important;
         .post_description {
-            background: #aaa !important;
+            background-color: #aaa !important;
         }
     }
     .deleted_info {

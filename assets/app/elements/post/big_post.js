@@ -15,12 +15,12 @@ function bigPost() {
     };
 }
 
-bigPostCtrl.$inject = ["$state", "Post", "ModalEditService", "ContextService", "Auth"];
+bigPostCtrl.$inject = ["$state", "Post", "ModalEditService", "ContextService", "Auth", "HistoryService"];
 
 //TODO: we are using the markdown directive directly and also allow to enter zen
 //mode. both directives will lead to parsing the markdown description, which is
 //not needed. zen mode should reuse the parsed description here.
-function bigPostCtrl($state, Post, ModalEditService, ContextService, Auth) {
+function bigPostCtrl($state, Post, ModalEditService, ContextService, Auth, HistoryService) {
     let vm = this;
 
     vm.node = vm.component.rootNode;
@@ -40,8 +40,6 @@ function bigPostCtrl($state, Post, ModalEditService, ContextService, Auth) {
     vm.editMode = false;
     vm.nodeHasContext = () => _.any(vm.node.tags, "isContext");
 
-    vm.nodeIsDeleted = false;
-
     // ContextService.setNodeContext(vm.node);
 
     function onSave(response) {
@@ -55,9 +53,7 @@ function bigPostCtrl($state, Post, ModalEditService, ContextService, Auth) {
 
     function onDelete(response) {
         vm.editMode = false;
-        if (response.$response.status === 204) // NoContent response means node was instantly deleted
-            onDeleteApply();
-        else { // there should be deleterequests
+        if (response.$response.status !== 204) { // NoContent response means node was instantly deleted
             //TODO: why can i not reference them via response.requestsDelete like in onSave
             vm.changeRequests = _.uniq(response.$response.data.requestsDelete.concat(vm.changeRequests), "id").filter(r => !r.status);
         }
@@ -69,7 +65,7 @@ function bigPostCtrl($state, Post, ModalEditService, ContextService, Auth) {
     }
 
     function onDeleteApply() {
-        vm.nodeIsDeleted = true;
+        HistoryService.removeFromCurrentView(vm.node.id);
     }
 
     function onTagApply(change) {

@@ -111,6 +111,9 @@ trait NodeBase extends NodeDelegates {
   var inRelations: Set[RelationLike] = Set.empty
   var outRelations: Set[RelationLike] = Set.empty
 
+  @JSExport
+  var isDeleted: Boolean = false
+
   def relations = inRelations ++ outRelations
   def predecessors = inRelations.map(_.startNode)
   def successors = outRelations.map(_.endNode)

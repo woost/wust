@@ -251,9 +251,13 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 .attr("class", d => d.isHyperRelation ? "hyperrelation" : "small_post_directive")
                 .style("background-color", n => {
                     if(n.isHyperRelation) return undefined;
+                    if(n.isDeleted) return "red";
                     let tags = Helpers.sortedNodeTags(n);
                     if(tags.length === 0) return undefined;
                     return Helpers.smallPostBackgroundColor(tags[0]);
+                })
+                .style("color", n => {
+                    return n.isDeleted ? "#666" : undefined;
                 })
                 .style("border-color", n => {
                     if( this.debugDraw ) return Math.sign(n.rootiness) > 0 ? "lightblue" : "pink";
@@ -298,7 +302,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                         let circleCont = document.createElement("span");
                         circleCont.className = "tag_circle_container pull-right";
                         elem.appendChild(circleCont);
-                        console.log(d.tags, d.classifications);
+                        // console.log(d.tags, d.classifications);
                         (d.tags.concat(d.classifications)).forEach(t => {
                             let circleTitle = document.createElement("span");
                             circleTitle.className = "tag_circle_title";
@@ -363,18 +367,18 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.d3NodeReplyTool = this.d3NodeTools.append("div")
                     .attr("class", "nodetool replytool fa fa-plus")
                     .attr("title", "Respond")
-                    .style("display", d => (Auth.isLoggedIn) ? "inline-block" : "none");
+                    .style("display", d => (Auth.isLoggedIn && !d.isDeleted) ? "inline-block" : "none");
 
                 this.d3NodeConnectTool = this.d3NodeTools.append("div")
                     .attr("class", "nodetool connecttool icon-flow-line")
                     .attr("title", "Drag to connect with other Node")
-                    .style("display", d => (Auth.isLoggedIn && d.isHyperRelation.implies(this.arrowToResponse)) ? "inline-block" : "none")
+                    .style("display", d => (Auth.isLoggedIn && !d.isDeleted && d.isHyperRelation.implies(this.arrowToResponse)) ? "inline-block" : "none")
                     .append("div").attr("class", "event-offset-rotate-fix");
 
                 this.d3NodeEditTool = this.d3NodeTools.append("div")
                     .attr("class", "nodetool edittool fa fa-pencil")
                     .attr("title", "Edit Connection")
-                    .style("display", d => (Auth.isLoggedIn && d.isHyperRelation) ? "inline-block" : "none");
+                    .style("display", d => (Auth.isLoggedIn && !d.isDeleted && d.isHyperRelation) ? "inline-block" : "none");
 
                 this.d3NodePinTool = this.d3NodeTools.append("div")
                     .attr("class", "nodetool pintool fa fa-thumb-tack")
