@@ -14,6 +14,9 @@
     .tag-editor, .tag-suggestions {
         border: 1px solid #ccc;
     }
+    .transparent-suggestion .tag-label {
+        opacity: 0.5;
+    }
     .tag-editor {
         width: 100%;
         display: block;
