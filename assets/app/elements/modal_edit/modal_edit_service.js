@@ -17,10 +17,15 @@ function ModalEditService($modal, EditService, $state, ContextService) {
     this.hide = hideModal;
     this.save = save;
 
-    let currentNode;
+    let currentNode, editedComponentNode;
     Object.defineProperty(this, "currentNode", {
         get: () => {
             return currentNode;
+        }
+    });
+    Object.defineProperty(this, "editedComponentNode", {
+        get: () => {
+            return editedComponentNode;
         }
     });
 
@@ -49,10 +54,13 @@ function ModalEditService($modal, EditService, $state, ContextService) {
     function showModal(editableNode, isAnswer = true) {
         if(editableNode === undefined) {
             currentNode = EditService.editNewDiscussion(angular.copy(ContextService.currentContexts));
+            editedComponentNode = undefined;
         } else if (isAnswer) {
             currentNode = EditService.editAnswer(editableNode);
+            editedComponentNode = undefined;
         } else {
             currentNode = EditService.edit(editableNode);
+            editedComponentNode = editableNode;
         }
         modalInstance.$promise.then(modalInstance.show);
     }
