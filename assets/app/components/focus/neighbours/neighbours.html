@@ -1,6 +1,6 @@
 <div id="neighbours_component">
     <div class="neighbours_attachedto">
-        <div class="btn-group" ng-model="vm.component.rootNode.successorOrder" bs-radio-group>
+        <div ng-if="vm.references.model.list.length" class="btn-group" ng-model="vm.component.rootNode.successorOrder" bs-radio-group>
             <label class="btn btn-xs btn-default fa fa-sort-amount-desc"><input type="radio" class="btn btn-xs btn-default" value="0"> Votes</label>
             <label class="btn btn-xs btn-default fa fa-sort-amount-asc"><input type="radio" class="btn btn-xs btn-default" value="1"> Time</label>
         </div>
@@ -18,7 +18,7 @@
         </div>
     </div>
     <div class="neighbours_followers">
-        <div class="btn-group" ng-model="vm.component.rootNode.predecessorOrder" bs-radio-group>
+        <div ng-if="vm.replies.model.list.length" class="btn-group" ng-model="vm.component.rootNode.predecessorOrder" bs-radio-group>
             <label class="btn btn-xs btn-default fa fa-sort-amount-desc"><input type="radio" class="btn btn-xs btn-default" value="0"> Votes</label>
             <label class="btn btn-xs btn-default fa fa-sort-amount-asc"><input type="radio" class="btn btn-xs btn-default" value="1"> Time</label>
         </div>
