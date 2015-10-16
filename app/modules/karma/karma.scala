@@ -8,6 +8,7 @@ import modules.db._
 import modules.db.types._
 import renesca.QueryHandler
 import renesca.parameter.implicits._
+import common.Constants
 
 trait KarmaQuery {
   def matcher: String
@@ -61,6 +62,9 @@ object KarmaUpdate {
         )
       )
 
+      println(params)
+      println(query)
+
       try {
         val discourse = Discourse(tx.queryGraph(query, params))
 
@@ -89,9 +93,25 @@ object KarmaUpdate {
     val tagDef = FactoryNodeDef(Scope)
 
     val tagMatch = s"""
-    match (${karmaQuery.postDef.name})-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)
+    match (${karmaQuery.postDef.name})-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..${Constants.karmaTagDepth * 2}]->(connectable: `${Connectable.label}`)
     with distinct connectable, ${karmaQuery.userDef.name}, ${karmaQuery.postDef.name}, karmaLog, karmaLog1, karmaLog2
     match ${tagDef.toPattern}-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`)
+    with distinct ${tagDef.name}, ${karmaQuery.userDef.name}, ${karmaQuery.postDef.name}, karmaLog, karmaLog1, karmaLog2
+    """
+
+    val karmaTagQuery = KarmaTagQuery(tagDef, tagMatch)
+    persist(karmaDefinition, karmaQuery, karmaTagQuery)
+  }
+
+  def persistWithConnectedTagsThroughParent(karmaDefinition: KarmaDefinition, karmaQuery: KarmaQuery, parentDef: NodeDef[Connects])(implicit ctx: QueryContext) = {
+    val tagDef = FactoryNodeDef(Scope)
+
+    //TODO: do not match all scopes!
+    val tagMatch = s"""
+    match ${parentDef.toPattern}-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..${Constants.karmaTagDepth * 2 - 1}]->(connectable: `${Connectable.label}`)
+    with distinct connectable, ${karmaQuery.userDef.name}, ${karmaQuery.postDef.name}, karmaLog, karmaLog1, karmaLog2
+    match ${tagDef.toPattern}
+    where (${tagDef.name})-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(${karmaQuery.postDef.name}) or (${tagDef.name})-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`)
     with distinct ${tagDef.name}, ${karmaQuery.userDef.name}, ${karmaQuery.postDef.name}, karmaLog, karmaLog1, karmaLog2
     """
 
@@ -103,7 +123,7 @@ object KarmaUpdate {
     val tagDef = FactoryNodeDef(Scope)
 
     val tagMatch = s"""
-    optional match (${karmaQuery.postDef.name})-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)
+    optional match (${karmaQuery.postDef.name})-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..${Constants.karmaTagDepth * 2}]->(connectable: `${Connectable.label}`)
     with distinct connectable, ${karmaQuery.userDef.name}, ${karmaQuery.postDef.name}, karmaLog, karmaLog1, karmaLog2
     match ${tagDef.toPattern}
     where (${tagDef.name})-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`) or (${tagDef.name})-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(${karmaQuery.postDef.name})

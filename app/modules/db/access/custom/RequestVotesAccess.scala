@@ -15,6 +15,7 @@ import renesca.schema._
 import renesca._
 import play.api.mvc.Results._
 import moderation.Moderation
+import common.Constants
 
 case class ApplyResponse(changed: Boolean, karmaDefinitionOpt: Option[KarmaDefinition])
 
@@ -77,7 +78,7 @@ case class VotesChangeRequestAccess(sign: Long) extends EndRelationAccessDefault
       where ${requestDef.name}.status = ${PENDING} or ${requestDef.name}.status = ${INSTANT}
       set ${requestDef.name}._locked = true
       with ${postDef.name}, ${requestDef.name}, updated1, updated2
-      optional match (${postDef.name})-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`), ${userDef.toPattern}
+      optional match (${postDef.name})-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..${Constants.karmaTagDepth * 2}]->(connectable: `${Connectable.label}`), ${userDef.toPattern}
       with distinct connectable, ${postDef.name}, ${userDef.name}, ${requestDef.name}, updated1, updated2
       optional match (tag: `${Scope.label}`)-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`)
       with distinct tag, connectable, ${postDef.name}, ${userDef.name}, ${requestDef.name}, updated1, updated2

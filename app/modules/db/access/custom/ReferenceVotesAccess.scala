@@ -124,8 +124,9 @@ case class VotesConnectsAccess(sign: Long) extends VotesReferenceAccess[Connects
   override def updateKarma(reference: Connects, karmaDefinition: KarmaDefinition) {
     implicit val ctx = new QueryContext
     val postDef = ConcreteNodeDef(reference.startNodeOpt.get)
+    val parentDef = ConcreteNodeDef(reference)
     val createdDef = RelationDef(FactoryNodeDef(User), SchemaCreated, postDef)
 
-    KarmaUpdate.persistWithConnectedTags(karmaDefinition, KarmaQueryCreated(createdDef))
+    KarmaUpdate.persistWithConnectedTagsThroughParent(karmaDefinition, KarmaQueryCreated(createdDef), parentDef)
   }
 }

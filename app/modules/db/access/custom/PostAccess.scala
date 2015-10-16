@@ -14,6 +14,7 @@ import renesca.parameter.implicits._
 import renesca.QueryHandler
 import play.api.mvc.Results._
 import moderation.Moderation
+import common.Constants
 
 case class KarmaProperties(authorBoost: Long, voteWeight: Long, applyThreshold: Long) {
   def approvalSum = authorBoost + voteWeight
@@ -237,7 +238,7 @@ case class PostAccess() extends NodeAccessDefault[Post] {
 
       //TODO: sufficient to lock at the end?
       val query = s"""
-      match ${postDef.toPattern}-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)
+      match ${postDef.toPattern}-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..${Constants.karmaTagDepth * 2}]->(connectable: `${Connectable.label}`)
       with distinct ${postDef.name}, connectable
       match ${userDef.toPattern}
       optional match (tag: `${Scope.label}`)-[:`${Tags.startRelationType}`]->(:`${Tags.label}`)-[:`${Tags.endRelationType}`]->(connectable: `${Post.label}`)
@@ -294,7 +295,7 @@ case class PostAccess() extends NodeAccessDefault[Post] {
         val createdDef = RelationDef(userDef, SchemaCreated, postDef)
 
         val query = s"""
-          match ${postDef.toPattern}-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..20]->(connectable: `${Connectable.label}`)
+          match ${postDef.toPattern}-[:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..${Constants.karmaTagDepth * 2}]->(connectable: `${Connectable.label}`)
           with distinct ${postDef.name}, connectable
           match ${userDef.toPattern}
           optional match ${createdDef.toPattern(false, false)}
