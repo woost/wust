@@ -16,7 +16,7 @@
         <div class="tag-suggestions ng-trans ng-trans-fade ease" ng-show="(emptyShow && tags.length === 0) || alwaysShow || focus">
             <span class="title">For example:</span>
             <span ng-repeat="suggestor in suggestions">
-                <span ng-repeat="tag in suggestor track by tag.id" tag-label="tag" disable-link ng-mousedown="$event.stopPropagation(); $event.preventDefault();" ng-mouseup="add(tag); setFocus = true;" ng-class="{'transparent-suggestion': alwaysShow}"></span>
+                <span ng-repeat="tag in suggestor track by tag.id" tag-label="tag" disable-link ng-mousedown="$event.stopPropagation(); $event.preventDefault();" ng-mouseup="add(tag); setFocus = true;" ng-class="{'transparent-suggestion': (alwaysShow && !focus)}"></span>
             </span>
         </div>
     </div>
