@@ -62,15 +62,9 @@ object KarmaUpdate {
         )
       )
 
-      println(params)
-      println(query)
-
       try {
         val discourse = Discourse(tx.queryGraph(query, params))
-
-        println(discourse)
         LiveWebSocket.sendKarmaUpdate(discourse.karmaLogs)
-
       } catch {
         case e: Exception => println("EXCEPTION WHILE UPDATING KARMA:\n" + e)
       }
