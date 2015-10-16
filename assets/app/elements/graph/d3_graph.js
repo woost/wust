@@ -1444,13 +1444,13 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             } else {
                 // if the longPressTimer is still active
                 // and the longPressAction is not triggered yet
-                if( this.longPressTimer )
+                if( this.longPressTimer ) {
                     this.nodeClickAction(d);
-
-
-                // if the user just clicked, the position should be reset.
-                // unsetFixed(graph, force, d);
-                // this is disabled, because we have the pin to unfix
+                }
+            }
+            if( this.longPressTimer ) {
+                clearTimeout(this.longPressTimer);
+                this.longPressTimer = undefined;
             }
 
             this.isDragging = false;
