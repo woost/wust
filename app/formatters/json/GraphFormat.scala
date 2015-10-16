@@ -57,7 +57,7 @@ object GraphFormat {
       ("tags", Json.toJson(post.inRelationsAs(Tags))),
       ("timestamp", Json.toJson(JsNumber(post.timestamp))),
       ("author", post.rev_createds.headOption.map(u => UserFormat.UserFormat.writes(u)).getOrElse(JsNull)),
-      ("viewcount", JsNumber(post.viewCount))
+      ("viewCount", JsNumber(post.viewCount))
     ))
   }
 
