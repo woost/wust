@@ -6,7 +6,7 @@ echo "building production assets"
 echo "building backend"
 sbt stage
 echo "starting server"
-target/universal/stage/bin/wust
+UI_SCRATCHPAD_ENABLED="false" target/universal/stage/bin/wust
 kill $NEO4JPID
 sleep 5
 

@@ -16,7 +16,7 @@ object Application extends Controller {
   private val apiDefinitionJson = Json.toJson(apiDefinition);
   private val nodeSchemasJson = Json.toJson(JsArray(nodeSchemas.map(Json.toJson(_))));
 
-  val scratchpadEnabled = "ui.scratchpad.enabled".configOrElse(false)
+  val scratchpadEnabled = "ui.scratchpad.enabled".configOrElse(true)
 
   def index(any: String) = Action {
     Ok(views.html.index(
