@@ -3,7 +3,7 @@ angular.module("wust.api").service("Session", Session);
 Session.$inject = ["User", "Auth", "$q"];
 
 function Session(User, Auth, $q) {
-    this.history = () => userOnly(userId => User.$buildRaw({id:userId}).history.$search().$asPromise());
+    this.history = (size) => userOnly(userId => User.$buildRaw({id:userId}).history.$search({size}).$asPromise());
     this.marks = {
         add: id => userOnly(userId => User.$buildRaw({id:userId}).marks.$buildRaw({id}).$save({}).$asPromise()),
         destroy: id => userOnly(userId => User.$buildRaw({id:userId}).marks.$buildRaw({id}).$destroy().$asPromise()),

@@ -3,7 +3,7 @@ angular.module("wust.services").service("HistoryService", HistoryService);
 HistoryService.$inject = ["Auth", "Session", "Post", "DiscourseNode", "$rootScope", "$state"];
 
 function HistoryService(Auth, Session, Post, DiscourseNode, $rootScope, $state) {
-    let maximum = 8;
+    let maximum = 10;
     let self = this;
 
     this.visited = [];
@@ -35,7 +35,7 @@ function HistoryService(Auth, Session, Post, DiscourseNode, $rootScope, $state) 
     }
 
     function load() {
-        Session.history().then(response => {
+        Session.history(maximum).then(response => {
             self.visited = _.values(response.$encode());
         });
     }

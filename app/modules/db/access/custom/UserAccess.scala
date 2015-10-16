@@ -209,14 +209,15 @@ case class UserHasHistory() extends StartRelationAccessDefault[User, Viewed, Pos
   val nodeFactory = Post
 
   override def read(context: RequestContext, param: ConnectParameter[User]) = {
-      implicit val ctx = new QueryContext
-      val userDef = FactoryUuidNodeDef(User, param.baseUuid)
-      val postDef = FactoryNodeDef(Post)
-      val viewedDef = RelationDef(userDef, Viewed, postDef)
+    implicit val ctx = new QueryContext
+    val userDef = FactoryUuidNodeDef(User, param.baseUuid)
+    val postDef = FactoryNodeDef(Post)
+    val viewedDef = RelationDef(userDef, Viewed, postDef)
 
-      val query = s"match ${ viewedDef.toPattern } return ${ postDef.name } order by ${ viewedDef.name }.timestamp desc limit 8"
-      val discourse = Discourse(db.queryGraph(query, ctx.params))
+    val size = context.sizeWithDefault
+    val query = s"match ${ viewedDef.toPattern } return ${ postDef.name } order by ${ viewedDef.name }.timestamp desc limit $size"
+    val discourse = Discourse(db.queryGraph(query, ctx.params))
 
-      Ok(Json.toJson(TaggedTaggable.shapeResponse(discourse.posts)))
+    Ok(Json.toJson(TaggedTaggable.shapeResponse(discourse.posts)))
   }
 }
