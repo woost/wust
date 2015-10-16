@@ -152,7 +152,7 @@ function DiscourseNodeList() {
             remove(elem) {
                 let self = this;
                 this.apiList.$buildRaw(elem.encode()).$destroy().$then(() => {
-                    humane.success("Disconnected node");
+                    // humane.success("Disconnected node");
                     //TODO: response should include the deleted relation
                     let hyperNode = this.getHyperRelationTo(elem);
                     self.component.removeRelation(hyperNode.startId, hyperNode.endId);
@@ -184,7 +184,7 @@ function DiscourseNodeList() {
                         console.warn("Tried to connect local node which is not in the EditService", node);
                     } else {
                         self.apiList.$buildRaw(node).$save({}).$then(data => {
-                            humane.success("Connected node");
+                            // humane.success("Connected node");
                             addToComponent(data);
                         }, response => humane.error(response.$response.data));
                     }

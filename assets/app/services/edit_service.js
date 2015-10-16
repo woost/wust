@@ -154,8 +154,8 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
                         humane.success("Updated node");
                     else if (hasRequests)
                         humane.success("Created change request");
-                    else if (!model.id)
-                        humane.success("Added new node");
+                    // else if (!model.id)
+                        // humane.success("Added new node");
 
                     // TODO: we should be able to include tags for the connects relation when we are responding.
                     // currently just send a second request to tag the newly created connects relation

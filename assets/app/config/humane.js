@@ -11,6 +11,6 @@ function HumaneConfig() {
 
     humane.success = humane.spawn({
         addnCls: "humane-libnotify-info",
-        timeout: 750
+        timeout: 1000,
     });
 }
