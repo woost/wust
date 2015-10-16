@@ -5,6 +5,8 @@ import formatters.json.ApiSchemaFormat._
 import modules.requests._
 import play.api.libs.json._
 import play.api.mvc._
+import play.api.Play.current
+import common.ConfigString._
 
 object Application extends Controller {
   //TODO create embedding type RequestSchema(ApiDefinition, Seq[NodeSchema])
@@ -14,10 +16,17 @@ object Application extends Controller {
   private val apiDefinitionJson = Json.toJson(apiDefinition);
   private val nodeSchemasJson = Json.toJson(JsArray(nodeSchemas.map(Json.toJson(_))));
 
+  val scratchpadEnabled = "ui.scratchpad.enabled".configOrElse(false)
+
   def index(any: String) = Action {
-    Ok(views.html.index(JsObject(Seq(
-      ("api", apiDefinitionJson),
-      ("models", nodeSchemasJson)
-    ))))
+    Ok(views.html.index(
+      JsObject(Seq(
+        ("api", apiDefinitionJson),
+        ("models", nodeSchemasJson)
+      )),
+      JsObject(Seq(
+        ("scratchpadEnabled", JsBoolean(scratchpadEnabled))
+      ))
+    ))
   }
 }

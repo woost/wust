@@ -1,4 +1,4 @@
-@(schema: play.api.libs.json.JsValue)
+@(schema: play.api.libs.json.JsValue, uiSettings: play.api.libs.json.JsValue)
 <!DOCTYPE html>
 
 <html ng-app='wust'>
@@ -10,7 +10,8 @@
 
         <script type="text/javascript" charset="utf-8">
             var globals = {
-                schema: @Html(play.api.libs.json.Json.stringify(schema))
+                schema: @Html(play.api.libs.json.Json.stringify(schema)),
+                uiSettings: @Html(play.api.libs.json.Json.stringify(uiSettings))
             };
         </script>
     </head>

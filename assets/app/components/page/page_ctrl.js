@@ -5,6 +5,8 @@ PageCtrl.$inject = ["SidebarService", "EditService", "FullscreenService", "$root
 function PageCtrl(SidebarService, EditService, FullscreenService, $rootScope, Auth) {
     let vm = this;
 
+    $rootScope.uiSettings = window.globals.uiSettings;
+
     vm.sidebar = SidebarService;
     vm.editNode = editNode;
     vm.Auth = Auth;
