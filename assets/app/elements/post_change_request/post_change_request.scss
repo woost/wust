@@ -13,12 +13,16 @@
         }
 
         .inactive {
-            opacity: 0.3;
+            opacity: 0.5;
         }
 
         .votebar {
             margin-top: 10px;
+            // background-color: #696969;
+            // color: white;
+            // border-radius: 3px; // same as up/down buttons
             .progress {
+                background-color: #a4a4a4;
                 margin-bottom: 5px; // originally strange 20px. is this coming from bootstrap itself?
             }
         }
