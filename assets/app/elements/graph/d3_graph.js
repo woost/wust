@@ -1211,7 +1211,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             if(d.isHyperRelation) {
                 TagRelationEditService.show(d, () => this.disconnectHyperRelation(d));
             } else {
-                ModalEditService.show(d); // ?jo da e steht jetzt noch repsond to. dann wie in edit_post einfach ngswitch
+                ModalEditService.show(d, false); // ?jo da e steht jetzt noch repsond to. dann wie in edit_post einfach ngswitch
             }
         }
 

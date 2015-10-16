@@ -46,14 +46,15 @@ function ModalEditService($modal, EditService, $state, ContextService) {
         }
     }
 
-    function showModal(referenceNode) {
-        if(referenceNode === undefined) {
+    function showModal(editableNode, isAnswer = true) {
+        if(editableNode === undefined) {
             currentNode = EditService.editNewDiscussion(angular.copy(ContextService.currentContexts));
-            modalInstance.$promise.then(modalInstance.show);
+        } else if (isAnswer) {
+            currentNode = EditService.editAnswer(editableNode);
         } else {
-            currentNode = EditService.editAnswer(referenceNode);
-            modalInstance.$promise.then(modalInstance.show);
+            currentNode = EditService.edit(editableNode);
         }
+        modalInstance.$promise.then(modalInstance.show);
     }
 
     function hideModal() {
