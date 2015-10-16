@@ -885,8 +885,14 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     let corner = rect.minCorner;
                     let angle = rect.angle;
 
-                    this.elementInfo.domNodeContainer(node).style[this.transformOriginCompat] = `${corner.x}px ${corner.y}px`;
-                    this.elementInfo.domNodeContainer(node).style[this.transformCompat] = `rotate(${angle}rad) translate(${corner.x}px, ${corner.y}px)`;
+                    let domNode = this.elementInfo.domNodeContainer(node);
+
+                    domNode.style[this.transformOriginCompat] = `${corner.x}px ${corner.y}px`;
+                    domNode.style[this.transformCompat] = `rotate(${angle}rad) translate(${corner.x}px, ${corner.y}px)`;
+
+                    let nodetools = domNode.querySelectorAll(".nodetool");
+                    for(let i = 0; i < nodetools.length; i++)
+                        nodetools[i].style[this.transformCompat] = `translate(0, 0) rotate(${-angle}rad)`;
                 } else {
                     let corner = this.nodeRect(node).minCorner;
                     this.elementInfo.domNodeContainer(node).style[this.transformCompat] = `translate(${corner.x}px, ${corner.y}px)`;
