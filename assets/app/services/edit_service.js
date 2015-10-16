@@ -266,7 +266,7 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
             this.isLocal = this.id === undefined;
 
             //TODO: share validation code between scala and js
-            let defaultValidity = ValidityEntry("Invalid", true);
+            let defaultValidity = ValidityEntry("", true);
             this.validity = {
                 title: defaultValidity,
                 description: defaultValidity,
@@ -279,7 +279,9 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
                                         .and(ValidityEntry("Title must be less than 140 characters", this.title.length <= 140));
 
                 if (this.referenceNode === undefined && this.isLocal) {
-                    this.validity.tags = ValidityEntry("New discussion needs context", !_.isEmpty(this.tags.filter(t => t.isContext)));
+                    let [contexts, classifications] = _.partition(this.tags, "isContext");
+                    this.validity.tags = ValidityEntry((_.isEmpty(classifications) ? "" : "Only selected Classifications. ") + "New discussion needs context", !_.isEmpty(contexts));
+
                 }
             }
 
@@ -289,7 +291,7 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
             function ValidityEntry(errorMsg, valid) {
                 let self = {};
                 self.valid = valid;
-                self.message = valid ? "Success" : errorMsg;
+                self.message = valid ? "" : errorMsg;
                 self.and = other => self.valid ? other : self;
                 return self;
             }
