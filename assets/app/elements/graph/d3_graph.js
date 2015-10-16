@@ -378,7 +378,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.d3NodeEditTool = this.d3NodeTools.append("div")
                     .attr("class", "nodetool edittool fa fa-pencil")
                     .attr("title", "Edit Connection")
-                    .style("display", d => (Auth.isLoggedIn && !d.isDeleted && d.isHyperRelation) ? "inline-block" : "none");
+                    .style("display", d => (Auth.isLoggedIn && !d.isDeleted) ? "inline-block" : "none");
 
                 this.d3NodePinTool = this.d3NodeTools.append("div")
                     .attr("class", "nodetool pintool fa fa-thumb-tack")
@@ -1210,6 +1210,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
         editNode(d) {
             if(d.isHyperRelation) {
                 TagRelationEditService.show(d, () => this.disconnectHyperRelation(d));
+            } else {
+                ModalEditService.show(d); // ?jo da e steht jetzt noch repsond to. dann wie in edit_post einfach ngswitch
             }
         }
 
