@@ -4,7 +4,9 @@ strapConfig.$inject = ["$modalProvider", "$tooltipProvider"];
 
 function strapConfig($modalProvider, $tooltipProvider) {
   angular.extend($modalProvider.defaults, {
-    html: true
+    html: true,
+    backdrop: "static",
+    keyboard: true
   });
   angular.extend($tooltipProvider.defaults, {
     animation: "",
