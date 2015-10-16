@@ -78,6 +78,15 @@ create (_75:`UUIDNODE`:`TIMESTAMP`:`KARMALOG` {`karmaChange`:1, `reason`:"Upvote
 create (_76:`UUIDNODE`:`TIMESTAMP`:`KARMALOG` {`karmaChange`:1, `reason`:"Upvoted post", `timestamp`:1445027854927, `uuid`:"hyzMzuJORGKAFT37gpBPnA"})
 create (_77:`UUIDNODE`:`TIMESTAMP`:`KARMALOG` {`karmaChange`:1, `reason`:"Upvoted post", `timestamp`:1445027884049, `uuid`:"jRnJI8qqRGeeMoqPisrH_A"})
 create (_78:`UUIDNODE`:`TIMESTAMP`:`KARMALOG` {`karmaChange`:1, `reason`:"Upvoted post", `timestamp`:1445027913085, `uuid`:"RiSxpI2lRS-Gdus2V1o9rw"})
+create (_79:`UUIDNODE`:`TAGLIKE`:`EXPOSEDNODE`:`SCOPE` {`color`:96, `title`:"Haushalt", `uuid`:"gOjgDSXMTaOTsUqcP97z4g"})
+create (_80:`UUIDNODE`:`TIMESTAMP`:`EXPOSEDNODE`:`CONNECTABLE`:`HIDEABLE`:`POST` {`_locked`:false, `backupLabels`:"", `timestamp`:1445028527972, `title`:"Was mache ich ich bei Fettflecken auf meiner Hose?", `uuid`:"rLNvZMajTvCg3X1kWw7pQw", `viewCount`:2})
+create (_81:`UUIDNODE`:`TIMESTAMP`:`ACTION`:`CREATED` {`timestamp`:1445028527972, `uuid`:"nL62rPZNSgi46fZMrqP7XA"})
+create (_82:`UUIDNODE`:`VOTABLE`:`REFERENCE`:`TAGS` {`_locked`:false, `uuid`:"yeaTofcWQ-CyUJrLRIzRhA", `voteCount`:0})
+create (_83:`UUIDNODE`:`TIMESTAMP`:`VOTABLE`:`ACTION`:`CHANGEREQUEST`:`UPDATED` {`_locked`:false, `applyThreshold`:2, `approvalSum`:33, `newTitle`:"Was mache ich ich bei Fettflecken auf meiner Hose?", `oldTitle`:"Was mache ich bei Fettflecken auf meiner Hose?", `status`:2, `timestamp`:1445028536394, `uuid`:"Wa1Qo9NZTtmfk4LhqOgocg"})
+create (_84:`LOGININFO` {`providerID`:"credentials", `providerKey`:"Alice"})
+create (_85:`USER`:`UUIDNODE` {`name`:"Alice", `uuid`:"EwixTQPwQeC-_QrdI5hWlw"})
+create (_86:`PASSWORDINFO` {`hasher`:"bcrypt", `password`:"$2a$10$yPQphYhdKZdEuIQZq4gvaeTLrkXWc4cAuRgdqB2FHjn9YY6jHSBSy"})
+create (_87:`UUIDNODE`:`TIMESTAMP`:`VOTABLE`:`ACTION`:`CHANGEREQUEST`:`UPDATED` {`_locked`:false, `applyThreshold`:2, `approvalSum`:1, `newTitle`:"Was mache ich bei Fettflecken auf meiner Hose?", `oldTitle`:"Was mache ich ich bei Fettflecken auf meiner Hose?", `status`:0, `timestamp`:1445028591239, `uuid`:"K1mVV4svQgaB6ZSqWJnQGg"})
 create _11-[:`CLASSIFIES`]->_53
 create _11-[:`CLASSIFIES`]->_54
 create _11-[:`CLASSIFIES`]->_63
@@ -89,13 +98,14 @@ create _12-[:`CLASSIFIES`]->_69
 create _15-[:`CLASSIFIES`]->_26
 create _15-[:`CLASSIFIES`]->_30
 create _15-[:`CLASSIFIES`]->_72
+create _15-[:`CLASSIFIES`]->_82
 create _16-[:`CLASSIFIES`]->_57
 create _16-[:`CLASSIFIES`]->_60
 create _20-[:`HASPASSWORD`]->_22
 create _21-[:`HASLOGIN`]->_20
 create _21-[:`MEMBEROF`]->_19
-create _21-[:`VIEWED` {`timestamp`:1445026845941}]->_24
-create _21-[:`VIEWED` {`timestamp`:1445026836838}]->_28
+create _21-[:`VIEWED` {`timestamp`:1445028476278}]->_24
+create _21-[:`VIEWED` {`timestamp`:1445028474800}]->_28
 create _21-[:`VIEWED` {`timestamp`:1445027874563}]->_34
 create _21-[:`VIEWED` {`timestamp`:1445026829829}]->_44
 create _21-[:`VIEWED` {`timestamp`:1445027719725}]->_58
@@ -104,7 +114,8 @@ create _21-[:`VIEWED` {`timestamp`:1445027911545}]->_51
 create _21-[:`VIEWED` {`timestamp`:1445027906346}]->_61
 create _21-[:`VIEWED` {`timestamp`:1445027729730}]->_64
 create _21-[:`VIEWED` {`timestamp`:1445027877222}]->_67
-create _21-[:`VIEWED` {`timestamp`:1445027715098}]->_70
+create _21-[:`VIEWED` {`timestamp`:1445028220917}]->_70
+create _21-[:`VIEWED` {`timestamp`:1445028536405}]->_80
 create _21-[:`HASKARMA` {`karma`:2}]->_23
 create _21-[:`HASKARMA` {`karma`:1}]->_50
 create _21-[:`HASKARMA` {`karma`:1}]->_27
@@ -113,13 +124,16 @@ create _21-[:`VOTES` {`timestamp`:1445026732933, `weight`:33}]->_48
 create _21-[:`VOTES` {`timestamp`:1445026812265, `weight`:1}]->_46
 create _21-[:`VOTES` {`timestamp`:1445027884039, `weight`:1}]->_69
 create _21-[:`VOTES` {`timestamp`:1445027913075, `weight`:1}]->_53
+create _21-[:`VOTES` {`timestamp`:1445028536396, `weight`:33}]->_83
 create _21-[:`CREATEDSTART`]->_25
 create _21-[:`CREATEDSTART`]->_29
 create _21-[:`CREATEDSTART`]->_65
+create _21-[:`CREATEDSTART`]->_81
 create _21-[:`KARMALOGSTART`]->_74
 create _21-[:`KARMALOGSTART`]->_75
 create _21-[:`KARMALOGSTART`]->_76
 create _21-[:`UPDATEDSTART`]->_48
+create _21-[:`UPDATEDSTART`]->_83
 create _23-[:`TAGSSTART`]->_26
 create _23-[:`TAGSSTART`]->_54
 create _25-[:`CREATEDEND`]->_24
@@ -226,5 +240,16 @@ create _77-[:`LOGONSCOPE` {`currentKarma`:2}]->_23
 create _77-[:`KARMALOGEND`]->_67
 create _78-[:`LOGONSCOPE` {`currentKarma`:2}]->_50
 create _78-[:`KARMALOGEND`]->_51
+create _79-[:`TAGSSTART`]->_82
+create _81-[:`CREATEDEND`]->_80
+create _82-[:`TAGSEND`]->_80
+create _83-[:`UPDATEDEND`]->_80
+create _84-[:`HASPASSWORD`]->_86
+create _85-[:`HASLOGIN`]->_84
+create _85-[:`MEMBEROF`]->_19
+create _85-[:`VIEWED` {`timestamp`:1445028605629}]->_80
+create _85-[:`VOTES` {`timestamp`:1445028605622, `weight`:1}]->_87
+create _85-[:`UPDATEDSTART`]->_87
+create _87-[:`UPDATEDEND`]->_80
 ;
 commit
