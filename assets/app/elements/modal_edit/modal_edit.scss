@@ -3,6 +3,9 @@
 
 .modal_edit {
     .modal-header {
+        h1 {
+            padding: 0;
+        }
         .response-header {
             @include display-flex(flex);
             @include justify-content(center); // halign
