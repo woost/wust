@@ -1,14 +1,5 @@
+match (n) optional match (n)-[r]-() delete n,r;
 begin
-create index on :`CHANGEREQUEST`(`status`)
-create index on :`CREATEREQUEST`(`applied`)
-create index on :`LOGININFO`(`providerID`)
-create index on :`TIMESTAMP`(`timestamp`)
-create constraint on (n:`LOGININFO`) assert n.`providerKey` is unique
-create constraint on (n:`TAGLIKE`) assert n.`title` is unique
-create constraint on (n:`TEST`) assert n.`title` is unique
-create constraint on (n:`USERGROUP`) assert n.`name` is unique
-create constraint on (n:`USER`) assert n.`name` is unique
-create constraint on (n:`UUIDNODE`) assert n.`uuid` is unique
 create (_10:`UUIDNODE`:`TAGLIKE`:`EXPOSEDNODE`:`CLASSIFICATION` {`color`:90, `symbol`:"fa fa-flask", `title`:"Problem", `uuid`:"OsWcw6CWRUWm4oBXwsZwEw"})
 create (_11:`UUIDNODE`:`TAGLIKE`:`EXPOSEDNODE`:`CLASSIFICATION` {`color`:169, `symbol`:"fa fa-crosshairs", `title`:"Goal", `uuid`:"hw_akS_8RYiqk38BNj-f0A"})
 create (_12:`UUIDNODE`:`TAGLIKE`:`EXPOSEDNODE`:`CLASSIFICATION` {`color`:260, `symbol`:"fa fa-lightbulb-o", `title`:"Idea", `uuid`:"SgA5_nScQGCVsBvdRizTWw"})
@@ -253,3 +244,13 @@ create _85-[:`UPDATEDSTART`]->_87
 create _87-[:`UPDATEDEND`]->_80
 ;
 commit
+create index on :`CHANGEREQUEST`(`status`);
+create index on :`CREATEREQUEST`(`applied`);
+create index on :`LOGININFO`(`providerID`);
+create index on :`TIMESTAMP`(`timestamp`);
+create constraint on (n:`LOGININFO`) assert n.`providerKey` is unique;
+create constraint on (n:`TAGLIKE`) assert n.`title` is unique;
+create constraint on (n:`TEST`) assert n.`title` is unique;
+create constraint on (n:`USERGROUP`) assert n.`name` is unique;
+create constraint on (n:`USER`) assert n.`name` is unique;
+create constraint on (n:`UUIDNODE`) assert n.`uuid` is unique;
