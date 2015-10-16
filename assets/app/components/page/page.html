@@ -8,7 +8,7 @@
             <button ng-if="::uiSettings.scratchpadEnabled && vm.Auth.isLoggedIn" drop-channel="node" ui-on-Drop="vm.editNode($data)" id="left_side_toggle" type="button" class="drop_post_box btn btn-default fa" ng-class="{'fa-arrow-right':!vm.sidebar.left.visible, 'fa-arrow-left':vm.sidebar.left.visible}" onclick="this.blur()" ng-click="vm.sidebar.left.visible = !vm.sidebar.left.visible" data-title="Toggle scratchpad" bs-tooltip></button>
             <div zen></div>
             <div search></div>
-            <button id="right_side_toggle" type="button" class="btn btn-default fa" ng-class="{'fa-arrow-left':!vm.sidebar.right.visible, 'fa-arrow-right':vm.sidebar.right.visible, 'right_side_visible':vm.sidebar.right.visible}" onclick="this.blur()" ng-click="vm.sidebar.right.visible = !vm.sidebar.right.visible" data-title="Toggle history" bs-tooltip></button>
+            <button id="right_side_toggle" type="button" class="btn btn-default fa" ng-class="{'fa-arrow-left':!vm.sidebar.right.visible, 'fa-arrow-right':vm.sidebar.right.visible, 'right_side_visible':vm.sidebar.right.visible}" onclick="this.blur()" ng-click="vm.sidebar.right.visible = !vm.sidebar.right.visible" data-title="Toggle History and Quick Search" bs-tooltip></button>
             <div id="content_view" ui-view></div>
         </div>
         <div id="right_hand_side" ng-class="{visible: vm.sidebar.right.visible}">
