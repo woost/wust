@@ -296,14 +296,14 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                             elem.appendChild(tagLabel);
                         });
                         return elem.outerHTML;
-                    } else {
+                    } else { // nonHyperRelation
                         let elem = document.createElement("span");
                         elem.appendChild(document.createTextNode(d.title));
                         let circleCont = document.createElement("span");
                         circleCont.className = "tag_circle_container pull-right";
                         elem.appendChild(circleCont);
                         // console.log(d.tags, d.classifications);
-                        (d.tags.concat(d.classifications)).forEach(t => {
+                        Helpers.sortedNodeTags(d).forEach(t => {
                             let circleTitle = document.createElement("span");
                             circleTitle.className = "tag_circle_title";
                             circleTitle.setAttribute("title", t.title);
