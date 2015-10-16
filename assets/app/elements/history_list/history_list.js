@@ -14,10 +14,28 @@ function historyList() {
     };
 }
 
-HistoryListCtrl.$inject = ["HistoryService"];
+HistoryListCtrl.$inject = ["HistoryService", "SearchService"];
 
-function HistoryListCtrl(HistoryService) {
+function HistoryListCtrl(HistoryService, SearchService) {
     let vm = this;
 
     vm.history = HistoryService;
+    vm.search = SearchService.search;
+    vm.onSearchBoxChange = onSearchBoxChange;
+
+    let lastSearch;
+    let searchTriggerDelay = 200;
+    let delayedTriggerSearch;
+    function onSearchBoxChange() {
+        if (lastSearch === SearchService.search.query)
+            return;
+
+        lastSearch = SearchService.search.query;
+        if(SearchService.search.query) {
+            if(delayedTriggerSearch)
+                clearTimeout(delayedTriggerSearch);
+
+            delayedTriggerSearch = setTimeout(() => SearchService.search.triggerSearch(), searchTriggerDelay);
+        }
+    }
 }

@@ -26,9 +26,6 @@ function navigationCtrl($state, Auth, SearchService, ModalEditService, Fullscree
         password: ""
     };
 
-    let searchTriggerDelay = 200;
-    let delayedTriggerSearch;
-
     vm.onSearchBoxChange = onSearchBoxChange;
     vm.authenticate = authenticate;
     vm.Auth = Auth;
@@ -54,6 +51,8 @@ function navigationCtrl($state, Auth, SearchService, ModalEditService, Fullscree
     }
 
     let lastSearch;
+    let searchTriggerDelay = 200;
+    let delayedTriggerSearch;
     function onSearchBoxChange() {
         if (lastSearch === SearchService.search.query)
             return;

@@ -45,8 +45,8 @@ main {
             @include transition(all 100ms ease);
             border-left: $sidebar_border;
             &.visible {
-                width: 200px;
-                min-width: 200px;
+                width: 250px;
+                min-width: 250px;
                 // overflow-y: auto; // we do this in history-list to not be overlapped by the scrollbar
             }
         }
@@ -77,7 +77,7 @@ main {
                 top: 200px;
                 right:0;
                 &.right_side_visible {
-                    right: 200px;
+                    right: 250px;
                 }
                 @include transition(all 100ms ease);
                 z-index: $zindex_right_side_toggle;
