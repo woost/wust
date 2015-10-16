@@ -54,7 +54,7 @@
                 <span ng-hide="vm.search.waiting" class="search_status text-muted">No results.</span>
             </span>
             <div id="search_results" infinite-scroll="vm.search.loadMore()" infinite="vm.infinite" promise="vm.search.results">
-                <div ng-repeat="result in vm.search.results track by result.id" small-post node="result" ignore-tags="vm.search.tagsAll"></div>
+                <div ng-repeat="result in vm.search.results track by result.id" small-post node="result" ng-click="vm.search.resultsVisible = false" ignore-tags="vm.search.tagsAll"></div>
                 <button class="btn btn-default pull-right ng-hide" ng-click="vm.infinite.manualLoad()" ng-disabled="vm.infinite.loading" ng-hide="vm.infinite.noMore">More</button>
             </div>
             <!-- </div> -->
