@@ -1,6 +1,7 @@
 @import "globals";
 @import "compass/css3/transform";
 @import "compass/css3/box-shadow";
+@import "compass/css3/flexbox";
 
 .graph_view_component {
     overflow: hidden;
@@ -99,9 +100,11 @@
 
             .nodetools {
                 position: absolute;
-                top: -32px;
-                left: -6px;
-                width: 110px; // to not break line of tool symbols
+                top: -30px;
+                // width: 120px; // to not break line of tool symbols
+                @include display-flex(flex);
+                @include justify-content(center);
+                width: 100%;
 
                 // $bgcolor: #C3E8FF;
                 // background: rgba($bgcolor, 0.2);
@@ -145,7 +148,7 @@
             .fixed {
                 .pintool {
                     @include transform(translate(0px, 0px) rotate(0deg));
-                    opacity: 1 !important;
+                    // opacity: 1 !important;
                 }
             }
         }
