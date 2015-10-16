@@ -3,6 +3,11 @@
     padding-right: 7px !important;
 }
 
+h2[contenteditable='true']:focus{
+    //TODO: hardcoded from bootstrap
+    border-color: #66afe9 !important;
+}
+
 .is_invalid {
     border: 2px solid red !important;
 }

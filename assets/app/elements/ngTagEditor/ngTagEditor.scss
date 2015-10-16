@@ -7,7 +7,8 @@
     line-height: 35px;
     &.active {
         .tag-editor, .tag-suggestions {
-            border-color: #aaa;
+            //TODO: hardcoded from bootstrap
+            border-color: #66afe9;
         }
     }
     .tag-editor, .tag-suggestions {
