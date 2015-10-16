@@ -1,7 +1,7 @@
-<div class="big_post_directive clearfix" colored-tag-node="vm.node" big="true" ng-switch="vm.editMode">
+<div class="big_post_directive clearfix" colored-tag-node="vm.node" big="true" ng-switch="vm.editMode" ng-class="{deleted: vm.nodeIsDeleted}">
     <div ng-switch-when="true" static-edit-post on-cancel="vm.onCancel()" on-delete="vm.onDelete(response)" on-save="vm.onSave(response)" node="vm.node"></div>
     <div ng-switch-default>
-        <button ng-if="::vm.Auth.isLoggedIn" class="fa fa-pencil pull-right btn btn-sm btn-default" ng-click="vm.editMode = true" data-title="Edit" bs-tooltip></button>
+        <button ng-if="vm.Auth.isLoggedIn && !vm.nodeIsDeleted" class="fa fa-pencil pull-right btn btn-sm btn-default" ng-click="vm.editMode = true" data-title="Edit" bs-tooltip></button>
         <h2 ng-bind="vm.node.title" class="post_title"></h2>
         <div class="additional_info">
             <div class="pull-right">
@@ -17,13 +17,16 @@
 
         <div big-taglist node="vm.node"></div>
         <div class="post_description" markdown="vm.node.description" ng-show="vm.node.description"></div>
-        <button ng-if="::vm.Auth.isLoggedIn" class="replytool pull-right btn btn-sm btn-default" ng-click='vm.replyTo()'>Respond</button>
+        <button ng-if="vm.Auth.isLoggedIn && !vm.nodeIsDeleted" class="replytool pull-right btn btn-sm btn-default" ng-click='vm.replyTo()'>Respond</button>
     </div>
-    <a ng-if="vm.changeRequests.length > 0" href="#" ng-click="vm.showChanges = !vm.showChanges" class="showchanges">
+    <a ng-if="vm.changeRequests.length > 0 && !vm.nodeIsDeleted" href="#" ng-click="vm.showChanges = !vm.showChanges" class="showchanges">
         <i class="fa" ng-class="{'fa-chevron-down': vm.showChanges, 'fa-chevron-right': !vm.showChanges}"></i>
         Show open change requests
     </a>
-    <div ng-show="vm.showChanges">
+    <div ng-if="vm.showChanges && !vm.nodeIsDeleted">
         <post-change-request changes="vm.changeRequests" on-delete-apply="vm.onDeleteApply()" on-tag-apply="vm.onTagApply(change)" on-apply="vm.onApply(node)"></post-change-request>
     </div>
+    <h2 class="deleted_info" ng-if="vm.nodeIsDeleted">
+            Deleted post
+    </h2>
 </div>

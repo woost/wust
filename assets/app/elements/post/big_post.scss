@@ -3,6 +3,17 @@
 @import "compass/css3/box-shadow";
 
 .big_post_directive {
+    &.deleted {
+        background: #aaa !important;
+        color: #666 !important;
+        .post_description {
+            background: #aaa !important;
+        }
+    }
+    .deleted_info {
+        color: red;
+    }
+
     border: 1px solid $post_default_border_color;
     border-radius: 4px;
     padding: 15px;

@@ -40,6 +40,8 @@ function bigPostCtrl($state, Post, ModalEditService, ContextService, Auth) {
     vm.editMode = false;
     vm.nodeHasContext = () => _.any(vm.node.tags, "isContext");
 
+    vm.nodeIsDeleted = false;
+
     // ContextService.setNodeContext(vm.node);
 
     function onSave(response) {
@@ -67,7 +69,7 @@ function bigPostCtrl($state, Post, ModalEditService, ContextService, Auth) {
     }
 
     function onDeleteApply() {
-        $state.go("dashboard");
+        vm.nodeIsDeleted = true;
     }
 
     function onTagApply(change) {
