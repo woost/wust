@@ -3,11 +3,15 @@
 @import "compass/css3/box-shadow";
 
 #vote_component {
+    @include display-flex(flex);
+    @include justify-content(center);
+
+
     #description_container {
         width: 600px;
         min-width: 600px;
         max-width: 600px;
-        margin: 20px auto;
+        margin: 20px 20px;
 
         @include display-flex(flex);
         .vote-buttons {

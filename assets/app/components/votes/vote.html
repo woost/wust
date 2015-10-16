@@ -1,27 +1,27 @@
 <div id="vote_component" class="content-component">
-    <p class="pull-right text-muted" style="width: 250px">Here you can see changes made by other users. You can decide whether these changes should be accepted or rejected.</p>
-    <h2 ng-if="vm.isLoading && !vm.change" class="text-muted">Loading</h2>
-    <h2 ng-if="!vm.isLoading && !vm.change" class="text-muted">Nothing to moderate</h2>
-    <div id="description_container" ng-if="vm.change">
-        <!-- <div style="text-align:center;height:60px;width:60px"> -->
-        <!--     <i class="fa fa-3x fa-fw" ng-class="vm.change.icon"></i> -->
-        <!--     <br/> {{vm.change.type}} -->
-        <!-- </div> -->
+    <div>
+        <h2 ng-if="vm.isLoading && !vm.change" class="text-muted">Loading</h2>
+        <h2 ng-if="!vm.isLoading && !vm.change" class="text-muted">Nothing to moderate</h2>
+        <div id="description_container" ng-if="vm.change">
+            <!-- <div style="text-align:center;height:60px;width:60px"> -->
+            <!--     <i class="fa fa-3x fa-fw" ng-class="vm.change.icon"></i> -->
+            <!--     <br/> {{vm.change.type}} -->
+            <!-- </div> -->
 
-        <div id="action_container" ng-if="::vm.change">
-            <div class="vote-buttons">
-                <button class="btn btn-danger" ng-click="vm.downvote()">
-                    <i class="fa fa-close"></i> Dosn't make sense
-                </button>
-                <button class="btn btn-warning" ng-click="vm.skip()">
-                    <i class="fa fa-fast-forward"></i> I don't know
-                </button>
-                <button class="btn btn-success" ng-click="vm.upvote()">
-                    <i class="fa fa-check-square-o"></i> Makes sense
-                </button>
-            </div>
+            <div id="action_container" ng-if="::vm.change">
+                <div class="vote-buttons">
+                    <button class="btn btn-danger" ng-click="vm.downvote()">
+                        <i class="fa fa-close"></i> Dosn't make sense
+                    </button>
+                    <button class="btn btn-warning" ng-click="vm.skip()">
+                        <i class="fa fa-fast-forward"></i> I don't know
+                    </button>
+                    <button class="btn btn-success" ng-click="vm.upvote()">
+                        <i class="fa fa-check-square-o"></i> Makes sense
+                    </button>
+                </div>
 
-            <h3 class="action-description" ng-switch="vm.change.type">
+                <h3 class="action-description" ng-switch="vm.change.type">
                 <span ng-switch-when="Delete">Delete Post <span small-post node="vm.change.post"></span></span>
                 <span ng-switch-when="Edit">Edit Post <span small-post node="vm.change.post"></span></span>
                 <span ng-switch-when="AddTag">
@@ -44,54 +44,56 @@
 
             </h3>
 
-            <div ng-class="vm.actionclasses">
-                <ul tabset class="tabs-above">
-                    <li tab>
-                        <a tab-heading>Old</a>
-                        <div class="post" colored-tag-node="vm.change.post" big="true">
-                            <h2 class="post-title" ng-bind="vm.change.oldTitle"></h2>
-                            <span ng-repeat="tag in (vm.change.post | nodetags) track by tag.id" tag-label="tag"></span>
-                            <div ng-show="vm.showDescription" class="post-description" markdown="vm.change.oldDescription" ng-show="vm.change.oldDescription"></div>
-                        </div>
+                <div ng-class="vm.actionclasses">
+                    <ul tabset class="tabs-above">
+                        <li tab>
+                            <a tab-heading>Old</a>
+                            <div class="post" colored-tag-node="vm.change.post" big="true">
+                                <h2 class="post-title" ng-bind="vm.change.oldTitle"></h2>
+                                <span ng-repeat="tag in (vm.change.post | nodetags) track by tag.id" tag-label="tag"></span>
+                                <div ng-show="vm.showDescription" class="post-description" markdown="vm.change.oldDescription" ng-show="vm.change.oldDescription"></div>
+                            </div>
 
-                    </li>
-                    <li tab active="vm.showMiddleTab">
-                        <a tab-heading>Difference</a>
-                        <div class="post" colored-tag-node="vm.change.post" big="true" ng-switch="vm.change.type" ng-class="{'removed-post': vm.is('Delete')}">
-                            <h2 class="post-title">
+                        </li>
+                        <li tab active="vm.showMiddleTab">
+                            <a tab-heading>Difference</a>
+                            <div class="post" colored-tag-node="vm.change.post" big="true" ng-switch="vm.change.type" ng-class="{'removed-post': vm.is('Delete')}">
+                                <h2 class="post-title">
                                 <div ng-if="vm.is('Edit')" word-based-diff source-a="vm.change.oldTitle" source-b="vm.change.newTitle"></div>
                                 <span  ng-if="!vm.is('Edit')" ng-bind="vm.change.post.title"></span>
                             </h2>
-                            <span ng-if="!vm.is('AddTag') && !vm.is('RemoveTag')" ng-repeat="tag in (vm.change.post | nodetags) track by tag.id" tag-label="tag"></span>
+                                <span ng-if="!vm.is('AddTag') && !vm.is('RemoveTag')" ng-repeat="tag in (vm.change.post | nodetags) track by tag.id" tag-label="tag"></span>
 
-                            <div ng-switch-when="AddTag">
-                                <span ng-repeat="tag in vm.change.post.tags.concat([vm.change.tag]) | unique:'id'" tag-label="tag" class="tag" ng-class="{'existing': tag.id !== vm.change.tag.id}"></span>
+                                <div ng-switch-when="AddTag">
+                                    <span ng-repeat="tag in vm.change.post.tags.concat([vm.change.tag]) | unique:'id'" tag-label="tag" class="tag" ng-class="{'existing': tag.id !== vm.change.tag.id}"></span>
+                                </div>
+
+                                <div ng-switch-when="RemoveTag">
+                                    <span ng-repeat="tag in vm.change.post.tags" tag-label="tag" class="tag"></span>
+                                    <span tag-label="vm.change.tag" class="tag" ng-class="{removed: !vm.change.classifications.length}"></span>
+                                </div>
+
+                                <div ng-show="vm.showDescription" class="well well-sm post-description">
+                                    <pre ng-switch-when="Edit" class="diff" word-based-diff source-a="vm.change.oldDescription" source-b="vm.change.newDescription"></pre>
+                                    <div ng-show="!vm.is('Edit') && vm.change.newDescription" class="post-description" markdown="vm.change.newDescription"></div>
+                                </div>
                             </div>
+                        </li>
+                        <li tab>
+                            <a tab-heading>New</a>
+                            <div class="post" colored-tag-node="vm.change.post" big="true">
+                                <h2 class="post-title" ng-bind="vm.change.newTitle"></h2>
+                                <span ng-repeat="tag in (vm.change.post | nodetags) track by tag.id" tag-label="tag"></span>
 
-                            <div ng-switch-when="RemoveTag">
-                                <span ng-repeat="tag in vm.change.post.tags" tag-label="tag" class="tag"></span>
-                                <span tag-label="vm.change.tag" class="tag" ng-class="{removed: !vm.change.classifications.length}"></span>
+                                <div ng-show="vm.showDescription" class="post-description" markdown="vm.change.newDescription" ng-show="vm.change.newDescription"></div>
                             </div>
+                        </li>
+                    </ul>
+                </div>
 
-                            <div ng-show="vm.showDescription" class="well well-sm post-description">
-                                <pre ng-switch-when="Edit" class="diff" word-based-diff source-a="vm.change.oldDescription" source-b="vm.change.newDescription"></pre>
-                                <div ng-show="!vm.is('Edit') && vm.change.newDescription" class="post-description" markdown="vm.change.newDescription"></div>
-                            </div>
-                        </div>
-                    </li>
-                    <li tab>
-                        <a tab-heading>New</a>
-                        <div class="post" colored-tag-node="vm.change.post" big="true">
-                            <h2 class="post-title" ng-bind="vm.change.newTitle"></h2>
-                            <span ng-repeat="tag in (vm.change.post | nodetags) track by tag.id" tag-label="tag"></span>
-
-                            <div ng-show="vm.showDescription" class="post-description" markdown="vm.change.newDescription" ng-show="vm.change.newDescription"></div>
-                        </div>
-                    </li>
-                </ul>
             </div>
 
         </div>
-
     </div>
+    <p class="text-muted" style="width: 250px">Here you can see changes made by other users. You can decide whether these changes should be accepted or rejected.</p>
 </div>
