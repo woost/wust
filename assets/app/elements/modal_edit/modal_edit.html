@@ -6,24 +6,25 @@
                     <h1>Respond to</h1>
                     <span small-post node="vm.node.referenceNode" class="disable-link reference-node"></span>
                 </span>
-                <span ng-if="!vm.node.referenceNode">
+                <span ng-if="vm.node.isLocal && !vm.node.referenceNode">
                     <h1 class="text-center">Start Discussion</h1>
                 </span>
             </div>
             <div class="modal-body" colored-tag-node="vm.node" big="true">
                 <div new-post node="vm.node" input-focus="true" preview-enabled="vm.previewEnabled"></div>
-                <progressbar max="vm.editedComponentNode.postChangeThreshold" type="success" value="vm.editWeight" class="karma-progress">
+            </div>
+            <div class="modal-footer">
+                <progressbar ng-if="vm.node.isEdit" max="vm.editedComponentNode.postChangeThreshold" type="success" value="vm.editWeight" class="karma-progress">
                     <span style="white-space:nowrap; padding-left: 5px;" ng-switch="vm.canApply">
                         <span ng-switch-when="true">You have enough Karma. This change will be applied instantly.</span>
                         <span ng-switch-default>This will become a change request, starting with {{vm.editWeight}} of {{vm.editedComponentNode.postChangeThreshold}} Votes.</span>
                     </span>
                 </progressbar>
-            </div>
-            <div class="modal-footer">
                 <button class="btn btn-default" ng-click="$hide()">Cancel</button>
                 <button class="btn btn-default" type="submit" ng-click="vm.save()" ng-disabled="vm.node.isSaving">
                     <span ng-if="::vm.node.newDiscussion">Start Discussion</span>
-                    <span ng-if="::!vm.node.newDiscussion">Respond</span>
+                    <span ng-if="::!vm.node.newDiscussion && vm.node.isLocal">Respond</span>
+                    <span ng-if="::vm.node.isEdit">Save</span>
                 </button>
             </div>
         </div>

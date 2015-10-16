@@ -35,7 +35,7 @@ function ModalEditService($modal, EditService, $state, ContextService) {
 
         let promise = currentNode.save();
         if (promise) {
-            if (currentNode.referenceNode === undefined) {
+            if (currentNode.newDiscussion) {
                 promise.$then(() => {
                     $state.go("focus", {
                         id: currentNode.id,

@@ -32,6 +32,10 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
             return this.isConnects ? Connects : Post;
         }
 
+        get isEdit() {
+            return !this.isLocal && !this.referenceNode;
+        }
+
         unsetOneTimeProperties() {
             this.newDiscussion = false;
             this.referenceNode = undefined;
