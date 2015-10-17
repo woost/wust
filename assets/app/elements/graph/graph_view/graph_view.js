@@ -17,9 +17,9 @@ function graphView() {
     };
 }
 
-graphViewCtrl.$inject = ["$scope", "$stateParams", "$filter", "EditService", "$state", "ConnectedComponents"];
+graphViewCtrl.$inject = ["$scope", "$rootScope", "$stateParams", "$filter", "EditService", "$state", "ConnectedComponents"];
 
-function graphViewCtrl($scope, $stateParams, $filter, EditService, $state, ConnectedComponents) {
+function graphViewCtrl($scope, $rootScope, $stateParams, $filter, EditService, $state, ConnectedComponents) {
     let vm = this;
 
     vm.isConverged = false;
@@ -67,6 +67,10 @@ function graphViewCtrl($scope, $stateParams, $filter, EditService, $state, Conne
     }
 
     function focusNode(node) {
-        $state.go("focus", { id: node.id, type: "" });
+        //TODO: duplicate controller instanciation with go
+        if ($stateParams.id === node.id)
+            $rootScope.$broadcast("focus.neighbours");
+        else
+            $state.go("focus", { id: node.id, type: "" });
     }
 }

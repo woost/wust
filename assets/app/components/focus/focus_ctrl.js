@@ -72,19 +72,24 @@ function FocusCtrl(Helpers, Post, $stateParams, $state, HistoryService, Connecte
     }
 
     vm.tabViews = _.map([0, 1, 2], i => new Tab(i));
-    if ($stateParams.type === "graph") {
-        // opening graph by url
-        vm.tabViews[0]._active = false;
-        vm.tabViews[1]._active = true;
-        vm.tabViews[2]._active = false;
-    } else if ($stateParams.type === "links") {
-        // opening graph by url
-        vm.tabViews[0]._active = false;
-        vm.tabViews[1]._active = false;
-        vm.tabViews[2]._active = true;
-    } else {
-        vm.tabViews[0]._active = true;
-        vm.tabViews[1]._active = false;
-        vm.tabViews[2]._active = false;
+    $scope.$on("focus.neighbours", () => vm.tabViews[0].active = true);
+    setTabs();
+
+    function setTabs() {
+        if ($stateParams.type === "graph") {
+            // opening graph by url
+            vm.tabViews[0]._active = false;
+            vm.tabViews[1]._active = true;
+            vm.tabViews[2]._active = false;
+        } else if ($stateParams.type === "links") {
+            // opening graph by url
+            vm.tabViews[0]._active = false;
+            vm.tabViews[1]._active = false;
+            vm.tabViews[2]._active = true;
+        } else {
+            vm.tabViews[0]._active = true;
+            vm.tabViews[1]._active = false;
+            vm.tabViews[2]._active = false;
+        }
     }
 }
