@@ -8,7 +8,7 @@ FFMPEGPID=$!
 
 TMP=$(mktemp -d)
 [ "$(hostname)" = "beef" ] && SCALE=1.2 || SCALE=1
-chromium --user-data-dir=$TMP --disable-infobars --disable-translate --d --disable-save-password-bubble --no-first-run --no-default-browser-check --high-dpi-support=1 --force-device-scale-factor=$SCALE http://localhost:9000/focus/drplTzjjQnKUbLezdznd8w/
+chromium --user-data-dir=$TMP --disable-infobars --disable-translate --d --disable-save-password-bubble --no-first-run --no-default-browser-check --high-dpi-support=1 --force-device-scale-factor=$SCALE http://localhost:9000/focus/pu4Uv0yETU6mOPyah5VKTQ/
 rm -r $TMP
 
 kill $FFMPEGPID
