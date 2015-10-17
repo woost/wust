@@ -1215,7 +1215,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
         editNode(d) {
             if(d.isHyperRelation) {
-                this.setStickyPreview(undefined);
                 TagRelationEditService.show(d, () => this.disconnectHyperRelation(d));
             } else {
                 ModalEditService.show(d, false); // ?jo da e steht jetzt noch repsond to. dann wie in edit_post einfach ngswitch
@@ -1408,7 +1407,6 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
                                 connects.startNode = startNode;
                                 connects.endNode = endNode;
-                                this.setStickyPreview(undefined);
                                 TagRelationEditService.show(connects, () => this.disconnectHyperRelation(connects), true);
                             }, response => humane.error(response.$response.data));
                         }
@@ -1418,6 +1416,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             // TODO: else { connect without dragging only by clicking }
 
             this.isDragging = false;
+            this.hoveredNode = undefined;
+
             // preview is reading isDragging, so angular needs to know that it changed
             scope.$apply();
 
@@ -1438,9 +1438,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             }
 
             if (d === undefined || !d.isHyperRelation) {
-                if( this.stickyPreview === d ) {
-                    if (d !== undefined)
-                        setClass(d, false);
+                if(d && this.stickyPreview === d ) {
+                    setClass(d, false);
                     this.stickyPreview = undefined;
                 } else {
                     if(this.stickyPreview) setClass(this.stickyPreview, false);
