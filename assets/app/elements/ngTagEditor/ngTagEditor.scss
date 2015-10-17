@@ -20,6 +20,10 @@
     .transparent-suggestion .tag-label {
         opacity: 0.5;
     }
+
+    .transparent-suggestion .tag-label:hover {
+        opacity: 1;
+    }
     .tag-editor {
         width: 100%;
         display: block;
