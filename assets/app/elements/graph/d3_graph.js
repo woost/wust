@@ -377,7 +377,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
                 this.d3NodeEditTool = this.d3NodeTools.append("div")
                     .attr("class", "nodetool edittool fa fa-pencil")
-                    .attr("title", "Edit Connection")
+                    .attr("title", d => d.isHyperRelation ? "Edit Connection" : "Edit Post")
                     .style("display", d => (Auth.isLoggedIn && !d.isDeleted) ? "inline-block" : "none");
 
                 this.d3NodePinTool = this.d3NodeTools.append("div")
