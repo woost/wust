@@ -161,7 +161,7 @@ function DiscourseNodeList() {
             }
 
             canAdd(elem) {
-                return this.writable && !this.exists(elem) && elem.id !== this.referenceNode.id;
+                return this.writable && !this.component.rootNode.isDeleted && !this.exists(elem) && elem.id !== this.referenceNode.id;
             }
 
             add(elem) {
