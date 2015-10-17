@@ -94,7 +94,7 @@ function HistoryService(Auth, Session, Post, DiscourseNode, $rootScope, $state) 
             current.rootNode.isDeleted = true;
 
             let current2 = currentViewComponent.getWrap("neighbours");
-            current2.nodes.filter(n => n.isHyperRelation).forEach(rel => current2.removeNode(rel.id));
+            current.rootNode.neighbours.filter(n => n.isHyperRelation).forEach(rel => current2.removeNode(rel.id));
 
             //TODO:why set on both?!
             current2.rootNode.isDeleted = true;
