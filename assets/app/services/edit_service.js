@@ -266,7 +266,7 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
             this.isLocal = this.id === undefined;
 
             //TODO: share validation code between scala and js
-            let defaultValidity = ValidityEntry("", true);
+            let defaultValidity = ValidityEntry("Invalid", true);
             this.validity = {
                 title: defaultValidity,
                 description: defaultValidity,
@@ -291,7 +291,7 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
             function ValidityEntry(errorMsg, valid) {
                 let self = {};
                 self.valid = valid;
-                self.message = valid ? "" : errorMsg;
+                self.message = valid ? "Success" : errorMsg;
                 self.and = other => self.valid ? other : self;
                 return self;
             }
