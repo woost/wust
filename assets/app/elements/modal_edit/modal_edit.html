@@ -20,6 +20,7 @@
                         <span ng-switch-default>This will become a change request, starting with {{vm.editWeight}} of {{vm.editedComponentNode.postChangeThreshold}} Votes.</span>
                     </span>
                 </progressbar>
+                <button class="pull-left btn btn-sm btn-danger" ng-click="vm.node.deleteNode(); $hide()" ng-hide="vm.node.isLocal" title="Delete"><i class="fa fa-trash-o"></i></button>
                 <button class="btn btn-default" ng-click="$hide()">Cancel</button>
                 <button class="btn btn-default" type="submit" ng-click="vm.save()" ng-disabled="vm.node.isSaving">
                     <span ng-if="::vm.node.newDiscussion">Start Discussion</span>
