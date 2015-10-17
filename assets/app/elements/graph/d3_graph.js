@@ -32,7 +32,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.arrowToResponse = false;
                 this.dragHyperRelations = false;
                 this.fixRootNodeAfterConverge = false;
-                this.focusRootNodeAfterConverge = true;
+                this.focusRootNodeAfterConverge = false;
                 this.longPressTime = 500;
 
                 // Simulation settings
