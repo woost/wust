@@ -44,9 +44,6 @@ function RoutesConfig($stateProvider, $urlRouterProvider, $locationProvider) {
         url: "/focus/:id/:type",
         templateUrl: `components/focus/focus.html`,
         controller: "FocusCtrl as vm",
-        params: {
-            type: { squash: true, value: null }
-        }
     });
 
     $urlRouterProvider.otherwise("/dashboard");
