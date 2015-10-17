@@ -79,13 +79,19 @@ create (_902:`USER`:`UUIDNODE` {`name`:"Alice", `uuid`:"EwixTQPwQeC-_QrdI5hWlw"}
 create (_903:`PASSWORDINFO` {`hasher`:"bcrypt", `password`:"$2a$10$yPQphYhdKZdEuIQZq4gvaeTLrkXWc4cAuRgdqB2FHjn9YY6jHSBSy"})
 create (_904:`UUIDNODE`:`TIMESTAMP`:`VOTABLE`:`ACTION`:`CHANGEREQUEST`:`UPDATED` {`_locked`:false, `applyThreshold`:2, `approvalSum`:1, `newTitle`:"Was mache ich bei Fettflecken auf meiner Hose?", `oldTitle`:"Was mache ich ich bei Fettflecken auf meiner Hose?", `status`:0, `timestamp`:1445028591239, `uuid`:"K1mVV4svQgaB6ZSqWJnQGg"})
 create (_905:`UUIDNODE`:`TAGLIKE`:`EXPOSEDNODE`:`SCOPE` {`color`:16, `title`:"Fahrrad", `uuid`:"r8h_bOCFQJmV2HSowxI9Ag"})
-create (_906:`UUIDNODE`:`TIMESTAMP`:`EXPOSEDNODE`:`CONNECTABLE`:`HIDEABLE`:`POST` {`_locked`:false, `backupLabels`:"", `timestamp`:1445080609909, `title`:"Wie kann ich bei meinem Fahrrad die Schaltung reparieren?", `uuid`:"G-UHYqIuTcuBH94n3mDJZA", `viewCount`:2})
+create (_906:`UUIDNODE`:`TIMESTAMP`:`EXPOSEDNODE`:`CONNECTABLE`:`HIDEABLE`:`POST` {`_locked`:false, `backupLabels`:"", `timestamp`:1445080609909, `title`:"Wie kann ich bei meinem Fahrrad die Schaltung reparieren?", `uuid`:"G-UHYqIuTcuBH94n3mDJZA", `viewCount`:4})
 create (_907:`UUIDNODE`:`TIMESTAMP`:`ACTION`:`CREATED` {`timestamp`:1445080609911, `uuid`:"J8bmWYFnSXqkdKyA6tpIvw"})
 create (_908:`UUIDNODE`:`VOTABLE`:`REFERENCE`:`TAGS` {`_locked`:false, `uuid`:"BvJr6X65RhCMHt7MLVWybQ", `voteCount`:0})
 create (_909:`UUIDNODE`:`TIMESTAMP`:`EXPOSEDNODE`:`CONNECTABLE`:`HIDEABLE`:`POST` {`_locked`:false, `backupLabels`:"", `timestamp`:1445080673124, `title`:"Käten- oder Nabenschaltung?", `uuid`:"oDNVqbATTJ2m71sJF_3JUQ", `viewCount`:2})
 create (_910:`UUIDNODE`:`TIMESTAMP`:`ACTION`:`CREATED` {`timestamp`:1445080673125, `uuid`:"Ea1nQmi1QbSQU9TNl8eUXw"})
 create (_911:`UUIDNODE`:`EXPOSEDNODE`:`CONNECTABLE`:`VOTABLE`:`CONNECTS`:`REFERENCE` {`_locked`:false, `timestamp`:1445080673129, `uuid`:"BjaCpVrjQw2Hf-V55mmjuw", `voteCount`:0})
 create (_912:`UUIDNODE`:`TIMESTAMP`:`VOTABLE`:`ACTION`:`CHANGEREQUEST`:`UPDATED` {`_locked`:false, `applyThreshold`:2, `approvalSum`:1, `newTitle`:"Ketten- oder Nabenschaltung?", `oldTitle`:"Käten- oder Nabenschaltung?", `status`:0, `timestamp`:1445080704405, `uuid`:"z4TtlUHPTa6AycS_UbHyDA"})
+create (_913:`LOGININFO` {`providerID`:"credentials", `providerKey`:"SpamBot"})
+create (_914:`USER`:`UUIDNODE` {`name`:"SpamBot", `uuid`:"URfbHW2pSe2yyN4W3aXq8w"})
+create (_915:`PASSWORDINFO` {`hasher`:"bcrypt", `password`:"$2a$10$TqLo6AvqjfcJo9qQTS4QFuHWhIN4ugDQJJSSzQuQsQ32ap1L9Fptq"})
+create (_916:`UUIDNODE`:`TIMESTAMP`:`EXPOSEDNODE`:`CONNECTABLE`:`HIDEABLE`:`POST` {`_locked`:false, `backupLabels`:"", `timestamp`:1445080823847, `title`:"SPAM", `uuid`:"gfsOdPonTbC62WCD3IWRFA", `viewCount`:2})
+create (_917:`UUIDNODE`:`TIMESTAMP`:`ACTION`:`CREATED` {`timestamp`:1445080823848, `uuid`:"s4zwmHJ9QUaHd_oqJnnEsA"})
+create (_918:`UUIDNODE`:`EXPOSEDNODE`:`CONNECTABLE`:`VOTABLE`:`CONNECTS`:`REFERENCE` {`_locked`:false, `timestamp`:1445080823849, `uuid`:"bsC4qrmCSNi_qb33qJIM5w", `voteCount`:0})
 create _828-[:`CLASSIFIES`]->_883
 create _828-[:`CLASSIFIES`]->_880
 create _828-[:`CLASSIFIES`]->_871
@@ -118,6 +124,7 @@ create _838-[:`VIEWED` {`timestamp`:1445028474800}]->_845
 create _838-[:`VIEWED` {`timestamp`:1445027874563}]->_851
 create _838-[:`VIEWED` {`timestamp`:1445026829829}]->_861
 create _838-[:`VIEWED` {`timestamp`:1445080704411}]->_909
+create _838-[:`VIEWED` {`timestamp`:1445080795873}]->_906
 create _838-[:`HASKARMA` {`karma`:1}]->_867
 create _838-[:`HASKARMA` {`karma`:2}]->_840
 create _838-[:`HASKARMA` {`karma`:1}]->_844
@@ -254,8 +261,9 @@ create _901-[:`HASPASSWORD`]->_903
 create _902-[:`HASLOGIN`]->_901
 create _902-[:`MEMBEROF`]->_836
 create _902-[:`VIEWED` {`timestamp`:1445028605629}]->_897
-create _902-[:`VIEWED` {`timestamp`:1445080640213}]->_906
-create _902-[:`VIEWED` {`timestamp`:1445080673125}]->_909
+create _902-[:`VIEWED` {`timestamp`:1445080856365}]->_906
+create _902-[:`VIEWED` {`timestamp`:1445080855569}]->_909
+create _902-[:`VIEWED` {`timestamp`:1445080850901}]->_916
 create _902-[:`VOTES` {`timestamp`:1445028605622, `weight`:1}]->_904
 create _902-[:`CREATEDSTART`]->_910
 create _902-[:`UPDATEDSTART`]->_904
@@ -267,6 +275,15 @@ create _909-[:`CONNECTSSTART`]->_911
 create _910-[:`CREATEDEND`]->_909
 create _911-[:`CONNECTSEND`]->_906
 create _912-[:`UPDATEDEND`]->_909
+create _913-[:`HASPASSWORD`]->_915
+create _914-[:`HASLOGIN`]->_913
+create _914-[:`MEMBEROF`]->_836
+create _914-[:`VIEWED` {`timestamp`:1445080817847}]->_906
+create _914-[:`VIEWED` {`timestamp`:1445080823848}]->_916
+create _914-[:`CREATEDSTART`]->_917
+create _916-[:`CONNECTSSTART`]->_918
+create _917-[:`CREATEDEND`]->_916
+create _918-[:`CONNECTSEND`]->_906
 ;
 commit
 create index on :`CHANGEREQUEST`(`status`);
