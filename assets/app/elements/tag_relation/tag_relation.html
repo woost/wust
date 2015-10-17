@@ -20,7 +20,7 @@
                         <span ng-switch-default>You do not have enough Karma to edit this connection ({{vm.editWeight}} / {{vm.currentEditRelation.startNode.postChangeThreshold}}).</span>
                     </span>
                 </progressbar>
-                <button ng-if="::!vm.currentEditRelation.isCreating" class="pull-left btn btn-danger" ng-disabled="!vm.canApply" ng-click="vm.disconnect();$hide()" data-title="Disconnect" bs-tooltip><i class="fa fa-trash-o"></i></button>
+                <button ng-if="::!vm.currentEditRelation.isCreating" class="pull-left btn btn-danger" ng-disabled="!vm.canApply" ng-click="vm.disconnect();$hide()" data-title="Disconnect"><i class="fa fa-trash-o"></i></button>
                 <button class="btn btn-default" ng-click="vm.cancel();$hide()">Cancel</button>
                 <button class="btn btn-default" ng-click="vm.save();$hide()" ng-disabled="!vm.canApply">Save</button>
             </div>
