@@ -13,10 +13,10 @@
                 Search results
             </div>
             <div class="tab_body">
-                <form ng-submit='vm.onSearchBoxChange()'>
+                <form ng-submit='vm.onSearchBoxChange(true)'>
                     <div class="form-group has-feedback">
                         <input type="text" placeholder="Search" class="form-control" ng-model="vm.search.query" ng-change='vm.onSearchBoxChange()'>
-                        <i class="fa fa-search form-control-feedback" style="pointer-events:all; cursor: pointer;"></i>
+                        <i class="fa fa-search form-control-feedback" style="pointer-events:all; cursor: pointer;" ng-click="vm.onSearchBoxChange(true)"></i>
                     </div>
                 </form>
                 <div ng-repeat="result in vm.search.results track by result.id" small-post node="result" class="ng-trans ng-trans-scale-up ease"></div>

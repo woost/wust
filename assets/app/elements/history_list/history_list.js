@@ -26,8 +26,8 @@ function HistoryListCtrl(HistoryService, SearchService) {
     let lastSearch;
     let searchTriggerDelay = 200;
     let delayedTriggerSearch;
-    function onSearchBoxChange() {
-        if (lastSearch === SearchService.search.query)
+    function onSearchBoxChange(force = false) {
+        if (!force && lastSearch === SearchService.search.query)
             return;
 
         lastSearch = SearchService.search.query;
