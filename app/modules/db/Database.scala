@@ -145,11 +145,9 @@ object Database {
     // query undirected connected component of posts with maximum depth
     // depth * 2 because hyperrelation depth
     val query = s"""
-match ${ focusNode.toPattern }-[connects:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(connectable:`${ Connectable.label }`)
+match p=${ focusNode.toPattern }-[connects:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(connectable:`${ Connectable.label }`)
+where ALL (conn in nodes(p)[1..] where not((conn: `${Hidden.label}`)))
 with distinct connectable, connects
-
-match (connectable) where (:`${Connectable.label}`)<-[:`${Connects.endRelationType}`]-(connectable:`${Connects.label}`)-[:`${Connects.startRelationType}`]-(:`${Post.label}`) OR (connectable:`${Post.label}`)
-with connectable, connects
 
 optional match (context:`${ Scope.label }`)-[contexttotags:`${ Tags.startRelationType }`]->(tags:`${ Tags.label }`)-[tagstopost:`${ Tags.endRelationType }`]->(connectable:`${ Post.label }`)
 optional match (classification:`${ Classification.label }`)-[classifies:`${ Classifies.relationType }`]->(connectable:`${ Connects.label }`)
@@ -164,13 +162,6 @@ return connectable,connects,context,tags,contexttotags,tagstopost, classificatio
 
     val (graph, table) = db.queryGraphsAndTables(Query(query, params)).head
     val component = Discourse(graph)
-
-    //TODO: workaround to filter out accidentally matched hidden nodes
-    //BE AWARE: DO NOT PERSIST AFTER THIS POINT, as we delete hidden nodes from the component
-    component.remove(component.hiddens: _*)
-    while (component.hyperRelations.exists(hr => hr.startNodeOpt.isEmpty || hr.endNodeOpt.isEmpty)) {
-      component.remove(component.hyperRelations.filter(hr => hr.startNodeOpt.isEmpty || hr.endNodeOpt.isEmpty): _*)
-    }
 
     val uuidToNode = component.connectables.map(n => (n.uuid, n)).toMap
     table.rows.foreach { row =>
