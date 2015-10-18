@@ -12,7 +12,7 @@ import play.api.mvc.Results._
 import play.api.mvc.{AnyContent, Controller, Result}
 import renesca.schema._
 
-case class RequestContext(controller: NodesBase with Controller, user: Option[User], json: Option[JsValue], query: Map[String, String]) {
+case class RequestContext(user: Option[User], json: Option[JsValue], query: Map[String, String]) {
   def page = query.get("page").map(_.toInt)
   def size = query.get("size").map(_.toInt)
   def skip = query.get("skip").map(_.toInt)

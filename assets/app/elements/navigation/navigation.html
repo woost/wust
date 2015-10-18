@@ -44,6 +44,7 @@
                 <li class="dropdown">
                     <a href class="dropdown-toggle" bs-dropdown="dropdown" template-url="elements/navigation/auth.html" placement="bottom-right">
                         <i ng-if="::vm.Auth.isLoggedIn" class="fa fa-user"></i>
+                        <b ng-if="vm.session.notifications.length" class="new_notification" ng-bind="vm.session.notifications.length"></b>
                         <span ng-if="::!vm.Auth.isLoggedIn"><span ng-if="::uiSettings.registrationEnabled">Register / </span>Login</span>
                         <span class="caret"></span>
                     </a>

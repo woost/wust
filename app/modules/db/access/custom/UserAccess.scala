@@ -7,7 +7,7 @@ import formatters.json.UserFormat
 import model.WustSchema.{Created => SchemaCreated, _}
 import modules.db.Database.db
 import modules.db._
-import modules.db.helpers.TaggedTaggable
+import modules.db.helpers.{TaggedTaggable, UserHelper}
 import modules.db.access._
 import modules.requests._
 import play.api.libs.json._
@@ -246,4 +246,12 @@ case class UserHasHistory() extends StartRelationAccessDefault[User, Viewed, Pos
 
     Ok(Json.toJson(TaggedTaggable.shapeResponse(discourse.posts)))
   }
+}
+
+case class UserHasNotifications() extends StartRelationAccessDefault[User, Follows, Post] {
+  import formatters.json.PostFormat.PostFormat
+
+  val nodeFactory = Post
+
+  override def read(context: RequestContext, param: ConnectParameter[User]) = Ok(Json.toJson(UserHelper.getPostNotificationsForUser(param.baseUuid)))
 }

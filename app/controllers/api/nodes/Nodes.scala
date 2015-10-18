@@ -15,7 +15,7 @@ import renesca.schema._
 trait NodesBase extends NestedResourceRouter with DefaultNestedResourceController with Silhouette[User, JWTAuthenticator] with HeaderEnvironmentModule {
 
   protected def context(request: UserAwareRequest[AnyContent]) = {
-    RequestContext(this, request.identity, request.body.asJson, request.queryString.flatMap { case (k, v) => v.headOption.map((k, _)) })
+    RequestContext(request.identity, request.body.asJson, request.queryString.flatMap { case (k, v) => v.headOption.map((k, _)) })
   }
 
   protected def unauthorized = Unauthorized("Only logged-in users allowed")

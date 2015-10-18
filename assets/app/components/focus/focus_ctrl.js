@@ -1,8 +1,8 @@
 angular.module("wust.components").controller("FocusCtrl", FocusCtrl);
 
-FocusCtrl.$inject = ["Helpers", "Post", "$stateParams", "$state", "HistoryService", "ConnectedComponents", "$q", "$scope", "LiveService"];
+FocusCtrl.$inject = ["Helpers", "Post", "$stateParams", "$state", "HistoryService", "ConnectedComponents", "$q", "$scope", "LiveService", "Session"];
 
-function FocusCtrl(Helpers, Post, $stateParams, $state, HistoryService, ConnectedComponents, $q, $scope, LiveService) {
+function FocusCtrl(Helpers, Post, $stateParams, $state, HistoryService, ConnectedComponents, $q, $scope, LiveService, Session) {
     let vm = this;
 
     if ($stateParams.id === "") {
@@ -40,6 +40,12 @@ function FocusCtrl(Helpers, Post, $stateParams, $state, HistoryService, Connecte
                     vm.tabViews[2]._active = false;
                     vm.tabViews[0].active = true;
                 }
+
+                //TODO: better way?
+                if (_.any([vm.graphComponent.rootNode].concat(vm.graphComponent.rootNode.deepPredecessors), n => _.any(Session.notifications, _.pick(n, "id")))) {
+                    //TODO: calculate locally?
+                    Session.loadNotifications();
+                }
             });
         }, () => vm.componentLoading = false);
     }
@@ -73,6 +79,10 @@ function FocusCtrl(Helpers, Post, $stateParams, $state, HistoryService, Connecte
 
     vm.tabViews = _.map([0, 1, 2], i => new Tab(i));
     $scope.$on("focus.neighbours", () => vm.tabViews[0].active = true);
+    $scope.$on("$destroy", () => {
+        HistoryService.setCurrentViewComponent(undefined);
+    });
+
     setTabs();
 
     function setTabs() {

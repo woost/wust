@@ -14,9 +14,9 @@ function navigation() {
     };
 }
 
-navigationCtrl.$inject = ["$state", "Auth", "SearchService", "ModalEditService", "FullscreenService", "KarmaService", "ContextService"];
+navigationCtrl.$inject = ["$state", "Auth", "SearchService", "ModalEditService", "FullscreenService", "KarmaService", "ContextService", "Session"];
 
-function navigationCtrl($state, Auth, SearchService, ModalEditService, FullscreenService, KarmaService, ContextService) {
+function navigationCtrl($state, Auth, SearchService, ModalEditService, FullscreenService, KarmaService, ContextService, Session) {
     let vm = this;
 
     vm.navbarCollapsed = true;
@@ -26,6 +26,7 @@ function navigationCtrl($state, Auth, SearchService, ModalEditService, Fullscree
         password: ""
     };
 
+    vm.session = Session;
     vm.onSearchBoxChange = onSearchBoxChange;
     vm.authenticate = authenticate;
     vm.Auth = Auth;

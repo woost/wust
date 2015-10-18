@@ -11,19 +11,21 @@ import formatters.json.GraphFormat.ConnectableFormat
 import formatters.json.ResponseFormat._
 import formatters.json.UserFormat.KarmaLogFormat
 import modules.requests.ConnectResponse
+import modules.db.helpers.UserHelper
 
 case class NodeRegister(nodes: List[String])
 
 case class ConnectableUpdate(connectable: Connectable)
 case class ConnectableDelete(connUuid: String)
 case class ConnectsAdd[NODE <: Connectable](baseUuid: String, response: ConnectResponse[NODE])
-case class DashboardUpdate()
+case class ContentUpdate(notifiablePostOpt: Option[Post] = None)
 case class KarmaUpdate(karmaLogs: Seq[KarmaLog])
 
 case class OutEvent(kind: String, data: JsValue)
 
 //TODO: don't send updates to request initiator
 // only users can change something (initiate an event), so we could get the current user from the request, when opening the websocket and then pass the current user to event actions
+//TODO: each nodes actor should know about its user, so we can EITHER send as nodes update for the component or as notification update through the userActor as follows update.
 object LiveWebSocket {
   implicit val nodeRegisterFormat = Json.format[NodeRegister]
   implicit val outEventFormat = Json.format[OutEvent]
@@ -45,21 +47,26 @@ object LiveWebSocket {
 
   def sendConnectableUpdate(connectable: Connectable) = {
     registerNodesActor ! ConnectableUpdate(connectable)
-    registerUsersActor ! DashboardUpdate()
+    registerUsersActor ! ContentUpdate()
   }
 
   def sendPostAdd(post: Post) = {
-    registerUsersActor ! DashboardUpdate()
+    registerUsersActor ! ContentUpdate()
   }
 
   def sendConnectableDelete(connUuid: String) = {
     registerNodesActor ! ConnectableDelete(connUuid)
-    registerUsersActor ! DashboardUpdate()
+    registerUsersActor ! ContentUpdate()
   }
 
   def sendConnectsAdd[NODE <: Connectable](baseUuid: String, response: ConnectResponse[NODE]) = {
     registerNodesActor ! ConnectsAdd(baseUuid, response)
-    registerUsersActor ! DashboardUpdate()
+    registerUsersActor ! ContentUpdate(response.node.flatMap { connectable =>
+      if (connectable.isInstanceOf[Post])
+        Some(connectable.asInstanceOf[Post])
+      else
+        None
+    })
   }
 
   def sendKarmaUpdate(karmaLogs: Seq[KarmaLog]) = {
@@ -125,6 +132,7 @@ class NodeWebSocketActor(out: ActorRef, registerNodesActor: ActorRef) extends Ac
 }
 
 class RegisterUsersActor extends DispatchActor {
+
   override def receive = super.receive orElse {
     case KarmaUpdate(karmaLogs) =>
       println("Got karma update " + karmaLogs)
@@ -133,9 +141,17 @@ class RegisterUsersActor extends DispatchActor {
           target ! OutEvent("karmalog", Json.toJson(karmaLogs))
         })
       }
-    case DashboardUpdate() =>
-      println("Got dashboard update trigger")
+    case ContentUpdate(postOpt) =>
+      println("Got content update trigger")
+      //TODO: just send send one of them
       registeredListeners.values.flatten.foreach( _ ! OutEvent("dashboard", JsBoolean(true)))
+      postOpt.foreach { post =>
+        UserHelper.getPostNotificationRecipients(post.uuid).foreach{ user =>
+          registeredListeners.get(user.uuid).foreach(_.foreach { target =>
+            target ! OutEvent("notification", Json.toJson(post))
+          })
+        }
+      }
   }
 }
 

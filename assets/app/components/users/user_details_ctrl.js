@@ -1,8 +1,8 @@
 angular.module("wust.components").controller("UserDetailsCtrl", UserDetailsCtrl);
 
-UserDetailsCtrl.$inject = ["$stateParams", "User", "Auth", "$q"];
+UserDetailsCtrl.$inject = ["$stateParams", "User", "Auth", "Session", "$q"];
 
-function UserDetailsCtrl($stateParams, User, Auth, $q) {
+function UserDetailsCtrl($stateParams, User, Auth, Session, $q) {
     let vm = this;
 
     vm.authInfo = {};
@@ -18,9 +18,15 @@ function UserDetailsCtrl($stateParams, User, Auth, $q) {
         vm.karmaSum = tags.map(t => t.karma).reduce((a, b) => a + b, 0);
     });
 
+    //TODO: pagination of karmalog...
     vm.karmaLog = User.$buildRaw({
         id: $stateParams.id
     }).karmaLog.$search();
+
+    if ($stateParams.id === Auth.current.userId) {
+        vm.session = Session;
+    }
+
 
     let size = 20;
     let page = 0;

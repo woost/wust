@@ -1,6 +1,6 @@
 package modules.db.access.custom
 
-import controllers.api.nodes.RequestContext
+import controllers.api.nodes.{RequestContext, ConnectParameter}
 import controllers.live.LiveWebSocket
 import formatters.json.RequestFormat._
 import play.api.libs.json._
@@ -341,5 +341,15 @@ case class PostAccess() extends NodeAccessDefault[Post] {
         }
       }
     }
+  }
+}
+
+case class PostViewedAccess() extends EndRelationAccessDefault[User, Viewed, Post] {
+  val nodeFactory = User
+
+  override def create(context: RequestContext, param: ConnectParameter[Post]) = context.withUser { user =>
+    //TODO: sync so the client know when we viewed it....should not be needed
+    PostHelper.viewPostSync(Post.matchesOnUuid(param.baseUuid), user)
+    NoContent
   }
 }

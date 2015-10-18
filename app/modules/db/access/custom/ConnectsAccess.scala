@@ -23,8 +23,9 @@ import wust.Shared.tagTitleColor
 import moderation.Moderation
 import common.Constants
 
+object ConnectsHelper extends ConnectsHelper
 trait ConnectsHelper {
-  protected def canEditConnects(startNode: Post, scopes: Seq[Scope]) = {
+  def canEditConnects(startNode: Post, scopes: Seq[Scope]) = {
     // val authorBoost = if (startNode.rev_createds.isEmpty) 0 else Moderation.authorKarmaBoost
     // val voteWeight = Moderation.voteWeightFromScopes(scopes)
     // val applyThreshold = Moderation.postChangeThreshold(startNode.viewCount)
@@ -32,7 +33,7 @@ trait ConnectsHelper {
     true
   }
 
-  protected def getConnectsWithKarma(user: User, startDef: UuidNodeDef[Post], endDef: NodeDef[Connectable])(implicit ctx: QueryContext): (Discourse, Option[(Post, Connectable)]) = {
+  def getConnectsWithKarma(user: User, startDef: UuidNodeDef[Post], endDef: NodeDef[Connectable])(implicit ctx: QueryContext): (Discourse, Option[(Post, Connectable)]) = {
     val userDef = ConcreteNodeDef(user)
     val createdDef = RelationDef(userDef, SchemaCreated, startDef)
     val query = s"""
@@ -53,7 +54,7 @@ trait ConnectsHelper {
     (discourse, postConnOpt)
   }
 
-  protected def getConnectsWithKarma(user: User, connectsDef: NodeRelationDef[Post, Connects, Connectable])(implicit ctx: QueryContext): (Discourse, Option[Connects]) = {
+  def getConnectsWithKarma(user: User, connectsDef: NodeRelationDef[Post, Connects, Connectable])(implicit ctx: QueryContext): (Discourse, Option[Connects]) = {
     val userDef = ConcreteNodeDef(user)
     val createdDef = RelationDef(userDef, SchemaCreated, connectsDef.startDefinition)
     val query = s"""
@@ -71,12 +72,12 @@ trait ConnectsHelper {
   }
 }
 
-trait ConnectsRelationHelper[NODE <: Connectable] extends ConnectsHelper {
+trait ConnectsRelationHelper[NODE <: Connectable] {
   implicit def format: Format[NODE]
 
   protected def forwardPersistRelation(discourse: Discourse, startNode: Post, endNode: Connectable): Result
 
-  protected def persistRelation(discourse: Discourse, result: NODE, base: Connectable): Result = {
+  protected def persistRelationNew(discourse: Discourse, result: NODE, base: Connectable): Result = {
     db.transaction(_.persistChanges(discourse)).map(err =>
       BadRequest(s"Cannot connect: $err'")
     ) getOrElse {
@@ -89,9 +90,9 @@ trait ConnectsRelationHelper[NODE <: Connectable] extends ConnectsHelper {
   }
 
   protected def persistRelationChecked(user: User, start: UuidNodeDef[Post], end: NodeDef[Connectable])(implicit ctx: QueryContext) = {
-    getConnectsWithKarma(user, start, end) match {
+    ConnectsHelper.getConnectsWithKarma(user, start, end) match {
       case (discourse, Some((startNode, endNode))) =>
-        if (canEditConnects(startNode, discourse.scopes)) {
+        if (ConnectsHelper.canEditConnects(startNode, discourse.scopes)) {
           discourse.add(Connects.merge(startNode, endNode))
           forwardPersistRelation(discourse, startNode, endNode)
         } else {
@@ -103,9 +104,9 @@ trait ConnectsRelationHelper[NODE <: Connectable] extends ConnectsHelper {
 
   protected def deleteRelationChecked(user: User, start: UuidNodeDef[Post], end: NodeDef[Connectable])(implicit ctx: QueryContext): Result = {
     val relationDef = RelationDef(start, Connects, end)
-    getConnectsWithKarma(user, relationDef) match {
+    ConnectsHelper.getConnectsWithKarma(user, relationDef) match {
       case (discourse, Some(connects)) =>
-        if (canEditConnects(connects.startNodeOpt.get, discourse.scopes)) {
+        if (ConnectsHelper.canEditConnects(connects.startNodeOpt.get, discourse.scopes)) {
           discourse.remove(connects)
           db.transaction(_.persistChanges(discourse)).map(err => BadRequest(s"Cannot disconnect: $err")).getOrElse {
             LiveWebSocket.sendConnectableDelete(connects.uuid)
@@ -137,10 +138,10 @@ case class StartConnectsAccess() extends StartRelationReadBase[Post, Connects, C
     val node = discourse.connectables.headOption.getOrElse(discourse.nodesAs(ConnectableMatches).head)
     val base = param.factory.matchesOnUuid(param.baseUuid)
     discourse.add(base, node, factory.merge(base, node))
-    persistRelation(discourse, node, base)
+    persistRelationNew(discourse, node, base)
   }
 
-  protected def forwardPersistRelation(discourse: Discourse, startNode: Post, endNode: Connectable): Result = persistRelation(discourse, endNode, startNode)
+  protected def forwardPersistRelation(discourse: Discourse, startNode: Post, endNode: Connectable): Result = persistRelationNew(discourse, endNode, startNode)
 
   private def neighbourDefs(param: ConnectParameter[Post], uuid: String)(implicit ctx: QueryContext) = {
     val node = FactoryUuidNodeDef(nodeFactory, uuid)
@@ -177,7 +178,7 @@ case class EndConnectsAccess() extends EndRelationReadBase[Post, Connects, Conne
     val node = discourse.posts.head
     val base = param.factory.matchesOnUuid(param.baseUuid)
     discourse.add(base, node, factory.merge(node, base))
-    persistRelation(discourse, node, base)
+    persistRelationNew(discourse, node, base)
   }
 
   private def createRelation[S <: UuidNode, E <: UuidNode](context: RequestContext, param: HyperConnectParameter[S, Connectable with AbstractRelation[S, E], E], discourse: Discourse) = {
@@ -187,10 +188,10 @@ case class EndConnectsAccess() extends EndRelationReadBase[Post, Connects, Conne
     val base = param.factory.matchesMatchableRelation(start, end)
     val relation = factory.merge(node, base)
     discourse.add(base, node, relation)
-    persistRelation(discourse, node, base)
+    persistRelationNew(discourse, node, base)
   }
 
-  protected def forwardPersistRelation(discourse: Discourse, startNode: Post, endNode: Connectable): Result = persistRelation(discourse, startNode, endNode)
+  protected def forwardPersistRelation(discourse: Discourse, startNode: Post, endNode: Connectable): Result = persistRelationNew(discourse, startNode, endNode)
 
   private def neighbourDefs(param: ConnectParameter[Connectable], uuid: String)(implicit ctx: QueryContext) = {
     val node = FactoryUuidNodeDef(nodeFactory, uuid)
@@ -241,7 +242,7 @@ case class EndConnectsAccess() extends EndRelationReadBase[Post, Connects, Conne
   }
 }
 
-case class ConnectsAccess() extends NodeAccessDefault[Connects] with ConnectsHelper {
+case class ConnectsAccess() extends NodeAccessDefault[Connects] {
   val factory = Connects
 
   private def deleteClassificationsFromGraph(discourse: Discourse, request: ConnectsUpdateRequest, node: Connects) {
@@ -253,7 +254,7 @@ case class ConnectsAccess() extends NodeAccessDefault[Connects] with ConnectsHel
     }
   }
 
-  private def addClassifcationsToGraph(discourse: Discourse, request: ConnectsUpdateRequest, node: Connects) {
+  private def addClassificationsToGraph(discourse: Discourse, request: ConnectsUpdateRequest, node: Connects) {
     request.addedTags.map(c => Classification.matchesOnUuid(c.id)).foreach { tag =>
       val tags = Classifies.merge(tag, node)
       discourse.add(tags)
@@ -266,11 +267,11 @@ case class ConnectsAccess() extends NodeAccessDefault[Connects] with ConnectsHel
     context.withJson { (request: ConnectsUpdateRequest) =>
       implicit val ctx = new QueryContext
       val connectsDef = HyperNodeDef(FactoryNodeDef(Post), Connects, FactoryNodeDef(Connectable), Some(uuid))
-      getConnectsWithKarma(user, connectsDef) match {
+      ConnectsHelper.getConnectsWithKarma(user, connectsDef) match {
         case (discourse, Some(connects)) =>
-          if (canEditConnects(connects.startNodeOpt.get, discourse.scopes)) {
+          if (ConnectsHelper.canEditConnects(connects.startNodeOpt.get, discourse.scopes)) {
             deleteClassificationsFromGraph(discourse, request, connects)
-            addClassifcationsToGraph(discourse, request, connects)
+            addClassificationsToGraph(discourse, request, connects)
 
             db.transaction(_.persistChanges(discourse)) match {
               case Some(err) => BadRequest(s"Cannot update Connects with uuid '$uuid': $err")

@@ -84,9 +84,16 @@
         height: 270px; // must be high enough to cover expanded tag-editor
         padding: 10px;
     }
+    .new_notification {
+        display: inline-block;
+        font-size: 8pt;
+        background: red;
+        border-radius: 3px;
+        text-align: center;
+        width: 18px;
+    }
     .new_discussion_button {
         margin-right: 0px;
-        margin-left: 10px;
     }
     .new_discussion_button_xs {
         margin-right: 0px;

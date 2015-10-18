@@ -77,6 +77,7 @@ object WustSchema {
   }
 
   @Relation class Marks(startNode: User, endNode: Post) extends ConstructRelation
+  @Relation class Follows(startNode: User, endNode: Post) extends ConstructRelation
 
   // if you add/remove any properties (including inherited), you need to update modules.karma.KarmaStore
   @Relation class LogOnScope(startNode: KarmaLog, endNode: Scope) {

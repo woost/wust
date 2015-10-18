@@ -35,17 +35,17 @@ object PostHelper {
   def createPost(request: PostAddRequest, user: User): Discourse = {
     val node = Post.create(title = request.title, description = request.description)
     val contribution = Created.create(user, node)
+    val follows = Follows.create(user, node)
     val viewed = Viewed.create(user, node)
     node.viewCount = 1
 
-    val discourse = Discourse(viewed, contribution)
+    val discourse = Discourse(viewed, contribution, follows)
     addScopesToGraph(discourse, request, node)
 
     discourse
   }
 
-
-  def viewPost(node: Post, user: User) = Future {
+  def viewPostSync(node: Post, user: User) = {
     db.transaction { tx =>
       implicit val ctx = new QueryContext
       val postDef = ConcreteNodeDef(node)
@@ -73,4 +73,6 @@ object PostHelper {
       tx.persistChanges(discourse)
     }
   }
+
+  def viewPost(node: Post, user: User) = Future { viewPostSync(node, user) }
 }

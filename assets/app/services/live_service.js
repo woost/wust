@@ -3,7 +3,7 @@ angular.module("wust.services").provider("LiveService", LiveService)
 
 RunLive.$inject = ["LiveService"];
 
-function RunLive(LiveService) {}
+function RunLive(LiveService, Session) {}
 
 LiveService.$inject = [];
 
@@ -13,8 +13,8 @@ function LiveService() {
 
     this.$get = get;
 
-    get.$inject = ["$rootScope", "Auth", "HistoryService", "KarmaService", "StreamService"];
-    function get($rootScope, Auth, HistoryService, KarmaService, StreamService) {
+    get.$inject = ["$rootScope", "Auth", "HistoryService", "KarmaService", "StreamService", "Session"];
+    function get($rootScope, Auth, HistoryService, KarmaService, StreamService, Session) {
         let url = currentUrl();
         let nodesSocket = new WebSocket(`${url}${baseUrl}/nodes`);
         nodesSocket.onmessage = readNodeEvent;
@@ -54,6 +54,9 @@ function LiveService() {
                         break;
                     case "dashboard":
                         StreamService.refreshDashboard(event.data);
+                        break;
+                    case "notification":
+                        Session.addNotification(event.data);
                         break;
                 }
             });

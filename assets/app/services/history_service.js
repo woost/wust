@@ -16,12 +16,15 @@ function HistoryService(Auth, Session, Post, DiscourseNode, $rootScope, $state) 
     this.addConnectToCurrentView = addConnectToCurrentView;
     this.removeFromCurrentView = removeFromCurrentView;
     this.addNodesToCurrentView = addNodesToCurrentView;
+    this.getNodeFromCurrentView = getNodeFromCurrentView;
 
     this.getCurrentViewComponentGraph = getCurrentViewComponentGraph;
     this.getCurrentViewComponentNeighbours = getCurrentViewComponentNeighbours;
 
     let currentCommitUnregister, currentViewComponent;
     this.setCurrentViewComponent = setCurrentViewComponent;
+    this.getCurrentViewComponentGraph = getCurrentViewComponentGraph;
+    this.getCurrentViewComponentNeighbours = getCurrentViewComponentNeighbours;
 
     if (Auth.isLoggedIn) {
         load();
@@ -45,6 +48,14 @@ function HistoryService(Auth, Session, Post, DiscourseNode, $rootScope, $state) 
         });
     }
 
+    function getCurrentViewComponentGraph() {
+        return currentViewComponent ? currentViewComponent.getWrap("graph") : undefined;
+    }
+
+    function getCurrentViewComponentNeighbours() {
+        return currentViewComponent ? currentViewComponent.getWrap("neighbours") : undefined;
+    }
+
     function load() {
         Session.history(maximum).then(response => {
             self.visited = _.values(response.$encode());
@@ -53,6 +64,14 @@ function HistoryService(Auth, Session, Post, DiscourseNode, $rootScope, $state) 
 
     function forget() {
         self.visited = [];
+    }
+
+    function getNodeFromCurrentView(id) {
+        if (!$state.is("focus") || currentViewComponent === undefined)
+            return;
+
+        let current = currentViewComponent.getWrap("graph");
+        return _.find(current.nodes, { id });
     }
 
     function updateCurrentView(node) {
