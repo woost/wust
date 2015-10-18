@@ -22,7 +22,7 @@
                 </progressbar>
                 <button class="pull-left btn btn-sm btn-danger" ng-click="vm.node.deleteNode(); $hide()" ng-hide="vm.node.isLocal" title="Delete"><i class="fa fa-trash-o"></i></button>
                 <button class="btn btn-default" ng-click="$hide()">Cancel</button>
-                <button class="btn btn-default" type="submit" ng-click="vm.save()" ng-disabled="vm.node.isSaving">
+                <button class="btn btn-default" type="submit" ng-click="vm.save()" ng-disabled="vm.node.isSaving || (!vm.node.isLocal && vm.node.isPristine)">
                     <span ng-if="::vm.node.newDiscussion">Start Discussion</span>
                     <span ng-if="::!vm.node.newDiscussion && vm.node.isLocal">Respond</span>
                     <span ng-if="::vm.node.isEdit">Save</span>
