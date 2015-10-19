@@ -23,6 +23,7 @@ object ConnectsCtrl extends Nodes[Connects] {
 object Posts extends Nodes[Post] {
   val node = NodeDef(PostAccess.apply,
     "requests" -> (N <> PostChangeRequestAccess.apply),
+    "history" -> (N <> PostHasHistoryAccess.apply),
     "tags" -> (N < SchemaTags <(EndRelationRead(SchemaTags, Scope),
       "up" -> (N < VotesTagsAccess(1)),
       "neutral" -> (N < VotesTagsAccess(0))

@@ -1,14 +1,23 @@
 <div class="big_post_directive clearfix" colored-tag-node="vm.node" big="true" ng-switch="vm.editMode" ng-class="{deleted: vm.node.isDeleted}">
-    <div ng-switch-when="true" static-edit-post on-cancel="vm.onCancel()" on-delete="vm.onDelete(response)" on-save="vm.onSave(response)" node="vm.node"></div>
+    <div ng-switch-when="true">
+        <div static-edit-post on-cancel="vm.onCancel()" on-delete="vm.onDelete(response)" on-save="vm.onSave(response)" node="vm.node"></div>
+        <a ng-if="vm.history.length > 0 && !vm.node.isDeleted" href="#" ng-click="vm.showHistory = !vm.showHistory" class="showchanges">
+            <i class="fa" ng-class="{'fa-chevron-down': vm.showHistory, 'fa-chevron-right': !vm.showHistory}"></i>
+            Show edit history
+        </a>
+        <div ng-if="vm.showHistory && !vm.node.isDeleted">
+            <post-change-request changes="vm.history" finished="true"></post-change-request>
+        </div>
+    </div>
     <div ng-switch-default>
         <button ng-if="vm.Auth.isLoggedIn && !vm.node.isDeleted" class="fa fa-pencil pull-right btn btn-sm btn-default" ng-click="vm.editMode = true" data-title="Edit" bs-tooltip></button>
         <h2 ng-bind="vm.node.title" class="post_title"></h2>
         <div class="additional_info">
             <div class="pull-right">
                 <div>{{vm.node.viewCount}} views</div>
-                <div ng-if="::vm.showAuthor">
+                <div ng-if="::vm.showAuthor" ng-repeat="author in vm.authors">
                     <i class="fa fa-user"></i>
-                    <a ui-sref="users.details({id: vm.node.author.id})" ng-bind="vm.node.author.name"></a>
+                    <a ui-sref="users.details({id: author.id})" ng-bind="author.name"></a>
                 </div>
                 <div toggle-zen node="vm.node" ng-show="vm.node.description"></div>
             </div>
@@ -24,7 +33,7 @@
         Show open change requests
     </a>
     <div ng-if="vm.showChanges && !vm.node.isDeleted">
-        <post-change-request changes="vm.changeRequests" on-delete-apply="vm.onDeleteApply()" on-tag-apply="vm.onTagApply(change)" on-apply="vm.onApply(node)"></post-change-request>
+        <post-change-request changes="vm.changeRequests" on-delete-apply="vm.onDeleteApply()" on-tag-apply="vm.onTagApply(change)" on-apply="vm.onApply(change, node)"></post-change-request>
     </div>
     <h2 class="deleted_info" ng-if="vm.node.isDeleted">
         Deleted post

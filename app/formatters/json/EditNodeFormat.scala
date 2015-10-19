@@ -9,6 +9,7 @@ import renesca.parameter.implicits._
 import formatters.json.TagFormat._
 
 object EditNodeFormat {
+  import UserFormat._
 
   implicit object CRFormat extends Format[ChangeRequest] {
     def reads(json: JsValue) = ???
@@ -16,6 +17,7 @@ object EditNodeFormat {
     def writes(node: ChangeRequest) = JsObject(node match {
       case n: Updated        => Seq(
         ("id", JsString(n.uuid)),
+        ("author", n.inRelationsAs(UpdatedStart).headOption.map(r => Json.toJson(r.startNode)).getOrElse(JsNull)),
         ("oldTitle", JsString(n.oldTitle)),
         ("newTitle", JsString(n.newTitle)),
         ("oldDescription", JsString(n.oldDescription.getOrElse(""))),
@@ -25,19 +27,23 @@ object EditNodeFormat {
         ("rejectThreshold", JsNumber(n.rejectThreshold)),
         ("votes", JsNumber(n.approvalSum)),
         ("status", JsNumber(n.status)),
+        ("timestamp", JsNumber(n.timestamp)),
         ("type", JsString("Edit"))
       )
       case n: Deleted        => Seq(
         ("id", JsString(n.uuid)),
+        ("author", n.inRelationsAs(DeletedStart).headOption.map(r => Json.toJson(r.startNode)).getOrElse(JsNull)),
         ("vote", n.inRelationsAs(Votes).headOption.map(vote => JsObject(Seq(("weight", JsNumber(vote.weight))))).getOrElse(JsNull)),
         ("applyThreshold", JsNumber(n.applyThreshold)),
         ("rejectThreshold", JsNumber(n.rejectThreshold)),
         ("votes", JsNumber(n.approvalSum)),
         ("status", JsNumber(n.status)),
+        ("timestamp", JsNumber(n.timestamp)),
         ("type", JsString("Delete"))
       )
       case n: AddTags    => Seq(
         ("id", JsString(n.uuid)),
+        ("author", n.inRelationsAs(AddTagsStart).headOption.map(r => Json.toJson(r.startNode)).getOrElse(JsNull)),
         ("tag", n.proposesTags.headOption.map(t => Json.toJson(t)).getOrElse(JsNull)),
         ("classifications", Json.toJson(n.proposesClassifys)),
         ("vote", n.inRelationsAs(Votes).headOption.map(vote => JsObject(Seq(("weight", JsNumber(vote.weight))))).getOrElse(JsNull)),
@@ -46,10 +52,12 @@ object EditNodeFormat {
         ("votes", JsNumber(n.approvalSum)),
         ("isRemove", JsBoolean(false)),
         ("status", JsNumber(n.status)),
+        ("timestamp", JsNumber(n.timestamp)),
         ("type", JsString("AddTag"))
       )
       case n: RemoveTags    => Seq(
         ("id", JsString(n.uuid)),
+        ("author", n.inRelationsAs(RemoveTagsStart).headOption.map(r => Json.toJson(r.startNode)).getOrElse(JsNull)),
         ("tag", n.proposesTags.headOption.map(t => Json.toJson(t)).getOrElse(JsNull)),
         ("classifications", Json.toJson(n.proposesClassifys)),
         ("vote", n.inRelationsAs(Votes).headOption.map(vote => JsObject(Seq(("weight", JsNumber(vote.weight))))).getOrElse(JsNull)),
@@ -58,6 +66,7 @@ object EditNodeFormat {
         ("votes", JsNumber(n.approvalSum)),
         ("isRemove", JsBoolean(true)),
         ("status", JsNumber(n.status)),
+        ("timestamp", JsNumber(n.timestamp)),
         ("type", JsString("RemoveTag"))
       )
     })

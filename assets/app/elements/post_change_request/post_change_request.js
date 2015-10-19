@@ -11,7 +11,8 @@ function postChangeRequest() {
             changes: "=",
             onApply: "&",
             onTagApply: "&",
-            onDeleteApply: "&"
+            onDeleteApply: "&",
+            finished: "@"
         },
         controller: postChangeRequestCtrl,
         controllerAs: "vm",
@@ -43,7 +44,7 @@ function postChangeRequestCtrl(ChangeRequests) {
             } else if (change.status > 0) {
                 humane.success("Change request accepted");
                 if (change.type === "Edit")
-                    vm.onApply({node: response.node});
+                    vm.onApply({change: change, node: response.node});
                 else if (change.type === "Delete")
                     vm.onDeleteApply();
                 else {

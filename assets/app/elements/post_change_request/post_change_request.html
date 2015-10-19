@@ -1,5 +1,12 @@
 <div class="post_change_request_directive" ng-if="vm.changes.length > 0">
     <div class="changerequest" ng-repeat="change in vm.changes">
+        <div class="summary" ng-if="::vm.finished">
+            <div class="pull-right">
+                <i class="fa fa-user"></i>
+                <a ui-sref="users.details({id: change.author.id})" ng-bind="change.author.name"></a>
+            </div>
+            <div show-timestamp="change.timestamp"></div>
+        </div>
         <span ng-switch="change.type">
             <div ng-switch-when="Edit">
                 <span ng-if="change.oldTitle != change.newTitle">
@@ -35,7 +42,7 @@
             </div>
         </span>
 
-        <div class="votebar">
+        <div class="votebar" ng-if="::!vm.finished">
             <button class="pull-right btn btn-success btn-xs" ng-class="{ inactive: change.vote.weight === undefined || change.vote.weight <= 0 }" type="button" ng-click="vm.voting.up(change)"><i class="fa fa-check"></i></button>
             <button class="pull-left btn btn-danger btn-xs" ng-class="{ inactive: change.vote.weight === undefined || change.vote.weight >= 0 }" type="button" ng-click="vm.voting.down(change)"><i class="fa fa-close"></i></button>
             <vote-progress change="change"></vote-progress>

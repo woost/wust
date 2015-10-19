@@ -30,6 +30,7 @@ function bigPostCtrl($state, Post, ModalEditService, ContextService, Auth, Histo
     vm.showAuthor = true;
 
     vm.changeRequests = Post.$buildRaw(_.pick(vm.node, "id")).requests.$search();
+    vm.history = Post.$buildRaw(_.pick(vm.node, "id")).history.$search().$then(updateAuthors);
     vm.replyTo = replyTo;
     vm.onSave = onSave;
     vm.onCancel = onCancel;
@@ -40,11 +41,19 @@ function bigPostCtrl($state, Post, ModalEditService, ContextService, Auth, Histo
     vm.editMode = false;
     vm.nodeHasContext = () => _.any(vm.node.tags, "isContext");
 
+    updateAuthors();
+
     // ContextService.setNodeContext(vm.node);
+
+    function updateAuthors() {
+        vm.authors = _.uniq([vm.node.author].concat(vm.history.map(h => h.author)), "id");
+    }
 
     function onSave(response) {
         vm.editMode = false;
-        vm.changeRequests = _.uniq(response.requestsEdit.concat(response.requestsTags).concat(vm.changeRequests), "id").filter(r => !r.status);
+        vm.changeRequests = _.uniq(response.requestsEdit.concat(response.requestsTags).concat(vm.changeRequests), "id").filter(r => r.status === 0);
+        vm.history = _.uniq(response.requestsEdit.concat(response.requestsTags).filter(r => r.status > 0).concat(vm.history), "id");
+        updateAuthors();
     }
 
     function onCancel() {
@@ -59,9 +68,11 @@ function bigPostCtrl($state, Post, ModalEditService, ContextService, Auth, Histo
         }
     }
 
-    function onApply(node) {
+    function onApply(change, node) {
         vm.node.title = node.title;
         vm.node.description = node.description;
+        vm.history.unshift(change);
+        updateAuthors();
     }
 
     function onDeleteApply() {
@@ -86,6 +97,8 @@ function bigPostCtrl($state, Post, ModalEditService, ContextService, Auth, Histo
                 vm.node.tags.push(change.tag);
             }
         }
+        vm.history.unshift(change);
+        updateAuthors();
     }
 
     function replyTo() {
