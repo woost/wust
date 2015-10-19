@@ -11,7 +11,7 @@
                     <div class="list-item">
                         <span ng-if="vm.templateBefore" ng-include="vm.templateBefore"></span>
                         <span class="list-item-small-post" small-post node="node">
-                            <div class="inner-list" ng-repeat="nested in node.nestedNodeLists[vm.nodeModel.listId]" discourse-node-list node-model="nested.model" template-before="{{vm.templateBefore}}" template-after="{{vm.templateAfter}}"></div>
+                            <div class="inner-list" ng-repeat="nested in node.nestedNodeLists[vm.nodeModel.listId]" discourse-node-list node-model="nested.model"></div>
                         </span>
                         <span ng-if="vm.templateAfter" ng-include="vm.templateAfter"></span>
                     </div>
