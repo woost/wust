@@ -15,7 +15,7 @@
                 <button class="close" ng-click="vm.node.remove()" type="button" aria-label="Close " data-title="Remove from scratchpad, discards unsaved changes" bs-tooltip><span aria-hidden="true">&times;</span></button>
                 <div class="tag_circle_container">
                     <span ng-repeat="tag in (vm.node | nodetags)" data-title="{{tag.title}}" bs-tooltip>
-                        <span colored-tag="tag" tagtype="circle" class="tag_circle" ng-class="tag.isContext ? '' : tag.symbol"></span>
+                        <span colored-tag="tag" tagtype="circle" class="tag_circle"></span>
                     </span>
                 </div>
             </div>

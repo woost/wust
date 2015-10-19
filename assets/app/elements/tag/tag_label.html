@@ -1,7 +1,7 @@
 <span class="tag-label" colored-tag="vm.tagLabel" tagtype="label" border="true" ng-switch="::vm.disableLink">
     <span data-title="{{vm.tagLabel.quality.toFixed(3)}}" bs-tooltip placement="bottom">
         <span ng-switch-when="true" class="content">
-            <i ng-if="::!vm.tagLabel.isContext" ng-class="vm.tagLabel.symbol"></i>
+            <i ng-if="::!vm.tagLabel.isContext"></i>
             <span ng-bind="vm.tagLabel.title" class="content"></span>
         </span>
         <a ng-switch-default ui-sref="tags.details({id: vm.tagLabel.id})" class="content">
