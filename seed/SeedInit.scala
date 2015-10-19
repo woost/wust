@@ -16,19 +16,23 @@ object SeedDatabase extends Task with SeedTools {
 
     modifyDiscourse { implicit discourse =>
       discourse.add(
-        mergeClassification("Problem", color = Some(90), symbol = "fa fa-flask"),
-        mergeClassification("Goal", color = Some(169), symbol = "fa fa-crosshairs"),
-        mergeClassification("Idea", color = Some(260), symbol = "fa fa-lightbulb-o"),
-        mergeClassification("Pro", color = Some(135), symbol = "fa fa-thumbs-o-up"),
-        mergeClassification("Contra", color = Some(21), symbol = "fa fa-thumbs-o-down"),
+        mergeClassification("Done", color = Some(150), symbol = "fa fa-check", precedence = 100),
+
+        mergeClassification("Problem", color = Some(90), symbol = "fa fa-flask", precedence = 20),
+        mergeClassification("Goal", color = Some(169), symbol = "fa fa-crosshairs", precedence = 20),
+        mergeClassification("Idea", color = Some(260), symbol = "fa fa-lightbulb-o", precedence = 20),
+
+        mergeClassification("Question", color = Some(301), symbol = "fa fa-question", precedence = 10),
+        mergeClassification("Task", color = Some(280), symbol = "fa fa-list-ul", precedence = 10),
+        mergeClassification("Cause", color = Some(70), symbol = "fa fa-arrow-left", precedence = 10),
+
+        mergeClassification("Pro", color = Some(135), symbol = "fa fa-thumbs-o-up", precedence = 6),
+        mergeClassification("Contra", color = Some(21), symbol = "fa fa-thumbs-o-down", precedence = 5)
+
         // mergeClassification("Bug", color = Some(50)),
-        mergeClassification("Question", color = Some(301), symbol = "fa fa-question"),
         // mergeClassification("Answer", color = Some(280)),
-        mergeClassification("Task", color = Some(280), symbol = "fa fa-list-ul"),
-        mergeClassification("Cause", color = Some(70), symbol = "fa fa-arrow-left"),
         // mergeClassification("Dependency", color = Some(110)),
         // mergeClassification("Hypothesis", color = Some(110)),
-        mergeClassification("Done", color = Some(150), symbol = "fa fa-check")
       )
 
       discourse.add(UserGroup.merge(name = "everyone", merge = Set("name")))

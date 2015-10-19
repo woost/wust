@@ -52,7 +52,7 @@ function hashCode(string) {
 }
 
 function sortByIdQuality(tags) {
-    return _.sortByOrder(tags, ["quality", "id"], ["desc", "asc"]);
+    return _.sortByOrder(tags, ["precedence", "quality", "id"], ["desc", "desc", "asc"]);
 }
 
 function withoutTags(tags, ignore) {

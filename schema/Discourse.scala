@@ -239,7 +239,7 @@ object WustSchema {
   // Tags
   @Node class Classification extends TagLike {
     val symbol: String // css class name, like "fa fa-lightbulb" or "icon-bla"
-    // val precendence: Int
+    val precedence: Long = 0
   }
 
   @Relation class Classifies(startNode: Classification, endNode: Reference)

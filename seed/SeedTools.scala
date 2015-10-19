@@ -8,8 +8,8 @@ import wust.Shared.tagTitleColor
 trait SeedTools {
   val maxTitleLength = 140
 
-  def mergeClassification(title: String, description: Option[String] = None, color:Option[Long] = None, symbol: String) = {
-    Classification.merge(title = title, description = description, color = color.getOrElse(tagTitleColor(title)), symbol = symbol, merge = Set("title"))
+  def mergeClassification(title: String, description: Option[String] = None, color:Option[Long] = None, symbol: String = "", precedence: Long = 0) = {
+    Classification.merge(title = title, description = description, color = color.getOrElse(tagTitleColor(title)), symbol = symbol, precedence = precedence, merge = Set("title"), onMatch = Set("description", "color", "symbol", "precedence"))
   }
 
   def matchClassification(title: String) = {

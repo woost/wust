@@ -16,7 +16,8 @@ object TagFormat {
     ("color", JsNumber(tag.color))
   ) ++ (tag match {
     case c: Classification => Seq(
-      ("symbol", JsString(c.symbol))
+      ("symbol", JsString(c.symbol)),
+      ("precedence", JsNumber(c.precedence))
     )
     case _ => Seq.empty
   })

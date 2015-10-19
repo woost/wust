@@ -1,8 +1,8 @@
 angular.module("wust.services").service("TagSuggestions", TagSuggestions);
 
-TagSuggestions.$inject = ["Search", "DiscourseNode", "$q"];
+TagSuggestions.$inject = ["Search", "DiscourseNode", "$q", "Helpers"];
 
-function TagSuggestions(Search, DiscourseNode, $q) {
+function TagSuggestions(Search, DiscourseNode, $q, Helpers) {
     this.search = search;
 
     let initialSuggestions = {};
@@ -16,7 +16,7 @@ function TagSuggestions(Search, DiscourseNode, $q) {
 
             let deferred = $q.defer();
             let regex = new RegExp(title, "i");
-            initialSuggestions[label].then(suggestions => deferred.resolve(suggestions.filter(s => s.title.match(regex))));
+            initialSuggestions[label].then(suggestions => deferred.resolve(Helpers.sortByIdQuality(suggestions.filter(s => s.title.match(regex)))));
             return deferred.promise;
         } else {
             if (_.isEmpty(title)) {
