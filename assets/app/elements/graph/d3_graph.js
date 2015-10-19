@@ -252,7 +252,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 .style("background-color", n => {
                     if(n.isHyperRelation) return undefined;
                     if(n.isDeleted) return "red";
-                    let tags = Helpers.sortedNodeTags(n);
+                    let tags = Helpers.sortedNodeTags(n).filter(t => !t.isContext);
                     if(tags.length === 0) return undefined;
                     return Helpers.smallPostBackgroundColor(tags[0]);
                 })
@@ -262,7 +262,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 .style("border-color", n => {
                     if( this.debugDraw ) return Math.sign(n.rootiness) > 0 ? "lightblue" : "pink";
 
-                    let tags = Helpers.sortedNodeTags(n);
+                    let tags = Helpers.sortedNodeTags(n).filter(t => !t.isContext);
                     return !n.isHyperRelation && tags.length > 0 ? Helpers.postBorderColor(tags[0]) : undefined;
                 })
                 .style("border-width", n => {
