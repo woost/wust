@@ -154,9 +154,9 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
                 if (!this.isConnects) {
                     let appliedRequests = data.requestsTags && _.any(data.requestsTags, "status") || data.requestsEdit && _.any(data.requestsEdit, "status");
                     let hasRequests = !_.isEmpty(data.requestsTags) || !_.isEmpty(data.requestsEdit);
-                    if (appliedRequests)
-                        humane.success("Updated node");
-                    else if (hasRequests)
+                    // if (appliedRequests)
+                    //     humane.success("Updated node");
+                    if (!appliedRequests && hasRequests)
                         humane.success("Created change request");
                     // else if (!model.id)
                         // humane.success("Added new node");
