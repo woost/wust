@@ -46,7 +46,7 @@ function bigPostCtrl($state, Post, ModalEditService, ContextService, Auth, Histo
     // ContextService.setNodeContext(vm.node);
 
     function updateAuthors() {
-        vm.authors = _.uniq([vm.node.author].concat(vm.history.map(h => h.author)), "id");
+        vm.authors = _.uniq([vm.node.author].concat(vm.history.map(h => h.author).reverse()), "id");
     }
 
     function onSave(response) {
