@@ -54,6 +54,7 @@ object LiveWebSocket {
 
   def sendConnectableDelete(connUuid: String) = {
     registerNodesActor ! ConnectableDelete(connUuid)
+    registerUsersActor ! DashboardUpdate()
   }
 
   def sendConnectsAdd[NODE <: Connectable](baseUuid: String, response: ConnectResponse[NODE]) = {
