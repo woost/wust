@@ -16,7 +16,8 @@ function editTaglist() {
             tagType: "@",
             editClassification: "@",
             placeholder: "@",
-            embedSuggestions: "@"
+            embedSuggestions: "@",
+            emptySearchOnlyFirst: "="
         },
         controller: editTaglistCtrl,
         controllerAs: "vm",
@@ -34,23 +35,24 @@ function editTaglistCtrl(TagSuggestions, DiscourseNode, $q) {
 
     vm.onChangeDistributor = onChangeDistributor;
     vm.searchTags = searchTags;
+    let tagLabels;
     switch (vm.tagType) {
         //TODO: expose labels without own node api in schema object from api
         case "classification":
             // tagLabel = DiscourseNode.Classification.label;
-            vm.tagLabels = ["CLASSIFICATION"];
+            tagLabels = ["CLASSIFICATION"];
             vm.placeholder = vm.placeholder || "Add Classification";
         break;
         case "taglike":
             // tagLabel = DiscourseNode.Classification.label;
-            vm.tagLabels = ["CLASSIFICATION", "SCOPE"];
+            tagLabels = ["CLASSIFICATION", "SCOPE"];
             vm.placeholder = vm.placeholder || "Add Tag";
         break;
         case "context":
             /* falls through */
         default:
             // tagLabel = DiscourseNode.Scope.label;
-            vm.tagLabels = ["SCOPE"];
+            tagLabels = ["SCOPE"];
             vm.placeholder = vm.placeholder || "Add Context";
         break;
     }
@@ -69,8 +71,9 @@ function editTaglistCtrl(TagSuggestions, DiscourseNode, $q) {
         if(delayedTriggerSearch)
             clearTimeout(delayedTriggerSearch);
 
+        let chosenLabels = vm.emptySearchOnlyFirst && term === "" ? [tagLabels[0]] : tagLabels;
         return $q((resolve, reject) => {
-            delayedTriggerSearch = setTimeout(() => $q.all(vm.tagLabels.map(tagLabel => {
+            delayedTriggerSearch = setTimeout(() => $q.all(chosenLabels.map(tagLabel => {
                 return TagSuggestions.search(term, tagLabel);
             })).then(resolve, reject), searchTriggerDelay);
         });

@@ -13,7 +13,6 @@ angular.module("wust.elements").directive("tagEditor", function() {
                 editClassification: "@",
                 placeholder: "@",
                 embedSuggestions: "@",
-                dualSuggestions: "@"
             },
             templateUrl: "elements/ngTagEditor/ngTagEditor.html",
             controller: ["$scope", "$attrs", "$element", "$filter",
