@@ -1,10 +1,10 @@
 #!/bin/bash -e
 
 echo "installing node dependencies..."
-npm install
+# npm install
 
 echo "installing bower dependencies..."
-bower --config.interactive=false install
+# bower --config.interactive=false install
 
 [ -s "$HOME/.rvm/scripts/rvm" ] && source "$HOME/.rvm/scripts/rvm"
 
