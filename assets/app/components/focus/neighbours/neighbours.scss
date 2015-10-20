@@ -38,7 +38,7 @@
                 @include align-items(stretch);
                 @include flex-wrap(wrap);
             }
-            .small_post_directive {
+            .small-post {
                 width: 190px;
                 vertical-align: top;
                 margin-right: 5px;
@@ -54,7 +54,7 @@
         .discourse_node_list {
             padding-top: 8px;
             padding-left: 10px;
-            .small_post_directive {
+            .small-post {
                 width: 180px;
             }
             .drop_post_container {
@@ -103,7 +103,7 @@
         .list-item-small-post {
             width: 100%; // without this small post does not stretch to 100%
         }
-        .small_post_directive {
+        .small-post {
             text-align: left;
             margin-bottom:0;
             width: $small-post-max-width;

@@ -11,7 +11,7 @@
     .contributions {
         margin-top: 30px;
         .authorship {
-            .small_post_directive {
+            .small-post {
                 width: 200px;
             }
         }
@@ -34,7 +34,7 @@
                 margin-bottom: 5px;
                 // @include transform(scale(0.75));
             }
-            .small_post_directive {
+            .small-post {
                 width: 200px;
                 margin-left: 5px;
             }

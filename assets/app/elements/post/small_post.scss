@@ -1,6 +1,6 @@
 @import "globals";
 
-.small_post_directive {
+.small-post {
     display: inline-block;
     border: 1px solid $post_default_border_color;
     border-radius: 4px;
@@ -12,7 +12,7 @@
     vertical-align: middle;
 
     margin-bottom: 5px;
-    .small_post_directive {
+    .small-post {
         margin-bottom: 5px !important;
     }
 
@@ -30,7 +30,7 @@
         margin-left: 5px;
         margin-top: 5px;
         margin-right: -2px; // there is a padding-left: 7px
-        .small_post_directive {
+        .small-post {
             width: 100% !important;
         }
     }

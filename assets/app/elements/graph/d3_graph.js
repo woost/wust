@@ -248,7 +248,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                     .append("div").attr("class", d => "nodeframe" + (d.isHyperRelation ? " nodeframe-hyperrelation" : ""));
 
                 this.d3Node = this.d3NodeContainerWithData.append("div")
-                .attr("class", d => d.isHyperRelation ? "hyperrelation" : "small_post_directive")
+                .attr("class", d => d.isHyperRelation ? "hyperrelation" : "small-post")
                 .style("background-color", n => {
                     if(n.isHyperRelation) return undefined;
                     if(n.isDeleted) return "red";

@@ -64,7 +64,7 @@
             }
 
             $fixed-color: rgba(0,0,0,0.3);
-            .fixed .small_post_directive {
+            .fixed .small-post {
                 @include box-shadow(0 0 0 5px $fixed-color);
             }
 
@@ -72,7 +72,7 @@
                 @include box-shadow(0 0 0 7px $fixed-color);
             }
 
-            .moving .small_post_directive {
+            .moving .small-post {
                 // dark shadow
                 @include box-shadow(0 5px 20px $shadow-color);
                 border-color: #000;
@@ -82,7 +82,7 @@
                 @include box-shadow(0 5px 20px $shadow-color);
             }
 
-            .selected .small_post_directive {
+            .selected .small-post {
                 // outline: 7px dashed white !important;
                 @include box-shadow(0 0 0 4px $drag_active_color);
                 border-color: $drag_active_color !important;
@@ -93,7 +93,7 @@
                 border-color: $drag_active_color !important;
             }
 
-            .sticky-preview .small_post_directive {
+            .sticky-preview .small-post {
                 background-color: #666 !important;
                 color: white;
             }
@@ -155,7 +155,7 @@
 
         .nodeframe {
             position: absolute; // needed for z-index (moving/fixed have higher z-index)
-            .small_post_directive {
+            .small-post {
                 cursor: pointer;
                 margin: 0;
                 max-width: 170px;
