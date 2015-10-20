@@ -17,6 +17,7 @@
         overflow: auto;
         .active > .tag-label {
             border: 2px solid black !important;
+            line-height: 21px !important;
         }
         .tag-label {
             display: inline-block;

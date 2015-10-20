@@ -1,14 +1,14 @@
 .tag-label {
     display: inline-block !important;
-    height: 24px;
     margin: 0 7px 0 0;
 
-    font-weight: normal;
     border: 1px solid; // color is set dynamically
-
     border-radius: 1px;
-    font-size: 14px;
-    line-height: 24px !important;
+    height: 23px !important;
+    line-height: 23px !important;
+    font-size: 14px !important;
+    font-weight: normal;
+
     color: black;
     cursor: default;
     vertical-align: middle;
@@ -21,6 +21,14 @@
     .content {
         padding: 0 $padding-h !important;
     }
+
+    &.fa {
+        padding-left:6px; // spacing for the symbol
+        .content {
+            padding-left: 1px !important;
+        }
+    }
+
 
     .right {
         padding-right: $padding-h;

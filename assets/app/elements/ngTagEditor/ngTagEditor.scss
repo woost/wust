@@ -5,9 +5,6 @@
     font-family: sans-serif;
     font-size: 16px;
     line-height: 35px;
-    .tag-label {
-        line-height:21px !important; // TODO: Why not the default?
-    }
     &.active {
         .tag-editor, .tag-suggestions {
             //TODO: hardcoded from bootstrap
