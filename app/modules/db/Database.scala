@@ -146,7 +146,7 @@ object Database {
     // depth * 2 because hyperrelation depth
     val query = s"""
 match p=${ focusNode.toPattern }-[connects:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(connectable:`${ Connectable.label }`)
-where ALL (conn in nodes(p)[1..] where not((conn: `${Hidden.label}`)))
+where ALL (conn in nodes(p)[1..] where (conn:`${Post.label}`) or (:`${Post.label}`)-->(conn:`${Connects.label}`)-->(:`${Connectable.label}`))
 with distinct connectable, connects
 
 optional match (context:`${ Scope.label }`)-[contexttotags:`${ Tags.startRelationType }`]->(tags:`${ Tags.label }`)-[tagstopost:`${ Tags.endRelationType }`]->(connectable:`${ Post.label }`)
