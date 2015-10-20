@@ -1,12 +1,13 @@
 <div class="tag-editor-directive" ng-class="{active:focus}" >
     <div class="tag-editor" ng-click="setFocus = true" deep-blur="focus = false">
         <span ng-repeat="tag in tags" tag-label="tag" disable-link>
-            <span ng-repeat="classification in tag.classifications" data-title="{{classification.title}}" bs-tooltip>
-                <span colored-tag="classification" tagtype="circle" class="tag_circle"></span>
-            </span>
-
-            <span data-title="Classify post in context" bs-tooltip>
-                <i ng-if="editClassification && tag.isContext" class="fa fa-pencil content" ng-click="focus = true; setFocus = true; $event.stopPropagation(); $event.preventDefault()" data-on-change="onChange({type: type, tag: tag})" data-tag="tag" data-template-url="elements/ngTagEditor/classification_popover.html" data-container="body" data-placement="right" data-animation="am-flip-x" data-auto-close="1" bs-popover></i>
+            <span class="right" data-title="Classify post in context" bs-tooltip>
+                <span ng-click="focus = true; setFocus = true; $event.stopPropagation(); $event.preventDefault()" data-on-change="onChange({type: type, tag: tag})" data-tag="tag" data-template-url="elements/ngTagEditor/classification_popover.html" data-container="body" data-placement="right" data-animation="am-flip-x" data-auto-close="1" bs-popover>
+                    <span ng-repeat="classification in tag.classifications">
+                        <span colored-tag="classification" tagtype="circle" class="tag_circle"></span>
+                    </span>
+                    <i ng-if="editClassification && tag.isContext && tag.classifications.length === 0" class="fa fa-ellipsis-h text-muted"></i>
+                </span>
             </span>
             <i class="remove fa fa-close right" data-title="Remove tag" bs-tooltip ng-mousedown="$event.stopPropagation(); $event.preventDefault();" ng-mouseup="remove($index)"></i>
         </span>
