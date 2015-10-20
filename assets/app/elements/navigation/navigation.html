@@ -8,7 +8,7 @@
                         <i class="fa fa-globe"></i><span class="hidden-sm hidden-xs">&nbsp;Browse</span></a></li>
                 <li><a ng-if="vm.currentContexts.length" ui-sref="tags.details({id: vm.currentContexts[0].id})" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()">
                         <i class="fa fa-globe"></i><span class="hidden-sm hidden-xs">&nbsp;Browse</span></a></li>
-                <li><a ng-if="::vm.Auth.isLoggedIn" ui-sref="vote" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()">
+                <li><a ng-if="::vm.Auth.isLoggedIn" ui-sref="vote" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()" data-title="Show changes made by other users. You can decide whether these changes should be accepted or rejected." bs-tooltip data-placement="bottom">
                         <i class="fa fa-sort"></i><span class="hidden-sm hidden-xs">&nbsp;Moderation</span></a></li>
                 <li class="hidden hidden-xs dropdown">
                     <a href="#" class="dropdown-toggle">
