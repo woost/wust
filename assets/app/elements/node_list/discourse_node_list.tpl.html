@@ -1,5 +1,5 @@
 <div class="discourse_node_list">
-    <div class="drop_post_container" ui-on-Drop="vm.nodeModel.add($data)" drop-validate="vm.nodeModel.canAdd($data)" drop-channel="node,hyper_node,scratch_node">
+    <div ng-class="::{'drop_post_container': vm.nodeModel.parent === undefined}" ui-on-Drop="vm.nodeModel.add($data)" drop-validate="!vm.nodeModel.parent && vm.nodeModel.canAdd($data)" drop-channel="node,hyper_node,scratch_node">
         <div ng-if="vm.isLoading" class="la-ball-triangle-path la-dark la-relative">
             <div></div>
             <div></div>

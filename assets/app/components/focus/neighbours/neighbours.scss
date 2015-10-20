@@ -52,13 +52,12 @@
 
     .inner-list {
         .discourse_node_list {
-            padding-top: 8px;
+            padding-top: 0px;
             padding-left: 10px;
             .small-post {
                 width: 180px;
-            }
-            .drop_post_container {
-                min-height: 8px;
+                margin-top: 5px !important;
+                margin-bottom: 0px !important;
             }
         }
     }
