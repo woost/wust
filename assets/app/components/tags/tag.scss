@@ -17,13 +17,21 @@
         overflow: auto;
         .active > .tag-label {
             border: 2px solid black !important;
-            line-height: 21px !important;
+            line-height: 20px !important;
         }
         .tag-label {
             display: inline-block;
             margin-bottom: 5px;
         }
     }
+
+    #tag_detail_box {
+        padding-right: 40px;
+        .small_post_directive {
+            width: 100%;
+        }
+    }
+
     #tag_ui_view {
         padding-left: 10px;
         @include flex-grow(2);

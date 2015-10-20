@@ -5,7 +5,7 @@
                 Posts
             </div>
             <div class="header">
-                <button class="pull-right btn btn-default" type="button" animation="am-fade-and-scale-down" ng-click="vm.addTagStream()">Create stream with this tag</button>
+                <button class="pull-right btn btn-xs btn-default" type="button" animation="am-fade-and-scale-down" ng-click="vm.addTagStream()">Create stream with this tag</button>
                 <span ng-repeat="inherits in vm.tag.inherits" tag-label="inherits"></span>
                 <span ng-if="vm.tag.inherits.length">
                     <b>contains</b>
