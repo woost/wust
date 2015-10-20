@@ -25,13 +25,6 @@
         }
     }
 
-    #tag_detail_box {
-        padding-right: 40px;
-        .small-post {
-            width: 100%;
-        }
-    }
-
     #tag_ui_view {
         padding-left: 10px;
         @include flex-grow(2);
