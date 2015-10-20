@@ -305,9 +305,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                         symbolCont.className = "tag-circle-container-left";
                         elem.appendChild(symbolCont);
 
-                        let nodeLink = document.createElement("a");
+                        let nodeLink = document.createElement("span");
                         nodeLink.appendChild(document.createTextNode(d.title));
-                        nodeLink.setAttribute("href", "#");
                         elem.appendChild(nodeLink);
 
                         let circleCont = document.createElement("span");
