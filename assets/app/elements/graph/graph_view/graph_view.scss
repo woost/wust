@@ -202,9 +202,12 @@
                 display: block !important; // triggers line breaks
                 text-align: center;
                 margin: 0;
-                font-size: $scale*100%;
-                line-height: $scale*24px !important;
-                height: $scale*24px !important;
+                font-size: $scale*100% !important;
+                line-height: 11px !important;
+                height: 12px !important;
+                .content {
+                    padding: 0 3px !important;
+                }
             }
         }
         .popover {

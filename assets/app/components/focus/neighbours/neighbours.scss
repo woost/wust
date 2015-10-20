@@ -134,7 +134,7 @@
                     margin-bottom: 0;
                     margin-left: 2px;
                     margin-right: 2px;
-                    font-size: $scale*100%;
+                    font-size: $scale*100% !important;
                     line-height: 11px !important;
                     height: 12px !important;
                     .content {

@@ -8,7 +8,8 @@ function coloredTag(Helpers) {
         // require: ["tagtype"], //TODO: require more attribute in directives
         scope: {
             coloredTag: "=",
-            tagtype: "@"
+            tagtype: "@",
+            noSymbol: "@"
         },
         link
     };
@@ -34,10 +35,12 @@ function coloredTag(Helpers) {
                     rawElem.style.borderRadius = Helpers.contextCircleBorderRadius();
                 }
             } else { // classification
-                scope.coloredTag.symbol.split(" ").forEach(className => {
-                    if (!rawElem.classList.contains(className))
-                        rawElem.classList.add(className);
-                });
+                if(!scope.noSymbol) {
+                    scope.coloredTag.symbol.split(" ").forEach(className => {
+                        if (!rawElem.classList.contains(className))
+                            rawElem.classList.add(className);
+                    });
+                }
 
                 if(scope.tagtype === "label") {
                     rawElem.style.backgroundColor = Helpers.classificationLabelBackgroundColor(tag);

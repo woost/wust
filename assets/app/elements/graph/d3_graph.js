@@ -285,7 +285,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                                 tagLabel.style.backgroundColor = Helpers.contextLabelBackgroundColor(t);
                                 tagLabel.style.border = "1px solid " + Helpers.contextLabelBorderColor(t);
                             } else { // classification
-                                tagLabel.className = tagLabel.className + " " + t.symbol;
+                                tagLabel.className = tagLabel.className; // + " " + t.symbol;
                                 tagLabel.style.backgroundColor = Helpers.classificationLabelBackgroundColor(t);
                                 tagLabel.style.paddingLeft = "4px";
                                 tagLabel.style.paddingRight = "4px";
@@ -301,30 +301,38 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                         return elem.outerHTML;
                     } else { // nonHyperRelation
                         let elem = document.createElement("span");
-                        elem.appendChild(document.createTextNode(d.title));
+                        let symbolCont = document.createElement("span");
+                        symbolCont.className = "tag-circle-container-left";
+                        elem.appendChild(symbolCont);
+
+                        let nodeLink = document.createElement("a");
+                        nodeLink.appendChild(document.createTextNode(d.title));
+                        nodeLink.setAttribute("href", "#");
+                        elem.appendChild(nodeLink);
+
                         let circleCont = document.createElement("span");
-                        circleCont.className = "tag_circle_container pull-right";
+                        circleCont.className = "tag-circle-container-right pull-right";
                         elem.appendChild(circleCont);
                         // console.log(d.tags, d.classifications);
                         Helpers.sortedNodeTags(d).forEach(t => {
                             let circleTitle = document.createElement("span");
                             circleTitle.className = "tag_circle_title";
                             circleTitle.setAttribute("title", t.title);
-                            circleCont.appendChild(circleTitle);
                             let circle = document.createElement("span");
                             circle.className = "tag_circle";
+                            circleTitle.appendChild(circle);
 
                             if( t.isContext ) {
                                 circle.style.backgroundColor = Helpers.contextCircleBackgroundColor(t);
                                 circle.style.border = "1px solid " + Helpers.contextCircleBorderColor(t);
                                 circle.style.borderRadius = Helpers.contextCircleBorderRadius();
+                                circleCont.appendChild(circleTitle);
                             } else { // classification
                                 circle.className = circle.className + " " + t.symbol;
                                 // circle.style.backgroundColor = Helpers.classificationCircleBackgroundColor(t);
                                 // circle.style.border = "1px solid " + Helpers.classificationCircleBorderColor(t);
+                                symbolCont.appendChild(circleTitle);
                             }
-
-                            circleTitle.appendChild(circle);
                         });
                         return elem.outerHTML;
                     }
@@ -375,7 +383,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
                 this.d3NodeConnectTool = this.d3NodeTools.append("div")
                     .attr("class", "nodetool connecttool icon-flow-line")
-                    .attr("title", "Drag to connect with other Node")
+                    .attr("title", "Drag to connect with other Post/Connection")
                     .style("display", d => (Auth.isLoggedIn && !d.isDeleted && d.isHyperRelation.implies(this.arrowToResponse)) ? "inline-block" : "none")
                     .append("div").attr("class", "event-offset-rotate-fix");
 
