@@ -52,6 +52,17 @@
     }
 
     .tag-circle-container-left {
+        .tag_symbol_border {
+            padding: 1px;
+            border-radius: 2px;
+            height:18.5px;
+            width: 18.5px;
+            text-align:center;
+        }
+        .tag_symbol {
+            border: 0 !important;
+            background: none !important;
+        }
         .tag_circle_title {
             padding-right: 2px;
         }

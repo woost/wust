@@ -6,7 +6,7 @@
     <span ng-switch-default>
         <span class="tag-circle-container-left">
             <span ng-repeat="tag in (vm.node | nodeclassifications:vm.ignoreTags)" class="tag_circle_title" data-title="{{tag.title}}" bs-tooltip>
-                <span colored-tag="tag" tagtype="circle" class="tag_circle"></span>
+                <span colored-tag="tag" tagtype="circle" class="tag_symbol"></span>
             </span>
         </span>
         <a ng-bind="vm.node.title" ui-sref="focus({id: vm.node.id})"></a>

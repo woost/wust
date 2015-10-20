@@ -4,7 +4,7 @@
             <span class="right" data-title="Classify post in context" bs-tooltip>
                 <span ng-click="focus = true; setFocus = true; $event.stopPropagation(); $event.preventDefault()" data-on-change="onChange({type: type, tag: tag})" data-tag="tag" data-template-url="elements/ngTagEditor/classification_popover.html" data-container="body" data-placement="right" data-animation="am-flip-x" data-auto-close="1" bs-popover>
                     <span ng-repeat="classification in tag.classifications">
-                        <span colored-tag="classification" tagtype="circle" class="tag_circle"></span>
+                        <span colored-tag="classification" tagtype="circle" class="tag_symbol"></span>
                     </span>
                     <i ng-if="editClassification && tag.isContext && tag.classifications.length === 0" class="fa fa-ellipsis-h text-muted"></i>
                 </span>

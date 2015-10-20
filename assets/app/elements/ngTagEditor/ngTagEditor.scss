@@ -36,8 +36,13 @@
             .remove {
                 font-weight: bold;
             }
-            .tag_circle {
+            .tag_symbol {
                 margin-left: 2px;
+                padding: 1px;
+                border-radius: 2px;
+                height:18.5px;
+                width: 18.5px;
+                text-align:center;
             }
         }
         .tag-input {
