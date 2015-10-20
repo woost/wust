@@ -11,6 +11,7 @@
         </span>
         <a ng-bind="vm.node.title" ui-sref="focus({id: vm.node.id})"></a>
         <span class="tag-circle-container-right pull-right">
+            <i class="text-muted fa fa-ellipsis-h" ng-if="vm.node.description" data-title="Post has Description" bs-tooltip></i>
             <span ng-repeat="tag in (vm.node | nodecontexts:vm.ignoreTags)" class="tag_circle_title" data-title="{{tag.title}}" bs-tooltip>
                 <span colored-tag="tag" tagtype="circle" class="tag_circle"></span>
             </span>
