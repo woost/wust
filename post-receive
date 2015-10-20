@@ -10,9 +10,9 @@ source $HOME/export_neo4j_pass
 
 cd ../app
 
-[ -f target/universal/stage/RUNNING_PID ] && kill $(cat target/universal/stage/RUNNING_PID)
-
 ./buildproduction || exit 1
+
+[ -f target/universal/stage/RUNNING_PID ] && kill $(cat target/universal/stage/RUNNING_PID)
 
 [ -x ../usertest/enable ] && ../usertest/enable >&- 2>&- &
 
