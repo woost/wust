@@ -41,7 +41,8 @@
         #search_options {
             width: 310px;
             height: 100%;
-            background: #eee;
+            background: $history_background_color;
+            border-right: 1px solid #d8d8d8;
             padding: 10px;
             border-bottom-left-radius: 10px;
             .input_option {
@@ -53,6 +54,10 @@
             }
             .label_like,label {
                 line-height: 30px;
+            }
+            .tag-editor-directive {
+                margin-left: 5px;
+                margin-right: 5px;
             }
             .edit_tags {
                 padding: 5px;
