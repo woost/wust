@@ -303,6 +303,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                         let elem = document.createElement("span");
                         let symbolCont = document.createElement("span");
                         symbolCont.className = "tag-circle-container-left";
+                        symbolCont.style.paddingRight = "7px";
                         elem.appendChild(symbolCont);
 
                         let nodeLink = document.createElement("span");
