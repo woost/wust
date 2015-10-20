@@ -3,6 +3,8 @@ angular.module("wust.services").value("Helpers", {
     mapFind,
     hashCode,
     sortedNodeTags,
+    sortedNodeClassifications,
+    sortedNodeContexts,
     hashToColor,
     navBackgroundColor,
     postBorderColor,
@@ -66,6 +68,21 @@ function sortedNodeTags(node, ignore = []) {
 
     let classifications = (node.classifications || []).concat(_.flatten(node.tags.map(t => t.classifications || [])));
     return _.uniq(sortByIdQuality(withoutTags(classifications,ignore)).concat(sortByIdQuality(withoutTags(node.tags, ignore))), "id");
+}
+
+function sortedNodeClassifications(node, ignore = []) {
+    if (node === undefined)
+        return [];
+
+    let classifications = (node.classifications || []).concat(_.flatten(node.tags.map(t => t.classifications || [])));
+    return _.uniq(sortByIdQuality(withoutTags(classifications,ignore)), "id");
+}
+
+function sortedNodeContexts(node, ignore = []) {
+    if (node === undefined)
+        return [];
+
+    return _.uniq(sortByIdQuality(withoutTags(node.tags, ignore)), "id");
 }
 
 function navBackgroundColor(tag) { return hashToColor(tag, 10, 98); }

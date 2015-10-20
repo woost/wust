@@ -4,9 +4,14 @@
         <div small-post node="vm.node.startNode"></div>
     </div>
     <span ng-switch-default>
+        <span class="tag-circle-container-left">
+            <span ng-repeat="tag in (vm.node | nodeclassifications:vm.ignoreTags)" class="tag_circle_title" data-title="{{tag.title}}" bs-tooltip>
+                <span colored-tag="tag" tagtype="circle" class="tag_circle"></span>
+            </span>
+        </span>
         <a ng-bind="vm.node.title" ui-sref="focus({id: vm.node.id})"></a>
-        <span class="tag_circle_container pull-right">
-            <span ng-repeat="tag in (vm.node | nodetags:vm.ignoreTags)" class="tag_circle_title" data-title="{{tag.title}}" bs-tooltip>
+        <span class="tag-circle-container-right pull-right">
+            <span ng-repeat="tag in (vm.node | nodecontexts:vm.ignoreTags)" class="tag_circle_title" data-title="{{tag.title}}" bs-tooltip>
                 <span colored-tag="tag" tagtype="circle" class="tag_circle"></span>
             </span>
         </span>

@@ -51,7 +51,13 @@
         cursor: pointer;
     }
 
-    .tag_circle_container {
+    .tag-circle-container-left {
+        .tag_circle_title {
+            padding-right: 2px;
+        }
+    }
+
+    .tag-circle-container-right {
         pointer-events: all;
         margin-left: 5px;
         line-height: 10px;
