@@ -9,7 +9,8 @@ function coloredTag(Helpers) {
         scope: {
             coloredTag: "=",
             tagtype: "@",
-            noSymbol: "@"
+            noSymbol: "="
+
         },
         link
     };

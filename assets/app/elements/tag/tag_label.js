@@ -9,7 +9,7 @@ function tagLabel() {
         transclude: true,
         scope: {
             tagLabel: "=",
-            noSymbol: "@",
+            noSymbol: "=",
         },
         // link: function(scope, elem, attrs) {
         //     console.log(scope.vm.tagLabel.title, attrs);
