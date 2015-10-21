@@ -84,6 +84,13 @@
         }
 
         #action_container {
+            .post-description {
+                padding-top: 15px;
+                padding-bottom: 15px;
+                .diff {
+                    overflow: auto;
+                }
+            }
             width: 600px;
             @include display-flex(flex);
             @include flex-direction(column);
