@@ -1,16 +1,16 @@
 @import "globals";
 
 .survey {
-    top: 0px;
+    // top: 0px;
     margin-top: 1px;
     padding: 3px;
     border-radius: 5px;
     min-height: 48px;
     max-height: 48px;
-    width: 360px;
-    left: -moz-calc(50% - 180px);
-    left: -webkit-calc(50% - 180px);
-    left: calc(50% - 170px);
+    // left: -moz-calc(50% - 180px);
+    // left: -webkit-calc(50% - 180px);
+    // left: calc(50% - 170px);
+    width: 370px;
     background: #00afaf;
     color: white;
     position: absolute;
@@ -22,7 +22,7 @@
         padding-left: 3px;
         padding-right: 3px;
         .description_text {
-            padding: 2px;
+            padding: 3px;
         }
     }
 }

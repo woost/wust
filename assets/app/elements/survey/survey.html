@@ -1,7 +1,7 @@
 <div class="survey">
     <button type="button" class="btn btn-xs btn-primary" ng-disabled="vm.currentIndex < 1" ng-click="vm.back()">Zurück</button>
     <button type="button" class="pull-right btn btn-xs btn-primary" ng-show="vm.currentIndex < vm.exercises.length - 1" ng-click="vm.next()">Weiter</button>
-    <a href="https://www.surveymonkey.com/r/woost" class="pull-right btn btn-xs btn-primary" ng-click="vm.finished()" ng-hide="vm.currentIndex < vm.exercises.length - 1">Fragebogen</a>
+    <a href="https://www.surveymonkey.com/r/woost" class="pull-right btn btn-xs btn-primary" style="color:white" ng-click="vm.finished()" ng-hide="vm.currentIndex < vm.exercises.length - 1">Fragebogen</a>
     <span class="info_text">
         <b ng-bind="vm.exercises[vm.currentIndex].title"></b>
         <div class="description_text" ng-bind="vm.exercises[vm.currentIndex].description"></div>
