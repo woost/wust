@@ -239,7 +239,9 @@
         &.left { left: 0; }
         &.top { top: 0; }
         &.bottom { bottom: 0; }
-
+        .preview-info {
+            font-size: 7pt;
+        }
         .post-preview {
             background: #FEFEFE;
             margin: 15px;
