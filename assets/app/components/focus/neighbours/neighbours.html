@@ -8,12 +8,12 @@
     </div>
     <div class="neighbours_content">
         <div class="rootnode" big-post component="vm.component"></div>
-        <div ng-if="vm.parallels.model.list.length">
+        <div ng-if="vm.parallels.model.list.length" class="parallels-wrap">
             <div class="btn-group pull-right" ng-model="vm.component.rootNode.parallelsOrder" bs-radio-group>
                 <label class="btn btn-xs btn-default fa fa-sort-amount-desc"><input type="radio" class="btn btn-xs btn-default" value="0"> Votes</label>
                 <label class="btn btn-xs btn-default fa fa-sort-amount-asc"><input type="radio" class="btn btn-xs btn-default" value="1"> Time</label>
             </div>
-            <h3 ng-show="vm.parallels.model.list.length > 0">Sibling Posts:</h3>
+            <h4 ng-show="vm.parallels.model.list.length > 0">Sibling Posts:</h4>
             <div discourse-node-list node-model='vm.parallels.model' is-loading="vm.isLoading" class="parallels discourse_node_list_vertical"></div>
         </div>
     </div>

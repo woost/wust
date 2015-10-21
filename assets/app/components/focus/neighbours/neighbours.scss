@@ -30,6 +30,13 @@
             margin-bottom: 20px;
         }
 
+        .parallels-wrap {
+            padding-top: 30px;
+            .btn-group {
+                padding-top: 10px;
+                padding-right: 60px;
+            }
+        }
         .parallels {
             .node_model_list > div {
                 @include display-flex(flex);
@@ -44,6 +51,7 @@
                 margin-right: 5px;
             }
         }
+
     }
 
     .discourse_node_list {
