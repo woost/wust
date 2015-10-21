@@ -25,7 +25,8 @@
     <div class="contributions row">
         <div class="authorship col-sm-4" infinite-scroll="vm.loadMore()" infinite="infinite" promise="vm.contributions" scroll-target="middle_content">
             <h4>Authored</h4>
-            <p class="text-muted" ng-if="vm.contributions.length === 0">Nothing</p>
+            <p class="text-muted" ng-if="vm.contributions.$resolved && vm.contributions.length === 0">Nothing</p>
+            <p class="text-muted" ng-if="!vm.contributions.$resolved && vm.contributions.length === 0">Loading</p>
             <div ng-repeat="contribution in vm.contributions | unique:'id' track by contribution.id" small-post node="contribution" class="ng-trans ng-trans-scale-up ease"></div>
             <button class="btn btn-default pull-right ng-hide" ng-click="infinite.manualLoad()" ng-disabled="infinite.loading" ng-hide="infinite.noMore">More</button>
         </div>

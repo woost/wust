@@ -13,15 +13,7 @@ object ExposedNodeFormat {
     def reads(json: JsValue) = ???
 
     def writes(node: ExposedNode) = node match {
-      case n: Post => {
-        val formatted = PostFormat.PostFormat.writes(n)
-        val indegree = n.rawItem.properties.get("indegree")
-        indegree.map { deg =>
-          JsObject(formatted.fields ++ Seq(
-            ("inDegree", JsNumber(deg.asLong))
-          ))
-        }.getOrElse(formatted)
-      }
+      case n: Post => PostFormat.PostFormat.writes(n)
       case n: Scope => TagFormat.ScopeFormat.writes(n)
       case n: Classification => TagFormat.ClassificationFormat.writes(n)
       case _ => throw new Exception("You did not specify a formatter for the api: " + node)

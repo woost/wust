@@ -14,6 +14,7 @@ import play.api.libs.json._
 import play.api.mvc.Result
 import play.api.mvc.Results._
 import renesca.parameter.implicits._
+import renesca.Query
 
 case class UserAccess() extends NodeReadBase[User] {
   val factory = User
@@ -105,17 +106,31 @@ case class UserContributions() extends RelationAccessDefault[User, Post] {
     val tagClassifiesDef = RelationDef(FactoryNodeDef(Classification), Classifies, tagsDef)
     val classifiesDef = RelationDef(FactoryNodeDef(Classification), Classifies, connectsDef)
     val createdDef = RelationDef(userDef, SchemaCreated, postDef)
+    val responsesDef = RelationDef(FactoryNodeDef(Post), Connects, postDef)
 
     val query = s"""
     match ${createdDef.toPattern}
-    with distinct ${ postDef.name } order by ${ postDef.name }.timestamp DESC skip ${ skip } limit ${ limit }
+    optional match ${ responsesDef.toPattern(true, false) }
+    with distinct ${ postDef.name }, count(${responsesDef.name}) as indegree order by ${ postDef.name }.timestamp DESC skip ${ skip } limit ${ limit }
     optional match ${ tagsDef.toPattern(true, false) }
     optional match ${ tagClassifiesDef.toPattern(true, false) }
     optional match ${ connDef.toPattern(false, true) }, ${ classifiesDef.toPattern(true, false) }
     return *
     """
 
-    val discourse = Discourse(db.queryGraph(query, ctx.params))
+    val (graph, table) = db.queryGraphsAndTables(Query(query, ctx.params)).head
+    val discourse = Discourse(graph)
+
+    val uuidToNode = discourse.posts.map(n => (n.uuid, n)).toMap
+    table.rows.foreach { row =>
+      val indegree = row("indegree").asLong
+
+      if(indegree > 0) {
+        val uuid = row(postDef.name).asMap("uuid").asString
+        uuidToNode(uuid).rawItem.properties += ("indegree" -> indegree)
+      }
+    }
+
     Ok(Json.toJson(discourse.posts))
   }
 

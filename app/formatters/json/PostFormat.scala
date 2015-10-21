@@ -20,7 +20,11 @@ object PostFormat {
       ("classifications", classificationConnectsWriter(n)),
       ("timestamp", Json.toJson(JsNumber(n.timestamp))),
       ("author", n.rev_createds.headOption.map(u => UserFormat.UserFormat.writes(u)).getOrElse(JsNull)),
-      ("viewCount", JsNumber(n.viewCount))
+      ("viewCount", JsNumber(n.viewCount)),
+      ("inDegree", {
+        val deg = n.rawItem.properties.get("indegree")
+        deg.map(d => JsNumber(d.asLong)).getOrElse(JsNull)
+      })
     ))
   }
 }
