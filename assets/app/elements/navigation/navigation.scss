@@ -69,22 +69,6 @@
         height: 270px; // must be high enough to cover expanded tag-editor
         padding: 10px;
     }
-    .auth-dropdown {
-        display: block;
-        width: 200px;
-        a, a:link, a:visited {
-            color: $link-color;
-        }
-        a:active, a:hover {
-            color: $link-hover-color;
-        }
-        form {
-            margin-right: 0px;
-        }
-        form.ng-leave {
-            display: none;
-        }
-    }
     #new_discussion_button {
         margin-left: 10px;
         margin-right: 10px;
@@ -95,3 +79,24 @@
     }
 }
 
+.auth-dropdown {
+    display: block;
+    z-index: $zindex_auth; // does not work
+    form {
+        a, a:link, a:visited {
+            color: $link-color;
+        }
+        a:active, a:hover {
+            color: $link-hover-color;
+        }
+    }
+
+    .tab_body {
+        padding: 5px;
+    }
+
+    .logout-form {
+        padding: 10px;
+        text-align: right;
+    }
+}

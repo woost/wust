@@ -10,9 +10,10 @@ function strapConfig($modalProvider, $tooltipProvider, $dropdownProvider) {
   });
   angular.extend($tooltipProvider.defaults, {
     animation: "",
-    container: "body"
+    container: "body",
   });
   angular.extend($dropdownProvider.defaults, {
     animation: "",
+    container: "body",
   });
 }
