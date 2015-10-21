@@ -3,7 +3,7 @@
         <div ng-repeat="user in vm.users track by user.id" class="list-group-item">
             <a ui-sref="users.details({id: user.id})" ng-bind="::user.name"></a>
             <span class="pull-right">
-                <span ng-repeat="karmaTag in user.hasKarma | orderBy:'-karma' | limitTo:3" tag-label="karmaTag" disable-link>
+                <span ng-repeat="karmaTag in user.hasKarma | orderBy:'-karma' | limitTo:3" tag-label="karmaTag">
                     <span ng-show="karmaTag.karma > 0" class="right">{{karmaTag.karma}}</span>
                 </span>
             </span>
