@@ -24,7 +24,7 @@ function wordBasedDiff() {
                 // grey for common parts
                 var color = part.added ? "green" :
                     part.removed ? "#EF1B1B" : "#AAA";
-                var span = document.createElement("span");
+                var span = document.createElement(part.removed ? "strike" : "span");
                 span.style.color = color;
                 span.appendChild(document.createTextNode(part.value));
 
