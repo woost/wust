@@ -12,9 +12,12 @@
         <a ng-bind="vm.node.title" ng-click="vm.onClick()" ui-sref="focus({id: vm.node.id})"></a>
         <span class="tag-circle-container-right pull-right">
             <i class="tag_symbol text-muted fa fa-ellipsis-h" ng-if="vm.node.description" data-title="Post has a Description" bs-tooltip></i>
+            <span class="node_degree" ng-if="vm.node.inDegree > 0" ng-bind="vm.node.inDegree" data-title="{{'Post has ' + vm.node.inDegree + (vm.node.inDegree === 1 ? ' response' : ' responses')}}" bs-tooltip></span>
+
             <span ng-repeat="tag in (vm.node | nodecontexts:vm.ignoreTags)" class="tag_circle_title" data-title="{{tag.title}}" bs-tooltip>
                 <span colored-tag="tag" tagtype="circle" class="tag_circle"></span>
             </span>
+
         </span>
     </span>
 </span>

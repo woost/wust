@@ -170,15 +170,20 @@ object Search extends Controller {
         val skip = page * limit
         s"skip $skip limit $limit"
       }.getOrElse("")
-      val returnStatement = if (contextsAll.nonEmpty && sortByQuality)
+      val returnPrefix = if (contextsAll.nonEmpty && sortByQuality)
         s"""
         unwind contextsAllTagsColl as contextsAllTags
         with min(contextsAllTags.voteCount) as tagVoteCount, ${ nodeDef.name } order by ${Moderation.postQualityString("tagVoteCount", nodeDef.name + ".viewCount")} desc $returnPostfix
-        return ${nodeDef.name}
         """
-      else
-        s"return ${ nodeDef.name } order by ${ nodeDef.name }.timestamp desc $returnPostfix"
+      else s"with ${ nodeDef.name } order by ${ nodeDef.name }.timestamp desc $returnPostfix"
 
+      val returnStatement = if(labelOpt.contains(Post.label.name)) {
+        val connectsDef = RelationDef(FactoryNodeDef(Post), Connects, nodeDef)
+        s"""
+        optional match ${ connectsDef.toPattern(true, false) }
+        return ${nodeDef.name}, count(${connectsDef.name}) as indegree
+        """
+      } else s"return ${nodeDef.name}"
 
       val query = s"""
       ${preQueries.mkString("\n\n")}
@@ -188,9 +193,9 @@ object Search extends Controller {
       ${if(lastWiths.nonEmpty) s"with ${nodeDef.name}, ${lastWiths.mkString(", ")}" else ""}
       ${if(lastConditions.nonEmpty) s"where ${lastConditions.mkString("\nand ")}" else ""}
       ${if(lastDistinct) s"with distinct ${nodeDef.name}" else ""}
+      $returnPrefix
       $returnStatement
       """
-
 
       // println("-"*30)
       // // println(query)
@@ -205,7 +210,22 @@ object Search extends Controller {
       // println("-"*30)
       try{
         // When Neo4j throws an error because the regexp is incorrect, return an empty Discourse instead
-        Discourse(db.queryGraph(query, ctx.params ++ params))
+        if (labelOpt.contains(Post.label.name)) {
+          val (graph, table) = db.queryGraphsAndTables(Query(query, ctx.params ++ params)).head
+          val component = Discourse(graph)
+
+          val uuidToNode = component.posts.map(n => (n.uuid, n)).toMap
+          table.rows.foreach { row =>
+            val indegree = row("indegree").asLong
+
+            if(indegree > 0) {
+              val uuid = row(nodeDef.name).asMap("uuid").asString
+              uuidToNode(uuid).rawItem.properties += ("indegree" -> indegree)
+            }
+          }
+
+          component
+        } else Discourse(db.queryGraph(query, ctx.params ++ params))
       } catch {
         case e:Exception =>
           println(e.getMessage) //TODO: use logger
