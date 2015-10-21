@@ -25,9 +25,13 @@
             // background-color: #696969;
             // color: white;
             // border-radius: 3px; // same as up/down buttons
+            .progress-bar {
+                line-height: 22px;
+            }
             .progress {
                 background-color: #a4a4a4;
                 margin-bottom: 5px; // originally strange 20px. is this coming from bootstrap itself?
+                height: 22px;
             }
         }
 
