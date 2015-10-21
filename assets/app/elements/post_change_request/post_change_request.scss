@@ -17,9 +17,16 @@
             opacity: 0.5;
         }
 
-
         .summary {
             padding: 10px;
+        }
+
+        .post-description {
+            margin-bottom: 5px !important; // yeah weird...
+            &.diff {
+                margin-bottom: 15px !important; // meh
+                overflow: auto;
+            }
         }
         .votebar {
             margin-top: 10px;

@@ -9,14 +9,35 @@
         </div>
         <span ng-switch="change.type">
             <div ng-switch-when="Edit">
-                <span ng-if="change.oldTitle != change.newTitle">
-                    <b>Edit Summary:</b>
-                    <h2 class="title-diff" word-based-diff source-a="change.oldTitle" source-b="change.newTitle"></h2>
-                </span>
-                <span ng-if="change.oldDescription != change.newDescription">
-                    <b>Edit Description:</b>
-                    <pre word-based-diff source-a="change.oldDescription" source-b="change.newDescription"></pre>
-                </span>
+                <b>Edit Post</b>
+                <ul tabset class="tabs-above">
+                    <li tab>
+                        <a tab-heading>Old</a>
+                        <div class="post">
+                            <h2 class="post-title" ng-bind="change.oldTitle"></h2>
+                            <div ng-if="change.oldDescription != change.newDescription" class="post-description" markdown="change.oldDescription"></div>
+                        </div>
+
+                    </li>
+                    <li tab active="true">
+                        <a tab-heading>Difference</a>
+                        <div class="post">
+                            <h2 class="post-title">
+                                <div word-based-diff source-a="change.oldTitle" source-b="change.newTitle"></div>
+                            </h2>
+
+                            <div ng-if="change.oldDescription != change.newDescription" class="post-description diff" word-based-diff source-a="change.oldDescription" source-b="change.newDescription"></div>
+                        </div>
+                    </li>
+                    <li tab>
+                        <a tab-heading>New</a>
+                        <div class="post">
+                            <h2 class="post-title" ng-bind="change.newTitle"></h2>
+
+                            <div ng-if="change.oldDescription != change.newDescription" class="post-description" markdown="change.newDescription"></div>
+                        </div>
+                    </li>
+                </ul>
             </div>
             <div ng-switch-when="Delete"><b>
                     Delete this Post
