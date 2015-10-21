@@ -50,7 +50,8 @@
             <!-- TODO: this does break the animation of the search overlay. but the ng-if here would be good, as the small-post would then not trigger any watchers. -->
             <!-- <div ng-if="vm.search.resultsVisible"> -->
             <span class="search_indicator" ng-show="vm.search.results.length === 0">
-                <span ng-show="vm.search.waiting" class="search_status text-muted">Searching…</span>
+                <span ng-show="vm.search.waiting && vm.search.query" class="search_status text-muted">Searching…</span>
+                <span ng-show="vm.search.waiting && !vm.search.query" class="search_status text-muted">Type to start searching</span>
                 <span ng-hide="vm.search.waiting" class="search_status text-muted">No results.</span>
             </span>
             <div id="search_results" infinite-scroll="vm.search.loadMore()" infinite="vm.infinite" promise="vm.search.results">
