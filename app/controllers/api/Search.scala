@@ -166,16 +166,16 @@ object Search extends Controller {
         }
       }
 
-      val returnPostfix = sizeOpt.map { limit =>
+      val limitOfReturn = sizeOpt.map { limit =>
         val skip = page * limit
         s"skip $skip limit $limit"
       }.getOrElse("")
-      val returnPrefix = if (contextsAll.nonEmpty && sortByQuality)
-        s"""
+      val (returnPrefix, returnPostfix) = if (contextsAll.nonEmpty && sortByQuality)
+        (s"""
         unwind contextsAllTagsColl as contextsAllTags
-        with min(contextsAllTags.voteCount) as tagVoteCount, ${ nodeDef.name } order by ${Moderation.postQualityString("tagVoteCount", nodeDef.name + ".viewCount")} desc $returnPostfix
-        """
-      else s"with ${ nodeDef.name } order by ${ nodeDef.name }.timestamp desc $returnPostfix"
+        with min(contextsAllTags.voteCount) as tagVoteCount, ${ nodeDef.name }
+        """, s", tagVoteCount order by ${Moderation.postQualityString("tagVoteCount", nodeDef.name + ".viewCount")} desc")
+      else ("", s"order by ${ nodeDef.name }.timestamp desc")
 
       val returnStatement = if(labelOpt.contains(Post.label.name)) {
         val connectsDef = RelationDef(FactoryNodeDef(Post), Connects, nodeDef)
@@ -194,7 +194,7 @@ object Search extends Controller {
       ${if(lastConditions.nonEmpty) s"where ${lastConditions.mkString("\nand ")}" else ""}
       ${if(lastDistinct) s"with distinct ${nodeDef.name}" else ""}
       $returnPrefix
-      $returnStatement
+      $returnStatement $returnPostfix $limitOfReturn
       """
 
       // println("-"*30)
