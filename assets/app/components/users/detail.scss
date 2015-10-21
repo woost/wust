@@ -3,6 +3,14 @@
 
 #user_detail_component {
     .userdetails {
+        .user-form {
+            height: 60px;
+            .editable {
+                line-height: 32px;
+                height: 32px;
+                padding-left: 13px;
+            }
+        }
         .tag-label {
             display: inline-block;
             margin-bottom: 5px;

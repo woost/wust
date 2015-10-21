@@ -8,10 +8,11 @@
         </div>
 
         <div class="col-sm-4">
-            <form editable-form name="userForm" onaftersave="vm.saveUser()" ng-if="vm.isCurrentUser || vm.user.email">
-                <span>
-                    <i class="fa fa-envelope-o"></i> <span editable-email="vm.user.email" ng-bind="vm.user.email"></span>
-                    <i class="fa fa-pencil" ng-if="vm.isCurrentUser" ng-click="userForm.$show()" ng-show="!userForm.$visible"></i>
+            <form class="user-form" editable-form name="userForm" onaftersave="vm.saveUser()" ng-if="vm.isCurrentUser || vm.user.email">
+                <span ng-if="vm.user.email || vm.isCurrentUser">
+                    <i class="fa fa-envelope-o"></i>
+                    <span editable-email="vm.user.email" ng-bind="vm.user.email"></span>
+                    <i class="fa fa-pencil" ng-click="userForm.$show()" ng-show="vm.isCurrentUser && !userForm.$visible"></i>
                     <div ng-show="userForm.$visible">
                         <button type="button" class="btn btn-xs btn-default" ng-disabled="userForm.$waiting" ng-click="userForm.$cancel()">Cancel</button>
                         <button type="submit" class="btn btn-xs btn-primary" ng-disabled="userForm.$waiting">Save</button>
@@ -24,11 +25,12 @@
     <div class="contributions row">
         <div class="authorship col-sm-4" infinite-scroll="vm.loadMore()" infinite="infinite" promise="vm.contributions" scroll-target="middle_content">
             <h4>Authored</h4>
+            <p class="text-muted" ng-if="vm.contributions.length === 0">Nothing</p>
             <div ng-repeat="contribution in vm.contributions | unique:'id' track by contribution.id" small-post node="contribution" class="ng-trans ng-trans-scale-up ease"></div>
             <button class="btn btn-default pull-right ng-hide" ng-click="infinite.manualLoad()" ng-disabled="infinite.loading" ng-hide="infinite.noMore">More</button>
         </div>
         <div class="karma-log col-sm-6">
-            <h4>Karma</h4>
+            <h4 ng-if="vm.karmaLog.length">Karma</h4>
             <ul class="list-group">
                 <li ng-repeat="entry in vm.karmaLog | reverse" class="list-group-item">
                     <div>
