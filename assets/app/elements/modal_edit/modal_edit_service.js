@@ -51,9 +51,9 @@ function ModalEditService($modal, EditService, $state, ContextService) {
         }
     }
 
-    function showModal(editableNode, isAnswer = true) {
+    function showModal(editableNode, isAnswer = true, tags = []) {
         if(editableNode === undefined) {
-            currentNode = EditService.editNewDiscussion(angular.copy(ContextService.currentContexts));
+            currentNode = EditService.editNewDiscussion(angular.copy(tags));
             editedComponentNode = undefined;
         } else if (isAnswer) {
             currentNode = EditService.editAnswer(editableNode);

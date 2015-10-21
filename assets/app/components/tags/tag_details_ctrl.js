@@ -34,8 +34,7 @@ function TagDetailsCtrl($stateParams, Scope, Search, DiscourseNode, StreamServic
     });
 
     function newDiscussion() {
-        ModalEditService.show();
-        ModalEditService.currentNode.tags = [vm.tag.$encode()];
+        ModalEditService.show(undefined, false, [vm.tag.$encode()]);
     }
 
     function loadMorePosts() {

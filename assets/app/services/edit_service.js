@@ -460,7 +460,7 @@ function EditService(Session, Post, Connectable, Connects, HistoryService, store
     }
 
     function editNewDiscussion(tags = []) {
-        let existingAnswer = _.find(self.list, elem => elem.isLocal && !elem.referenceNode && elem.newDiscussion && _.every(tags, tag => _.any(elem.tags, other => other.id === tag.id)));
+        let existingAnswer = _.find(self.list, elem => elem.isLocal && !elem.referenceNode && elem.newDiscussion && (tags.length !== 0 || elem.tags.length === 0) && _.every(tags, tag => _.any(elem.tags, other => other.id === tag.id)));
         if (existingAnswer === undefined) {
             let session = new EditSession({tags});
             session.lazyAdd = true;
