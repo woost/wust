@@ -1,16 +1,16 @@
 <div id="tag_detail_component">
-    <div tabset class="tabs-above">
-        <div tab>
-            <div tab-heading>
-                Posts
-            </div>
+    <!-- <div tabset class="tabs-above"> -->
+    <!--     <div tab> -->
+    <!--         <div tab-heading> -->
+    <!--             Posts -->
+    <!--         </div> -->
             <div class="header">
                 <button class="pull-right btn btn-xs btn-default" type="button" animation="am-fade-and-scale-down" ng-click="vm.addTagStream()">Create stream with this tag</button>
                 <span ng-repeat="inherits in vm.tag.inherits" tag-label="inherits"></span>
                 <span ng-if="vm.tag.inherits.length">
                     <b>contains</b>
                 </span>
-                <span show="vm.tag.implements.length || vm.tag.inherits.length" tag-label="vm.tag"></span>
+                <span ng-if="vm.tag.$resolved" class="ng-trans ng-trans-fade ease" tag-label="vm.tag"></span>
                 <span ng-if="vm.tag.implements.length">
                     <b>
                         <span ng-show="vm.tag.implements.length && vm.tag.inherits.length">which</span>
@@ -23,19 +23,19 @@
                 <div ng-repeat="contribution in vm.contributions | unique:'id' track by contribution.id" small-post node="contribution" ignore-tags="::[vm.tag]" class="ng-trans ng-trans-scale-up ease"></div>
                 <button class="btn btn-default pull-right ng-hide" ng-click="infinitePosts.manualLoad()" ng-disabled="infinitePosts.loading" ng-hide="infinitePosts.noMore">More</button>
             </div>
-        </div>
-        <div tab ng-if="::vm.auth.isLoggedIn">
-            <div tab-heading class="text_heading">
-                Edit
-            </div>
-            <div class="tag_editing">
-                <div>
-                    <label>Is contained by</label>
-                    <div edit-taglist tags="vm.tag.inherits" existing-only="true" on-change="vm.changedInherits(vm.tag.inherits, type, tag)"></div>
-                    <label>Contains</label>
-                    <div edit-taglist tags="vm.tag.implements" existing-only="true" on-change="vm.changedInherits(vm.tag.implements, type, tag)"></div>
-                </div>
-            </div>
-        </div>
-    </div>
+        <!-- </div> -->
+        <!-- <div tab ng-if="::vm.auth.isLoggedIn"> -->
+        <!--     <div tab-heading class="text_heading"> -->
+        <!--         Edit -->
+        <!--     </div> -->
+        <!--     <div class="tag_editing"> -->
+        <!--         <div> -->
+        <!--             <label>Is contained by</label> -->
+        <!--             <div edit-taglist tags="vm.tag.inherits" existing-only="true" on-change="vm.changedInherits(vm.tag.inherits, type, tag)"></div> -->
+        <!--             <label>Contains</label> -->
+        <!--             <div edit-taglist tags="vm.tag.implements" existing-only="true" on-change="vm.changedInherits(vm.tag.implements, type, tag)"></div> -->
+        <!--         </div> -->
+        <!--     </div> -->
+        <!-- </div> -->
+    <!-- </div> -->
 </div>
