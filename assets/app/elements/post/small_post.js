@@ -8,7 +8,8 @@ function smallPost(ContextService) {
         templateUrl: "elements/post/small_post.html",
         scope: {
             node: "=",
-            ignoreTags: "="
+            ignoreTags: "=",
+            onClick: "&"
         },
         transclude: true,
         controller: smallPostCtrl,
