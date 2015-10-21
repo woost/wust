@@ -8,15 +8,16 @@
 
 
     .stream-container {
-        width: 600px;
-        min-width: 600px;
-        max-width: 600px;
-        padding: 20px 40px;
+        margin-top: 20px;
+        margin-right: 80px;
+        width: 650px;
+        min-width: 650px;
+        max-width: 650px;
+    }
+    .information-box {
+        width: 250px;
     }
     #description_container {
-        width: 100%;
-        min-width: 100%;
-        max-width: 100%;
 
         @include display-flex(flex);
         .vote-buttons {
