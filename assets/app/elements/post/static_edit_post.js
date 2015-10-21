@@ -19,9 +19,9 @@ function staticEditPost() {
     };
 }
 
-StaticEditPostCtrl.$inject = ["$state", "$scope", "Auth", "EditService", "KarmaService"];
+StaticEditPostCtrl.$inject = ["$state", "$scope", "Auth", "EditService", "KarmaService", "HistoryService"];
 
-function StaticEditPostCtrl($state, $scope, Auth, EditService, KarmaService) {
+function StaticEditPostCtrl($state, $scope, Auth, EditService, KarmaService, HistoryService) {
     let vm = this;
 
     vm.deleteNode = deleteNode;
@@ -44,7 +44,14 @@ function StaticEditPostCtrl($state, $scope, Auth, EditService, KarmaService) {
     }
 
     function calculateEditWeight() {
-        vm.editWeight = KarmaService.voteWeightInContexts(vm.node.connectedTags) + authorBoost;
+        //TODO: FIXME: this is used in the neighbours graph, but successors of hyperrelations is broken in hyper graph wrappers, so get it the node from the current component:
+        let comp = HistoryService.getCurrentViewComponentGraph();
+        let node = _.find(comp.nodes, {id: vm.node.id});
+        if (node)
+            vm.editWeight = KarmaService.voteWeightInContexts(node.connectedTags) + authorBoost;
+        else
+            vm.editWeight = 0;
+
         vm.canApply = wust.Moderation().canApply(vm.editWeight, vm.node.postChangeThreshold);
     }
 }

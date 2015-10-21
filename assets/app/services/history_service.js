@@ -17,11 +17,22 @@ function HistoryService(Auth, Session, Post, DiscourseNode, $rootScope, $state) 
     this.removeFromCurrentView = removeFromCurrentView;
     this.addNodesToCurrentView = addNodesToCurrentView;
 
+    this.getCurrentViewComponentGraph = getCurrentViewComponentGraph;
+    this.getCurrentViewComponentNeighbours = getCurrentViewComponentNeighbours;
+
     let currentCommitUnregister, currentViewComponent;
     this.setCurrentViewComponent = setCurrentViewComponent;
 
     if (Auth.isLoggedIn) {
         load();
+    }
+
+    function getCurrentViewComponentGraph() {
+        return currentViewComponent ? currentViewComponent.getWrap("graph") : undefined;
+    }
+
+    function getCurrentViewComponentNeighbours() {
+        return currentViewComponent ? currentViewComponent.getWrap("neighbours") : undefined;
     }
 
     function setCurrentViewComponent(component) {
