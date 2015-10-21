@@ -2,7 +2,6 @@
 GIT_WORK_TREE=../app git checkout -f
 
 #TODO: separate start/stop script
-#TODO: write PID into file
 
 export PATH="$PATH:$HOME/.rvm/bin"
 export PATH="$PATH:$HOME/.node_modules/bin"
@@ -10,9 +9,11 @@ source $HOME/export_neo4j_pass
 
 cd ../app
 
+PID=$(cat target/universal/stage/RUNNING_PID)
+
 ./buildproduction || exit 1
 
-[ -f target/universal/stage/RUNNING_PID ] && kill $(cat target/universal/stage/RUNNING_PID)
+[ -n "$PID" ] && kill $PID
 
 [ -x ../usertest/enable ] && ../usertest/enable >&- 2>&- &
 
