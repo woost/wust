@@ -5,7 +5,10 @@
     <!--             Posts -->
     <!--         </div> -->
             <div class="header">
-                <button class="pull-right btn btn-xs btn-default" type="button" animation="am-fade-and-scale-down" ng-click="vm.addTagStream()">Create stream with this tag</button>
+                <div class="pull-right btn-group-vertical">
+                    <button class="btn btn-xs btn-default" type="button" animation="am-fade-and-scale-down" ng-click="vm.newDiscussion()">Start new Discussion in this Context</button>
+                    <button class="btn btn-xs btn-default" type="button" animation="am-fade-and-scale-down" ng-click="vm.addTagStream()">Create stream with this Context</button>
+                </div>
                 <span ng-repeat="inherits in vm.tag.inherits" tag-label="inherits"></span>
                 <span ng-if="vm.tag.inherits.length">
                     <b>contains</b>

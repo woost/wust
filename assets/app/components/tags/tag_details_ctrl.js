@@ -1,8 +1,8 @@
 angular.module("wust.components").controller("TagDetailsCtrl", TagDetailsCtrl);
 
-TagDetailsCtrl.$inject = ["$stateParams", "Scope", "Search", "DiscourseNode", "StreamService", "Auth", "ContextService"];
+TagDetailsCtrl.$inject = ["$stateParams", "Scope", "Search", "DiscourseNode", "StreamService", "Auth", "ContextService", "ModalEditService"];
 
-function TagDetailsCtrl($stateParams, Scope, Search, DiscourseNode, StreamService, Auth, ContextService) {
+function TagDetailsCtrl($stateParams, Scope, Search, DiscourseNode, StreamService, Auth, ContextService, ModalEditService) {
     let vm = this;
 
     let postSize = 30;
@@ -12,6 +12,7 @@ function TagDetailsCtrl($stateParams, Scope, Search, DiscourseNode, StreamServic
     vm.addTagStream = addTagStream;
     vm.changedInherits = changedInherits;
     vm.auth = Auth;
+    vm.newDiscussion = newDiscussion;
 
     vm.tag = Scope.$find($stateParams.id);
     // vm.tag.$then(() => {
@@ -31,6 +32,11 @@ function TagDetailsCtrl($stateParams, Scope, Search, DiscourseNode, StreamServic
         page: postPage,
         size: postSize
     });
+
+    function newDiscussion() {
+        ModalEditService.show();
+        ModalEditService.currentNode.tags = [vm.tag.$encode()];
+    }
 
     function loadMorePosts() {
         if (vm.tag === undefined)
