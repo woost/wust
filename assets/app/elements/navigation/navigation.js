@@ -35,9 +35,14 @@ function navigationCtrl($state, Auth, SearchService, ModalEditService, Fullscree
     vm.newDiscussion = newDiscussion;
     vm.fullscreen = FullscreenService;
     vm.$state = $state;
-    vm.currentContexts = ContextService.currentContexts;
-    vm.contextStyle = ContextService.contextStyle;
-    vm.onContextChange = () => ContextService.emitChangedEvent();
+
+    let brandingColor = window.globals.uiSettings.brandingColor;
+    if (brandingColor) {
+        vm.contextStyle = {
+            backgroundColor: brandingColor,
+            borderBottom: "1px solid " + d3.hcl(d3.rgb(brandingColor)).darker().toString()
+        };
+    }
 
     function authenticate(register) {
         let func = register ? Auth.register : Auth.login;

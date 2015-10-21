@@ -1,28 +1,17 @@
 <nav id="navigation" class="navbar navbar navbar-fixed-top" role="navigation" ng-style="vm.contextStyle">
     <div class="container-fluid">
+        <a class="navbar-brand" rel="home" href="#" ng-click="vm.fullscreen.hideFullscreens()">
+            <img style="display:inline;" ng-if="::uiSettings.brandingLogo" src="{{::uiSettings.brandingLogo}}">
+            <span ng-bind="::uiSettings.brandingText"></span>
+        </a>
         <div ng-class="{search_results_visible: vm.search.resultsVisible, has_fullscreen: vm.fullscreen.hasFullscreen}">
             <ul class="navpagelinks nav navbar-nav navbar-left">
                 <li><a ui-sref="dashboard" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()">
                         <i class="fa fa-home"></i><span class="hidden-sm hidden-xs">&nbsp;Dashboard</span></a></li>
-                <li><a ng-if="!vm.currentContexts.length" ui-sref="tags" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()">
-                        <i class="fa fa-globe"></i><span class="hidden-sm hidden-xs">&nbsp;Browse</span></a></li>
-                <li><a ng-if="vm.currentContexts.length" ui-sref="tags.details({id: vm.currentContexts[0].id})" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()">
+                <li><a ui-sref="tags" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()">
                         <i class="fa fa-globe"></i><span class="hidden-sm hidden-xs">&nbsp;Browse</span></a></li>
                 <li><a ng-if="::vm.Auth.isLoggedIn" ui-sref="vote" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()" data-title="Show changes made by other users. You can decide whether these changes should be accepted or rejected." bs-tooltip data-placement="bottom">
                         <i class="fa fa-sort"></i><span class="hidden-sm hidden-xs">&nbsp;Moderation</span></a></li>
-                <li class="hidden hidden-xs dropdown">
-                    <a href="#" class="dropdown-toggle">
-                        <span ng-repeat="context in vm.currentContexts" tag-label="context" disable-link>
-                            <span ng-show="context.karma > 0" class="right">{{context.karma}}</span>
-                        </span>
-                        <span ng-show="vm.currentContexts.length === 0">Context <span class="caret"></span></span>
-                    </a>
-                    <ul class="dropdown-menu context-dropdown">
-                        <li>
-                            <div edit-taglist tags="vm.currentContexts" embed-suggestions="true" placeholder="Select Context" on-change="vm.onContextChange()" tag-type="context" always-show="true" existing-only="true"></div>
-                        </li>
-                    </ul>
-                </li>
                 <li>
                     <button ng-if="::vm.Auth.isLoggedIn" id="new_discussion_button" type="button" class="btn btn-default navbar-btn" onclick="this.blur()" ng-click="vm.newDiscussion()">Start<span class="hidden-xs">&nbsp;Discussion</span></button>
                 </li>
