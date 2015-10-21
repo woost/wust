@@ -1,4 +1,5 @@
 @import "globals";
+@import "bootstrap/variables";
 
 #navigation {
     .container-fluid {
@@ -8,9 +9,6 @@
     background-color: $nav_normal_background;
     border-width: 0px;
     border-bottom: 1px solid $nav_border_color;
-    ul.nav li.dropdown:hover > ul.dropdown-menu {
-        display: block;
-    }
     color: $nav_normal_color;
 
     .navpagelinks a:link, .navpagelinks a:hover, .navpagelinks a:visited, .navpagelinks a.active,
@@ -40,10 +38,6 @@
         // negative margin to prevent expanding navbar
         margin-top: -4px;
         margin-bottom: -10px;
-    }
-
-    .dropdown-menu {
-        color: #333; //TODO: use bootstrap variable
     }
 
     .search-form input {
@@ -76,7 +70,14 @@
         padding: 10px;
     }
     .auth-dropdown {
+        display: block;
         width: 200px;
+        a, a:link, a:visited {
+            color: $link-color;
+        }
+        a:active, a:hover {
+            color: $link-hover-color;
+        }
         form {
             margin-right: 0px;
         }

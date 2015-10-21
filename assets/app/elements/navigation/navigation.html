@@ -21,7 +21,7 @@
             </ul>
 
 
-            <ul class="nav navbar-nav navbar-right navpagelinks ">
+            <ul class="nav navbar-nav navbar-right navpagelinks">
                 <li>
                     <form class="search-form navbar-form navbar-left hidden-sm hidden-xs" ng-submit='vm.onSearchBoxChange()'>
                         <div class="form-group has-feedback">
@@ -31,28 +31,15 @@
                     </form>
                 </li>
                 <li><a ui-sref="users.list" ng-class="{active: vm.$state.includes('users.*')}" ng-click="vm.fullscreen.hideFullscreens()">
-                        <i class="fa fa-users"></i><span class="hidden-md hidden-sm hidden-xs">&nbsp;Users</span></a></li>
+                        <i class="fa fa-users"></i><span class="hidden-md hidden-sm hidden-xs">&nbsp;Users</span></a>
+                </li>
                 <li class="dropdown">
-                    <a ui-sref="users.details({id: vm.Auth.current.userId})" class="dropdown-toggle" ng-class="::{'disable-link': !vm.Auth.isLoggedIn}" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                    <a href class="dropdown-toggle" bs-dropdown="dropdown" template-url="elements/navigation/auth.html" placement="bottom-right">
                         <i class="fa fa-user"></i>
                         <span ng-if="::vm.Auth.isLoggedIn" class="hidden-xs"> {{vm.Auth.current.identifier}} ({{vm.karma.sum}}) </span>
                         <span ng-if="::!vm.Auth.isLoggedIn" class="hidden-xs">Register / Login</span>
                         <span class="caret"></span>
                     </a>
-                    <ul class="dropdown-menu auth-dropdown" ng-switch="vm.Auth.isLoggedIn">
-                        <li>
-                            <form ng-switch-when="false" name="signForm" ng-submit="vm.authenticate(registerUser)" class="navbar-form navbar-right ng-trans ng-trans-slide-right ease">
-                                <input class="form-control" size="10" name="username" type="text" ng-model='vm.newUser.identifier' placeholder="Username" required>
-                                <input class="form-control" size="10" name="password" type="password" ng-model='vm.newUser.password' placeholder="Password" required>
-                                <input type="submit" value="Login" ng-click="registerUser = false" class="btn btn-default" ng-disabled="signForm.$invalid">
-                                <input type="submit" value="Register" ng-click="registerUser = true" class="btn btn-default" ng-disabled="signForm.$invalid">
-                            </form>
-                            <form ng-switch-default ng-submit="vm.logout()" class="navbar-form navbar-right ng-trans ng-trans-slide-right ease">
-                                <a ui-sref="users.details({id: vm.Auth.current.userId})" style="padding-right: 10px">Profile</a>
-                                <input type="submit" value="Logout" class="btn btn-default">
-                            </form>
-                        </li>
-                    </ul>
                 </li>
             </ul>
         </div>
