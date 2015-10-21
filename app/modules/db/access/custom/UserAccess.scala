@@ -34,20 +34,20 @@ case class UserAccess() extends NodeReadBase[User] {
     val discourse = if (context.scopes.isEmpty) {
       val query = s"""
       match ${ userDef.toPattern }
-      with ${userDef.name} skip $skip limit $limit
       optional match ${ hasKarmaDef.toPattern(false, true) }
       with ${userDef.name}, sum(
         case ${hasKarmaDef.name}.karma
           when null then 0
           else ${hasKarmaDef.name}.karma
         end
-      ) as karmaAggregate order by karmaAggregate DESC
+      ) as karmaAggregate order by karmaAggregate DESC skip $skip limit $limit
       optional match ${ hasKarmaDef.toPattern(false, true) }
-      return ${hasKarmaDef.name}, ${userDef.name}
+      return ${hasKarmaDef.name}, ${userDef.name}, karmaAggregate order by karmaAggregate DESC
       """
 
       Discourse(db.queryGraph(query, ctx.params))
     } else {
+      // TODO: fix, order broken
       val query = s"""
       match ${ hasKarmaDef.toPattern(true, true) }
       where ${scopeDef.name}.uuid in {scopeUuids}
@@ -62,13 +62,7 @@ case class UserAccess() extends NodeReadBase[User] {
       Discourse(db.queryGraph(query, ctx.params ++ Map("scopeUuids" -> context.scopes, "scopeLength" -> context.scopes.size)))
     }
 
-    //TODO: why is the order incorrect?
-    // Ok(Json.toJson(discourse.users))
-    Ok(Json.toJson(if (context.scopes.isEmpty)
-      discourse.users.sortBy(- _.outRelationsAs(HasKarma).map(_.karma).sum)
-    else
-      discourse.users.sortBy(- _.outRelationsAs(HasKarma).map(_.karma).min)
-    ))
+    Ok(Json.toJson(discourse.users))
   }
 
   override def update(context: RequestContext, uuid: String) = {
