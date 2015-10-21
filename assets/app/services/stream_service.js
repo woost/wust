@@ -1,9 +1,9 @@
 angular.module("wust.services").service("StreamService", StreamService);
 
-StreamService.$inject = ["Search", "DiscourseNode", "Auth", "store", "Helpers", "$state"];
+StreamService.$inject = ["Search", "DiscourseNode", "store", "Helpers", "$state"];
 
-function StreamService(Search, DiscourseNode, Auth, store, Helpers, $state) {
-    let streamStore = store.getNamespacedStore(`stream.${Auth.current.userId}`);
+function StreamService(Search, DiscourseNode, store, Helpers, $state) {
+    let streamStore = store.getNamespacedStore("stream");
     let self = this;
 
 
