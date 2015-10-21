@@ -6,7 +6,7 @@
                     <span ng-repeat="classification in tag.classifications">
                         <span colored-tag="classification" tagtype="circle" class="tag_symbol"></span>
                     </span>
-                    <i ng-if="editClassification && tag.isContext && tag.classifications.length === 0" class="fa fa-ellipsis-h text-muted"></i>
+                    <i ng-if="editClassification && tag.isContext && tag.classifications.length === 0" class="fa fa-ellipsis-v text-muted text-center" style="width: 18.5px"></i>
                 </span>
             </span>
             <i class="remove fa fa-close right" data-title="Remove tag" bs-tooltip ng-mousedown="$event.stopPropagation(); $event.preventDefault();" ng-mouseup="remove($index)"></i>
