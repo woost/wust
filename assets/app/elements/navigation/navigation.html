@@ -5,14 +5,14 @@
             <span class="hidden-md hidden-sm hidden-xs" ng-bind="::uiSettings.brandingText"></span>
         </a>
         <div ng-class="{search_results_visible: vm.search.resultsVisible, has_fullscreen: vm.fullscreen.hasFullscreen}">
-            <ul class="navpagelinks nav navbar-nav navbar-left">
-                <li><a ui-sref="dashboard" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()">
+            <ul class="nav navbar-nav navbar-left">
+                <li class="navpagelinks"><a ui-sref="dashboard" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()">
                         <i class="fa fa-home"></i><span class="hidden-md hidden-sm hidden-xs">&nbsp;Dashboard</span></a></li>
-                <li><a ui-sref="tags" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()">
+                <li class="navpagelinks"><a ui-sref="tags" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()">
                         <i class="fa fa-globe"></i><span class="hidden-md hidden-sm hidden-xs">&nbsp;Browse</span></a></li>
-                <li><a ng-if="::vm.Auth.isLoggedIn" ui-sref="vote" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()" data-title="Show changes made by other users. You can decide whether these changes should be accepted or rejected." bs-tooltip data-placement="bottom">
+                <li class="navpagelinks"><a ng-if="::vm.Auth.isLoggedIn" ui-sref="vote" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()" data-title="Show changes made by other users. You can decide whether these changes should be accepted or rejected." bs-tooltip data-placement="bottom">
                         <i class="fa fa-sort"></i><span class="hidden-md hidden-sm hidden-xs">&nbsp;Moderation</span></a></li>
-                <li>
+                <li class="navpagelinks">
                     <button ng-if="::vm.Auth.isLoggedIn" id="new_discussion_button" type="button" class="btn btn-default navbar-btn" onclick="this.blur()" ng-click="vm.newDiscussion()">New<span class="hidden-md hidden-sm hidden-xs">&nbsp;Discussion</span></button>
                 </li>
                 <li class="survey-container hidden-xs" ng-if="::uiSettings.surveyEnabled">

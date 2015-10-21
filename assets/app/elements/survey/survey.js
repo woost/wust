@@ -24,7 +24,13 @@ function surveyCtrl(store) {
     vm.exercises = [
         {
             title: "Do something",
-            description: "Should be a cool thing"
+            description: `
+Should be a cool thing
+
+# foo
+1. bar
+2. baz
+            `
         },
         {
             title: "Vielen Dank für deine Teilnahme!",

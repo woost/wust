@@ -1,22 +1,21 @@
 @import "globals";
+@import "bootstrap/variables";
 
 .survey {
-    // top: 0px;
+    overflow: hidden;
     margin-top: 1px;
-    padding: 3px;
-    border-radius: 5px;
     min-height: 48px;
     max-height: 48px;
-    // left: -moz-calc(50% - 180px);
-    // left: -webkit-calc(50% - 180px);
-    // left: calc(50% - 170px);
+    padding: 2px !important;
     width: 370px;
-    background: #00afaf;
-    color: white;
     position: absolute;
     z-index: 200;
     &:hover {
+        overflow: auto;
         max-height: 200px;
+    }
+    a {
+        color: white;
     }
     .info_text {
         padding-left: 3px;
