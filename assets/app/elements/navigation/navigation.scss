@@ -20,6 +20,7 @@
 
     .navbar-brand {
         color: $nav_normal_color;
+        margin-bottom: -1px;
     }
 
     .navpagelinks a:link, .navpagelinks a:hover, .navpagelinks a:visited, .navpagelinks a.active,
