@@ -46,7 +46,7 @@
     .search-form {
         margin-right: -10px;
         input {
-            width: 190px;
+            width: 185px;
         }
     }
 
@@ -75,9 +75,13 @@
         height: 270px; // must be high enough to cover expanded tag-editor
         padding: 10px;
     }
-    #new_discussion_button {
+    .new_discussion_button {
+        font-size: 12px;
+        line-height: 10px;
         margin-right: 0px;
         margin-left: 10px;
+        padding-left: 5px;
+        padding-right: 5px;
     }
     .survey-container {
         margin-left: 10px;
