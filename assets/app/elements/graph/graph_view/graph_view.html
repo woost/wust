@@ -11,7 +11,7 @@
             <input type="text" class="form-control" ng-model="vm.search.title" placeholder="Filter">
         </div>
     </div>
-    <div class="post-preview-frame top right" ng-show="vm.d3Info.isHovering || vm.d3Info.stickyPreview">
+    <div class="post-preview-frame top" ng-class="{left: !(vm.d3Info.hoveredNode || vm.d3Info.stickyPreview).onLeftHalf, right: (vm.d3Info.hoveredNode || vm.d3Info.stickyPreview).onLeftHalf}" ng-show="vm.d3Info.isHovering || vm.d3Info.stickyPreview">
         <div preview node="vm.d3Info.hoveredNode || vm.d3Info.stickyPreview">
             <button class="close pull-right" ng-click="vm.d3Info.stickyPreview = undefined" type="button"><span aria-hidden="true">&times;</span></button>
             <p class="text-muted preview-info">Click to focus this post. Long press to make this preview sticky.</p>
