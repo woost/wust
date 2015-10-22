@@ -181,7 +181,7 @@ object Search extends Controller {
         val connectsDef = RelationDef(FactoryNodeDef(Post), Connects, nodeDef)
         s"""
         optional match ${ connectsDef.toPattern(true, false) }
-        return ${nodeDef.name}, count(${connectsDef.name}) as indegree
+        return ${nodeDef.name}, count(distinct ${connectsDef.name}) as indegree
         """
       } else s"return ${nodeDef.name}"
 

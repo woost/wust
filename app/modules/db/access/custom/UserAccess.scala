@@ -105,7 +105,7 @@ case class UserContributions() extends RelationAccessDefault[User, Post] {
     val query = s"""
     match ${createdDef.toPattern}
     optional match ${ responsesDef.toPattern(true, false) }
-    with distinct ${ postDef.name }, count(${responsesDef.name}) as indegree order by ${ postDef.name }.timestamp DESC skip ${ skip } limit ${ limit }
+    with distinct ${ postDef.name }, count(distinct ${responsesDef.name}) as indegree order by ${ postDef.name }.timestamp DESC skip ${ skip } limit ${ limit }
     optional match ${ tagsDef.toPattern(true, false) }
     optional match ${ tagClassifiesDef.toPattern(true, false) }
     optional match ${ connDef.toPattern(false, true) }, ${ classifiesDef.toPattern(true, false) }
