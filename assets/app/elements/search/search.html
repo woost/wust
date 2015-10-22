@@ -17,9 +17,13 @@
                 <label>Only start posts</label>
                 <span switch ng-model="vm.search.searchStartPost" ng-change="vm.search.triggerSearch()"></span>
             </div>
-            <div edit-taglist placeholder="All Tags" tag-type="taglike" tags="vm.search.tagsAll" class="row edit_tags" existing-only="true" on-change="vm.search.triggerSearch()"></div>
-            <div edit-taglist placeholder="Any Tag" tag-type="taglike" tags="vm.search.tagsAny" class="row edit_tags" existing-only="true" on-change="vm.search.triggerSearch()"></div>
-            <div edit-taglist placeholder="Ignored Tags" tag-type="taglike" tags="vm.search.tagsWithout" class="row edit_tags" existing-only="true" on-change="vm.search.triggerSearch()"></div>
+            <div>
+                <hr />
+                <b>Posts need to have</b>
+            </div>
+            <div edit-taglist placeholder="All of these Tags" tag-type="taglike" tags="vm.search.tagsAll" class="row edit_tags" existing-only="true" on-change="vm.search.triggerSearch()"></div>
+            <div edit-taglist placeholder="One of these Tags" tag-type="taglike" tags="vm.search.tagsAny" class="row edit_tags" existing-only="true" on-change="vm.search.triggerSearch()"></div>
+            <div edit-taglist placeholder="None of these Tags" tag-type="taglike" tags="vm.search.tagsWithout" class="row edit_tags" existing-only="true" on-change="vm.search.triggerSearch()"></div>
             <hr>
             <div id="search_options_bottom">
                 <!-- <div class="option"> -->
