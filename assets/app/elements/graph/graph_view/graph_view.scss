@@ -127,7 +127,7 @@
                 .connecttool {
                     @include transform(rotate(-45deg));
                     font-size: 130%; // larger symbol
-                    padding: 5px;
+                    padding: 3px;
                     cursor: crosshair;
                     .event-offset-rotate-fix {
                         // backrotated transparent overlay to fix event.offsetX
