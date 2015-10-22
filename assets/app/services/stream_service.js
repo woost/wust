@@ -51,6 +51,8 @@ function StreamService(Search, DiscourseNode, store, Helpers, $state) {
     }
 
     function searchParams(streamDef) {
+        let hasDefinition = streamDef.tagsAll.length + streamDef.tagsWithout.length + streamDef.tagsAny.length;
+
         return {
             label: DiscourseNode.Post.label,
             tagsAll: streamDef.tagsAll.filter(t => t.isContext).map(t => t.id),
@@ -59,6 +61,7 @@ function StreamService(Search, DiscourseNode, store, Helpers, $state) {
             classificationsAll: streamDef.tagsAll.filter(t => !t.isContext).map(t => t.id),
             classificationsAny: streamDef.tagsAny.filter(t => !t.isContext).map(t => t.id),
             classificationsWithout: streamDef.tagsWithout.filter(t => !t.isContext).map(t => t.id),
+            startPost: !hasDefinition,
             size: 20,
             page: 0,
         };
