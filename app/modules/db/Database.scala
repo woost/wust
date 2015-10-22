@@ -173,6 +173,10 @@ return connectable,connects,context,tags,contexttotags,tagstopost, classificatio
       }
     }
 
+
+    //TODO: HACK: remove all hyperrealtion without start/end from component
+    component.hyperRelations.filter(hr => hr.startNodeOpt.isEmpty || hr.endNodeOpt.isEmpty).foreach(component.remove(_))
+
     component
   }
 }
