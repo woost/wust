@@ -1,6 +1,6 @@
 <nav id="navigation" class="navbar navbar navbar-fixed-top" role="navigation" ng-style="vm.contextStyle">
     <div class="container-fluid">
-        <a class="navbar-brand hidden-xs" rel="home" ui-sref="dashboard" ng-click="vm.fullscreen.hideFullscreens()">
+        <a class="navbar-brand hidden-xs" ng-if="::uiSettings.brandingLogo || uiSettings.brandingText" rel="home" ui-sref="dashboard" ng-click="vm.fullscreen.hideFullscreens()">
             <img style="display:inline;" ng-if="::uiSettings.brandingLogo" src="{{::uiSettings.brandingLogo}}">
             <b class="hidden-md hidden-sm" ng-bind="::uiSettings.brandingText"></b>
         </a>
