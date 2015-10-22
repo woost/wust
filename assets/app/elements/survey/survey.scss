@@ -16,11 +16,25 @@
         // width: 600px;
         // max-width: 600px;
     }
+    .second-title {
+        font-size: 13px;
+        padding-right: 10px;
+        line-height: 22px;
+    }
     .info_text {
         padding-left: 3px;
         padding-right: 3px;
         .description_text {
             padding: 3px;
         }
+    }
+    .email-info {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    img[alt=graph-icon] {
+        width: 25px;
+        height: 25px;
     }
 }
