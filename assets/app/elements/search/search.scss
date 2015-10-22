@@ -40,7 +40,12 @@
             }
         }
         #search_options {
+            .option {
+                @include display-flex(flex);
+                @include justify-content(space-between);
+            }
             width: 310px;
+            min-width: 250px;
             height: 100%;
             background: $history_background_color;
             border-right: 1px solid #d8d8d8;
