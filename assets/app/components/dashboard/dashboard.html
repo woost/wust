@@ -6,6 +6,7 @@
                     <div class="as-sortable-item-handle" as-sortable-item-handle>
                         <span ng-if="!stream.showEdit">
                             <span ng-repeat="tag in stream.tagsAll" tag-label="tag"></span>
+                            <b ng-if="stream.tagsAll.length === 0" class="text-muted">Recent Posts</b>
                         </span>
                         <button class="edit-button btn btn-sm btn-default pull-right" onclick="this.blur()" ng-model="stream.showEdit" bs-checkbox><i class="fa fa-pencil"></i></button>
                         <button ng-show="stream.showEdit" class="btn btn-sm btn-danger edit-button pull-left" ng-click="vm.removeStream($index)" data-title="Remove Stream" bs-tooltip><i class="fa fa-trash-o"></i></button>
