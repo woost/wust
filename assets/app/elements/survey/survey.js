@@ -29,15 +29,17 @@ function surveyCtrl(store) {
             description: `
 **Wust** ist ein Graph-basiertes Diskussionsystem.
 
-Bitte führen Sie alle hier gestellten Aufgaben aus, um mit dem System vertraut zu werden.
-Sie entscheiden selbst, wann eine Aufgabe erledigt ist.
-Die erste Aufgabe sehen Sie mit einem Klick auf **Weiter**.
+- Bitte führen Sie alle hier gestellten Aufgaben aus, um mit dem System vertraut zu werden.
+- Sie entscheiden selbst, wann eine Aufgabe erledigt ist.
+- Die erste Aufgabe sehen Sie mit einem Klick auf **Weiter**.
 `
         },
         {
             title: "Registrieren Sie sich",
             description: `
-Klicken Sie rechts oben auf das Menü **Register / Login**. Registrieren Sie einen Benutzer-Account. Wenn Sie bereits einen Account haben, loggen Sie sich damit ein.
+- Klicken Sie rechts oben auf das Menü **Register / Login**.
+- Registrieren Sie einen Benutzer-Account.
+- Wenn Sie bereits einen Account haben, loggen Sie sich damit ein.
 `
         },
         {
