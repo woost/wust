@@ -3,7 +3,7 @@ angular.module("wust.services").service("SearchService", SearchService);
 SearchService.$inject = ["Search", "DiscourseNode"];
 
 function SearchService(Search, DiscourseNode) {
-    let defaultSize = 30;
+    let defaultSize = 20;
     let reloadHandler;
 
     this.search = {

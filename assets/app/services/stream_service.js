@@ -56,7 +56,7 @@ function StreamService(Search, DiscourseNode, store, Helpers, $state) {
             classificationsAll: streamDef.tagsAll.filter(t => !t.isContext).map(t => t.id),
             classificationsAny: streamDef.tagsAny.filter(t => !t.isContext).map(t => t.id),
             classificationsWithout: streamDef.tagsWithout.filter(t => !t.isContext).map(t => t.id),
-            size: 50,
+            size: 20,
             page: 0,
         };
     }
