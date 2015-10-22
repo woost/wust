@@ -39,7 +39,7 @@ function surveyCtrl(store) {
             description: `
 - Klicken Sie rechts oben auf das Menü **Register / Login**.
 - Registrieren Sie einen Benutzer-Account.
-- Wenn Sie bereits einen Account haben, loggen Sie sich damit ein.
+- Wenn Sie bereits einen Account haben, können Sie sich auch damit einloggen.
 `
         },
         {
@@ -74,31 +74,35 @@ Auf der **rechten Seite** sehen Sie Beiträge, die sich auf diesen Beitrag bezie
 1. Klicken Sie auf das **+** Symbol über dem ursprünglichen Beitrag und stellen Sie noch eine Frage.
 1. Fügen Sie eine Idee zu Ihrer gestellten Frage hinzu.
 1. Das zweite Symbol über den Knoten lässt Sie den Beitrag durch Ziehen mit anderen verbinden. Verbinden Sie die Idee mit der anderen Frage.
-
-`
-        },
-        {
-            title: "Stellen Sie eine weitere Frage",
-            description: `
-`
-        },
-        {
-            title: "Antworten Sie mit einer Idee",
-            description: `
-`
-        },
-        {
-            title: "Verbinden Sie Idee mit der anderen Frage",
-            description: `
+1. Verbinden Sie einen Beitrag mit einer Verbindung.
 `
         },
         {
             title: "Starten Sie eine neue Diskussion",
             description: `
-1. Klicken Sie auf den Button "Start Discussion" oben in der Navigationsleiste.
-1. // schreib nen coolen titel/summary hin
-1. Wählen Sie im zweiten Eingabefeld bitte den Kontext **Wust** aus (Eckige Boxen).
-1. In der Beschreibungen haben Sie Raum für Anmerkungen. Was hat Ihnen gefallen? Was hat Ihnen nicht gefallen?
+1. Starten Sie eine neue Diskussion indem Sie auf den Knopf **Start Discussion** oben in der Navigationsleiste klicken, z.B., Sie haben ein Problem in ihrem Haushalt und möchten andere Leute nach Ideen fragen.
+1. Wählen Sie im zweiten Eingabefeld bitte den Kontext **Haushalt** aus (Eckige Boxen).
+1. Es gibt 2 unterschiedliche Tag-Arten: **Klassifikationen** (Frage, Idee, ...) und **Kontexte** (Themengebiete wie Haushalt, Politik). Klassifikationen gelten immer im Bezug auf einen anderen Beitrag oder einen Kontext. **Neue Diskussionen müssen mindestens einen Kontext haben**.
+`
+        },
+        {
+            title: "Bearbeiten Sie einen fremden Beitrag",
+            description: `
+1. Sehen Sie sich einen weiteren fremden Beitrag in der Focus-Ansicht an.
+1. Klicken Sie rechts oben auf den Knopf mit dem Stift-Symbol, um den Beitrag zu bearbeiten.
+1. Ändern sie etwas in der Beschreibung des Beitrags.
+1. Beachten Sie den Fortschrittsbalken über dem "Save"-Knopf.
+
+Wenn Sie etwas an einem fremden Beitrag verändern, müssen andere Nutzer der Änderung zustimmen. Die Anzahl der nötigen Stimmen hängt davon ab, wie oft der Beitrag angesehen wurde.
+`
+        },
+        {
+            title: "Bewerten Sie Änderungen anderer Nutzer",
+            description: `
+1. Klicken Sie in der Navigationsleiste auf den Eintrag **Moderation**. Hier können Sie über vorgeschlagene Änderungen anderer Nutzer abstimmen. Sie entscheiden mit, welche Änderungen akzeptiert und welche abgelehnt werden.
+1. Stimmen Sie über ein oder zwei Änderungen ab.
+
+Wurden viele Ihrer Änderungsvorschläge akzeptiert, haben Sie mehr Stimmen. In einigen Fällen führt das dazu, dass Ihre Änderungen sofort sichtbar sind - Nutzer können dann nachträglich darüber abstimmen. Wird eine Änderung abgelehnt, so wird sie automatisch rückgängig gemacht.
 `
         },
         {
@@ -108,7 +112,6 @@ Auf der **rechten Seite** sehen Sie Beiträge, die sich auf diesen Beitrag bezie
 Vielen Dank, Sie haben alle Aufgaben erledigt.
 
 Schauen Sie sich nun weiter im System um. Wenn Sie möchten, können Sie gerne weitere Diskussionen starten und sich an anderen beteiligen, bevor Sie den Fragebogen ausfüllen.
-
 `
         }
     ];
