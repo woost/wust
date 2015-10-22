@@ -51,7 +51,7 @@
             <!-- <div ng-if="vm.search.resultsVisible"> -->
             <span class="search_indicator" ng-show="vm.search.results.length === 0">
                 <span ng-show="vm.search.waiting && vm.search.query" class="search_status text-muted">Searching…</span>
-                <span ng-show="vm.search.waiting && !vm.search.query" class="search_status text-muted">Type to start searching</span>
+                <span ng-show="vm.search.waiting && !vm.search.query" class="search_status text-muted">Start typing to search</span>
                 <span ng-hide="vm.search.waiting" class="search_status text-muted">No results.</span>
             </span>
             <div id="search_results" infinite-scroll="vm.search.loadMore()" infinite="vm.infinite" promise="vm.search.results">
