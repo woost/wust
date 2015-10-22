@@ -1,3 +1,5 @@
+@import "globals";
+
 .tag-label {
     display: inline-block !important;
     margin: 0 7px 0 0;
@@ -20,6 +22,7 @@
     $padding-h: 5px;
     .content {
         padding: 0 $padding-h !important;
+        font-family: $font-family;
     }
 
     &.fa {
