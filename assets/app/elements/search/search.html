@@ -35,9 +35,9 @@
                     <span class="number_value">{{vm.infinite.currentPage + 1}} / {{vm.infinite.maxPage == -1 ? vm.search.page + 1 + '…' : vm.infinite.maxPage + 1}}</span>
                 </div>
                 <div class="option">
-                    <span class="label_like">Size</span>
+                    <span class="label_like">Posts per Page</span>
                     <span>
-                        <input type="number" class="form-control" min="1" max="100" ng-model="vm.search.size" ng-change="vm.search.triggerSearch()" ng-disabled="vm.search.unlimited">
+                        <input type="number" class="form-control page-size-input" min="1" max="100" ng-model="vm.search.size" ng-change="vm.search.triggerSearch()" ng-disabled="vm.search.unlimited">
                     </span>
                 </div>
                 <!-- <div class="option"> -->
