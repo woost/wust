@@ -31,7 +31,7 @@
             </div>
     </li>
 
-    <li ng-switch-default><a ui-sref="users.details({id: vm.Auth.current.userId})" style="padding-right: 10px" ng-click="$hide()">Profile</a></li>
+    <li ng-switch-default><a ui-sref="users.details({id: vm.Auth.current.userId})" style="padding-right: 10px" ng-click="$hide()">{{vm.Auth.current.identifier}} ({{vm.karma.sum}})</a></li>
     <li ng-switch-default role="separator" class="divider"></li>
     <li ng-switch-default><a href ng-click="vm.logout()">Logout</a></li>
 
