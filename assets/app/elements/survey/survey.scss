@@ -12,10 +12,9 @@
     z-index: 200;
     &:hover {
         overflow: auto;
-        max-height: 200px;
-    }
-    a {
-        color: white;
+        max-height: 600px;
+        // width: 600px;
+        // max-width: 600px;
     }
     .info_text {
         padding-left: 3px;

@@ -23,18 +23,36 @@ function surveyCtrl(store) {
     vm.currentIndex = surveyStore.get("currentIndex") || 0;
     vm.exercises = [
         {
-            title: "Do something",
+            title: "Willkommen bei Wust!",
             description: `
-Should be a cool thing
+Fahren Sie mit der Maus über dieses Feld.
 
-# foo
-1. bar
-2. baz
-            `
+**Wust** ist ein Graph-basiertes Diskussionsystem.
+
+Bitte führen Sie alle hier gestellten Aufgaben aus, um mit dem System vertraut zu werden. Die erste Aufgabe sehen Sie mit einem Klick auf **Weiter**.
+
+Bei Fragen oder Problemen schreiben Sie uns bitte eine kurze E-Mail:
+<felix.dietze@rwth-aachen.de>
+<johannes.karoff@rwth-aachen.de>
+`
         },
         {
-            title: "Vielen Dank für deine Teilnahme!",
-            description: "Bitte fülle jetzt den Fragebogen aus"
+            title: "Fokus-Ansicht eines Beitrags",
+            description: `
+Fahren Sie mit der Maus über dieses Feld.
+
+**Wust** ist ein Graph-basiertes Diskussionsystem.
+
+Bitte führen Sie alle hier gestellten Aufgaben aus, um mit dem System vertraut zu werden. Die erste Aufgabe sehen Sie mit einem Klick auf \`\`\`Weiter\`\`\`.
+
+Bei Fragen oder Problemen schreiben Sie uns bitte eine kurze E-Mail:
+<felix.dietze@rwth-aachen.de>
+<johannes.karoff@rwth-aachen.de>
+`
+        },
+        {
+            title: "Sie haben alle Aufgaben Erledigt",
+            description: `Bitte füllen Sie jetzt den [Fragebogen](https://www.surveymonkey.com/r/woost) aus`
         }
     ];
 
