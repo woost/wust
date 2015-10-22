@@ -249,7 +249,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
                 this.d3Node = this.d3NodeContainerWithData.append("div")
                 .attr("class", d => d.isHyperRelation ? "hyperrelation" : "small-post")
-                // .attr("title", "Click to view this post in focus view. Long press to make the preview sticky.")
+                .attr("title", "Click to view this post in focus view.")
                 .style("background-color", n => {
                     if(n.isHyperRelation) return undefined;
                     if(n.isDeleted) return "red";
