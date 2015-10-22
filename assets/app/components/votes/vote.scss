@@ -86,9 +86,12 @@
         #action_container {
             .post-description {
                 padding-top: 15px;
-                padding-bottom: 15px;
+                margin-bottom: 15px !important;
                 .diff {
+                    padding-bottom: 10px;
                     overflow: auto;
+                }
+                .plain {
                 }
             }
             width: 600px;

@@ -74,8 +74,8 @@
                                 </div>
 
                                 <div ng-show="vm.showDescription" class="post-description">
-                                    <div ng-switch-when="Edit" class="diff" word-based-diff source-a="vm.change.oldDescription" source-b="vm.change.newDescription"></div>
-                                    <div ng-show="!vm.is('Edit') && vm.change.newDescription" class="post-description" markdown="vm.change.newDescription"></div>
+                                    <div ng-switch-when="Edit" ng-show="vm.showDescription" class="diff" word-based-diff source-a="vm.change.oldDescription" source-b="vm.change.newDescription"></div>
+                                    <div ng-show="!vm.is('Edit') && vm.showDescription" class="plain" markdown="vm.change.newDescription"></div>
                                 </div>
                             </div>
                         </li>
