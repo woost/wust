@@ -7,11 +7,11 @@
         <div ng-class="{search_results_visible: vm.search.resultsVisible, has_fullscreen: vm.fullscreen.hasFullscreen}">
             <ul class="nav navbar-nav navbar-left">
                 <li class="navpagelinks"><a ui-sref="dashboard" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()">
-                        <i class="fa fa-home"></i><span class="hidden-md hidden-sm hidden-xs">&nbsp;Dashboard</span></a></li>
+                        <i class="fa fa-home"></i><span class="hidden-sm hidden-xs">&nbsp;Dashboard</span></a></li>
                 <li class="navpagelinks"><a ui-sref="tags" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()">
-                        <i class="fa fa-globe"></i><span class="hidden-md hidden-sm hidden-xs">&nbsp;Browse</span></a></li>
+                        <i class="fa fa-globe"></i><span class="hidden-sm hidden-xs">&nbsp;Browse</span></a></li>
                 <li class="navpagelinks"><a ng-if="::vm.Auth.isLoggedIn" ui-sref="vote" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()" data-title="Show changes made by other users. You can decide whether these changes should be accepted or rejected." bs-tooltip data-placement="bottom">
-                        <i class="fa fa-sort"></i><span class="hidden-md hidden-sm hidden-xs">&nbsp;Moderation</span></a></li>
+                        <i class="fa fa-sort"></i><span class="hidden-sm hidden-xs">&nbsp;Moderation</span></a></li>
                 <li class="navpagelinks">
                     <button ng-if="::vm.Auth.isLoggedIn" id="new_discussion_button" type="button" class="btn btn-default navbar-btn" onclick="this.blur()" ng-click="vm.newDiscussion()">New<span class="hidden-md hidden-sm hidden-xs">&nbsp;Discussion</span></button>
                 </li>
@@ -23,7 +23,7 @@
 
             <ul class="nav navbar-nav navbar-right navpagelinks">
                 <li>
-                    <form class="search-form navbar-form navbar-left hidden-sm hidden-xs" ng-submit='vm.onSearchBoxChange()'>
+                    <form class="search-form navbar-form navbar-left hidden-xs" ng-submit='vm.onSearchBoxChange()'>
                         <div class="form-group has-feedback">
                             <input type="text" placeholder="Search" class="form-control" ng-model="vm.search.query" ng-change='vm.onSearchBoxChange()'>
                             <i class="fa fa-search form-control-feedback" style="pointer-events:all; cursor: pointer;" ng-click="vm.search.resultsVisible = !vm.search.resultsVisible"></i>
@@ -31,13 +31,13 @@
                     </form>
                 </li>
                 <li><a ui-sref="users.list" ng-class="{active: vm.$state.includes('users.*')}" ng-click="vm.fullscreen.hideFullscreens()">
-                        <i class="fa fa-users"></i><span class="hidden-md hidden-sm hidden-xs">&nbsp;Users</span></a>
+                        <i class="fa fa-users"></i><span class="hidden-sm hidden-xs">&nbsp;Users</span></a>
                 </li>
                 <li class="dropdown">
                     <a href class="dropdown-toggle" bs-dropdown="dropdown" template-url="elements/navigation/auth.html" placement="bottom-right">
                         <i class="fa fa-user"></i>
-                        <span ng-if="::vm.Auth.isLoggedIn" class="hidden-xs"> {{vm.Auth.current.identifier}} ({{vm.karma.sum}}) </span>
-                        <span ng-if="::!vm.Auth.isLoggedIn" class="hidden-xs">Register / Login</span>
+                        <span ng-if="::vm.Auth.isLoggedIn" class="hidden-sm hidden-xs"> {{vm.Auth.current.identifier}} ({{vm.karma.sum}}) </span>
+                        <span ng-if="::!vm.Auth.isLoggedIn" class="hidden-sm hidden-xs">Register / Login</span>
                         <span class="caret"></span>
                     </a>
                 </li>

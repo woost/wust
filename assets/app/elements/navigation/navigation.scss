@@ -43,8 +43,11 @@
         margin-bottom: -10px;
     }
 
-    .search-form input {
-        width: 190px;
+    .search-form {
+        margin-right: -10px;
+        input {
+            width: 190px;
+        }
     }
 
     .search_results_visible, .has_fullscreen {
@@ -73,8 +76,8 @@
         padding: 10px;
     }
     #new_discussion_button {
-        margin-left: 10px;
-        margin-right: 10px;
+        margin-right: 5px;
+        margin-left: 5px;
     }
     .survey-container {
         overflow: visible;
