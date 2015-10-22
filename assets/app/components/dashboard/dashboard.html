@@ -12,6 +12,7 @@
                         <button ng-show="stream.showEdit" class="btn btn-sm btn-danger edit-button pull-left" ng-click="vm.removeStream($index)" data-title="Remove Stream" bs-tooltip><i class="fa fa-trash-o"></i></button>
                     </div>
                     <div ng-if="stream.showEdit">
+                        <b class="text-muted">Filter Posts in this Stream:</b>
                         <div class="taglist" edit-taglist tags="stream.tagsAll" tag-type="taglike" placeholder="All Tags" on-change="vm.refreshStream(stream)" existing-only="true"></div>
                         <div class="taglist" edit-taglist tags="stream.tagsAny" tag-type="taglike" placeholder="Any Tag" on-change="vm.refreshStream(stream)" existing-only="true"></div>
                         <div class="tag-editor" edit-taglist tags="stream.tagsWithout" tag-type="taglike" placeholder="Ignored Tags" on-change="vm.refreshStream(stream)" existing-only="true"></div>
