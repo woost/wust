@@ -18,6 +18,10 @@
         margin-bottom: 0; // becomes 15px on small screen sizes...
     }
 
+    .navbar-brand {
+        color: $nav_normal_color;
+    }
+
     .navpagelinks a:link, .navpagelinks a:hover, .navpagelinks a:visited, .navpagelinks a.active,
      a.dropdown-toggle:link, a.dropdown-toggle:hover, a.dropdown-toggle:visited, .navbar-form {
         color: $nav_normal_color;

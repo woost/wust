@@ -2,7 +2,7 @@
     <div class="container-fluid">
         <a class="navbar-brand hidden-xs" rel="home" ui-sref="dashboard" ng-click="vm.fullscreen.hideFullscreens()">
             <img style="display:inline;" ng-if="::uiSettings.brandingLogo" src="{{::uiSettings.brandingLogo}}">
-            <span class="hidden-md hidden-sm" ng-bind="::uiSettings.brandingText"></span>
+            <b class="hidden-md hidden-sm" ng-bind="::uiSettings.brandingText"></b>
         </a>
         <div ng-class="{search_results_visible: vm.search.resultsVisible, has_fullscreen: vm.fullscreen.hasFullscreen}">
             <ul class="nav navbar-nav navbar-left">
