@@ -68,7 +68,7 @@ object Search extends Controller {
         params += ("term" -> termRegex.get)
       }
 
-      if(startPost && contextsAll.isEmpty && contextsAny.isEmpty) {
+      if(startPost && contextsAll.isEmpty && (contextsAny.isEmpty || classificationsAny.nonEmpty)) {
         val tagsDef = AnonRelationDef(FactoryNodeDef(Scope), SchemaTags, nodeDef)
         postMatches += s"match ${ tagsDef.toPattern }"
       }
