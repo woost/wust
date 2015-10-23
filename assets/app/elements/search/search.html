@@ -4,8 +4,8 @@
             <div class="option">
                 <label>Sort order</label>
                 <div class="btn-group" style="line-height: 10px;" ng-model="vm.search.sortOrder" bs-radio-group>
-                    <label class="btn btn-xs btn-default fa fa-sort-amount-desc"><input type="radio" ng-click="vm.search.triggerSearch()" class="btn btn-xs btn-default" value="0"> Votes</label>
-                    <label class="btn btn-xs btn-default fa fa-sort-amount-asc"><input type="radio" ng-click="vm.search.triggerSearch()" class="btn btn-xs btn-default" value="1"> Time</label>
+                    <label class="btn btn-xs btn-default fa fa-sort-amount-desc" data-title="Sort by Votes" bs-tooltip><input type="radio" ng-click="vm.search.triggerSearch()" class="btn btn-xs btn-default" value="0"> Votes</label>
+                    <label class="btn btn-xs btn-default fa fa-sort-amount-asc" data-title="Sort by Time" bs-tooltip><input type="radio" ng-click="vm.search.triggerSearch()" class="btn btn-xs btn-default" value="1"> Time</label>
                 </div>
             </div>
             <hr>
