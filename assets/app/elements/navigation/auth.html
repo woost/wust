@@ -6,11 +6,11 @@
                         Login
                     </div>
                     <div class="tab_body">
-                        <form name="signForm" ng-submit="vm.authenticate(registerUser)">
+                        <form name="loginForm" ng-submit="vm.authenticate(registerUser)">
                             <div class="form-group">
                                 <input class="form-control" size="10" name="username" type="text" ng-model='vm.newUser.identifier' placeholder="Username" required>
                                 <input class="form-control" size="10" name="password" type="password" ng-model='vm.newUser.password' placeholder="Password" required>
-                                <input type="submit" value="Login" ng-click="registerUser = false" class="btn btn-default" ng-disabled="signForm.$invalid">
+                                <input type="submit" value="Login" ng-click="registerUser = false" class="btn btn-default" ng-disabled="loginForm.$invalid">
                             </div>
                         </form>
                     </div>
