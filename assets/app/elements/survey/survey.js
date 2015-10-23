@@ -46,7 +46,7 @@ function surveyCtrl(store) {
             title: "Betrachten Sie einen Beitrag",
             description: `
 1. Klicken Sie in der Navigationsleiste auf **Dashboard**. Hier sehen Sie neue Beiträge - dargestellt als farbige Boxen.
-1. Klicken Sie auf einen beliebigen Beitrag um in die Focus-Ansicht des Beitrags zu wechseln.
+1. Klicken Sie auf einen beliebigen Beitrag um in die Fokus-Ansicht des Beitrags zu wechseln.
 `
         },
         {
@@ -57,7 +57,7 @@ Auf der **rechten Seite** sehen Sie Beiträge, die sich auf diesen Beitrag bezie
 1. Klicken Sie auf **Respond**, um eine Frage zu diesem Beitrag zu stellen.
 1. Wenn Ihnen keine passende Frage einfällt, stellen Sie eine beliebige Frage.
 1. Im zweiten Eingabefeld können Sie auswählen, wie sich Ihr Beitrag auf den anderen bezieht (Runde Boxen). Wählen Sie bitte **Question** aus.
-1. Klicken Sie rechts unten auf **Respond**.
+1. Bestätigen Sie rechts unten mit **Respond**.
 `
         },
         {
@@ -73,8 +73,8 @@ Auf der **rechten Seite** sehen Sie Beiträge, die sich auf diesen Beitrag bezie
 1. Klicken Sie nun auf der linken Seite auf das Symbol ![graph-icon](assets/images/icon-graph.png), um in die Graph-Ansicht zu wechseln.
 1. Klicken Sie auf das **+** Symbol über dem ursprünglichen Beitrag und stellen Sie noch eine Frage.
 1. Fügen Sie eine Idee zu Ihrer gestellten Frage hinzu.
-1. Das zweite Symbol über den Knoten lässt Sie den Beitrag durch Ziehen mit anderen verbinden. Verbinden Sie die Idee mit der anderen Frage.
-1. Verbinden Sie einen Beitrag mit einer Verbindung.
+1. Das zweite Symbol über den Beiträgen lässt Sie den Beitrag durch Ziehen mit anderen verbinden. Verbinden Sie die Idee mit der anderen von Ihnen erstellten Frage und klassifizieren Sie die Verbindung als Idee.
+1. Experimentieren Sie etwas mehr. Verbinden Sie beispielsweise einen ihrer erstellten Beiträge mit einer Verbindung.
 `
         },
         {
@@ -88,7 +88,7 @@ Auf der **rechten Seite** sehen Sie Beiträge, die sich auf diesen Beitrag bezie
         {
             title: "Bearbeiten Sie einen fremden Beitrag",
             description: `
-1. Sehen Sie sich einen weiteren fremden Beitrag in der Focus-Ansicht an.
+1. Gehen Sie zum **Dashboard** und sehen Sie sich einen weiteren fremden Beitrag in der Fokus-Ansicht an.
 1. Klicken Sie rechts oben auf den Knopf mit dem Stift-Symbol, um den Beitrag zu bearbeiten.
 1. Ändern sie etwas in der Beschreibung des Beitrags.
 1. Beachten Sie den Fortschrittsbalken über dem "Save"-Knopf.
@@ -102,7 +102,7 @@ Wenn Sie etwas an einem fremden Beitrag verändern, müssen andere Nutzer der Ä
 1. Klicken Sie in der Navigationsleiste auf den Eintrag **Moderation**. Hier können Sie über vorgeschlagene Änderungen anderer Nutzer abstimmen. Sie entscheiden mit, welche Änderungen akzeptiert und welche abgelehnt werden.
 1. Stimmen Sie über ein oder zwei Änderungen ab.
 
-Wurden viele Ihrer Änderungsvorschläge akzeptiert, haben Sie mehr Stimmen. In einigen Fällen führt das dazu, dass Ihre Änderungen sofort sichtbar sind - Nutzer können dann nachträglich darüber abstimmen. Wird eine Änderung abgelehnt, so wird sie automatisch rückgängig gemacht.
+Wurden viele Ihrer eigenen Änderungsvorschläge akzeptiert, haben Sie mehr Stimmen. In einigen Fällen führt das dazu, dass Ihre Änderungen sofort sichtbar sind - Nutzer können dann nachträglich darüber abstimmen. Wird eine Änderung abgelehnt, so wird sie automatisch rückgängig gemacht.
 `
         },
         {
@@ -115,8 +115,6 @@ Schauen Sie sich nun weiter im System um. Wenn Sie möchten, können Sie gerne w
 `
         }
     ];
-
-    // TODO: Seitenzahlen
 
     vm.next = next;
     vm.back = back;
