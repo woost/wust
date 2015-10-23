@@ -47,6 +47,8 @@
             }
             .small-post {
                 width: 190px;
+                min-width: 190px;
+                max-width: 190px;
                 vertical-align: top;
                 margin-right: 5px;
             }
@@ -64,6 +66,8 @@
             padding-left: 10px;
             .small-post {
                 width: 180px;
+                min-width: 180px;
+                max-width: 180px;
                 margin-top: 5px !important;
                 margin-bottom: 0px !important;
             }
@@ -108,13 +112,16 @@
         // we move the margin from small-post to list-item
         // for the flex-box to center the arrow correctly
         .list-item-small-post {
-            width: 100%; // without this small post does not stretch to 100%
+            width: $small-post-max-width;
+            max-width: $small-post-max-width;
+            min-width: $small-post-max-width;
         }
         .small-post {
             text-align: left;
             margin-bottom:0;
-            width: 100%;
+            width: $small-post-max-width;
             max-width: $small-post-max-width;
+            min-width: $small-post-max-width;
         }
         margin-bottom: 5px;
         .connection {
