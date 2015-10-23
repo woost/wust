@@ -24,7 +24,7 @@
 
             <ul class="nav navbar-nav navbar-right navpagelinks">
                 <li>
-                    <form class="search-form navbar-form navbar-left" ng-submit='vm.onSearchBoxChange()'>
+                    <form class="search-form navbar-form navbar-left" ng-submit='vm.onSearchBoxChange(true)'>
                         <div class="form-group has-feedback">
                             <input type="text" placeholder="Search" class="form-control" ng-model="vm.search.query" ng-change='vm.onSearchBoxChange()'>
                             <i class="fa fa-search form-control-feedback" style="pointer-events:all; cursor: pointer;" ng-click="vm.search.resultsVisible = !vm.search.resultsVisible"></i>

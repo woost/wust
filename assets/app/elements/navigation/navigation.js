@@ -58,7 +58,10 @@ function navigationCtrl($state, Auth, SearchService, ModalEditService, Fullscree
     let lastSearch;
     let searchTriggerDelay = 200;
     let delayedTriggerSearch;
-    function onSearchBoxChange() {
+    function onSearchBoxChange(isSubmit = false) {
+        if (isSubmit)
+            SearchService.search.resultsVisible = true;
+
         if (lastSearch === SearchService.search.query)
             return;
 
