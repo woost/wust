@@ -139,7 +139,7 @@ case class UserHasKarmaScopes() extends StartRelationAccessDefault[User, HasKarm
     val userDef = FactoryUuidNodeDef(User, param.baseUuid)
     val karmaDef = RelationDef(userDef, HasKarma, FactoryNodeDef(Scope))
 
-    val query = s"match ${ karmaDef.toPattern } where ${karmaDef.name}.karma <> 0 return *"
+    val query = s"match ${ karmaDef.toPattern } return *"
     val discourse = Discourse(db.queryGraph(query, ctx.params))
 
     Ok(JsArray(discourse.hasKarmas.map(karmaTagWriter)))
