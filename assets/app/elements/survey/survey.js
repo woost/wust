@@ -53,9 +53,10 @@ function SurveyService(store) {
         {
             title: "Registrieren Sie sich",
             description: `
-- Klicken Sie rechts oben auf das Menü **Register / Login**.
-- Registrieren Sie einen Benutzer-Account.
-- Wenn Sie bereits einen Account haben, können Sie sich auch damit einloggen.
+1. Klicken Sie rechts oben auf das Menü **Register / Login**.
+1. Registrieren Sie einen Benutzer-Account.
+
+Wenn Sie bereits einen Account haben, können Sie sich auch damit einloggen.
 `
         },
         {
@@ -79,9 +80,9 @@ Auf der **rechten Seite** sehen Sie Beiträge, die sich auf diesen Beitrag bezie
         {
             title: "Navigieren Sie zu Ihrer Frage und zurück",
             description: `
-- Klicken Sie auf ihre soeben erstellte Frage.
-- Auf der **linken Seite** sehen Sie Beiträge, auf die sich dieser Beitrag bezieht.
-- Klicken Sie wieder auf den ursprünglichen Beitrag.
+1. Klicken Sie auf Ihre soeben erstellte Frage.
+1. Auf der **linken Seite** sehen Sie Beiträge, auf die sich dieser Beitrag bezieht.
+1. Klicken Sie wieder auf den ursprünglichen Beitrag.
 `
         },{
             title: "Wechseln Sie in die Graph-Ansicht",
@@ -89,14 +90,14 @@ Auf der **rechten Seite** sehen Sie Beiträge, die sich auf diesen Beitrag bezie
 1. Klicken Sie nun auf der linken Seite auf das Symbol ![graph-icon](assets/images/icon-graph.png), um in die Graph-Ansicht zu wechseln.
 1. Klicken Sie auf das **+** Symbol über dem ursprünglichen Beitrag und stellen Sie noch eine Frage.
 1. Fügen Sie eine Idee zu Ihrer gestellten Frage hinzu.
-1. Das zweite Symbol über den Beiträgen lässt Sie den Beitrag durch Ziehen mit anderen verbinden. Verbinden Sie die Idee mit der anderen von Ihnen erstellten Frage und klassifizieren Sie die Verbindung als Idee.
-1. Experimentieren Sie etwas mehr. Verbinden Sie beispielsweise einen ihrer erstellten Beiträge mit einer Verbindung.
+1. Das zweite Symbol über den Beiträgen lässt Sie den Beitrag durch Ziehen mit anderen verbinden. Verbinden Sie die Idee mit der anderen Frage und klassifizieren Sie die Verbindung als Idee.
+1. Experimentieren Sie etwas mehr. Verbinden Sie beispielsweise einen beliebigen Beitrag mit einer Verbindung.
 `
         },
         {
             title: "Starten Sie eine neue Diskussion",
             description: `
-1. Starten Sie eine neue Diskussion indem Sie auf den Knopf **Start Discussion** oben in der Navigationsleiste klicken, z.B., Sie haben ein Problem in ihrem Haushalt und möchten andere Leute nach Ideen fragen.
+1. Starten Sie eine neue Diskussion indem Sie oben in der Navigationsleiste auf den Knopf **Start Discussion** klicken. Nehmen Sie an, sie hätten ein Problem in Ihrem Haushalt und möchten andere Leute nach Ideen fragen.
 1. Wählen Sie im zweiten Eingabefeld bitte den Kontext **Haushalt** aus (Eckige Boxen).
 1. Es gibt 2 unterschiedliche Tag-Arten: **Klassifikationen** (Frage, Idee, ...) und **Kontexte** (Themengebiete wie Haushalt, Politik). Klassifikationen gelten immer im Bezug auf einen anderen Beitrag oder einen Kontext. **Neue Diskussionen müssen mindestens einen Kontext haben**.
 `
@@ -106,10 +107,12 @@ Auf der **rechten Seite** sehen Sie Beiträge, die sich auf diesen Beitrag bezie
             description: `
 1. Gehen Sie zum **Dashboard** und sehen Sie sich einen weiteren fremden Beitrag in der Fokus-Ansicht an.
 1. Klicken Sie rechts oben auf den Knopf mit dem Stift-Symbol, um den Beitrag zu bearbeiten.
-1. Ändern sie etwas in der Beschreibung des Beitrags.
-1. Beachten Sie den Fortschrittsbalken über dem "Save"-Knopf.
+1. Ändern Sie etwas in der Beschreibung des Beitrags.
+1. Beachten Sie den Fortschrittsbalken über dem **Save**-Knopf.
 
 Wenn Sie etwas an einem fremden Beitrag verändern, müssen andere Nutzer der Änderung zustimmen. Die Anzahl der nötigen Stimmen hängt davon ab, wie oft der Beitrag angesehen wurde.
+
+Für akzeptierte Änderungen erhalten sie **Karma**-Punkte in dem jeweiligen Kontext (Themenbereich). Damit haben Sie mehr Einfluss in der Abstimmung über Änderungen in diesem Kontext.
 `
         },
         {
@@ -118,7 +121,7 @@ Wenn Sie etwas an einem fremden Beitrag verändern, müssen andere Nutzer der Ä
 1. Klicken Sie in der Navigationsleiste auf den Eintrag **Moderation**. Hier können Sie über vorgeschlagene Änderungen anderer Nutzer abstimmen. Sie entscheiden mit, welche Änderungen akzeptiert und welche abgelehnt werden.
 1. Stimmen Sie über ein oder zwei Änderungen ab.
 
-Wurden viele Ihrer eigenen Änderungsvorschläge akzeptiert, haben Sie mehr Stimmen. In einigen Fällen führt das dazu, dass Ihre Änderungen sofort sichtbar sind - Nutzer können dann nachträglich darüber abstimmen. Wird eine Änderung abgelehnt, so wird sie automatisch rückgängig gemacht.
+Wurden viele Ihrer eigenen Änderungsvorschläge akzeptiert, haben Sie mehr **Karma**-Punkte und damit mehr Stimmgewicht. In einigen Fällen führt das dazu, dass Ihre Änderungen sofort sichtbar sind - Nutzer können dann nachträglich darüber abstimmen. Wird eine Änderung abgelehnt, so wird sie automatisch rückgängig gemacht.
 `
         },
         {

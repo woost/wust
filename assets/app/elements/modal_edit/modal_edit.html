@@ -2,7 +2,7 @@
     <form class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <div style="position:relative;">
+                <div ng-if="::uiSettings.surveyEnabled" style="position:relative; height: 55px;">
                     <div survey can-hide="true" style="width: 100% !important"></div>
                 </div>
                 <span class="response-header" ng-if="vm.node.referenceNode">

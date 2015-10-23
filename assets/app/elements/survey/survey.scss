@@ -26,6 +26,7 @@
         padding-right: 3px;
         .description_text {
             padding: 3px;
+            padding-right: 15px;
         }
     }
     .email-info {
@@ -36,5 +37,9 @@
     img[alt=graph-icon] {
         width: 25px;
         height: 25px;
+    }
+
+    p {
+        margin: 10px;
     }
 }
