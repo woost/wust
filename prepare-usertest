@@ -1,13 +1,10 @@
 #!/bin/bash -e
-neo4j console &
-NEO4JPID=$!
+neo4j start-no-wait &
 echo "building production assets"
 ./prodassets
 echo "building backend"
 sbt stage
 echo "starting server"
-UI_SCRATCHPAD_ENABLED="false" target/universal/stage/bin/wust
-kill $NEO4JPID
-sleep 5
-
+UI_SCRATCHPAD_ENABLED=false target/universal/stage/bin/wust || true
+neo4j stop
 

@@ -1,8 +1,10 @@
 #!/bin/bash -e
 neo4j-shell -file usertest2.cql
+
 killall unclutter || true
 systemctl --user stop redshift || true
 killall redshift || true
+
 ffmpeg -y -f alsa -ac 1 -i pulse -f x11grab -s `xdpyinfo | grep 'dimensions:'|awk '{print $2}'` -i :0.0 -acodec libvorbis -b:a 128k -c:v libx264 -crf 23 -preset superfast -r 25 capture-$(date +"%Y-%m-%d-%H-%M-%S").mkv &
 FFMPEGPID=$!
 
@@ -12,4 +14,6 @@ chromium --user-data-dir=$TMP --disable-infobars --disable-translate --d --disab
 rm -r $TMP
 
 kill $FFMPEGPID
-sleep 10
+sleep 2
+echo "done"
+
