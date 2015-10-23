@@ -64,8 +64,8 @@
         </span>
 
         <div class="votebar" ng-if="::!vm.finished">
-            <button class="pull-right btn btn-success btn-xs" ng-class="{ inactive: change.vote.weight === undefined || change.vote.weight <= 0 }" type="button" ng-click="vm.voting.up(change)"><i class="fa fa-check-square-o"></i></button>
-            <button class="pull-left btn btn-danger btn-xs" ng-class="{ inactive: change.vote.weight === undefined || change.vote.weight >= 0 }" type="button" ng-click="vm.voting.down(change)"><i class="fa fa-close"></i></button>
+            <button class="pull-right btn btn-default btn-xs" ng-class="{ active: change.vote.weight !== undefined && change.vote.weight > 0 }" type="button" ng-click="vm.voting.up(change)" data-title="Vote for accepting this change request" bs-tooltip><i class="fa fa-check text-success"></i></button>
+            <button class="pull-left btn btn-default btn-xs" ng-class="{ active: change.vote.weight !== undefined && change.vote.weight < 0 }" type="button" ng-click="vm.voting.down(change)" data-title="Vote for rejecting this change request" bs-tooltip><i class="fa fa-close text-danger"></i></button>
             <vote-progress change="change"></vote-progress>
         <div>
     </div>

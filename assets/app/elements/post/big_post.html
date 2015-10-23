@@ -24,9 +24,10 @@
     <div>
         <a ng-if="vm.changeRequests.length > 0 && !vm.node.isDeleted" href="#" ng-click="vm.showChanges = !vm.showChanges" class="showchanges">
             <i class="fa" ng-class="{'fa-chevron-down': vm.showChanges, 'fa-chevron-right': !vm.showChanges}"></i>
-            Show open change requests
+            Show change requests
         </a>
         <div ng-if="vm.showChanges && !vm.node.isDeleted">
+            <p class="text-muted information-box" style="margin-left: 17px;">Here you can see requested changes by other users. You can decide whether these changes should be accepted or rejected.</p>
             <post-change-request changes="vm.changeRequests" on-delete-apply="vm.onDeleteApply()" on-tag-apply="vm.onTagApply(change)" on-apply="vm.onApply(change, node)"></post-change-request>
         </div>
     </div>
