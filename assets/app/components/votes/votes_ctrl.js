@@ -5,6 +5,9 @@ VotesCtrl.$inject = ["ChangeRequests"];
 function VotesCtrl(ChangeRequests) {
     //TODO: deliver .quality in change.tag, to display the removed tag at the original position in the taglist
 
+    //TODO: WORKAROUND: list of seen change request ids
+    //sometimes we skip a request and get new ones but the skipped action did not succeed before and so we get duplicates back.
+    let seenIds = [];
 
     let vm = this;
     let pageSize = 5;
@@ -13,6 +16,7 @@ function VotesCtrl(ChangeRequests) {
 
     vm.isLoading = true;
     vm.changes = ChangeRequests.$search({size: pageSize}).$then( () => {
+        Array.prototype.push.apply(seenIds, vm.changes.map(c => c.id));
         loadedFullPage = vm.changes.length === pageSize;
         if(vm.changes.length > 0) next();
         vm.isLoading = false;
@@ -24,7 +28,10 @@ function VotesCtrl(ChangeRequests) {
     vm.is = (actiontype) => vm.change.type === actiontype;
 
     function next() {
-        vm.change = vm.changes.shift();
+        // approved by Felix: die wörter sind richtig.
+        do {
+            vm.change = vm.changes.shift();
+        } while (vm.change !== undefined && _.any(seenIds, {id: vm.change.id}));
 
         if( vm.change !== undefined ) {
             vm.showMiddleTab = true;
@@ -36,6 +43,7 @@ function VotesCtrl(ChangeRequests) {
         if( loadedFullPage && vm.changes.length < refreshWhenLessThan ) {
             vm.isLoading = true;
             vm.changes.$refresh({skip: vm.changes.length}).$then(response => {
+                Array.prototype.push.apply(seenIds, vm.changes.map(c => c.id));
                 loadedFullPage = vm.changes.length === pageSize;
                 if(vm.change === undefined && vm.changes.length > 0) {
                     next();

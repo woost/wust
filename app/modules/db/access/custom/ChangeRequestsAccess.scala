@@ -39,7 +39,7 @@ case class InstantChangeRequestAccess() extends NodeAccessDefault[ChangeRequest]
     and not((${userDef.name})-[:`${Votes.relationType}`]->(${crDef.name}))
     and not((${userDef.name})-[:`${Skipped.relationType}`]->(${crDef.name}))
     and not((${userDef.name})-[:`${UpdatedStart.relationType}`|`${DeletedStart.relationType}`|`${AddTagsStart.relationType}`|`${RemoveTagsStart.relationType}`]->(${crDef.name}))
-    with ${ postDef.name }, relation, ${ crDef.name } order by ${ crDef.name }.timestamp skip ${ skip } limit ${ limit }
+    with ${ postDef.name }, relation, ${ crDef.name } order by ${ crDef.name }.timestamp, id(${crDef.name}) skip ${ skip } limit ${ limit }
     optional match ${ crTagsDef.toPattern(false, true) }
     optional match ${ crClassifiesDef.toPattern(false, true) }
     optional match ${ tagsDef.toPattern(true, false) }
