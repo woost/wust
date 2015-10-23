@@ -17,10 +17,12 @@ function coloredTag(Helpers) {
 
     function link(scope, elem) {
         let rawElem = elem[0];
-        if (scope.coloredTag.$then)
-            scope.coloredTag.$then(setStyle);
-        else
-            setStyle();
+        scope.$watch("coloredTag", () => {
+            if (scope.coloredTag.$then)
+                scope.coloredTag.$then(setStyle);
+            else
+                setStyle();
+        });
 
         function setStyle() {
             let tag = scope.coloredTag;

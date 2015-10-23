@@ -22,24 +22,24 @@
                 </div>
 
                 <h3 class="action-description" ng-switch="vm.change.type">
-                <span ng-switch-when="Delete">Delete Post <span small-post node="vm.change.post"></span></span>
-                <span ng-switch-when="Edit">Edit Post <span small-post node="vm.change.post"></span></span>
+                <span ng-switch-when="Delete">Request to delete post</span>
+                <span ng-switch-when="Edit">Request to edit <span small-post node="vm.change.post"></span></span>
                 <span ng-switch-when="AddTag">
-                    Put Post <span small-post node="vm.change.post"></span>
-                    <!-- TODO: FIXME: context color does not change for next context -->
-                    in context <span tag-label="vm.change.tag"></span>
+                    Request to tag <span small-post node="vm.change.post"></span>
+                    with <span tag-label="vm.change.tag"></span>
 
                     <span ng-if="vm.change.classifications.length">
-                        as a <span ng-repeat="classification in vm.change.classifications" tag-label="classification"></span>
+                        as <span ng-repeat="classification in vm.change.classifications" tag-label="classification"></span>
                     </span>
                 </span>
 
                 <span ng-switch-when="RemoveTag">
-                    Take Post <span small-post node="vm.change.post"></span>
-                    out of context <span tag-label="vm.change.tag" ng-class="{removed: !vm.change.classifications.length}"></span>
+                    Request to remove
+                    <span tag-label="vm.change.tag" ng-class="{removed: !vm.change.classifications.length}"></span>
                     <span ng-if="vm.change.classifications.length">
-                        as a <span ng-repeat="classification in vm.change.classifications" class="removed" tag-label="classification"></span>
+                        as <span ng-repeat="classification in vm.change.classifications" class="removed" tag-label="classification"></span>
                     </span>
+                    from <span small-post node="vm.change.post"></span>
                 </span>
 
             </h3>
@@ -69,7 +69,7 @@
                                 </div>
 
                                 <div ng-switch-when="RemoveTag">
-                                    <span ng-repeat="tag in vm.change.post.tags" tag-label="tag" class="tag"></span>
+                                    <span ng-repeat="tag in _.without(vm.change.post.tags, vm.change.tag)" tag-label="tag" class="tag"></span>
                                     <span tag-label="vm.change.tag" class="tag" ng-class="{removed: !vm.change.classifications.length}"></span>
                                 </div>
 

@@ -59,7 +59,7 @@
         }
 
         .removed .tag-label {
-            a {
+            a, .content {
                 text-decoration: line-through;
             }
             @include box-shadow(0 0 0 5px red);

@@ -3,9 +3,9 @@
 
 .post_change_request_directive {
     .changerequest {
-        border: 1px solid rgba(#666,0.4);
+        border: 1px solid rgba(#000,0.4);
         background-color: rgba(white,0.4);
-        margin-top:5px;
+        margin-top:15px;
         padding: 5px;
 
         .title-diff {
@@ -48,7 +48,7 @@
         }
 
         .removed .tag-label {
-            a {
+            a, .content {
                 text-decoration: line-through;
             }
             @include box-shadow(0 0 0 5px red);
