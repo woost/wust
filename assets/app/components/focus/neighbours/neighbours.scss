@@ -6,7 +6,7 @@
     height:100%;
     $arrow-length: 70px;
     $small-post-max-width: 200px;
-    $small-post-min-width: 100px;
+    $small-post-min-width: 200px;
     $neighbours-max-width: $arrow-length + $small-post-max-width;
     $neighbours-min-width: $arrow-length + $small-post-min-width;
     $content-max-width: 600px;
@@ -113,7 +113,8 @@
         .small-post {
             text-align: left;
             margin-bottom:0;
-            width: $small-post-max-width;
+            width: 100%;
+            max-width: $small-post-max-width;
         }
         margin-bottom: 5px;
         .connection {
