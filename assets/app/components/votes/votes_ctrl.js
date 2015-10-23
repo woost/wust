@@ -30,7 +30,7 @@ function VotesCtrl(ChangeRequests) {
         // approved by Felix: die wörter sind richtig.
         do {
             vm.change = vm.changes.shift();
-        } while (vm.change !== undefined && _.any(seenIds, vm.change.id));
+        } while (vm.change !== undefined && _.contains(seenIds, vm.change.id));
 
         if( vm.change !== undefined ) {
             seenIds.push(vm.change.id);
@@ -42,7 +42,7 @@ function VotesCtrl(ChangeRequests) {
 
         if( loadedFullPage && vm.changes.length < refreshWhenLessThan ) {
             vm.isLoading = true;
-            vm.changes.$refresh({skip: vm.changes.length}).$then(response => {
+            vm.changes.$fetch({skip: vm.changes.length}).$then(response => {
                 loadedFullPage = vm.changes.length === pageSize;
                 if(vm.change === undefined && vm.changes.length > 0) {
                     next();
