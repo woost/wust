@@ -14,15 +14,15 @@
                 <div edit-taglist tags="vm.currentEditRelation.tags" placeholder="Classify the connection" set-focus="true" always-show="true" embed-suggestions="true" tag-type="classification" existing-only="true"></div>
             </div>
             <div class="modal-footer">
-                <progressbar ng-if="::!vm.currentEditRelation.isCreating" class="progressbar" max="vm.currentEditRelation.startNode.postChangeThreshold" type="{{vm.canApply ? 'success' : 'warning'}}" value="vm.editWeight">
-                    <span style="white-space:nowrap; padding-left: 5px;" ng-switch="vm.canApply">
-                        <span ng-switch-when="true">You have enough Karma. This change will be applied instantly.</span>
-                        <span ng-switch-default>You do not have enough Karma to edit this connection ({{vm.editWeight}} / {{vm.currentEditRelation.startNode.postChangeThreshold}}).</span>
-                    </span>
-                </progressbar>
-                <button ng-if="::!vm.currentEditRelation.isCreating" class="pull-left btn btn-danger" ng-disabled="!vm.canApply" ng-click="vm.disconnect();$hide()" title="Disconnect"><i class="fa fa-trash-o"></i></button>
+                <!-- <progressbar ng-if="::!vm.currentEditRelation.isCreating" class="progressbar" max="vm.currentEditRelation.startNode.postChangeThreshold" type="{{vm.canApply ? 'success' : 'warning'}}" value="vm.editWeight"> -->
+                <!--     <span style="white-space:nowrap; padding-left: 5px;" ng-switch="vm.canApply"> -->
+                <!--         <span ng-switch-when="true">You have enough Karma. This change will be applied instantly.</span> -->
+                <!--         <span ng-switch-default>You do not have enough Karma to edit this connection ({{vm.editWeight}} / {{vm.currentEditRelation.startNode.postChangeThreshold}}).</span> -->
+                <!--     </span> -->
+                <!-- </progressbar> -->
+                <button ng-if="::!vm.currentEditRelation.isCreating" class="pull-left btn btn-danger" ng-click="vm.disconnect();$hide()" title="Disconnect"><i class="fa fa-trash-o"></i></button>
                 <button class="btn btn-default" ng-click="vm.cancel();$hide()">Cancel</button>
-                <button class="btn btn-default" ng-click="vm.save();$hide()" ng-disabled="!vm.canApply">Save</button>
+                <button class="btn btn-default" ng-click="vm.save();$hide()">Save</button>
             </div>
         </div>
     </div>

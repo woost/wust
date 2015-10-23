@@ -25,10 +25,11 @@ import common.Constants
 
 trait ConnectsHelper {
   protected def canEditConnects(startNode: Post, scopes: Seq[Scope]) = {
-    val authorBoost = if (startNode.rev_createds.isEmpty) 0 else Moderation.authorKarmaBoost
-    val voteWeight = Moderation.voteWeightFromScopes(scopes)
-    val applyThreshold = Moderation.postChangeThreshold(startNode.viewCount)
-    Moderation.canApply(voteWeight + authorBoost, applyThreshold)
+    // val authorBoost = if (startNode.rev_createds.isEmpty) 0 else Moderation.authorKarmaBoost
+    // val voteWeight = Moderation.voteWeightFromScopes(scopes)
+    // val applyThreshold = Moderation.postChangeThreshold(startNode.viewCount)
+    // Moderation.canApply(voteWeight + authorBoost, applyThreshold)
+    true
   }
 
   protected def getConnectsWithKarma(user: User, startDef: UuidNodeDef[Post], endDef: NodeDef[Connectable])(implicit ctx: QueryContext): (Discourse, Option[(Post, Connectable)]) = {
