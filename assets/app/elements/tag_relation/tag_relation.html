@@ -11,7 +11,7 @@
                 <span small-post node="vm.currentEditRelation.startNode"></span>
             </div>
             <div class="modal-body">
-                <div edit-taglist tags="vm.currentEditRelation.tags" set-focus="true" always-show="true" embed-suggestions="true" tag-type="classification" existing-only="true"></div>
+                <div edit-taglist tags="vm.currentEditRelation.tags" placeholder="Classify the connection" set-focus="true" always-show="true" embed-suggestions="true" tag-type="classification" existing-only="true"></div>
             </div>
             <div class="modal-footer">
                 <progressbar ng-if="::!vm.currentEditRelation.isCreating" class="progressbar" max="vm.currentEditRelation.startNode.postChangeThreshold" type="{{vm.canApply ? 'success' : 'warning'}}" value="vm.editWeight">
