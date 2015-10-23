@@ -2,12 +2,15 @@
     <form class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
+                <div style="position:relative; height: 50px; margin-bottom: -10px;">
+                    <div survey can-hide="true" style="width: 100% !important"></div>
+                </div>
                 <span class="response-header" ng-if="vm.node.referenceNode">
-                    <h1>Respond to</h1>
+                    <h2>Respond to</h2>
                     <span small-post node="vm.node.referenceNode" class="disable-link reference-node"></span>
                 </span>
                 <span ng-if="vm.node.isLocal && !vm.node.referenceNode">
-                    <h1 class="text-center">Start Discussion</h1>
+                    <h2 class="text-center">Start Discussion</h2>
                 </span>
             </div>
             <div class="modal-body" colored-tag-node="vm.node" big="true">

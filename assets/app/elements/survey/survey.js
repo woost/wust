@@ -2,26 +2,42 @@ angular.module("wust.elements").directive("survey", survey);
 
 survey.$inject = [];
 
-function survey() {
-    return {
-        restrict: "A",
-        replace: true,
-        templateUrl: "elements/survey/survey.html",
-        scope: true,
-        controller: surveyCtrl,
-        controllerAs: "vm",
-        bindToController: true
-    };
-}
+angular.module("wust.elements").service("SurveyService", SurveyService);
 
-surveyCtrl.$inject = ["store"];
+SurveyService.$inject = ["store"];
 
-function surveyCtrl(store) {
-    let vm = this;
+function SurveyService(store) {
     let surveyStore = store.getNamespacedStore("survey");
 
-    vm.currentIndex = surveyStore.get("currentIndex") || 0;
-    vm.exercises = [
+    this.currentIndex = surveyStore.get("currentIndex") || 0;
+
+    this.finished = finished;
+    this.isFinished = false;
+    this.back = back;
+    this.next = next;
+
+    function finished() {
+        this.isFinished = true;
+        // surveyStore.set("currentIndex", undefined);
+    }
+
+    function back() {
+        if (this.currentIndex < 1)
+            return;
+
+        this.currentIndex--;
+        surveyStore.set("currentIndex", this.currentIndex);
+    }
+
+    function next() {
+        if (this.currentIndex >= this.exercises.length - 1)
+            return;
+
+        this.currentIndex++;
+        surveyStore.set("currentIndex", this.currentIndex);
+    }
+
+    this.exercises = [
         {
             title: "Willkommen bei Wust",
             secondTitle: "Fahren Sie mit der Maus über dieses Feld",
@@ -115,28 +131,27 @@ Schauen Sie sich nun weiter im System um. Wenn Sie möchten, können Sie gerne w
 `
         }
     ];
+}
 
-    vm.next = next;
-    vm.back = back;
-    vm.finished = finished;
+function survey() {
+    return {
+        restrict: "A",
+        replace: true,
+        templateUrl: "elements/survey/survey.html",
+        scope: {
+            canHide: "@"
+        },
+        controller: surveyCtrl,
+        controllerAs: "vm",
+        bindToController: true
+    };
+}
 
-    function finished() {
-        // surveyStore.set("currentIndex", undefined);
-    }
+surveyCtrl.$inject = ["SurveyService"];
 
-    function back() {
-        if (vm.currentIndex < 1)
-            return;
+function surveyCtrl(SurveyService) {
+    let vm = this;
 
-        vm.currentIndex--;
-        surveyStore.set("currentIndex", vm.currentIndex);
-    }
+    vm.survey = SurveyService;
 
-    function next() {
-        if (vm.currentIndex >= vm.exercises.length - 1)
-            return;
-
-        vm.currentIndex++;
-        surveyStore.set("currentIndex", vm.currentIndex);
-    }
 }
