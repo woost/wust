@@ -10,15 +10,15 @@ function SurveyService(store) {
     let surveyStore = store.getNamespacedStore("survey");
 
     this.currentIndex = surveyStore.get("currentIndex") || 0;
+    // this.isFinished = surveyStore.get("isFinished") || false;
 
     this.finished = finished;
-    this.isFinished = false;
     this.back = back;
     this.next = next;
 
     function finished() {
-        this.isFinished = true;
-        // surveyStore.set("currentIndex", undefined);
+        // this.isFinished = true;
+        // surveyStore.set("isFinished", this.isFinished);
     }
 
     function back() {

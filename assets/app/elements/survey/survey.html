@@ -8,21 +8,21 @@
             <a href="https://www.surveymonkey.com/r/woost" target="_blank" class="pull-right btn btn-xs btn-primary" ng-click="vm.survey.finished()" ng-hide="vm.survey.currentIndex < vm.survey.exercises.length - 1">Fragebogen</a>
             <span class="pull-right second-title">{{vm.survey.currentIndex + 1}} / {{vm.survey.exercises.length}}</span>
         </div>
-            <br />
-            <div class="description_text" markdown="vm.survey.exercises[vm.survey.currentIndex].description"></div>
-        </span>
-        <h4 class="text-center" ng-hide="vm.survey.currentIndex < vm.survey.exercises.length - 1">
-            Hier geht es zum <a href="https://www.surveymonkey.com/r/woost" target="_blank" ng-click="vm.survey.finished()">Fragebogen</a>.
-        </h4>
-        <div class="email-info" ng-show="vm.survey.exercises[vm.survey.currentIndex].email">
-            <hr />
-            Bei Fragen oder Problemen schreiben Sie uns bitte eine kurze E-Mail:
-            <div>
-                <a href="mailto:felix.dietze@rwth-aachen.de">felix.dietze@rwth-aachen.de</a>
-            </div>
-            <div>
-                <a href="mailto:johannes.karoff@rwth-aachen.de">johannes.karoff@rwth-aachen.de</a>
-            </div>
-            <br />
+        <br />
+        <div class="description_text" markdown="vm.survey.exercises[vm.survey.currentIndex].description"></div>
+    </span>
+    <h4 class="text-center" ng-hide="vm.survey.currentIndex < vm.survey.exercises.length - 1">
+        Hier geht es zum <a href="https://www.surveymonkey.com/r/woost" target="_blank" ng-click="vm.survey.finished()">Fragebogen</a>.
+    </h4>
+    <div class="email-info" ng-show="vm.survey.exercises[vm.survey.currentIndex].email">
+        <hr />
+        Bei Fragen oder Problemen schreiben Sie uns bitte eine kurze E-Mail:
+        <div>
+            <a href="mailto:felix.dietze@rwth-aachen.de">felix.dietze@rwth-aachen.de</a>
         </div>
+        <div>
+            <a href="mailto:johannes.karoff@rwth-aachen.de">johannes.karoff@rwth-aachen.de</a>
+        </div>
+        <br />
+    </div>
 </div>
