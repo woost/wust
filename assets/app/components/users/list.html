@@ -4,7 +4,7 @@
             <a ui-sref="users.details({id: user.id})" ng-bind="::user.name"></a>
             <span class="pull-right">
                 <span ng-repeat="karmaTag in user.hasKarma | orderBy:'-karma' | limitTo:3" tag-label="karmaTag">
-                    <span ng-show="karmaTag.karma > 0" class="right">{{karmaTag.karma}}</span>
+                    <b class="right">{{karmaTag.karma}}</b>
                 </span>
             </span>
         </div>

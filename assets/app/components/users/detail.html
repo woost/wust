@@ -1,9 +1,10 @@
 <div id="user_detail_component" class="content-component">
-    <div class="row"><h2 class="col-sm-12"><i class="fa fa-user"></i> {{::vm.user.name}} ({{vm.karmaSum}})</h2></div>
+    <div class="row"><h2 class="col-sm-12"><i class="fa fa-user"></i> {{::vm.user.name}} ({{vm.karmaSum}} Karma)</h2></div>
     <div class="userdetails row">
         <div class="col-sm-8">
+            <div class="text-muted">Karma in different Contexts</div>
             <span ng-repeat="context in vm.karmaTags | orderBy:'-karma'" tag-label="context">
-                <span ng-show="context.karma > 0" class="right">{{context.karma}}</span>
+                <b class="right">{{context.karma}}</b>
             </span>
         </div>
 
@@ -24,14 +25,14 @@
 
     <div class="contributions row">
         <div class="authorship col-sm-4" infinite-scroll="vm.loadMore()" infinite="infinite" promise="vm.contributions" scroll-target="middle_content">
-            <h4>Authored</h4>
+            <h4>Created Posts</h4>
             <p class="text-muted" ng-if="vm.contributions.$resolved && vm.contributions.length === 0">Nothing</p>
             <p class="text-muted" ng-if="!vm.contributions.$resolved && vm.contributions.length === 0">Loading</p>
             <div ng-repeat="contribution in vm.contributions | unique:'id' track by contribution.id" small-post node="contribution" class="ng-trans ng-trans-scale-up ease"></div>
             <button class="btn btn-default pull-right ng-hide" ng-click="infinite.manualLoad()" ng-disabled="infinite.loading" ng-hide="infinite.noMore">More</button>
         </div>
         <div class="karma-log col-sm-6">
-            <h4 ng-if="vm.karmaLog.length">Karma</h4>
+            <h4 ng-if="vm.karmaLog.length">Karma History</h4>
             <ul class="list-group">
                 <li ng-repeat="entry in vm.karmaLog | reverse" class="list-group-item">
                     <div>
