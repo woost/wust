@@ -16,7 +16,6 @@ function VotesCtrl(ChangeRequests) {
 
     vm.isLoading = true;
     vm.changes = ChangeRequests.$search({size: pageSize}).$then( () => {
-        Array.prototype.push.apply(seenIds, vm.changes.map(c => c.id));
         loadedFullPage = vm.changes.length === pageSize;
         if(vm.changes.length > 0) next();
         vm.isLoading = false;
@@ -31,9 +30,10 @@ function VotesCtrl(ChangeRequests) {
         // approved by Felix: die wörter sind richtig.
         do {
             vm.change = vm.changes.shift();
-        } while (vm.change !== undefined && _.any(seenIds, {id: vm.change.id}));
+        } while (vm.change !== undefined && _.any(seenIds, vm.change.id));
 
         if( vm.change !== undefined ) {
+            seenIds.push(vm.change.id);
             vm.showMiddleTab = true;
             vm.actionclasses = {"action": true};
             vm.actionclasses[vm.change.type] = true;
@@ -43,7 +43,6 @@ function VotesCtrl(ChangeRequests) {
         if( loadedFullPage && vm.changes.length < refreshWhenLessThan ) {
             vm.isLoading = true;
             vm.changes.$refresh({skip: vm.changes.length}).$then(response => {
-                Array.prototype.push.apply(seenIds, vm.changes.map(c => c.id));
                 loadedFullPage = vm.changes.length === pageSize;
                 if(vm.change === undefined && vm.changes.length > 0) {
                     next();
