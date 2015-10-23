@@ -1327,12 +1327,9 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
         onDragMove(d) {
             //TODO: fails when zooming/scrolling and dragging at the same time
-            this.onDragMoveInit(d, 5, () => {
-                this.elementInfo.d3NodeContainer(d).classed({
-                    "moving": true
-                });
-                this.force.alpha(0.1);
-            }, d => d.isHyperRelation.implies(this.dragHyperRelations));
+            this.onDragMoveInit(d, 5, () => this.elementInfo.d3NodeContainer(d).classed({
+                "moving": true
+            }), d => d.isHyperRelation.implies(this.dragHyperRelations));
 
             if (this.isDragging) {
                 // default positioning is center of node.
@@ -1341,8 +1338,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 let scale = this.zoom.scale();
                 d.x = d.px = this.dragStartNodeX + (event.clientX - this.dragStartMouseX) / scale;
                 d.y = d.py = this.dragStartNodeY + (event.clientY - this.dragStartMouseY) / scale;
-                // this.force.alpha(0.1);
-                // this.force.resume(); // restart annealing
+                this.force.resume(); // restart annealing
             }
         }
 
@@ -1471,8 +1467,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             if (this.isDragging) {
                 // if we were dragging before, the node should be fixed
                 this.setFixed(d);
-                this.force.alpha(0.1);
-                // this.force.resume();
+                this.force.resume();
             } else {
                 // if the longPressTimer is still active
                 // and the longPressAction is not triggered yet
