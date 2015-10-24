@@ -89,7 +89,7 @@ create (_1070:`UUIDNODE`:`TIMESTAMP`:`ACTION`:`VOTABLE`:`CHANGEREQUEST`:`UPDATED
 create (_1071:`LOGININFO` {`providerID`:"credentials", `providerKey`:"SpamBot"})
 create (_1072:`USER`:`UUIDNODE` {`name`:"SpamBot", `uuid`:"URfbHW2pSe2yyN4W3aXq8w"})
 create (_1073:`PASSWORDINFO` {`hasher`:"bcrypt", `password`:"$2a$10$TqLo6AvqjfcJo9qQTS4QFuHWhIN4ugDQJJSSzQuQsQ32ap1L9Fptq"})
-create (_1074:`UUIDNODE`:`TIMESTAMP`:`EXPOSEDNODE`:`CONNECTABLE`:`HIDEABLE`:`POST` {`_locked`:false, `backupLabels`:"", `timestamp`:1445080823847, `title`:"SPAM", `uuid`:"gfsOdPonTbC62WCD3IWRFA", `viewCount`:2})
+create (_1074:`UUIDNODE`:`TIMESTAMP`:`EXPOSEDNODE`:`CONNECTABLE`:`HIDEABLE`:`POST` {`_locked`:false, `backupLabels`:"", `timestamp`:1445080823847, `title`:"Earn 1000 dollars every day without doing anything.", `uuid`:"gfsOdPonTbC62WCD3IWRFA", `viewCount`:2})
 create (_1075:`UUIDNODE`:`TIMESTAMP`:`ACTION`:`CREATED` {`timestamp`:1445080823848, `uuid`:"s4zwmHJ9QUaHd_oqJnnEsA"})
 create (_1076:`UUIDNODE`:`EXPOSEDNODE`:`CONNECTABLE`:`VOTABLE`:`REFERENCE`:`CONNECTS` {`_locked`:false, `timestamp`:1445080823849, `uuid`:"bsC4qrmCSNi_qb33qJIM5w", `voteCount`:0})
 create _986-[:`CLASSIFIES`]->_1029
