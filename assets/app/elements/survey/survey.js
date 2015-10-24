@@ -47,6 +47,7 @@ function SurveyService(store) {
 
 - Bitte führen Sie alle hier gestellten Aufgaben aus, um mit dem System vertraut zu werden.
 - Sie entscheiden selbst, wann eine Aufgabe erledigt ist.
+- Am Ende der Aufgaben finden Sie einen Link zu einem Fragebogen. Wir würden uns freuen, wenn sie diesen nach den Aufgaben ausfüllen würden.
 - Die erste Aufgabe sehen Sie mit einem Klick auf **Weiter**.
 `
         },
