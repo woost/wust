@@ -1,9 +1,8 @@
 @import play.api.Play.current
 @import play.api.Play
 
-@if(Play.isProd) {
-    @inspectlet()
-}
+@if(Play.isProd) { @inspectlet() }
+@if(Play.isProd) { @googleAnalytics() }
 
 <link rel="icon" type="image/png" href='@routes.Assets.versioned("images/favicon.png")'>
 
