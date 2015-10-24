@@ -1007,10 +1007,16 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
         }
 
         resizeContainers() {
-            this.width = this.rootDomElement.offsetWidth;
-            this.height = this.rootDomElement.offsetHeight;
-            this.d3Svg.style("width", this.width + "px").style("height", this.height + "px");
-            this.d3Html.style("width", this.width + "px").style("height", this.height + "px");
+            let width = this.rootDomElement.offsetWidth;
+            let height = this.rootDomElement.offsetHeight;
+            if (width === 0 || height === 0) {
+                console.warn("Should resize graph to height/width 0. Ignoring.");
+            } else {
+                this.width = width;
+                this.height = height;
+                this.d3Svg.style("width", this.width + "px").style("height", this.height + "px");
+                this.d3Html.style("width", this.width + "px").style("height", this.height + "px");
+            }
         }
 
         // resize graph according to the current element dimensions
