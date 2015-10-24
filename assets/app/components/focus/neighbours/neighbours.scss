@@ -122,6 +122,12 @@
             width: $small-post-max-width;
             max-width: $small-post-max-width;
             min-width: $small-post-max-width;
+
+            .small-post {
+                // dont inherit the min-with to nested posts
+                max-width: initial;
+                min-width: initial;
+            }
         }
         margin-bottom: 5px;
         .connection {
