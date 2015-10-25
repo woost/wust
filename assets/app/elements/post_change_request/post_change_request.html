@@ -9,7 +9,8 @@
         </div>
         <span ng-switch="change.type">
             <div ng-switch-when="Edit">
-                <b>Request to edit this post</b>
+                <b ng-if="::!vm.finished">Request to edit this post</b>
+                <b ng-if="::vm.finished">This post was edited</b>
                 <ul tabset class="tabs-above">
                     <li tab>
                         <a tab-heading>Old</a>
@@ -39,11 +40,13 @@
                     </li>
                 </ul>
             </div>
-            <div ng-switch-when="Delete"><b>
-                    Request to delete this post
-            </b></div>
+            <div ng-switch-when="Delete">
+                <b ng-if="::!vm.finished">Request to delete this post</b>
+                <b ng-if="::vm.finished">This post was deleted</b>
+            </div>
             <div ng-switch-when="AddTag">
-                <b>Request to tag with </b>
+                <b ng-if="::!vm.finished">Request to tag with </b>
+                <b ng-if="::vm.finished">Tagged with </b>
                 <span tag-label="change.tag"></span>
                 <span ng-if="change.classifications.length">
                     <b>as </b>
@@ -51,7 +54,8 @@
                 </span>
             </div>
             <div ng-switch-when="RemoveTag" ng-switch="change.classifications.length">
-                <b>Request to remove tag </b>
+                <b ng-if="::!vm.finished">Request to remove tag </b>
+                <b ng-if="::vm.finished">Removed tag </b>
                 <span ng-switch-when="0">
                     <span class="removed" tag-label="change.tag"></span>
                 </span>
