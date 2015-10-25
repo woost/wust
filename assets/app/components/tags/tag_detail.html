@@ -6,8 +6,8 @@
     <!--         </div> -->
             <div class="header">
                 <div class="pull-right">
-                    <button class="btn btn-xs btn-default" type="button" animation="am-fade-and-scale-down" ng-click="vm.newDiscussion()">Start Discussion</button>
-                    <button class="btn btn-xs btn-default" type="button" animation="am-fade-and-scale-down" ng-click="vm.addTagStream()">Create stream</button>
+                    <button ng-if="::vm.auth.isLoggedIn" class="btn btn-xs btn-default" type="button" ng-click="vm.newDiscussion()">Start Discussion</button>
+                    <button class="btn btn-xs btn-default" type="button" ng-click="vm.addTagStream()">Create stream</button>
                 </div>
                 <span ng-repeat="inherits in vm.tag.inherits" tag-label="inherits"></span>
                 <span ng-if="vm.tag.inherits.length">
