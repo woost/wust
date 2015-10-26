@@ -1,5 +1,5 @@
 <div class="new_post_directive">
-    <h2 contenteditable="true" placeholder="Summarize your post" maxchars="140" focus-me="vm.inputFocus" ng-keydown="vm.redirectEnter($event)" ng-model="vm.node.title" ng-change="vm.node.onChange()" ng-class="{'is_invalid': vm.node.triedSave && !vm.node.validity.title.valid}" class="title"></h2>
+    <h2 contenteditable="true" placeholder="Your Issue (keep it short)" maxchars="140" focus-me="vm.inputFocus" ng-keydown="vm.redirectEnter($event)" ng-model="vm.node.title" ng-change="vm.node.onChange()" ng-class="{'is_invalid': vm.node.triedSave && !vm.node.validity.title.valid}" class="title"></h2>
     <div validity-info="vm.node" property="title"></div>
 
     <div edit-taglist placeholder="Categorize your post" edit-classification="true" empty-search-only-first="!!vm.node.referenceNode" set-focus="vm.focusEditTags" tags="vm.node.tags" on-change="vm.node.onChange(type,tag)" tag-type="taglike" ng-class="{'is_invalid': vm.node.triedSave && !vm.node.validity.tags.valid}" always-show="true" embed-suggestions="true"></div>

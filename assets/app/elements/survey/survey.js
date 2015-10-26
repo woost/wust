@@ -64,18 +64,18 @@ Wenn Sie bereits einen Account haben, können Sie sich auch damit einloggen.
             title: "Betrachten Sie einen Beitrag",
             description: `
 1. Klicken Sie in der Navigationsleiste auf **Dashboard**. Hier sehen Sie neue Beiträge - dargestellt als farbige Boxen.
-1. Klicken Sie auf einen beliebigen Beitrag um in die Fokus-Ansicht des Beitrags zu wechseln.
+1. Klicken Sie auf einen beliebigen Beitrag, um ihn in der Fokus-Ansicht zu lesen.
 `
         },
         {
             title: "Stellen Sie eine Frage zum Beitrag",
             description: `
-Auf der **rechten Seite** sehen Sie Beiträge, die sich auf diesen Beitrag beziehen.
-
 1. Klicken Sie auf **Respond**, um eine Frage zu diesem Beitrag zu stellen.
 1. Wenn Ihnen keine passende Frage einfällt, stellen Sie eine beliebige Frage.
 1. Im zweiten Eingabefeld können Sie auswählen, wie sich Ihr Beitrag auf den anderen bezieht (Runde Boxen). Wählen Sie bitte **Question** aus.
 1. Bestätigen Sie rechts unten mit **Respond**.
+
+In der Spalte **rechts** neben dem Beitrag sehen Sie Beiträge, die sich auf diesen beziehen.
 `
         },
         {
@@ -92,15 +92,17 @@ Auf der **rechten Seite** sehen Sie Beiträge, die sich auf diesen Beitrag bezie
 1. Klicken Sie auf das **+** Symbol über dem ursprünglichen Beitrag und stellen Sie noch eine Frage.
 1. Fügen Sie eine Idee zu Ihrer gestellten Frage hinzu.
 1. Das zweite Symbol über den Beiträgen lässt Sie den Beitrag durch Ziehen mit anderen verbinden. Verbinden Sie die Idee mit der anderen Frage und klassifizieren Sie die Verbindung als Idee.
-1. Experimentieren Sie etwas mehr. Verbinden Sie beispielsweise einen beliebigen Beitrag mit einer Verbindung.
+1. Experimentieren Sie ein bisschen. Verbinden Sie beispielsweise einen beliebigen Beitrag mit einer Verbindung.
 `
         },
         {
             title: "Starten Sie eine neue Diskussion",
             description: `
-1. Starten Sie eine neue Diskussion indem Sie oben in der Navigationsleiste auf den Knopf **Start Discussion** klicken. Nehmen Sie an, sie hätten ein Problem in Ihrem Haushalt und möchten andere Leute nach Ideen fragen.
-1. Wählen Sie im zweiten Eingabefeld bitte den Kontext **Haushalt** aus (Eckige Boxen).
-1. Es gibt 2 unterschiedliche Tag-Arten: **Klassifikationen** (Frage, Idee, ...) und **Kontexte** (Themengebiete wie Haushalt, Politik). Klassifikationen gelten immer im Bezug auf einen anderen Beitrag oder einen Kontext. **Neue Diskussionen müssen mindestens einen Kontext haben**.
+1. Starten Sie eine neue Diskussion indem Sie oben in der Navigationsleiste auf den Knopf **Start Discussion** klicken. Wenn Ihnen nichts einfällt: Nehmen Sie an, Sie hätten ein Problem in Ihrem Haushalt und möchten andere Leute um Hilfe bitten.
+1. Wählen Sie im zweiten Eingabefeld einen passenden Kontext (eckige Boxen) aus, z.B. Haushalt. Um einen neuen Kontext zu erzeugen, geben Sie den Namen ein und bestätigen Sie mit ENTER.
+1. Veröffentlichen Sie die neue Diskussion mit einem Klick auf **Start Discussion**.
+
+Es gibt 2 unterschiedliche Tag-Arten: **Klassifikationen** (Frage, Idee, ...) und **Kontexte** (Themengebiete wie Haushalt, Politik). Klassifikationen gelten immer im Bezug auf einen anderen Beitrag oder einen Kontext. **Neue Diskussionen müssen mindestens einen Kontext haben**. Definieren Sie einen oder auch mehrere Kontexte, damit Ihr Beitrag besser gefunden werden kann.
 `
         },
         {
