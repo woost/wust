@@ -5,14 +5,14 @@
             <button type="button" class="btn btn-xs btn-default" ng-hide="vm.survey.currentIndex < 1" ng-click="vm.survey.back()">Zurück</button>
             <span class="second-title" ng-bind="vm.survey.exercises[vm.survey.currentIndex].secondTitle"></span>
             <button type="button" class="pull-right btn btn-xs btn-primary" ng-show="vm.survey.currentIndex < vm.survey.exercises.length - 1" ng-click="vm.survey.next()">Weiter</button>
-            <a href="https://www.surveymonkey.com/r/woost" target="_blank" class="pull-right btn btn-xs btn-primary" ng-click="vm.survey.finished()" ng-hide="vm.survey.currentIndex < vm.survey.exercises.length - 1">Fragebogen</a>
+            <a href="https://www.surveymonkey.com/r/woost" target="_blank" class="pull-right btn btn-xs btn-primary" ng-click="vm.survey.finished(); vm.survey.openQuestionaire()" ng-hide="vm.survey.currentIndex < vm.survey.exercises.length - 1">Fragebogen</a>
             <span class="pull-right second-title">{{vm.survey.currentIndex + 1}} / {{vm.survey.exercises.length}}</span>
         </div>
         <br />
         <div class="description_text" markdown="vm.survey.exercises[vm.survey.currentIndex].description"></div>
     </span>
     <h4 class="text-center" ng-hide="vm.survey.currentIndex < vm.survey.exercises.length - 1">
-        Hier geht es zum <a href="https://www.surveymonkey.com/r/woost" target="_blank" ng-click="vm.survey.finished()">Fragebogen</a>.
+        Hier geht es zum <a href="https://www.surveymonkey.com/r/woost" target="_blank" ng-click="vm.survey.finished(); vm.survey.openQuestionaire()">Fragebogen</a>.
     </h4>
     <div class="email-info" ng-show="vm.survey.exercises[vm.survey.currentIndex].email">
         <hr />

@@ -13,12 +13,17 @@ function SurveyService(store) {
     // this.isFinished = surveyStore.get("isFinished") || false;
 
     this.finished = finished;
+    this.openQuestionaire = openQuestionaire;
     this.back = back;
     this.next = next;
 
     function finished() {
         // this.isFinished = true;
         // surveyStore.set("isFinished", this.isFinished);
+    }
+
+    function openQuestionaire() {
+        ga("send", "event", "Questionaire", "opened");
     }
 
     function back() {
@@ -33,8 +38,15 @@ function SurveyService(store) {
         if (this.currentIndex >= this.exercises.length - 1)
             return;
 
+
         this.currentIndex++;
         surveyStore.set("currentIndex", this.currentIndex);
+
+        // Google Analytics Events
+        if( this.currentIndex === 1)
+            ga("send", "event", "Tutorial", "started");
+        if( this.currentIndex === this.exercises.length - 1)
+            ga("send", "event", "Tutorial", "finished");
     }
 
     this.exercises = [
