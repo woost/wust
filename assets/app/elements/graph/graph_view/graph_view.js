@@ -31,10 +31,17 @@ function graphViewCtrl($scope, $rootScope, $stateParams, $filter, EditService, $
         title: ""
     };
 
-    $scope.$on("component.changed", () => {
-        vm.tagSuggestions = angular.copy(_.uniq(_.flatten(vm.graph.nodes.map(n => n.tags.concat(n.classifications))), "id"));
-        $scope.$broadcast("tageditor.suggestions");
+    setSuggestions();
+    let commitUnregister = vm.graph.onCommit(() => {
+        setSuggestions();
+        _.defer(() => $scope.$broadcast("tageditor.suggestions"));
     });
+
+    $scope.$on("$destroy", commitUnregister);
+
+    function setSuggestions() {
+        vm.tagSuggestions = _.partition(angular.copy(_.uniq(_.flatten(vm.graph.nodes.map(n => n.tags.concat(n.classifications))), "id")), t => !t.isContext);
+    }
 
     function filter() {
         let matchingNodes = $filter("fuzzyFilter")(_.reject(vm.graph.nodes, { isHyperRelation: true }), vm.search);
