@@ -71,7 +71,7 @@ function editTaglistCtrl(TagSuggestions, DiscourseNode, $q) {
     function searchTags(term) {
         if (vm.staticSuggestions) {
             let re = new RegExp(term, "i");
-            return $q((resolve, reject) => resolve([vm.staticSuggestions.filter(t => t.title.match(re))]));
+            return $q((resolve, reject) => resolve(vm.staticSuggestions.map(tags => tags.filter(t => t.title.match(re)))));
         } else {
             if(delayedTriggerSearch)
                 clearTimeout(delayedTriggerSearch);
