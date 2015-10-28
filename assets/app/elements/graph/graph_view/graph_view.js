@@ -26,19 +26,17 @@ function graphViewCtrl($scope, $rootScope, $stateParams, $filter, EditService, $
     vm.addNodeToGraph = addNodeToGraph;
     vm.focusNode = focusNode;
     vm.onDraw = () => $scope.$apply(() => vm.isConverged = true);
+    vm.filter = filter;
     vm.search = {
         title: ""
     };
 
-    let firstFilter = true;
-    $scope.$watch("vm.search.title", filter);
+    $scope.$on("component.changed", () => {
+        vm.tagSuggestions = angular.copy(_.uniq(_.flatten(vm.graph.nodes.map(n => n.tags.concat(n.classifications))), "id"));
+        $scope.$broadcast("tageditor.suggestions");
+    });
 
     function filter() {
-        if (firstFilter) {
-            firstFilter = false;
-            return;
-        }
-
         let matchingNodes = $filter("fuzzyFilter")(_.reject(vm.graph.nodes, { isHyperRelation: true }), vm.search);
         vm.d3Info.filter(matchingNodes);
     }

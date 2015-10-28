@@ -69,6 +69,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.commitCount = 0;
                 this.displayed = $q.defer();
                 this.gotAllInitialData = $q.defer();
+                this.anyTags = [];
 
                 // state for drag+drop
                 this.isDragging = false;
@@ -1132,6 +1133,10 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
         // filter the graph
         filter(matchingNodes) {
+            if (!_.isEmpty(this.anyTags)) {
+                matchingNodes = matchingNodes.filter(n => _.any(this.anyTags, t => _.any(n.tags.concat(n.classifications), {id: t.id})));
+            }
+
             let component = _(matchingNodes).map(node => node.component).flatten().uniq().value();
 
             this.graph.nodes.forEach(node => {
@@ -1504,6 +1509,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             if(node.degree > 0)
                 d3Graph.force.resume();
         },
+        anyTags: d3Graph.anyTags,
         filter: nodes => d3Graph.filter(nodes)
     };
 

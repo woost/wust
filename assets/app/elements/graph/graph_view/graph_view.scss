@@ -12,6 +12,9 @@
         position: absolute;
         z-index: $zindex_fiter_input;
         width: 250px;
+        & > input {
+            margin-bottom: 5px;
+        }
     }
     .graph_network {
             height: 100%;
