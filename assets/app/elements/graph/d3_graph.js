@@ -21,7 +21,15 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                 this.onDraw = onDraw;
 
                 // settings
-                this.nodeClickAction = d => {if(!d.isHyperRelation) this.focusNode(d);};
+                this.nodeClickAction = d => {
+                    if(!d.isHyperRelation) {
+                        this.canSingleClick = true;
+                        setTimeout(() => {
+                            if (this.canSingleClick)
+                                this.focusNode(d);
+                        }, 250);
+                    }
+                };
                 this.nodeLongPressAction = d => this.setStickyPreview(d);
                 this.stopForceOnPan = true;
                 this.stopForceAfterNodeDrag = true;
@@ -528,6 +536,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
 
         loadMoreNodes(d) {
+            this.canSingleClick = false;
             ConnectedComponents.$find(d.id, {depth: 1}).$then(response => {
                 response.nodes.forEach(n => this.graph.addNode(n));
                 response.relations.forEach(r => this.graph.addRelation(r));
