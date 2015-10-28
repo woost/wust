@@ -1140,12 +1140,13 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
 
             });
 
-            this.graph.nodes.forEach(node => {
-                if (node.isHyperRelation) {
-                    //TODO: mark chains of hyperrelations
+            let hyperRels = this.graph.nodes.filter(n => n.isHyperRelation);
+            //TODO: mark chains of hyperrelations...meh
+            for (let i = 0; i < 5; i++) {
+                hyperRels.forEach(node => {
                     node.marked = node.marked || node.source.marked && node.target.marked;
-                }
-            });
+                });
+            }
 
             this.graph.relations.forEach(relation => {
                 relation.visible = _(component).contains(relation.source) && _(component).contains(relation.target);
