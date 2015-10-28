@@ -17,7 +17,8 @@ function editTaglist() {
             editClassification: "@",
             placeholder: "@",
             embedSuggestions: "@",
-            emptySearchOnlyFirst: "="
+            emptySearchOnlyFirst: "=",
+            staticSuggestions: "="
         },
         controller: editTaglistCtrl,
         controllerAs: "vm",
@@ -68,14 +69,19 @@ function editTaglistCtrl(TagSuggestions, DiscourseNode, $q) {
     }
 
     function searchTags(term) {
-        if(delayedTriggerSearch)
-            clearTimeout(delayedTriggerSearch);
+        if (vm.staticSuggestions) {
+            let re = new RegExp(term, "i");
+            return $q((resolve, reject) => resolve([vm.staticSuggestions.filter(t => t.title.match(re))]));
+        } else {
+            if(delayedTriggerSearch)
+                clearTimeout(delayedTriggerSearch);
 
-        let chosenLabels = vm.emptySearchOnlyFirst && term === "" ? [tagLabels[0]] : tagLabels;
-        return $q((resolve, reject) => {
-            delayedTriggerSearch = setTimeout(() => $q.all(chosenLabels.map(tagLabel => {
-                return TagSuggestions.search(term, tagLabel);
-            })).then(resolve, reject), searchTriggerDelay);
-        });
+            let chosenLabels = vm.emptySearchOnlyFirst && term === "" ? [tagLabels[0]] : tagLabels;
+            return $q((resolve, reject) => {
+                delayedTriggerSearch = setTimeout(() => $q.all(chosenLabels.map(tagLabel => {
+                    return TagSuggestions.search(term, tagLabel);
+                })).then(resolve, reject), searchTriggerDelay);
+            });
+        }
     }
 }

@@ -24,15 +24,18 @@ angular.module("wust.elements").directive("tagEditor", function() {
                     let completeTabbing, ignoreNextSuggestion;
                     $scope.getSuggestions = $scope.getSuggestions ? $scope.getSuggestions : function() { return []; };
 
-                    $scope.$watch("search", function(value) {
+                    $scope.$watch("search", search);
+                    $scope.$on("tageditor.suggestions", search);
+
+                    function search() {
                         if (!ignoreNextSuggestion && completeTabbing === undefined) {
-                            $scope.getSuggestions({search: value}).then(vals => {
+                            $scope.getSuggestions({search: $scope.search}).then(vals => {
                                 $scope.suggestions = vals;
                             });
                         }
 
                         ignoreNextSuggestion = false;
-                    });
+                    }
 
                     $scope.unfocusedInput = function() {
                         if ($scope.search !== "") {
