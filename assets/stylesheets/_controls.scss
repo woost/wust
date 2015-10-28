@@ -1,14 +1,16 @@
+@import "bootstrap/variables";
+
 .view_close_button {
     font-size: 35px;
     padding-right: 7px !important;
 }
 
 h2[contenteditable='true']:focus{
-    //TODO: hardcoded from bootstrap
-    border-color: #66afe9 !important;
+    border-color: $input-border-focus !important;
 }
 
 .is_invalid {
+    //TODO: http://getbootstrap.com/css/#forms-control-validation ?
     border: 2px solid red !important;
 }
 
@@ -19,7 +21,36 @@ h2[contenteditable='true']:focus{
 
 [contenteditable='true'][placeholder]:empty:before {
     content: attr(placeholder);
-    color: #A9A9A9;
+    color: $input-color-placeholder;
+    cursor: text;
+}
+
+h2[contenteditable='true'][placeholder]:empty:before {
+    color: #A9A9A9; // this is lighter than default bootstrap placeholder because of the font-size
+}
+
+.ace_editor {
+    border: 1px solid $input-border;
+    border-radius: $input-border-radius;
+}
+
+.ace_focus {
+    border: 1px solid $input-border-focus;
+}
+
+.ace_invisible {
+    color: $input-color-placeholder !important;
+}
+
+input {
+//from: https://github.com/twbs/bootstrap-sass/blob/e15eef6a47ab94b15f80d44507859e4bc08ae965/assets/stylesheets/bootstrap/mixins/_vendor-prefixes.scss#L100
+  // Firefox
+  &::-moz-placeholder {
+    color: $input-color-placeholder;
+    opacity: 1; // Override Firefox's unusual default opacity; see https://github.com/twbs/bootstrap/pull/11526
+  }
+  &:-ms-input-placeholder { color: $input-color-placeholder; } // Internet Explorer 10+
+  &::-webkit-input-placeholder  { color: $input-color-placeholder; } // Safari and Chrome
 }
 
 .error_message {

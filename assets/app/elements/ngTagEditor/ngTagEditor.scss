@@ -1,18 +1,17 @@
 @import "globals";
 @import "compass/css3/box-shadow";
+@import "bootstrap/variables";
 
 .tag-editor-directive {
-    font-family: sans-serif;
-    font-size: 16px;
+    font-size: $font-size-base;
     line-height: 35px;
     &.active {
         .tag-editor, .tag-suggestions {
-            //TODO: hardcoded from bootstrap
-            border-color: #66afe9;
+            border-color: $input-border-focus;
         }
     }
     .tag-editor, .tag-suggestions {
-        border: 1px solid #ccc;
+        border: 1px solid $input-border;
     }
     .transparent-suggestion .tag-label {
         opacity: 0.5;
@@ -25,11 +24,11 @@
         width: 100%;
         display: block;
         margin: 0;
-        border-radius: 3px;
+        border-radius: $input-border-radius;
         min-height: 40px;
         overflow: hidden;
         padding: 0 9px;
-        font-size: 16px;
+        font-size: $font-size-base;
         background-color: #fff;
         cursor: text;
         .tag-label {
@@ -94,7 +93,7 @@
             padding-left: 0px;
             margin-top: 5px;
             background-color: transparent;
-            color: #888;
+            color: $input-color-placeholder;
             font-weight: bold;
             padding: 0 5px;
             font-size: 14px;
