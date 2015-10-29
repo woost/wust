@@ -114,7 +114,7 @@ In der Spalte **rechts** neben dem Beitrag sehen Sie Beiträge, die sich auf die
 1. Wählen Sie im zweiten Eingabefeld einen passenden Kontext (eckige Boxen) aus, z.B. Haushalt. Um einen neuen Kontext zu erzeugen, geben Sie den Namen ein und bestätigen Sie mit ENTER.
 1. Veröffentlichen Sie die neue Diskussion mit einem Klick auf **Start Discussion**.
 
-Es gibt 2 unterschiedliche Tag-Arten: **Klassifikationen** (Frage, Idee, ...) und **Kontexte** (Themengebiete wie Haushalt, Politik). Klassifikationen gelten immer im Bezug auf einen anderen Beitrag oder einen Kontext. **Neue Diskussionen müssen mindestens einen Kontext haben**. Definieren Sie einen oder auch mehrere Kontexte, damit Ihr Beitrag besser gefunden werden kann.
+Es gibt 2 unterschiedliche **Tag**-Arten: **Klassifikationen** (Frage, Idee, ...) und **Kontexte** (Themengebiete wie Haushalt, Politik). Klassifikationen gelten immer im Bezug auf einen anderen Beitrag oder einen Kontext. **Neue Diskussionen müssen mindestens einen Kontext haben**. Definieren Sie einen oder auch mehrere Kontexte, damit Ihr Beitrag besser gefunden werden kann.
 `
         },
         {
