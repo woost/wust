@@ -1,6 +1,6 @@
 <div id="user_list_component" class="list-group" infinite-scroll="vm.loadMore()" infinite="infinite" promise="vm.users" scroll-target="middle_content">
     <div id="user_list_box">
-        <div ng-repeat="user in vm.users track by user.id" class="list-group-item">
+        <div ng-repeat="user in vm.users | unique:'id' track by user.id" class="list-group-item">
             <a ui-sref="users.details({id: user.id})" ng-bind="::user.name"></a>
             <span class="pull-right">
                 <span ng-repeat="karmaTag in user.hasKarma | orderBy:'-karma' | limitTo:3" tag-label="karmaTag">
