@@ -11,6 +11,7 @@ trait ModerationBase {
     val authorKarmaBoost:Long = postChangeThreshold(viewCount = 1024) // author can change its own post until 1024 views
 
     //TODO: negative karmasum: reject changerequests automatically?
+    // equal to: if (votersKarma < 4) 1 else log2(votersKarma)
     def voteWeight(votersKarma: Long):Long = if (votersKarma > 0) log2(votersKarma) max 1 else 1 // log weight from paper WikiTrust
 
     def postChangeThreshold(viewCount: Long):Long = sqrt(viewCount) + 1 // +1, because viewcount will be at least 2 (author, editor). One needs min 4 karma to do instant edits on new posts
