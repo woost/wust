@@ -578,7 +578,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             let min = 9999999;
             function invsqr(x) {return 1 / (x*x + 1);}
             this.graph.nodes.forEach(node => {
-                let weight = invsqr(node.deepSuccessors.length) - invsqr(node.deepPredecessors.length);
+                let weight = invsqr(node.deepPredecessors.length) - invsqr(node.deepSuccessors.length);
                 node.rootiness = weight;
                 max = Math.max(max, weight);
                 min = Math.min(min, weight);
@@ -764,6 +764,8 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
                         x: (start.x + end.x) / 2,
                         y: (start.y + end.y) / 2
                     };
+                    //TODO: pushing startnode and endnode away from each other is already handled by the linkStrength constraint
+                    // So this can be removed
                     let startDiffX = start.x - node.x;
                     let startDiffY = start.y - node.y;
                     let endDiffX = end.x - node.x;
@@ -790,7 +792,7 @@ function d3Graph($window, DiscourseNode, Helpers, $location, $filter, Post, Moda
             // pull nodes with more more children up
             this.graph.nodes.forEach(node => {
                 if (node.fixed !== true) {
-                    node.x -= Math.sqrt(this.graph.nodes.length) * node.rootiness * e.alpha * this.rootinessForceFactor;
+                    node.x += Math.sqrt(this.graph.nodes.length) * node.rootiness * e.alpha * this.rootinessForceFactor;
                 }
             });
         }
