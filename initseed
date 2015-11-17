@@ -1,2 +1,2 @@
 #!/bin/bash
-sbt "project seed" run run run
+sbt "project seed" run

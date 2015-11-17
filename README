@@ -1,9 +1,0 @@
-My Wust
-
-Tested with Neo4j 2.2.2
-
-run ./initseed on an empty database to prepare it for usage.
-
-production vs dev
-
-env variablen: db + tutorial
