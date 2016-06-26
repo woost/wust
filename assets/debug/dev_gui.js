@@ -30,10 +30,12 @@ angular.module("wust").run(function(Auth) {
         return Math.random().toString(36).replace(/[^a-z]+/g, "").substr(0, length);
     }
 
-    function loginLink(name, link) {
-        var link = link || name;
-        var randLogin = rawElem("<a href=\"#\" title=\"login as "+name+"\">"+link+"</a> ");
-        randLogin.onclick = function() {loginAs(name);};
+    function loginLink(name, linkname) {
+        var link = linkname || name;
+        var randLogin = rawElem("<a href=\"#\" title=\"login as " + name + "\">" + link + "</a> ");
+        randLogin.onclick = function() {
+            loginAs(name);
+        };
         return randLogin;
     }
 

@@ -1,8 +1,8 @@
 name := "wust"
 
-val scalaV = "2.11.7"
+val scalaV = "2.11.8"
 
-val paradiseVersion = "2.1.0-M5"
+val paradiseVersion = "2.1.0"
 
 // TODO: use this syntax to share settings
 // lazy val wust: Project = Project( "wust", file("."),
@@ -11,8 +11,9 @@ val paradiseVersion = "2.1.0-M5"
 
 lazy val wust = (project in file(".")).settings(
   scalaVersion := scalaV,
+  resolvers += Resolver.jcenterRepo,
   resolvers += "Atlassian Releases" at "https://maven.atlassian.com/public/",
-  resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases",
+  resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releasesy",
   libraryDependencies ++= Seq(
     cache,
     ws,
@@ -22,7 +23,7 @@ lazy val wust = (project in file(".")).settings(
     // in case we need to export shared code to js:
     // https://stackoverflow.com/questions/28413266/how-to-export-properties-of-shared-case-classes
     // authentication / authorization
-    "com.mohiva" %% "play-silhouette" % "2.0",
+    "com.mohiva" %% "play-silhouette" % "2.0.2" excludeAll (ExclusionRule(organization = "com.typesafe.play")),
     "com.typesafe.play.plugins" %% "play-plugins-mailer" % "2.3.1",
     // database
     "commons-codec" % "commons-codec" % "1.10" // for base64 encoding of uuids
@@ -33,7 +34,7 @@ lazy val wust = (project in file(".")).settings(
   excludeFilter in gzip := (excludeFilter in gzip).value || new SimpleFileFilter(file => new File(file.getAbsolutePath + ".gz").exists), // do not compress assets for which a gzipped version already exists
   scalacOptions ++= scalacOpts,
   // disable gerenation of scaladoc
-  sources in (Compile,doc) := Seq.empty,
+  sources in (Compile, doc) := Seq.empty,
   publishArtifact in (Compile, packageDoc) := false
 ).
   enablePlugins(PlayScala).
@@ -43,15 +44,18 @@ lazy val wust = (project in file(".")).settings(
 lazy val schema = (project in file("schema")).
   settings(
     scalaVersion := scalaV,
+    resolvers += Resolver.jcenterRepo,
+    resolvers += "Atlassian Releases" at "https://maven.atlassian.com/public/",
+    resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releasesy",
     scalacOptions ++= scalacOpts,
     libraryDependencies ++= Seq(
-      "com.github.renesca" %% "renesca" % "0.3.2-8",
-      "com.github.renesca" %% "renesca-magic" % "0.3.4",
+      "com.github.renesca" %% "renesca" % "0.3.2-9",
+      "com.github.renesca" %% "renesca-magic" % "0.3.4-1",
       // for external inheritance and default value code
-      "com.mohiva" %% "play-silhouette" % "2.0"
+      "com.mohiva" %% "play-silhouette" % "2.0.2" excludeAll (ExclusionRule(organization = "com.typesafe.play"))
     ),
     addCompilerPlugin("org.scalamacros" % "paradise" % paradiseVersion cross CrossVersion.full),
-    sources in (Compile,doc) := Seq.empty,
+    sources in (Compile, doc) := Seq.empty,
     publishArtifact in (Compile, packageDoc) := false
   ).
     dependsOn(scalajsSharedJs)
@@ -75,7 +79,7 @@ lazy val scalajs = (project in file("scalajs")).settings(
   ),
   testFrameworks += new TestFramework("utest.runner.Framework"),
   persistLauncher in Test := false,
-  sources in (Compile,doc) := Seq.empty,
+  sources in (Compile, doc) := Seq.empty,
   publishArtifact in (Compile, packageDoc) := false
 ).enablePlugins(ScalaJSPlugin, ScalaJSPlay).
   dependsOn(scalajsSharedJs)
@@ -84,14 +88,13 @@ lazy val scalajs = (project in file("scalajs")).settings(
 lazy val scalajsShared = (crossProject.crossType(CrossType.Pure) in file("scalajs-shared")).settings(
   scalaVersion := scalaV,
   scalacOptions ++= scalacOpts,
-  libraryDependencies += "org.scala-js" % "scalajs-stubs_2.11" % "0.6.5"
+  libraryDependencies += "org.scala-js" % "scalajs-stubs_2.11" % "0.6.10"
 ).
   jsConfigure(_ enablePlugins ScalaJSPlay).
   jsSettings(sourceMapsBase := baseDirectory.value / "..")
 
 lazy val scalajsSharedJvm = scalajsShared.jvm
 lazy val scalajsSharedJs = scalajsShared.js
-
 
 lazy val seed = (project in file("seed")).settings(
   scalaVersion := scalaV,
@@ -101,7 +104,7 @@ lazy val seed = (project in file("seed")).settings(
     // escape and unescape operations (html, json, css, ...)
     "org.unbescape" % "unbescape" % "1.1.1.RELEASE"
   ),
-  sources in (Compile,doc) := Seq.empty,
+  sources in (Compile, doc) := Seq.empty,
   publishArtifact in (Compile, packageDoc) := false
 ).dependsOn(schema, wust)
 
@@ -117,7 +120,7 @@ val scalacOpts = Seq(
   //"-Yinline", "-Yinline-warnings",
   "-language:_",
   "-Xlint:_"
-  //,"-Xdisable-assertions", "-optimize"
+//,"-Xdisable-assertions", "-optimize"
 )
 
 val scalacMacroOpts = Seq(

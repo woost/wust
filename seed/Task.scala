@@ -7,7 +7,7 @@ trait Task extends App {
   val db = new DbService
   db.restService = new RestService(
     server = "http://localhost:7474",
-    credentials = Some(spray.http.BasicHttpCredentials("neo4j", "neo4j"))
+    credentials = Some(spray.http.BasicHttpCredentials(sys.env.getOrElse("NEO4J_USER", "neo4j"), sys.env.getOrElse("NEO4J_PASS", "neo4j")))
   )
 
   def dbContext(code: DbService => Any): Unit = {
