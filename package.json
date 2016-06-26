@@ -3,9 +3,10 @@
     "node": "0.12.x"
   },
   "devDependencies": {
-    "broccoli": "0.16.8",
+    "broccoli": "0.16.9",
     "broccoli-babel-transpiler": "5.4.5",
     "broccoli-browser-sync": "git://github.com/cornerman/broccoli-browser-sync.git",
+    "broccoli-cli": "1.0.0",
     "broccoli-closure": "1.2.0",
     "broccoli-compass": "0.2.4",
     "broccoli-concat": "0.0.13",
@@ -20,6 +21,7 @@
     "broccoli-ng-annotate": "1.2.0",
     "broccoli-sourcemap-concat": "1.0.2",
     "broccoli-string-replace": "0.1.0",
+    "jshint": "2.9.2",
     "mkdirp": "0.5.1"
   },
   "dependencies": {

@@ -1,4 +1,4 @@
 #!/bin/bash
 
 rm -rf public
-BROCCOLI_ENV=production broccoli build public
+BROCCOLI_ENV=production node_modules/broccoli-cli/bin/broccoli build public

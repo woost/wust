@@ -8,7 +8,7 @@ This is a proof of concept prototype. Please don't consider extending this proje
 - simple build tool (sbt)
 - Neo4j 2.2.2
 - `gem install compass`
-- `npm -g install broccoli broccoli-cli jshint`
+- npm
 - bower
 
 ## Build instructions

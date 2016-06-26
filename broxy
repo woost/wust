@@ -1,4 +1,4 @@
 #!/bin/bash
 # https://github.com/gr2m/CORS-Proxy
 CORSPROXY_PORT=4300 corsproxy > /dev/null &
-broccoli serve
+node_modules/broccoli-cli/bin/broccoli serve

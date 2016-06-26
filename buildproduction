@@ -9,7 +9,7 @@ bower --config.interactive=false install
 [ -s "$HOME/.rvm/scripts/rvm" ] && source "$HOME/.rvm/scripts/rvm"
 
 echo "linting production assets..."
-jshint assets
+node_modules/jshint/bin/jshint assets
 
 echo "running tests..."
 sbt clean test
