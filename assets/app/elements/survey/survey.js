@@ -53,7 +53,7 @@ function SurveyService(store) {
         titleGerman: "Willkommen bei Wust",
         title: "Welcome to Wust",
         secondTitleGerman: "Fahren Sie mit der Maus über dieses Feld",
-        secondTitle: "Hover here with your mouse",
+        secondTitle: "Hover me with your mouse",
         email: true,
         descriptionGerman: `
 **Wust** ist ein Graph-basiertes Diskussionsystem.
@@ -69,8 +69,6 @@ function SurveyService(store) {
 - Please do all exercises to get comfortable with the system.
 - You decide when an exercise is done.
 - You see the first exercise with a click on **Next**.
-
-Improvements
 `
     }, {
         titleGerman: "Registrieren Sie sich",
@@ -100,7 +98,7 @@ If you already have an account you can just login.
 `
     }, {
         titleGerman: "Stellen Sie eine Frage zum Beitrag",
-        title: "Stellen Sie eine Frage zum Beitrag",
+        title: "Ask a question about the Post",
         descriptionGerman: `
 1. Klicken Sie auf **Respond**, um eine Frage zu diesem Beitrag zu stellen.
 1. Wenn Ihnen keine passende Frage einfällt, stellen Sie eine beliebige Frage.
@@ -112,7 +110,7 @@ In der Spalte **rechts** neben dem Beitrag sehen Sie Beiträge, die sich auf die
         description: `
 1. Click on **Respond**, to ask a question about the post.
 1. If you cannot find a suitable question, ask an arbitrary question.
-1. In the second text-field you can choose, how your post relates to the other (round boxes). Choose **Question**.
+1. In the second text-field you can choose, how your post refers to the other post (round boxes). Choose **Question**.
 1. Confirm with **Respond** at the bottom right.
 
 In the column on the **right** side of the post you see posts which refer to it.
@@ -144,7 +142,7 @@ In the column on the **right** side of the post you see posts which refer to it.
 1. On the left side, click on the symbol ![graph-icon](assets/images/icon-graph.png), to switch to the Graph-View.
 1. Click on the **+** symbol above the current post and ask another question.
 1. Add an Idea to your just asked question.
-1. The second symbol above the posts lets you connect the post with others. Connect the idea with another question and classify the connection as an idea.
+1. The second symbol above a posts lets you connect the post with others. Connect the idea with another question and classify the connection as an idea.
 1. Experiment a bit. For example connect a post with a connection.
 `
     }, {
@@ -218,7 +216,7 @@ Thank you, you completed all exercises.
 
 Now look around in the system, start more discussions or participate in existing ones.
 
-Wust is Open Source Software and available on (GitHub)[https://github.com/woost/wust].
+Wust is Open Source Software and available on [GitHub](https://github.com/woost/wust).
 `
     }];
 }
