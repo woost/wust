@@ -1,7 +1,13 @@
 # Wust
 A hypergraph-based discussion system
 
-This is a proof of concept prototype. Please don't consider extending this project. We'd like to do a complete rewrite based on the experiences, survey results and new ideas we have now. If you are interested, please contact us.
+[Live demo of the prototype](http://lanzarote.informatik.rwth-aachen.de:9001)
+
+This is a proof of concept prototype. Please don't consider extending this project. We'd like to do a complete rewrite based on the experiences, user study results, insights and new ideas we have now. If you are interested, please contact us.
+
+## Screenshots
+![Screenshot of Graph View](screenshot-graph.png)
+![Screenshot of Focus View](screenshot-focus.png)
 
 ## Build dependencies
 - JDK 8
@@ -25,10 +31,6 @@ have a look into `./buildproduction` and then run it:
     this seeds the database
 - ```target/universal/stage/bin/wust```
     starts the production web server on port ```9000```
-
-## Screenshots
-![Screenshot of Graph View](screenshot-graph.png)
-![Screenshot of Focus View](screenshot-focus.png)
 
 ## License
 wust is free software released under the [Apache License, Version 2.0][Apache]
