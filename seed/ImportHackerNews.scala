@@ -2,7 +2,6 @@ package tasks
 
 import hackernews4s.v0._
 import model.WustSchema._
-import renesca.DbService
 import renesca.parameter.implicits._
 
 import scala.util.Try
@@ -24,14 +23,14 @@ object ImportHackerNews extends Task with SeedTools {
     }
   }
 
-  def importTopStories()(implicit db: DbService) {
+  def importTopStories()(implicit db: TaskQueryHandler) {
     println("importing top Stories...")
     HackerNews.getItemIdsForTopStories().take(10).foreach { id =>
       importItem(forceGetItem(id))
     }
   }
 
-  def importTopQuestions()(implicit db: DbService) {
+  def importTopQuestions()(implicit db: TaskQueryHandler) {
     println("importing top Questions...")
     HackerNews.getItemIdsForAskStories().take(10).foreach { id =>
       importItem(forceGetItem(id))
@@ -54,7 +53,7 @@ object ImportHackerNews extends Task with SeedTools {
     got.get
   }
 
-  def importItem(hnItem: Item)(implicit db: DbService): Unit = {
+  def importItem(hnItem: Item)(implicit db: TaskQueryHandler): Unit = {
     modifyDiscourse { discourse =>
       println(s"importing ${ hnItem.itemType }: ${ hnItem.title.get }")
       val hackerNewsScope = mergeScope("HackerNews")

@@ -4,7 +4,7 @@ import model.WustSchema._
 import renesca.parameter.implicits._
 
 object ClearDatabase extends Task with SeedTools {
-  println(s"Clearing database at ${db.restService.server}")
+  println(s"Clearing database at ${db.serverName}")
   scala.io.StdIn.readLine("Press enter to continue")
   println("Deleting all nodes and relations...")
 

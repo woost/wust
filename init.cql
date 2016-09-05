@@ -1,0 +1,18 @@
+CREATE CONSTRAINT ON (n:USER) ASSERT n.name IS UNIQUE;
+CREATE CONSTRAINT ON (n:LOGININFO) ASSERT n.providerKey IS UNIQUE;
+CREATE CONSTRAINT ON (n:USERGROUP) ASSERT n.name IS UNIQUE;
+CREATE CONSTRAINT ON (n:UUIDNODE) ASSERT n.uuid IS UNIQUE;
+CREATE CONSTRAINT ON (n:TAGLIKE) ASSERT n.title IS UNIQUE;
+CREATE INDEX ON :`TIMESTAMP`(timestamp);
+CREATE INDEX ON :`LOGININFO`(providerID);
+CREATE INDEX ON :`CHANGEREQUEST`(status);
+merge (V0 :`EXPOSEDNODE`:`TAGLIKE`:`UUIDNODE`:`CLASSIFICATION` {title: "Done"}) on create set V0 += { `color`: 150,`precedence`: 100,`symbol`: "fa fa-check",`uuid`: "QLnwEkPAS9ya6toMpWb3qg" } on match set V0 += { `color`: 150,`precedence`: 100,`symbol`: "fa fa-check" } return V0;
+merge (V0 :`EXPOSEDNODE`:`TAGLIKE`:`UUIDNODE`:`CLASSIFICATION` {title: "Problem"}) on create set V0 += { `color`: 90,`precedence`: 20,`symbol`: "fa fa-flask",`uuid`: "hXMrduxATuCaGEClhaHX1A" } on match set V0 += { `color`: 90,`precedence`: 20,`symbol`: "fa fa-flask" } return V0;
+merge (V0 :`EXPOSEDNODE`:`TAGLIKE`:`UUIDNODE`:`CLASSIFICATION` {title: "Goal"}) on create set V0 += { `color`: 169,`precedence`: 20,`symbol`: "fa fa-crosshairs",`uuid`: "x-p7GCXSRM66FzGfwXbKAg" } on match set V0 += { `color`: 169,`precedence`: 20,`symbol`: "fa fa-crosshairs" } return V0;
+merge (V0 :`EXPOSEDNODE`:`TAGLIKE`:`UUIDNODE`:`CLASSIFICATION` {title: "Idea"}) on create set V0 += { `color`: 260,`precedence`: 20,`symbol`: "fa fa-lightbulb-o",`uuid`: "jmv104GbR1-BJGzeWsb8BA" } on match set V0 += { `color`: 260,`precedence`: 20,`symbol`: "fa fa-lightbulb-o" } return V0;
+merge (V0 :`EXPOSEDNODE`:`TAGLIKE`:`UUIDNODE`:`CLASSIFICATION` {title: "Question"}) on create set V0 += { `color`: 301,`precedence`: 10,`symbol`: "fa fa-question",`uuid`: "RkTBCPrMQOK-c8HI153ksA" } on match set V0 += { `color`: 301,`precedence`: 10,`symbol`: "fa fa-question" } return V0;
+merge (V0 :`EXPOSEDNODE`:`TAGLIKE`:`UUIDNODE`:`CLASSIFICATION` {title: "Task"}) on create set V0 += { `color`: 280,`precedence`: 10,`symbol`: "fa fa-list-ul",`uuid`: "UzlXvtaaTHiZx2XMFIAxsQ" } on match set V0 += { `color`: 280,`precedence`: 10,`symbol`: "fa fa-list-ul" } return V0;
+merge (V0 :`EXPOSEDNODE`:`TAGLIKE`:`UUIDNODE`:`CLASSIFICATION` {title: "Cause"}) on create set V0 += { `color`: 70,`precedence`: 10,`symbol`: "fa fa-arrow-left",`uuid`: "UjBdKC7zTamRYCOZRSzC_w" } on match set V0 += { `color`: 70,`precedence`: 10,`symbol`: "fa fa-arrow-left" } return V0;
+merge (V0 :`EXPOSEDNODE`:`TAGLIKE`:`UUIDNODE`:`CLASSIFICATION` {title: "Pro"}) on create set V0 += { `color`: 135,`precedence`: 6,`symbol`: "fa fa-thumbs-o-up",`uuid`: "A4hEjKIxSLCZ1h7nxPqtHQ" } on match set V0 += { `color`: 135,`precedence`: 6,`symbol`: "fa fa-thumbs-o-up" } return V0;
+merge (V0 :`EXPOSEDNODE`:`TAGLIKE`:`UUIDNODE`:`CLASSIFICATION` {title: "Contra"}) on create set V0 += { `color`: 21,`precedence`: 5,`symbol`: "fa fa-thumbs-o-down",`uuid`: "kTeaSR8ST7-bUJ8QjoxOmQ" } on match set V0 += { `color`: 21,`precedence`: 5,`symbol`: "fa fa-thumbs-o-down" } return V0;
+merge (V0 :`USERGROUP`:`UUIDNODE` {name: "everyone"}) on create set V0 += { `uuid`: "cxR0OzzETjuGxp0DRIvIHQ" } on match set V0 += {  } return V0;
