@@ -15,7 +15,9 @@ services:
     image: neo4j
     environment:
       - NEO4J_AUTH=neo4j/${NEO4J_PASS}
+      - EXTENSION_SCRIPT=/neo4j_init/init.sh
     volumes:
       - data:/data/
+      - ./neo4j_init/:/neo4j_init/
 volumes:
   data: {}
