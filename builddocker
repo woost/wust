@@ -1,0 +1,10 @@
+#!/bin/bash -e
+
+echo "building docker image..."
+version="$(sbt version | grep -Eo '[0-9]+\.[0-9]+(-SNAPSHOT)?' | tail -n 1)" # TODO: better?
+if [ -z "$version" ]; then
+    echo "No version found. No docker image built."
+    exit 1
+fi
+docker build . --tag woost/wust:latest --tag woost/wust:$version
+

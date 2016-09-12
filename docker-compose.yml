@@ -9,7 +9,7 @@ services:
       - NEO4J_URL=http://neo4j:7474
       - NEO4J_USER=neo4j
       - NEO4J_PASS=${NEO4J_PASS}
-    links:
+    depends_on:
       - neo4j
   neo4j:
     image: neo4j
