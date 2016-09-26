@@ -1,7 +1,7 @@
 version: '2'
 
 services:
-  wurst:
+  wust:
     image: woost/wust
     ports:
       - "80:9000"
@@ -17,7 +17,6 @@ services:
       - NEO4J_AUTH=neo4j/${NEO4J_PASS}
       - EXTENSION_SCRIPT=/neo4j_init/init.sh
     volumes:
-      - data:/data/
-      - ./neo4j_init/:/neo4j_init/
-volumes:
-  data: {}
+      - /data:/data/
+      - /logs:/logs/
+      - /neo4j_init/:/neo4j_init/
