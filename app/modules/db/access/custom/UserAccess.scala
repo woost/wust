@@ -15,8 +15,9 @@ import play.api.mvc.Result
 import play.api.mvc.Results._
 import renesca.parameter.implicits._
 import renesca.Query
+import modules.auth.HeaderEnvironmentModule
 
-case class UserAccess() extends NodeReadBase[User] {
+case class UserAccess() extends NodeReadBase[User] with HeaderEnvironmentModule {
   val factory = User
 
   implicit val format = UserFormat.UserFormat
@@ -69,10 +70,26 @@ case class UserAccess() extends NodeReadBase[User] {
     context.withUser { user =>
       context.withJson { (request: UserUpdateRequest) =>
         //TODO: sanity check + welcome mail
-        if(request.email.isDefined)
-          user.email = request.email
+        val error = request.email.map { email =>
+          user.email = Some(email)
+          db.transaction(_.persistChanges(user))
+        } getOrElse request.password.foreach { password =>
+          //TODO this actually belongs in the login controller
+          val auth = Auth(db.queryGraph(Query(
+            s"match (l:`${ LoginInfo.label }`)-[r:`${ HasPassword.relationType }`]->(p:`${ PasswordInfo.label }`) return p"
+          )))
+          auth.passwordInfos.headOption match {
+            case Some(pi) =>
+              val authInfo = passwordHasher.hash(password)
+              pi.hasher = authInfo.hasher
+              pi.password = authInfo.password
+              pi.salt = authInfo.salt
+              db.persistChanges(pi)
+            case None => Some("Nothing to update")
+          }
+        }
 
-        db.transaction(_.persistChanges(user)) match {
+        error match {
           case Some(err) => BadRequest(s"Cannot update User: $err'")
           case _         => Ok(Json.toJson(user))
         }

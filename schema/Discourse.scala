@@ -105,9 +105,9 @@ object WustSchema {
   }
 
   @Node class PasswordInfo {
-    val hasher: String
-    val password: String
-    val salt: Option[String]
+    var hasher: String
+    var password: String
+    var salt: Option[String]
   }
   @Relation class HasLogin(startNode: User, endNode: LoginInfo)
   @Relation class HasPassword(startNode: LoginInfo, endNode: PasswordInfo)

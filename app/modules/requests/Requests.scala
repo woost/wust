@@ -26,4 +26,4 @@ case class ConnectsUpdateRequest(addedTagsOption: Option[List[ClassificationRequ
 case class TagAddRequest(title: String)
 case class TagUpdateRequest(description: Option[String])
 
-case class UserUpdateRequest(email: Option[String])
+case class UserUpdateRequest(email: Option[String], password: Option[String])
