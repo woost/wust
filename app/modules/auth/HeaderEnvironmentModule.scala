@@ -34,7 +34,7 @@ trait HeaderEnvironmentModule {
   lazy val authenticatorService: AuthenticatorService[JWTAuthenticator] = {
     val settings = JWTAuthenticatorSettings(
       headerName = Play.configuration.getString("silhouette.authenticator.headerName").getOrElse { "X-Auth-Token" },
-      issuerClaim = Play.configuration.getString("silhouette.authenticator.issueClaim").getOrElse { "play-silhouette" },
+      issuerClaim = Play.configuration.getString("silhouette.authenticator.issueClaim").getOrElse { "wust" },
       encryptSubject = Play.configuration.getBoolean("silhouette.authenticator.encryptSubject").getOrElse { true },
       //TODO: what to do for production
       //authenticatorIdleTimeout = Play.configuration.getInt("silhouette.authenticator.authenticatorIdleTimeout"), // This feature is disabled by default to prevent the generation of a new JWT on every request
