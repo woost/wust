@@ -20,6 +20,17 @@
                     </div>
                 </span>
             </form>
+
+            <form class="user-auth-form" editable-form name="userAuthForm" onaftersave="vm.savePassword()" ng-if="vm.isCurrentUser">
+                Password:
+                <span editable-password="vm.authInfo.password" ng-bind="vm.authInfo.password"></span>
+                <span editable-password="vm.authInfo.password2" ng-bind="vm.authInfo.password2"></span>
+                <i class="fa fa-pencil" ng-click="userForm.$show()"></i>
+                <div ng-show="userForm.$visible">
+                    <button type="button" class="btn btn-xs btn-default" ng-disabled="userAuthForm.$waiting" ng-click="userAuthForm.$cancel()">Cancel</button>
+                    <button type="submit" class="btn btn-xs btn-primary" ng-disabled="userAuthForm.$waiting">Save</button>
+                </div>
+            </form>
         </div>
     </div>
 

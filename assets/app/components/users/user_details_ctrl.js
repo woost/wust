@@ -5,9 +5,11 @@ UserDetailsCtrl.$inject = ["$stateParams", "User", "Auth", "$q"];
 function UserDetailsCtrl($stateParams, User, Auth, $q) {
     let vm = this;
 
+    vm.authInfo = {};
     vm.user = User.$find($stateParams.id);
     vm.isCurrentUser = $stateParams.id === Auth.current.userId;
     vm.saveUser = saveUser;
+    vm.savePassword = savePassword;
     vm.karmaTags = User.$buildRaw({id: $stateParams.id}).karmaContexts.$search();
     vm.karmaSum = 0;
     vm.karmaTags.$then(tags => {
@@ -25,6 +27,23 @@ function UserDetailsCtrl($stateParams, User, Auth, $q) {
         return vm.user.$save().$then(() => {
             // humane.success("Updated user profile");
         }, () => humane.error("Error updating user profile")).$asPromise();
+    }
+
+    function savePassword() {
+        if (!vm.authInfo.password1 || !vm.authInfo.password2)
+            return;
+
+        if (vm.authInfo.password1 !== vm.authInfo.password2) {
+            humane.error("passwords do not match");
+        }
+
+        val user = User.$buildRaw(_.pick(vm.user, "id"));
+        user.password = vm.authInfo.password1;
+        return user.$save().$then(() => {
+            // humane.success("Updated user password");
+        }, () => {
+            humane.error("Error updating user password");
+        }).$asPromise();
     }
 
     function loadMore() {
