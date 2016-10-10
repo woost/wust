@@ -1,34 +1,34 @@
 <ul class="dropdown-menu auth-dropdown" ng-switch="vm.Auth.isLoggedIn" ng-click="$event.stopPropagation()">
     <li ng-switch-when="false">
-            <div tabset class="tabs-above">
-                <div tab>
-                    <div tab-heading>
-                        Login
-                    </div>
-                    <div class="tab_body">
-                        <form name="loginForm" ng-submit="vm.authenticate(registerUser)">
-                            <div class="form-group">
-                                <input class="form-control" size="10" name="username" type="text" ng-model='vm.newUser.identifier' placeholder="Username" required>
-                                <input class="form-control" size="10" name="password" type="password" ng-model='vm.newUser.password' placeholder="Password" required>
-                                <input type="submit" value="Login" ng-click="registerUser = false" class="btn btn-default" ng-disabled="loginForm.$invalid">
-                            </div>
-                        </form>
-                    </div>
+        <div tabset class="tabs-above">
+            <div tab>
+                <div tab-heading>
+                    Login
                 </div>
-                <div tab>
-                    <div tab-heading>
-                        Register
-                    </div>
-                    <div class="tab_body">
-                        <form name="signForm" ng-submit="vm.authenticate(registerUser)">
+                <div class="tab_body">
+                    <form name="loginForm" ng-submit="vm.authenticate(registerUser)">
+                        <div class="form-group">
                             <input class="form-control" size="10" name="username" type="text" ng-model='vm.newUser.identifier' placeholder="Username" required>
                             <input class="form-control" size="10" name="password" type="password" ng-model='vm.newUser.password' placeholder="Password" required>
-                            <input class="form-control" size="10" name="password_repeat" type="password" ng-model='vm.newUser.password_repeat' placeholder="Repeat Password" required>
-                            <input type="submit" value="Register" ng-click="registerUser = true" class="btn btn-default" ng-disabled="signForm.$invalid || vm.newUser.password !== vm.newUser.password_repeat">
-                        </form>
-                    </div>
+                            <input type="submit" value="Login" ng-click="registerUser = false" class="btn btn-default" ng-disabled="loginForm.$invalid">
+                        </div>
+                    </form>
                 </div>
             </div>
+            <div tab ng-if="::uiSettings.registrationEnabled">
+                <div tab-heading>
+                    Register
+                </div>
+                <div class="tab_body">
+                    <form name="signForm" ng-submit="vm.authenticate(registerUser)">
+                        <input class="form-control" size="10" name="username" type="text" ng-model='vm.newUser.identifier' placeholder="Username" required>
+                        <input class="form-control" size="10" name="password" type="password" ng-model='vm.newUser.password' placeholder="Password" required>
+                        <input class="form-control" size="10" name="password_repeat" type="password" ng-model='vm.newUser.password_repeat' placeholder="Repeat Password" required>
+                        <input type="submit" value="Register" ng-click="registerUser = true" class="btn btn-default" ng-disabled="signForm.$invalid || vm.newUser.password !== vm.newUser.password_repeat">
+                    </form>
+                </div>
+            </div>
+        </div>
     </li>
 
     <li ng-switch-default><a ui-sref="users.details({id: vm.Auth.current.userId})" style="padding-right: 10px" ng-click="$hide()">{{vm.Auth.current.identifier}} ({{vm.karma.sum}})</a></li>

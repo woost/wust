@@ -21,6 +21,7 @@ object Application extends Controller {
   val brandingLogo = "ui.branding.logo".configOrElse("")
   val brandingColor = "ui.branding.color".configOrElse("")
   val surveyEnabled = "ui.survey.enabled".configOrElse(false)
+  val registrationEnabled = "ui.registration.enabled".configOrElse(true)
 
   def index(any: String) = Action {
     Ok(views.html.index(
@@ -33,7 +34,8 @@ object Application extends Controller {
         ("brandingText", JsString(brandingText)),
         ("brandingLogo", JsString(brandingLogo)),
         ("brandingColor", JsString(brandingColor)),
-        ("surveyEnabled", JsBoolean(surveyEnabled))
+        ("surveyEnabled", JsBoolean(surveyEnabled)),
+        ("registrationEnabled", JsBoolean(registrationEnabled))
       ))
     ))
   }

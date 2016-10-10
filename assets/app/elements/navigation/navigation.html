@@ -6,12 +6,18 @@
         </a>
         <div ng-class="{search_results_visible: vm.search.resultsVisible, has_fullscreen: vm.fullscreen.hasFullscreen}">
             <ul class="nav navbar-nav navbar-left">
-                <li class="navpagelinks"><a ui-sref="dashboard" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()" data-title="Dashboard" bs-tooltip data-placement="bottom">
-                        <i class="fa fa-home"></i><span class="hidden-sm hidden-xs">&nbsp;Dashboard</span></a></li>
-                <li class="navpagelinks"><a ui-sref="tags" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()" data-title="Browse" bs-tooltip data-placement="bottom">
-                        <i class="fa fa-globe"></i><span class="hidden-sm hidden-xs">&nbsp;Browse</span></a></li>
-                <li class="navpagelinks"><a ng-if="::vm.Auth.isLoggedIn" ui-sref="vote" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()" data-title="Moderation" bs-tooltip data-placement="bottom">
-                        <i class="fa fa-sort"></i><span class="hidden-sm hidden-xs">&nbsp;Moderation</span></a></li>
+                <li class="navpagelinks">
+                    <a ui-sref="dashboard" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()" data-title="Dashboard" bs-tooltip data-placement="bottom">
+                        <i class="fa fa-home"></i><span class="hidden-sm hidden-xs">&nbsp;Dashboard</span></a>
+                </li>
+                <li class="navpagelinks">
+                    <a ui-sref="tags" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()" data-title="Browse" bs-tooltip data-placement="bottom">
+                        <i class="fa fa-globe"></i><span class="hidden-sm hidden-xs">&nbsp;Browse</span></a>
+                </li>
+                <li class="navpagelinks">
+                    <a ng-if="::vm.Auth.isLoggedIn" ui-sref="vote" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()" data-title="Moderation" bs-tooltip data-placement="bottom">
+                        <i class="fa fa-sort"></i><span class="hidden-sm hidden-xs">&nbsp;Moderation</span></a>
+                </li>
                 <li>
                     <button ng-if="::vm.Auth.isLoggedIn" type="button" class="hidden-lg hidden-md new_discussion_button_xs btn btn-xs btn-default navbar-btn" onclick="this.blur()" ng-click="vm.newDiscussion()">Start<br />Discussion</button>
                     <button ng-if="::vm.Auth.isLoggedIn" type="button" class="hidden-xs hidden-sm new_discussion_button btn btn-default navbar-btn" onclick="this.blur()" ng-click="vm.newDiscussion()">Start Discussion</button>
@@ -31,13 +37,14 @@
                         </div>
                     </form>
                 </li>
-                <li><a ui-sref="users.list" ng-class="{active: vm.$state.includes('users.*')}" ng-click="vm.fullscreen.hideFullscreens()" data-title="Users" bs-tooltip data-placement="bottom">
+                <li>
+                    <a ui-sref="users.list" ng-class="{active: vm.$state.includes('users.*')}" ng-click="vm.fullscreen.hideFullscreens()" data-title="Users" bs-tooltip data-placement="bottom">
                         <i class="fa fa-users"></i><span class="hidden-md hidden-sm hidden-xs">&nbsp;Users</span></a>
                 </li>
                 <li class="dropdown">
                     <a href class="dropdown-toggle" bs-dropdown="dropdown" template-url="elements/navigation/auth.html" placement="bottom-right">
                         <i ng-if="::vm.Auth.isLoggedIn" class="fa fa-user"></i>
-                        <span ng-if="::!vm.Auth.isLoggedIn">Register / Login</span>
+                        <span ng-if="::!vm.Auth.isLoggedIn"><span ng-if="::uiSettings.registrationEnabled">Register / </span>Login</span>
                         <span class="caret"></span>
                     </a>
                 </li>
