@@ -68,7 +68,6 @@ object AuthBlob extends HeaderEnvironmentModule {
   def createUser(user: User)(implicit db: TaskQueryHandler): Future[Option[String]] = {
     val loginInfo = LoginInfo(CredentialsProvider.ID, user.name)
     val authInfo = passwordHasher.hash(user.password)
-    // was ist der fehler?
     val query = s"merge (u:`${ ws.User.label }` {name: {userProps}.name})-[hasLogin:`${ws.HasLogin.relationType}`]->(l:`${ ws.LoginInfo.label }` {providerID: {loginInfoProps}.providerID, providerKey: {loginInfoProps}.providerKey}) merge (l)-[hasPassword:`${ ws.HasPassword.relationType }`]->(p:`${ ws.PasswordInfo.label }`) on match set p = {passwordInfoProps} on create set p = {passwordInfoProps} return *"
     val params = Map(
       "loginInfoProps" -> Map(
