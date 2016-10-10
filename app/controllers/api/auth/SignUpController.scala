@@ -14,35 +14,37 @@ import play.api.mvc._
 import scala.concurrent.Future
 
 class SignUpController extends Silhouette[User, JWTAuthenticator]
-with HeaderEnvironmentModule {
+  with HeaderEnvironmentModule {
 
   implicit val signUpFormat = Json.format[SignUp]
 
   def signUp = Action.async(parse.json) { implicit request =>
-    request.body.validate[SignUp].map { signUp =>
-      val loginInfo = LoginInfo(CredentialsProvider.ID, signUp.identifier)
-      userService.retrieve(loginInfo).flatMap {
-        case None    =>
-          val authInfo = passwordHasher.hash(signUp.password)
-          for {
-            user <- userService.create(loginInfo, signUp)
-            authInfo <- authInfoService.save(loginInfo, authInfo)
-            authenticator <- env.authenticatorService.create(loginInfo)
-            token <- env.authenticatorService.init(authenticator)
-            result <- env.authenticatorService.embed(token, Future.successful {
-              Ok(Json.toJson(Token(token = token, expiresOn = authenticator.expirationDate, userId = user.uuid)))
-            })
-          } yield {
-            env.eventBus.publish(SignUpEvent(user, request, request2lang))
-            env.eventBus.publish(LoginEvent(user, request, request2lang))
-            mailService.sendWelcomeEmail(user)
-            result
-          }
-        case Some(u) => Future.successful(Conflict("User already exists"))
-      }.recoverWith(exceptionHandler)
-    }.recoverTotal {
-      case error => Future.successful(BadRequest("Couldn't parse register request"))
-    }
+    if ("ui.registration.enabled".configOrElse(true)) Future.successful(BadRequest("Registration is disabled"))
+    else
+      request.body.validate[SignUp].map { signUp =>
+        val loginInfo = LoginInfo(CredentialsProvider.ID, signUp.identifier)
+        userService.retrieve(loginInfo).flatMap {
+          case None =>
+            val authInfo = passwordHasher.hash(signUp.password)
+            for {
+              user <- userService.create(loginInfo, signUp)
+              authInfo <- authInfoService.save(loginInfo, authInfo)
+              authenticator <- env.authenticatorService.create(loginInfo)
+              token <- env.authenticatorService.init(authenticator)
+              result <- env.authenticatorService.embed(token, Future.successful {
+                Ok(Json.toJson(Token(token = token, expiresOn = authenticator.expirationDate, userId = user.uuid)))
+              })
+            } yield {
+              env.eventBus.publish(SignUpEvent(user, request, request2lang))
+              env.eventBus.publish(LoginEvent(user, request, request2lang))
+              mailService.sendWelcomeEmail(user)
+              result
+            }
+          case Some(u) => Future.successful(Conflict("User already exists"))
+        }.recoverWith(exceptionHandler)
+      }.recoverTotal {
+        case error => Future.successful(BadRequest("Couldn't parse register request"))
+      }
   }
 
   def signOut = SecuredAction.async { implicit request =>
