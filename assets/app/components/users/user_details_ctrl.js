@@ -10,18 +10,25 @@ function UserDetailsCtrl($stateParams, User, Auth, $q) {
     vm.isCurrentUser = $stateParams.id === Auth.current.userId;
     vm.saveUser = saveUser;
     vm.savePassword = savePassword;
-    vm.karmaTags = User.$buildRaw({id: $stateParams.id}).karmaContexts.$search();
+    vm.karmaTags = User.$buildRaw({
+        id: $stateParams.id
+    }).karmaContexts.$search();
     vm.karmaSum = 0;
     vm.karmaTags.$then(tags => {
-        vm.karmaSum = tags.map(t => t.karma).reduce((a,b) => a+b, 0);
+        vm.karmaSum = tags.map(t => t.karma).reduce((a, b) => a + b, 0);
     });
 
-    vm.karmaLog = User.$buildRaw({id: $stateParams.id}).karmaLog.$search();
+    vm.karmaLog = User.$buildRaw({
+        id: $stateParams.id
+    }).karmaLog.$search();
 
     let size = 20;
     let page = 0;
     vm.loadMore = loadMore;
-    vm.contributions = vm.user.contributions.$search({page, size});
+    vm.contributions = vm.user.contributions.$search({
+        page,
+        size
+    });
 
     function saveUser() {
         return vm.user.$save().$then(() => {
@@ -37,7 +44,7 @@ function UserDetailsCtrl($stateParams, User, Auth, $q) {
             humane.error("passwords do not match");
         }
 
-        val user = User.$buildRaw(_.pick(vm.user, "id"));
+        var user = User.$buildRaw(_.pick(vm.user, "id"));
         user.password = vm.authInfo.password1;
         return user.$save().$then(() => {
             // humane.success("Updated user password");
@@ -48,6 +55,9 @@ function UserDetailsCtrl($stateParams, User, Auth, $q) {
 
     function loadMore() {
         page++;
-        return vm.contributions.$fetch({page, size});
+        return vm.contributions.$fetch({
+            page,
+            size
+        });
     }
 }
