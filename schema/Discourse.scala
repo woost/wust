@@ -76,20 +76,6 @@ object WustSchema {
     }
   }
 
-  // Authentification
-  @Graph trait Auth {Nodes(User, LoginInfo, PasswordInfo) }
-  @Node class User extends UuidNode with Identity {
-    @unique val name: String
-    var email: Option[String]
-
-    valid("Username may not be empty", "name") { !name.trim.isEmpty }
-    valid("Email address is invalid", "email") { email.map(_.contains("@")).getOrElse(true) }
-  }
-  @Node class LoginInfo {
-    val providerID: String
-    @unique val providerKey: String
-  }
-
   @Relation class Marks(startNode: User, endNode: Post) extends ConstructRelation
 
   // if you add/remove any properties (including inherited), you need to update modules.karma.KarmaStore
@@ -104,12 +90,27 @@ object WustSchema {
     var karma: Long = 0
   }
 
+  // Authentification
+  @Graph trait Auth {Nodes(User, LoginInfo, PasswordInfo) }
+  @Node class User extends UuidNode with Identity {
+    @unique val name: String
+    var email: Option[String]
+
+    valid("Username may not be empty", "name") { !name.trim.isEmpty }
+    valid("Email address is invalid", "email") { email.map(_.contains("@")).getOrElse(true) }
+  }
+  @Node class LoginInfo {
+    val providerID: String
+    @unique val providerKey: String
+  }
+
   @Node class PasswordInfo {
     var hasher: String
     var password: String
     var salt: Option[String]
   }
   @Relation class HasLogin(startNode: User, endNode: LoginInfo)
+
   @Relation class HasPassword(startNode: LoginInfo, endNode: PasswordInfo)
   @Node class UserGroup extends UuidNode {
     @unique val name: String
