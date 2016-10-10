@@ -12,8 +12,8 @@ This is a proof of concept prototype. Please don't consider extending this proje
 ## Build dependencies
 - JDK 8
 - simple build tool (sbt)
-- Neo4j 2.2.2
-- `gem install compass`
+- Neo4j >= 2.2.2
+- gem
 - npm
 - bower
 
@@ -25,12 +25,22 @@ have a look into `./buildproduction` and then run it:
 ## Running
 - start the neo4j server
 - set the environment variables for connecting to the database:
-    ```NEO4J_URL```, ```NEO4J_USER```, ```NEO4J_PASS```
-    to activate the tutorial: ```UI_SURVEY_ENABLED=true```
-- ```./initseed``` and select ```[6] tasks.SeedDatabase```
-    this seeds the database
-- ```target/universal/stage/bin/wust```
-    starts the production web server on port ```9000```
+    - `NEO4J_URL`, `NEO4J_USER`, `NEO4J_PASS`
+    - to activate the tutorial: `UI_SURVEY_ENABLED=true`
+- `./initseed` and select `[6] tasks.SeedDatabase`
+    - this seeds the database
+- `target/universal/stage/bin/wust`
+    - starts the production web server on port `9000`
+
+## Hacking
+- `gem install compass`
+- `npm install`
+- `bower install`
+- `npm install -g blumenkohl.js`
+- start a neo4j server on `localhost:7474` with user/pw `neo4j/neo4j` or adjust using env variables `NEO4J_URL`, `NEO4J_USER`, `NEO4J_PASS`
+- `sbt run` and `./blumenkohl`
+- open browser at http://localhost:3000
+- changing source files will recompile and reload automatically
 
 ## License
 wust is free software released under the [Apache License, Version 2.0][Apache]
