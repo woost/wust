@@ -28,7 +28,7 @@ class SignUpController extends Silhouette[User, JWTAuthenticator]
           case None =>
             val authInfo = passwordHasher.hash(signUp.password)
             for {
-              user <- userService.create(loginInfo, signUp)
+              user <- userService.create(loginInfo, signUp.identifier)
               authInfo <- authInfoService.save(loginInfo, authInfo)
               authenticator <- env.authenticatorService.create(loginInfo)
               token <- env.authenticatorService.init(authenticator)

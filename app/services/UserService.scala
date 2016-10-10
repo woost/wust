@@ -13,15 +13,15 @@ import scala.concurrent.Future
 
 trait UserService extends IdentityService[User] {
 
-  def create(loginInfo: SLoginInfo, signUp: SignUp, json: JsValue = JsNull): Future[User]
+  def create(loginInfo: SLoginInfo, identifier: String): Future[User]
 
 }
 
 class UserServiceDB extends UserService {
   implicit def sloginInfoToLoginInfo(li: SLoginInfo) = LoginInfo.create(li.providerID, li.providerKey)
 
-  def create(sLoginInfo: SLoginInfo, signUp: SignUp, json: JsValue = JsNull): Future[User] = {
-    val user = User.create(signUp.identifier)
+  def create(sLoginInfo: SLoginInfo, identifier: String): Future[User] = {
+    val user = User.create(identifier)
     val group = UserGroup.matchesOnName("everyone")
     val memberOf = MemberOf.create(user, group)
     val loginInfo: LoginInfo = sLoginInfo

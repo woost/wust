@@ -68,8 +68,9 @@ class TaskDbService extends DbService with TaskQueryHandler {
   }
 }
 
-trait Task extends App {
-  val db = sys.env.get("SEED_QUERY_FILE").map { file =>
+trait Task extends DbUtil with App
+trait DbUtil {
+  lazy val db = sys.env.get("SEED_QUERY_FILE").map { file =>
     new FileWriterQueryHandler(file)
   }.getOrElse {
     val db = new TaskDbService
@@ -80,9 +81,10 @@ trait Task extends App {
     db
   }
 
-  def dbContext(code: TaskQueryHandler => Any): Unit = {
-    code(db)
+  def dbContext[T](code: TaskQueryHandler => T): T = {
+    val res = code(db)
     db.shutdown()
+    res
   }
 
   def modifyDiscourse(code: Discourse => Any)(implicit db: TaskQueryHandler): Unit = {
