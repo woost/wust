@@ -47,7 +47,9 @@ function UserDetailsCtrl($stateParams, User, Auth, $q) {
         var user = User.$buildRaw(_.pick(vm.user, "id"));
         user.password = vm.authInfo.password1;
         return user.$save().$then(() => {
-            // humane.success("Updated user password");
+            vm.authInfo.password1 = "";
+            vm.authInfo.password2 = "";
+            humane.success("Updated user password");
         }, () => {
             humane.error("Error updating user password");
         }).$asPromise();
