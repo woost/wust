@@ -38,6 +38,7 @@ have a look into `./buildproduction` and then run it:
 - `bower install`
 - `npm install -g blumenkohl.js`
 - start a neo4j server on `localhost:7474` with user/pw `neo4j/neo4j` or adjust using env variables `NEO4J_URL`, `NEO4J_USER`, `NEO4J_PASS`
+    - don't forget to seed the database: `./initseed`
 - `sbt run` and `./blumenkohl`
 - open browser at http://localhost:3000
 - changing source files will recompile and reload automatically
