@@ -20,3 +20,12 @@ services:
       - /data:/data/
       - /logs:/logs/
       - ./neo4j_init/:/neo4j_init/
+  neo4j2s3:
+    image: woost/neo4j2s3
+    environment:
+      - NEO4J_URL=http://neo4j:7474
+      - NEO4J_USER=neo4j
+      - NEO4J_PASS=${NEO4J_PASS}
+      - AWS_ACCESS_KEY_ID=${WUST_AWS_ACCESS_KEY}
+      - AWS_SECRET_ACCESS_KEY=${WUST_AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${WUST_AWS_DEFAULT_REGION}
