@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# generates passwords for users in files:
+#   $ ./addpws file1 file2 file3...
+# user files should be in the form:
+#   - one user per line
+#   - each line consists of one word: username
+# dependency:
+#   - pwgen
+
+pw_length=8
+
+if [ $# -eq 0 ]; then
+    echo "usage: $(basename $0) <files..>"
+fi
+
+for file in "$@"; do
+    new_file_fmt="${file}_pw"
+    new_file=$new_file_fmt
+    counter=1
+    while [ -e $new_file ]; do
+        new_file="$new_file_fmt$counter"
+        counter=$((counter + 1))
+    done
+
+    lines=$(wc -l $file)
+    paste -d " " $file <(pwgen $pw_length $lines | cat) > $new_file
+done

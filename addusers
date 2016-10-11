@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # adds users from files:
-#   $ addusers file1 file2 file3...
+#   $ ./addusers file1 file2 file3...
 # user/password files should be in the form:
 #   - one user per line
-#   - each user line consists of two words (username and password) separted by a whitespace: username password
-#   - empty lines and lines starting with a '#' arg ignored
+#   - each line consists of two words (username and password) separated by a whitespace: username password
+#   - empty lines and lines starting with a '#' are ignored
 
 if [ $# -eq 0 ]; then
     echo "usage: $(basename $0) <files..>"
