@@ -8,15 +8,21 @@ services:
     environment:
       - NEO4J_URL=http://neo4j:7474
       - NEO4J_USER=neo4j
-      - NEO4J_PASS=${NEO4J_PASS}
+      - NEO4J_PASS=${WUST_NEO4J_PASS}
+      - UI_REGISTRATION_ENABLED=${WUST_UI_REGISTRATION_ENABLED}
+      - "JAVA_OPTS=-Xms128m -Xmx256m"
     depends_on:
       - neo4j
   neo4j:
-    image: neo4j
+    build: neo4wust
+    ports:
+      - "7474:7474"
     environment:
-      - NEO4J_AUTH=neo4j/${NEO4J_PASS}
-      - EXTENSION_SCRIPT=/neo4j_init/init.sh
+      - NEO4J_AUTH=neo4j/${WUST_NEO4J_PASS}
+      - AWS_ACCESS_KEY_ID=${WUST_AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${WUST_AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${WUST_AWS_DEFAULT_REGION}
+      - NEO4J_BACKUP_S3_BUCKET=${WUST_NEO4J_BACKUP_S3_BUCKET}
     volumes:
       - /data:/data/
       - /logs:/logs/
-      - ./neo4j_init/:/neo4j_init/

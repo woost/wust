@@ -13,7 +13,7 @@ trait TaskQueryHandler extends QueryHandler {
 
 class FileWriterQueryHandler(fileName: String) extends TaskQueryHandler {
   val writer = new java.io.PrintWriter(fileName)
-  val parameterRegex = "\\{[^{}]+\\}".r
+  val parameterRegex = "\\{[^{}: ]+\\}".r
 
   private def formatParameterValue(value: ParameterValue): String = value match {
     case StringPropertyValue(str) => s""""$str""""
@@ -26,11 +26,15 @@ class FileWriterQueryHandler(fileName: String) extends TaskQueryHandler {
   }
 
   private def formatQuery(query: Query): String = {
-    parameterRegex.replaceAllIn(query.statement, m => {
-      val key = m.group(0).drop(1).dropRight(1)
+    val r = parameterRegex.replaceAllIn(query.statement, m => {
+      // println(m)
+      val matched = m.group(0)
+      val key = matched.drop(1).dropRight(1)
       val value = query.parameters(PropertyKey(key))
-      formatParameterValue(value)
+      formatParameterValue(value).replace("$", "\\$")
     }) + ";\n"
+    println(r)
+    r
   }
 
   private def logQueries(queries: Seq[Query]) {
