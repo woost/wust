@@ -12,7 +12,7 @@ services:
     depends_on:
       - neo4j
   neo4j:
-    image: neo4j
+    image: neo4j:3.0.6
     environment:
       - NEO4J_AUTH=neo4j/${NEO4J_PASS}
       - EXTENSION_SCRIPT=/neo4j_init/init.sh
@@ -21,11 +21,13 @@ services:
       - /logs:/logs/
       - ./neo4j_init/:/neo4j_init/
   neo4j2s3:
-    image: woost/neo4j2s3
+    build: neo4j2s3
     environment:
-      - NEO4J_URL=http://neo4j:7474
       - NEO4J_USER=neo4j
       - NEO4J_PASS=${NEO4J_PASS}
       - AWS_ACCESS_KEY_ID=${WUST_AWS_ACCESS_KEY}
       - AWS_SECRET_ACCESS_KEY=${WUST_AWS_SECRET_ACCESS_KEY}
       - AWS_DEFAULT_REGION=${WUST_AWS_DEFAULT_REGION}
+      - JAVA_OPTS="-Xms32m -Xmx32m"
+    depends_on:
+      - neo4j
