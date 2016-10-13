@@ -1,4 +1,4 @@
-script_dir="/neo4j_init/"
+script_dir="/neo4j-extension/init"
 imported_label="__CQL_FILE_IMPORTED"
 
 echo "initializing neo4j..."
