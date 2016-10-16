@@ -1,20 +1,19 @@
 #!/bin/bash -e
 
-target_file="$1"
-
-if [ -z "$target_file" ]; then
-    sbt "project seed" run
+if [ -z "$NEO4J_DUMP_FILE" ]; then
+    sbt "project seed" "run $@"
 else
-    container=$(docker run -d -p 1337:1337 -p 7474:7474 -e "NEO4J_AUTH=none" neo4j)
-    while ! timeout 1 cat < /dev/null > /dev/tcp/localhost/7474 > /dev/null 2> /dev/null; do sleep 0.1; done
+    # container=$(docker run -d -p 7474:7474 -e "NEO4J_AUTH=none" "neo4j:2.3.6")
+    # echo "started neo4j container $container"
+    # while ! timeout 1 cat < /dev/null > /dev/tcp/localhost/7474 > /dev/null 2> /dev/null; do sleep 0.1; done
 
-    sbt "project seed" run
+    # sbt "project seed" "run $@"
 
-    docker exec $container /var/lib/neo4j/bin/neo4j-shell -c dump > $target_file
+    # docker exec $container /var/lib/neo4j/bin/neo4j-shell -c dump > $NEO4J_DUMP_FILE
 
-    docker stop $container
-    docker rm $container
+    # docker stop $container
+    # docker rm $container
 
-    # export QUERY_SEED_FILE=$target_file
-    # sbt "project seed" run
+    export SEED_QUERY_FILE=$NEO4J_DUMP_FILE
+    sbt "project seed" "run $@"
 fi

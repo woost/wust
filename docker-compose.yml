@@ -8,28 +8,19 @@ services:
     environment:
       - NEO4J_URL=http://neo4j:7474
       - NEO4J_USER=neo4j
-      - NEO4J_PASS=${NEO4J_PASS}
-      # - "JAVA_OPTS=-Xms128m -Xmx128m"
-    # depends_on:
-    #   - neo4j # das nach unten? oder ganz weg, oder sleep vorm neo4j entrypoint sleep ist eigentlich hart quatsch. Und die sollten auch kein problem haben gleichzeitig zu starten. stimmt eignetlich ja. aber wir haben es mit computern zu tun.
+      - NEO4J_PASS=${WUST_NEO4J_PASS}
+      - UI_REGISTRATION_ENABLED=${WUST_UI_REGISTRATION_ENABLED}
+      - "JAVA_OPTS=-Xms128m -Xmx256m"
+    depends_on:
+      - neo4j
   neo4j:
     build: neo4wust
     environment:
-      - NEO4J_AUTH=none #neo4j/${NEO4J_PASS} ???
-      - AWS_ACCESS_KEY_ID=${WUST_AWS_ACCESS_KEY}
+      - NEO4J_AUTH=neo4j/${WUST_NEO4J_PASS}
+      - AWS_ACCESS_KEY_ID=${WUST_AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${WUST_AWS_SECRET_ACCESS_KEY}
       - AWS_DEFAULT_REGION=${WUST_AWS_DEFAULT_REGION}
-      # - "JAVA_OPTS=-Xms512m -Xmx512m"
-    # entrypoint: sh -c /docker-entrypoint.sh || /docker-entrypoint.sh || /docker-entrypoint.sh # so sieht unser entrypoint auf der arbeit für kafka schema registry aus. die crash manchmal beim starten.
-        # ich hatte doch mal einen blockierenden start implementiert, für travis. kann man das denn nicht nehmen? diue machen das selbst auch
-        #  aber das pw ändern scheint da nicht drauf zu warten
-        #  doch
-        #  https://github.com/neo4j/docker-neo4j/blob/master/src/3.1/docker-entrypoint.sh
-        #  oh das was 3.1. das is unser entrypoint:
-        #  https://github.com/neo4j/docker-neo4j/blob/master/src/3.0/docker-entrypoint.sh
-        #  line: 48...100 seconds, vilellecith reicht das nich// TODO: aber unser entrpoint retry bringt auch nix, das failed dann im script. wir müssen das patchen, man kann doch einfach mit docker die datei überschreiben, oder?
-        #  du kannst alles machen. RUN <any command> im container bis zum jetztigen layer. der created ja dafür immer inermediate container aus dem akteullen image und dann huat er mit RUN oder COPY nen neues "layer" drauf
-        #  ok, hab ich verstanden. Macht es sinn da jetzt das timeout zu erhöhen? probieren! oder mal in die logfile gucken.jo sah aber nich nach viel aus. achte...wir testne das hier mal
+      - NEO4J_BACKUP_S3_BUCKET=${WUST_NEO4J_BACKUP_S3_BUCKET}
     volumes:
       - /data:/data/
       - /logs:/logs/
