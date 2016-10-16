@@ -15,6 +15,8 @@ services:
       - neo4j
   neo4j:
     build: neo4wust
+    ports:
+      - "7474:7474"
     environment:
       - NEO4J_AUTH=neo4j/${WUST_NEO4J_PASS}
       - AWS_ACCESS_KEY_ID=${WUST_AWS_ACCESS_KEY_ID}
