@@ -12,6 +12,7 @@ pw_length=8
 
 if [ $# -eq 0 ]; then
     echo "usage: $(basename $0) <files..>"
+    exit 1
 fi
 
 for file in "$@"; do
