@@ -1,0 +1,66 @@
+#!/bin/bash -e
+
+if [ $# -lt 2 ]; then
+    echo "usage: $(basename $0) <machine> <cmd>"
+    exit 1
+fi
+
+machine=$1
+cmd=${@:2}
+
+local_port="7474"
+remote_port="7474"
+remote_backup_cmd="/neo4j-extension/neo4j-s3-backup.sh"
+neo4j_container="wust_neo4j_1"
+ssh_pid=""
+
+cleanup() {
+    [ -n "$ssh_pid" ] && pkill -P "$ssh_pid"
+}
+
+exit_handler() {
+  echo "exiting!"
+  cleanup
+  exit $?
+}
+
+trap exit_handler SIGINT
+trap exit_handler EXIT
+
+machine_status=$(docker-machine status "$machine")
+if [ "$machine_status" != "Running" ]; then
+    echo "machine '$machine' is not running"
+    exit 1
+fi
+
+local_port_on=$(netstat -lnt | awk "\$6 == \"LISTEN\" && \$4 ~ \":$local_port\"")
+if [ -n "$local_port_on" ]; then
+    echo "local port '$local_port' already in use"
+    exit 1
+fi
+
+remote_port_on=$(docker-machine ssh "$machine" netstat -lnt | awk "\$6 == \"LISTEN\" && \$4 ~ \":$remote_port\"")
+if [ -z "$remote_port_on" ]; then
+    echo "remote port '$remote_port' on machine '$machine' not listening"
+    exit 1
+fi
+
+echo "backing up neo4j in container '$neo4j_container' '$machine' using '$remote_backup_cmd'"
+(
+    eval "$(docker-machine env $machine)"
+    docker exec "$neo4j_container" "$remote_backup_cmd"
+)
+
+read -p "Do you really want to execute the command '$cmd'? (y/n)" answer
+if [ "$answer" != "y" ]; then
+    exit 1
+fi
+
+echo "forward remote port '$remote_port' to local port '$local_port'"
+docker-machine ssh "$machine" -NL $remote_port:localhost:$local_port &
+ssh_pid=$!
+
+echo "executing command '$cmd'"
+bash -c "$cmd"
+
+echo "done"
