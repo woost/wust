@@ -1,7 +1,7 @@
 @import "globals";
 @import "bootstrap/variables";
 
-.survey {
+.tutorial {
     overflow: hidden;
     margin-top: 1px;
     min-height: 48px;
@@ -10,25 +10,32 @@
     width: 370px;
     position: absolute;
     z-index: 200;
+
     &:hover {
         overflow: auto;
         max-height: 600px;
+
         // width: 600px;
         // max-width: 600px;
+   
     }
+
     .second-title {
         font-size: 13px;
         padding-right: 10px;
         line-height: 22px;
     }
+
     .info_text {
         padding-left: 3px;
         padding-right: 3px;
+
         .description_text {
             padding: 3px;
             padding-right: 15px;
         }
     }
+
     .email-info {
         padding-left: 10px;
         padding-right: 10px;

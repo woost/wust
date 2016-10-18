@@ -22,8 +22,8 @@
                     <button ng-if="::vm.Auth.isLoggedIn" type="button" class="hidden-lg hidden-md new_discussion_button_xs btn btn-xs btn-default navbar-btn" onclick="this.blur()" ng-click="vm.newDiscussion()">Start<br />Discussion</button>
                     <button ng-if="::vm.Auth.isLoggedIn" type="button" class="hidden-xs hidden-sm new_discussion_button btn btn-default navbar-btn" onclick="this.blur()" ng-click="vm.newDiscussion()">Start Discussion</button>
                 </li>
-                <li class="survey-container hidden-xs" ng-if="::uiSettings.surveyEnabled">
-                    <div survey></div>
+                <li class="tutorial-container hidden-xs" ng-if="::uiSettings.tutorialEnabled">
+                    <div tutorial></div>
                 </li>
             </ul>
 

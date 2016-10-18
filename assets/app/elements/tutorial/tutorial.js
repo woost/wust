@@ -1,16 +1,16 @@
-angular.module("wust.elements").directive("survey", survey);
+angular.module("wust.elements").directive("tutorial", tutorial);
 
-survey.$inject = [];
+tutorial.$inject = [];
 
-angular.module("wust.elements").service("SurveyService", SurveyService);
+angular.module("wust.elements").service("TutorialService", TutorialService);
 
-SurveyService.$inject = ["store"];
+TutorialService.$inject = ["store"];
 
-function SurveyService(store) {
-    let surveyStore = store.getNamespacedStore("survey");
+function TutorialService(store) {
+    let tutorialStore = store.getNamespacedStore("tutorial");
 
-    this.currentIndex = surveyStore.get("currentIndex") || 0;
-    // this.isFinished = surveyStore.get("isFinished") || false;
+    this.currentIndex = tutorialStore.get("currentIndex") || 0;
+    // this.isFinished = tutorialStore.get("isFinished") || false;
 
     this.finished = finished;
     this.openQuestionaire = openQuestionaire;
@@ -19,7 +19,7 @@ function SurveyService(store) {
 
     function finished() {
         // this.isFinished = true;
-        // surveyStore.set("isFinished", this.isFinished);
+        // tutorialStore.set("isFinished", this.isFinished);
     }
 
     function openQuestionaire() {
@@ -31,7 +31,7 @@ function SurveyService(store) {
             return;
 
         this.currentIndex--;
-        surveyStore.set("currentIndex", this.currentIndex);
+        tutorialStore.set("currentIndex", this.currentIndex);
     }
 
     function next() {
@@ -40,7 +40,7 @@ function SurveyService(store) {
 
 
         this.currentIndex++;
-        surveyStore.set("currentIndex", this.currentIndex);
+        tutorialStore.set("currentIndex", this.currentIndex);
 
         // Google Analytics Events
         if (this.currentIndex === 1)
@@ -221,25 +221,25 @@ Wust is Open Source Software and available on [GitHub](https://github.com/woost/
     }];
 }
 
-function survey() {
+function tutorial() {
     return {
         restrict: "A",
         replace: true,
-        templateUrl: "elements/survey/survey.html",
+        templateUrl: "elements/tutorial/tutorial.html",
         scope: {
             canHide: "@"
         },
-        controller: surveyCtrl,
+        controller: tutorialCtrl,
         controllerAs: "vm",
         bindToController: true
     };
 }
 
-surveyCtrl.$inject = ["SurveyService"];
+tutorialCtrl.$inject = ["TutorialService"];
 
-function surveyCtrl(SurveyService) {
+function tutorialCtrl(TutorialService) {
     let vm = this;
 
-    vm.survey = SurveyService;
+    vm.tutorial = TutorialService;
 
 }

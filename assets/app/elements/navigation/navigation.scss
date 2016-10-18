@@ -5,6 +5,7 @@
     .container-fluid {
         padding-left: 0;
     }
+
     .navbar-brand {
         margin-left: 0px;
     }
@@ -15,7 +16,10 @@
     color: $nav_normal_color;
 
     .form-group {
-        margin-bottom: 0; // becomes 15px on small screen sizes...
+        margin-bottom: 0;
+
+        // becomes 15px on small screen sizes...
+   
     }
 
     .navbar-brand {
@@ -24,7 +28,7 @@
     }
 
     .navpagelinks a:link, .navpagelinks a:hover, .navpagelinks a:visited, .navpagelinks a.active,
-     a.dropdown-toggle:link, a.dropdown-toggle:hover, a.dropdown-toggle:visited, .navbar-form {
+    a.dropdown-toggle:link, a.dropdown-toggle:hover, a.dropdown-toggle:visited, .navbar-form {
         color: $nav_normal_color;
         border-left: 1px solid transparent;
         border-right: 1px solid transparent;
@@ -41,7 +45,7 @@
         background-color: $nav_active_background;
         border-left: 1px solid rgba(100, 100, 100, 0.68);
         border-right: 1px solid rgba(100, 100, 100, 0.68);
-        border-bottom:1px solid white;
+        border-bottom: 1px solid white;
     }
 
     .tag-label {
@@ -54,6 +58,7 @@
 
     .search-form {
         margin-right: -10px;
+
         input {
             width: 185px;
         }
@@ -80,14 +85,19 @@
         h3 {
             padding: 10px 0px;
         }
+
         width: 300px;
-        height: 270px; // must be high enough to cover expanded tag-editor
+        height: 270px;
+
+        // must be high enough to cover expanded tag-editor
         padding: 10px;
     }
+
     .new_discussion_button {
         margin-right: 0px;
         margin-left: 10px;
     }
+
     .new_discussion_button_xs {
         margin-right: 0px;
         margin-left: 10px;
@@ -96,7 +106,8 @@
         padding-left: 5px;
         padding-right: 5px;
     }
-    .survey-container {
+
+    .tutorial-container {
         margin-left: 10px;
         overflow: visible;
         position: relative;
@@ -105,11 +116,14 @@
 
 .auth-dropdown {
     display: block;
-    z-index: $zindex_auth; // does not work
+    z-index: $zindex_auth;
+
+    // does not work
     form {
         a, a:link, a:visited {
             color: $link-color;
         }
+
         a:active, a:hover {
             color: $link-hover-color;
         }

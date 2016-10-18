@@ -26,7 +26,7 @@ have a look into `./buildproduction` and then run it:
 - start the neo4j server
 - set the environment variables for connecting to the database:
     - `NEO4J_URL`, `NEO4J_USER`, `NEO4J_PASS`
-    - to activate the tutorial: `UI_SURVEY_ENABLED=true`
+    - to activate the tutorial: `UI_TUTORIAL_ENABLED=true`
 - `./initseed` and select `[6] tasks.SeedDatabase`
     - this seeds the database
 - `target/universal/stage/bin/wust`

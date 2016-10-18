@@ -1,0 +1,22 @@
+<div class="tutorial alert alert-success">
+    <span class="info_text">
+        <b class="text-center" ng-bind="vm.tutorial.exercises[vm.tutorial.currentIndex].title"></b>
+        <div>
+            <button type="button" class="btn btn-xs btn-default" ng-hide="vm.tutorial.currentIndex < 1" ng-click="vm.tutorial.back()">Back</button>
+            <span class="second-title" ng-bind="vm.tutorial.exercises[vm.tutorial.currentIndex].secondTitle"></span>
+    <button type="button" class="pull-right btn btn-xs btn-primary" ng-show="vm.tutorial.currentIndex < vm.tutorial.exercises.length - 1" ng-click="vm.tutorial.next()">Next</button>
+    <a href="https://www.surveymonkey.com" target="_blank" class="pull-right btn btn-xs btn-primary" ng-click="vm.tutorial.finished(); vm.tutorial.openQuestionaire()" ng-hide="true || vm.tutorial.currentIndex < vm.tutorial.exercises.length - 1">Fragebogen</a>
+    <span class="pull-right second-title">{{vm.tutorial.currentIndex + 1}} / {{vm.tutorial.exercises.length}}</span>
+</div>
+<br />
+<div class="description_text" markdown="vm.tutorial.exercises[vm.tutorial.currentIndex].description"></div>
+</span>
+<h4 class="text-center" ng-hide="true || vm.tutorial.currentIndex < vm.tutorial.exercises.length - 1">
+        Hier geht es zum <a href="https://www.surveymonkey.com" target="_blank" ng-click="vm.tutorial.finished(); vm.tutorial.openQuestionaire()">Fragebogen</a>.
+    </h4>
+<div class="email-info" ng-show="vm.tutorial.exercises[vm.tutorial.currentIndex].email">
+    <hr /> If you have questions or problems please create an issue on <a href="https://github.com/woost/wust/issues">GitHub</a>.
+    <br /> If you have improvements for this tutorial, please send a <a href="https://github.com/woost/wust/edit/master/assets/app/elements/tutorial/tutorial.js#L54">pull request.</a>.
+    <br />
+</div>
+</div>
