@@ -23,6 +23,7 @@ object Application extends Controller {
   val surveyEnabled = "ui.survey.enabled".configOrElse(false)
   val registrationEnabled = "ui.registration.enabled".configOrElse(true)
   val inspectletId = "tracking.inspectlet.id".configOrElse("")
+  val googleanalyticsId = "tracking.googleanalytics.id".configOrElse("")
 
   def index(any: String) = Action {
     Ok(views.html.index(
