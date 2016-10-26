@@ -64,7 +64,7 @@ else
     fi
 
     echo "forward remote port '$remote_port' to local port '$local_port'"
-    docker-machine ssh "$machine" -NL $remote_port:localhost:$local_port &
+    docker-machine ssh "$machine" -NL $local_port:localhost:$remote_port &
     ssh_pid=$!
 
     echo "executing command '$cmd'"
