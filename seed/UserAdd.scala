@@ -79,7 +79,7 @@ object AuthBlob extends HeaderEnvironmentModule {
   def createUser(user: User)(implicit db: TaskQueryHandler): Future[Option[String]] = {
     val loginInfo = LoginInfo(CredentialsProvider.ID, user.name)
     val authInfo = passwordHasher.hash(user.password)
-    val query = s"""match (group ${ ws.UserGroup.labels.map(l => s":`$l`").mkString} { name: "everyone" }) with group merge (u ${ ws.User.labels.map(l => s":`$l`").mkString} {name: {userProps}.name, uuid: {userProps}.uuid})-[hasLogin:`${ws.HasLogin.relationType}`]->(l ${ ws.LoginInfo.labels.map(l => s":`$l`").mkString } {providerID: {loginInfoProps}.providerID, providerKey: {loginInfoProps}.providerKey}) merge (u)-[memberof: `${ ws.MemberOf.relationType}`]->(group) merge (l)-[hasPassword:`${ ws.HasPassword.relationType }`]->(p ${ ws.PasswordInfo.labels.map(l => s":`$l`").mkString }) on match set p = {passwordInfoProps} on create set p = {passwordInfoProps} return *"""
+    val query = s"""match (group ${ ws.UserGroup.labels.map(l => s":`$l`").mkString} { name: "everyone" }) with group merge (u ${ ws.User.labels.map(l => s":`$l`").mkString} {name: {userProps}.name})-[hasLogin:`${ws.HasLogin.relationType}`]->(l ${ ws.LoginInfo.labels.map(l => s":`$l`").mkString } {providerID: {loginInfoProps}.providerID, providerKey: {loginInfoProps}.providerKey}) on create set u.uuid = {userProps}.name merge (u)-[memberof: `${ ws.MemberOf.relationType}`]->(group) merge (l)-[hasPassword:`${ ws.HasPassword.relationType }`]->(p ${ ws.PasswordInfo.labels.map(l => s":`$l`").mkString }) on match set p = {passwordInfoProps} on create set p = {passwordInfoProps} return *"""
     println(query)
 
     val params = Map(
