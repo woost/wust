@@ -1,4 +1,4 @@
-FROM neo4j:2.3.6
+FROM neo4j:3.0
 
 RUN apt-get update && apt-get install cron python -y
 
