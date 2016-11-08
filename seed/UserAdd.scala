@@ -9,7 +9,7 @@ import modules.auth.HeaderEnvironmentModule
 import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
 import com.mohiva.play.silhouette.api.LoginInfo
 
-case class User(name: String, password: String)
+case class UserData(name: String, password: String)
 
 // adds users from files:
 //   $ UserAdd.main file1 file2 file3...
@@ -47,7 +47,7 @@ object UserAdd extends DbUtil {
     }
   }
 
-  def parseUserFile(file: String): Either[String, Seq[User]] = {
+  def parseUserFile(file: String): Either[String, Seq[UserData]] = {
     Try(Source.fromFile(file)) match {
       case Success(src) =>
         val lines = src.getLines.zipWithIndex.filterNot { case (l,i) =>
@@ -57,7 +57,7 @@ object UserAdd extends DbUtil {
         val users = lines.map { case (line, index) =>
           val splits = line.split(" ")
           if (splits.size != 2) Left(s"$index($line)")
-          else Right(User(splits(0), splits(1)))
+          else Right(UserData(splits(0), splits(1)))
         }.toList
 
         src.close()
@@ -76,10 +76,10 @@ object AuthBlob extends HeaderEnvironmentModule {
   import renesca.parameter.implicits._
   import model.{WustSchema => ws}
 
-  def createUser(user: User)(implicit db: TaskQueryHandler): Future[Option[String]] = {
+  def createUser(user: UserData)(implicit db: TaskQueryHandler): Future[Option[String]] = {
     val loginInfo = LoginInfo(CredentialsProvider.ID, user.name)
     val authInfo = passwordHasher.hash(user.password)
-    val query = s"""match (group ${ ws.UserGroup.labels.map(l => s":`$l`").mkString} { name: "everyone" }) with group merge (u ${ ws.User.labels.map(l => s":`$l`").mkString} {name: {userProps}.name})-[hasLogin:`${ws.HasLogin.relationType}`]->(l ${ ws.LoginInfo.labels.map(l => s":`$l`").mkString } {providerID: {loginInfoProps}.providerID, providerKey: {loginInfoProps}.providerKey}) on create set u.uuid = {userProps}.name merge (u)-[memberof: `${ ws.MemberOf.relationType}`]->(group) merge (l)-[hasPassword:`${ ws.HasPassword.relationType }`]->(p ${ ws.PasswordInfo.labels.map(l => s":`$l`").mkString }) on match set p = {passwordInfoProps} on create set p = {passwordInfoProps} return *"""
+    val query = s"""match (group ${ ws.UserGroup.labels.map(l => s":`$l`").mkString} { name: "everyone" }) with group merge (u ${ ws.User.labels.map(l => s":`$l`").mkString} {name: {userProps}.name})-[hasLogin:`${ws.HasLogin.relationType}`]->(l ${ ws.LoginInfo.labels.map(l => s":`$l`").mkString } {providerID: {loginInfoProps}.providerID, providerKey: {loginInfoProps}.providerKey}) on create set u.uuid = {userProps}.uuid merge (u)-[memberof: `${ ws.MemberOf.relationType}`]->(group) merge (l)-[hasPassword:`${ ws.HasPassword.relationType }`]->(p ${ ws.PasswordInfo.labels.map(l => s":`$l`").mkString }) on match set p = {passwordInfoProps} on create set p = {passwordInfoProps} return *"""
     println(query)
 
     val params = Map(
@@ -104,7 +104,7 @@ object AuthBlob extends HeaderEnvironmentModule {
     }
   }
 
-  def addUsers(users: Seq[User])(implicit db: TaskQueryHandler): Future[Seq[Option[String]]] = {
+  def addUsers(users: Seq[UserData])(implicit db: TaskQueryHandler): Future[Seq[Option[String]]] = {
     val userFutures = users.map(createUser)
     Future.sequence(userFutures)
   }
