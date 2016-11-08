@@ -41,7 +41,7 @@ trait MyWithFilters extends GlobalSettings {
   lazy val filters = if(Play.isDev) {
     Array(LoggingFilter)
   } else {
-    Array(new GzipFilter)
+    Array(new GzipFilter, LoggingFilter)
   }
 
   override def doFilter(a: EssentialAction): EssentialAction = {
