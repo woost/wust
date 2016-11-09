@@ -20,7 +20,7 @@ object Database {
   //TODO: more methods with optional tx
   private def discourseGraphWithReturn(returns: String, definitions: NamedGraphDefinition*)(implicit ctx: QueryContext): Discourse = discourseGraphWithReturn(db, returns, definitions: _*)
   private def discourseGraphWithReturn(tx: QueryHandler, returns: String, definitions: NamedGraphDefinition*)(implicit ctx: QueryContext): Discourse = {
-    if(definitions.isEmpty || returns.isEmpty)
+    if (definitions.isEmpty || returns.isEmpty)
       return Discourse.empty
 
     val matcher = definitions.map(_.toPattern).mkString(",")
@@ -41,10 +41,10 @@ object Database {
 
   def nodeDiscourseGraph[NODE <: UuidNode](factory: NodeFactory[NODE], uuids: String*): Discourse = {
     implicit val ctx = new QueryContext
-    if(uuids.isEmpty)
+    if (uuids.isEmpty)
       return discourseGraph(FactoryNodeDef(factory))
 
-    val query = s"match (n :`${ factory.label }`) where n.uuid in {uuids} return n limit ${ uuids.size }"
+    val query = s"match (n :`${factory.label}`) where n.uuid in {uuids} return n limit ${uuids.size}"
     val params = Map("uuids" -> uuids)
     Discourse(db.queryGraph(Query(query, params)))
   }
@@ -52,7 +52,7 @@ object Database {
   def limitedDiscourseNodes[NODE <: UuidNode](skip: Int, limit: Int, factory: NodeFactory[NODE]): (Discourse, Seq[NODE]) = {
     implicit val ctx = new QueryContext
     val nodeDef = FactoryNodeDef(factory)
-    val discourse = discourseGraphWithReturn(s"${ nodeDef.name } skip $skip limit $limit", nodeDef)
+    val discourse = discourseGraphWithReturn(s"${nodeDef.name} skip $skip limit $limit", nodeDef)
     (discourse, nodesWithType[NODE](discourse.nodes))
   }
 
@@ -73,7 +73,7 @@ object Database {
 
   def startConnectedDiscourseGraph[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinitions: NodeAndFixedRelationDef[START, RELATION, END]*)(implicit ctx: QueryContext): Discourse = {
     val queries = relationDefinitions.map { relationDefinition =>
-      val query = s"match ${ relationDefinition.toPattern } return ${ relationDefinition.endDefinition.name }"
+      val query = s"match ${relationDefinition.toPattern} return ${relationDefinition.endDefinition.name}"
       Query(query, ctx.params)
     }
     Discourse(db.queryGraphs(queries: _*).fold(Graph.empty)(_ merge _))
@@ -87,7 +87,7 @@ object Database {
   //TODO: need ordering for limit search, otherwise we get duplicates
   def limitedStartConnectedDiscourseGraph[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](skip: Int, limit: Int, relationDefinitions: NodeAndFixedRelationDef[START, RELATION, END]*)(implicit ctx: QueryContext): Discourse = {
     val queries = relationDefinitions.map { relationDefinition =>
-      val query = s"match ${ relationDefinition.toPattern } return ${ relationDefinition.endDefinition.name } skip $skip limit $limit"
+      val query = s"match ${relationDefinition.toPattern} return ${relationDefinition.endDefinition.name} skip $skip limit $limit"
       Query(query, ctx.params)
     }
     Discourse(db.queryGraphs(queries: _*).fold(Graph.empty)(_ merge _))
@@ -100,7 +100,7 @@ object Database {
 
   def endConnectedDiscourseGraph[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](relationDefinitions: FixedAndNodeRelationDef[START, RELATION, END]*)(implicit ctx: QueryContext): Discourse = {
     val queries = relationDefinitions.map { relationDefinition =>
-      val query = s"match ${ relationDefinition.toPattern } return ${ relationDefinition.startDefinition.name }"
+      val query = s"match ${relationDefinition.toPattern} return ${relationDefinition.startDefinition.name}"
       Query(query, ctx.params)
     }
     Discourse(db.queryGraphs(queries: _*).fold(Graph.empty)(_ merge _))
@@ -113,7 +113,7 @@ object Database {
 
   def limitedEndConnectedDiscourseGraph[START <: Node, RELATION <: AbstractRelation[START, END], END <: Node](skip: Int, limit: Int, relationDefinitions: FixedAndNodeRelationDef[START, RELATION, END]*)(implicit ctx: QueryContext): Discourse = {
     val queries = relationDefinitions.map { relationDefinition =>
-      val query = s"match ${ relationDefinition.toPattern } return ${ relationDefinition.startDefinition.name } skip $skip limit $limit"
+      val query = s"match ${relationDefinition.toPattern} return ${relationDefinition.startDefinition.name} skip $skip limit $limit"
       Query(query, ctx.params)
     }
     Discourse(db.queryGraphs(queries: _*).fold(Graph.empty)(_ merge _))
@@ -124,8 +124,9 @@ object Database {
     nodesWithType[START](discourse.nodes)
   }
 
-  // IMPORTANT: we need to write the constancts as doubles to avoid integer arithmetic
   def connectedComponent(postUuid: String, identity: Option[User], depth: Int): Discourse = {
+    // IMPORTANT: we need to write the constants as doubles to avoid integer arithmetic
+    //
     // Tag weights
     // 1. Cypher does not support subqueries yet, so we have to do extra queries for the tag weights.
     // This is not very efficient, because the component is traversed in each query.
@@ -145,15 +146,15 @@ object Database {
     // query undirected connected component of posts with maximum depth
     // depth * 2 because hyperrelation depth
     val query = s"""
-match p=${ focusNode.toPattern }-[connects:`${ Connects.startRelationType }`|`${ Connects.endRelationType }` *0..${ depth * 2 }]-(connectable:`${ Connectable.label }`)
+match p=${focusNode.toPattern}-[connects:`${Connects.startRelationType}`|`${Connects.endRelationType}` *0..${depth * 2}]-(connectable:`${Connectable.label}`)
 where ALL (conn in nodes(p)[1..] where (conn:`${Post.label}`) or (:`${Post.label}`)-->(conn:`${Connects.label}`)-->(:`${Connectable.label}`))
 with distinct connectable, connects
 
-optional match (context:`${ Scope.label }`)-[contexttotags:`${ Tags.startRelationType }`]->(tags:`${ Tags.label }`)-[tagstopost:`${ Tags.endRelationType }`]->(connectable:`${ Post.label }`)
-optional match (classification:`${ Classification.label }`)-[classifies:`${ Classifies.relationType }`]->(connectable:`${ Connects.label }`)
-optional match (tagclassification:`${ Classification.label }`)-[tagclassifies:`${ Classifies.relationType }`]->(tags)
-optional match (:`${ User.label }` {uuid: {useruuid}})-[selfanswervoted :`${ Votes.relationType }`]->(connectable:`${ Connects.label }`)
-optional match (author:`${ User.label }`)-[authorStart :`${ Created.startRelationType }`]->(created:`${ Created.label }`)-[authorEnd: `${ Created.endRelationType }`]->(connectable:`${Post.label}`)
+optional match (context:`${Scope.label}`)-[contexttotags:`${Tags.startRelationType}`]->(tags:`${Tags.label}`)-[tagstopost:`${Tags.endRelationType}`]->(connectable:`${Post.label}`)
+optional match (classification:`${Classification.label}`)-[classifies:`${Classifies.relationType}`]->(connectable:`${Connects.label}`)
+optional match (tagclassification:`${Classification.label}`)-[tagclassifies:`${Classifies.relationType}`]->(tags)
+optional match (:`${User.label}` {uuid: {useruuid}})-[selfanswervoted :`${Votes.relationType}`]->(connectable:`${Connects.label}`)
+optional match (author:`${User.label}`)-[authorStart :`${Created.startRelationType}`]->(created:`${Created.label}`)-[authorEnd: `${Created.endRelationType}`]->(connectable:`${Post.label}`)
 return connectable,connects,context,tags,contexttotags,tagstopost, classification, classifies, count(selfanswervoted) as selfanswervotecount,tagclassification,tagclassifies, author, authorStart, created, authorEnd
     """
 
@@ -167,12 +168,11 @@ return connectable,connects,context,tags,contexttotags,tagstopost, classificatio
     table.rows.foreach { row =>
       val selfanswervotecount = row("selfanswervotecount").asLong
 
-      if(selfanswervotecount > 0) {
+      if (selfanswervotecount > 0) {
         val uuid = row("connectable").asMap("uuid").asString
         uuidToNode(uuid).rawItem.properties += ("selfanswervotecount" -> selfanswervotecount)
       }
     }
-
 
     //TODO: HACK: remove all hyperrealtion without start/end from component
     component.hyperRelations.filter(hr => hr.startNodeOpt.isEmpty || hr.endNodeOpt.isEmpty).foreach(component.remove(_))
