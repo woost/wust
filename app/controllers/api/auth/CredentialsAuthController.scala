@@ -21,7 +21,9 @@ import scala.concurrent.Future
 
 trait PublicReadingControl extends Controller with Silhouette[User, JWTAuthenticator] with HeaderEnvironmentModule {
   val PublicReadingControlledAction = if (Application.publicReadingEnabled) Action else SecuredAction
-  // val PublicReadingControlledUserAwareAction = if (Application.publicReadingEnabled) UserAwareAction else SecuredAction
+  def PublicReadingControlledUserAwareAction(block: => Result) = if (Application.publicReadingEnabled) UserAwareAction(block) else SecuredAction(block)
+  def PublicReadingControlledUserAwareAction(block: UserAwareRequest[AnyContent] => Result) = if (Application.publicReadingEnabled) UserAwareAction(block) else SecuredAction(s => block(securedToUserAwareRequest(s)))
+  private def securedToUserAwareRequest[B](r: SecuredRequest[B]) = UserAwareRequest(Some(r.identity), Some(r.authenticator), r.request)
 }
 
 class CredentialsAuthController extends Silhouette[User, JWTAuthenticator]

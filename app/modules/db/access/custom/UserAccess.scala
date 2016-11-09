@@ -22,7 +22,7 @@ case class UserAccess() extends NodeReadBase[User] with HeaderEnvironmentModule 
 
   implicit val format = UserFormat.UserFormat
 
-  override def read(context: RequestContext) = context.withPublicReadingControl {
+  override def read(context: RequestContext) = {
     val page = context.page.getOrElse(0)
     val limit = context.sizeWithDefault
     val skip = page * limit
@@ -103,7 +103,7 @@ case class UserContributions() extends RelationAccessDefault[User, Post] {
 
   val nodeFactory = Post
 
-  override def read(context: RequestContext, param: ConnectParameter[User]) = context.withPublicReadingControl {
+  override def read(context: RequestContext, param: ConnectParameter[User]) = {
     val page = context.page.getOrElse(0)
     val limit = context.sizeWithDefault
     val skip = page * limit
@@ -151,7 +151,7 @@ case class UserContributions() extends RelationAccessDefault[User, Post] {
 case class UserHasKarmaScopes() extends StartRelationAccessDefault[User, HasKarma, Scope] {
   val nodeFactory = Scope
 
-  override def read(context: RequestContext, param: ConnectParameter[User]) = context.withPublicReadingControl {
+  override def read(context: RequestContext, param: ConnectParameter[User]) = {
     implicit val ctx = new QueryContext
     val userDef = FactoryUuidNodeDef(User, param.baseUuid)
     val karmaDef = RelationDef(userDef, HasKarma, FactoryNodeDef(Scope))
@@ -168,7 +168,7 @@ case class UserHasKarmaLog() extends StartRelationAccessDefault[User, KarmaLog, 
 
   val nodeFactory = Post
 
-  override def read(context: RequestContext, param: ConnectParameter[User]) = context.withPublicReadingControl {
+  override def read(context: RequestContext, param: ConnectParameter[User]) = {
     implicit val ctx = new QueryContext
     val userDef = FactoryUuidNodeDef(User, param.baseUuid)
     val nodeDef = LabelNodeDef[Post](Set.empty)
@@ -202,7 +202,7 @@ case class UserMarks() extends StartRelationWriteBase[User, Marks, Post] with St
   val nodeFactory = Post
   val factory = Marks
 
-  override def read(context: RequestContext, param: ConnectParameter[User]) = context.withPublicReadingControl {
+  override def read(context: RequestContext, param: ConnectParameter[User]) = {
     implicit val ctx = new QueryContext
     val userDef = FactoryUuidNodeDef(User, param.baseUuid)
     val nodeDef = FactoryNodeDef(Post)
@@ -234,7 +234,7 @@ case class UserHasHistory() extends StartRelationAccessDefault[User, Viewed, Pos
 
   val nodeFactory = Post
 
-  override def read(context: RequestContext, param: ConnectParameter[User]) = context.withPublicReadingControl {
+  override def read(context: RequestContext, param: ConnectParameter[User]) = {
     implicit val ctx = new QueryContext
     val userDef = FactoryUuidNodeDef(User, param.baseUuid)
     val postDef = FactoryNodeDef(Post)

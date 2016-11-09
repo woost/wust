@@ -22,11 +22,11 @@ case class RequestContext(controller: NodesBase with Controller, user: Option[Us
 
   def scopes = query.get("scopes").map(_.split(",").toSeq).getOrElse(Seq.empty)
 
-  def jsonAs[T](implicit rds: play.api.libs.json.Reads[T]) = {
+  def jsonAs[T : play.api.libs.json.Reads] = {
     json.flatMap(_.validate[T].asOpt)
   }
 
-  def withJson[S](handler: S => Result)(implicit rds: play.api.libs.json.Reads[S]) = {
+  def withJson[S : play.api.libs.json.Reads](handler: S => Result) = {
     jsonAs[S].map(handler(_)).getOrElse(UnprocessableEntity("Cannot parse json body"))
   }
 
@@ -36,14 +36,6 @@ case class RequestContext(controller: NodesBase with Controller, user: Option[Us
 
   def withUser(handler: => Result): Result = {
     user.map(_ => handler).getOrElse(onlyUsersError)
-  }
-
-  def withPublicReadingControl(handler: => Result): Result = {
-    if (Application.publicReadingEnabled)
-      handler
-    else {
-      withUser(handler)
-    }
   }
 
   def onlyUsersError = Forbidden("Only for users")

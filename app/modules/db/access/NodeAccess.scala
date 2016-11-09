@@ -30,14 +30,14 @@ trait FormattingNode[NODE <: UuidNode] {
 }
 
 trait NodeReadBase[NODE <: UuidNode] extends NodeAccessDefault[NODE] with FormattingNode[NODE] {
-  override def read(context: RequestContext) = context.withPublicReadingControl {
+  override def read(context: RequestContext) = {
     context.page.map { page =>
       val skip = page * context.sizeWithDefault
       Ok(Json.toJson(limitedDiscourseNodes(skip, context.sizeWithDefault, factory)._2))
     }.getOrElse(Ok(Json.toJson(discourseNodes(factory)._2)))
   }
 
-  override def read(context: RequestContext, uuid: String) = context.withPublicReadingControl {
+  override def read(context: RequestContext, uuid: String) = {
     val node = factory.matchesOnUuid(uuid)
     db.transaction(_.persistChanges(node)) match {
       case Some(err) => NotFound(s"Cannot find node with uuid '$uuid': $err")
@@ -65,10 +65,10 @@ case class NodeReadDelete[NODE <: UuidNode](factory: UuidNodeMatchesFactory[NODE
 trait NodeAccessDecorator[NODE <: UuidNode] extends NodeAccess[NODE] with AccessDecoratorControlDefault {
   val self: NodeAccess[NODE]
 
-  override def read(context: RequestContext) = context.withPublicReadingControl {
+  override def read(context: RequestContext) = {
     acceptRequestRead(context, None).getOrElse(self.read(context))
   }
-  override def read(context: RequestContext, uuid: String) = context.withPublicReadingControl {
+  override def read(context: RequestContext, uuid: String) = {
     acceptRequestRead(context, Some(uuid)).getOrElse(self.read(context, uuid))
   }
   override def create(context: RequestContext) = {

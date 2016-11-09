@@ -19,7 +19,7 @@ case class TagAccess() extends NodeReadBase[Scope] {
   implicit val format = TagFormat.ScopeFormat
 
   //TODO: should override read for multiple tags, too. so it includes inherits
-  override def read(context: RequestContext, uuid: String) = context.withPublicReadingControl {
+  override def read(context: RequestContext, uuid: String) = {
     implicit val ctx = new QueryContext
     val node = FactoryUuidNodeDef(factory, uuid)
     val base = FactoryNodeDef(factory)

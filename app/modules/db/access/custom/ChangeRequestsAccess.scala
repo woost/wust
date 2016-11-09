@@ -83,7 +83,7 @@ case class PostChangeRequestAccess() extends RelationAccessDefault[Post, ChangeR
 
   val nodeFactory = ChangeRequestMatches
 
-  override def read(context: RequestContext, param: ConnectParameter[Post]) = context.withPublicReadingControl {
+  override def read(context: RequestContext, param: ConnectParameter[Post]) = {
     Ok(Json.toJson(context.user.map { user =>
       implicit val ctx = new QueryContext
       val updatedDef = LabelNodeDef[TagChangeRequest](nodeFactory.labels)
@@ -114,7 +114,7 @@ case class PostHasHistoryAccess() extends RelationAccessDefault[Post, ChangeRequ
 
   val nodeFactory = ChangeRequest
 
-  override def read(context: RequestContext, param: ConnectParameter[Post]) = context.withPublicReadingControl {
+  override def read(context: RequestContext, param: ConnectParameter[Post]) = {
     implicit val ctx = new QueryContext
     val requestDef = LabelNodeDef[TagChangeRequest](ChangeRequest.labels)
     val postDef = FactoryUuidNodeDef(Post, param.baseUuid)

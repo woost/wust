@@ -158,7 +158,7 @@ case class PostAccess() extends NodeAccessDefault[Post] {
     existing.tagChangeRequests.foreach(_._locked = false)
   }
 
-  override def read(context: RequestContext, uuid: String) = context.withPublicReadingControl {
+  override def read(context: RequestContext, uuid: String) = {
     import formatters.json.PostFormat._
 
     implicit val ctx = new QueryContext
