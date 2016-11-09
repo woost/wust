@@ -14,22 +14,31 @@ import com.typesafe.config.ConfigFactory
 import scala.concurrent.Future
 
 object LoggingFilter extends EssentialFilter {
+  val red = "\u001b[31m"
+  val yellow = "\u001b[33m"
+  val reset = "\u001b[0m"
+
+  def timeColored(text: String, ms: Long): String = {
+    if (ms < 100) return text
+    else if (ms < 1000) return s"$yellow$text$reset"
+    else return s"$red$text$reset"
+  }
+
+  def statusColored(status: Int): String = {
+    status match {
+      case 200 => status.toString
+      case _ => s"$red$status$reset"
+    }
+  }
+
   def apply(nextFilter: EssentialAction) = new EssentialAction {
     def apply(requestHeader: RequestHeader) = {
       val startTime = System.nanoTime
       nextFilter(requestHeader).map { result =>
         val endTime = System.nanoTime
         val requestTime = (endTime - startTime) / 1000000
-        def timeColored(text:String, ms:Long):String = {
-          val red = "\u001b[31m"
-          val yellow = "\u001b[33m"
-          val reset = "\u001b[0m"
-          if(ms < 100) return text
-          else if(ms < 1000) return s"$yellow$text$reset"
-          else return s"$red$text$reset"
-        }
         val time = timeColored(s"${"%5d" format requestTime}ms", requestTime)
-        Logger.info(s"$time ${requestHeader.method} ${requestHeader.uri} [${result.header.status}]")
+        Logger.info(s"$time ${requestHeader.method} ${requestHeader.uri} [${statusColored(result.header.status)}]")
         result.withHeaders("Request-Time" -> requestTime.toString)
       }
     }
@@ -39,7 +48,7 @@ object LoggingFilter extends EssentialFilter {
 trait MyWithFilters extends GlobalSettings {
   // this reimplements the WithFilters class
   // https://github.com/playframework/playframework/blob/912ea929f61a5c452e090715e6d02a22871a0dbb/framework/src/play/src/main/scala/play/api/mvc/Filters.scala#L107
-  lazy val filters = if(Play.isDev) {
+  lazy val filters = if (Play.isDev) {
     Array(LoggingFilter)
   } else {
     Array(new GzipFilter, LoggingFilter)
@@ -66,4 +75,3 @@ object Global extends GlobalSettings with MyWithFilters with SecuredSettings wit
     Some(Future { Forbidden("credentials not correct") })
   }
 }
-
