@@ -74,7 +74,7 @@ lazy val scalajs = (project in file("scalajs")).settings(
   // because in production there is an error in the generated code
   // scalaJSOptimizerOptions ~= { _.withDisableOptimizer(true) },
   libraryDependencies ++= Seq(
-    "org.scala-js" %%% "scalajs-dom" % "0.8.1",
+    "org.scala-js" %%% "scalajs-dom" % "0.9.1",
     "com.lihaoyi" %%% "utest" % "0.3.1"
   ),
   testFrameworks += new TestFramework("utest.runner.Framework"),
@@ -88,7 +88,7 @@ lazy val scalajs = (project in file("scalajs")).settings(
 lazy val scalajsShared = (crossProject.crossType(CrossType.Pure) in file("scalajs-shared")).settings(
   scalaVersion := scalaV,
   scalacOptions ++= scalacOpts,
-  libraryDependencies += "org.scala-js" % "scalajs-stubs_2.11" % "0.6.10"
+  libraryDependencies += "org.scala-js" %% "scalajs-stubs" % "0.6.13"
 ).
   jsConfigure(_ enablePlugins ScalaJSPlay).
   jsSettings(sourceMapsBase := baseDirectory.value / "..")
@@ -109,7 +109,7 @@ lazy val seed = (project in file("seed")).settings(
 ).dependsOn(schema, wust)
 
 // deploy to heroku
-herokuAppName in Compile := "wust"
+// herokuAppName in Compile := "wust"
 
 val scalacOpts = Seq(
   "-encoding", "UTF-8",
