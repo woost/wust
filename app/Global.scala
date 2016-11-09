@@ -16,10 +16,10 @@ import scala.concurrent.Future
 object LoggingFilter extends EssentialFilter {
   def apply(nextFilter: EssentialAction) = new EssentialAction {
     def apply(requestHeader: RequestHeader) = {
-      val startTime = System.currentTimeMillis
+      val startTime = System.nanoTime
       nextFilter(requestHeader).map { result =>
-        val endTime = System.currentTimeMillis
-        val requestTime = endTime - startTime
+        val endTime = System.nanoTime
+        val requestTime = (endTime - startTime) / 1000000
         def timeColored(text:String, ms:Long):String = {
           val red = "\u001b[31m"
           val yellow = "\u001b[33m"
@@ -28,7 +28,8 @@ object LoggingFilter extends EssentialFilter {
           else if(ms < 1000) return s"$yellow$text$reset"
           else return s"$red$text$reset"
         }
-        Logger.info(timeColored(s"${"%5d" format requestTime}ms ${requestHeader.method} ${requestHeader.uri} [${result.header.status}]", requestTime))
+        val time = timeColored(s"${"%5d" format requestTime}ms", requestTime)
+        Logger.info(s"$time ${requestHeader.method} ${requestHeader.uri} [${result.header.status}]")
         result.withHeaders("Request-Time" -> requestTime.toString)
       }
     }
