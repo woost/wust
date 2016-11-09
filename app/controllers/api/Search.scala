@@ -17,16 +17,14 @@ import wust.SortOrder
 
 import scala.util.Try
 
-object Search extends Controller {
-  def index(labelOpt: Option[String], termOpt: Option[String], searchDescriptionsOpt: Option[Boolean], startPostOpt: Option[Boolean], contextsAll: List[String], contextsAnyRaw: List[String], contextsWithout: List[String], classificationsAll: List[String], classificationsAnyRaw: List[String], classificationsWithout: List[String], pageOpt: Option[Int], sizeOpt: Option[Int], sortOrder: Option[Int]) = Action {
+object Search extends Controller with auth.PublicReadingControl {
+  def index(labelOpt: Option[String], termOpt: Option[String], searchDescriptionsOpt: Option[Boolean], startPostOpt: Option[Boolean], contextsAll: List[String], contextsAnyRaw: List[String], contextsWithout: List[String], classificationsAll: List[String], classificationsAnyRaw: List[String], classificationsWithout: List[String], pageOpt: Option[Int], sizeOpt: Option[Int], sortOrder: Option[Int]) = PublicReadingControlledAction {
 
-    val discourse = if(
-      sizeOpt.map(_ == 0).getOrElse(false) ||
+    val discourse = if (sizeOpt.map(_ == 0).getOrElse(false) ||
       (contextsAll intersect contextsWithout).nonEmpty ||
       (classificationsAll intersect classificationsWithout).nonEmpty ||
       (contextsAnyRaw.size > 0 && contextsAnyRaw.toSet.subsetOf(contextsWithout.toSet)) ||
-      (classificationsAnyRaw.size > 0 && classificationsAnyRaw.toSet.subsetOf(classificationsWithout.toSet))
-    ) {
+      (classificationsAnyRaw.size > 0 && classificationsAnyRaw.toSet.subsetOf(classificationsWithout.toSet))) {
       Discourse.empty
     } else {
       //TODO: uniq tag and classification ids
@@ -44,7 +42,7 @@ object Search extends Controller {
       val nodeDef = LabelNodeDef(labels)
 
       val termRegex = termOpt.flatMap { title =>
-        if(title.trim.isEmpty)
+        if (title.trim.isEmpty)
           None
         else
           Some("(?i).*" + title.replace(" ", ".*") + ".*")
@@ -56,56 +54,56 @@ object Search extends Controller {
       val lastWiths = mutable.ArrayBuffer.empty[String]
       val lastConditions = mutable.ArrayBuffer.empty[String]
       var lastDistinct = false
-      var params:ParameterMap = Map.empty[PropertyKey,ParameterValue]
+      var params: ParameterMap = Map.empty[PropertyKey, ParameterValue]
 
-      if(termRegex.isDefined) {
-        val titleMatcher = s"${ nodeDef.name }.title =~ {term}"
-        if( searchDescriptions )
-          postConditions += s"$titleMatcher or ${ nodeDef.name }.description =~ {term}"
+      if (termRegex.isDefined) {
+        val titleMatcher = s"${nodeDef.name}.title =~ {term}"
+        if (searchDescriptions)
+          postConditions += s"$titleMatcher or ${nodeDef.name}.description =~ {term}"
         else
           postConditions += titleMatcher
 
         params += ("term" -> termRegex.get)
       }
 
-      if(startPost && contextsAll.isEmpty && (contextsAny.isEmpty || classificationsAny.nonEmpty)) {
+      if (startPost && contextsAll.isEmpty && (contextsAny.isEmpty || classificationsAny.nonEmpty)) {
         val tagsDef = AnonRelationDef(FactoryNodeDef(Scope), SchemaTags, nodeDef)
-        postMatches += s"match ${ tagsDef.toPattern }"
+        postMatches += s"match ${tagsDef.toPattern}"
       }
 
-      def matchInheritedContexts(contexts:List[String], uuidParamName:String) = {
+      def matchInheritedContexts(contexts: List[String], uuidParamName: String) = {
         val askedContextDef = FactoryNodeDef(Scope)
         val inheritedContextDef = FactoryNodeDef(Scope)
-        val inheritancePath = s"${ inheritedContextDef.toPattern }-[:`${ Inherits.relationType }`*0..10]->${ askedContextDef.toPattern }"
+        val inheritancePath = s"${inheritedContextDef.toPattern}-[:`${Inherits.relationType}`*0..10]->${askedContextDef.toPattern}"
         preQueries +=
           s"""
-          match ${ inheritancePath }
-          where ${ askedContextDef.name }.uuid in {$uuidParamName}
+          match ${inheritancePath}
+          where ${askedContextDef.name}.uuid in {$uuidParamName}
           with *
           """
-        params += (uuidParamName-> contexts)
+        params += (uuidParamName -> contexts)
 
         (askedContextDef, inheritedContextDef)
       }
 
-      def matchClassifications(classifications:List[String], uuidParamName:String, matchClassifies:Boolean) = {
+      def matchClassifications(classifications: List[String], uuidParamName: String, matchClassifies: Boolean) = {
         val classificationDef = FactoryNodeDef(Classification)
         preQueries += s"""
           match ${classificationDef.toPattern}
           where ${classificationDef.name}.uuid in {$uuidParamName}
           with *
           """
-        params += (uuidParamName-> classifications)
+        params += (uuidParamName -> classifications)
 
         val connectsDef = HyperNodeDef(nodeDef, Connects, FactoryNodeDef(Post))
         val classifiesConnectsDef = AnonRelationDef(classificationDef, Classifies, connectsDef)
         val tagsDef = HyperNodeDef(FactoryNodeDef(Scope), SchemaTags, nodeDef)
         val classifiesTagsDef = AnonRelationDef(classificationDef, Classifies, tagsDef)
 
-        if(matchClassifies) {
+        if (matchClassifies) {
           postMatches += s"""
-          optional match ${connectsDef.toPattern(false, true)}, ${ classifiesConnectsDef.toPattern(false) }
-          optional match ${tagsDef.toPattern(true, false)}, ${ classifiesTagsDef.toPattern(false) }
+          optional match ${connectsDef.toPattern(false, true)}, ${classifiesConnectsDef.toPattern(false)}
+          optional match ${tagsDef.toPattern(true, false)}, ${classifiesTagsDef.toPattern(false)}
           with *
           """
         } else {
@@ -118,48 +116,48 @@ object Search extends Controller {
         (connectsDef, tagsDef, classifiesConnectsDef, classifiesTagsDef)
       }
 
-      if(labelOpt.contains(Post.label.name)) {
-        if(contextsAll.nonEmpty) {
+      if (labelOpt.contains(Post.label.name)) {
+        if (contextsAll.nonEmpty) {
           val (askedContextDef, inheritedContextDef) = matchInheritedContexts(contextsAll, "contextsAllUuids")
           val tagsDef = RelationDef(inheritedContextDef, SchemaTags, nodeDef)
-          postMatches += s"""match ${ tagsDef.toPattern(false) }"""
+          postMatches += s"""match ${tagsDef.toPattern(false)}"""
           lastWiths += s"""count(distinct ${askedContextDef.name}) as contextsAllMatchCount, collect(${tagsDef.name}) as contextsAllTagsColl"""
           lastConditions += s"""contextsAllMatchCount >= {contextsAllCount}"""
           params += ("contextsAllCount" -> contextsAll.size)
         }
 
-        if(classificationsAll.nonEmpty) {
+        if (classificationsAll.nonEmpty) {
           val (connectsDef, tagsDef, _, _) = matchClassifications(classificationsAll, "classificationsAllUuids", matchClassifies = true)
           lastWiths += s"""count(${connectsDef.name}) + count(${tagsDef.name}) as classificationsAllMatchCount"""
           lastConditions += s"""classificationsAllMatchCount >= {classificationsAllCount}"""
           params += ("classificationsAllCount" -> classificationsAll.size)
         }
 
-        if(contextsAny.nonEmpty) {
+        if (contextsAny.nonEmpty) {
           val (_, inheritedContextDef) = matchInheritedContexts(contextsAny, "contextsAnyUuids")
-          val tagsDef = new RelationDef(inheritedContextDef, SchemaTags, nodeDef) { override val name = "contextsAnytags"}
-          postMatches += s"""${if(classificationsAny.nonEmpty) "optional" else ""} match ${ tagsDef.toPattern(false, false) }"""
+          val tagsDef = new RelationDef(inheritedContextDef, SchemaTags, nodeDef) { override val name = "contextsAnytags" }
+          postMatches += s"""${if (classificationsAny.nonEmpty) "optional" else ""} match ${tagsDef.toPattern(false, false)}"""
         }
 
-        if(classificationsAny.nonEmpty) {
+        if (classificationsAny.nonEmpty) {
           val (connectsDef, tagsDef, classifiesConnectsDef, classifiesTagsDef) = matchClassifications(classificationsAny, "classificationsAnyUuids", matchClassifies = false)
           postConditions += s"""(
-            (${connectsDef.endName} is not null and ${ classifiesConnectsDef.toPattern(false) })
-            or (${tagsDef.startName} is not null and ${ classifiesTagsDef.toPattern(false) })
-            ${if(contextsAny.nonEmpty) "or (contextsAnytags is not null)" else ""}
+            (${connectsDef.endName} is not null and ${classifiesConnectsDef.toPattern(false)})
+            or (${tagsDef.startName} is not null and ${classifiesTagsDef.toPattern(false)})
+            ${if (contextsAny.nonEmpty) "or (contextsAnytags is not null)" else ""}
           )"""
-          if(contextsAny.nonEmpty) lastDistinct = true
+          if (contextsAny.nonEmpty) lastDistinct = true
         }
 
-        if(contextsWithout.nonEmpty) {
+        if (contextsWithout.nonEmpty) {
           val (_, inheritedContextDef) = matchInheritedContexts(contextsWithout, "contextsWithoutUuids")
           val tagsDef = RelationDef(inheritedContextDef, SchemaTags, nodeDef)
-          postMatches += s"""optional match ${ tagsDef.toPattern(false, false) }"""
+          postMatches += s"""optional match ${tagsDef.toPattern(false, false)}"""
           lastWiths += s"""count(${tagsDef.name}) as contextsWithoutCount"""
           lastConditions += s"""contextsWithoutCount = 0"""
         }
 
-        if(classificationsWithout.nonEmpty) {
+        if (classificationsWithout.nonEmpty) {
           val (connectsDef, tagsDef, _, _) = matchClassifications(classificationsWithout, "classificationsWithoutUuids", matchClassifies = true)
           lastWiths += s"""count(${connectsDef.name}) + count(${tagsDef.name}) as classificationsWithoutMatchCount"""
           lastConditions += s"""classificationsWithoutMatchCount = 0"""
@@ -173,26 +171,26 @@ object Search extends Controller {
       val (returnPrefix, returnPostfix) = if (contextsAll.nonEmpty && sortByQuality)
         (s"""
         unwind contextsAllTagsColl as contextsAllTags
-        with min(contextsAllTags.voteCount) as tagVoteCount, ${ nodeDef.name }
+        with min(contextsAllTags.voteCount) as tagVoteCount, ${nodeDef.name}
         """, s", tagVoteCount order by ${Moderation.postQualityString("tagVoteCount", nodeDef.name + ".viewCount")} desc")
-      else ("", s"order by ${ nodeDef.name }.timestamp desc")
+      else ("", s"order by ${nodeDef.name}.timestamp desc")
 
-      val returnStatement = if(labelOpt.contains(Post.label.name)) {
+      val returnStatement = if (labelOpt.contains(Post.label.name)) {
         val connectsDef = RelationDef(FactoryNodeDef(Post), Connects, nodeDef)
         s"""
-        optional match ${ connectsDef.toPattern(true, false) }
+        optional match ${connectsDef.toPattern(true, false)}
         return ${nodeDef.name}, count(distinct ${connectsDef.name}) as indegree
         """
       } else s"return ${nodeDef.name}"
 
       val query = s"""
       ${preQueries.mkString("\n\n")}
-      match ${ nodeDef.toPattern }
+      match ${nodeDef.toPattern}
       ${postMatches.mkString("\n")}
-      ${if(postConditions.nonEmpty) s"where ${postConditions.mkString("\nand ")}" else ""}
-      ${if(lastWiths.nonEmpty) s"with ${nodeDef.name}, ${lastWiths.mkString(", ")}" else ""}
-      ${if(lastConditions.nonEmpty) s"where ${lastConditions.mkString("\nand ")}" else ""}
-      ${if(lastDistinct) s"with distinct ${nodeDef.name}" else ""}
+      ${if (postConditions.nonEmpty) s"where ${postConditions.mkString("\nand ")}" else ""}
+      ${if (lastWiths.nonEmpty) s"with ${nodeDef.name}, ${lastWiths.mkString(", ")}" else ""}
+      ${if (lastConditions.nonEmpty) s"where ${lastConditions.mkString("\nand ")}" else ""}
+      ${if (lastDistinct) s"with distinct ${nodeDef.name}" else ""}
       $returnPrefix
       $returnStatement $returnPostfix $limitOfReturn
       """
@@ -208,7 +206,7 @@ object Search extends Controller {
       // }
       // println((ctx.params ++ params).map{case(k,v) => (s"\\{$k\\}", parameterToString(v))}.foldLeft(query){case (z, (s,r)) => z.replaceAll(s, r)})
       // println("-"*30)
-      try{
+      try {
         // When Neo4j throws an error because the regexp is incorrect, return an empty Discourse instead
         if (labelOpt.contains(Post.label.name)) {
           val (graph, table) = db.queryGraphsAndTables(Query(query, ctx.params ++ params)).head
@@ -218,7 +216,7 @@ object Search extends Controller {
           table.rows.foreach { row =>
             val indegree = row("indegree").asLong
 
-            if(indegree > 0) {
+            if (indegree > 0) {
               val uuid = row(nodeDef.name).asMap("uuid").asString
               uuidToNode(uuid).rawItem.properties += ("indegree" -> indegree)
             }
@@ -227,7 +225,7 @@ object Search extends Controller {
           component
         } else Discourse(db.queryGraph(query, ctx.params ++ params))
       } catch {
-        case e:Exception =>
+        case e: Exception =>
           println(e.getMessage) //TODO: use logger
           val discourse = Discourse.empty
           discourse.add(Post.create(s"""Search Error. Please report this to us."""))
@@ -238,10 +236,10 @@ object Search extends Controller {
 
     Ok(Json.toJson(
       // we only add attached tags to the result when searching for posts
-      if(labelOpt.contains(Post.label.name))
+      if (labelOpt.contains(Post.label.name))
         TaggedTaggable.shapeResponse(discourse.posts)
       else
         discourse.exposedNodes
-      ))
+    ))
   }
 }

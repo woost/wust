@@ -22,6 +22,7 @@ object Application extends Controller {
   val brandingColor = "ui.branding.color".configOrElse("")
   val tutorialEnabled = "ui.tutorial.enabled".configOrElse(false)
   val registrationEnabled = "ui.registration.enabled".configOrElse(true)
+  val publicReadingEnabled = "ui.publicReading.enabled".configOrElse(true)
   val inspectletId = "tracking.inspectlet.id".configOrElse("")
   val googleanalyticsId = "tracking.googleanalytics.id".configOrElse("")
 
@@ -37,7 +38,8 @@ object Application extends Controller {
         ("brandingLogo", JsString(brandingLogo)),
         ("brandingColor", JsString(brandingColor)),
         ("tutorialEnabled", JsBoolean(tutorialEnabled)),
-        ("registrationEnabled", JsBoolean(registrationEnabled))
+        ("registrationEnabled", JsBoolean(registrationEnabled)),
+        ("publicReadingEnabled", JsBoolean(publicReadingEnabled))
       ))
     ))
   }

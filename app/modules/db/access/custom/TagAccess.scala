@@ -19,7 +19,7 @@ case class TagAccess() extends NodeReadBase[Scope] {
   implicit val format = TagFormat.ScopeFormat
 
   //TODO: should override read for multiple tags, too. so it includes inherits
-  override def read(context: RequestContext, uuid: String) = {
+  override def read(context: RequestContext, uuid: String) = context.withPublicReadingControl {
     implicit val ctx = new QueryContext
     val node = FactoryUuidNodeDef(factory, uuid)
     val base = FactoryNodeDef(factory)
@@ -28,9 +28,9 @@ case class TagAccess() extends NodeReadBase[Scope] {
     val implInherit = RelationDef(node, Inherits, impl)
 
     val query = s"""
-    match ${ node.toPattern }
-    optional match ${ baseInherit.toPattern(true, false) }
-    optional match ${ implInherit.toPattern(false, true) }
+    match ${node.toPattern}
+    optional match ${baseInherit.toPattern(true, false)}
+    optional match ${implInherit.toPattern(false, true)}
     return *
     """
 
@@ -47,11 +47,12 @@ case class TagAccess() extends NodeReadBase[Scope] {
       val node = Scope.merge(
         title = request.title,
         color = tagTitleColor(request.title),
-        merge = Set("title"))
+        merge = Set("title")
+      )
 
       db.transaction(_.persistChanges(node)) match {
         case Some(err) => BadRequest(s"Cannot create Tag: $err'")
-        case _         => Ok(Json.toJson(node))
+        case _ => Ok(Json.toJson(node))
       }
     }
   }
@@ -60,13 +61,13 @@ case class TagAccess() extends NodeReadBase[Scope] {
     context.withJson { (request: TagUpdateRequest) =>
       val node = Scope.matchesOnUuid(uuid)
       //TODO: normally we would want to set it back to None instead of ""
-      if(request.description.isDefined) {
+      if (request.description.isDefined) {
         node.description = request.description
       }
 
       db.transaction(_.persistChanges(node)) match {
         case Some(err) => BadRequest(s"Cannot update Tag with uuid '$uuid': $err'")
-        case _         => Ok(Json.toJson(node))
+        case _ => Ok(Json.toJson(node))
       }
     }
   }

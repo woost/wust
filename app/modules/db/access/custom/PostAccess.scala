@@ -29,7 +29,7 @@ case class PostAccess() extends NodeAccessDefault[Post] {
       request.approvalSum = karmaProps.authorBoost
       request.status = APPROVED
       discourse.add(Votes.merge(user, request, weight = karmaProps.authorBoost))
-    } else if(request.canApply(karmaProps.approvalSum)) {
+    } else if (request.canApply(karmaProps.approvalSum)) {
       request.status = INSTANT
     } else {
       request.approvalSum = karmaProps.approvalSum
@@ -69,7 +69,7 @@ case class PostAccess() extends NodeAccessDefault[Post] {
         // we create a new change request as there is no existing one here
         val addTags = AddTags.create(user, post, applyThreshold = karmaProps.applyThreshold)
         discourse.add(addTags, tag, ProposesTag.create(addTags, tag))
-        tagReq.classifications.map(c => Classification.matchesOnUuid(c.id)).foreach{classification =>
+        tagReq.classifications.map(c => Classification.matchesOnUuid(c.id)).foreach { classification =>
           discourse.add(ProposesClassify.merge(addTags, classification))
         }
         handleInitialChange(discourse, addTags, user, karmaProps)
@@ -85,7 +85,7 @@ case class PostAccess() extends NodeAccessDefault[Post] {
 
           val tags = Tags.merge(cr.proposesTags.head, post)
           discourse.add(tags)
-          cr.proposesClassifys.foreach{classification =>
+          cr.proposesClassifys.foreach { classification =>
             discourse.add(Classifies.merge(classification, tags))
           }
         }
@@ -105,7 +105,7 @@ case class PostAccess() extends NodeAccessDefault[Post] {
         val remTags = RemoveTags.create(user, post, applyThreshold = karmaProps.applyThreshold)
         val tag = Scope.matchesOnUuid(tagReq.id)
         discourse.add(remTags, tag, ProposesTag.create(remTags, tag))
-        tagReq.classifications.map(c => Classification.matchesOnUuid(c.id)).foreach{ classification =>
+        tagReq.classifications.map(c => Classification.matchesOnUuid(c.id)).foreach { classification =>
           discourse.add(ProposesClassify.merge(remTags, classification))
         }
         handleInitialChange(discourse, remTags, user, karmaProps)
@@ -123,7 +123,7 @@ case class PostAccess() extends NodeAccessDefault[Post] {
           discourse.remove(tags)
         } else {
           discourse.add(tags)
-          cr.proposesClassifys.foreach{classification =>
+          cr.proposesClassifys.foreach { classification =>
             discourse.remove(Classifies.matches(classification, tags))
           }
         }
@@ -143,7 +143,7 @@ case class PostAccess() extends NodeAccessDefault[Post] {
     val votesDef = RelationDef(ConcreteNodeDef(user), Votes, requestDef)
 
     val query = s"""
-    match ${userDef.toPattern}-[ut:`${AddTags.startRelationType}`|`${RemoveTags.startRelationType}`]->(${requestDef.name} ${requestDef.factory.labels.map(l => s":`$l`").mkString} { status: ${PENDING} })-[tp:`${AddTags.endRelationType}`|`${RemoveTags.endRelationType}`]->${postDef.toPattern}, ${tagsDef.toPattern(false,true)}
+    match ${userDef.toPattern}-[ut:`${AddTags.startRelationType}`|`${RemoveTags.startRelationType}`]->(${requestDef.name} ${requestDef.factory.labels.map(l => s":`$l`").mkString} { status: ${PENDING} })-[tp:`${AddTags.endRelationType}`|`${RemoveTags.endRelationType}`]->${postDef.toPattern}, ${tagsDef.toPattern(false, true)}
     optional match ${classifiesDef.toPattern(false, true)}
     optional match ${votesDef.toPattern(true, false)}
     set ${requestDef.name}._locked = true
@@ -158,7 +158,7 @@ case class PostAccess() extends NodeAccessDefault[Post] {
     existing.tagChangeRequests.foreach(_._locked = false)
   }
 
-  override def read(context: RequestContext, uuid: String) = {
+  override def read(context: RequestContext, uuid: String) = context.withPublicReadingControl {
     import formatters.json.PostFormat._
 
     implicit val ctx = new QueryContext
@@ -177,7 +177,7 @@ case class PostAccess() extends NodeAccessDefault[Post] {
 
       s"""
       optional match ${viewedDef.toPattern(true, false)}
-      optional match ${votesDef.toPattern(true,false)}
+      optional match ${votesDef.toPattern(true, false)}
       """
     }.getOrElse("")
 
@@ -261,7 +261,7 @@ case class PostAccess() extends NodeAccessDefault[Post] {
         val deleted = discourse.deleteds.headOption.map { deleted =>
           handleExistingChange(discourse, deleted, user, karmaProps)
           deleted
-        }.getOrElse{
+        }.getOrElse {
           val deleted = Deleted.create(user, post, applyThreshold = karmaProps.applyThreshold)
           discourse.add(deleted)
           handleInitialChange(discourse, deleted, user, karmaProps)
@@ -329,7 +329,7 @@ case class PostAccess() extends NodeAccessDefault[Post] {
 
           tx.persistChanges(discourse) match {
             case Some(err) => BadRequest(s"Cannot update Post with uuid '$uuid': $err")
-            case _         =>
+            case _ =>
               tx.commit() //otherwise taggedtaggable won't see the changes on another transactions
               val post = TaggedTaggable.shapeResponse(node)
               if (discourse.changeRequests.exists(_.status != PENDING))

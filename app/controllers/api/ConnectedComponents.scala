@@ -11,10 +11,10 @@ import play.api.libs.json.Json
 import play.api.mvc.Controller
 import common.Constants
 
-object ConnectedComponents extends Controller with Silhouette[User, JWTAuthenticator] with HeaderEnvironmentModule {
-  def show(uuid: String, depth: Option[Int]) = UserAwareAction { request =>
+object ConnectedComponents extends Controller with auth.PublicReadingControl {
+  def show(uuid: String, depth: Option[Int]) = UserAwareAction { request => //TODO: publicReadingControl!
     val discourse = connectedComponent(uuid, request.identity, depth.getOrElse(Constants.componentDepth))
-    if(discourse.nodes.isEmpty)
+    if (discourse.nodes.isEmpty)
       NotFound(s"Cannot find node with uuid '$uuid'")
     else
       Ok(Json.toJson(discourse))

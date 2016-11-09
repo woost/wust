@@ -12,6 +12,7 @@ import play.api.libs.json._
 import play.api.mvc._
 import play.api.Play.current
 import common.ConfigString._
+import controllers.Application
 
 import scala.concurrent.Future
 
@@ -21,7 +22,7 @@ class SignUpController extends Silhouette[User, JWTAuthenticator]
   implicit val signUpFormat = Json.format[SignUp]
 
   def signUp = Action.async(parse.json) { implicit request =>
-    if ("ui.registration.enabled".configOrElse(true))
+    if (Application.registrationEnabled)
       request.body.validate[SignUp].map { signUp =>
         val loginInfo = LoginInfo(CredentialsProvider.ID, signUp.identifier)
         userService.retrieve(loginInfo).flatMap {

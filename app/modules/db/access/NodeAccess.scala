@@ -30,18 +30,18 @@ trait FormattingNode[NODE <: UuidNode] {
 }
 
 trait NodeReadBase[NODE <: UuidNode] extends NodeAccessDefault[NODE] with FormattingNode[NODE] {
-  override def read(context: RequestContext) = {
+  override def read(context: RequestContext) = context.withPublicReadingControl {
     context.page.map { page =>
       val skip = page * context.sizeWithDefault
       Ok(Json.toJson(limitedDiscourseNodes(skip, context.sizeWithDefault, factory)._2))
     }.getOrElse(Ok(Json.toJson(discourseNodes(factory)._2)))
   }
 
-  override def read(context: RequestContext, uuid: String) = {
+  override def read(context: RequestContext, uuid: String) = context.withPublicReadingControl {
     val node = factory.matchesOnUuid(uuid)
     db.transaction(_.persistChanges(node)) match {
       case Some(err) => NotFound(s"Cannot find node with uuid '$uuid': $err")
-      case None      => Ok(Json.toJson(node))
+      case None => Ok(Json.toJson(node))
     }
   }
 }
@@ -50,7 +50,7 @@ trait NodeDeleteBase[NODE <: UuidNode] extends NodeAccessDefault[NODE] with Form
   override def delete(context: RequestContext, uuid: String) = context.withUser {
     val node = factory.matchesOnUuid(uuid)
     val failure = db.transaction(_.persistChanges(Discourse.remove(node)))
-    if(failure.isDefined)
+    if (failure.isDefined)
       BadRequest("Cannot delete node")
     else
       NoContent
@@ -65,10 +65,10 @@ case class NodeReadDelete[NODE <: UuidNode](factory: UuidNodeMatchesFactory[NODE
 trait NodeAccessDecorator[NODE <: UuidNode] extends NodeAccess[NODE] with AccessDecoratorControlDefault {
   val self: NodeAccess[NODE]
 
-  override def read(context: RequestContext) = {
+  override def read(context: RequestContext) = context.withPublicReadingControl {
     acceptRequestRead(context, None).getOrElse(self.read(context))
   }
-  override def read(context: RequestContext, uuid: String) = {
+  override def read(context: RequestContext, uuid: String) = context.withPublicReadingControl {
     acceptRequestRead(context, Some(uuid)).getOrElse(self.read(context, uuid))
   }
   override def create(context: RequestContext) = {

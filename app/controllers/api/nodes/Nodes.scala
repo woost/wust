@@ -24,7 +24,7 @@ trait NodesBase extends NestedResourceRouter with DefaultNestedResourceControlle
   protected def getSchema[NODE <: UuidNode](schemas: Map[String, _ <: ConnectSchema[NODE]], path: String)(handler: ConnectSchema[NODE] => Result) = {
     schemas.get(path) match {
       case Some(schema) => handler(schema)
-      case None         => pathNotFound
+      case None => pathNotFound
     }
   }
 
@@ -32,21 +32,21 @@ trait NodesBase extends NestedResourceRouter with DefaultNestedResourceControlle
     schemas.get(path) match {
       case Some(schema) => schema match {
         case c: HyperConnectSchema[NODE] => handler(c)
-        case _                           => pathNotFound
+        case _ => pathNotFound
       }
-      case None         => pathNotFound
+      case None => pathNotFound
     }
   }
 
   protected def validateConnect(uuid: String, otherUuid: String)(handler: () => Result): Result = {
-    if(uuid == otherUuid)
+    if (uuid == otherUuid)
       BadRequest("Self loops are not allowed")
     else
       handler()
   }
 
   protected def validateHyperConnect(uuid: String, otherUuid: String, nestedUuid: String)(handler: () => Result): Result = validateConnect(uuid, otherUuid) { () =>
-    if(uuid == nestedUuid || otherUuid == nestedUuid)
+    if (uuid == nestedUuid || otherUuid == nestedUuid)
       BadRequest("Incident loops are not allowed")
     else
       handler()

@@ -22,7 +22,7 @@ case class UserAccess() extends NodeReadBase[User] with HeaderEnvironmentModule 
 
   implicit val format = UserFormat.UserFormat
 
-  override def read(context: RequestContext) = {
+  override def read(context: RequestContext) = context.withPublicReadingControl {
     val page = context.page.getOrElse(0)
     val limit = context.sizeWithDefault
     val skip = page * limit
@@ -34,15 +34,15 @@ case class UserAccess() extends NodeReadBase[User] with HeaderEnvironmentModule 
 
     val discourse = if (context.scopes.isEmpty) {
       val query = s"""
-      match ${ userDef.toPattern }
-      optional match ${ hasKarmaDef.toPattern(false, true) }
+      match ${userDef.toPattern}
+      optional match ${hasKarmaDef.toPattern(false, true)}
       with ${userDef.name}, sum(
         case ${hasKarmaDef.name}.karma
           when null then 0
           else ${hasKarmaDef.name}.karma
         end
       ) as karmaAggregate order by karmaAggregate DESC skip $skip limit $limit
-      optional match ${ hasKarmaDef.toPattern(false, true) }
+      optional match ${hasKarmaDef.toPattern(false, true)}
       return ${hasKarmaDef.name}, ${userDef.name}, karmaAggregate order by karmaAggregate DESC
       """
 
@@ -50,7 +50,7 @@ case class UserAccess() extends NodeReadBase[User] with HeaderEnvironmentModule 
     } else {
       // TODO: fix, order broken
       val query = s"""
-      match ${ hasKarmaDef.toPattern(true, true) }
+      match ${hasKarmaDef.toPattern(true, true)}
       where ${scopeDef.name}.uuid in {scopeUuids}
       with ${hasKarmaDef.name}, ${userDef.name} skip $skip limit $limit
       with ${userDef.name}, sum(${hasKarmaDef.name}.karma) as karmaAggregate, collect(${hasKarmaDef.name}) as karmaDefColl unwind karmaDefColl as karmaDef
@@ -76,7 +76,7 @@ case class UserAccess() extends NodeReadBase[User] with HeaderEnvironmentModule 
         } getOrElse request.password.foreach { password =>
           //TODO this actually belongs in the login controller
           val auth = Auth(db.queryGraph(Query(
-            s"match (l:`${ LoginInfo.label }`)-[r:`${ HasPassword.relationType }`]->(p:`${ PasswordInfo.label }`) return p"
+            s"match (l:`${LoginInfo.label}`)-[r:`${HasPassword.relationType}`]->(p:`${PasswordInfo.label}`) return p"
           )))
           auth.passwordInfos.headOption match {
             case Some(pi) =>
@@ -91,7 +91,7 @@ case class UserAccess() extends NodeReadBase[User] with HeaderEnvironmentModule 
 
         error match {
           case Some(err) => BadRequest(s"Cannot update User: $err'")
-          case _         => Ok(Json.toJson(user))
+          case _ => Ok(Json.toJson(user))
         }
       }
     }
@@ -103,7 +103,7 @@ case class UserContributions() extends RelationAccessDefault[User, Post] {
 
   val nodeFactory = Post
 
-  override def read(context: RequestContext, param: ConnectParameter[User]) = {
+  override def read(context: RequestContext, param: ConnectParameter[User]) = context.withPublicReadingControl {
     val page = context.page.getOrElse(0)
     val limit = context.sizeWithDefault
     val skip = page * limit
@@ -121,11 +121,11 @@ case class UserContributions() extends RelationAccessDefault[User, Post] {
 
     val query = s"""
     match ${createdDef.toPattern}
-    optional match ${ responsesDef.toPattern(true, false) }
-    with distinct ${ postDef.name }, count(distinct ${responsesDef.name}) as indegree order by ${ postDef.name }.timestamp DESC skip ${ skip } limit ${ limit }
-    optional match ${ tagsDef.toPattern(true, false) }
-    optional match ${ tagClassifiesDef.toPattern(true, false) }
-    optional match ${ connDef.toPattern(false, true) }, ${ classifiesDef.toPattern(true, false) }
+    optional match ${responsesDef.toPattern(true, false)}
+    with distinct ${postDef.name}, count(distinct ${responsesDef.name}) as indegree order by ${postDef.name}.timestamp DESC skip ${skip} limit ${limit}
+    optional match ${tagsDef.toPattern(true, false)}
+    optional match ${tagClassifiesDef.toPattern(true, false)}
+    optional match ${connDef.toPattern(false, true)}, ${classifiesDef.toPattern(true, false)}
     return *
     """
 
@@ -136,7 +136,7 @@ case class UserContributions() extends RelationAccessDefault[User, Post] {
     table.rows.foreach { row =>
       val indegree = row("indegree").asLong
 
-      if(indegree > 0) {
+      if (indegree > 0) {
         val uuid = row(postDef.name).asMap("uuid").asString
         uuidToNode(uuid).rawItem.properties += ("indegree" -> indegree)
       }
@@ -151,12 +151,12 @@ case class UserContributions() extends RelationAccessDefault[User, Post] {
 case class UserHasKarmaScopes() extends StartRelationAccessDefault[User, HasKarma, Scope] {
   val nodeFactory = Scope
 
-  override def read(context: RequestContext, param: ConnectParameter[User]) = {
+  override def read(context: RequestContext, param: ConnectParameter[User]) = context.withPublicReadingControl {
     implicit val ctx = new QueryContext
     val userDef = FactoryUuidNodeDef(User, param.baseUuid)
     val karmaDef = RelationDef(userDef, HasKarma, FactoryNodeDef(Scope))
 
-    val query = s"match ${ karmaDef.toPattern } return *"
+    val query = s"match ${karmaDef.toPattern} return *"
     val discourse = Discourse(db.queryGraph(query, ctx.params))
 
     Ok(JsArray(discourse.hasKarmas.map(karmaTagWriter)))
@@ -168,7 +168,7 @@ case class UserHasKarmaLog() extends StartRelationAccessDefault[User, KarmaLog, 
 
   val nodeFactory = Post
 
-  override def read(context: RequestContext, param: ConnectParameter[User]) = {
+  override def read(context: RequestContext, param: ConnectParameter[User]) = context.withPublicReadingControl {
     implicit val ctx = new QueryContext
     val userDef = FactoryUuidNodeDef(User, param.baseUuid)
     val nodeDef = LabelNodeDef[Post](Set.empty)
@@ -183,10 +183,10 @@ case class UserHasKarmaLog() extends StartRelationAccessDefault[User, KarmaLog, 
     val classifiesDef = RelationDef(FactoryNodeDef(Classification), Classifies, connectsDef)
 
     val query = s"""
-    match ${ karmaLogDef.toPattern }, ${ logOnScopeDef.toPattern(false, true) }
-    optional match ${ tagsDef.toPattern(true, false) }
-    optional match ${ tagClassifiesDef.toPattern(true, false) }
-    optional match ${ connDef.toPattern(false, true) }, ${ classifiesDef.toPattern(true, false) }
+    match ${karmaLogDef.toPattern}, ${logOnScopeDef.toPattern(false, true)}
+    optional match ${tagsDef.toPattern(true, false)}
+    optional match ${tagClassifiesDef.toPattern(true, false)}
+    optional match ${connDef.toPattern(false, true)}, ${classifiesDef.toPattern(true, false)}
     return * order by ${karmaLogDef.name}.timestamp
     """
 
@@ -202,7 +202,7 @@ case class UserMarks() extends StartRelationWriteBase[User, Marks, Post] with St
   val nodeFactory = Post
   val factory = Marks
 
-  override def read(context: RequestContext, param: ConnectParameter[User]) = {
+  override def read(context: RequestContext, param: ConnectParameter[User]) = context.withPublicReadingControl {
     implicit val ctx = new QueryContext
     val userDef = FactoryUuidNodeDef(User, param.baseUuid)
     val nodeDef = FactoryNodeDef(Post)
@@ -216,10 +216,10 @@ case class UserMarks() extends StartRelationWriteBase[User, Marks, Post] with St
     val classifiesDef = RelationDef(FactoryNodeDef(Classification), Classifies, connectsDef)
 
     val query = s"""
-    match ${ marksDef.toPattern }
-    optional match ${ tagsDef.toPattern(true, false) }
-    optional match ${ tagClassifiesDef.toPattern(true, false) }
-    optional match ${ connDef.toPattern(false, true) }, ${ classifiesDef.toPattern(true, false) }
+    match ${marksDef.toPattern}
+    optional match ${tagsDef.toPattern(true, false)}
+    optional match ${tagClassifiesDef.toPattern(true, false)}
+    optional match ${connDef.toPattern(false, true)}, ${classifiesDef.toPattern(true, false)}
     return *
     """
 
@@ -234,14 +234,14 @@ case class UserHasHistory() extends StartRelationAccessDefault[User, Viewed, Pos
 
   val nodeFactory = Post
 
-  override def read(context: RequestContext, param: ConnectParameter[User]) = {
+  override def read(context: RequestContext, param: ConnectParameter[User]) = context.withPublicReadingControl {
     implicit val ctx = new QueryContext
     val userDef = FactoryUuidNodeDef(User, param.baseUuid)
     val postDef = FactoryNodeDef(Post)
     val viewedDef = RelationDef(userDef, Viewed, postDef)
 
     val size = context.sizeWithDefault
-    val query = s"match ${ viewedDef.toPattern } return ${ postDef.name } order by ${ viewedDef.name }.timestamp desc limit $size"
+    val query = s"match ${viewedDef.toPattern} return ${postDef.name} order by ${viewedDef.name}.timestamp desc limit $size"
     val discourse = Discourse(db.queryGraph(query, ctx.params))
 
     Ok(Json.toJson(TaggedTaggable.shapeResponse(discourse.posts)))

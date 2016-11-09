@@ -11,6 +11,8 @@ import play.api.libs.json.JsValue
 import play.api.mvc.Results._
 import play.api.mvc.{AnyContent, Controller, Result}
 import renesca.schema._
+import play.api.Play.current
+import common.ConfigString._
 
 case class RequestContext(controller: NodesBase with Controller, user: Option[User], json: Option[JsValue], query: Map[String, String]) {
   def page = query.get("page").map(_.toInt)
@@ -36,13 +38,21 @@ case class RequestContext(controller: NodesBase with Controller, user: Option[Us
     user.map(_ => handler).getOrElse(onlyUsersError)
   }
 
+  def withPublicReadingControl(handler: => Result): Result = {
+    if (Application.publicReadingEnabled)
+      handler
+    else {
+      withUser(handler)
+    }
+  }
+
   def onlyUsersError = Forbidden("Only for users")
 }
 
 case class ConnectParameter[+BASE <: UuidNode](
   factory: UuidNodeMatchesFactory[BASE],
   baseUuid: String
-  )
+)
 
 trait HyperConnectParameter[START <: UuidNode, +RELATION <: UuidNode with AbstractRelation[START, END], END <: UuidNode] {
   def baseUuid: String
@@ -59,8 +69,8 @@ case class StartHyperConnectParameter[START <: UuidNode, +RELATION <: UuidNode w
   factory: MatchableRelationFactory[START, RELATION, END] with UuidNodeMatchesFactory[RELATION],
   endFactory: UuidNodeMatchesFactory[END],
   endUuid: String
-  ) extends HyperConnectParameter[START, RELATION, END] {
-    def baseUuid = startUuid
+) extends HyperConnectParameter[START, RELATION, END] {
+  def baseUuid = startUuid
 }
 
 case class EndHyperConnectParameter[START <: UuidNode, +RELATION <: UuidNode with AbstractRelation[START, END], END <: UuidNode](
@@ -69,6 +79,6 @@ case class EndHyperConnectParameter[START <: UuidNode, +RELATION <: UuidNode wit
   factory: MatchableRelationFactory[START, RELATION, END] with UuidNodeMatchesFactory[RELATION],
   startFactory: UuidNodeMatchesFactory[START],
   startUuid: String
-  ) extends HyperConnectParameter[START, RELATION, END] {
-    def baseUuid = endUuid
+) extends HyperConnectParameter[START, RELATION, END] {
+  def baseUuid = endUuid
 }

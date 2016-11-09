@@ -1,6 +1,6 @@
 <div navigation></div>
 <main role="main">
-    <div id="main_view">
+    <div id="main_view" ng-if="::vm.Auth.isLoggedIn || uiSettings.publicReadingEnabled">
         <div ng-if="::uiSettings.scratchpadEnabled && vm.Auth.isLoggedIn" id="left_hand_side" ng-class="{visible: vm.sidebar.left.visible, fullscreen: vm.sidebar.left.fullscreen}">
             <div scratchpad></div>
         </div>
@@ -14,5 +14,8 @@
         <div id="right_hand_side" ng-class="{visible: vm.sidebar.right.visible}">
             <div history-list></div>
         </div>
+    </div>
+    <div ng-if="::!(vm.Auth.isLoggedIn || uiSettings.publicReadingEnabled)">
+        <h3 style="text-align:center;margin-top:50px">Please log in.</h3>
     </div>
 </main>

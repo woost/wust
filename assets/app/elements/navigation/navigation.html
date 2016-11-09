@@ -5,7 +5,7 @@
             <b class="hidden-md hidden-sm" ng-bind="::uiSettings.brandingText"></b>
         </a>
         <div ng-class="{search_results_visible: vm.search.resultsVisible, has_fullscreen: vm.fullscreen.hasFullscreen}">
-            <ul class="nav navbar-nav navbar-left">
+            <ul class="nav navbar-nav navbar-left" ng-if="::vm.Auth.isLoggedIn || uiSettings.publicReadingEnabled">
                 <li class="navpagelinks">
                     <a ui-sref="dashboard" ui-sref-active="active" ng-click="vm.fullscreen.hideFullscreens()" data-title="Dashboard" bs-tooltip data-placement="bottom">
                         <i class="fa fa-home"></i><span class="hidden-sm hidden-xs">&nbsp;Dashboard</span></a>
@@ -29,7 +29,7 @@
 
 
             <ul class="nav navbar-nav navbar-right navpagelinks">
-                <li>
+                <li ng-if="::vm.Auth.isLoggedIn || uiSettings.publicReadingEnabled">
                     <form class="search-form navbar-form navbar-left" ng-submit='vm.onSearchBoxChange(true)'>
                         <div class="form-group has-feedback">
                             <input type="text" placeholder="Search" class="form-control" ng-model="vm.search.query" ng-change='vm.onSearchBoxChange()'>
@@ -37,7 +37,7 @@
                         </div>
                     </form>
                 </li>
-                <li>
+                <li ng-if="::vm.Auth.isLoggedIn || uiSettings.publicReadingEnabled">
                     <a ui-sref="users.list" ng-class="{active: vm.$state.includes('users.*')}" ng-click="vm.fullscreen.hideFullscreens()" data-title="Users" bs-tooltip data-placement="bottom">
                         <i class="fa fa-users"></i><span class="hidden-md hidden-sm hidden-xs">&nbsp;Users</span></a>
                 </li>

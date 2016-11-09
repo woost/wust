@@ -34,17 +34,17 @@ case class InstantChangeRequestAccess() extends NodeAccessDefault[ChangeRequest]
     //which request is responsible for the current deletion.
     //we currently would show edit and tag requests for already deleted posts.
     val query = s"""
-    match ${ crDef.toPattern }-[relation:`${ Updated.endRelationType }`|`${ Deleted.endRelationType }`|`${ AddTags.endRelationType }`|`${ RemoveTags.endRelationType }`]->${ postDef.toPattern }, ${ userDef.toPattern }
-    where (${ crDef.name }.status = ${ INSTANT } OR ${ crDef.name }.status = ${ PENDING })
+    match ${crDef.toPattern}-[relation:`${Updated.endRelationType}`|`${Deleted.endRelationType}`|`${AddTags.endRelationType}`|`${RemoveTags.endRelationType}`]->${postDef.toPattern}, ${userDef.toPattern}
+    where (${crDef.name}.status = ${INSTANT} OR ${crDef.name}.status = ${PENDING})
     and not((${userDef.name})-[:`${Votes.relationType}`]->(${crDef.name}))
     and not((${userDef.name})-[:`${Skipped.relationType}`]->(${crDef.name}))
     and not((${userDef.name})-[:`${UpdatedStart.relationType}`|`${DeletedStart.relationType}`|`${AddTagsStart.relationType}`|`${RemoveTagsStart.relationType}`]->(${crDef.name}))
-    with ${ postDef.name }, relation, ${ crDef.name } order by ${ crDef.name }.timestamp, id(${crDef.name}) skip ${ skip } limit ${ limit }
-    optional match ${ crTagsDef.toPattern(false, true) }
-    optional match ${ crClassifiesDef.toPattern(false, true) }
-    optional match ${ tagsDef.toPattern(true, false) }
-    optional match ${ tagClassifiesDef.toPattern(true, false) }
-    optional match ${ connDef.toPattern(false, true) }, ${ classifiesDef.toPattern(true, false) }
+    with ${postDef.name}, relation, ${crDef.name} order by ${crDef.name}.timestamp, id(${crDef.name}) skip ${skip} limit ${limit}
+    optional match ${crTagsDef.toPattern(false, true)}
+    optional match ${crClassifiesDef.toPattern(false, true)}
+    optional match ${tagsDef.toPattern(true, false)}
+    optional match ${tagClassifiesDef.toPattern(true, false)}
+    optional match ${connDef.toPattern(false, true)}, ${classifiesDef.toPattern(true, false)}
     return *
     """
 
@@ -83,7 +83,7 @@ case class PostChangeRequestAccess() extends RelationAccessDefault[Post, ChangeR
 
   val nodeFactory = ChangeRequestMatches
 
-  override def read(context: RequestContext, param: ConnectParameter[Post]) = {
+  override def read(context: RequestContext, param: ConnectParameter[Post]) = context.withPublicReadingControl {
     Ok(Json.toJson(context.user.map { user =>
       implicit val ctx = new QueryContext
       val updatedDef = LabelNodeDef[TagChangeRequest](nodeFactory.labels)
@@ -95,10 +95,10 @@ case class PostChangeRequestAccess() extends RelationAccessDefault[Post, ChangeR
 
       val query = s"""
       match ${userDef.toPattern}-[updated1:`${Updated.startRelationType}`|`${AddTags.startRelationType}`|`${Deleted.startRelationType}`|`${RemoveTags.startRelationType}`]->${updatedDef.toPattern}-[updated2:`${Updated.endRelationType}`|`${Deleted.endRelationType}`|`${AddTags.endRelationType}`|`${RemoveTags.endRelationType}`]->${postDef.toPattern}
-      where ${ updatedDef.name }.status = ${ PENDING }
-      optional match ${ votesDef.toPattern(true, false) }
-      optional match ${ proposesTagDef.toPattern(false, true) }
-      optional match ${ proposesClassifyDef.toPattern(false, true) }
+      where ${updatedDef.name}.status = ${PENDING}
+      optional match ${votesDef.toPattern(true, false)}
+      optional match ${proposesTagDef.toPattern(false, true)}
+      optional match ${proposesClassifyDef.toPattern(false, true)}
       return *
       """
 
@@ -114,27 +114,27 @@ case class PostHasHistoryAccess() extends RelationAccessDefault[Post, ChangeRequ
 
   val nodeFactory = ChangeRequest
 
-  override def read(context: RequestContext, param: ConnectParameter[Post]) = {
-      implicit val ctx = new QueryContext
-      val requestDef = LabelNodeDef[TagChangeRequest](ChangeRequest.labels)
-      val postDef = FactoryUuidNodeDef(Post, param.baseUuid)
-      val userDef = FactoryNodeDef(User)
-      val proposesTagDef = RelationDef(requestDef, ProposesTag, FactoryNodeDef(Scope))
-      val proposesClassifyDef = RelationDef(requestDef, ProposesClassify, FactoryNodeDef(Classification))
+  override def read(context: RequestContext, param: ConnectParameter[Post]) = context.withPublicReadingControl {
+    implicit val ctx = new QueryContext
+    val requestDef = LabelNodeDef[TagChangeRequest](ChangeRequest.labels)
+    val postDef = FactoryUuidNodeDef(Post, param.baseUuid)
+    val userDef = FactoryNodeDef(User)
+    val proposesTagDef = RelationDef(requestDef, ProposesTag, FactoryNodeDef(Scope))
+    val proposesClassifyDef = RelationDef(requestDef, ProposesClassify, FactoryNodeDef(Classification))
 
-      //TODO: separate queries for subclasses
-      //TODO: simpler? locking really needed?
-      val query = s"""
+    //TODO: separate queries for subclasses
+    //TODO: simpler? locking really needed?
+    val query = s"""
       match ${userDef.toPattern}-[updated1:`${Updated.startRelationType}`|`${AddTags.startRelationType}`|`${RemoveTags.startRelationType}`]->${requestDef.toPattern}-[updated2:`${Updated.endRelationType}`|`${AddTags.endRelationType}`|`${RemoveTags.endRelationType}`]->${postDef.toPattern}
       where ${requestDef.name}.status = $INSTANT or ${requestDef.name}.status = $APPROVED
-      optional match ${ proposesTagDef.toPattern(false, true) }
-      optional match ${ proposesClassifyDef.toPattern(false, true) }
+      optional match ${proposesTagDef.toPattern(false, true)}
+      optional match ${proposesClassifyDef.toPattern(false, true)}
       return * order by ${requestDef.name}.timestamp DESC
       """
 
-      val discourse = Discourse(db.queryGraph(query, ctx.params))
-      // Ok(Json.toJson(discourse.changeRequests))
-      //TODO: why need to sort?
-      Ok(Json.toJson(discourse.changeRequests.sortBy(- _.timestamp)))
+    val discourse = Discourse(db.queryGraph(query, ctx.params))
+    // Ok(Json.toJson(discourse.changeRequests))
+    //TODO: why need to sort?
+    Ok(Json.toJson(discourse.changeRequests.sortBy(-_.timestamp)))
   }
 }

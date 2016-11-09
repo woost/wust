@@ -22,14 +22,12 @@ trait ReadableNodes[NODE <: UuidNode] extends NodesBase {
 
   override def showNestedMembers(path: String, nestedPath: String, uuid: String, otherUuid: String) = UserAwareAction { request =>
     getHyperSchema(nodeSchema.connectSchemas, path)({
-      case c@StartHyperConnectSchema(factory, op, connectSchemas) =>
+      case c @ StartHyperConnectSchema(factory, op, connectSchemas) =>
         getSchema(connectSchemas, nestedPath)(schema =>
-          schema.op.read(context(request), StartHyperConnectParameter(nodeSchema.op.factory, uuid, c.factory, c.op.nodeFactory, otherUuid))
-        )
-      case c@EndHyperConnectSchema(factory, op, connectSchemas)   =>
+          schema.op.read(context(request), StartHyperConnectParameter(nodeSchema.op.factory, uuid, c.factory, c.op.nodeFactory, otherUuid)))
+      case c @ EndHyperConnectSchema(factory, op, connectSchemas) =>
         getSchema(connectSchemas, nestedPath)(schema =>
-          schema.op.read(context(request), EndHyperConnectParameter(nodeSchema.op.factory, uuid, c.factory, c.op.nodeFactory, otherUuid))
-        )
+          schema.op.read(context(request), EndHyperConnectParameter(nodeSchema.op.factory, uuid, c.factory, c.op.nodeFactory, otherUuid)))
     })
   }
 }
