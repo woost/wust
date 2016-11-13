@@ -9,6 +9,6 @@ object ClearDatabase extends Task with SeedTools {
   println("Deleting all nodes and relations...")
 
   dbContext { implicit db =>
-    db.query("match n optional match (n)-[r]-() delete n,r")
+    db.query("match (n) optional match (n)-[r]-() delete n,r")
   }
 }
