@@ -15,6 +15,7 @@ services:
       - TRACKING_GOOGLEANALYTICS_ID=${WUST_TRACKING_GOOGLEANALYTICS_ID}
     depends_on:
       - neo4j
+    restart: always
   neo4j:
     build: neo4wust
     ports:
@@ -28,3 +29,4 @@ services:
     volumes:
       - /data:/data/
       - /logs:/logs/
+    restart: always
