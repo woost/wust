@@ -26,6 +26,16 @@ object Application extends Controller {
   val inspectletId = "tracking.inspectlet.id".configOrElse("")
   val googleanalyticsId = "tracking.googleanalytics.id".configOrElse("")
 
+  println(s"scratchpadEnabled: $scratchpadEnabled")
+  println(s"brandingText: $brandingText")
+  println(s"brandingLogo: $brandingLogo")
+  println(s"brandingColor: $brandingColor")
+  println(s"tutorialEnabled: $tutorialEnabled")
+  println(s"registrationEnabled: $registrationEnabled")
+  println(s"publicReadingEnabled: $publicReadingEnabled")
+  println(s"inspectletId: $inspectletId")
+  println(s"googleanalyticsId: $googleanalyticsId")
+
   def index(any: String) = Action {
     Ok(views.html.index(
       JsObject(Seq(
