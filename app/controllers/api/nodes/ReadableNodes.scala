@@ -2,26 +2,25 @@ package controllers.api.nodes
 
 import model.WustSchema._
 import modules.requests._
-import controllers.api.auth.PublicReadingControl
 
-trait ReadableNodes[NODE <: UuidNode] extends NodesBase with PublicReadingControl {
+trait ReadableNodes[NODE <: UuidNode] extends NodesBase {
   def nodeSchema: NodeSchema[NODE]
 
-  override def show(uuid: String) = PublicReadingControlledUserAwareAction { request =>
+  override def show(uuid: String) = UserAwareAction { request =>
     nodeSchema.op.read(context(request), uuid)
   }
 
-  override def index = PublicReadingControlledUserAwareAction { request =>
+  override def index = UserAwareAction { request =>
     nodeSchema.op.read(context(request))
   }
 
-  override def showMembers(path: String, uuid: String) = PublicReadingControlledUserAwareAction { request =>
+  override def showMembers(path: String, uuid: String) = UserAwareAction { request =>
     getSchema(nodeSchema.connectSchemas, path)(connectSchema => {
       connectSchema.op.read(context(request), ConnectParameter(nodeSchema.op.factory, uuid))
     })
   }
 
-  override def showNestedMembers(path: String, nestedPath: String, uuid: String, otherUuid: String) = PublicReadingControlledUserAwareAction { request =>
+  override def showNestedMembers(path: String, nestedPath: String, uuid: String, otherUuid: String) = UserAwareAction { request =>
     getHyperSchema(nodeSchema.connectSchemas, path)({
       case c @ StartHyperConnectSchema(factory, op, connectSchemas) =>
         getSchema(connectSchemas, nestedPath)(schema =>
