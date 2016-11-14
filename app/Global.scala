@@ -26,8 +26,8 @@ object LoggingFilter extends EssentialFilter {
 
   def statusColored(status: Int): String = {
     status match {
-      case 200 => status.toString
-      case _ => s"$red$status$reset"
+      case code if code < 400 => status.toString
+      case x => s"$red$status$reset"
     }
   }
 
