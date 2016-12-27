@@ -1,4 +1,5 @@
-# Wust
+Note: We are redesigning Wust from Scratch. Check out [woost/wust2](https://github.com/woost/wust2). Ideas welcome.
+#Wust
 A hypergraph-based discussion system
 
 [Live demo of the prototype](http://lanzarote.informatik.rwth-aachen.de:9001)
