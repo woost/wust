@@ -1,8 +1,7 @@
 Note: We are redesigning Wust from scratch. Check out [woost/wust2](https://github.com/woost/wust2). Ideas welcome.
-#Wust
-A hypergraph-based discussion system
 
-[Live demo of the prototype](http://wust.comm.rwth-aachen.de)
+# Wust
+A hypergraph-based discussion system
 
 This is a proof of concept prototype. Please don't consider extending this project. We'd like to do a complete rewrite based on the experiences, user study results, insights and new ideas we have now. If you are interested, please contact us.
 
