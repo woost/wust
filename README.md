@@ -1,4 +1,4 @@
-## We are redesigning Wust from scratch. Check out https://woost.space.
+## This is the old, unmaintained version of Woost. It was a research project. You can find the next generation here: https://woost.space.
 
 # Wust
 A hypergraph-based discussion system
