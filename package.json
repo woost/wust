@@ -25,7 +25,7 @@
     "mkdirp": "0.5.1"
   },
   "dependencies": {
-    "angular": "1.4.7",
+    "angular": "1.7.9",
     "angular-animate": "1.4.7",
     "angular-deep-blur": "1.0.6",
     "angular-jwt": "0.0.9",
