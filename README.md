@@ -1,9 +1,16 @@
-## This is the old, unmaintained version of Woost. It was a research project. You can find the next generation here: https://woost.space.
+## This is an unmaintained research project. Please learn from it and steal ideas.
 
 # Wust
 A hypergraph-based discussion system
 
-This is a proof of concept prototype. Please don't consider extending this project. We'd like to do a complete rewrite based on the experiences, user study results, insights and new ideas we have now. If you are interested, please contact us.
+You can find an in-depth description of the goals and ideas in our master theses:
+- [Quality Assurance in a Structured Collaborative Discussion System, Felix Dietze (2015)](https://github.com/fdietze/notes/raw/master/felix_dietze_master_thesis_2015.pdf)
+- [Modeling Open Discourse in a Structured Collaborative Discussion System, Johannes Karoff (2015)](https://github.com/fdietze/notes/raw/master/johannes_karoff_master_thesis_2015.pdf)
+
+Other related projects can be found here: [Related Projects](https://github.com/FactGraph/FactGraph/wiki/Related-Projects)
+
+If you have any questions, or just want to talk to us, use felix.dietze@rwth-aachen.de. We're happy to talk to you.
+
 
 ## Screenshots
 ![Screenshot of Graph View](screenshot-graph.png)
